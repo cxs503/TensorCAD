@@ -80,7 +80,13 @@ def generate_hull(parameters: HullParameters = HullParameters()) -> HullModel:
     for side in (-1.0, 1.0):
         for i in range(p.nx):
             x = p.length * i / (p.nx - 1)
-            longitudinal = max(0.0, math.sin(math.pi * i / (p.nx - 1))) ** 0.7
+            # Force exact zero at the bow and stern; sin(pi) is not
+            # exactly zero in floating-point arithmetic.
+            longitudinal = (
+                0.0
+                if i == 0 or i == p.nx - 1
+                else math.sin(math.pi * i / (p.nx - 1)) ** 0.7
+            )
             for k in range(p.nz):
                 vertical_fraction = k / (p.nz - 1)
                 z = -p.draft + p.draft * vertical_fraction
