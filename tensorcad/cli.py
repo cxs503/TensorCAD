@@ -1,26 +1,97 @@
-"""Command-line entry point for the first TensorCAD geometry example."""
+"""Command-line entry point for the TensorCAD hull geometry model.
+
+The CLI is the agent-facing surface: it takes parameters, prints measured
+results (not just "done"), and exits non-zero with the full validation list when
+a model is unusable. ``--json`` emits the complete reproducibility record for a
+machine consumer.
+"""
 from __future__ import annotations
 
 import argparse
 import json
+import sys
+from typing import Any
 
-from .hull import HullParameters, export_hull, generate_hull
+from .export import export_hull
+from .hull import HullParameters, generate_hull
+
+SUMMARY_KEYS = (
+    ("displacement_volume_m3", "displacement volume"),
+    ("displacement_mass_kg", "displacement mass"),
+    ("wetted_surface_area_m2", "wetted surface"),
+    ("waterplane_area_m2", "waterplane area"),
+    ("block_coefficient", "block coeff Cb"),
+    ("prismatic_coefficient", "prismatic coeff Cp"),
+    ("longitudinal_centre_buoyancy_m", "LCB from x=0"),
+    ("vertical_centre_buoyancy_m", "VCB"),
+)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate a reproducible TensorCAD parametric hull example.")
-    parser.add_argument("--length", type=float, default=10.0, help="length in metres")
-    parser.add_argument("--beam", type=float, default=2.0, help="maximum beam in metres")
-    parser.add_argument("--draft", type=float, default=0.8, help="draft in metres")
-    parser.add_argument("--nx", type=int, default=41, help="longitudinal sample count")
-    parser.add_argument("--nz", type=int, default=13, help="vertical sample count")
-    parser.add_argument("--output", default="tensorcad-output", help="output directory")
-    args = parser.parse_args()
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="tensorcad-hull",
+        description="Generate a closed, validated parametric hull surface with metadata.",
+    )
+    parser.add_argument("--length", type=float, default=10.0, help="length in metres (required to be > 0)")
+    parser.add_argument("--beam", type=float, default=2.0, help="maximum moulded breadth in metres")
+    parser.add_argument("--draft", type=float, default=0.8, help="keel-to-waterline draft in metres")
+    parser.add_argument("--nx", type=int, default=41,
+                        help="longitudinal stations (an odd value lands on midship)")
+    parser.add_argument("--nz", type=int, default=13, help="vertical levels from keel to waterline")
+    parser.add_argument("--density", type=float, default=1025.0,
+                        help="water density in kg/m^3 used for displacement mass (1025 seawater, 1000 fresh)")
+    parser.add_argument("--output", default="tensorcad-output", help="directory for the exported artifacts")
+    parser.add_argument("--no-export", action="store_true", help="validate and report only, write no files")
+    parser.add_argument("--no-convergence", action="store_true",
+                        help="skip the refined-grid discretisation estimate (faster, less informative)")
+    parser.add_argument("--json", action="store_true",
+                        help="print the full metadata record instead of a summary")
+    return parser
 
-    model = generate_hull(HullParameters(args.length, args.beam, args.draft, args.nx, args.nz))
-    artifacts = export_hull(model, args.output)
-    print(json.dumps({"artifacts": artifacts, "metadata": model.metadata()}, indent=2))
+
+def _summary(model: Any) -> dict[str, Any]:
+    metadata = model.metadata()
+    hydro = metadata.get("hydrostatics", {})
+    lines: dict[str, Any] = {
+        "parameters": metadata["parameters"],
+        "mesh": {
+            "vertex_count": metadata["mesh"]["vertex_count"],
+            "triangle_count": metadata["mesh"]["triangle_count"],
+            "bounding_box_size": metadata["mesh"]["bounding_box"]["size"],
+        },
+        "validation": {
+            "passed": metadata["validation"]["passed"],
+            "errors": metadata["validation"]["errors"],
+            "warnings": metadata["validation"]["warnings"],
+        },
+        "hydrostatics": {key: hydro.get(key) for key, _ in SUMMARY_KEYS},
+    }
+    return lines
 
 
-if __name__ == "__main__":
-    main()
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    parameters = HullParameters(args.length, args.beam, args.draft, args.nx, args.nz, args.density)
+    try:
+        model = generate_hull(parameters)
+    except ValueError as exc:
+        print(f"tensorcad-hull: invalid model: {exc}", file=sys.stderr)
+        return 2
+
+    artifacts: dict[str, str] = {}
+    if not args.no_export:
+        artifacts = export_hull(model, args.output, convergence=not args.no_convergence)
+
+    if args.json:
+        metadata = model.metadata(with_discretisation=not args.no_convergence)
+        metadata["artifacts"] = artifacts
+        print(json.dumps(metadata, indent=2, sort_keys=True))
+    else:
+        report = _summary(model)
+        report["artifacts"] = artifacts
+        print(json.dumps(report, indent=2))
+    return 0 if model.validation.passed else 1
+
+
+if __name__ == "__main__":  # pragma: no cover - module entry point
+    raise SystemExit(main(sys.argv[1:]))
