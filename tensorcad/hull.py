@@ -80,14 +80,22 @@ def generate_hull(parameters: HullParameters = HullParameters()) -> HullModel:
     for side in (-1.0, 1.0):
         for i in range(p.nx):
             x = p.length * i / (p.nx - 1)
-            longitudinal = max(0.0, math.sin(math.pi * i / (p.nx - 1))) ** 0.7
+            # Force exact zero at the bow and stern; sin(pi) is not
+            # exactly zero in floating-point arithmetic.
+            longitudinal = (
+                0.0
+                if i == 0 or i == p.nx - 1
+                else math.sin(math.pi * i / (p.nx - 1)) ** 0.7
+            )
             for k in range(p.nz):
                 vertical_fraction = k / (p.nz - 1)
                 z = -p.draft + p.draft * vertical_fraction
                 half_breadth = 0.5 * p.beam * longitudinal * math.sqrt(vertical_fraction)
                 y = side * half_breadth
                 vertices.append((x, y, z))
-                if side == 1.0:
+                # Offsets describe the waterline breadth: one value per
+                # longitudinal station, sampled at the top vertical level.
+                if side == 1.0 and k == p.nz - 1:
                     offsets.append((x, 2.0 * half_breadth))
 
     faces: list[tuple[int, int, int]] = []

@@ -13,6 +13,9 @@ def test_default_hull_is_deterministic_and_valid():
     assert len(first.vertices) == 2 * 41 * 13
     assert len(first.faces) == 4 * 40 * 12
     assert len(first.offsets) == 41
+    assert first.offsets[0] == (0.0, 0.0)
+    assert first.offsets[-1] == (10.0, 0.0)
+    assert max(width for _, width in first.offsets) == pytest.approx(2.0)
 
 
 def test_dimensions_change_geometry():
