@@ -87,7 +87,9 @@ def generate_hull(parameters: HullParameters = HullParameters()) -> HullModel:
                 half_breadth = 0.5 * p.beam * longitudinal * math.sqrt(vertical_fraction)
                 y = side * half_breadth
                 vertices.append((x, y, z))
-                if side == 1.0:
+                # Offsets are one breadth value per longitudinal station at
+                # the waterline, not one value for every vertical sample.
+                if side == 1.0 and k == p.nz - 1:
                     offsets.append((x, 2.0 * half_breadth))
 
     faces: list[tuple[int, int, int]] = []
