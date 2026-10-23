@@ -10,14 +10,33 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e ".[test]"
-      - run: pytest
-      - run: tensorcad-hull --output /tmp/tensorcad-hull
-      - run: test -s /tmp/tensorcad-hull/hull.obj && test -s /tmp/tensorcad-hull/offsets.csv && test -s /tmp/tensorcad-hull/metadata.json
+      - run: python -m pip install -e ".[test,dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Type check
+        run: mypy
+      - name: Tests with coverage gate
+        run: pytest --cov --cov-report=term-missing
+      - name: CLI artifacts
+        run: |
+          tensorcad-hull --output /tmp/tensorcad-hull
+          test -s /tmp/tensorcad-hull/hull.obj
+          test -s /tmp/tensorcad-hull/offsets.csv
+          test -s /tmp/tensorcad-hull/metadata.json
+      - name: Reproducibility (same parameters, same bytes)
+        run: |
+          tensorcad-hull --nx 21 --nz 9 --output /tmp/run-a > /dev/null
+          tensorcad-hull --nx 21 --nz 9 --output /tmp/run-b > /dev/null
+          cmp /tmp/run-a/hull.obj /tmp/run-b/hull.obj
+          cmp /tmp/run-a/metadata.json /tmp/run-b/metadata.json
+      - name: Geometry benchmark (measured verification, no mocks)
+        run: python examples/parametric_hull/run_example.py --output /tmp/tensorcad-example
+      - name: Example artifacts
+        run: test -s /tmp/tensorcad-example/hull.obj
