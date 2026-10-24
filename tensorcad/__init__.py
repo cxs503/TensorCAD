@@ -47,7 +47,32 @@ from .hull import (
     validate_hull,
 )
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .mesh_conditioning import (
+    ConditionedMesh,
+    MeshConditioningError,
+    MeshMeasurements,
+    condition_mesh,
+    decimate,
+    measure_mesh,
+    project_to_field,
+    taubin_smooth,
+)
 from .parameters import ParameterSpec, RatioSpec
+from .suboff import (
+    SUBOFF_LENGTH_M,
+    SUBOFF_RADIUS_M,
+    SuboffHullField,
+    suboff_radius_fraction,
+    suboff_reference_geometry,
+)
+from .suboff_appendages import (
+    SuboffAppendagesField,
+    SuboffFinsField,
+    SuboffFullField,
+    SuboffSailField,
+    suboff_fin_chord,
+    suboff_sail_half_width,
+)
 from .validation import (
     Check,
     ValidationReport,
@@ -56,8 +81,11 @@ from .validation import (
 )
 
 __all__ = [
+    "SUBOFF_LENGTH_M",
+    "SUBOFF_RADIUS_M",
     "BoundingBox",
     "Check",
+    "ConditionedMesh",
     "CylinderField",
     "EllipsoidField",
     "FieldError",
@@ -67,22 +95,38 @@ __all__ = [
     "Hydrostatics",
     "Mesh",
     "MeshBuilder",
+    "MeshConditioningError",
+    "MeshMeasurements",
     "ParameterSpec",
     "PlaneField",
     "RatioSpec",
     "SampledField",
     "SphereField",
+    "SuboffAppendagesField",
+    "SuboffFinsField",
+    "SuboffFullField",
+    "SuboffHullField",
+    "SuboffSailField",
     "ValidationReport",
     "build_mesh",
     "compute_hydrostatics",
+    "condition_mesh",
+    "decimate",
     "estimate_discretisation_error",
     "export_hull",
     "generate_hull",
     "inspect_geometry",
     "inspect_mesh_quality",
+    "measure_mesh",
+    "project_to_field",
     "read_metadata",
     "read_obj",
+    "suboff_fin_chord",
+    "suboff_radius_fraction",
+    "suboff_reference_geometry",
+    "suboff_sail_half_width",
     "surface_point",
+    "taubin_smooth",
     "to_mesh",
     "validate_hull",
     "write_metadata",
@@ -90,4 +134,4 @@ __all__ = [
     "write_offsets_csv",
     "write_stl",
 ]
-__version__ = "0.4.0"
+__version__ = "0.7.0"

@@ -642,13 +642,14 @@ class SampledField:
         }
 
 
-#: 1/phi**2, an irrational fraction used to keep the sampling grid off the surface.
-_GRID_OFFSET = 0.3819660112501051
+#: Irrational fractions of one cell (1/phi**2, 1/phi**3, 1/phi**4) used to keep the
+#: sampling grid off the surface on each axis independently.
+_GRID_OFFSETS = (0.3819660112501051, 0.2360679774997897, 0.1458980337503154)
 
 
 def to_mesh(
     field: GeometryField,
-    resolution: int = 48,
+    resolution: int | Sequence[int] = 48,
     *,
     margin: int = 3,
     units: str | None = None,
@@ -656,6 +657,11 @@ def to_mesh(
     validate: bool = True,
 ) -> SampledField:
     """Sample ``field`` into a closed triangle mesh, then validate it.
+
+    ``resolution`` is cells per axis, as one number or three. A slender body wants
+    an anisotropic grid (a 8.6:1 hull at 64x64x64 wastes most of the cells and still
+    under-resolves the length); the cell size is then whatever ``box / cells`` is on
+    each axis.
 
     Sampling needs NumPy (imported here, not at module import), so the analytic
     fields stay usable in a standard-library-only environment as long as nobody
@@ -670,7 +676,12 @@ def to_mesh(
     if min(box.sizes) <= 0.0:
         raise FieldError(f"{field.kind} has a degenerate bounds box: {box.sizes!r}")
 
-    from .neural.extract import ExtractionError, extract_surface, summarise  # optional NumPy path
+    from .neural.extract import (  # optional NumPy path
+        ExtractionError,
+        cells_per_axis,
+        extract_surface,
+        summarise,
+    )
     from .validation import inspect_geometry, inspect_mesh_quality
 
     evaluate = field.numpy_callable()
@@ -685,11 +696,13 @@ def to_mesh(
     # marching tetrahedra then emits thousands of zero-area triangles -- 12.5 % of the
     # faces for a cylinder at 40 cells per axis. Shifting the sampling box by an
     # irrational fraction of one cell removes the coincidence without changing the
-    # resolution, the units, or the margin.
-    cell = max(box.sizes) / resolution
-    pad = _GRID_OFFSET * cell
-    minimum = tuple(value - pad for value in box.minimum)
-    maximum = tuple(value + pad for value in box.maximum)
+    # resolution, the units, or the margin. Each axis gets its own irrational offset.
+    cells = cells_per_axis(resolution)
+    pad = tuple(
+        _GRID_OFFSETS[axis] * box.sizes[axis] / cells[axis] for axis in range(3)
+    )
+    minimum = tuple(box.minimum[axis] - pad[axis] for axis in range(3))
+    maximum = tuple(box.maximum[axis] + pad[axis] for axis in range(3))
 
     try:
         mesh = extract_surface(
