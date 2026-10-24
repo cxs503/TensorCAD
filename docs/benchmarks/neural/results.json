@@ -4,7 +4,7 @@
   "failures": [
     "case_a_sphere_dent: the_depth_threshold_is_the_same_for_every_measured_row"
   ],
-  "seconds": 7.40341694100016,
+  "seconds": 7.265726764000192,
   "command": "python examples/benchmarks/run_benchmark.py --neural-bundle results/sphere-dent.ngo --output docs/benchmarks/neural",
   "environment": {
     "tensorcad": "0.9.0",
@@ -23,7 +23,7 @@
       "identifier": "case_a_sphere_dent",
       "question": "A local edit with a closed-form reference: how much of the error is the edit, and how much is the representation?",
       "reference": "sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 rad on +x; 512 stratified rays, dent < 1 sigma, protected > 2.5 sigma + 1.5 cells",
-      "seconds": 5.069949915000052,
+      "seconds": 5.067846968999675,
       "notes": [
         "the mesh row moves only vertices inside 2.5 sigma and does not re-project: the error it shows is interpolation between vertices, not a defect of meshes",
         "every row is probed along the same stratified ray set: a third of the rays lie inside the edit cone so a small edit is resolved, the rest are uniform, so no row sees an easier sample",
@@ -66,7 +66,7 @@
           "identifier": "analytic_field",
           "role": "reference: exact closed form",
           "status": "measured",
-          "seconds": 0.052092346000335965,
+          "seconds": 0.05195215599997027,
           "artifacts": {
             "triangulated_surface": "109ae5a9f426fc28430ec07c116bd9b3ca92937ac7d13e78ece2af3b36388740"
           },
@@ -131,10 +131,10 @@
           }
         },
         {
-          "identifier": "mesh_local_edit",
+          "identifier": "mesh",
           "role": "control: explicit triangles, vertices moved in place",
           "status": "measured",
-          "seconds": 3.0740148259997113,
+          "seconds": 3.0587233500000366,
           "artifacts": {
             "edited_surface": "d855050f19d9f15b3c6e0d2799a8233410adf8d96f3b2b416309501e90652a2a"
           },
@@ -207,6 +207,15 @@
               "note": "",
               "passed": true
             },
+            "protected_displacement_p95_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "same ray through the unedited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
             "protected_displacement_max_m": {
               "value": 0.0,
               "unit": "m",
@@ -227,6 +236,15 @@
             },
             "surface_error_mean_m": {
               "value": 0.00010238401810186491,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface over every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "surface_error_p95_m": {
+              "value": 0.00018369357906574123,
               "unit": "m",
               "status": "measured",
               "reference": "analytic surface over every ray",
@@ -288,6 +306,33 @@
               "note": "",
               "passed": true
             },
+            "vertex_count": {
+              "value": 12642.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "edited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "face_count": {
+              "value": 25280.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "edited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "rays_per_second": {
+              "value": 167.39009757126087,
+              "unit": "1/s",
+              "status": "measured",
+              "reference": "build the mesh, intersect every ray once",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
             "watertight": {
               "value": 1.0,
               "unit": "bool",
@@ -312,7 +357,7 @@
           "identifier": "neural_field",
           "role": "learned representation: versioned .ngo object, queried as an implicit field",
           "status": "measured",
-          "seconds": 0.48566684000024907,
+          "seconds": 0.4684269120002682,
           "artifacts": {
             "bundle": "results/sphere-dent.ngo",
             "weights_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7"
@@ -387,6 +432,15 @@
               "note": "",
               "passed": null
             },
+            "protected_total_error_p95_m": {
+              "value": 0.010093454531047485,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
             "protected_total_error_max_m": {
               "value": 0.015085404139219993,
               "unit": "m",
@@ -407,6 +461,15 @@
             },
             "surface_error_mean_m": {
               "value": 0.0034331241080292054,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface over every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "surface_error_p95_m": {
+              "value": 0.009157517581127386,
               "unit": "m",
               "status": "measured",
               "reference": "analytic surface over every ray",
@@ -441,6 +504,24 @@
               "note": "",
               "passed": null
             },
+            "artifact_bytes": {
+              "value": 221620.0,
+              "unit": "byte",
+              "status": "measured",
+              "reference": "the whole .ngo bundle on disk",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "rays_per_second": {
+              "value": 1093.0200355348218,
+              "unit": "1/s",
+              "status": "measured",
+              "reference": "load the weights, march and bisect every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
             "reported_dent_surface_error_mean_m": {
               "value": 0.002320727100595832,
               "unit": "m",
@@ -459,11 +540,47 @@
               "note": "the parent weights are not part of the bundle, so this cannot be re-measured here",
               "passed": null
             },
+            "protected_displacement_p95_m": {
+              "value": 0.003311760723590851,
+              "unit": "m",
+              "status": "imported",
+              "reference": "the producing run's parent-field comparison",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
             "locality_ratio": {
               "value": 0.02133474141980211,
               "unit": "relative",
               "status": "imported",
               "reference": "imported leak / peak edit depth",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "training_steps": {
+              "value": 1000.0,
+              "unit": "count",
+              "status": "imported",
+              "reference": "the producing run",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "training_seconds": {
+              "value": 27.199306949999936,
+              "unit": "s",
+              "status": "imported",
+              "reference": "the producing run, on its own hardware",
+              "tolerance": null,
+              "note": "informational: measured on the machine that trained, not on this one",
+              "passed": null
+            },
+            "training_seed": {
+              "value": 503.0,
+              "unit": "count",
+              "status": "imported",
+              "reference": "the producing run",
               "tolerance": null,
               "note": "",
               "passed": null
@@ -497,7 +614,7 @@
       "identifier": "case_b_hull_handoff",
       "question": "The engineering case: can a target become a verified hull, and does the artifact a solver reads describe the same surface?",
       "reference": "L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3",
-      "seconds": 2.323352098000214,
+      "seconds": 2.1879511199999797,
       "notes": [
         "the mesh volume here is a discretisation of an analytic form, so its error is the grid's: the refinement row measures how much"
       ],
@@ -523,7 +640,7 @@
           "identifier": "parametric_hull",
           "role": "engineering case: three design variables, analytic volume reference",
           "status": "measured",
-          "seconds": 2.1780361899996024,
+          "seconds": 2.0550270810003894,
           "artifacts": {
             "hull_surface": "98dfdf8f1bea4dc1218896e54d37dc974fe7919ef86cf04aba118d8add29767e"
           },
@@ -569,7 +686,7 @@
               "passed": null
             },
             "design_loop_seconds": {
-              "value": 2.1569910409998556,
+              "value": 2.0342561520001254,
               "unit": "s",
               "status": "measured",
               "reference": "wall clock around solve()",

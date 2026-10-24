@@ -2,7 +2,7 @@
   "schema": "tensorcad.benchmark/1",
   "passed": true,
   "failures": [],
-  "seconds": 6.216700343999946,
+  "seconds": 6.067278653000358,
   "command": "python examples/benchmarks/run_benchmark.py --output docs/benchmarks/full",
   "environment": {
     "tensorcad": "0.9.0",
@@ -21,7 +21,7 @@
       "identifier": "case_a_sphere_dent",
       "question": "A local edit with a closed-form reference: how much of the error is the edit, and how much is the representation?",
       "reference": "sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 rad on +x; 512 stratified rays, dent < 1 sigma, protected > 2.5 sigma + 1.5 cells",
-      "seconds": 3.1565418790000876,
+      "seconds": 3.0584571429999414,
       "notes": [
         "the mesh row moves only vertices inside 2.5 sigma and does not re-project: the error it shows is interpolation between vertices, not a defect of meshes",
         "every row is probed along the same stratified ray set: a third of the rays lie inside the edit cone so a small edit is resolved, the rest are uniform, so no row sees an easier sample",
@@ -64,7 +64,7 @@
           "identifier": "analytic_field",
           "role": "reference: exact closed form",
           "status": "measured",
-          "seconds": 0.055932693000158906,
+          "seconds": 0.053711303000000044,
           "artifacts": {
             "triangulated_surface": "109ae5a9f426fc28430ec07c116bd9b3ca92937ac7d13e78ece2af3b36388740"
           },
@@ -129,10 +129,10 @@
           }
         },
         {
-          "identifier": "mesh_local_edit",
+          "identifier": "mesh",
           "role": "control: explicit triangles, vertices moved in place",
           "status": "measured",
-          "seconds": 2.9720279759999357,
+          "seconds": 2.877103975999944,
           "artifacts": {
             "edited_surface": "d855050f19d9f15b3c6e0d2799a8233410adf8d96f3b2b416309501e90652a2a"
           },
@@ -205,6 +205,15 @@
               "note": "",
               "passed": true
             },
+            "protected_displacement_p95_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "same ray through the unedited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
             "protected_displacement_max_m": {
               "value": 0.0,
               "unit": "m",
@@ -225,6 +234,15 @@
             },
             "surface_error_mean_m": {
               "value": 0.00010238401810186491,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface over every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "surface_error_p95_m": {
+              "value": 0.00018369357906574123,
               "unit": "m",
               "status": "measured",
               "reference": "analytic surface over every ray",
@@ -285,6 +303,33 @@
               "tolerance": 0.999,
               "note": "",
               "passed": true
+            },
+            "vertex_count": {
+              "value": 12642.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "edited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "face_count": {
+              "value": 25280.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "edited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "rays_per_second": {
+              "value": 177.956724633858,
+              "unit": "1/s",
+              "status": "measured",
+              "reference": "build the mesh, intersect every ray once",
+              "tolerance": null,
+              "note": "",
+              "passed": null
             },
             "watertight": {
               "value": 1.0,
@@ -381,7 +426,7 @@
       "identifier": "case_b_hull_handoff",
       "question": "The engineering case: can a target become a verified hull, and does the artifact a solver reads describe the same surface?",
       "reference": "L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3",
-      "seconds": 1.8608036240002548,
+      "seconds": 1.854230016999736,
       "notes": [
         "the mesh volume here is a discretisation of an analytic form, so its error is the grid's: the refinement row measures how much"
       ],
@@ -407,7 +452,7 @@
           "identifier": "parametric_hull",
           "role": "engineering case: three design variables, analytic volume reference",
           "status": "measured",
-          "seconds": 1.7842216389999521,
+          "seconds": 1.778598673000488,
           "artifacts": {
             "hull_surface": "98dfdf8f1bea4dc1218896e54d37dc974fe7919ef86cf04aba118d8add29767e"
           },
@@ -453,7 +498,7 @@
               "passed": null
             },
             "design_loop_seconds": {
-              "value": 1.7648457430000235,
+              "value": 1.7607817910002268,
               "unit": "s",
               "status": "measured",
               "reference": "wall clock around solve()",

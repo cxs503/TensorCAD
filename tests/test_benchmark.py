@@ -35,6 +35,7 @@ from tensorcad.benchmark import (
     _angle_from_axis,
     _field_radii,
     _lat_long_surface,
+    _percentile,
     _RayCaster,
     dent_radius,
     fibonacci_directions,
@@ -122,7 +123,7 @@ def test_the_reference_row_is_the_reference(quick_case) -> None:
 
 
 def test_the_mesh_row_measures_a_real_edit(quick_case) -> None:
-    mesh = quick_case.by_id("mesh_local_edit")
+    mesh = quick_case.by_id("mesh")
     assert mesh.status == MEASURED
     metrics = mesh.metrics
     assert metrics["ray_coverage"].value == 1.0
@@ -153,13 +154,13 @@ def test_a_coarse_grid_fails_its_own_gate_and_says_so() -> None:
     measurement, not a decoration, and it fails when the representation is too coarse.
     """
     coarse = sphere_dent_case(rays=128, rings=12, segments=24)
-    assert not coarse.by_id("mesh_local_edit").metrics["dent_depth_axis_error_m"].passed
+    assert not coarse.by_id("mesh").metrics["dent_depth_axis_error_m"].passed
     assert "mesh_edit_hits_the_target_depth" in {gate.name for gate in coarse.failed_gates}
 
     # The same case on the grid the harness ships clears it, so the failure above is
     # resolution and not a broken edit.
     fine = sphere_dent_case(rays=128)
-    assert fine.by_id("mesh_local_edit").metrics["dent_depth_axis_error_m"].passed
+    assert fine.by_id("mesh").metrics["dent_depth_axis_error_m"].passed
     assert not fine.failed_gates
 
 
@@ -172,7 +173,7 @@ def test_the_sag_floor_is_well_inside_the_depth_gate(quick_case) -> None:
     metric so a reader can see the headroom rather than trust a comment.
     """
     gate = 0.01 * DENT_DEPTH_M
-    floor = quick_case.by_id("mesh_local_edit").metrics["discretisation_floor_m"].value
+    floor = quick_case.by_id("mesh").metrics["discretisation_floor_m"].value
     assert floor is not None
     assert 0.0 < floor < 0.35 * gate, f"chord-sag floor {floor:.3e} m is too close to the {gate:.3e} m gate"
 
@@ -257,6 +258,41 @@ def test_have_neural_reflects_what_is_importable() -> None:
     assert have_neural() is expected
 
 
+def test_the_row_ids_match_the_merged_contract(quick_run) -> None:
+    """The IDs are not cosmetic: docs/benchmarks/representation-comparison.md defines them."""
+    identifiers = {row.identifier for case in quick_run.cases for row in case.representations}
+    assert identifiers == {
+        "analytic_field",
+        "mesh",
+        "neural_field",
+        "ocp_step",
+        "parametric_hull",
+    }
+
+
+def test_the_plot_is_generated_from_the_same_numbers(quick_run, tmp_path) -> None:
+    svg = quick_run.write_svg(tmp_path / "plot.svg").read_text(encoding="utf-8")
+    assert svg.startswith("<svg")
+    assert svg.rstrip().endswith("</svg>")
+    # One point per measured surface, labelled with its row; a row with no measurement
+    # must not appear at zero.
+    mesh = quick_run.cases[0].by_id("mesh")
+    assert "mesh (" in svg
+    assert "neural_field (" not in svg  # not measured in a run without a bundle
+    assert mesh.metrics["surface_error_mean_m"].value is not None
+    assert svg.count("<circle") == 1
+
+
+def test_percentiles_are_what_they_say() -> None:
+    sample = [1.0, 2.0, 3.0, 4.0, 5.0]
+    assert _percentile(sample, 0.0) == 1.0
+    assert _percentile(sample, 1.0) == 5.0
+    assert _percentile(sample, 0.5) == 3.0
+    assert _percentile([7.0], 0.95) == 7.0
+    with pytest.raises(ValueError, match="empty"):
+        _percentile([], 0.95)
+
+
 def test_the_hull_case_measures_against_the_analytic_volume() -> None:
     from tensorcad.hull import analytic_volume
 
@@ -294,7 +330,8 @@ def test_a_full_quick_run_passes_and_is_reproducible(quick_run) -> None:
                 representation.pop("seconds")
                 for metric in representation["metrics"].values():
                     metric.pop("note")
-                    if metric.get("unit") == "s":  # wall-clock, the one thing that varies
+                    # Wall clock and anything derived from it is the one thing that varies.
+                    if metric.get("unit") in ("s", "1/s"):
                         metric["value"] = None
         return payload
 
@@ -315,7 +352,7 @@ def test_the_documents_are_generated_and_agree(quick_run, tmp_path) -> None:
     assert "verdict: pass" in report
     assert "case_a_sphere_dent" in report
     # The report is derived: a number in it must exist in the JSON.
-    dent = quick_run.cases[0].by_id("mesh_local_edit").metrics["locality_ratio"].value
+    dent = quick_run.cases[0].by_id("mesh").metrics["locality_ratio"].value
     assert dent is not None
     assert f"{dent:.3e}" in report or f"{dent:.6g}" in report
 

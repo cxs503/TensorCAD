@@ -9,7 +9,7 @@ semantic versioning.
 Representations stop being an argument and become a measurement. One harness runs an
 analytic formula, a mesh edit, a trained neural field and an optional kernel export through
 the same rays, the same closed form and the same thresholds, and writes `results.json` plus
-a generated `report.md`.
+a generated `report.md` and `plot.svg`.
 
 ### Added
 - **`tensorcad.benchmark`** — `Metric` (value, unit, reference, tolerance, status ∈
@@ -24,15 +24,21 @@ a generated `report.md`.
   inside the edit cone so a 0.22 rad feature is actually resolved).
 - **Case B, `case_b_hull_handoff`** — a displacement target → damped Newton → hull → gmsh
   round trip, measured against `hull.analytic_volume` rather than against its own mesh.
-- **`examples/benchmarks/run_benchmark.py`** — writes `results.json` and `report.md`, and
-  exits 1 when any gate fails, so it is usable as a CI step.
+- **`examples/benchmarks/run_benchmark.py`** — writes `results.json`, `report.md` and
+  `plot.svg` (standard-library SVG, surface error against wall clock), and exits 1 when any
+  gate fails, so it is usable as a CI step.
+- **Contract coverage** — the row IDs are the ones the merged contract defines
+  (`analytic_field`, `mesh`, `neural_field`, `ocp_step`, `parametric_hull`), P95 alongside
+  mean/max, query throughput and artifact bytes, and training steps/time/seed imported from
+  the bundle. Peak memory is not measured; contract Case B (AFF-8 round trip) and Case C
+  (real solver run) are not implemented and the document says so.
 
 ### Measured (full sampling, 512 rays, grid 80×160, in `docs/benchmarks/`)
-- mesh local edit: cone-mean depth error **2.3e-6 m**, dent surface error mean **4.5e-5 m**,
-  leak outside the edit support **exactly 0 m**, all-ray surface error 1.0e-4 m, 2.9 s;
-- trained neural field (`.ngo`, weights `db1df71e…`, 1.73 s for the same 512 rays): cone-mean
-  depth error **1.9e-3 m** (3.2 % of the edit depth), dent surface error mean 2.1e-3 m,
-  imported parent-relative leak 1.3e-3 m, all-ray surface error 3.4e-3 m;
+- mesh edit: cone-mean depth error **2.3e-6 m**, dent surface error mean **4.5e-5 m**, leak
+  outside the edit support **exactly 0 m**, all-ray surface error 1.0e-4 m (P95 1.8e-4 m);
+- trained neural field (`.ngo`, weights `db1df71e…`, 221,620 bytes): cone-mean depth error
+  **1.9e-3 m** (3.2 % of the edit depth), dent surface error mean 2.1e-3 m, imported
+  parent-relative leak 1.3e-3 m (P95 3.3e-3 m), all-ray surface error 3.4e-3 m (P95 9.2e-3 m);
 - the same 1 %-of-depth gate applied to both: the mesh row passes, the neural row fails, and
   the run exits 1. No looser tolerance was invented for the learned field;
 - the shipped grid is 80×160 because its measured chord-sag floor (1.9e-4 m) sits below the

@@ -95,6 +95,7 @@ jobs:
         run: |
           test -s /tmp/tensorcad-benchmark/results.json
           test -s /tmp/tensorcad-benchmark/report.md
+          test -s /tmp/tensorcad-benchmark/plot.svg
           python -c "import json,sys; d=json.load(open('/tmp/tensorcad-benchmark/results.json')); \
             assert d['passed'] is True, d['failures']; \
             assert d['schema'] == 'tensorcad.benchmark/1'; \

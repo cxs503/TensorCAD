@@ -304,13 +304,14 @@ hull, and the gmsh artifact a solver reads. A row whose optional extra is missin
 | cone-mean depth error | 0 (reference) | **2.3e-6 m** | 1.9e-3 m |
 | dent surface error, mean | 0 | 4.5e-5 m | 2.1e-3 m |
 | leak outside the edit (vs its own parent) | 0 | **0 m** | 1.3e-3 m (imported) |
-| surface error over every ray | 0 | 1.0e-4 m | 3.4e-3 m |
-| cost for 512 rays | 0.05 s | 2.9 s | 1.7 s |
+| surface error over every ray (mean / P95) | 0 | 1.0e-4 / 1.8e-4 m | 3.4e-3 / 9.2e-3 m |
+| wall clock for 512 rays (informational, see the doc) | 0.05 s | 3.1 s | 0.47 s |
 
 The measured verdict is that a plain vertex move beats the trained field by 13–840× on depth
 and surface accuracy for this task, with an exactly-zero leak outside its support; the field
-keeps a 236 KB topology-free artifact and a continuous surface, which this benchmark does not
-score. Both rows face the **same 1 %-of-depth threshold**, so the neural row fails the mesh
+keeps a 222 KB topology-free artifact and a continuous surface, which this benchmark does not
+score, and answers rays faster only because the harness's own mesh ray caster has no spatial
+index. Both rows face the **same 1 %-of-depth threshold**, so the neural row fails the mesh
 row's gate (exit code 1) instead of being given a looser one. The 40×80 grid that happens to
 pass is rejected in favour of 80×160 because its chord-sag floor (1.9e-4 m) must sit well
 below the gate. Details, the resolution ladder and the threats to validity:
@@ -388,7 +389,7 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
 - `tensorcad.benchmark` — the representation benchmark: metric schema with explicit missing
   states, ray caster, exact references, and `results.json` / `report.md` generation.
-- `examples/` and `tests/` — runnable benchmarks and 391 tests, 14 of which need the
+- `examples/` and `tests/` — runnable benchmarks and 394 tests, 15 of which need the
   `neural` extra; the OCP bridge adds 10 more when its wheels are installed.
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.

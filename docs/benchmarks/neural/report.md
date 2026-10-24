@@ -5,8 +5,12 @@ produced by the run that wrote this file.
 
 - command: `python examples/benchmarks/run_benchmark.py --neural-bundle results/sphere-dent.ngo --output docs/benchmarks/neural`
 - tensorcad 0.9.0, python 3.11.2, numpy 2.4.6, torch 2.14.1+cu130, ocp None
-- wall clock: 7.40 s
+- wall clock: 7.27 s
 - **verdict: FAIL** — 1 gate(s) failed
+
+![surface error against wall clock](plot.svg)
+
+Generated from the same result set by `write_svg`: error is the all-ray surface error (analytic rows are exact, so they sit at the floor of the measurement, not at zero error).
 
 ## case_a_sphere_dent
 
@@ -31,7 +35,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 
 > the surface radius is a formula, so this row's surface error is the harness's own; its useful numbers are the volume/area of the triangulation a solver would receive
 
-### `mesh_local_edit` — control: explicit triangles, vertices moved in place (measured, 3.07 s)
+### `mesh` — control: explicit triangles, vertices moved in place (measured, 3.06 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -42,15 +46,20 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 | `dent_surface_error_mean_m` | 4.546e-05 | m | measured | pass |
 | `dent_surface_error_max_m` | 1.498e-04 | m | measured | — |
 | `protected_displacement_mean_m` | 0 | m | measured | pass |
+| `protected_displacement_p95_m` | 0 | m | measured | — |
 | `protected_displacement_max_m` | 0 | m | measured | — |
 | `protected_total_error_mean_m` | 1.264e-04 | m | measured | — |
 | `surface_error_mean_m` | 1.024e-04 | m | measured | — |
+| `surface_error_p95_m` | 1.837e-04 | m | measured | — |
 | `surface_error_max_m` | 0.00122204 | m | measured | — |
 | `transition_band_displacement_m` | 0.00195981 | m | measured | — |
 | `locality_ratio` | 0 | relative | measured | pass |
 | `volume_error` | 3.833e-04 | relative | measured | pass |
 | `discretisation_floor_m` | 1.904e-04 | m | measured | — |
 | `ray_coverage` | 1 | fraction | measured | pass |
+| `vertex_count` | 12642 | count | measured | — |
+| `face_count` | 25280 | count | measured | — |
+| `rays_per_second` | 167.39 | 1/s | measured | — |
 | `watertight` | 1 | bool | measured | pass |
 | `euler_characteristic` | 2 | count | measured | pass |
 
@@ -58,7 +67,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 > no re-projection, no fairing, no smoothing: this is what a plain mesh edit costs
 > protected_displacement_* is measured against the unedited mesh on the same ray; protected_total_error_* is measured against the analytic surface and includes the chord sag of the triangulation
 
-### `neural_field` — learned representation: versioned .ngo object, queried as an implicit field (measured, 0.49 s)
+### `neural_field` — learned representation: versioned .ngo object, queried as an implicit field (measured, 0.47 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -69,15 +78,23 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 | `dent_surface_error_mean_m` | 0.00211524 | m | measured | — |
 | `dent_surface_error_max_m` | 0.00528896 | m | measured | — |
 | `protected_total_error_mean_m` | 0.0041399 | m | measured | — |
+| `protected_total_error_p95_m` | 0.0100935 | m | measured | — |
 | `protected_total_error_max_m` | 0.0150854 | m | measured | — |
 | `transition_band_total_error_m` | 0.010733 | m | measured | — |
 | `surface_error_mean_m` | 0.00343312 | m | measured | — |
+| `surface_error_p95_m` | 0.00915752 | m | measured | — |
 | `surface_error_max_m` | 0.0150854 | m | measured | — |
 | `ray_coverage` | 1 | fraction | measured | pass |
 | `truncation_distance_m` | 0.15 | m | measured | — |
+| `artifact_bytes` | 2.216e+05 | byte | measured | — |
+| `rays_per_second` | 1093.02 | 1/s | measured | — |
 | `reported_dent_surface_error_mean_m` | 0.00232073 | m | imported | — |
 | `protected_displacement_mean_m` | 0.00128008 | m | imported | — |
+| `protected_displacement_p95_m` | 0.00331176 | m | imported | — |
 | `locality_ratio` | 0.0213347 | relative | imported | — |
+| `training_steps` | 1000 | count | imported | — |
+| `training_seconds` | 27.1993 | s | imported | — |
+| `training_seed` | 503 | count | imported | — |
 
 > queried on the same 512 rays as every other row, by marching the field and bisecting the zero crossing (tensorcad.mlp_fourier.v1, truncation 0.15 m)
 > dent_depth_* and dent_surface_error_* are measured here, not imported: the learned surface is compared with the same closed form as the mesh row
@@ -111,7 +128,7 @@ Reference: L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3
 
 - the mesh volume here is a discretisation of an analytic form, so its error is the grid's: the refinement row measures how much
 
-### `parametric_hull` — engineering case: three design variables, analytic volume reference (measured, 2.18 s)
+### `parametric_hull` — engineering case: three design variables, analytic volume reference (measured, 2.06 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -119,7 +136,7 @@ Reference: L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3
 | `design_loop_volume_error` | 2.220e-16 | relative | measured | pass |
 | `design_loop_solved` | 1 | bool | measured | pass |
 | `design_loop_evaluations` | 6 | count | measured | — |
-| `design_loop_seconds` | 2.15699 | s | measured | — |
+| `design_loop_seconds` | 2.03426 | s | measured | — |
 | `watertight` | 1 | bool | measured | pass |
 | `euler_characteristic` | 2 | count | measured | pass |
 | `export_node_error_m` | 0 | m | measured | pass |

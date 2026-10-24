@@ -20,8 +20,8 @@ python examples/benchmarks/run_benchmark.py --neural-bundle results/sphere-dent.
 ```
 
 Exit code is 1 when any gate fails, so the command is usable as a CI step. The artifacts
-written are `results.json` (machine readable), `report.md` (generated from the same data)
-and, per case, small OBJ/msh files when `--artifacts` is passed.
+written are `results.json` (machine readable), `report.md` and `plot.svg` (both generated
+from the same data) and, per case, small OBJ/msh files when `--artifacts` is passed.
 """
 
 from __future__ import annotations
@@ -57,6 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     json_path = result.write_json(output / "results.json")
     report_path = result.write_markdown(output / "report.md")
+    plot_path = result.write_svg(output / "plot.svg")
 
     environment = result.environment
     print(
@@ -83,6 +84,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"\nwrote {json_path}")
     print(f"wrote {report_path}")
+    print(f"wrote {plot_path}")
     if result.passed:
         print(f"all gates passed in {result.seconds:.2f} s")
         return 0
