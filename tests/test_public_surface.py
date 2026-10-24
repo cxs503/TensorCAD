@@ -32,13 +32,13 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.8.0"
+    assert tensorcad.__version__ == "0.9.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("geometry", "geometry_field", "mesh", "mesh_conditioning", "parameters",
                    "validation", "hydrostatics", "export", "hull", "design", "suboff",
-                   "suboff_appendages", "cli", "adapters.fem"):
+                   "suboff_appendages", "cli", "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 

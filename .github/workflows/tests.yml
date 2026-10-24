@@ -86,5 +86,20 @@ jobs:
           test -s /tmp/tensorcad-design/design_hull.msh
           test -s /tmp/tensorcad-design/solver_manifest.json
           test -s /tmp/tensorcad-design/design_path.json
+      - name: Representation benchmark (analytic, mesh, neural, STEP in one harness)
+        # Every row is measured against the same rays and the same closed form; rows whose
+        # extra is not installed (torch, OCP) must report not_supported rather than a zero,
+        # and the command's exit code is the verdict, so a red gate fails this job.
+        run: python examples/benchmarks/run_benchmark.py --quick --output /tmp/tensorcad-benchmark
+      - name: Representation benchmark artifacts
+        run: |
+          test -s /tmp/tensorcad-benchmark/results.json
+          test -s /tmp/tensorcad-benchmark/report.md
+          python -c "import json,sys; d=json.load(open('/tmp/tensorcad-benchmark/results.json')); \
+            assert d['passed'] is True, d['failures']; \
+            assert d['schema'] == 'tensorcad.benchmark/1'; \
+            rows={r['identifier'] for c in d['cases'] for r in c['representations']}; \
+            assert {'analytic_field','mesh_local_edit','parametric_hull'} <= rows, rows"
+
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj

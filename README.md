@@ -286,6 +286,37 @@ false}`. TensorCAD measures and hands off geometry; running the flow or the stru
 TensorFEM's and TensorLBM's job, and no number here claims otherwise. Details:
 [docs/design_loop.md](docs/design_loop.md).
 
+## Representation benchmark (0.9)
+
+Analytic formula, explicit triangles, a learned field and a kernel export, all through one
+harness on the same rays, the same closed form and the same gates:
+
+```bash
+python examples/benchmarks/run_benchmark.py --quick --output results/bench
+```
+
+Case A is a sphere with a Gaussian dent of known depth; Case B is a design target, a converged
+hull, and the gmsh artifact a solver reads. A row whose optional extra is missing reports
+`not_supported` with the command that would measure it — never a zero.
+
+| Case A, full sampling (512 rays, one edit, one reference) | analytic | mesh edit | neural field |
+|---|---|---|---|
+| cone-mean depth error | 0 (reference) | **2.3e-6 m** | 1.9e-3 m |
+| dent surface error, mean | 0 | 4.5e-5 m | 2.1e-3 m |
+| leak outside the edit (vs its own parent) | 0 | **0 m** | 1.3e-3 m (imported) |
+| surface error over every ray | 0 | 1.0e-4 m | 3.4e-3 m |
+| cost for 512 rays | 0.05 s | 2.9 s | 1.7 s |
+
+The measured verdict is that a plain vertex move beats the trained field by 13–840× on depth
+and surface accuracy for this task, with an exactly-zero leak outside its support; the field
+keeps a 236 KB topology-free artifact and a continuous surface, which this benchmark does not
+score. Both rows face the **same 1 %-of-depth threshold**, so the neural row fails the mesh
+row's gate (exit code 1) instead of being given a looser one. The 40×80 grid that happens to
+pass is rejected in favour of 80×160 because its chord-sag floor (1.9e-4 m) must sit well
+below the gate. Details, the resolution ladder and the threats to validity:
+[docs/representation_benchmark.md](docs/representation_benchmark.md); the committed runs are in
+`docs/benchmarks/{quick,full,neural}/`.
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -355,7 +386,9 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmarks and 369 tests, 14 of which need the
+- `tensorcad.benchmark` — the representation benchmark: metric schema with explicit missing
+  states, ray caster, exact references, and `results.json` / `report.md` generation.
+- `examples/` and `tests/` — runnable benchmarks and 391 tests, 14 of which need the
   `neural` extra; the OCP bridge adds 10 more when its wheels are installed.
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
@@ -400,7 +433,9 @@ The point of a headless geometry library is that a caller can tell "bad input" f
 
 ## Status and limitations
 
-0.8.0 adds the design loop: a displacement and shape-ratio target, a damped Newton search
+0.9.0 adds the representation benchmark: one harness that puts an analytic formula, a mesh
+edit, a learned field and an optional kernel export on the same rays, the same closed form
+and the same thresholds, and publishes `results.json` + `report.md` for every run. 0.8.0 added the design loop: a displacement and shape-ratio target, a damped Newton search
 over the free hull dimensions, a verdict that refuses a converged design whose triangles
 fail validation, and a solver manifest with the geometry handoff attached. 0.7.0 adds mesh conditioning (smoothing, projection and decimation with measured shape
 drift) and the two solver exits: a standard-library FEM handoff (gmsh 2.2 + JSON with named
