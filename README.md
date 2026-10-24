@@ -243,6 +243,49 @@ The optional extra is `pip install "tensorcad[ocp]"`; without it `write_step` ra
 `OcpUnavailable` with that command in the message, and the FEM handoff still runs,
 because it needs nothing but the standard library.
 
+## Design loop (0.8)
+
+Everything above answers "what is this surface?". This answers the question an agent
+actually receives — *"give me a hull that displaces 12.06 m³ with a B/T of 2.67 and a
+wetted area under 33.3 m², and prove it"*:
+
+```python
+from tensorcad import DesignProblem, DesignTargets, HullParameters, write_solver_manifest
+
+solution = DesignProblem(
+    base=HullParameters(length=10.0, beam=2.0, draft=0.8),
+    targets=DesignTargets(displacement_m3=12.063418, beam_to_draft=2.4 / 0.9,
+                          wetted_area_m2_max=33.3),
+    variables=("length", "beam", "draft"),
+).solve()
+
+solution.status            # 'converged'
+solution.solved            # converged AND every geometric gate green
+solution.failed_checks     # names, never a message to parse
+solution.convergence_order # 1.940 -- measured, above the finite-difference floor
+write_solver_manifest(solution, "results/solver_manifest.json")
+```
+
+Damped Newton on `log` of the free dimensions, finite-difference Jacobian, backtracking
+line search, bounds from the hull model's own specs, every iteration kept and measured.
+Standard library only, like the hull model it drives.
+
+| Check | Measurement |
+|---|---|
+| recover a known hull (L 12, B 2.4, T 0.9) from its measured displacement + ratios | all three dimensions to **1e-7 relative** in 6 evaluations, 1.1 s |
+| convergence order, from the residual triple (9.1e-3, 4.1e-5, 8.3e-10) | **1.940** (Newton is 2; the estimate stops above the 1e-10 finite-difference floor) |
+| Jacobian sanity | B/T has sensitivity **+1.000000 / −1.000000**, displacement **+1.000000** in beam and draft |
+| replay | same targets → same mesh digest `814f4770b0189c58` |
+| re-open with a 15 % heavier brief | converges from the previous answer in 5 evaluations, 13.872930 m³ |
+| grid sensitivity | (41,13) → (81,25): displacement **+0.577 %**, area +0.18 % |
+| a design that *converges and is refused* | 200 m³ at L = 10 m: ‖r‖ = 1.13e-12, and the verdict is `solved=False` naming `mesh_min_angle`, `mesh_aspect_ratio`, `mesh_sliver_share` |
+
+The manifest carries the target, every iteration, the full `handoff/1` record, the
+reference quantities a solver needs and `"solver": {"status": "ready", "executed_here":
+false}`. TensorCAD measures and hands off geometry; running the flow or the structure is
+TensorFEM's and TensorLBM's job, and no number here claims otherwise. Details:
+[docs/design_loop.md](docs/design_loop.md).
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -294,6 +337,8 @@ The boundaries below are the ones the code actually has (they were proposals in 
   offset-table provenance, analytic reference geometry and anisotropic export.
 - `tensorcad.suboff_appendages` — the AFF-8 sail and cruciform stern fins from their
   published predicates, plus the hull-sail-fin union field.
+- `tensorcad.design` — the design loop: targets in, damped Newton over the free hull
+  dimensions, every iteration measured and verified, and a solver manifest out.
 - `tensorcad.mesh` — generic algorithms: weld, orient outward, boundary/manifold/watertight analysis, surface integrals.
 - `tensorcad.mesh_conditioning` — Taubin smoothing, field projection, quadric decimation,
   and the `condition_mesh` gates that refuse to hand on a surface whose shape drifted.
@@ -310,8 +355,8 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmarks and 356 tests (337 without the `neural`
-  extra; the OCP bridge adds 10 more when its wheels are installed).
+- `examples/` and `tests/` — runnable benchmarks and 369 tests, 14 of which need the
+  `neural` extra; the OCP bridge adds 10 more when its wheels are installed.
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -323,6 +368,7 @@ pytest --cov
 python examples/parametric_hull/run_example.py --output results/hull-demo
 python examples/geometry_core/run_benchmark.py --resolution 40
 python examples/suboff/run_example.py --output results/suboff
+python examples/design_loop/run_example.py --output results/design
 python examples/mesh_conditioning/run_example.py --output results/conditioning
 python examples/step_export/run_example.py --output results/step   # STEP part needs .[ocp]
 tensorcad-hull --length 12 --beam 2.4 --draft 0.9 --nx 61 --nz 17 --output results/hull-demo
@@ -354,7 +400,9 @@ The point of a headless geometry library is that a caller can tell "bad input" f
 
 ## Status and limitations
 
-0.7.0 adds mesh conditioning (smoothing, projection and decimation with measured shape
+0.8.0 adds the design loop: a displacement and shape-ratio target, a damped Newton search
+over the free hull dimensions, a verdict that refuses a converged design whose triangles
+fail validation, and a solver manifest with the geometry handoff attached. 0.7.0 adds mesh conditioning (smoothing, projection and decimation with measured shape
 drift) and the two solver exits: a standard-library FEM handoff (gmsh 2.2 + JSON with named
 boundary patches) and an optional OpenCASCADE STEP bridge behind the `ocp` extra. 0.6.0 adds the SUBOFF appendages (sail and cruciform fins) on top of the bare hull,
 from their published closed-form predicates rather than a boolean engine. 0.5.0 added the SUBOFF bare hull on top of the geometry core. 0.4.0 added the continuous geometry core: one protocol for analytic and learned fields,
@@ -370,5 +418,6 @@ fins are transcribed), a `Cb`-parameterised hull family (SUBOFF is the published
 editable in length and radius only), any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
-1.9 %), booleans or sweeps, a B-rep/STEP *feature model* (the STEP export is a faceted solid),
+1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape
+ratios, not resistance or stability), a B-rep/STEP *feature model* (the STEP export is a faceted solid),
 mesh refinement or remeshing to a target size field (conditioning only coarsens), a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
