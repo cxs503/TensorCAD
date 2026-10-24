@@ -78,5 +78,13 @@ jobs:
         run: |
           test -s /tmp/tensorcad-step/aff8_surface.msh
           test -s /tmp/tensorcad-step/aff8_surface.json
+      - name: Design loop (target -> verified hull -> solver manifest)
+        run: python examples/design_loop/run_example.py --output /tmp/tensorcad-design
+      - name: Design loop artifacts
+        run: |
+          test -s /tmp/tensorcad-design/design_hull.obj
+          test -s /tmp/tensorcad-design/design_hull.msh
+          test -s /tmp/tensorcad-design/solver_manifest.json
+          test -s /tmp/tensorcad-design/design_path.json
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj

@@ -17,6 +17,15 @@ contracts and algorithms, :mod:`tensorcad.parameters` and
 live in :mod:`tensorcad.adapters`.
 """
 
+from .design import (
+    DESIGN_SCHEMA,
+    DesignProblem,
+    DesignRecord,
+    DesignSolution,
+    DesignTargets,
+    write_design_json,
+    write_solver_manifest,
+)
 from .export import (
     export_hull,
     read_metadata,
@@ -81,12 +90,17 @@ from .validation import (
 )
 
 __all__ = [
+    "DESIGN_SCHEMA",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
     "BoundingBox",
     "Check",
     "ConditionedMesh",
     "CylinderField",
+    "DesignProblem",
+    "DesignRecord",
+    "DesignSolution",
+    "DesignTargets",
     "EllipsoidField",
     "FieldError",
     "GeometryField",
@@ -129,9 +143,11 @@ __all__ = [
     "taubin_smooth",
     "to_mesh",
     "validate_hull",
+    "write_design_json",
     "write_metadata",
     "write_obj",
     "write_offsets_csv",
+    "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.7.0"
+__version__ = "0.8.0"
