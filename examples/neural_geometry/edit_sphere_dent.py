@@ -129,7 +129,6 @@ def main() -> None:
         loss.backward()
         optimizer.step()
 
-    radius_state = torch.full((2048,), args.radius)
     # Immutable parent snapshot: this is the rollback point and replay teacher.
     parent = ConditionalTSDF()
     parent.load_state_dict({k: v.detach().clone() for k, v in model.state_dict().items()})
