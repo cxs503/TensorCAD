@@ -1,0 +1,70 @@
+name: neural-geometry-experiments
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/neural-geometry-experiments.yml'
+      - 'examples/neural_geometry/**'
+      - 'tensorcad/neural_geometry.py'
+  pull_request:
+    paths:
+      - '.github/workflows/neural-geometry-experiments.yml'
+      - 'examples/neural_geometry/**'
+      - 'tensorcad/neural_geometry.py'
+
+jobs:
+  neural-geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install neural research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[neural]'
+      - name: Train and measure state-conditioned sphere
+        id: sphere
+        shell: bash
+        run: |
+          mkdir -p results
+          set +e
+          python examples/neural_geometry/train_sphere.py --steps 1800 --seed 503 --output results/neural-sphere.ngo > results/neural-sphere.stdout.json 2> results/neural-sphere.stderr.log
+          status=$?
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          cat results/neural-sphere.stdout.json || true
+          echo "sphere experiment exit code: $status"
+          exit 0
+      - name: Train and validate local dent edit transaction
+        id: dent
+        shell: bash
+        run: |
+          mkdir -p results
+          set +e
+          python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 --output results/sphere-dent.ngo > results/sphere-dent.stdout.json 2> results/sphere-dent.stderr.log
+          status=$?
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          cat results/sphere-dent.stdout.json || true
+          echo "dent experiment exit code: $status"
+          exit 0
+      - name: Upload measured outputs even when a validation gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neural-geometry-results-${{ github.run_id }}
+          path: results/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Fail the run if either scientific acceptance gate fails
+        if: always()
+        env:
+          SPHERE_EXIT: ${{ steps.sphere.outputs.exit_code }}
+          DENT_EXIT: ${{ steps.dent.outputs.exit_code }}
+        run: |
+          echo "sphere_exit=${SPHERE_EXIT:-not-run}"
+          echo "dent_exit=${DENT_EXIT:-not-run}"
+          test "${SPHERE_EXIT:-1}" = "0"
+          test "${DENT_EXIT:-1}" = "0"
