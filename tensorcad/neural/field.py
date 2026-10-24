@@ -320,6 +320,29 @@ def field_callable(
     return evaluate
 
 
+def gradient_callable(
+    model: ConditionalTSDF, state_value: float
+) -> Callable[[Array], Array]:
+    """Wrap the model's exact gradient (torch autograd) as a numpy callable.
+
+    The field is a float32 network, so a central difference of its output is only
+    accurate for steps around ``1e-4`` of the object's size; below that the
+    difference of two nearly equal float32 values is noise. Autograd has no such
+    problem, which is why the protocol's numerical fallback is not the default
+    here.
+    """
+
+    def evaluate(points: Array) -> Array:
+        tensor = _to_tensor(points).requires_grad_(True)
+        state = torch.full((len(tensor),), float(state_value), dtype=torch.float32)
+        with torch.enable_grad():
+            values = model(tensor, state)
+            (gradient,) = torch.autograd.grad(cast(Tensor, values).sum(), tensor)
+        return _to_numpy(cast(Tensor, gradient))
+
+    return evaluate
+
+
 def _sample_directions(count: int, generator: torch.Generator) -> Tensor:
     directions = torch.randn((count, 3), generator=generator)
     return cast(

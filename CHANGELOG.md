@@ -4,6 +4,67 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.4.0 — 2026-10-24
+
+The continuous geometry core (CGC v0.1): analytic and learned geometry now answer the
+same questions, so they can be interchanged, compared and handed to a solver without
+each consumer learning a second API. Everything here is measured by
+`examples/geometry_core/run_benchmark.py`, which fails the build if a claim stops
+being true; see `docs/geometry-core.md` for the protocol and the numbers.
+
+### Added
+- **One protocol for every representation.** `tensorcad.geometry_field.GeometryField`
+  defines batch `signed_distance`, `gradient`, `bounds`, editable `state`/`with_state`,
+  `parameters`, `provenance`, `metadata`, `contains`, `numerical_gradient` and an
+  optional `numpy_callable` fast path. Declared per field, not assumed: `kind`,
+  `quantity`, `inside_sign`, `surface_isovalue`, `units`, `coordinate_frame`.
+- **Four exact primitives** — `PlaneField`, `SphereField`, `CylinderField` (capped,
+  arbitrary axis), `EllipsoidField`. Measured against independently recomputed closed
+  forms, the difference is `0.00e+00` in double precision. Gradients are analytic and
+  match central differences to `2.7e-11 … 2.0e-10`. `EllipsoidField` declares
+  `quantity="implicit_function"`: its zero set is exact, its magnitude is not a distance.
+- **Edits that provably do not drift.** `with_state` returns a new field and leaves the
+  original untouched. Measured: sphere radius 0.5 → 0.65 moves the surface 0.150000 m in
+  all 24 probe directions with the centre unchanged; a cylinder height edit leaves the
+  barrel value bit-identical; an ellipsoid axis edit leaves the other two axes alone;
+  unknown controls raise `FieldError` instead of being ignored.
+- **`to_mesh(field, resolution)`** — field → closed mesh → the existing hull acceptance
+  pipeline. At 40 cells per axis: sphere −0.129 %, capped cylinder −0.167 %, ellipsoid
+  −0.134 % volume error; all watertight, edge-manifold, `V − E + F = 2`, no hard errors.
+- **`inspect_mesh_quality`** — smallest interior angle, worst aspect ratio and sliver
+  share as *warnings*: a closed solid can still be a poor discretisation.
+- **`SampledField.handoff()` and `mesh_digest()`** — a self-describing record (schema,
+  mesh SHA-256 over float64 bits, units, frame, counts, topology, volume, area, bounds,
+  validation, quality) for the TensorFEM handoff.
+- **`surface_point(field, direction)`** — ray-bisected surface position, so
+  representations are compared by where their surfaces are rather than by field values
+  that are not comparable.
+- **`NeuralGeometryField` / `field_from_object`** — a published `.ngo` revision behind
+  the same protocol, with `quantity="truncated_signed_distance"`, autograd gradients and
+  conditioned edits. Measured on the committed bundle: surface 3.98 mm mean / 9.33 mm
+  worst from the analytic sphere away from the dent; dent axis 441.73 mm against a
+  440.00 mm target; conditioned radius 0.45/0.55/0.60 reproduced within 0.33/0.08/0.01 %.
+
+### Fixed
+- **Zero-area triangles from grid-vertex coincidence.** A radius-0.3 cylinder in a ±0.3
+  box is exactly 20 cells across, so the level set passed through grid vertices and
+  marching tetrahedra emitted 8,108 exactly-zero-area triangles (12.5 % of 65,144;
+  sliver share 22.4 %). `to_mesh` now offsets the sampling box by `1/φ²` of one cell:
+  zero-area faces → 0, sliver share → 2.3 %, volume error unchanged at −0.17 %.
+- **Finite differences are the wrong derivative for a float32 field.** At `step=1e-6`
+  a central difference of the network is dominated by rounding (0.023 disagreement with
+  autograd); at `1e-4` it agrees to `3e-4`. `NeuralGeometryField.gradient` now uses
+  torch autograd, and `numerical_gradient`'s docstring states the step requirement.
+
+### Notes
+- The learned field's `|∇f|` ranges 0.65–1.39, i.e. it is not a metric: distance queries
+  must read the field value and surface queries the zero set. Beyond the truncation band
+  the outward cosine drops from 0.983 to 0.721 — the truncation caveat, measured.
+- The bundle's recorded `dent_peak_measured_m = 0.052690` is parent-relative; re-measuring
+  against the analytic sphere gives 0.058268 m. Both are correct and both are printed
+  side by side; the difference is the parent's own 5.58 mm axis error.
+- 262 tests (245 without the `neural` extra), 95 % line / 91 % branch coverage.
+
 ## 0.3.1 — 2026-10-24
 
 The review of 0.3.0 found four defects that could crash a legal model, corrupt an
