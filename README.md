@@ -134,6 +134,41 @@ The tips are points of zero area, so the mesh stops short of them by about a cel
 than smoothed away. `python examples/suboff/run_example.py` re-measures every row and
 fails the build if one stops holding.
 
+## SUBOFF appendages (0.6)
+
+The sail and the four stern fins (AFF-8) on top of that hull — from the published
+predicates, so no boolean engine and no CAD kernel is involved:
+
+```python
+from tensorcad import SuboffFullField, SuboffSailField, SuboffFinsField, to_mesh
+
+full = SuboffFullField()                       # hull + sail + cruciform fins, L = 4.3561 m
+full.contains([(1.10, 0.0, 0.35)])             # [True]  -- inside the sail, above the hull
+full.signed_distance([(1.10, 0.0, 0.35)])      # -0.0333 m (a lower bound: min-union)
+full.with_state(sail_scale=1.5, fin_scale=1.2) # bigger appendages, still on the hull
+
+sail = SuboffSailField()                       # the sail alone: 3 polynomials + elliptical cap
+sail.height                                    # 0.47625 m above the axis (0.22225 above the deck)
+SuboffFinsField().parameters()["chord_root_m"] # 0.26018 m at the root, 0.15358 m at the tip
+
+sampled = to_mesh(full, (436, 52, 76))         # anisotropic: 8.6:1 model, 0.033 m sail
+sampled.report.signed_volume / 0.70754064 - 1  # -0.00059  (-0.059 % vs quadrature)
+```
+
+Measured, with the details in
+[docs/suboff_appendages.md](docs/suboff_appendages.md):
+
+| Check | Result |
+|---|---|
+| sail half width / NACA half thickness vs TensorLBM's transcription | `0.00e+00 ft` / `6.9e-18 ft` |
+| containment vs TensorLBM's torch predicates | 18/18 hand-picked labels; 20,000 random points × 3 scales with **0 mismatches** (checked externally at 400,000 per scale, also 0) |
+| normalised gap, 0.5 mm off the analytic surface | sail p50 0.0012 mm, fins p50 0.00001 mm |
+| `\|∇f\|` | sail 0.980 … 0.996 … 1.000, fins 0.999 … 1.000 … 1.000 |
+| volume from quadrature over the sections | sail 0.00916043, fins 0.00785718, full 0.70754064 m³ (+1.19 % over the hull) |
+| export `(436,52,76)` | watertight, genus 0, volume −0.059 %, 569,056 triangles, 6.350646 m² |
+| fins alone | watertight genus **1** (the blades touch near the root; the hull fills the axis) |
+| throughput | 77 k queries/s on a 20,000-point batch |
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -183,6 +218,8 @@ The boundaries below are the ones the code actually has (they were proposals in 
   field sampling to a validated mesh, and the solver handoff record.
 - `tensorcad.suboff` — the DARPA SUBOFF bare hull as an analytic field, with its
   offset-table provenance, analytic reference geometry and anisotropic export.
+- `tensorcad.suboff_appendages` — the AFF-8 sail and cruciform stern fins from their
+  published predicates, plus the hull-sail-fin union field.
 - `tensorcad.mesh` — generic algorithms: weld, orient outward, boundary/manifold/watertight analysis, surface integrals.
 - `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
   aspect ratios), errors versus warnings, `ValidationReport`.
@@ -195,7 +232,7 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmarks and 262 tests (281 with the `neural` extra).
+- `examples/` and `tests/` — runnable benchmarks and 295 tests (314 with the `neural` extra).
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -236,7 +273,8 @@ The point of a headless geometry library is that a caller can tell "bad input" f
 
 ## Status and limitations
 
-0.5.0 adds the SUBOFF bare hull on top of the geometry core. 0.4.0 added the continuous geometry core: one protocol for analytic and learned fields,
+0.6.0 adds the SUBOFF appendages (sail and cruciform fins) on top of the bare hull,
+from their published closed-form predicates rather than a boolean engine. 0.5.0 added the SUBOFF bare hull on top of the geometry core. 0.4.0 added the continuous geometry core: one protocol for analytic and learned fields,
 four exact primitives, mesh-quality checks, a solver handoff record, and a benchmark that
 enforces every claim above. 0.3.1 fixed the defects the 0.3.0 review found (a legal model
 could crash the convergence estimate, a failed commit could leave derived meshes in the
@@ -244,8 +282,9 @@ live bundle, and extraction could be deleted by the next edit). 0.3.0 added the 
 geometry object layer. 0.2.0 delivered the hull milestone: a headless, parameterized geometry model with
 tests, CI, export, and validation that fails loudly.
 
-What it does **not** provide: appendages or a `Cb`-parameterised hull family (SUBOFF is the
-bare hull, editable in length and radius only), any shape family beyond a sphere for the neural objects (the
+What it does **not** provide: the AFF-2/3/4/7 appendage *layouts* (only AFF-8's sail and
+fins are transcribed), a `Cb`-parameterised hull family (SUBOFF is the published hull,
+editable in length and radius only), any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, mesh smoothing/decimation (2–3 % of triangles are thinner
