@@ -92,7 +92,8 @@ def main() -> int:
     output = args.output or (args.experiment_dir / "verification" / "angular_profile.json")
 
     parent = rebuild_parent(BASE_STEPS, SEED)
-    save_file({k: v.detach().cpu().contiguous() for k, v in parent.state_dict().items()}, str(args.parent_out))
+    tensors = {k: v.detach().cpu().contiguous() for k, v in parent.state_dict().items()}
+    save_file(tensors, str(args.parent_out))
     parent_hash = hashlib.sha256(args.parent_out.read_bytes()).hexdigest()
 
     paths = {

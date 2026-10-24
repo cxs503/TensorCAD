@@ -23,7 +23,12 @@ jobs:
       - name: Type check
         run: mypy
       - name: Tests with coverage gate
+        # The torch-backed neural modules are excluded here (the `neural` extra is
+        # not installed) and measured by the neural-geometry-experiments workflow.
         run: pytest --cov --cov-report=term-missing
+      - name: Neural CLI help (no torch required)
+        run: tensorcad-neural --help
+
       - name: CLI artifacts
         run: |
           tensorcad-hull --output /tmp/tensorcad-hull

@@ -24,6 +24,7 @@ from .export import (
     write_metadata,
     write_obj,
     write_offsets_csv,
+    write_stl,
 )
 from .geometry import BoundingBox, Mesh, MeshBuilder
 from .hull import (
@@ -61,5 +62,6 @@ __all__ = [
     "write_metadata",
     "write_obj",
     "write_offsets_csv",
+    "write_stl",
 ]
-__version__ = "0.2.0"
+__version__ = "0.3.0"

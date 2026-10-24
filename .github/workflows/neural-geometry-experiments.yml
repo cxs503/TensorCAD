@@ -6,13 +6,17 @@ on:
     paths:
       - '.github/workflows/neural-geometry-experiments.yml'
       - 'examples/neural_geometry/**'
+      - 'tensorcad/neural/**'
       - 'tensorcad/neural_geometry.py'
+      - 'tensorcad/cli_neural.py'
       - 'pyproject.toml'
   pull_request:
     paths:
       - '.github/workflows/neural-geometry-experiments.yml'
       - 'examples/neural_geometry/**'
+      - 'tensorcad/neural/**'
       - 'tensorcad/neural_geometry.py'
+      - 'tensorcad/cli_neural.py'
 
 jobs:
   neural-geometry:
@@ -26,31 +30,55 @@ jobs:
       - name: Install neural research dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e '.[neural]'
-      - name: Train and measure state-conditioned sphere
+          python -m pip install -e '.[neural,test,dev]'
+
+      - name: Neural runtime tests with coverage gate
+        run: |
+          coverage run --rcfile=/dev/null --branch -m pytest \
+            tests/test_extract.py tests/test_neural_pipeline.py tests/test_cli_neural.py -q
+          coverage report --include='tensorcad/neural/*,tensorcad/cli_neural.py' --fail-under=85
+
+      - name: Object pipeline (fit, edit, extract, verify, reject)
+        run: |
+          mkdir -p results
+          python examples/neural_geometry/run_object_pipeline.py --output results/object
+
+      - name: CLI surface (agent-facing commands)
+        run: |
+          set -euo pipefail
+          OBJECT=results/object/sphere.ngo
+          tensorcad-neural info --object "$OBJECT" --json > results/object/info.json
+          tensorcad-neural verify --object "$OBJECT" --json > results/object/verify.json
+          python -c "import json,sys; d=json.load(open('results/object/verify.json')); sys.exit(0 if d['status']=='verified' else 1)"
+          test -s results/object/sphere.ngo/derived/surface.obj
+          test -s results/object/sphere.ngo/derived/surface.stl
+
+      - name: Legacy sphere experiment (measured gate)
         id: sphere
         shell: bash
         run: |
           mkdir -p results
           set +e
-          python examples/neural_geometry/train_sphere.py --steps 1800 --seed 503 --output results/neural-sphere.ngo > results/neural-sphere.stdout.json 2> results/neural-sphere.stderr.log
+          python examples/neural_geometry/train_sphere.py --steps 1800 --seed 503 \
+            --output results/neural-sphere.ngo > results/neural-sphere.stdout.json 2> results/neural-sphere.stderr.log
           status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
           cat results/neural-sphere.stdout.json || true
-          echo "sphere experiment exit code: $status"
           exit 0
-      - name: Train and validate local dent edit transaction
+
+      - name: Legacy dent experiment (measured gate)
         id: dent
         shell: bash
         run: |
           mkdir -p results
           set +e
-          python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 --output results/sphere-dent.ngo > results/sphere-dent.stdout.json 2> results/sphere-dent.stderr.log
+          python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 \
+            --output results/sphere-dent.ngo > results/sphere-dent.stdout.json 2> results/sphere-dent.stderr.log
           status=$?
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
           cat results/sphere-dent.stdout.json || true
-          echo "dent experiment exit code: $status"
           exit 0
+
       - name: Upload measured outputs even when a validation gate fails
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,7 +87,8 @@ jobs:
           path: results/
           if-no-files-found: error
           retention-days: 30
-      - name: Fail the run if either scientific acceptance gate fails
+
+      - name: Fail the run if either legacy scientific gate fails
         if: always()
         env:
           SPHERE_EXIT: ${{ steps.sphere.outputs.exit_code }}
