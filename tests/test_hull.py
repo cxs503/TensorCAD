@@ -139,6 +139,54 @@ def test_discretisation_estimate_reports_measured_change() -> None:
 
 
 @pytest.mark.parametrize(
+    ("nx", "nz", "refined"),
+    [
+        (4001, 3, "8001x5"),    # refined stations exceed the station limit
+        (3, 513, "5x1025"),     # refined levels exceed the level limit
+        (2002, 3, "4003x5"),    # under the size cap, over the station limit
+        (3, 258, "5x515"),      # under the size cap, over the level limit
+    ],
+)
+def test_discretisation_estimate_skips_instead_of_failing_a_legal_model(
+    nx: int, nz: int, refined: str
+) -> None:
+    from tensorcad import estimate_discretisation_error
+
+    # Each of these models is legal and builds fine; only the *refinement* is out
+    # of range, so reporting it must not turn a valid export into a crash.
+    model = generate_hull(HullParameters(nx=nx, nz=nz))
+    assert model.validation.passed
+    report = estimate_discretisation_error(HullParameters(nx=nx, nz=nz))
+    assert report["status"] == "skipped"
+    assert refined in report["reason"]
+
+
+def test_discretisation_estimate_keeps_the_water_density(monkeypatch) -> None:
+    from tensorcad import hull as hull_module
+
+    seen: list[float] = []
+    real_build = hull_module.build_mesh
+
+    def spy(parameters: HullParameters):
+        seen.append(parameters.water_density)
+        return real_build(parameters)
+
+    monkeypatch.setattr(hull_module, "build_mesh", spy)
+    hull_module.estimate_discretisation_error(HullParameters(nx=21, nz=9, water_density=1000.0))
+    assert seen, "the estimate must actually rebuild the mesh"
+    assert set(seen) == {1000.0}, f"the refined parameters dropped the density: {seen}"
+
+
+def test_under_sampled_grid_warns_instead_of_reporting_clean_numbers() -> None:
+    coarse = generate_hull(HullParameters(nx=3, nz=3))
+    assert coarse.validation.passed
+    assert any("sampling_error" in warning for warning in coarse.validation.warnings)
+    assert any("-35" in warning for warning in coarse.validation.warnings)
+    fine = generate_hull(HullParameters(nx=41, nz=13))
+    assert fine.validation.warnings == []
+
+
+@pytest.mark.parametrize(
     "kwargs",
     [
         {"length": 0},

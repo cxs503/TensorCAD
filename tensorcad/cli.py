@@ -72,20 +72,44 @@ def _summary(model: Any) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     parameters = HullParameters(args.length, args.beam, args.draft, args.nx, args.nz, args.density)
+
+    def fail(stage: str, exc: Exception) -> int:
+        """One error contract: humans on stderr, machines on stdout, exit 2."""
+        message = f"{type(exc).__name__}: {exc}" if not isinstance(exc, ValueError) else str(exc)
+        print(f"tensorcad-hull: {stage} failed: {message}", file=sys.stderr)
+        if args.json:
+            print(json.dumps({"error": message, "stage": stage}, sort_keys=True))
+        return 2
+
     try:
         model = generate_hull(parameters)
     except ValueError as exc:
         print(f"tensorcad-hull: invalid model: {exc}", file=sys.stderr)
+        if args.json:
+            print(json.dumps({"error": str(exc), "stage": "validate"}, sort_keys=True))
         return 2
+
+    # One metadata document, computed once: the convergence estimate regenerates
+    # a refined mesh, so paying for it twice (file + stdout) is real work.
+    try:
+        metadata = model.metadata(with_discretisation=not args.no_convergence)
+    except Exception as exc:
+        return fail("metadata", exc)
 
     artifacts: dict[str, str] = {}
     if not args.no_export:
-        artifacts = export_hull(model, args.output, convergence=not args.no_convergence)
+        try:
+            artifacts = export_hull(model, args.output, metadata=metadata)
+        except Exception as exc:
+            return fail("export", exc)
 
     if args.json:
-        metadata = model.metadata(with_discretisation=not args.no_convergence)
-        metadata["artifacts"] = artifacts
-        print(json.dumps(metadata, indent=2, sort_keys=True))
+        payload: dict[str, Any] = dict(metadata)
+        payload["artifacts"] = artifacts
+        try:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        except (TypeError, ValueError) as exc:
+            return fail("serialise", exc)
     else:
         report = _summary(model)
         report["artifacts"] = artifacts

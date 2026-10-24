@@ -115,3 +115,28 @@ def test_padding_keeps_a_surface_away_from_the_grid_boundary() -> None:
     mesh = extract_surface(sphere_field, (-0.5,) * 3, (0.5,) * 3, 32, margin=2)
     assert meshlib.is_watertight(mesh)
     assert meshlib.total_signed_volume(mesh) > 0.0
+
+
+def test_extracted_mesh_can_be_measured_with_the_same_hydrostatics() -> None:
+    """The two halves of the project have to meet: field -> mesh -> hydrostatics.
+
+    A marching-tetrahedra mesh gives (almost) every vertex its own ``x``, which is
+    exactly the case the station loop used to handle in ``O(V * stations)``. This
+    asserts both the number (the mid-section of a sphere is ``pi*r^2``) and that
+    measuring it stays interactive.
+    """
+    import time
+
+    from tensorcad import compute_hydrostatics
+    from tensorcad.hydrostatics import stations
+
+    mesh = extract_surface(sphere_field, (-0.58,) * 3, (0.58,) * 3, 32)
+    assert len(stations(mesh)) > 1000, "the fixture must not accidentally have a station grid"
+
+    started = time.perf_counter()
+    hydro = compute_hydrostatics(mesh, 0.58, closed=True)
+    elapsed = time.perf_counter() - started
+
+    assert hydro.maximum_section_area == pytest.approx(math.pi * 0.5**2, rel=2e-3)
+    assert hydro.block_coefficient == pytest.approx(hydro.displacement_volume, rel=1e-3)
+    assert elapsed < 5.0, f"hydrostatics on an extracted mesh took {elapsed:.2f}s"
