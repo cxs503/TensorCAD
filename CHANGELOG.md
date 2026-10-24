@@ -4,6 +4,61 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.5.0 — 2026-10-24
+
+The first real hull form on the geometry core: the DARPA SUBOFF bare hull (AFF-1) as an
+analytic signed-distance field, with its offset-table provenance, an analytic reference,
+anisotropic meshing, and a measured export. `examples/suboff/run_example.py` enforces
+every claim below; `docs/suboff.md` records the numbers.
+
+### Added
+- **`tensorcad.suboff.SuboffHullField`** — the four-segment DARPA offset table (bow
+  polynomial, parallel midbody, sextic stern taper, elliptical stern cap) in its
+  published feet, carried as a true signed distance in metres. `L = 4.356100 m`,
+  `R = 0.254000 m`, `L/D = 8.575`, bow at `x = 0`, stern at `x = length`.
+  `|s|` matches a brute-force 400,001-sample meridian to `2.4e-08 m` (0.09 ppm of R);
+  the gradient is the exact unit normal (`1.000000`, agreeing with central differences
+  to `1.7e-08`).
+- **Provenance in the record, not in a document.** `parameters()` / `provenance()`
+  carry the source (Groves, Huang & Chang 1989, DTRC/SHD-1298-01), the transcription
+  (TensorLBM `suboff_cad.suboff_radius_profile`), the unit convention, the axial origin
+  and the profile description. The profile agrees with that transcription to
+  `0.00e+00` at every station tested.
+- **`suboff_reference_geometry()`** — analytic volume, wetted area, midship area and
+  prismatic coefficient by quadrature, reported at two resolutions with their
+  difference (volume 0.000 ppm, area 0.005 ppm between 10⁵ and 10⁶ samples).
+  `V = 0.699211 m³`, `A = 5.988264 m²`, `Cp = 0.79194`.
+- **Anisotropic export.** `to_mesh` and `extract_surface` now accept three cell counts
+  per axis, and `sample_grid` marches a non-cubic grid. A 8.575:1 hull at
+  `(218, 26, 26)` (147,368 cells) reaches −0.138 % volume / −0.066 % wetted-area
+  error with 4.3 % slivers, where an isotropic `64³` (262,144 cells) reaches
+  −0.089 % / −0.080 % with 10.0 % slivers and 64 stations along the hull.
+
+### Fixed
+- **`test_public_surface` poisoned the interpreter.** It deleted `numpy` from
+  `sys.modules` and reloaded `tensorcad` to prove the core needs no third-party stack,
+  which left torch's numpy bridge broken for every later test in the session — a
+  real order-dependent failure, observed when the file was run before
+  `test_geometry_field.py`. The check now runs in a fresh interpreter, like the
+  neighbouring opt-in tests.
+- **A scale-dependent "degenerate face" criterion.** 0.4.0 counted faces with an area
+  below 10⁻¹² m², which is a different geometric claim on a 0.3 m cylinder and a
+  4.4 m hull. Tests and benchmarks now use area below 10⁻⁶ of the longest edge
+  squared. The corrected 0.4.0 record: the cylinder at 40 cells emitted 8,108 faces
+  below 10⁻¹² m² (12.4 %), 2,936 of them with an aspect ratio above 10⁶ — not, as
+  0.4.0's notes said, "exactly zero area".
+
+### Notes
+- 281 tests (262 without the `neural` extra), 95 % line coverage.
+- TensorLBM's `r_over_l` default is `1/(2·8.57) = 0.058343` (`R = 0.254148 m`); the
+  offset table gives `0.058310` (`R = 0.254000 m`). This module uses the table, which
+  makes its wetted area 0.060 % smaller than TensorLBM's published value. At
+  TensorLBM's radius the two implementations agree to `+0.00000 %`, so the whole
+  difference is the radius convention.
+- Mesh quality is reported, not repaired: at `(218, 26, 26)` 4.3 % of triangles are
+  thinner than 2°, concentrated at the two tips where the meridian slope is infinite.
+  There is no smoothing or decimation yet.
+
 ## 0.4.0 — 2026-10-24
 
 The continuous geometry core (CGC v0.1): analytic and learned geometry now answer the
@@ -46,11 +101,12 @@ being true; see `docs/geometry-core.md` for the protocol and the numbers.
   440.00 mm target; conditioned radius 0.45/0.55/0.60 reproduced within 0.33/0.08/0.01 %.
 
 ### Fixed
-- **Zero-area triangles from grid-vertex coincidence.** A radius-0.3 cylinder in a ±0.3
+- **Squashed triangles from grid-vertex coincidence.** A radius-0.3 cylinder in a ±0.3
   box is exactly 20 cells across, so the level set passed through grid vertices and
-  marching tetrahedra emitted 8,108 exactly-zero-area triangles (12.5 % of 65,144;
-  sliver share 22.4 %). `to_mesh` now offsets the sampling box by `1/φ²` of one cell:
-  zero-area faces → 0, sliver share → 2.3 %, volume error unchanged at −0.17 %.
+  marching tetrahedra emitted 8,108 faces with an area below 10⁻¹² m² (12.4 % of
+  65,144), 2,936 of them with an aspect ratio above 10⁶, and a 22.4 % sliver share.
+  `to_mesh` now offsets the sampling box by an irrational fraction of a cell per axis:
+  every count → 0, sliver share → 2.3 %, volume error unchanged at −0.17 %.
 - **Finite differences are the wrong derivative for a float32 field.** At `step=1e-6`
   a central difference of the network is dominated by rounding (0.023 disagreement with
   autograd); at `1e-4` it agrees to `3e-4`. `NeuralGeometryField.gradient` now uses

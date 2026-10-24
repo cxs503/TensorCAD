@@ -97,6 +97,43 @@ of 0.45/0.55/0.60 m is reproduced within 0.33/0.08/0.01 %. Details, including th
 zero-area-triangle defect this work found in the sampler, are in
 [docs/geometry-core.md](docs/geometry-core.md).
 
+## SUBOFF bare hull (0.5)
+
+The first real hull form on the geometry core. `SuboffHullField` implements the DARPA
+SUBOFF bare hull (AFF-1) from its published offset table — four segments in feet,
+carried as a true signed distance in metres:
+
+```python
+from tensorcad import SuboffHullField, to_mesh
+
+hull = SuboffHullField()                          # L = 4.3561 m, D = 0.5080 m, L/D = 8.575
+hull.length, hull.max_radius                      # 4.35610, 0.25400   (offset table, not a rounded L/D)
+hull.signed_distance([(2.0, 0.30, 0.0)])          # +0.0460  (outside the barrel)
+hull.with_state(radius=1.2 * hull.max_radius)     # a fatter hull, same length -- no drift
+
+sampled = to_mesh(hull, (218, 26, 26))            # cells per axis: a slender body is not a cube
+sampled.report.watertight, sampled.report.euler_characteristic      # True, 2
+sampled.report.signed_volume / 0.699211 - 1       # -0.00138  (-0.138 % vs the analytic volume)
+sampled.report.surface_area / 5.988264 - 1        # -0.00066  (-0.066 % vs the analytic wetted area)
+```
+
+Measured, with the details in [docs/suboff.md](docs/suboff.md):
+
+| Check | Result |
+|---|---|
+| `|s|` vs a brute-force meridian | `2.4e-08 m` (0.09 ppm of R) |
+| joints | C0 exact, C1 continuous at all three; curvature jumps at the stern cap |
+| gradient | unit length, matches central differences to `1.7e-08` |
+| profile vs TensorLBM's transcription | `0.00e+00` at every station |
+| wetted area at TensorLBM's radius | reproduces its 5.991830 m² to `+0.00000 %` |
+| offset-table wetted area vs the experiment | −0.162 % of 5.998 m² |
+| export `(218,26,26)` | watertight, genus 0, volume −0.138 %, area −0.066 % |
+
+The tips are points of zero area, so the mesh stops short of them by about a cell and
+4.3 % of the triangles there are thinner than 2°; that is reported as a warning rather
+than smoothed away. `python examples/suboff/run_example.py` re-measures every row and
+fails the build if one stops holding.
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -144,6 +181,8 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.geometry` — `Mesh`, `BoundingBox`, `MeshBuilder` (exact-position vertex sharing).
 - `tensorcad.geometry_field` — the continuous-geometry protocol, four exact primitives,
   field sampling to a validated mesh, and the solver handoff record.
+- `tensorcad.suboff` — the DARPA SUBOFF bare hull as an analytic field, with its
+  offset-table provenance, analytic reference geometry and anisotropic export.
 - `tensorcad.mesh` — generic algorithms: weld, orient outward, boundary/manifold/watertight analysis, surface integrals.
 - `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
   aspect ratios), errors versus warnings, `ValidationReport`.
@@ -156,7 +195,7 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmarks and 245 tests (262 with the `neural` extra).
+- `examples/` and `tests/` — runnable benchmarks and 262 tests (281 with the `neural` extra).
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -167,6 +206,7 @@ python -m pip install -e ".[test,dev]"
 pytest --cov
 python examples/parametric_hull/run_example.py --output results/hull-demo
 python examples/geometry_core/run_benchmark.py --resolution 40
+python examples/suboff/run_example.py --output results/suboff
 tensorcad-hull --length 12 --beam 2.4 --draft 0.9 --nx 61 --nz 17 --output results/hull-demo
 tensorcad-hull --json            # full reproducibility record on stdout
 
@@ -196,7 +236,7 @@ The point of a headless geometry library is that a caller can tell "bad input" f
 
 ## Status and limitations
 
-0.4.0 adds the continuous geometry core: one protocol for analytic and learned fields,
+0.5.0 adds the SUBOFF bare hull on top of the geometry core. 0.4.0 added the continuous geometry core: one protocol for analytic and learned fields,
 four exact primitives, mesh-quality checks, a solver handoff record, and a benchmark that
 enforces every claim above. 0.3.1 fixed the defects the 0.3.0 review found (a legal model
 could crash the convergence estimate, a failed commit could leave derived meshes in the
@@ -204,7 +244,8 @@ live bundle, and extraction could be deleted by the next edit). 0.3.0 added the 
 geometry object layer. 0.2.0 delivered the hull milestone: a headless, parameterized geometry model with
 tests, CI, export, and validation that fails loudly.
 
-What it does **not** provide: any shape family beyond a sphere for the neural objects (the
+What it does **not** provide: appendages or a `Cb`-parameterised hull family (SUBOFF is the
+bare hull, editable in length and radius only), any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, mesh smoothing/decimation (2–3 % of triangles are thinner

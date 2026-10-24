@@ -48,6 +48,13 @@ from .hull import (
 )
 from .hydrostatics import Hydrostatics, compute_hydrostatics
 from .parameters import ParameterSpec, RatioSpec
+from .suboff import (
+    SUBOFF_LENGTH_M,
+    SUBOFF_RADIUS_M,
+    SuboffHullField,
+    suboff_radius_fraction,
+    suboff_reference_geometry,
+)
 from .validation import (
     Check,
     ValidationReport,
@@ -56,6 +63,8 @@ from .validation import (
 )
 
 __all__ = [
+    "SUBOFF_LENGTH_M",
+    "SUBOFF_RADIUS_M",
     "BoundingBox",
     "Check",
     "CylinderField",
@@ -72,6 +81,7 @@ __all__ = [
     "RatioSpec",
     "SampledField",
     "SphereField",
+    "SuboffHullField",
     "ValidationReport",
     "build_mesh",
     "compute_hydrostatics",
@@ -82,6 +92,8 @@ __all__ = [
     "inspect_mesh_quality",
     "read_metadata",
     "read_obj",
+    "suboff_radius_fraction",
+    "suboff_reference_geometry",
     "surface_point",
     "to_mesh",
     "validate_hull",
@@ -90,4 +102,4 @@ __all__ = [
     "write_offsets_csv",
     "write_stl",
 ]
-__version__ = "0.4.0"
+__version__ = "0.5.0"

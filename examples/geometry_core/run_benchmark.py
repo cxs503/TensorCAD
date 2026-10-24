@@ -13,8 +13,9 @@ What this script establishes, and fails the build if it stops being true:
 3. every representation exports through the same pipeline: sample -> closed mesh
    -> ``inspect_geometry`` + mesh-quality checks, with the volume compared against
    the closed-form value;
-4. a sampled mesh carries no zero-area faces even when the extent is a whole
-   number of cells long (the cylinder used to emit 8,108 of them at 40 cells);
+4. a sampled mesh carries no squashed triangles (area below 1e-6 of the longest
+   edge squared) even when the extent is a whole number of cells long -- the
+   cylinder used to emit 2,936 of them at 40 cells;
 5. when the ``neural`` extra is installed, a *learned* field (the revision-2 sphere
    bundle committed in this repo) is queried through the same protocol and
    compared with the analytic reference: surface error, conditioned edits,
@@ -71,8 +72,12 @@ def failure_collector() -> tuple[list[str], object]:
     return failures, expect
 
 
-def _degenerate_faces(mesh: object) -> int:
-    """Faces with exactly zero area: what a grid-vertex coincidence leaves behind."""
+def _squashed_faces(mesh: object) -> int:
+    """Triangles with area below 1e-6 of their longest edge squared.
+
+    Scale-free on purpose: what a grid-vertex coincidence leaves behind is a
+    triangle whose shape is degenerate, not one with a particular area.
+    """
     count = 0
     for face in mesh.faces:  # type: ignore[attr-defined]
         a, b, c = (mesh.vertices[index] for index in face)  # type: ignore[attr-defined]
@@ -81,7 +86,8 @@ def _degenerate_faces(mesh: object) -> int:
         area2 = math.sqrt(
             (uy * vz - uz * vy) ** 2 + (uz * vx - ux * vz) ** 2 + (ux * vy - uy * vx) ** 2
         )
-        if area2 < 1e-12:
+        longest = max(math.dist(a, b), math.dist(b, c), math.dist(c, a))
+        if longest > 0.0 and area2 <= 1e-6 * longest * longest:
             count += 1
     return count
 
@@ -211,10 +217,10 @@ def main(argv: list[str] | None = None) -> int:
         angle = float(by_name["mesh_min_angle"].detail.split()[3])
         slivers = float(by_name["mesh_sliver_share"].detail.split("(")[1].split("%")[0])
         error = 100.0 * (sampled.report.signed_volume / exact - 1.0)
-        zero_area = _degenerate_faces(sampled.mesh)
+        zero_area = _squashed_faces(sampled.mesh)
         print(f"     {field.kind:10s} {args.resolution:5d} {sampled.report.triangles:7d} "
               f"{zero_area:9d} {error:+10.3f} {angle:7.3f} {slivers:9.3f}")
-        expect(f"{field.kind} has no zero-area faces", zero_area == 0, f"{zero_area}")
+        expect(f"{field.kind} has no squashed faces", zero_area == 0, f"{zero_area}")
         expect(f"{field.kind} mesh is watertight", sampled.report.watertight)
         expect(f"{field.kind} mesh is genus zero", sampled.report.euler_characteristic == 2)
         expect(f"{field.kind} volume within 0.5 %", abs(error) < 0.5, f"{error:+.3f} %")
