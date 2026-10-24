@@ -1,0 +1,106 @@
+# Proposal: TensorCAD SDF 体素网格导出
+
+**mission 草案**: m243（建议）
+**角色**: implementer
+**预算**: ~50 tool calls, ~45 min
+**优先级**: P1（scan_runner SDF 栈对接）
+
+## 目标
+
+在 TensorCAD `GeometryField` 协议中新增 `to_voxel_grid(field, resolution, bounds)` 方法，
+直接输出 SDF 体素网格（numpy array），使 scan_runner 的 SDF 栈可直接消费 TensorCAD
+的解析场和神经场。
+
+## 背景
+
+当前 TensorCAD 支持：
+- `to_mesh(field, resolution)` → marching tetrahedra → mesh
+- `SampledField.handoff()` → mesh + metadata
+
+但缺少：
+- 直接 SDF 体素网格导出
+- scan_runner 需要 SDF 网格做 L2 几何编码训练
+
+scan_runner 现有 SDF 栈期望 numpy array 格式的 SDF 网格，TensorCAD 需适配此接口。
+
+## 交付物
+
+1. `tensorcad/geometry_field.py` 新增：
+   - `to_voxel_grid(field, resolution, bounds=None)` → numpy.ndarray
+   - 支持任意 `GeometryField`（解析 + 神经）
+   - bounds 默认取 `field.bounds()`，可用户指定
+   - 返回 shape=(nx, ny, nz) 的 SDF 数组，正值为外部，负值为内部
+
+2. `tests/test_voxel_grid.py`：测试覆盖
+   - SphereField：解析 SDF vs 体素网格，误差 < 1 cell
+   - EllipsoidField：各向异性验证
+   - NeuralGeometryField：从 .ngo 加载后导出体素
+   - bounds 参数测试（默认 vs 用户指定）
+
+3. `examples/geometry_core/run_voxel_export.py`：基准脚本
+   - 导出 sphere/ellipsoid/cylinder 体素网格
+   - 输出统计（min/max/mean/zero-crossing count）
+   - 与解析 SDF 对比误差
+
+4. README 更新：新增体素导出章节
+
+## 验收判据
+
+- [ ] `to_voxel_grid` 实现，支持解析场 + 神经场
+- [ ] 测试套件新增 ≥ 8 个测试，全部通过
+- [ ] 基准脚本可运行，输出数字与代码一致
+- [ ] 与解析 SDF 对比误差 < 2 cell（双线性插值误差）
+- [ ] 零依赖声明保持（numpy 在 test extra，核心包不强制）
+
+## 风险
+
+- 神经场查询较慢（96³ = 884,736 次查询），需向量化
+- 大分辨率体素网格内存占用（256³ float32 = 64 MB）
+- 需确认 scan_runner SDF 栈的符号约定（正外/负内 vs 正内/负外）
+
+## 与既有线的关系
+
+- 不碰 TensorBEM/TensorSPH/TensorDG
+- 对接 scan_runner SDF 栈（L2 几何编码器训练数据）
+- 为 TensorShipDesign 提供 SDF 导出能力（可微几何表示）
+
+## 实现要点
+
+```python
+def to_voxel_grid(
+    field: GeometryField,
+    resolution: int | tuple[int, int, int],
+    bounds: tuple[np.ndarray, np.ndarray] | None = None,
+) -> np.ndarray:
+    """Export field as a voxelized SDF grid.
+    
+    Args:
+        field: Any GeometryField (analytic or learned)
+        resolution: Grid resolution (isotropic or per-axis)
+        bounds: (min_corner, max_corner), defaults to field.bounds()
+    
+    Returns:
+        SDF grid of shape (nx, ny, nz), positive outside, negative inside.
+    """
+    if bounds is None:
+        bounds = field.bounds()
+    
+    # Generate grid points
+    if isinstance(resolution, int):
+        nx = ny = nz = resolution
+    else:
+        nx, ny, nz = resolution
+    
+    x = np.linspace(bounds[0][0], bounds[1][0], nx)
+    y = np.linspace(bounds[0][1], bounds[1][1], ny)
+    z = np.linspace(bounds[0][2], bounds[1][2], nz)
+    
+    # Meshgrid and flatten
+    xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
+    points = np.stack([xx.ravel(), yy.ravel(), zz.ravel()], axis=1)
+    
+    # Query field (vectorized if available)
+    sdf = field.signed_distance(torch.from_numpy(points).float())
+    
+    return sdf.numpy().reshape(nx, ny, nz)
+```
