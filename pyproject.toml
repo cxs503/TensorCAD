@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tensorcad"
-version = "0.6.0"
+version = "0.7.0"
 description = "Agent-callable parametric geometry foundation for the Tensor scientific-computing ecosystem"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,8 +28,9 @@ test = ["pytest>=7", "numpy>=1.24"]
 dev = ["ruff>=0.6", "mypy>=1.8", "pytest-cov>=4"]
 # Research-only neural field training and non-executable tensor checkpoints.
 neural = ["torch>=2.2", "safetensors>=0.4", "numpy>=1.24"]
-# Optional solver/kernel bridges (tensorcad.adapters) land here, e.g. "ocp>=7",
-# "gmsh". Nothing in the core may import them.
+# Optional kernel bridge (tensorcad/adapters/ocp.py). Nothing in the core may import
+# it; the FEM handoff (tensorcad/adapters/fem.py) needs no extra at all.
+ocp = ["cadquery-ocp>=7"]
 
 [project.urls]
 Homepage = "https://github.com/cxs503/TensorCAD"
@@ -103,3 +104,9 @@ omit = [
 show_missing = true
 skip_covered = false
 fail_under = 90
+
+[[tool.mypy.overrides]]
+# The OpenCASCADE wheels have no type stubs; the adapter is a thin, tested wrapper and
+# the boundary is a function that returns `Any`, so the untyped import is contained.
+module = ["OCP", "OCP.*"]
+ignore_missing_imports = true

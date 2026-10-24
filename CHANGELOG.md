@@ -4,6 +4,59 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.7.0 — 2026-10-24
+
+Mesh conditioning and the two solver exits. The 0.6.0 release closed with "mesh
+smoothing/decimation: 1.5–3.2 % of triangles are thinner than 2°; repairing them is the
+next piece of work"; this release repairs them, measures the shape drift that repair
+causes, and hands the result to TensorFEM (and to any tool that reads gmsh or STEP)
+without adding a mandatory dependency.
+
+### Added
+- **`tensorcad.mesh_conditioning`** — `taubin_smooth` (λ 0.5 then μ −0.53, a band-pass so
+  the body does not shrink), `project_to_field` (one Newton step per vertex along the
+  field gradient, with a per-vertex step limit and a 4-step backtracking line search),
+  `decimate` (quadric-error collapse under the link, orientation, duplicate-face and
+  aspect-ratio guards, with every rejected collapse counted), `measure_mesh` and
+  `condition_mesh`, which refuses to return a surface whose watertightness, manifolding,
+  Euler characteristic, volume (0.5 %) or area (1 %) moved beyond its declared tolerance.
+- **Measured on AFF-8 at `(150, 18, 26)`** (65,812 triangles, 1.664 % slivers):
+  Taubin ×30 → min angle 0.0080° → 8.3202°, no slivers, volume −0.127 % of the analytic
+  0.70754064 m³ in 0.4 s; + projection ×30 (53.6 s) → 3.6590°, aspect 17.6, volume
+  −0.117 %, area −0.198 %, worst displacement 18.4 mm, worst residual `|f|` 0.57 mm;
+  + decimation to 45,000 / 30,000 / 20,000 faces in 5.4 / 9.7 / 11.6 s → min angle
+  2.70 / 2.56 / 2.40°, zero slivers, volume drift −0.12 / −0.14 / −0.21 %.
+- **The decimate-first order is reported, not recommended.** `condition_mesh` at the same
+  budgets reaches 2.21° (45 k) and 0.149° with 28 slivers (30 k); at 45 k faces it costs
+  40 s against 5 s smoothing-first. Both pass the shape gates; the example prints both
+  tables.
+- **`tensorcad.adapters.fem`** — solver-neutral handoff needing no extra: node/element
+  tables, boundary patches assigned by nearest analytic component, gmsh 2.2 ASCII with one
+  physical tag per patch, and a JSON manifest. Round trip: worst node displacement **0.0 m**,
+  worst per-patch area difference 2.2e−14 m², digest identical to the source surface.
+- **`tensorcad.adapters.ocp`** — optional STEP bridge (`pip install "tensorcad[ocp]"`):
+  sew → shell → solid → STEP, with the free-edge count, shell closure, `BRepCheck_Analyzer`
+  verdict, kernel volume, written size and re-imported volume all reported. Measured on
+  14,764 AFF-8 triangles: 12.8 s sewing, 4.4 s writing, 0 free edges, kernel volume
+  0.694708267 m³ against a mesh signed volume of 0.694708267 m³ (**+5.3e−15 relative**),
+  re-import −3.1e−13 relative, 37.14 MB. Detached islands are kept and counted
+  (`shells`/`solids`) rather than dropped.
+
+### Notes
+- The STEP file is a **faceted solid**: one planar face per triangle (14,764 faces). That
+  is what a solver-facing exchange file needs; a B-rep feature model is issue #4.
+  `write_step` raises `OcpUnavailable` with the pip command when the extra is absent — it
+  never writes a mesh file with a `.step` extension.
+- 357 tests in the default lane (336 without the `neural` extra), plus 10 OCP tests that
+  run when the wheels are installed; 93.2 % line coverage overall, with
+  `tensorcad/adapters/ocp.py` at 32 % in the default lane because its tests skip there.
+  Strict `mypy` clean on 22 files (OCP is an untyped import behind a documented
+  override), `ruff` clean.
+
+### Still missing
+- Mesh *refinement* or remeshing to a target size field: conditioning only coarsens.
+- A B-rep/STEP feature model, booleans, fillets, sweeps.
+
 ## 0.6.0 — 2026-10-24
 
 The DARPA SUBOFF appendages (AFF-8): the sail and the four cruciform stern fins, on top

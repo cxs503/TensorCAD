@@ -192,7 +192,9 @@ numbers side by side so nobody has to guess which baseline a figure used.
   validation, export, handoff and the edit tests for free; the datum/units provenance
   travels in `parameters()` and `provenance()`. See
   [docs/suboff.md](suboff.md) and [docs/suboff_appendages.md](suboff_appendages.md).
-- **TensorFEM** consumes `to_mesh(field, resolution).handoff()`: units, frame, digest,
+- **TensorFEM** consumes `to_mesh(field, resolution).handoff()` (and, for node/element
+  tables with named boundary patches, `tensorcad.adapters.fem` — see
+  [docs/step_export.md](step_export.md)): units, frame, digest,
   topology, measured volume and quality metrics. A B-rep/STEP adapter becomes a third
   implementation of the same six methods.
 
