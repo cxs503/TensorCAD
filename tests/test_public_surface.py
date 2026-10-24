@@ -10,6 +10,7 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "DESIGN_SCHEMA", "DesignProblem", "DesignRecord", "DesignSolution", "DesignTargets",
     "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
     "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder",
     "MeshConditioningError", "MeshMeasurements", "ParameterSpec",
@@ -22,8 +23,8 @@ EXPECTED_API = {
     "read_metadata", "read_obj",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
-    "taubin_smooth", "to_mesh", "validate_hull", "write_metadata", "write_offsets_csv",
-    "write_obj", "write_stl",
+    "taubin_smooth", "to_mesh", "validate_hull", "write_design_json", "write_metadata",
+    "write_offsets_csv", "write_obj", "write_solver_manifest", "write_stl",
 }
 
 
@@ -31,12 +32,12 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.7.0"
+    assert tensorcad.__version__ == "0.8.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("geometry", "geometry_field", "mesh", "mesh_conditioning", "parameters",
-                   "validation", "hydrostatics", "export", "hull", "suboff",
+                   "validation", "hydrostatics", "export", "hull", "design", "suboff",
                    "suboff_appendages", "cli", "adapters.fem"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
