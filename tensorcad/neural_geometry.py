@@ -27,7 +27,7 @@ import re
 import shutil
 import tempfile
 import uuid
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from pathlib import Path
@@ -230,6 +230,25 @@ def _read_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _read_json_array(path: Path) -> list[dict[str, Any]]:
+    """Read a JSON array strictly: no NaN/Infinity, every entry an object.
+
+    ``history.json`` is the audit trail of what was attempted, so it is parsed
+    with the same rules as the manifest rather than with a bare ``json.loads``
+    that would quietly accept the non-standard tokens this project refuses to
+    write.
+    """
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"), parse_constant=_reject_constant)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise NeuralGeometryFormatError(f"cannot read valid JSON from {path.name}: {exc}") from exc
+    if not isinstance(value, list):
+        raise NeuralGeometryFormatError(f"{path.name} must contain a JSON array")
+    entries = [entry for entry in value if isinstance(entry, dict)]
+    _ensure_finite(entries, path.name)
+    return entries
+
+
 def _ensure_finite(value: Any, where: str) -> None:
     if isinstance(value, float) and not math.isfinite(value):
         raise NeuralGeometryFormatError(f"non-finite number in {where}")
@@ -350,10 +369,7 @@ def parse_manifest(data: dict[str, Any]) -> NeuralGeometryManifest:
             else HISTORY_FILE
         ),
     )
-    derived_data = data.get("derived", [])
-    if not isinstance(derived_data, list):
-        raise NeuralGeometryFormatError("derived must be a list of artifact records")
-    derived = tuple(record for record in derived_data if isinstance(record, dict))
+    derived = _parse_derived_records(data.get("derived", []))
 
     validation_data = data.get("validation")
     validation_status = "unknown"
@@ -496,6 +512,46 @@ def derived_record(
     }
 
 
+def _parse_derived_records(raw: Any) -> tuple[dict[str, Any], ...]:
+    """Validate the ``derived[]`` records the same way the writer builds them.
+
+    The writer has always enforced "relative path inside the bundle, lowercase
+    SHA-256, non-negative size"; the reader did not, so a hand-edited manifest
+    could point an artifact at ``../../etc/passwd`` and ``info`` would happily
+    print it. Readers are the security boundary -- they must not be weaker than
+    the writers they accept files from.
+    """
+    if raw is None:
+        return ()
+    if not isinstance(raw, list):
+        raise NeuralGeometryFormatError("derived must be a list of artifact records")
+    records: list[dict[str, Any]] = []
+    for index, record in enumerate(raw):
+        where = f"derived[{index}]"
+        if not isinstance(record, dict):
+            raise NeuralGeometryFormatError(f"{where} must be an object")
+        kind = record.get("kind")
+        if not isinstance(kind, str) or not kind.strip():
+            raise NeuralGeometryFormatError(f"{where}.kind must be a non-empty string")
+        artifact_format = record.get("format")
+        if not isinstance(artifact_format, str) or not artifact_format.strip():
+            raise NeuralGeometryFormatError(f"{where}.format must be a non-empty string")
+        path = _safe_relative_path(record.get("path"), f"{where}.path")
+        digest = record.get("sha256")
+        if not isinstance(digest, str) or not _SHA256_RE.fullmatch(digest):
+            raise NeuralGeometryFormatError(f"{where}.sha256 must be a lowercase SHA-256 hex digest")
+        size_bytes = record.get("bytes")
+        if not isinstance(size_bytes, int) or isinstance(size_bytes, bool) or size_bytes < 0:
+            raise NeuralGeometryFormatError(f"{where}.bytes must be a non-negative integer")
+        metrics = record.get("metrics", {})
+        if not isinstance(metrics, dict):
+            raise NeuralGeometryFormatError(f"{where}.metrics must be an object")
+        record = dict(record)
+        record["path"] = path
+        records.append(record)
+    return tuple(records)
+
+
 # --------------------------------------------------------------------------- #
 # versioned object store: stage -> validate -> commit / rollback
 # --------------------------------------------------------------------------- #
@@ -583,10 +639,7 @@ class ObjectStore:
         path = self.root / HISTORY_FILE
         if not path.is_file():
             return []
-        entries = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(entries, list):
-            raise NeuralGeometryFormatError("history.json must contain a JSON array")
-        return [entry for entry in entries if isinstance(entry, dict)]
+        return _read_json_array(path)
 
     def state(self) -> dict[str, Any]:
         data = _read_json(self.root / STATE_FILE)
@@ -710,6 +763,66 @@ class ObjectStore:
         except Exception:
             shutil.rmtree(staging, ignore_errors=True)
             raise
+
+    def publish_derived(
+        self,
+        *,
+        files: Mapping[str, bytes | str],
+        derived: Sequence[Mapping[str, Any]],
+        expected_parent: int | None = None,
+        operation: str = "extract",
+        command: Sequence[str] | None = None,
+    ) -> NeuralGeometryManifest:
+        """Publish a revision whose only change is added derived artifacts.
+
+        Extraction produces files that the manifest has to describe, otherwise a
+        derived mesh exists on disk with nothing pointing at it -- and the next
+        commit, which swaps the whole bundle directory, deletes it. Registering
+        them means the export survives and ``info`` can report it. The canonical
+        geometry is untouched: weights and their hash are copied forward verbatim,
+        so this revision is honest about being a metadata-only change.
+        """
+        manifest = load_bundle(self.root)
+        current = manifest.revision
+        if expected_parent is not None and current != expected_parent:
+            raise TransactionError(
+                f"stale candidate: expected parent revision {expected_parent}, "
+                f"on-disk revision is {current}"
+            )
+
+        raw = dict(manifest.raw)
+        raw["revision"] = current + 1
+        raw["derived"] = [*raw.get("derived", []), *[dict(record) for record in derived]]
+        lineage = dict(raw.get("lineage", {}))
+        lineage["parent_revision"] = current
+        lineage["root_revision"] = manifest.lineage.root_revision or current
+        lineage["operation"] = operation
+        raw["lineage"] = lineage
+        provenance = dict(raw.get("provenance", {}))
+        provenance["created_utc"] = _utc_now()
+        if command:
+            provenance["command"] = list(command)
+        raw["provenance"] = provenance
+
+        inherited: dict[str, bytes | str] = {}
+        for relative in (manifest.state_file, manifest.training_file, manifest.validation_file):
+            inherited[relative] = (self.root / relative).read_bytes()
+        inherited[manifest.weights.path] = (self.root / manifest.weights.path).read_bytes()
+        inherited.update(files)
+
+        record = TransactionRecord(
+            revision=current + 1,
+            parent_revision=current,
+            status=COMMITTED,
+            operation=operation,
+            weights_sha256=manifest.weights.sha256,
+            metrics={"derived_artifacts": [str(entry.get("path")) for entry in derived]},
+            recorded_utc=_utc_now(),
+            command=list(command) if command else None,
+        )
+        return self.publish(
+            files=inherited, manifest=raw, expected_parent=current, record=record
+        )
 
     def derived_dir(self) -> Path:
         path = self.root / DERIVED_DIR

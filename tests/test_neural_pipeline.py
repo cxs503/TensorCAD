@@ -155,3 +155,57 @@ def test_extract_from_the_active_revision_writes_closed_meshes(fitted: Path) -> 
         assert (target / record["path"]).is_file()
         assert record["sha256"]
     assert mesh.units == "m"
+
+
+def test_extraction_registers_its_artifacts_in_the_manifest(fitted: Path) -> None:
+    """An export must leave a pointer behind, in a revision of its own."""
+    before = load_bundle(fitted)
+    assert before.derived == ()
+
+    _mesh, _report, records = extract_object(fitted, resolution=20)
+    after = load_bundle(fitted)
+
+    assert after.revision == before.revision + 1
+    assert after.lineage.operation == "extract"
+    assert after.lineage.parent_revision == before.revision
+    assert after.weights.sha256 == before.weights.sha256
+    assert {item["path"] for item in after.derived} == {item["path"] for item in records}
+    for item in after.derived:
+        path = fitted / item["path"]
+        assert path.is_file()
+        assert item["bytes"] == path.stat().st_size
+
+
+def test_extract_to_an_explicit_directory_is_an_export_not_a_revision(fitted: Path) -> None:
+    before = load_bundle(fitted)
+    target = fitted.parent / "external-export"
+    _mesh, _report, records = extract_object(fitted, resolution=16, output=target)
+
+    after = load_bundle(fitted)
+    assert after.revision == before.revision
+    assert after.derived == ()
+    for record in records:
+        assert (target / Path(record["path"]).name).is_file()
+
+
+def test_a_later_edit_keeps_registered_derived_artifacts(fitted: Path) -> None:
+    """Committing swaps the whole directory, so unlisted files used to vanish.
+
+    Extraction now registers what it wrote, and an edit carries those records (and
+    bytes) forward marked with the revision they came from.
+    """
+    extract_object(fitted, resolution=16)
+    registered = load_bundle(fitted).derived
+    assert registered
+
+    result = apply_dent_edit(
+        fitted, depth=0.04, sigma=0.25, steps=STEPS, seed=19, tolerance=LOOSE, rays=RAYS
+    )
+    assert result.committed
+
+    after = load_bundle(fitted)
+    assert {item["path"] for item in registered} <= {item["path"] for item in after.derived}
+    for item in after.derived:
+        assert (fitted / item["path"]).is_file(), f"{item['path']} was deleted by the commit"
+    carried = [item for item in after.derived if "source_revision" in item]
+    assert carried, "carried artifacts must say which revision produced them"

@@ -147,6 +147,11 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     print("4. failure injection: an edit that must be rejected")
+    # Extraction published its own revision: a derived artifact is registered in
+    # the manifest, so the bundle state changed even though the weights did not.
+    after_extract = store.active_revision()
+    expect("extraction published a revision without touching the weights",
+           after_extract is not None and after_extract > 2)
     before_weights = store.active_weights_sha256()
     before_manifest = (store.root / "manifest.json").read_bytes()
     rejected = apply_dent_edit(
@@ -155,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"     status {rejected.status}; failed gates: {', '.join(rejected.failed_checks)}")
     expect("rejected edit did not commit", not rejected.committed)
     expect("rejected edit names the gates it broke", bool(rejected.failed_checks))
-    expect("active revision unchanged", store.active_revision() == 2)
+    expect("active revision unchanged", store.active_revision() == after_extract)
     expect("weights bytes unchanged", store.active_weights_sha256() == before_weights)
     expect("manifest bytes unchanged", (store.root / "manifest.json").read_bytes() == before_manifest)
     history = store.history()
@@ -170,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     expect(
         "re-opened object still verifies",
-        read_manifest(store.root).revision == 2,
+        read_manifest(store.root).revision == after_extract,
     )
 
     summary = {

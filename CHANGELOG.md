@@ -4,6 +4,74 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.3.1 — 2026-10-24
+
+The review of 0.3.0 found four defects that could crash a legal model, corrupt an
+active bundle or delete an export. They are fixed here, with regression tests that
+fail on the old behaviour; nothing was re-thresholded to make a gate pass.
+
+### Fixed
+- **Convergence estimate crashed on a legal model.** `estimate_discretisation_error`
+  guarded the requested grid (`nx*nz`), then built the *refined* parameters, which
+  could exceed the `4001 x 513` limits (`nx=2002, nz=3` raised
+  `nx must be <= 4001 stations, got 4003`). It now reports `skipped` with the
+  refined grid in the reason. The refined parameter set also keeps
+  `water_density` instead of silently falling back to 1025.
+- **Half-written export on failure.** `export_hull` wrote the OBJ and CSV before
+  the metadata, so a failure during reporting left a directory with a mesh and no
+  record of the parameters that produced it. The metadata document is now built
+  first and all three files are written afterwards.
+- **`tensorcad-hull` had a half-open error boundary.** Only `generate_hull` was
+  inside a `try`; export and metadata failures escaped as tracebacks. Every phase
+  now reports `stage` + `error` (JSON on stdout under `--json`, human text on
+  stderr) and exits 2. The CLI also computes the metadata document once instead of
+  generating the refined grid twice.
+- **`tensorcad-neural verify` required torch.** The `build_field` import sat
+  outside the error boundary, so a torch-free environment got a `ModuleNotFoundError`
+  traceback even though the manifest, hash and history checks need no neural
+  extra. Those checks now run everywhere, `field_query` reports `skipped` when the
+  extra is absent, and `verify` gained derived-artifact integrity checks
+  (presence, SHA-256, size) as warnings.
+- **Derived meshes could be written into the live bundle before publishing.**
+  `apply_dent_edit` extracted straight into `bundle/derived/` and then committed,
+  so a rejected or failed commit left files behind that no manifest described.
+  Extraction now happens in a scratch directory and travels inside the staged
+  bundle.
+- **Extraction was invisible and destructible.** `extract_object` wrote
+  `derived/surface.obj|stl` without registering them, and the next commit -- which
+  swaps the whole bundle directory -- deleted them silently. Extraction into the
+  object now publishes its own revision (`lineage.operation = "extract"`, weights
+  untouched) and registers the records; an edit carries the parent's registered
+  artifacts forward, marked with `source_revision`. `extract --output DIR` remains
+  an unregistered export, which is now stated in the docstring.
+- **`parse_manifest` did not validate `derived[]`.** Readers accepted an escaping
+  `../../../../etc/passwd` path, a non-hex digest or a negative size, so `info`
+  would print them. Records are now validated exactly like the writer builds them.
+  `ObjectStore.history()` also rejects `NaN`/`Infinity` instead of accepting the
+  tokens this project refuses to write.
+- **`max_section_area` was quadratic on non-grid meshes.** It re-scanned every
+  vertex per station, which is invisible on a lofted hull and ruinous on an
+  extracted implicit surface: 14.1 s of a 14.1 s `compute_hydrostatics` at 64^3.
+  One bucketing pass makes it `O(V + stations)`; the same call now takes 0.34 s and
+  returns the identical numbers (a test pins it against the old definition).
+
+### Added
+- Coarse-grid warning: `generate_hull` compares the mesh-integrated volume against
+  the analytic volume of the generating functions and warns above 2 % (`nx=3, nz=3`
+  is -35.7 % and used to report `warnings == []`). `analytic_volume` is public, and
+  the benchmark example now imports it instead of duplicating the formula.
+- `tensorcad/py.typed`, so the strict typing this package is developed under is
+  actually visible to PEP 561 consumers.
+- Regression tests for every item above, including a parametrised overflow matrix
+  and a "derived files survive an edit" test.
+
+### Changed
+- Test suite: 194 tests without the neural extra, 213 with it (was 175 / 189);
+  96 % branch coverage.
+- Corpus bundles: `verify` reports recorded-but-absent derived meshes as warnings.
+  The committed experiment bundle intentionally omits the 20 MB exports, so it now
+  shows two warnings -- which is the honest description of what is in the repo.
+
 ## 0.3.0 — 2026-10-24
 
 Geometry can now be stored as an object rather than a mesh: a learned continuous

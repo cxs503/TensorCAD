@@ -210,6 +210,7 @@ def _cmd_extract(args: argparse.Namespace) -> int:
     payload = {
         "status": "derived",
         "object": str(Path(args.object)),
+        "active_revision": ObjectStore(args.object).active_revision(),
         "resolution": args.resolution,
         "report": report.to_dict(),
         "artifacts": [
@@ -277,14 +278,20 @@ def _cmd_info(args: argparse.Namespace) -> int:
 
 
 def _cmd_verify(args: argparse.Namespace) -> int:
-    from .neural.objects import build_field
+    """Re-open the object and check everything that does not need a training loop.
 
+    The integrity checks (manifest, revision, weights hash, history, derived
+    artifacts) are standard-library only, so they must keep working when the
+    optional ``neural`` extra is absent. Only the live field query needs torch,
+    and it is reported as skipped instead of taking the whole command down.
+    """
     store = ObjectStore(args.object)
     checks: list[dict[str, Any]] = []
 
-    def record(name: str, passed: bool, detail: str) -> None:
-        checks.append({"name": name, "passed": passed, "detail": detail})
+    def record(name: str, passed: bool, detail: str, severity: str = "error") -> None:
+        checks.append({"name": name, "passed": passed, "detail": detail, "severity": severity})
 
+    manifest = None
     try:
         manifest = read_manifest(store.root, verify_payload=False)
         record("manifest_parses", True, f"format {manifest.format_version}")
@@ -299,32 +306,80 @@ def _cmd_verify(args: argparse.Namespace) -> int:
             f"{len(history)} attempts, last committed revision "
             f"{committed[-1].get('revision') if committed else None}",
         )
-        field = build_field(manifest, store.root / manifest.weights.path)
-        import numpy as np
-
-        points = np.array([[0.0, 0.0, 0.0], [0.05, 0.0, 0.0], [0.9, 0.0, 0.0]], dtype=np.float64)
-        values = field(points)
-        record(
-            "field_query",
-            bool(np.all(np.isfinite(values))),
-            "values at centre/inside/outside: " + ", ".join(f"{value:+.4f}" for value in values),
-        )
     except Exception as exc:
-        checks.append({"name": "verify_ran", "passed": False, "detail": f"{type(exc).__name__}: {exc}"})
+        checks.append(
+            {"name": "verify_ran", "passed": False,
+             "detail": f"{type(exc).__name__}: {exc}", "severity": "error"}
+        )
 
-    passed = all(check["passed"] for check in checks)
-    payload = {"status": "verified" if passed else "failed", "checks": checks}
-    _emit(
-        payload,
-        args.json,
-        [
-            *[
-                f"  [{'PASS' if check['passed'] else 'FAIL'}] {check['name']}: {check['detail']}"
-                for check in checks
-            ],
-            f"verify {args.object}: {'passed' if passed else 'FAILED'}",
+    if manifest is not None:
+        for artifact in manifest.derived:
+            path = artifact.get("path", "?")
+            target = store.root / str(path)
+            if not target.is_file():
+                record(
+                    f"derived_present:{path}",
+                    False,
+                    "recorded derived artifact is missing from the bundle",
+                    severity="warning",
+                )
+                continue
+            digest = sha256_file(target)
+            record(
+                f"derived_hash:{path}",
+                digest == artifact.get("sha256"),
+                f"{digest[:16]} vs recorded {str(artifact.get('sha256'))[:16]}",
+            )
+            expected_size = artifact.get("bytes")
+            record(
+                f"derived_size:{path}",
+                expected_size is None or target.stat().st_size == expected_size,
+                f"{target.stat().st_size} bytes",
+            )
+
+        try:
+            from .neural.objects import build_field
+
+            field = build_field(manifest, store.root / manifest.weights.path)
+            import numpy as np
+
+            points = np.array(
+                [[0.0, 0.0, 0.0], [0.05, 0.0, 0.0], [0.9, 0.0, 0.0]], dtype=np.float64
+            )
+            values = field(points)
+            record(
+                "field_query",
+                bool(np.all(np.isfinite(values))),
+                "values at centre/inside/outside: " + ", ".join(f"{value:+.4f}" for value in values),
+            )
+        except ImportError as exc:
+            record(
+                "field_query",
+                True,
+                f"skipped: the neural extra is not installed ({exc})",
+                severity="skipped",
+            )
+        except Exception as exc:
+            record("field_query", False, f"{type(exc).__name__}: {exc}")
+
+    failed = [check for check in checks if not check["passed"] and check["severity"] == "error"]
+    warned = [check for check in checks if not check["passed"] and check["severity"] != "error"]
+    passed = not failed
+    payload = {
+        "status": "verified" if passed else "failed",
+        "checks": checks,
+        "warnings": [check["name"] for check in warned],
+    }
+    lines = [
+        *[
+            f"  [{'PASS' if check['passed'] else ('WARN' if check['severity'] != 'error' else 'FAIL')}] "
+            f"{check['name']}: {check['detail']}"
+            for check in checks
         ],
-    )
+        f"verify {args.object}: {'passed' if passed else 'FAILED'}"
+        + (f" ({len(warned)} warning(s))" if warned else ""),
+    ]
+    _emit(payload, args.json, lines)
     return EXIT_OK if passed else EXIT_FAILED
 
 

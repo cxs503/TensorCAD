@@ -27,16 +27,7 @@ import itertools
 
 from tensorcad import HullParameters, build_mesh, compute_hydrostatics, export_hull, generate_hull
 from tensorcad import mesh as meshlib
-from tensorcad.hull import TAPER_INTEGRAL
-
-def analytic_volume(length: float, beam: float, draft: float) -> float:
-    """Exact displaced volume of the analytic surface this generator samples.
-
-    V = integral over the waterplane of the section area; the vertical profile is
-    sqrt, whose integral over the depth is 2/3, and the longitudinal taper has the
-    closed-form integral above.
-    """
-    return beam * length * draft * TAPER_INTEGRAL * (2.0 / 3.0)
+from tensorcad.hull import TAPER_INTEGRAL, analytic_volume
 
 
 def analytic_waterplane_area(length: float, beam: float) -> float:
