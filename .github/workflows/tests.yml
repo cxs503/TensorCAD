@@ -45,5 +45,12 @@ jobs:
         run: python examples/parametric_hull/run_example.py --output /tmp/tensorcad-example
       - name: Continuous geometry core benchmark (analytic fields only without torch)
         run: python examples/geometry_core/run_benchmark.py --resolution 40 --points 5000
+      - name: SUBOFF bare hull (measured field, edits and export)
+        run: python examples/suboff/run_example.py --output /tmp/tensorcad-suboff
+      - name: SUBOFF export artifacts
+        run: |
+          test -s /tmp/tensorcad-suboff/suboff_bare_hull.obj
+          test -s /tmp/tensorcad-suboff/suboff_bare_hull.stl
+          test -s /tmp/tensorcad-suboff/handoff.json
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj

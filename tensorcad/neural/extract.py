@@ -62,7 +62,7 @@ class ExtractionError(ValueError):
 class ExtractionReport:
     """Measured quality of an extracted mesh, written into the object metadata."""
 
-    resolution: int
+    resolution: int | tuple[int, int, int]
     vertices: int
     triangles: int
     watertight: bool
@@ -76,7 +76,9 @@ class ExtractionReport:
 
     def to_dict(self) -> dict[str, object]:
         return {
-            "resolution_cells": self.resolution,
+            "resolution_cells": list(self.resolution)
+            if isinstance(self.resolution, tuple)
+            else self.resolution,
             "vertex_count": self.vertices,
             "triangle_count": self.triangles,
             "watertight": self.watertight,
@@ -105,28 +107,55 @@ def _evaluate(
     return values
 
 
+def cells_per_axis(resolution: int | Sequence[int]) -> tuple[int, int, int]:
+    """Normalise a scalar or per-axis resolution into three cell counts.
+
+    An axisymmetric or slender body does not want a cube of cells: a 8.6:1 hull
+    sampled at 64^3 wastes 98 % of the grid on empty space outside the body and
+    still leaves only 64 cells along the length. Per-axis resolution keeps the
+    cell size near-isotropic at the same total cost.
+    """
+    if isinstance(resolution, (Sequence, np.ndarray)):
+        cells = tuple(int(value) for value in resolution)
+        if len(cells) != 3:
+            raise ExtractionError(f"resolution needs 1 or 3 cell counts, got {len(cells)}")
+        values: tuple[int, int, int] = (cells[0], cells[1], cells[2])
+    else:
+        scalar = int(resolution)
+        values = (scalar, scalar, scalar)
+    if min(values) < 2:
+        raise ExtractionError(f"resolution must be at least 2 cells per axis, got {values}")
+    return values
+
+
 def sample_grid(
     field: Callable[[Array], Array],
     minimum: Sequence[float],
     maximum: Sequence[float],
-    resolution: int,
+    resolution: int | Sequence[int],
     margin: int = 3,
     *,
     isovalue: float = 0.0,
-) -> tuple[Array, Array, int]:
-    """Sample ``field`` on a padded grid; returns ``(points, values, counts)``."""
+) -> tuple[Array, Array, tuple[int, int, int]]:
+    """Sample ``field`` on a padded grid; returns ``(points, values, counts)``.
+
+    ``resolution`` is cells per axis, either one number or three.
+    """
     low = np.asarray(minimum, dtype=np.float64).reshape(3)
     high = np.asarray(maximum, dtype=np.float64).reshape(3)
     if np.any(high <= low):
         raise ExtractionError("bounds must have positive extent on every axis")
-    if resolution < 2:
-        raise ExtractionError("resolution must be at least 2 cells per axis")
+    cells = np.asarray(cells_per_axis(resolution), dtype=np.float64)
     if margin < 1:
         raise ExtractionError("margin must be at least 1 cell")
-    spacing = (high - low) / resolution
+    spacing = (high - low) / cells
     origin = low - spacing * margin
-    counts = resolution + 1 + 2 * margin
-    axes = [origin[axis] + spacing[axis] * np.arange(counts) for axis in range(3)]
+    counts: tuple[int, int, int] = (
+        int(cells[0]) + 1 + 2 * margin,
+        int(cells[1]) + 1 + 2 * margin,
+        int(cells[2]) + 1 + 2 * margin,
+    )
+    axes = [origin[axis] + spacing[axis] * np.arange(counts[axis]) for axis in range(3)]
     points = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
     values = _evaluate(field, points)
     if not np.any(values < isovalue):
@@ -151,14 +180,14 @@ class _Slab:
 def _march_slab(
     values: Array,
     corners: Array,
-    counts: int,
+    strides: tuple[int, int, int],
     start: int,
     stop: int,
     isovalue: float,
 ) -> _Slab:
     """March the cells between grid planes ``start`` and ``stop``."""
     slab = corners[start:stop, :-1, :-1]
-    offsets = _CORNER_BITS[:, 0] * counts * counts + _CORNER_BITS[:, 1] * counts + _CORNER_BITS[:, 2]
+    offsets = _CORNER_BITS[:, 0] * strides[0] + _CORNER_BITS[:, 1] * strides[1] + _CORNER_BITS[:, 2]
     cell_corners = (slab[..., None] + offsets).reshape(-1, 8).astype(np.int64)
     cell_values = values[cell_corners]
     del slab
@@ -266,7 +295,7 @@ def extract_surface(
     field: Callable[[Array], Array],
     minimum: Sequence[float],
     maximum: Sequence[float],
-    resolution: int,
+    resolution: int | Sequence[int],
     *,
     isovalue: float = 0.0,
     margin: int = 3,
@@ -278,18 +307,19 @@ def extract_surface(
 
     ``minimum``/``maximum`` bound the region of interest; sampling is extended by
     ``margin`` cells on every side so the surface closes inside the grid instead
-    of hitting its boundary. ``resolution`` is in cells per axis.
+    of hitting its boundary. ``resolution`` is cells per axis (one number or three).
     """
     points, values, counts = sample_grid(field, minimum, maximum, resolution, margin, isovalue=isovalue)
-    corners = np.arange(len(values)).reshape(counts, counts, counts)
+    corners = np.arange(len(values)).reshape(counts)
+    strides = (counts[1] * counts[2], counts[2], 1)
 
     slabs: list[_Slab] = []
     edge_total = 0
     triangle_total = 0
-    cells_per_slab = max(1, cell_chunk // (counts * counts))
-    for start in range(0, counts - 1, cells_per_slab):
-        stop = min(start + cells_per_slab, counts - 1)
-        slab = _march_slab(values, corners, counts, start, stop, isovalue)
+    cells_per_slab = max(1, cell_chunk // (counts[1] * counts[2]))
+    for start in range(0, counts[0] - 1, cells_per_slab):
+        stop = min(start + cells_per_slab, counts[0] - 1)
+        slab = _march_slab(values, corners, strides, start, stop, isovalue)
         if len(slab.edge_lo) == 0:
             continue
         slabs.append(
@@ -356,15 +386,23 @@ def extract_surface(
     return mesh
 
 
-def summarise(mesh: Mesh, resolution: int, *, expected_units: str | None = None) -> ExtractionReport:
+def summarise(
+    mesh: Mesh,
+    resolution: int | Sequence[int],
+    *,
+    expected_units: str | None = None,
+) -> ExtractionReport:
     """Measure an extracted mesh with the same checks used for CAD output."""
+    cells = cells_per_axis(resolution)
     edges = meshlib.edge_face_counts(mesh)
     areas = meshlib.triangle_areas(mesh)
     box = mesh.bounding_box()
     if expected_units is not None and mesh.units != expected_units:
         raise ExtractionError(f"mesh units {mesh.units!r} do not match the object's {expected_units!r}")
     return ExtractionReport(
-        resolution=resolution,
+        # Isotropic callers keep the scalar they passed; anisotropic ones get the
+        # per-axis tuple, so an existing reader of ``resolution`` is unaffected.
+        resolution=cells if isinstance(resolution, (tuple, list)) else cells[0],
         vertices=len(mesh.vertices),
         triangles=len(mesh.faces),
         watertight=meshlib.is_watertight(mesh),

@@ -122,12 +122,14 @@ reported, not asserted away.
 ### A defect this work found and fixed
 
 A cylinder of radius 0.3 sampled in a ±0.3 box is exactly 20 cells across, so the
-level set ran *through* grid vertices. Marching tetrahedra then emitted **8,108
-exactly-zero-area triangles** out of 65,144 (12.5 %), and the sliver share was 22.4 %.
-A finite-element code is entitled to reject that mesh. `to_mesh` now offsets its
-sampling box by `1/φ²` of one cell, which breaks the coincidence without changing
-resolution, units or margin: zero-area faces dropped to **0** and the cylinder's
-sliver share to 2.3 %. The regression test states the old number so the fix cannot be
+level set ran *through* grid vertices. Marching tetrahedra then emitted 8,108 faces
+with an area below 10⁻¹² m² out of 65,144 (12.4 %), of which **2,936 had an aspect
+ratio above 10⁶** — squashed elements a finite-element code is entitled to reject —
+and the sliver share was 22.4 %. `to_mesh` now offsets its sampling box by an
+irrational fraction of one cell *per axis*, which breaks the coincidence without
+changing resolution, units or margin: every count drops to **0** and the cylinder's
+sliver share to 2.3 %. The regression test uses a scale-free criterion (area below
+10⁻⁶ of the longest edge squared) and states the old numbers, so the fix cannot be
 quietly undone.
 
 ### Handoff record
