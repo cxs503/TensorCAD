@@ -148,8 +148,23 @@ def main() -> None:
     optimizer = torch.optim.Adam(candidate.parameters(), lr=2e-4)
     start = time.perf_counter()
     for _ in range(args.edit_steps):
-        xyz = torch.rand((2048, 3)) * 1.6 - 0.8
-        radii = torch.full((2048,), args.radius)
+        # Bias edit samples toward the surface, where the zero level set lives.
+        # Half the samples cover the whole sphere; half resolve the target dent
+        # cone so a small local edit is not drowned out by the volume loss.
+        count = 2048
+        general = torch.randn((count // 2, 3))
+        general = general / torch.linalg.vector_norm(general, dim=1, keepdim=True).clamp_min(1e-8)
+        angle = torch.rand(count - count // 2) * (2.5 * args.sigma)
+        azimuth = torch.rand_like(angle) * (2.0 * math.pi)
+        dent_directions = torch.stack((
+            torch.cos(angle),
+            torch.sin(angle) * torch.cos(azimuth),
+            torch.sin(angle) * torch.sin(azimuth),
+        ), dim=1)
+        directions_edit = torch.cat((general, dent_directions), dim=0)
+        radial_offset = (torch.rand(count) - 0.5) * 0.30
+        xyz = directions_edit * (args.radius + radial_offset)[:, None]
+        radii = torch.full((count,), args.radius)
         target = dent_tsdf(xyz, radii, args.depth, args.sigma, truncation)
         candidate_prediction = candidate(xyz, radii)
         target_loss = torch.mean((candidate_prediction - target) ** 2)
