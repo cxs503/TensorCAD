@@ -100,7 +100,8 @@ jobs:
             assert d['passed'] is True, d['failures']; \
             assert d['schema'] == 'tensorcad.benchmark/1'; \
             rows={r['identifier'] for c in d['cases'] for r in c['representations']}; \
-            assert {'analytic_field','mesh_local_edit','parametric_hull'} <= rows, rows"
+            assert {'analytic_field','mesh','parametric_hull'} <= rows, rows; \
+            assert ('neural_field' in rows) and ('ocp_step' in rows), rows"
 
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj
