@@ -1,0 +1,83 @@
+{
+  "object": "/tmp/pipe-final/sphere.ngo",
+  "revision": 2,
+  "fit_seconds": 14.240808708000259,
+  "edit_seconds": 24.871176603000094,
+  "metrics": {
+    "fit": {
+      "field_mae_m": 0.005091998726129532,
+      "field_rmse_m": 0.007775053381919861,
+      "boundary_error_mean_m": 0.00408579595386982,
+      "boundary_error_p95_m": 0.009899145923554897,
+      "boundary_error_max_m": 0.015767693519592285,
+      "ray_coverage": 1.0,
+      "ray_count": 2048,
+      "final_batch_mse": 7.445351366186514e-05,
+      "training_seconds": 12.40996092100022
+    },
+    "edit": {
+      "ray_coverage": 1.0,
+      "ray_count": 4096,
+      "dent_peak_target_m": 0.06,
+      "dent_peak_measured_m": 0.0526902973651886,
+      "dent_peak_error_m": 0.007309702634811399,
+      "dent_region_error_mean_m": 0.0028249879833310843,
+      "dent_region_ray_count": 124,
+      "protected_mean_displacement_m": -0.0007728333002887666,
+      "protected_mean_abs_displacement_m": 0.001209024223499,
+      "protected_p95_abs_displacement_m": 0.0030369460582733154,
+      "protected_p99_abs_displacement_m": 0.0048816874623298645,
+      "protected_max_abs_displacement_m": 0.009652674198150635,
+      "protected_ray_count": 3776,
+      "training_seconds": 24.871176603000094,
+      "final_batch_mse": 4.526972770690918e-05,
+      "dent_depth_m": 0.06,
+      "dent_sigma_radians": 0.22
+    },
+    "mesh": {
+      "resolution_cells": 96,
+      "vertex_count": 97332,
+      "triangle_count": 194660,
+      "watertight": true,
+      "edge_manifold": true,
+      "euler_characteristic": 2,
+      "signed_volume_m3": 0.5153998568601795,
+      "surface_area_m2": 3.175587701399903,
+      "smallest_triangle_area_m2": 2.9812913218994037e-16,
+      "bounds_min_m": [
+        -0.4938667666748041,
+        -0.511985806266143,
+        -0.5009501611105925
+      ],
+      "bounds_max_m": [
+        0.45987418893508347,
+        0.5047401941889008,
+        0.4999824653471944
+      ]
+    }
+  },
+  "history": [
+    {
+      "revision": 1,
+      "status": "committed",
+      "operation": "fit",
+      "failed_checks": []
+    },
+    {
+      "revision": 2,
+      "status": "committed",
+      "operation": "dent_edit",
+      "failed_checks": []
+    },
+    {
+      "revision": 3,
+      "status": "rolled_back",
+      "operation": "dent_edit",
+      "failed_checks": [
+        "dent_peak_error",
+        "dent_region_error_mean"
+      ]
+    }
+  ],
+  "checks_failed": []
+}
