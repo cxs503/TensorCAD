@@ -1,0 +1,345 @@
+{
+  "schema_version": "1.0",
+  "experiment": "neural-sphere-dent",
+  "date": "2026-10-24",
+  "environment": {
+    "python": "3.11.2",
+    "implementation": "CPython",
+    "platform": "Linux-6.1.158+-x86_64-with-glibc2.36",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+    "cpu_count": 2,
+    "memory_gb": 3,
+    "cuda_available": false,
+    "note": "torch 2.2.2+cu121 wheel on CPU; the CUDA runtime is installed as a wheel dependency but no GPU is present. NumPy 2.x triggers a harmless 'Failed to initialize NumPy' warning in torch 2.2.2.",
+    "packages": [
+      "Jinja2==3.1.6",
+      "filelock==4.2.4",
+      "fsspec==2026.9.0",
+      "networkx==3.6.1",
+      "numpy==2.4.6",
+      "safetensors==0.8.0",
+      "sympy==1.14.0",
+      "torch==2.2.2"
+    ]
+  },
+  "runs": {
+    "smoke_20_20": {
+      "command": "python examples/neural_geometry/edit_sphere_dent.py --base-steps 20 --edit-steps 20 --seed 503 --output /tmp/tc-exp/smoke.ngo",
+      "exit_code": 1,
+      "wall_seconds": 7.8,
+      "result": {
+        "transaction": "rolled_back",
+        "reason": "validation thresholds not met",
+        "active_revision": 1,
+        "candidate_not_published": true,
+        "ray_coverage": 0.890869140625,
+        "dent_depth_target_m": 0.06,
+        "dent_depth_measured_mean_m": 0.08175241947174072,
+        "dent_surface_error_mean_m": 0.009281720966100693,
+        "protected_mean_displacement_m": 0.030125167220830917,
+        "protected_p95_displacement_m": 0.07679928094148636,
+        "dent_ray_count": 9,
+        "protected_ray_count": 3393
+      },
+      "bundle_written": false
+    },
+    "sphere_1800": {
+      "command": "python examples/neural_geometry/train_sphere.py --steps 1800 --seed 503 --output results/neural-sphere.ngo",
+      "exit_code": 0,
+      "wall_seconds": 21.3,
+      "result": {
+        "bundle": "results/neural-sphere.ngo",
+        "revision": 1,
+        "architecture_id": "tensorcad.mlp_fourier.v1",
+        "steps": 1800,
+        "elapsed_seconds": 18.746327718999964,
+        "validation_status": "passed",
+        "field_mae": 0.003706875257194042,
+        "field_rmse": 0.005329158157110214,
+        "boundary_radial_error_mean": 0.0021844865132597947,
+        "boundary_radial_error_p95": 0.005107967047148332,
+        "boundary_radial_error_max": 0.010618612420915441,
+        "ray_zero_crossing_coverage": 1.0
+      },
+      "bundle_written": true
+    },
+    "dent_1200_1000": {
+      "command": "python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 --output results/sphere-dent-seed-503.ngo",
+      "exit_code": 0,
+      "wall_seconds": 43.3,
+      "result": {
+        "transaction": "committed",
+        "bundle": "results/sphere-dent-seed-503.ngo",
+        "revision": 2,
+        "weights_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+        "ray_coverage": 1.0,
+        "dent_depth_target_m": 0.06,
+        "dent_depth_measured_mean_m": 0.04612323269248009,
+        "dent_surface_error_mean_m": 0.002320727100595832,
+        "protected_mean_displacement_m": 0.0012800844851881266,
+        "protected_p95_displacement_m": 0.003311760723590851,
+        "dent_ray_count": 60,
+        "protected_ray_count": 3776
+      },
+      "bundle_written": true
+    },
+    "dent_1200_1000_repeat": {
+      "command": "same as dent_1200_1000, independent process, --output /tmp/tc-exp/dent-repeat.ngo",
+      "exit_code": 0,
+      "result": {
+        "transaction": "committed",
+        "bundle": "/tmp/tc-exp/dent-repeat.ngo",
+        "revision": 2,
+        "weights_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+        "ray_coverage": 1.0,
+        "dent_depth_target_m": 0.06,
+        "dent_depth_measured_mean_m": 0.04612323269248009,
+        "dent_surface_error_mean_m": 0.002320727100595832,
+        "protected_mean_displacement_m": 0.0012800844851881266,
+        "protected_p95_displacement_m": 0.003311760723590851,
+        "dent_ray_count": 60,
+        "protected_ray_count": 3776
+      },
+      "bundle_written": true,
+      "determinism": "weights SHA-256 and every metric identical to dent_1200_1000"
+    },
+    "rollback_depth_0.25": {
+      "command": "python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 --depth 0.25 --sigma 0.15 --output /tmp/tc-exp/rollback1.ngo",
+      "exit_code": 1,
+      "result": {
+        "transaction": "rolled_back",
+        "reason": "validation thresholds not met",
+        "active_revision": 1,
+        "candidate_not_published": true,
+        "ray_coverage": 0.9921875,
+        "dent_depth_target_m": 0.25,
+        "dent_depth_measured_mean_m": null,
+        "dent_surface_error_mean_m": null,
+        "protected_mean_displacement_m": 0.002825253177434206,
+        "protected_p95_displacement_m": 0.007898733019828796,
+        "dent_ray_count": 0,
+        "protected_ray_count": 3946
+      },
+      "bundle_written": false
+    },
+    "rollback_depth_0.45": {
+      "command": "python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 --depth 0.45 --sigma 0.12 --output /tmp/tc-exp/rollback2.ngo",
+      "exit_code": 1,
+      "result": {
+        "transaction": "rolled_back",
+        "reason": "validation thresholds not met",
+        "active_revision": 1,
+        "candidate_not_published": true,
+        "ray_coverage": 0.990234375,
+        "dent_depth_target_m": 0.45,
+        "dent_depth_measured_mean_m": null,
+        "dent_surface_error_mean_m": null,
+        "protected_mean_displacement_m": 0.0033229643013328314,
+        "protected_p95_displacement_m": 0.00873455312103033,
+        "dent_ray_count": 0,
+        "protected_ray_count": 3993
+      },
+      "bundle_written": false
+    },
+    "rollback_into_existing_bundle": {
+      "command": "python examples/neural_geometry/edit_sphere_dent.py --base-steps 1200 --edit-steps 1000 --seed 503 --depth 0.45 --sigma 0.12 --output results/sphere-dent-seed-503.ngo",
+      "exit_code": 1,
+      "result": {
+        "transaction": "rolled_back",
+        "reason": "validation thresholds not met",
+        "active_revision": 1,
+        "candidate_not_published": true,
+        "ray_coverage": 0.990234375,
+        "dent_depth_target_m": 0.45,
+        "dent_depth_measured_mean_m": null,
+        "dent_surface_error_mean_m": null,
+        "protected_mean_displacement_m": 0.0033229643013328314,
+        "protected_p95_displacement_m": 0.00873455312103033,
+        "dent_ray_count": 0,
+        "protected_ray_count": 3993
+      },
+      "bundle_written": false,
+      "existing_bundle": {
+        "revision_on_disk": 2,
+        "weights_sha256_before": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+        "weights_sha256_after": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+        "unchanged": true
+      }
+    }
+  },
+  "bundles": {
+    "neural-sphere.ngo": {
+      "revision": 1,
+      "weights_sha256": "3eb7b8bf15161d46772b9eea7852b79e839f58e79711e5fae2bd1b9dec0c7c5d"
+    },
+    "sphere-dent-seed-503.ngo": {
+      "revision": 2,
+      "parent_revision": 1,
+      "weights_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7"
+    },
+    "dent_parent_rebuilt_from_seed": {
+      "description": "base training of edit_sphere_dent.py (seed 503, 1200 steps) replayed independently for the verification probes",
+      "weights_sha256": "62764ef93a278a5521bf51c199db783fd4b39122b85a786f6793651eb1a93181"
+    }
+  },
+  "independent_verification": {
+    "angular_profile": {
+      "parent_rebuilt_sha256": "62764ef93a278a5521bf51c199db783fd4b39122b85a786f6793651eb1a93181",
+      "candidate_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+      "baseline_sha256": "3eb7b8bf15161d46772b9eea7852b79e839f58e79711e5fae2bd1b9dec0c7c5d",
+      "profile": [
+        {
+          "angle_deg": 0.0,
+          "baseline_radius_m": 0.49838586151599884,
+          "baseline_radius_azimuth90_m": 0.49838586151599884,
+          "candidate_radius_m": 0.44076453149318695,
+          "analytic_dent_radius_m": 0.44,
+          "displacement_m": -0.05762133002281189,
+          "candidate_vs_analytic_m": 0.0007645314931869485
+        },
+        {
+          "angle_deg": 5.0,
+          "baseline_radius_m": 0.5014903247356415,
+          "baseline_radius_azimuth90_m": 0.5034969747066498,
+          "candidate_radius_m": 0.4481814056634903,
+          "analytic_dent_radius_m": 0.44453940836338984,
+          "displacement_m": -0.053308919072151184,
+          "candidate_vs_analytic_m": 0.0036419973001004524
+        },
+        {
+          "angle_deg": 10.0,
+          "baseline_radius_m": 0.5010980665683746,
+          "baseline_radius_azimuth90_m": 0.5015141665935516,
+          "candidate_radius_m": 0.4597039073705673,
+          "analytic_dent_radius_m": 0.45619897823461775,
+          "displacement_m": -0.04139415919780731,
+          "candidate_vs_analytic_m": 0.003504929135949575
+        },
+        {
+          "angle_deg": 15.0,
+          "baseline_radius_m": 0.4997824877500534,
+          "baseline_radius_azimuth90_m": 0.49980728328227997,
+          "candidate_radius_m": 0.47024454176425934,
+          "analytic_dent_radius_m": 0.47044367178642654,
+          "displacement_m": -0.029537945985794067,
+          "candidate_vs_analytic_m": -0.00019913002216720432
+        },
+        {
+          "angle_deg": 20.0,
+          "baseline_radius_m": 0.50221386551857,
+          "baseline_radius_azimuth90_m": 0.5026063024997711,
+          "candidate_radius_m": 0.4788188189268112,
+          "analytic_dent_radius_m": 0.4829594654079493,
+          "displacement_m": -0.023395046591758728,
+          "candidate_vs_analytic_m": -0.004140646481138099
+        },
+        {
+          "angle_deg": 30.0,
+          "baseline_radius_m": 0.5082917511463165,
+          "baseline_radius_azimuth90_m": 0.5061380565166473,
+          "candidate_radius_m": 0.48548008501529694,
+          "analytic_dent_radius_m": 0.4964669631165953,
+          "displacement_m": -0.022811666131019592,
+          "candidate_vs_analytic_m": -0.010986878101298336
+        },
+        {
+          "angle_deg": 45.0,
+          "baseline_radius_m": 0.5005482733249664,
+          "baseline_radius_azimuth90_m": 0.5025053322315216,
+          "candidate_radius_m": 0.5086794197559357,
+          "analytic_dent_radius_m": 0.49989751877160266,
+          "displacement_m": 0.008131146430969238,
+          "candidate_vs_analytic_m": 0.008781900984333013
+        },
+        {
+          "angle_deg": 90.0,
+          "baseline_radius_m": 0.4979790896177292,
+          "baseline_radius_azimuth90_m": 0.4994259923696518,
+          "candidate_radius_m": 0.4996369630098343,
+          "analytic_dent_radius_m": 0.49999999999948935,
+          "displacement_m": 0.0016578733921051025,
+          "candidate_vs_analytic_m": -0.00036303698965506337
+        },
+        {
+          "angle_deg": 180.0,
+          "baseline_radius_m": 0.49840329587459564,
+          "baseline_radius_azimuth90_m": 0.49840329587459564,
+          "candidate_radius_m": 0.48614339530467987,
+          "analytic_dent_radius_m": 0.5,
+          "displacement_m": -0.012259900569915771,
+          "candidate_vs_analytic_m": -0.01385660469532013
+        }
+      ]
+    },
+    "protected_region": {
+      "directions": 4096,
+      "coverage": 1.0,
+      "baseline_form_error_m": {
+        "mean_abs": 0.004086358938366175,
+        "p95_abs": 0.009732924401760101,
+        "max_abs": 0.01714956760406494,
+        "signed_mean": -0.0003414863895159215
+      },
+      "dent_region": {
+        "count": 59,
+        "mean_signed_m": -0.04649215564131737,
+        "mean_abs_m": 0.04649215564131737,
+        "median_abs_m": 0.04621511697769165,
+        "p95_abs_m": 0.05611492693424225,
+        "p99_abs_m": 0.05651320517063141,
+        "max_abs_m": 0.05672764778137207,
+        "outward_fraction": 0.0
+      },
+      "transition_region": {
+        "count": 272,
+        "mean_signed_m": -0.01764615811407566,
+        "mean_abs_m": 0.01764615811407566,
+        "median_abs_m": 0.017568394541740417,
+        "p95_abs_m": 0.03574696555733681,
+        "p99_abs_m": 0.039451662451028824,
+        "max_abs_m": 0.041406720876693726,
+        "outward_fraction": 0.0
+      },
+      "protected_region": {
+        "count": 3765,
+        "mean_signed_m": -0.0006227033445611596,
+        "mean_abs_m": 0.001271675224415958,
+        "median_abs_m": 0.0009950101375579834,
+        "p95_abs_m": 0.003368342062458396,
+        "p99_abs_m": 0.005262285470962524,
+        "max_abs_m": 0.01085004210472107,
+        "outward_fraction": 0.3354581594467163
+      },
+      "protected_vs_analytic_surface": {
+        "count": 3765,
+        "mean_signed_m": -0.0010305882897228003,
+        "mean_abs_m": 0.003990413621068001,
+        "median_abs_m": 0.003382861614227295,
+        "p95_abs_m": 0.009724277071654797,
+        "p99_abs_m": 0.01196211576461792,
+        "max_abs_m": 0.015389323234558105,
+        "outward_fraction": 0.42363879084587097
+      },
+      "worst_protected": {
+        "angle_deg": 175.7346954345703,
+        "displacement_m": -0.01085004210472107
+      }
+    },
+    "scripts": [
+      "verification/verify_profile.py",
+      "verification/protected_stats.py"
+    ]
+  },
+  "ci_status": {
+    "latest_neural_geometry_run_on_main": {
+      "run_id": 40063938007,
+      "conclusion": "success",
+      "duration_seconds": 136
+    },
+    "latest_tests_run_on_main": {
+      "run_id": 40063937945,
+      "conclusion": "success",
+      "duration_seconds": 35
+    }
+  }
+}

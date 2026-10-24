@@ -1,0 +1,40 @@
+{
+  "format": "tensorcad.neural-geometry",
+  "format_version": "0.1.0",
+  "object_id": "urn:tensorcad:geometry:sphere-seed-503",
+  "revision": 1,
+  "model": {
+    "family": "conditional_implicit_field",
+    "architecture_id": "tensorcad.mlp_fourier.v1",
+    "architecture_config": {
+      "coordinate_dim": 3,
+      "state_dim": 1,
+      "hidden_width": 128,
+      "hidden_layers": 4,
+      "coordinate_encoding": "fourier",
+      "output_dim": 1
+    },
+    "weights": {
+      "path": "weights.safetensors",
+      "sha256": "3eb7b8bf15161d46772b9eea7852b79e839f58e79711e5fae2bd1b9dec0c7c5d"
+    }
+  },
+  "field": {
+    "quantity": "truncated_signed_distance",
+    "inside_sign": "negative",
+    "surface_isovalue": 0.0,
+    "length_unit": "m",
+    "truncation_distance": 0.15
+  },
+  "coordinates": {
+    "dimension": 3,
+    "frame": "object_local"
+  },
+  "state_file": "state.json",
+  "training_file": "training.json",
+  "validation_file": "validation.json",
+  "producer": {
+    "name": "TensorCAD",
+    "experiment": "neural-sphere-v0.1"
+  }
+}

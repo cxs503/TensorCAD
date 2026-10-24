@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tensorcad"
-version = "0.2.0"
+version = "0.3.0"
 description = "Agent-callable parametric geometry foundation for the Tensor scientific-computing ecosystem"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -24,7 +24,7 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-test = ["pytest>=7"]
+test = ["pytest>=7", "numpy>=1.24"]
 dev = ["ruff>=0.6", "mypy>=1.8", "pytest-cov>=4"]
 # Research-only neural field training and non-executable tensor checkpoints.
 neural = ["torch>=2.2", "safetensors>=0.4", "numpy>=1.24"]
@@ -37,6 +37,7 @@ Issues = "https://github.com/cxs503/TensorCAD/issues"
 
 [project.scripts]
 tensorcad-hull = "tensorcad.cli:main"
+tensorcad-neural = "tensorcad.cli_neural:main"
 
 [tool.setuptools.packages.find]
 include = ["tensorcad*"]
@@ -70,8 +71,13 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["torch.*", "safetensors.*"]
+# Treat the optional torch/safetensors stack as untyped whether or not it is
+# installed, so `mypy` gives the same answer in the torch-free CI job and in an
+# environment with the `neural` extra. The alternative -- different results per
+# machine -- made the type check environment-dependent.
+module = ["torch", "torch.*", "safetensors", "safetensors.*"]
 ignore_missing_imports = true
+follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = "tests.*"
@@ -80,7 +86,17 @@ ignore_errors = true
 [tool.coverage.run]
 source = ["tensorcad"]
 branch = true
+# These modules import torch (or, for the CLI, call into it), so they cannot even
+# be imported without the `neural` extra that the default test job does not
+# install. They are measured by the neural-geometry-experiments workflow, which
+# installs the extra and runs its own coverage gate.
+omit = [
+  "tensorcad/neural/field.py",
+  "tensorcad/neural/objects.py",
+  "tensorcad/cli_neural.py",
+]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
+fail_under = 90

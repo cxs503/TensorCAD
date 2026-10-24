@@ -1,0 +1,15 @@
+{
+  "batch": 2048,
+  "elapsed_seconds": 24.871176603000094,
+  "equation": "surface target r(a) = R - depth*exp(-a^2/(2*sigma^2))",
+  "final_batch_mse": 4.526972770690918e-05,
+  "learning_rate": 0.0002,
+  "method": "online_fit_with_replay",
+  "optimizer": "Adam",
+  "parent_revision": 1,
+  "parent_weights_sha256": "62764ef93a278a5521bf51c199db783fd4b39122b85a786f6793651eb1a93181",
+  "replay_weight": 3.0,
+  "schema_version": "0.2.0",
+  "seed": 503,
+  "steps": 1000
+}

@@ -1,0 +1,14 @@
+{
+  "bundle": "results/neural-sphere.ngo",
+  "revision": 1,
+  "architecture_id": "tensorcad.mlp_fourier.v1",
+  "steps": 1800,
+  "elapsed_seconds": 18.746327718999964,
+  "validation_status": "passed",
+  "field_mae": 0.003706875257194042,
+  "field_rmse": 0.005329158157110214,
+  "boundary_radial_error_mean": 0.0021844865132597947,
+  "boundary_radial_error_p95": 0.005107967047148332,
+  "boundary_radial_error_max": 0.010618612420915441,
+  "ray_zero_crossing_coverage": 1.0
+}
