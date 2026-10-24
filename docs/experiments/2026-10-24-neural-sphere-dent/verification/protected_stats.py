@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
 from pathlib import Path
 
@@ -61,7 +60,7 @@ def stats(mask: torch.Tensor, values: torch.Tensor) -> dict[str, float | int]:
     absolute = selected.abs()
     quantiles = torch.quantile(absolute, torch.tensor([0.5, 0.95, 0.99]), interpolation="linear")
     return {
-        "count": int(len(selected)),
+        "count": len(selected),
         "mean_signed_m": float(selected.mean()),
         "mean_abs_m": float(absolute.mean()),
         "median_abs_m": float(quantiles[0]),
@@ -113,7 +112,7 @@ def main() -> int:
     worst_index = displacement[protected].abs().argmax()
     report = {
         "method": "4096 fixed-seed directions, first zero crossing on a 1201-point radial grid",
-        "directions": int(len(directions)),
+        "directions": len(directions),
         "coverage": float(valid.float().mean()),
         "baseline_form_error_m": {
             "mean_abs": float(baseline_form_error[valid].abs().mean()),

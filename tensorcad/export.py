@@ -17,6 +17,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import struct
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -69,6 +70,44 @@ def write_obj(mesh: Mesh, path: str | Path, *, precision: int = ROUND_TRIP_PRECI
     )
     lines.extend(f"f {a} {b} {c}" for a, b, c in mesh.to_obj_faces())
     target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return target
+
+
+def write_stl(mesh: Mesh, path: str | Path) -> Path:
+    """Write a binary STL for downstream viewers and 3-D printing workflows.
+
+    STL is a *derived* format: it stores one flat triangle soup with no topology,
+    no units and no provenance, which is exactly why a neural object keeps that
+    information and treats the STL as an export. The mesh is assumed closed and
+    outward-oriented (``tensorcad.neural.extract`` guarantees both).
+    """
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    header = b"TensorCAD binary STL; derived from a neural geometry object"
+    records = bytearray()
+    for face in mesh.faces:
+        ax, ay, az = mesh.vertices[face[0]]
+        bx, by, bz = mesh.vertices[face[1]]
+        cx, cy, cz = mesh.vertices[face[2]]
+        ux, uy, uz = bx - ax, by - ay, bz - az
+        vx, vy, vz = cx - ax, cy - ay, cz - az
+        nx, ny, nz = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
+        length = math.sqrt(nx * nx + ny * ny + nz * nz)
+        if length > 0.0:
+            nx, ny, nz = nx / length, ny / length, nz / length
+        else:  # pragma: no cover - degenerate faces are rejected before export
+            nx = ny = nz = 0.0
+        records += struct.pack(
+            "<12fH",
+            nx, ny, nz,
+            ax, ay, az,
+            bx, by, bz,
+            cx, cy, cz,
+            0,
+        )
+    with target.open("wb") as stream:
+        stream.write(struct.pack("<80sI", header[:80].ljust(80, b" "), len(mesh.faces)))
+        stream.write(records)
     return target
 
 

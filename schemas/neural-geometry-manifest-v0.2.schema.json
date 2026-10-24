@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tensorcad.dev/schemas/neural-geometry-manifest-v0.2.schema.json",
+  "title": "TensorCAD Neural Geometry Object Manifest v0.2",
+  "description": "Canonical metadata for a geometry stored as a learned continuous field. Meshes and STL/OBJ exports are derived artifacts listed under `derived`, never the source of truth.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "format", "format_version", "object_id", "revision", "model", "field",
+    "coordinates", "state_file", "training_file", "validation_file"
+  ],
+  "properties": {
+    "format": { "const": "tensorcad.neural-geometry" },
+    "format_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "description": "Semantic version. Readers accept major version 0 and reject anything newer."
+    },
+    "object_id": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "lineage": {
+      "type": "object",
+      "required": ["parent_revision", "root_revision", "operation", "history_file"],
+      "properties": {
+        "parent_revision": { "type": ["integer", "null"], "minimum": 1 },
+        "root_revision": { "type": ["integer", "null"], "minimum": 1 },
+        "operation": { "type": "string", "minLength": 1 },
+        "history_file": { "$ref": "#/$defs/relativePath" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["family", "architecture_id", "architecture_config", "weights"],
+      "properties": {
+        "family": { "const": "conditional_implicit_field" },
+        "architecture_id": { "type": "string", "minLength": 1 },
+        "architecture_config": {
+          "type": "object",
+          "required": ["coordinate_dim", "state_dim", "hidden_width", "hidden_layers", "output_dim"],
+          "properties": {
+            "coordinate_dim": { "const": 3 },
+            "state_dim": { "type": "integer", "minimum": 0 },
+            "hidden_width": { "type": "integer", "minimum": 1 },
+            "hidden_layers": { "type": "integer", "minimum": 1 },
+            "output_dim": { "const": 1 }
+          }
+        },
+        "weights": {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": { "$ref": "#/$defs/relativePath" },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "bytes": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["quantity", "inside_sign", "surface_isovalue", "length_unit", "truncation_distance"],
+      "properties": {
+        "quantity": { "const": "truncated_signed_distance" },
+        "inside_sign": { "const": "negative" },
+        "surface_isovalue": { "const": 0 },
+        "length_unit": { "type": "string", "minLength": 1 },
+        "truncation_distance": { "type": "number", "exclusiveMinimum": 0 },
+        "continuity": { "type": "string" },
+        "resolution": { "type": "string" }
+      }
+    },
+    "coordinates": {
+      "type": "object",
+      "required": ["dimension", "frame"],
+      "properties": {
+        "dimension": { "const": 3 },
+        "frame": { "type": "string", "minLength": 1 },
+        "units": { "type": "string", "minLength": 1 },
+        "bounds": {
+          "type": "object",
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "$ref": "#/$defs/vec3" },
+            "max": { "$ref": "#/$defs/vec3" }
+          }
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "description": "Editable controls; field_state holds the values the network is conditioned on.",
+      "properties": {
+        "schema_version": { "type": "string" },
+        "field_state": { "type": "object" },
+        "controls": { "type": "object" }
+      }
+    },
+    "training": { "type": "object" },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["passed", "failed", "unknown"] },
+        "metrics": { "type": "object" },
+        "tolerances": { "type": "object" },
+        "checks": { "type": "array" },
+        "failed_checks": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "provenance": { "type": "object" },
+    "derived": {
+      "type": "array",
+      "description": "Non-canonical exports. Deleting them loses nothing but the cost of re-extraction.",
+      "items": {
+        "type": "object",
+        "required": ["kind", "format", "path", "sha256", "bytes"],
+        "properties": {
+          "kind": { "type": "string" },
+          "format": { "type": "string" },
+          "path": { "$ref": "#/$defs/relativePath" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "metrics": { "type": "object" }
+        }
+      }
+    },
+    "state_file": { "$ref": "#/$defs/relativePath" },
+    "training_file": { "$ref": "#/$defs/relativePath" },
+    "validation_file": { "$ref": "#/$defs/relativePath" }
+  },
+  "$defs": {
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "vec3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number" }
+    }
+  }
+}
