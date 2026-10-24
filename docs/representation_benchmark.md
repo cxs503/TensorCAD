@@ -24,7 +24,7 @@ Two cases, both with an exact reference:
 - **Case A — `case_a_sphere_dent`.** A sphere R = 0.5 m with a Gaussian dent of depth
   0.06 m and σ = 0.22 rad on +x. The reference radius is a formula, so "the right answer" is
   known to machine precision. Rows: `analytic_field` (the formula, triangulated for export),
-  `mesh_local_edit` (move the vertices inside 2.5 σ, nothing else), `neural_field` (a trained
+  `mesh` (move the vertices inside 2.5 σ, nothing else), `neural_field` (a trained
   `.ngo` object, queried as an implicit field), `ocp_step` (faceted STEP round trip).
 - **Case B — `case_b_hull_handoff`.** A design target → converged hull → the gmsh artifact a
   solver receives. The reference is `hull.analytic_volume`, not the mesh. Rows:
@@ -90,9 +90,9 @@ convenience knob. Case A takes 0.8 s at `--quick` and 2.9 s at full sampling.
 
 From `docs/benchmarks/neural/results.json`:
 
-| metric | `analytic_field` | `mesh_local_edit` | `neural_field` |
+| metric | `analytic_field` | `mesh` | `neural_field` |
 |---|---|---|---|
-| status | measured (reference) | measured | measured, 1.73 s |
+| status | measured (reference) | measured, 3.06 s | measured, 0.47 s |
 | dent depth, cone mean | 0.047199 m (reference, by construction) | 0.047199 m | 0.045292 m |
 | depth error, cone mean | 0 | **2.3e-6 m** (0.004 % of depth) | 1.9e-3 m (**3.2 %**, gate fails) |
 | depth error, ray nearest the axis | 0 | 1.3e-4 m | 1.8e-3 m |
@@ -101,7 +101,10 @@ From `docs/benchmarks/neural/results.json`:
 | protected leak (vs its own parent) | 0 | **0 m** (exactly) | 1.3e-3 m (imported; parent weights not shipped) |
 | protected total error (vs formula) | 0 | 1.3e-4 m | 4.1e-3 m |
 | transition band | 0 | 2.0e-3 m (staircase) | 1.1e-2 m |
-| surface error over every ray, mean / max | 0 | 1.0e-4 / 1.2e-3 m | 3.4e-3 / 1.5e-2 m |
+| surface error over every ray, mean / P95 / max | 0 | 1.0e-4 / 1.8e-4 / 1.2e-3 m | 3.4e-3 / 9.2e-3 / 1.5e-2 m |
+| protected leak, P95 | 0 | 0 m | 3.3e-3 m (imported) |
+| ray throughput | — | 167 rays/s | 1093 rays/s |
+| artifact on disk | 12,642 vertices / 25,280 faces | 12,642 / 25,280 | 221,620 bytes (`.ngo`) |
 | volume error | 6.7e-4 (its own triangulation) | 3.8e-4 | not measurable: a field has no faces to integrate |
 | watertight / Euler χ | 1 / 2 | 1 / 2 | n/a (no mesh) |
 | ray coverage | 1 | 1.0 | 1.0 |
@@ -109,17 +112,26 @@ From `docs/benchmarks/neural/results.json`:
 The trained bundle's own validation claimed `dent_surface_error_mean_m = 2.32e-3 m` on its
 own 4096-ray set; this harness measures 2.12e-3 m on a different ray set. The two agree, so
 the artifact reproduces its claim — that cross-check is why the imported numbers are kept
-next to the measured ones instead of replacing them.
+next to the measured ones instead of replacing them. The artifact cost is imported too:
+1000 edit steps, 27.2 s of training on the machine that produced it, seed 503.
 
 **What this says, and what it does not.** On a local edit with a closed-form target, moving
 vertices on a triangulation is 13–840× more accurate here than the trained field, and its
-leak outside the support is exactly zero because untouched vertices are untouched. The
-network's cost is not only accuracy: 1.73 s to answer 512 rays (batched, 241 samples per ray
-plus 48 bisection steps) against 0.05 s to build the analytic surface and 2.9 s to build and
-intersect a 12,642-vertex mesh — the field sits between them and wins on neither axis. What
-the field does have is a 236 KB artifact with no topology, a continuous guarantee between
-samples, and an edit that is a weight update rather than a re-meshing; none of that is
-scored by this benchmark, and none of it is claimed in the table above.
+leak outside the support is exactly zero because untouched vertices are untouched.
+
+The cost column needs a disclaimer before it is read: the mesh row at 3.06 s for 512 rays is
+this harness's ray caster, which tests every triangle with a cheap angle prefilter and no
+spatial index — 25,280 triangles per ray. That is a property of the *measurement instrument*,
+not of meshes: with a bounding-volume hierarchy the same query is milliseconds, and this
+benchmark does not implement one. The field, at 0.47 s (241 samples per ray plus 48 bisection
+steps, batched), charges a fixed cost per evaluation that does not care about geometry size;
+per ray it is ~7× faster here for the wrong reason. Timings are informational and vary
+between runs (the same neural query measured 1.73 s on an earlier run on this machine, from
+thread scheduling); accuracy numbers do not vary.
+
+What the field does have is a 222 KB artifact with no topology, a continuous guarantee
+between samples, and an edit that is a weight update rather than a re-meshing; none of that
+is scored above, and none of it is claimed.
 
 It is *also* true that this comparison is tilted in a way worth stating: the network was
 trained against the same closed form the harness scores it with, so it cannot lose to a bad
@@ -146,6 +158,29 @@ The `ocp_step` row is `not_supported` in every committed run because this machin
 OpenCASCADE wheel. It is a real row, not a placeholder: with `pip install "tensorcad[ocp]"`
 it exports the faceted solid and re-reads it, reporting facet count beside the round-trip
 volume, because a faceted solid is not a feature B-rep and the row must not be read as one.
+
+## Where this sits against the merged contract
+
+[`docs/benchmarks/representation-comparison.md`](benchmarks/representation-comparison.md)
+(merged as PR #20) defines the contract. What this implementation covers:
+
+| contract item | state here |
+|---|---|
+| row IDs `analytic_field` / `mesh` / `neural_field` / `ocp_step` / `parametric_hull` | **same IDs**, same roles |
+| Case A — localized edit with analytic ground truth | **implemented**, both ray probes and gates |
+| Case B — AFF-8 export round trip | **not implemented**; the committed case B is the design-loop/handoff variant and is named `case_b_hull_handoff` for that reason |
+| Case C — real solver handoff (TensorFEM) | **not implemented**, no solver run is claimed |
+| `results.json` with metadata, per-row metrics, gate outcomes, hashes | implemented (`tensorcad.benchmark/1`) |
+| `report.md` generated, not hand-written | implemented |
+| plot generated from `results.json` | implemented as `plot.svg` (standard-library SVG: surface error against wall clock) |
+| shape metrics: mean / P95 / max surface error | implemented for every row that measured a surface |
+| edit semantics: target error, protected mean/P95/max, locality ratio, commit outcome | implemented; the commit/rollback outcome is the `.ngo` transaction, imported |
+| validity: watertight, manifold, Euler, slivers | watertight and χ per row; sliver/aspect checks live in `tensorcad.validation` and are not repeated here |
+| cost: wall time by stage, training steps/time, query throughput, artifact bytes | implemented; **peak memory is not measured** |
+| provenance: hashes, seed, versions, command line, device | implemented, except device (CPU only here) |
+| never compare exact SDF values with truncated SDF values | followed: only surface positions are compared, and each field reports its `truncation_distance_m` and quantity |
+
+The contract's implementation sequence says "Case A first", which is what this is.
 
 ## Threats to validity
 

@@ -5,8 +5,12 @@ produced by the run that wrote this file.
 
 - command: `python examples/benchmarks/run_benchmark.py --output docs/benchmarks/full`
 - tensorcad 0.9.0, python 3.11.2, numpy 2.4.6, torch 2.14.1+cu130, ocp None
-- wall clock: 6.22 s
+- wall clock: 6.07 s
 - **verdict: pass**
+
+![surface error against wall clock](plot.svg)
+
+Generated from the same result set by `write_svg`: error is the all-ray surface error (analytic rows are exact, so they sit at the floor of the measurement, not at zero error).
 
 ## case_a_sphere_dent
 
@@ -18,7 +22,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 - every row is probed along the same stratified ray set: a third of the rays lie inside the edit cone so a small edit is resolved, the rest are uniform, so no row sees an easier sample
 - an unweighted mean over rays is not a volume average: the rows are compared with each other, not with a surface integral
 
-### `analytic_field` — reference: exact closed form (measured, 0.06 s)
+### `analytic_field` — reference: exact closed form (measured, 0.05 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -31,7 +35,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 
 > the surface radius is a formula, so this row's surface error is the harness's own; its useful numbers are the volume/area of the triangulation a solver would receive
 
-### `mesh_local_edit` — control: explicit triangles, vertices moved in place (measured, 2.97 s)
+### `mesh` — control: explicit triangles, vertices moved in place (measured, 2.88 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -42,15 +46,20 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 | `dent_surface_error_mean_m` | 4.546e-05 | m | measured | pass |
 | `dent_surface_error_max_m` | 1.498e-04 | m | measured | — |
 | `protected_displacement_mean_m` | 0 | m | measured | pass |
+| `protected_displacement_p95_m` | 0 | m | measured | — |
 | `protected_displacement_max_m` | 0 | m | measured | — |
 | `protected_total_error_mean_m` | 1.264e-04 | m | measured | — |
 | `surface_error_mean_m` | 1.024e-04 | m | measured | — |
+| `surface_error_p95_m` | 1.837e-04 | m | measured | — |
 | `surface_error_max_m` | 0.00122204 | m | measured | — |
 | `transition_band_displacement_m` | 0.00195981 | m | measured | — |
 | `locality_ratio` | 0 | relative | measured | pass |
 | `volume_error` | 3.833e-04 | relative | measured | pass |
 | `discretisation_floor_m` | 1.904e-04 | m | measured | — |
 | `ray_coverage` | 1 | fraction | measured | pass |
+| `vertex_count` | 12642 | count | measured | — |
+| `face_count` | 25280 | count | measured | — |
+| `rays_per_second` | 177.957 | 1/s | measured | — |
 | `watertight` | 1 | bool | measured | pass |
 | `euler_characteristic` | 2 | count | measured | pass |
 
@@ -104,7 +113,7 @@ Reference: L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3
 | `design_loop_volume_error` | 2.220e-16 | relative | measured | pass |
 | `design_loop_solved` | 1 | bool | measured | pass |
 | `design_loop_evaluations` | 6 | count | measured | — |
-| `design_loop_seconds` | 1.76485 | s | measured | — |
+| `design_loop_seconds` | 1.76078 | s | measured | — |
 | `watertight` | 1 | bool | measured | pass |
 | `euler_characteristic` | 2 | count | measured | pass |
 | `export_node_error_m` | 0 | m | measured | pass |

@@ -13,16 +13,17 @@ Four representation slots, taken from the issue
     The exact closed form. Its role is *reference*: the surface radius of the reference
     geometry is a formula, so the harness's own error is what this row measures (it comes
     out at machine precision, which is the point -- it proves the measurement chain).
-``mesh_local_edit``
+``mesh``
     A triangle mesh, edited the way a mesh editor would: move the vertices inside the
     edit region, leave everything else alone, no re-projection. This is the control that
     shows what discretisation alone costs.
 ``neural_field``
-    A versioned ``.ngo`` bundle. This Python process cannot query it without the
-    ``neural`` extra (torch), and the module does not pretend otherwise: with a bundle it
-    imports the metrics that produced it, verifying the bundle's hashes first, and labels
-    them ``imported`` with the producer named; without a bundle the row is
-    ``not_supported`` with a command to run.
+    A versioned ``.ngo`` bundle, queried on the same rays as everything else by marching
+    the field and bisecting the zero crossing -- surface positions, never field values,
+    because a truncated field's magnitudes are not comparable with an exact one. With a
+    bundle but without the ``neural`` extra, the row degrades to the numbers the producing
+    run recorded, labelled ``imported``; with no bundle it is ``not_supported`` with the
+    command that would produce one.
 ``ocp_step``
     The OpenCASCADE path. Sewing is the only thing this repository can do with a triangle
     soup, and it says so: the row reports a *faceted* round trip, never a feature B-rep.
@@ -317,7 +318,7 @@ class BenchmarkResult:
         target.write_text(json.dumps(self.to_dict(), indent=2) + "\n", encoding="utf-8")
         return target
 
-    def write_markdown(self, path: str | Path) -> Path:
+    def write_markdown(self, path: str | Path, *, plot: str | None = "plot.svg") -> Path:
         """A generated report: same numbers as the JSON, no hand editing."""
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -336,6 +337,17 @@ class BenchmarkResult:
             + ("" if self.passed else f" — {len(self.failures)} gate(s) failed"),
             "",
         ]
+        if plot is not None:
+            lines.extend(
+                [
+                    f"![surface error against wall clock]({plot})",
+                    "",
+                    "Generated from the same result set by `write_svg`: error is the all-ray "
+                    "surface error (analytic rows are exact, so they sit at the floor of the "
+                    "measurement, not at zero error).",
+                    "",
+                ]
+            )
         for case in self.cases:
             lines.extend(
                 [
@@ -375,6 +387,97 @@ class BenchmarkResult:
             lines.append("")
         target.write_text("\n".join(lines) + "\n", encoding="utf-8")
         return target
+
+    def write_svg(self, path: str | Path) -> Path:
+        """Surface error against wall clock, drawn from the result set itself.
+
+        Standard library only (an SVG is text), and deliberately plain: one point per
+        representation that measured a surface, on log axes, labelled with its identifier.
+        A row that could not be measured is absent rather than plotted at zero.
+        """
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        points: list[tuple[str, float, float, str]] = []
+        for case in self.cases:
+            for result in case.representations:
+                metric = result.metrics.get("surface_error_mean_m") or result.metrics.get(
+                    "dent_surface_error_mean_m"
+                )
+                if metric is None or metric.value is None or result.seconds <= 0.0:
+                    continue
+                error = max(metric.value, 1e-9)  # a log axis cannot show an exact zero
+                points.append((case.identifier, result.seconds, error, result.identifier))
+        width, height, left, right, top, bottom = 720.0, 360.0, 70.0, 190.0, 40.0, 50.0
+        x_min = min((math.log10(item[1]) for item in points), default=-2.0) - 0.2
+        x_max = max((math.log10(item[1]) for item in points), default=1.0) + 0.2
+        y_min = min((math.log10(item[2]) for item in points), default=-5.0) - 0.3
+        y_max = max((math.log10(item[2]) for item in points), default=-2.0) + 0.3
+
+        def sx(value: float) -> float:
+            span = x_max - x_min or 1.0
+            return left + (math.log10(value) - x_min) / span * (width - left - right)
+
+        def sy(value: float) -> float:
+            span = y_max - y_min or 1.0
+            return height - bottom - (math.log10(value) - y_min) / span * (height - top - bottom)
+
+        parts = [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width:.0f}" height="{height:.0f}" '
+            f'viewBox="0 0 {width:.0f} {height:.0f}">',
+            '<rect width="100%" height="100%" fill="#ffffff"/>',
+            f'<line x1="{left}" y1="{height - bottom}" x2="{width - right}" '
+            f'y2="{height - bottom}" stroke="#333"/>',
+            f'<line x1="{left}" y1="{top}" x2="{left}" y2="{height - bottom}" stroke="#333"/>',
+            f'<text x="{width / 2:.0f}" y="{height - 12:.0f}" font-family="sans-serif" '
+            f'font-size="12" text-anchor="middle">wall clock for this case (s, log)</text>',
+            f'<text x="16" y="{height / 2:.0f}" font-family="sans-serif" font-size="12" '
+            f'text-anchor="middle" transform="rotate(-90 16 {height / 2:.0f})">'
+            f'surface error (m, log)</text>',
+        ]
+        for exponent in range(math.floor(x_min), math.ceil(x_max) + 1):
+            tick = 10.0**exponent
+            parts.append(
+                f'<text x="{sx(tick):.1f}" y="{height - bottom + 15:.1f}" font-family="sans-serif" '
+                f'font-size="10" text-anchor="middle">{tick:g}</text>'
+            )
+        for exponent in range(math.floor(y_min), math.ceil(y_max) + 1):
+            tick = 10.0**exponent
+            parts.append(
+                f'<line x1="{left}" y1="{sy(tick):.1f}" x2="{width - right}" y2="{sy(tick):.1f}" '
+                f'stroke="#e5e5e5"/>'
+            )
+            parts.append(
+                f'<text x="{left - 6:.1f}" y="{sy(tick) + 3:.1f}" font-family="sans-serif" '
+                f'font-size="10" text-anchor="end">{tick:g}</text>'
+            )
+        colours = {"analytic_field": "#1f77b4", "mesh": "#ff7f0e", "neural_field": "#2ca02c",
+                   "parametric_hull": "#9467bd", "ocp_step": "#8c564b"}
+        for _, seconds, error, identifier in points:
+            x, y = sx(seconds), sy(error)
+            parts.append(
+                f'<circle cx="{x:.1f}" cy="{y:.1f}" r="5" fill="{colours.get(identifier, "#555")}"/>'
+            )
+            parts.append(
+                f'<text x="{x + 8:.1f}" y="{y + 4:.1f}" font-family="sans-serif" font-size="11">'
+                f'{identifier} ({seconds:.2f} s)</text>'
+            )
+        parts.append("</svg>")
+        target.write_text("\n".join(parts) + "\n", encoding="utf-8")
+        return target
+
+
+def _percentile(values: Sequence[float], fraction: float) -> float:
+    """Linear-interpolated percentile; the P95 columns the contract asks for."""
+    if not values:
+        raise ValueError("percentile of an empty sample")
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    position = fraction * (len(ordered) - 1)
+    low = math.floor(position)
+    high = min(low + 1, len(ordered) - 1)
+    weight = position - low
+    return ordered[low] * (1.0 - weight) + ordered[high] * weight
 
 
 def _format(value: float) -> str:
@@ -871,6 +974,9 @@ def sphere_dent_case(
                 f"rays at theta >= {protected_start:.4f} rad"
             ),
         ).at_most(0.02 * DENT_DEPTH_M),
+        "protected_displacement_p95_m": Metric(
+            _percentile(protected_leaks, 0.95), "m", reference="same ray through the unedited mesh"
+        ),
         "protected_displacement_max_m": Metric(
             max(protected_leaks), "m", reference="same ray through the unedited mesh"
         ),
@@ -881,6 +987,9 @@ def sphere_dent_case(
         ),
         "surface_error_mean_m": Metric(
             statistics.fmean(surface_errors), "m", reference="analytic surface over every ray"
+        ),
+        "surface_error_p95_m": Metric(
+            _percentile(surface_errors, 0.95), "m", reference="analytic surface over every ray"
         ),
         "surface_error_max_m": Metric(
             max(surface_errors), "m", reference="analytic surface over every ray"
@@ -919,6 +1028,11 @@ def sphere_dent_case(
         "ray_coverage": Metric(
             (rays - missing) / rays, "fraction", reference="every ray hits the surface"
         ).at_least(0.999),
+        "vertex_count": Metric(float(len(edited_mesh.vertices)), "count", reference="edited mesh"),
+        "face_count": Metric(float(len(edited_mesh.faces)), "count", reference="edited mesh"),
+        "rays_per_second": Metric(
+            rays / mesh_seconds, "1/s", reference="build the mesh, intersect every ray once"
+        ),
         "watertight": Metric(
             1.0 if meshlib.is_watertight(edited_mesh) else 0.0, "bool", reference="closed surface"
         ).at_least(1.0),
@@ -934,7 +1048,7 @@ def sphere_dent_case(
     }
     representations.append(
         RepresentationResult(
-            identifier="mesh_local_edit",
+            identifier="mesh",
             role="control: explicit triangles, vertices moved in place",
             status=MEASURED,
             metrics=mesh_metrics,
@@ -1177,11 +1291,40 @@ def _neural_row(
             reference="displacement against the producing run's parent field (the edit's leak)",
             note="the parent weights are not part of the bundle, so this cannot be re-measured here",
         )
+        if "protected_p95_displacement_m" in reported:
+            imported["protected_displacement_p95_m"] = Metric(
+                float(reported["protected_p95_displacement_m"]),
+                "m",
+                status=IMPORTED,
+                reference="the producing run's parent-field comparison",
+            )
         imported["locality_ratio"] = Metric(
             float(reported["protected_mean_displacement_m"]) / DENT_DEPTH_M,
             "relative",
             status=IMPORTED,
             reference="imported leak / peak edit depth",
+        )
+    # Cost and provenance of the artifact, so a reader never has to open the bundle.
+    try:
+        training = json.loads((path / manifest.training_file).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        training = {}
+    if isinstance(training.get("steps"), int | float):
+        imported["training_steps"] = Metric(
+            float(training["steps"]), "count", status=IMPORTED, reference="the producing run"
+        )
+    compute = training.get("compute")
+    if isinstance(compute, dict) and isinstance(compute.get("elapsed_seconds"), int | float):
+        imported["training_seconds"] = Metric(
+            float(compute["elapsed_seconds"]),
+            "s",
+            status=IMPORTED,
+            reference="the producing run, on its own hardware",
+            note="informational: measured on the machine that trained, not on this one",
+        )
+    if "seed" in training:
+        imported["training_seed"] = Metric(
+            float(training["seed"]), "count", status=IMPORTED, reference="the producing run"
         )
     producing_failed = validation.get("status") != "passed"
 
@@ -1296,6 +1439,9 @@ def _neural_row(
                 "it carries everywhere, not the edit's leak (reported, not gated)"
             ),
         ),
+        "protected_total_error_p95_m": Metric(
+            _percentile(protected_errors, 0.95), "m", reference="analytic surface"
+        ),
         "protected_total_error_max_m": Metric(max(protected_errors), "m", reference="analytic surface"),
         "transition_band_total_error_m": Metric(
             max(transition_errors, default=0.0),
@@ -1305,12 +1451,23 @@ def _neural_row(
         "surface_error_mean_m": Metric(
             statistics.fmean(errors), "m", reference="analytic surface over every ray"
         ),
+        "surface_error_p95_m": Metric(
+            _percentile(errors, 0.95), "m", reference="analytic surface over every ray"
+        ),
         "surface_error_max_m": Metric(max(errors), "m", reference="analytic surface over every ray"),
         "ray_coverage": Metric(
             (rays - missing) / rays, "fraction", reference="every ray crosses the surface"
         ).at_least(0.999),
         "truncation_distance_m": Metric(
             float(field.truncation_distance), "m", reference="the field saturates outside this band"
+        ),
+        "artifact_bytes": Metric(
+            float(sum(item.stat().st_size for item in path.rglob("*") if item.is_file())),
+            "byte",
+            reference="the whole .ngo bundle on disk",
+        ),
+        "rays_per_second": Metric(
+            rays / seconds, "1/s", reference="load the weights, march and bisect every ray"
         ),
     }
     metrics = {**measured, **imported}
@@ -1621,7 +1778,7 @@ def run_benchmark(
     rays = 128 if quick else 512
     # `quick` reduces the *sampling*, never the surface: the grid sets the chord-sag floor
     # that the depth gate is compared against, so a coarser quick grid would move the thing
-    # being measured (the ladder is in docs/benchmarks/representation-comparison.md). At
+    # being measured (the ladder is in docs/representation_benchmark.md). At
     # 80x160 the floor is ~1.4e-4 m against a 6.0e-4 m gate, a factor of four in hand.
     rings, segments = 80, 160
     cases = (
