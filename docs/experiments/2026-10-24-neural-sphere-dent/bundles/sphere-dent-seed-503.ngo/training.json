@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.1.0",
+  "method": "online_fit_with_replay",
+  "optimizer": "Adam",
+  "seed": 503,
+  "steps": 1000,
+  "learning_rate": 0.0002,
+  "parent_revision": 1,
+  "compute": {
+    "device": "cpu",
+    "elapsed_seconds": 23.789974002999998
+  },
+  "edit": {
+    "type": "smooth_local_inward_dent",
+    "center": "+x",
+    "depth": 0.06,
+    "sigma_radians": 0.22
+  }
+}

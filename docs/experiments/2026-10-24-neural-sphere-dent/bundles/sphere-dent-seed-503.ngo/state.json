@@ -1,0 +1,20 @@
+{
+  "schema_version": "0.1.0",
+  "controls": {
+    "radius": {
+      "value": 0.5,
+      "unit": "m",
+      "edit_mode": "conditioned"
+    },
+    "dent_depth": {
+      "value": 0.06,
+      "unit": "m",
+      "edit_mode": "online_fit"
+    },
+    "dent_sigma": {
+      "value": 0.22,
+      "unit": "rad",
+      "edit_mode": "online_fit"
+    }
+  }
+}

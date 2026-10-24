@@ -1,0 +1,81 @@
+{
+  "checks": [
+    {
+      "comparison": ">=",
+      "limit": 0.95,
+      "measured": 1.0,
+      "name": "ray_coverage",
+      "passed": true
+    },
+    {
+      "comparison": "<=",
+      "limit": 0.025,
+      "measured": 0.007309702634811399,
+      "name": "dent_peak_error",
+      "passed": true
+    },
+    {
+      "comparison": "<=",
+      "limit": 0.02,
+      "measured": 0.0028249879833310843,
+      "name": "dent_region_error_mean",
+      "passed": true
+    },
+    {
+      "comparison": "<=",
+      "limit": 0.012,
+      "measured": -0.0007728333002887666,
+      "name": "protected_mean_displacement",
+      "passed": true
+    },
+    {
+      "comparison": "<=",
+      "limit": 0.02,
+      "measured": 0.0048816874623298645,
+      "name": "protected_p99_displacement",
+      "passed": true
+    },
+    {
+      "comparison": "<=",
+      "limit": 0.03,
+      "measured": 0.009652674198150635,
+      "name": "protected_max_displacement",
+      "passed": true
+    }
+  ],
+  "comparison_basis": "protected displacement is measured against the parent revision at the same ray directions, so the field's own approximation error is not counted as edit drift",
+  "failed_checks": [],
+  "metrics": {
+    "dent_depth_m": 0.06,
+    "dent_peak_error_m": 0.007309702634811399,
+    "dent_peak_measured_m": 0.0526902973651886,
+    "dent_peak_target_m": 0.06,
+    "dent_region_error_mean_m": 0.0028249879833310843,
+    "dent_region_ray_count": 124,
+    "dent_sigma_radians": 0.22,
+    "final_batch_mse": 4.526972770690918e-05,
+    "protected_max_abs_displacement_m": 0.009652674198150635,
+    "protected_mean_abs_displacement_m": 0.001209024223499,
+    "protected_mean_displacement_m": -0.0007728333002887666,
+    "protected_p95_abs_displacement_m": 0.0030369460582733154,
+    "protected_p99_abs_displacement_m": 0.0048816874623298645,
+    "protected_ray_count": 3776,
+    "ray_count": 4096,
+    "ray_coverage": 1.0,
+    "training_seconds": 24.871176603000094
+  },
+  "revision": 2,
+  "schema_version": "0.2.0",
+  "status": "passed",
+  "tolerances": {
+    "boundary_error_mean_m": 0.01,
+    "dent_peak_error_m": 0.025,
+    "dent_region_error_mean_m": 0.02,
+    "field_mae_m": 0.008,
+    "protected_max_displacement_m": 0.03,
+    "protected_mean_displacement_m": 0.012,
+    "protected_p99_displacement_m": 0.02,
+    "ray_coverage": 0.95
+  },
+  "weights_sha256": "fefbd7be2bcca92a4a2a061dd53973be1f9aa7c7a298a6cc20e7694fecdf102e"
+}

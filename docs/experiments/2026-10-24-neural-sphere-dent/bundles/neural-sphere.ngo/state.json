@@ -1,0 +1,11 @@
+{
+  "schema_version": "0.1.0",
+  "controls": {
+    "radius": {
+      "value": 0.537,
+      "unit": "m",
+      "role": "global_parameter",
+      "edit_mode": "conditioned"
+    }
+  }
+}

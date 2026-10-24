@@ -1,0 +1,20 @@
+{
+  "python": "3.11.2",
+  "implementation": "CPython",
+  "platform": "Linux-6.1.158+-x86_64-with-glibc2.36",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+  "cpu_count": 2,
+  "memory_gb": 3,
+  "cuda_available": false,
+  "note": "torch 2.2.2+cu121 wheel on CPU; the CUDA runtime is installed as a wheel dependency but no GPU is present. NumPy 2.x triggers a harmless 'Failed to initialize NumPy' warning in torch 2.2.2.",
+  "packages": [
+    "Jinja2==3.1.6",
+    "filelock==4.2.4",
+    "fsspec==2026.9.0",
+    "networkx==3.6.1",
+    "numpy==2.4.6",
+    "safetensors==0.8.0",
+    "sympy==1.14.0",
+    "torch==2.2.2"
+  ]
+}

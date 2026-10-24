@@ -1,0 +1,55 @@
+{
+  "method": "4096 fixed-seed directions, first zero crossing on a 1201-point radial grid",
+  "directions": 4096,
+  "coverage": 1.0,
+  "baseline_form_error_m": {
+    "mean_abs": 0.004086358938366175,
+    "p95_abs": 0.009732924401760101,
+    "max_abs": 0.01714956760406494,
+    "signed_mean": -0.0003414863895159215
+  },
+  "dent_region": {
+    "count": 59,
+    "mean_signed_m": -0.04649215564131737,
+    "mean_abs_m": 0.04649215564131737,
+    "median_abs_m": 0.04621511697769165,
+    "p95_abs_m": 0.05611492693424225,
+    "p99_abs_m": 0.05651320517063141,
+    "max_abs_m": 0.05672764778137207,
+    "outward_fraction": 0.0
+  },
+  "transition_region": {
+    "count": 272,
+    "mean_signed_m": -0.01764615811407566,
+    "mean_abs_m": 0.01764615811407566,
+    "median_abs_m": 0.017568394541740417,
+    "p95_abs_m": 0.03574696555733681,
+    "p99_abs_m": 0.039451662451028824,
+    "max_abs_m": 0.041406720876693726,
+    "outward_fraction": 0.0
+  },
+  "protected_region": {
+    "count": 3765,
+    "mean_signed_m": -0.0006227033445611596,
+    "mean_abs_m": 0.001271675224415958,
+    "median_abs_m": 0.0009950101375579834,
+    "p95_abs_m": 0.003368342062458396,
+    "p99_abs_m": 0.005262285470962524,
+    "max_abs_m": 0.01085004210472107,
+    "outward_fraction": 0.3354581594467163
+  },
+  "protected_vs_analytic_surface": {
+    "count": 3765,
+    "mean_signed_m": -0.0010305882897228003,
+    "mean_abs_m": 0.003990413621068001,
+    "median_abs_m": 0.003382861614227295,
+    "p95_abs_m": 0.009724277071654797,
+    "p99_abs_m": 0.01196211576461792,
+    "max_abs_m": 0.015389323234558105,
+    "outward_fraction": 0.42363879084587097
+  },
+  "worst_protected": {
+    "angle_deg": 175.7346954345703,
+    "displacement_m": -0.01085004210472107
+  }
+}

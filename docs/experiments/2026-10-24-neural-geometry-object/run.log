@@ -1,0 +1,38 @@
+1. fit revision 1
+     field MAE 0.005092 m, surface error mean 0.004086 m, coverage 1.000
+  [PASS] revision 1 published
+  [PASS] parent is absent on a root revision
+  [PASS] gates passed
+  [PASS] weights hash recorded
+  [PASS] history has one committed attempt
+2. local dent edit (transaction)
+     dent peak 0.05269 m (target 0.06000), region error mean 0.00282 m
+     protected mean 0.00121 m, P95 0.00304 m, max 0.00965 m
+  [PASS] edit committed
+  [PASS] new revision is 2
+  [PASS] lineage points at revision 1
+  [PASS] training record names the parent weights
+  [PASS] dent reached at least 80% of its target depth
+  [PASS] protected region stayed inside its gates
+3. derived mesh
+     97332 vertices, 194660 triangles, volume 0.515400 m^3, area 3.175588 m^2
+  [PASS] derived mesh is watertight
+  [PASS] derived mesh is edge-manifold
+  [PASS] derived mesh is genus zero
+  [PASS] derived mesh is positively oriented
+  [PASS] every derived file exists
+  [PASS] committed manifest carries the derived artifacts
+  [PASS] dented volume is below the sphere it started from: 0.515400 < 0.523599
+4. failure injection: an edit that must be rejected
+     status rolled_back; failed gates: dent_peak_error, dent_region_error_mean
+  [PASS] rejected edit did not commit
+  [PASS] rejected edit names the gates it broke
+  [PASS] active revision unchanged
+  [PASS] weights bytes unchanged
+  [PASS] manifest bytes unchanged
+  [PASS] failure is recorded in history
+  [PASS] history keeps the metrics that justified the rejection
+  [PASS] history is valid standard JSON
+  [PASS] re-opened object still verifies
+
+all checks passed
