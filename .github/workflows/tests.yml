@@ -62,5 +62,21 @@ jobs:
           test -s /tmp/tensorcad-aff8/suboff_fins.obj
           test -s /tmp/tensorcad-aff8/handoff.json
           test -s /tmp/tensorcad-aff8/field.json
+      - name: Mesh conditioning (sliver removal, drift, decimation)
+        # The projection step dominates; 15,000 faces keeps the job at ~30 s while
+        # still going through every stage of the pipeline.
+        run: python examples/mesh_conditioning/run_example.py --resolution 110,14,20 --targets 30000,20000 --output /tmp/tensorcad-conditioning
+      - name: Mesh conditioning artifacts
+        run: |
+          test -s /tmp/tensorcad-conditioning/aff8_conditioned.obj
+          test -s /tmp/tensorcad-conditioning/aff8_conditioned.msh
+          test -s /tmp/tensorcad-conditioning/aff8_conditioned.json
+          test -s /tmp/tensorcad-conditioning/conditioning.json
+      - name: FEM handoff and STEP export (STEP part needs the optional OCP extra)
+        run: python examples/step_export/run_example.py --resolution 60,8,11 --output /tmp/tensorcad-step
+      - name: FEM handoff artifacts
+        run: |
+          test -s /tmp/tensorcad-step/aff8_surface.msh
+          test -s /tmp/tensorcad-step/aff8_surface.json
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj

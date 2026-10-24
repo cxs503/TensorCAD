@@ -11,15 +11,19 @@ import tensorcad
 
 EXPECTED_API = {
     "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
-    "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder", "ParameterSpec",
+    "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder",
+    "MeshConditioningError", "MeshMeasurements", "ParameterSpec",
     "PlaneField", "RatioSpec", "SUBOFF_LENGTH_M", "SUBOFF_RADIUS_M", "SampledField",
     "SphereField", "SuboffAppendagesField", "SuboffFinsField", "SuboffFullField",
     "SuboffHullField", "SuboffSailField", "ValidationReport", "build_mesh",
-    "compute_hydrostatics", "estimate_discretisation_error", "export_hull", "generate_hull",
-    "inspect_geometry", "inspect_mesh_quality", "read_metadata", "read_obj",
+    "compute_hydrostatics", "condition_mesh", "decimate", "estimate_discretisation_error",
+    "export_hull", "generate_hull",
+    "inspect_geometry", "inspect_mesh_quality", "measure_mesh", "project_to_field",
+    "read_metadata", "read_obj",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
-    "to_mesh", "validate_hull", "write_metadata", "write_offsets_csv", "write_obj", "write_stl",
+    "taubin_smooth", "to_mesh", "validate_hull", "write_metadata", "write_offsets_csv",
+    "write_obj", "write_stl",
 }
 
 
@@ -27,12 +31,13 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.6.0"
+    assert tensorcad.__version__ == "0.7.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
-    for module in ("geometry", "geometry_field", "mesh", "parameters", "validation",
-                   "hydrostatics", "export", "hull", "suboff", "suboff_appendages", "cli"):
+    for module in ("geometry", "geometry_field", "mesh", "mesh_conditioning", "parameters",
+                   "validation", "hydrostatics", "export", "hull", "suboff",
+                   "suboff_appendages", "cli", "adapters.fem"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 
@@ -55,10 +60,13 @@ def test_core_import_pulls_in_no_third_party_geometry_stack() -> None:
     assert completed.returncode == 0, completed.stderr
 
 
-def test_adapters_package_is_an_empty_boundary_placeholder() -> None:
+def test_adapters_package_is_a_documented_boundary() -> None:
+    """Adapters are reached explicitly; nothing in the core imports them."""
     adapters = importlib.import_module("tensorcad.adapters")
     assert adapters.__all__ == []
     assert "core package" in (adapters.__doc__ or "").lower()
+    assert "tensorcad.adapters.ocp" in (adapters.__doc__ or "")
+    assert "tensorcad.adapters.fem" in (adapters.__doc__ or "")
 
 
 def test_neural_runtime_is_opt_in_and_not_imported_by_the_core() -> None:

@@ -169,6 +169,80 @@ Measured, with the details in
 | fins alone | watertight genus **1** (the blades touch near the root; the hull fills the axis) |
 | throughput | 77 k queries/s on a 20,000-point batch |
 
+## Mesh conditioning (0.7)
+
+Marching tets gives a closed surface and a bad triangulation. `tensorcad.mesh_conditioning`
+fixes the triangulation without moving the shape: Taubin smoothing (a band-pass, so
+unlike a plain Laplacian it does not shrink the body), then a bounded Newton projection
+back onto the analytic field, then quadric-error decimation with the link, orientation,
+duplicate-face and aspect-ratio guards.
+
+```python
+from tensorcad import SuboffFullField, condition_mesh, measure_mesh, to_mesh
+
+mesh = to_mesh(SuboffFullField(), (150, 18, 26), margin=2).mesh
+measure_mesh(mesh).sliver_share                # 0.0166 -- 1.66 % of triangles are slivers
+result = condition_mesh(mesh, field=SuboffFullField(), target_faces=45_000)
+result.passed                                  # topology and shape-drift gates
+measure_mesh(result.mesh).sliver_share         # 0.0
+result.after.signed_volume / 0.70754064 - 1    # -0.00127  (0.13 % below the analytic volume)
+```
+
+Measured at `(150, 18, 26)`, with the details in
+[docs/mesh_conditioning.md](docs/mesh_conditioning.md):
+
+| Stage | tris | min angle | max aspect | slivers | ΔV | ΔA | s |
+|---|---|---|---|---|---|---|---|
+| input | 65,812 | 0.0080° | 7,126 | 1.664 % | −0.323 % | −0.378 % | — |
+| Taubin ×30 | 65,812 | 8.3202° | 8.3 | 0.000 % | −0.127 % | −0.729 % | 0.4 |
+| + projection ×30 | 65,812 | 3.6590° | 17.6 | 0.000 % | −0.117 % | −0.198 % | 53.6 |
+| + decimate → 45,000 | 45,000 | 2.7038° | 25.0 | 0.000 % | −0.118 % | −0.198 % | 5.4 |
+| + decimate → 20,000 | 20,000 | 2.4021° | 25.0 | 0.000 % | −0.209 % | −0.162 % | 11.6 |
+
+Volume/area drift is measured against the analytic AFF-8 references, not against the
+input mesh. The minimum angle is reported, not gated: a knife edge's neighbourhood has no
+good triangle to offer, and the example prints the decimate-first path's worse numbers
+(0.15° at 30 k faces) rather than hiding them. The sliver share *is* gated, at zero,
+because a sliver is a degenerate fold rather than a taste judgement.
+
+## STEP and the TensorFEM handoff (0.7)
+
+Two exits, for two consumers, and neither is imported by the core:
+
+```python
+from tensorcad.adapters.fem import fem_surface, write_gmsh, write_fem_json
+from tensorcad.adapters.ocp import have_ocp, write_step
+
+surface = fem_surface(sampled, components={"hull": SuboffHullField(),
+                                           "sail": SuboffSailField(),
+                                           "fins": SuboffFinsField()})
+write_gmsh(surface, "aff8_surface.msh")     # gmsh 2.2, one physical tag per patch
+write_fem_json(surface, "aff8_surface.json") # same tables + handoff manifest
+
+have_ocp()                                   # False without the optional extra
+record = write_step(mesh, "aff8.step", round_trip=True)
+```
+
+Measured by `examples/step_export/run_example.py`, details in
+[docs/step_export.md](docs/step_export.md):
+
+| Check | Result |
+|---|---|
+| gmsh 2.2 round trip (7,386 nodes) | worst node displacement **0.0 m**, worst per-patch area difference 2.2e−14 m² |
+| JSON round trip | digest identical to the source surface |
+| patches on the AFF-8 surface | hull 96.75 %, sail 1.72 %, fins 1.53 % of 6.105 m²; worst centroid-to-component distance 30–32 mm on a 60 mm cell |
+| OCP sewing (14,764 triangles) | 12.8 s, 0 free edges, 0 multiple edges, all shells closed, `BRepCheck_Analyzer` valid |
+| kernel volume vs mesh signed volume | 0.694708267 m³ vs 0.694708267 m³ (**+5.3e−15 relative**) |
+| STEP round trip | re-imported volume −3.1e−13 relative; 37.14 MB, one planar face per triangle |
+| disconnected islands | written as a compound with every island counted (`shells`/`solids`), never dropped |
+
+The STEP output is a **faceted solid**, not a B-rep model: 14,764 planar faces, no
+fillets, no analytic surfaces, no feature tree. That is what a solver-facing exchange file
+needs and what a designer does not want; a feature model is [issue #4](https://github.com/cxs503/TensorCAD/issues/4).
+The optional extra is `pip install "tensorcad[ocp]"`; without it `write_step` raises
+`OcpUnavailable` with that command in the message, and the FEM handoff still runs,
+because it needs nothing but the standard library.
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -221,18 +295,23 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.suboff_appendages` — the AFF-8 sail and cruciform stern fins from their
   published predicates, plus the hull-sail-fin union field.
 - `tensorcad.mesh` — generic algorithms: weld, orient outward, boundary/manifold/watertight analysis, surface integrals.
+- `tensorcad.mesh_conditioning` — Taubin smoothing, field projection, quadric decimation,
+  and the `condition_mesh` gates that refuse to hand on a surface whose shape drifted.
 - `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
   aspect ratios), errors versus warnings, `ValidationReport`.
 - `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients.
 - `tensorcad.export` — OBJ/CSV/JSON writers and an OBJ reader (round-trip exact).
 - `tensorcad.hull` — the one ship-specific model.
-- `tensorcad.adapters` — optional solver/kernel bridges; the core must never import from here.
+- `tensorcad.adapters` — solver/kernel bridges the core must never import: `adapters.fem`
+  (node/element tables, gmsh 2.2 + JSON, no extra) and `adapters.ocp` (sew → solid → STEP,
+  `ocp` extra).
 - `tensorcad.neural_geometry` — neural geometry object format: metadata, hashing, atomic
   revision publishing, edit transactions (standard library only).
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmarks and 295 tests (314 with the `neural` extra).
+- `examples/` and `tests/` — runnable benchmarks and 356 tests (337 without the `neural`
+  extra; the OCP bridge adds 10 more when its wheels are installed).
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -244,6 +323,8 @@ pytest --cov
 python examples/parametric_hull/run_example.py --output results/hull-demo
 python examples/geometry_core/run_benchmark.py --resolution 40
 python examples/suboff/run_example.py --output results/suboff
+python examples/mesh_conditioning/run_example.py --output results/conditioning
+python examples/step_export/run_example.py --output results/step   # STEP part needs .[ocp]
 tensorcad-hull --length 12 --beam 2.4 --draft 0.9 --nx 61 --nz 17 --output results/hull-demo
 tensorcad-hull --json            # full reproducibility record on stdout
 
@@ -273,7 +354,9 @@ The point of a headless geometry library is that a caller can tell "bad input" f
 
 ## Status and limitations
 
-0.6.0 adds the SUBOFF appendages (sail and cruciform fins) on top of the bare hull,
+0.7.0 adds mesh conditioning (smoothing, projection and decimation with measured shape
+drift) and the two solver exits: a standard-library FEM handoff (gmsh 2.2 + JSON with named
+boundary patches) and an optional OpenCASCADE STEP bridge behind the `ocp` extra. 0.6.0 adds the SUBOFF appendages (sail and cruciform fins) on top of the bare hull,
 from their published closed-form predicates rather than a boolean engine. 0.5.0 added the SUBOFF bare hull on top of the geometry core. 0.4.0 added the continuous geometry core: one protocol for analytic and learned fields,
 four exact primitives, mesh-quality checks, a solver handoff record, and a benchmark that
 enforces every claim above. 0.3.1 fixed the defects the 0.3.0 review found (a legal model
@@ -287,5 +370,5 @@ fins are transcribed), a `Cb`-parameterised hull family (SUBOFF is the published
 editable in length and radius only), any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
-1.9 %), booleans or sweeps, mesh smoothing/decimation (2–3 % of triangles are thinner
-than 2° and are reported as warnings, not repaired), B-rep/STEP geometry, a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+1.9 %), booleans or sweeps, a B-rep/STEP *feature model* (the STEP export is a faceted solid),
+mesh refinement or remeshing to a target size field (conditioning only coarsens), a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
