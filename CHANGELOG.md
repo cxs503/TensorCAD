@@ -4,6 +4,58 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.9.0 — 2026-10-24
+
+Representations stop being an argument and become a measurement. One harness runs an
+analytic formula, a mesh edit, a trained neural field and an optional kernel export through
+the same rays, the same closed form and the same thresholds, and writes `results.json` plus
+a generated `report.md` and `plot.svg`.
+
+### Added
+- **`tensorcad.benchmark`** — `Metric` (value, unit, reference, tolerance, status ∈
+  measured/imported/not_supported/not_run/failed, and a gate verdict; a missing value can
+  never be `0` and never passes a gate), `RepresentationResult`, `Gate`, `CaseResult`,
+  `BenchmarkResult` (`passed`, `failures`, `write_json`, `write_markdown`) and
+  `run_benchmark(quick=…)`. Standard library only; the neural row imports `tensorcad.neural`
+  behind an importability check.
+- **Case A, `case_a_sphere_dent`** — a sphere R = 0.5 m with a Gaussian dent of depth
+  0.06 m, σ = 0.22 rad, whose radius is a closed form; exact volume and area by Simpson
+  quadrature, a Möller–Trumbore ray caster, and a stratified ray set (a third of the rays
+  inside the edit cone so a 0.22 rad feature is actually resolved).
+- **Case B, `case_b_hull_handoff`** — a displacement target → damped Newton → hull → gmsh
+  round trip, measured against `hull.analytic_volume` rather than against its own mesh.
+- **`examples/benchmarks/run_benchmark.py`** — writes `results.json`, `report.md` and
+  `plot.svg` (standard-library SVG, surface error against wall clock), and exits 1 when any
+  gate fails, so it is usable as a CI step.
+- **Contract coverage** — the row IDs are the ones the merged contract defines
+  (`analytic_field`, `mesh`, `neural_field`, `ocp_step`, `parametric_hull`), P95 alongside
+  mean/max, query throughput and artifact bytes, and training steps/time/seed imported from
+  the bundle. Peak memory is not measured; contract Case B (AFF-8 round trip) and Case C
+  (real solver run) are not implemented and the document says so.
+
+### Measured (full sampling, 512 rays, grid 80×160, in `docs/benchmarks/`)
+- mesh edit: cone-mean depth error **2.3e-6 m**, dent surface error mean **4.5e-5 m**, leak
+  outside the edit support **exactly 0 m**, all-ray surface error 1.0e-4 m (P95 1.8e-4 m);
+- trained neural field (`.ngo`, weights `db1df71e…`, 221,620 bytes): cone-mean depth error
+  **1.9e-3 m** (3.2 % of the edit depth), dent surface error mean 2.1e-3 m, imported
+  parent-relative leak 1.3e-3 m (P95 3.3e-3 m), all-ray surface error 3.4e-3 m (P95 9.2e-3 m);
+- the same 1 %-of-depth gate applied to both: the mesh row passes, the neural row fails, and
+  the run exits 1. No looser tolerance was invented for the learned field;
+- the shipped grid is 80×160 because its measured chord-sag floor (1.9e-4 m) sits below the
+  6.0e-4 m gate; 40×80 happens to pass with a floor *above* the gate, which is luck;
+- the bundle's own claim (2.32e-3 m) and this harness's re-measurement (2.12e-3 m) agree,
+  which is why imported numbers are kept beside measured ones instead of replacing them;
+- case B: 0.880 % volume error at (41, 13), residual 2.2e-16 in 6 evaluations, gmsh node
+  round trip exact (0 m) and area to 6.8e-16, refinement +0.577 %.
+
+### Fixed
+- `examples/neural_geometry/edit_sphere_dent.py` wrote a bundle that verified but could not
+  be evaluated: `state.json` lacked `field_state.radius` and `coordinates` lacked `bounds`,
+  so `field_from_object` raised a format error. Both are now written, and re-running the
+  example reproduces the same weights hash bit-for-bit.
+- `at_most` / `at_least` / `equals` now record the limit they compared against, so a
+  published `results.json` states the threshold that produced each verdict.
+
 ## 0.8.0 — 2026-10-24
 
 The first release whose input is a *requirement* rather than a parameter set. 0.7.0 could
