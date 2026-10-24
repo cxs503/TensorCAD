@@ -287,6 +287,98 @@ def _near(name: str, actual: float, expected: float, tolerance: float, label: st
     )
 
 
+def inspect_mesh_quality(
+    mesh: Mesh,
+    *,
+    min_angle_degrees: float = 2.0,
+    max_aspect_ratio: float = 25.0,
+    sliver_share_limit: float = 0.02,
+) -> list[Check]:
+    """Face-quality checks: a watertight mesh can still be unusable to a solver.
+
+    Closure says the surface is a solid; it says nothing about whether the
+    elements are shaped well enough for a finite-element or finite-volume code.
+    Three cheap measures catch almost all of it:
+
+    * the smallest interior angle (a sliver has one near zero);
+    * the aspect ratio of each triangle (longest edge over twice its height);
+    * the share of faces inside that threshold.
+
+    All three are warnings: a mesh can be a valid closed solid and still be a poor
+    discretisation, and the report should say so without pretending the geometry
+    is broken.
+    """
+    checks: list[Check] = []
+    if not mesh.faces:
+        return [Check("mesh_quality_measured", False, "no faces to measure", severity=WARNING)]
+    smallest_angle = 180.0
+    largest_aspect = 0.0
+    slivers = 0
+    for face in mesh.faces:
+        a = mesh.vertices[face[0]]
+        b = mesh.vertices[face[1]]
+        c = mesh.vertices[face[2]]
+        lengths = (
+            math.dist(a, b),
+            math.dist(b, c),
+            math.dist(c, a),
+        )
+        longest = max(lengths)
+        shortest = min(lengths)
+        if shortest <= 0.0:  # degenerate; inspect_geometry already reports it
+            slivers += 1
+            continue
+        ux, uy, uz = b[0] - a[0], b[1] - a[1], b[2] - a[2]
+        vx, vy, vz = c[0] - a[0], c[1] - a[1], c[2] - a[2]
+        # |u x v| is twice the area, so longest**2 / area2 is longest edge over height.
+        area2 = math.sqrt(
+            (uy * vz - uz * vy) ** 2 + (uz * vx - ux * vz) ** 2 + (ux * vy - uy * vx) ** 2
+        )
+        if area2 <= 0.0:
+            slivers += 1
+            continue
+        aspect = longest * longest / area2
+        largest_aspect = max(largest_aspect, aspect)
+        # Smallest angle from the two shortest sides meeting at its vertex.
+        ordered = sorted(lengths)
+        opposite, side_a, side_b = ordered[0], ordered[1], ordered[2]
+        cosine = (side_a * side_a + side_b * side_b - opposite * opposite) / (2.0 * side_a * side_b)
+        angle = math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
+        smallest_angle = min(smallest_angle, angle)
+        if angle < min_angle_degrees:
+            slivers += 1
+
+    total = len(mesh.faces)
+    share = slivers / total
+    checks.append(
+        Check(
+            "mesh_min_angle",
+            smallest_angle >= min_angle_degrees,
+            f"smallest interior angle {smallest_angle:.3f} deg over {total} triangles "
+            f"(limit {min_angle_degrees:g} deg)",
+            severity=WARNING,
+        )
+    )
+    checks.append(
+        Check(
+            "mesh_aspect_ratio",
+            largest_aspect <= max_aspect_ratio,
+            f"worst triangle aspect ratio {largest_aspect:.3g} (limit {max_aspect_ratio:g})",
+            severity=WARNING,
+        )
+    )
+    checks.append(
+        Check(
+            "mesh_sliver_share",
+            share <= sliver_share_limit,
+            f"{slivers}/{total} triangles ({100.0 * share:.3f} %) are degenerate or thinner "
+            f"than {min_angle_degrees:g} deg (limit {100.0 * sliver_share_limit:g} %)",
+            severity=WARNING,
+        )
+    )
+    return checks
+
+
 def merge(*groups: list[Check]) -> ValidationReport:
     flat = [check for group in groups for check in group]
     return ValidationReport(tuple(flat))

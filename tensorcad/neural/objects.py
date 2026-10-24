@@ -14,14 +14,21 @@ import math
 import shutil
 import sys
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from ..export import write_obj, write_stl
-from ..geometry import Mesh
+from ..geometry import BoundingBox, Mesh
+from ..geometry_field import (
+    TRUNCATED_SIGNED_DISTANCE,
+    FieldError,
+    GeometryField,
+    Point,
+    _points,
+)
 from ..neural_geometry import (
     COMMITTED,
     HISTORY_FILE,
@@ -47,6 +54,7 @@ from .field import (
     FieldConfig,
     field_callable,
     fine_tune_dent,
+    gradient_callable,
     load_weights,
     measure_dent_edit,
     measure_sphere,
@@ -765,6 +773,112 @@ def extract_object(
     return mesh, report, records
 
 
+class NeuralGeometryField(GeometryField):
+    """A published ``.ngo`` revision exposed through the shared field protocol.
+
+    The point is interchangeability: benchmark code, export code and validation
+    code should not care whether a surface came from ``|x|-r`` or from a network.
+    Two differences are stated rather than hidden:
+
+    * ``quantity`` is ``"truncated_signed_distance"`` -- outside the truncation
+      band the magnitude is meaningless, so a comparison against an exact SDF has
+      to compare *surfaces*, not values;
+    * ``gradient`` is a central difference of the network (torch autograd would be
+      exact but is not available on the NumPy-only extraction path).
+
+    ``with_state`` edits the conditioning value of the frozen weights, which is the
+    cheap parameter edit the format was designed around -- no retraining happens.
+    """
+
+    kind: ClassVar[str] = "neural_geometry_object"
+    quantity: ClassVar[str] = TRUNCATED_SIGNED_DISTANCE
+
+    def __init__(
+        self, manifest: Any, weights_path: str | Path, *, state_value: float | None = None
+    ) -> None:
+        config = FieldConfig.from_dict(manifest.architecture_config)
+        self.manifest = manifest
+        self._weights_path = Path(weights_path)
+        self._model = load_weights(self._weights_path, config)
+        self._state_value = (
+            field_state_value(manifest.raw.get("state", {})) if state_value is None else state_value
+        )
+        self._evaluate = field_callable(self._model, self._state_value)
+        self._gradient: Callable[[Any], Any] | None = gradient_callable(self._model, self._state_value)
+        bounds = manifest.raw["coordinates"]["bounds"]
+        self._bounds = BoundingBox(tuple(bounds["min"]), tuple(bounds["max"]))
+        self.units = str(manifest.field.get("length_unit", "m"))
+        self.coordinate_frame = str(manifest.coordinates.get("frame", "object_local"))
+        self.truncation_distance = float(manifest.field.get("truncation_distance", 0.0))
+
+    def signed_distance(self, points: Iterable[Sequence[float]]) -> list[float]:
+        import numpy as np
+
+        batch = [(float(x), float(y), float(z)) for x, y, z in points]
+        if not batch:
+            return []
+        values = np.asarray(self._evaluate(np.asarray(batch, dtype=np.float64)), dtype=np.float64)
+        return [float(value) for value in values]
+
+    def gradient(self, points: Iterable[Sequence[float]]) -> list[Point]:
+        """Exact gradient of the network, via autograd -- not a finite difference.
+
+        A float32 network makes central differences unreliable below ~1e-4 of the
+        object size, so the protocol's numerical fallback is kept only as a
+        fallback.
+        """
+        import numpy as np
+
+        batch = _points(points)
+        if not batch:
+            return []
+        if self._gradient is not None:
+            values = np.atleast_2d(self._gradient(np.asarray(batch, dtype=np.float64)))
+            return [(float(row[0]), float(row[1]), float(row[2])) for row in values]
+        return self.numerical_gradient(batch, step=1e-4 * max(self._bounds.sizes))
+
+    def bounds(self) -> BoundingBox:
+        return self._bounds
+
+    def state(self) -> dict[str, float]:
+        return {"radius": self._state_value}
+
+    def with_state(self, **values: float) -> NeuralGeometryField:
+        unknown = set(values) - {"radius"}
+        if unknown:
+            raise FieldError(f"{self.kind} has no control(s) {sorted(unknown)}")
+        return NeuralGeometryField(
+            self.manifest, self._weights_path, state_value=float(values.get("radius", self._state_value))
+        )
+
+    def parameters(self) -> dict[str, Any]:
+        return {
+            "architecture_id": self.manifest.architecture_id,
+            "weights_sha256": self.manifest.weights.sha256,
+            "revision": self.manifest.revision,
+            "truncation_distance": self.truncation_distance,
+        }
+
+    def provenance(self) -> dict[str, Any]:
+        return {
+            "producer": "TensorCAD",
+            "representation": "neural_field",
+            "object_id": self.manifest.object_id,
+            "revision": self.manifest.revision,
+            "weights_sha256": self.manifest.weights.sha256,
+        }
+
+    def numpy_callable(self) -> Any:
+        return self._evaluate
+
+
+def field_from_object(target: str | Path) -> NeuralGeometryField:
+    """Open a bundle and present its active revision as a :class:`GeometryField`."""
+    store = ObjectStore(target)
+    manifest = store.manifest()
+    return NeuralGeometryField(manifest, store.root / manifest.weights.path)
+
+
 def history_entries(target: str | Path) -> list[dict[str, Any]]:
     return ObjectStore(target).history()
 
@@ -774,11 +888,13 @@ __all__ = [
     "Check",
     "EditResult",
     "FitResult",
+    "NeuralGeometryField",
     "NeuralObjectError",
     "Tolerances",
     "apply_dent_edit",
     "build_field",
     "extract_object",
+    "field_from_object",
     "field_state_value",
     "fit_sphere",
     "history_entries",
