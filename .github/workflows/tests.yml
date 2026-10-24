@@ -43,5 +43,7 @@ jobs:
           cmp /tmp/run-a/metadata.json /tmp/run-b/metadata.json
       - name: Geometry benchmark (measured verification, no mocks)
         run: python examples/parametric_hull/run_example.py --output /tmp/tensorcad-example
+      - name: Continuous geometry core benchmark (analytic fields only without torch)
+        run: python examples/geometry_core/run_benchmark.py --resolution 40 --points 5000
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj

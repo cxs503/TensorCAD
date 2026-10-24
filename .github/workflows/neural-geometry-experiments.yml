@@ -6,16 +6,20 @@ on:
     paths:
       - '.github/workflows/neural-geometry-experiments.yml'
       - 'examples/neural_geometry/**'
+      - 'examples/geometry_core/**'
       - 'tensorcad/neural/**'
       - 'tensorcad/neural_geometry.py'
+      - 'tensorcad/geometry_field.py'
       - 'tensorcad/cli_neural.py'
       - 'pyproject.toml'
   pull_request:
     paths:
       - '.github/workflows/neural-geometry-experiments.yml'
       - 'examples/neural_geometry/**'
+      - 'examples/geometry_core/**'
       - 'tensorcad/neural/**'
       - 'tensorcad/neural_geometry.py'
+      - 'tensorcad/geometry_field.py'
       - 'tensorcad/cli_neural.py'
 
 jobs:
@@ -42,6 +46,9 @@ jobs:
         run: |
           mkdir -p results
           python examples/neural_geometry/run_object_pipeline.py --output results/object
+
+      - name: Continuous geometry core benchmark (analytic vs learned, measured)
+        run: python examples/geometry_core/run_benchmark.py --resolution 40
 
       - name: CLI surface (agent-facing commands)
         run: |

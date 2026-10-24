@@ -53,6 +53,50 @@ model.validation.warnings                   # [] at nx=41; non-empty when the gr
 
 Measured at the default resolution, the sampled surface sits 0.88 % below the analytic volume of its own generating functions; at `nx=161, nz=41` the gap is 0.14 %. That is reported per export rather than asserted in prose.
 
+## Continuous geometry core (0.4)
+
+Every representation now answers the same questions. `tensorcad.geometry_field`
+defines one protocol — batch signed distance, gradient, bounds, editable state,
+parameters, sign convention, units, frame — and ships four exact primitives as the
+reference the others are measured against:
+
+```python
+from tensorcad import SphereField, CylinderField, to_mesh
+
+sphere = SphereField(radius=0.5)
+sphere.signed_distance([(0.9, 0.0, 0.0)])        # 0.4  (exactly |x|-r, not an approximation)
+wider = sphere.with_state(radius=0.65)           # a new field; the original is untouched
+wider.center == sphere.center                    # True -- the edit moved the radius only
+
+sampled = to_mesh(sphere, 40)                    # field -> closed mesh -> validation
+sampled.report.watertight, sampled.report.euler_characteristic     # True, 2
+sampled.report.signed_volume / (4 / 3 * 3.14159 * 0.125) - 1       # -0.0013  (-0.13 %)
+sampled.handoff()["mesh_sha256"]                 # what a solver is actually being given
+```
+
+The primitives (plane, sphere, capped cylinder, ellipsoid) are exact to `0.00e+00` in
+double precision, so a learned field can be compared against them without wondering
+which side of the comparison is wrong. An ellipsoid declares
+`quantity="implicit_function"` and a learned field `"truncated_signed_distance"`:
+the magnitude of neither is a distance, and the protocol says so instead of letting a
+caller assume otherwise.
+
+A published `.ngo` object is a `GeometryField` too:
+
+```python
+from tensorcad.neural.objects import field_from_object
+
+learned = field_from_object("docs/experiments/2026-10-24-neural-geometry-object/bundle")
+learned.quantity                                 # 'truncated_signed_distance'
+learned.with_state(radius=0.55)                  # conditioned edit, no retraining
+```
+
+Measured through this protocol, the reference bundle's surface sits 3.98 mm (mean) /
+9.33 mm (worst) from the analytic sphere away from its dent, and a conditioned radius
+of 0.45/0.55/0.60 m is reproduced within 0.33/0.08/0.01 %. Details, including the
+zero-area-triangle defect this work found in the sampler, are in
+[docs/geometry-core.md](docs/geometry-core.md).
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -98,8 +142,11 @@ The boundaries below are the ones the code actually has (they were proposals in 
 
 - `tensorcad.parameters` — parameter specs, units, ranges, dimensionless ratio checks.
 - `tensorcad.geometry` — `Mesh`, `BoundingBox`, `MeshBuilder` (exact-position vertex sharing).
+- `tensorcad.geometry_field` — the continuous-geometry protocol, four exact primitives,
+  field sampling to a validated mesh, and the solver handoff record.
 - `tensorcad.mesh` — generic algorithms: weld, orient outward, boundary/manifold/watertight analysis, surface integrals.
-- `tensorcad.validation` — named geometric checks, errors versus warnings, `ValidationReport`.
+- `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
+  aspect ratios), errors versus warnings, `ValidationReport`.
 - `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients.
 - `tensorcad.export` — OBJ/CSV/JSON writers and an OBJ reader (round-trip exact).
 - `tensorcad.hull` — the one ship-specific model.
@@ -109,7 +156,7 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmark and 194 tests (213 with the `neural` extra).
+- `examples/` and `tests/` — runnable benchmarks and 245 tests (262 with the `neural` extra).
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -119,6 +166,7 @@ The core package depends on nothing outside the standard library. That is a test
 python -m pip install -e ".[test,dev]"
 pytest --cov
 python examples/parametric_hull/run_example.py --output results/hull-demo
+python examples/geometry_core/run_benchmark.py --resolution 40
 tensorcad-hull --length 12 --beam 2.4 --draft 0.9 --nx 61 --nz 17 --output results/hull-demo
 tensorcad-hull --json            # full reproducibility record on stdout
 
@@ -148,12 +196,16 @@ The point of a headless geometry library is that a caller can tell "bad input" f
 
 ## Status and limitations
 
-0.3.1 fixes the defects the 0.3.0 review found (a legal model could crash the convergence
-estimate, a failed commit could leave derived meshes in the live bundle, and extraction
-could be deleted by the next edit). 0.3.0 added the neural geometry object layer described
-above. 0.2.0 delivered the hull milestone: a headless, parameterized geometry model with
+0.4.0 adds the continuous geometry core: one protocol for analytic and learned fields,
+four exact primitives, mesh-quality checks, a solver handoff record, and a benchmark that
+enforces every claim above. 0.3.1 fixed the defects the 0.3.0 review found (a legal model
+could crash the convergence estimate, a failed commit could leave derived meshes in the
+live bundle, and extraction could be deleted by the next edit). 0.3.0 added the neural
+geometry object layer. 0.2.0 delivered the hull milestone: a headless, parameterized geometry model with
 tests, CI, export, and validation that fails loudly.
 
 What it does **not** provide: any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
-accurate enough to replace a CAD surface (radial error is about 3 % of the radius), B-rep/STEP geometry, a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
+1.9 %), booleans or sweeps, mesh smoothing/decimation (2–3 % of triangles are thinner
+than 2° and are reported as warnings, not repaired), B-rep/STEP geometry, a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.

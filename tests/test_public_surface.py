@@ -10,11 +10,12 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
-    "BoundingBox", "Check", "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder",
-    "ParameterSpec", "RatioSpec", "ValidationReport", "build_mesh", "compute_hydrostatics",
-    "estimate_discretisation_error", "export_hull", "generate_hull", "inspect_geometry",
-    "read_metadata", "read_obj", "validate_hull", "write_metadata", "write_offsets_csv", "write_obj",
-    "write_stl",
+    "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
+    "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder", "ParameterSpec",
+    "PlaneField", "RatioSpec", "SampledField", "SphereField", "ValidationReport", "build_mesh",
+    "compute_hydrostatics", "estimate_discretisation_error", "export_hull", "generate_hull",
+    "inspect_geometry", "inspect_mesh_quality", "read_metadata", "read_obj", "surface_point",
+    "to_mesh", "validate_hull", "write_metadata", "write_offsets_csv", "write_obj", "write_stl",
 }
 
 
@@ -22,11 +23,12 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.3.1"
+    assert tensorcad.__version__ == "0.4.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
-    for module in ("geometry", "mesh", "parameters", "validation", "hydrostatics", "export", "hull", "cli"):
+    for module in ("geometry", "geometry_field", "mesh", "parameters", "validation",
+                   "hydrostatics", "export", "hull", "cli"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 
