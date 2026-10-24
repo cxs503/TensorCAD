@@ -1,0 +1,14 @@
+{
+  "transaction": "rolled_back",
+  "reason": "validation thresholds not met",
+  "active_revision": 1,
+  "candidate_not_published": true,
+  "ray_coverage": 0.890869140625,
+  "dent_depth_target_m": 0.06,
+  "dent_depth_measured_mean_m": 0.08175241947174072,
+  "dent_surface_error_mean_m": 0.009281720966100693,
+  "protected_mean_displacement_m": 0.030125167220830917,
+  "protected_p95_displacement_m": 0.07679928094148636,
+  "dent_ray_count": 9,
+  "protected_ray_count": 3393
+}

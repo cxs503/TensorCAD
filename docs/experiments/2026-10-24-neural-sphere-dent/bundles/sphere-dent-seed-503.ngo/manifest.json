@@ -1,0 +1,41 @@
+{
+  "format": "tensorcad.neural-geometry",
+  "format_version": "0.1.0",
+  "object_id": "urn:tensorcad:geometry:sphere-dent-seed-503",
+  "revision": 2,
+  "model": {
+    "family": "conditional_implicit_field",
+    "architecture_id": "tensorcad.mlp_fourier.v1",
+    "architecture_config": {
+      "coordinate_dim": 3,
+      "state_dim": 1,
+      "hidden_width": 128,
+      "hidden_layers": 4,
+      "coordinate_encoding": "fourier",
+      "output_dim": 1
+    },
+    "weights": {
+      "path": "weights.safetensors",
+      "sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7"
+    }
+  },
+  "field": {
+    "quantity": "truncated_signed_distance",
+    "inside_sign": "negative",
+    "surface_isovalue": 0.0,
+    "length_unit": "m",
+    "truncation_distance": 0.15
+  },
+  "coordinates": {
+    "dimension": 3,
+    "frame": "object_local"
+  },
+  "state_file": "state.json",
+  "training_file": "training.json",
+  "validation_file": "validation.json",
+  "parent_revision": 1,
+  "producer": {
+    "name": "TensorCAD",
+    "experiment": "online-dent-v0.1"
+  }
+}
