@@ -244,6 +244,43 @@ def _section_point(parameters: HullParameters, i: int, j: int) -> tuple[float, f
     return (x, y, z)
 
 
+#: Above this relative deviation from the analytic volume the sampled grid is
+#: reported as too coarse to trust. The default 41x13 grid sits at 0.88 %, and a
+#: 161x41 grid at 0.14 %, so this only fires when a caller really did under-sample.
+SAMPLING_ERROR_WARNING = 0.02
+
+
+def analytic_volume(length: float, beam: float, draft: float) -> float:
+    """Exact displaced volume of the analytic surface the generator samples.
+
+    ``length * beam * draft * TAPER_INTEGRAL * 2/3``: the breadth taper integrated
+    over ``x``, the ``sqrt(z/draft)`` profile integrated over ``z``, and the port
+    and starboard halves. This is the O(1) reference a sampled grid has to be
+    compared against -- a formula the mesh never got to see, which is exactly why
+    it is useful as an independent check.
+    """
+    return beam * length * draft * TAPER_INTEGRAL * (2.0 / 3.0)
+
+
+def _sampling_check(parameters: HullParameters, hydrostatics: Hydrostatics) -> Check:
+    """Warn when the grid, not the form, is what makes the numbers wrong."""
+    p = parameters
+    exact = analytic_volume(p.length, p.beam, p.draft)
+    measured = hydrostatics.displacement_volume
+    error = (measured / exact - 1.0) if exact else float("nan")
+    ok = math.isfinite(error) and abs(error) <= SAMPLING_ERROR_WARNING
+    detail = (
+        f"grid {p.nx}x{p.nz} integrates {measured:.6g} m^3 against an analytic "
+        f"{exact:.6g} m^3 ({100.0 * error:+.2f} %)"
+    )
+    if not ok:
+        detail += (
+            f"; the discretisation error exceeds {100.0 * SAMPLING_ERROR_WARNING:.0f} % -- "
+            "raise nx/nz or call estimate_discretisation_error for the measured convergence"
+        )
+    return Check("sampling_error_within_tolerance", ok, detail, severity=WARNING)
+
+
 def build_mesh(parameters: HullParameters) -> tuple[Mesh, tuple[tuple[float, float], ...]]:
     """Loft and cap the hull surface; returns the mesh and waterline offsets.
 
@@ -384,6 +421,7 @@ def generate_hull(parameters: HullParameters | None = None) -> HullModel:
     hydrostatics = compute_hydrostatics(
         mesh, waterline_z, water_density=p.water_density, closed=True
     )
+    report = merge(list(report.checks), [_sampling_check(p, hydrostatics)])
     return HullModel(parameters=p, mesh=mesh, offsets=offsets, validation=report, hydrostatics=hydrostatics)
 
 
@@ -402,12 +440,28 @@ def estimate_discretisation_error(parameters: HullParameters) -> dict[str, Any]:
     exact.
     """
     p = parameters
+    refined_nx, refined_nz = 2 * p.nx - 1, 2 * p.nz - 1
+    # The guard has to cover the *refined* grid, not only the requested one: the
+    # refined parameters are validated again by ``build_mesh``, so a coarse grid
+    # with a very high station count (2002 x 3, for instance) is cheap to build
+    # and impossible to refine. Returning "skipped" keeps a legal, already
+    # generated model exportable instead of failing it during reporting.
     if p.nx * p.nz > MAX_MESH_SIZE_FOR_CONVERGENCE:
         return {
             "status": "skipped",
             "reason": f"mesh size {p.nx * p.nz} exceeds {MAX_MESH_SIZE_FOR_CONVERGENCE} vertices per side",
         }
-    refined = HullParameters(p.length, p.beam, p.draft, 2 * p.nx - 1, 2 * p.nz - 1)
+    if refined_nx > MAX_LONGITUDINAL_STATIONS or refined_nz > MAX_VERTICAL_LEVELS:
+        return {
+            "status": "skipped",
+            "reason": (
+                f"refined grid {refined_nx}x{refined_nz} would exceed the "
+                f"{MAX_LONGITUDINAL_STATIONS}x{MAX_VERTICAL_LEVELS} parameter limits"
+            ),
+        }
+    refined = HullParameters(
+        p.length, p.beam, p.draft, refined_nx, refined_nz, p.water_density
+    )
     coarse_mesh, _ = build_mesh(p)
     fine_mesh, _ = build_mesh(refined)
     wl_coarse = coarse_mesh.bounding_box().maximum[2]

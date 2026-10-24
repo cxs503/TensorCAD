@@ -1,6 +1,7 @@
 """Tests for mesh-integrated hydrostatics."""
 from __future__ import annotations
 
+import itertools
 import math
 
 import pytest
@@ -111,3 +112,32 @@ def test_hull_hydrostatics_are_reported_in_the_metadata() -> None:
     assert data["displacement_volume_m3"] == pytest.approx(model.hydrostatics.displacement_volume)
     assert all(math.isfinite(value) for value in data.values() if isinstance(value, float))
     assert data["block_coefficient"] < 0.5 < data["prismatic_coefficient"]
+
+
+def brute_force_section_area(mesh: Mesh, x: float, tolerance: float = 1e-9) -> float:
+    """The pre-optimisation definition, kept here as the reference result."""
+    profile: dict[float, float] = {}
+    for px, py, pz in mesh.vertices:
+        if abs(px - x) <= tolerance:
+            previous = profile.get(pz)
+            breadth = abs(py)
+            if previous is None or breadth > previous:
+                profile[pz] = breadth
+    levels = sorted(profile)
+    if len(levels) < 2:
+        return float("nan")
+    area = 0.0
+    for lower, upper in itertools.pairwise(levels):
+        area += 0.5 * (profile[lower] + profile[upper]) * (upper - lower)
+    return 2.0 * area
+
+
+def test_section_areas_match_the_brute_force_definition_on_every_station() -> None:
+    model = generate_hull(HullParameters(nx=41, nz=13))
+    for station in stations(model.mesh):
+        assert section_area_at(model.mesh, station) == pytest.approx(
+            brute_force_section_area(model.mesh, station)
+        )
+    assert max_section_area(model.mesh) == pytest.approx(
+        max(brute_force_section_area(model.mesh, station) for station in stations(model.mesh))
+    )

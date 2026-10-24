@@ -286,3 +286,94 @@ def test_manifest_parses_a_minimal_v01_document_for_backwards_compatibility() ->
     assert parsed.revision == 1
     assert parsed.lineage.history_file == "history.json"
     assert parsed.derived == ()
+
+
+def test_a_recorded_derived_path_cannot_escape_the_bundle(tmp_path: Path) -> None:
+    """The reader is the security boundary: a hand-edited manifest must be rejected.
+
+    ``derived_record`` always refused an escaping path, but a manifest can be
+    produced by any text editor, so ``parse_manifest`` has to apply the same rule.
+    """
+    from tensorcad.neural_geometry import parse_manifest
+
+    data = make_manifest(revision=1)
+    data["derived"] = [
+        {"kind": "surface_mesh", "format": "obj", "path": "../../../../etc/passwd",
+         "sha256": "0" * 64, "bytes": 1, "metrics": {}},
+    ]
+    with pytest.raises(NeuralGeometryFormatError, match="unsafe bundle path"):
+        parse_manifest(data)
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ({"sha256": "not-a-digest"}, "sha256"),
+        ({"bytes": -1}, "non-negative integer"),
+        ({"kind": ""}, "kind"),
+        ({"format": ""}, "format"),
+        ({"metrics": []}, "metrics"),
+    ],
+)
+def test_recorded_derived_entries_are_validated_like_written_ones(
+    tmp_path: Path, mutation: dict[str, object], message: str
+) -> None:
+    from tensorcad.neural_geometry import parse_manifest
+
+    data = make_manifest(revision=1)
+    entry = {
+        "kind": "surface_mesh", "format": "obj", "path": "derived/surface.obj",
+        "sha256": "0" * 64, "bytes": 1, "metrics": {},
+    }
+    entry.update(mutation)
+    data["derived"] = [entry]
+    with pytest.raises(NeuralGeometryFormatError, match=message):
+        parse_manifest(data)
+
+
+def test_history_rejects_non_standard_numbers_instead_of_accepting_them(
+    tmp_path: Path,
+) -> None:
+    store = ObjectStore(tmp_path / "sphere.ngo")
+    publish_first(store)
+    (store.root / "history.json").write_text('[{"revision": NaN}]', encoding="utf-8")
+    with pytest.raises(NeuralGeometryFormatError, match="non-standard JSON"):
+        store.history()
+
+
+def test_publish_derived_bumps_the_revision_and_keeps_the_canonical_geometry(
+    tmp_path: Path,
+) -> None:
+    from tensorcad.neural_geometry import derived_record, sha256_file
+
+    store = ObjectStore(tmp_path / "sphere.ngo")
+    publish_first(store)
+    entry = derived_record(
+        kind="surface_mesh", fmt="obj", path="derived/surface.obj",
+        digest=sha256_bytes(b"o mesh"), size_bytes=len(b"o mesh"), metrics={"watertight": True},
+    )
+    published = store.publish_derived(files={"derived/surface.obj": b"o mesh"}, derived=[entry])
+
+    assert published.revision == 2
+    assert published.lineage.operation == "extract"
+    assert published.lineage.parent_revision == 1
+    assert published.weights.sha256 == sha256_bytes(PAYLOAD), "the weights must not change"
+    assert published.validation_status == "passed", "the validation record is inherited"
+    assert (store.root / "derived/surface.obj").read_bytes() == b"o mesh"
+    assert [item["path"] for item in published.derived] == ["derived/surface.obj"]
+    assert sha256_file(store.root / "weights.safetensors") == sha256_bytes(PAYLOAD)
+    assert [entry["status"] for entry in store.history()] == [COMMITTED, COMMITTED]
+
+
+def test_publish_derived_refuses_a_stale_parent(tmp_path: Path) -> None:
+    from tensorcad.neural_geometry import derived_record
+
+    store = ObjectStore(tmp_path / "sphere.ngo")
+    publish_first(store)
+    entry = derived_record(kind="surface_mesh", fmt="obj", path="derived/surface.obj",
+                           digest="0" * 64, size_bytes=1, metrics={})
+    with pytest.raises(TransactionError, match="stale candidate"):
+        store.publish_derived(
+            files={"derived/surface.obj": b"x"}, derived=[entry], expected_parent=7
+        )
+    assert store.active_revision() == 1
