@@ -7,6 +7,7 @@ on:
       - '.github/workflows/neural-geometry-experiments.yml'
       - 'examples/neural_geometry/**'
       - 'tensorcad/neural_geometry.py'
+      - 'pyproject.toml'
   pull_request:
     paths:
       - '.github/workflows/neural-geometry-experiments.yml'
