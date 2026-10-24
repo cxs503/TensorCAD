@@ -25,8 +25,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from train_sphere import ConditionalTSDF, reference_tsdf  # noqa: E402
-from tensorcad.neural_geometry import load_bundle  # noqa: E402
+from train_sphere import ConditionalTSDF, reference_tsdf
+from tensorcad.neural_geometry import load_bundle
 
 
 def dent_tsdf(points: Tensor, radius: Tensor, depth: float, sigma: float, truncation: float) -> Tensor:
@@ -59,6 +59,17 @@ def ray_surface_radii(
         roots[i] = x0 + frac * (x1 - x0)
         found[i] = True
     return roots, found
+
+
+def json_safe_metrics(metrics: dict[str, float]) -> dict[str, float | int | None]:
+    """Replace non-finite measurements with null so rollback reports remain valid JSON."""
+    safe: dict[str, float | int | None] = {}
+    for name, value in metrics.items():
+        if isinstance(value, float) and not math.isfinite(value):
+            safe[name] = None
+        else:
+            safe[name] = value
+    return safe
 
 
 def build_bundle(output: Path, model: ConditionalTSDF, radius: float, depth: float, sigma: float,
@@ -205,11 +216,11 @@ def main() -> None:
         loaded = load_bundle(args.output)
         assert loaded.revision == 2
         result = {"transaction": "committed", "bundle": str(args.output), "revision": loaded.revision,
-                  "weights_sha256": loaded.weights.sha256, **metrics}
+                  "weights_sha256": loaded.weights.sha256, **json_safe_metrics(metrics)}
     else:
         # Roll back by retaining the parent model; never publish failed candidate as active.
         result = {"transaction": "rolled_back", "reason": "validation thresholds not met",
-                  "active_revision": 1, "candidate_not_published": True, **metrics}
+                  "active_revision": 1, "candidate_not_published": True, **json_safe_metrics(metrics)}
     print(json.dumps(result, indent=2, allow_nan=False))
     if not passed:
         raise SystemExit("online dent candidate failed validation; parent revision retained")
