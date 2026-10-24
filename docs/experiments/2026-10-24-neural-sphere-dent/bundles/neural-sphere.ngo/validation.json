@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "revision": 1,
+  "weights_sha256": "3eb7b8bf15161d46772b9eea7852b79e839f58e79711e5fae2bd1b9dec0c7c5d",
+  "status": "passed",
+  "metrics": {
+    "field_mae": 0.003706875257194042,
+    "field_rmse": 0.005329158157110214,
+    "boundary_radial_error_mean": 0.0021844865132597947,
+    "boundary_radial_error_p95": 0.005107967047148332,
+    "boundary_radial_error_max": 0.010618612420915441,
+    "ray_zero_crossing_coverage": 1.0
+  },
+  "tolerances": {
+    "field_mae": 0.008,
+    "boundary_radial_error_mean": 0.01,
+    "ray_zero_crossing_coverage": 0.95
+  },
+  "checks": [
+    {
+      "name": "finite_field_values",
+      "passed": true
+    },
+    {
+      "name": "unseen_radius_field_accuracy",
+      "passed": true
+    },
+    {
+      "name": "surface_zero_crossing_coverage",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.1.0",
+  "revision": 2,
+  "weights_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+  "status": "passed",
+  "metrics": {
+    "ray_coverage": 1.0,
+    "dent_depth_target_m": 0.06,
+    "dent_depth_measured_mean_m": 0.04612323269248009,
+    "dent_surface_error_mean_m": 0.002320727100595832,
+    "protected_mean_displacement_m": 0.0012800844851881266,
+    "protected_p95_displacement_m": 0.003311760723590851,
+    "dent_ray_count": 60,
+    "protected_ray_count": 3776
+  },
+  "tolerances": {
+    "dent_depth_error_m": 0.025,
+    "protected_mean_displacement_m": 0.012,
+    "ray_coverage": 0.98
+  }
+}

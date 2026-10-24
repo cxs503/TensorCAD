@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1.0",
+  "method": "supervised_tsdf",
+  "optimizer": "Adam",
+  "seed": 503,
+  "steps": 1800,
+  "learning_rate": 0.001,
+  "final_batch_mse": 2.855437014659401e-05,
+  "compute": {
+    "device": "cpu",
+    "elapsed_seconds": 18.746327718999964
+  }
+}

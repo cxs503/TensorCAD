@@ -1,0 +1,89 @@
+{
+  "method": "dense radial scan (0.20-0.80 m, 2401 samples) plus 60-step bisection; parent replayed from seed 503 with 1200 base steps",
+  "parent_rebuilt_sha256": "62764ef93a278a5521bf51c199db783fd4b39122b85a786f6793651eb1a93181",
+  "candidate_sha256": "db1df71e2f681a958b9382904554c21135fedb5af692abf07932e50b57253cd7",
+  "baseline_sha256": "3eb7b8bf15161d46772b9eea7852b79e839f58e79711e5fae2bd1b9dec0c7c5d",
+  "profile": [
+    {
+      "angle_deg": 0.0,
+      "baseline_radius_m": 0.49838586151599884,
+      "baseline_radius_azimuth90_m": 0.49838586151599884,
+      "candidate_radius_m": 0.44076453149318695,
+      "analytic_dent_radius_m": 0.44,
+      "displacement_m": -0.05762133002281189,
+      "candidate_vs_analytic_m": 0.0007645314931869485
+    },
+    {
+      "angle_deg": 5.0,
+      "baseline_radius_m": 0.5014903247356415,
+      "baseline_radius_azimuth90_m": 0.5034969747066498,
+      "candidate_radius_m": 0.4481814056634903,
+      "analytic_dent_radius_m": 0.44453940836338984,
+      "displacement_m": -0.053308919072151184,
+      "candidate_vs_analytic_m": 0.0036419973001004524
+    },
+    {
+      "angle_deg": 10.0,
+      "baseline_radius_m": 0.5010980665683746,
+      "baseline_radius_azimuth90_m": 0.5015141665935516,
+      "candidate_radius_m": 0.4597039073705673,
+      "analytic_dent_radius_m": 0.45619897823461775,
+      "displacement_m": -0.04139415919780731,
+      "candidate_vs_analytic_m": 0.003504929135949575
+    },
+    {
+      "angle_deg": 15.0,
+      "baseline_radius_m": 0.4997824877500534,
+      "baseline_radius_azimuth90_m": 0.49980728328227997,
+      "candidate_radius_m": 0.47024454176425934,
+      "analytic_dent_radius_m": 0.47044367178642654,
+      "displacement_m": -0.029537945985794067,
+      "candidate_vs_analytic_m": -0.00019913002216720432
+    },
+    {
+      "angle_deg": 20.0,
+      "baseline_radius_m": 0.50221386551857,
+      "baseline_radius_azimuth90_m": 0.5026063024997711,
+      "candidate_radius_m": 0.4788188189268112,
+      "analytic_dent_radius_m": 0.4829594654079493,
+      "displacement_m": -0.023395046591758728,
+      "candidate_vs_analytic_m": -0.004140646481138099
+    },
+    {
+      "angle_deg": 30.0,
+      "baseline_radius_m": 0.5082917511463165,
+      "baseline_radius_azimuth90_m": 0.5061380565166473,
+      "candidate_radius_m": 0.48548008501529694,
+      "analytic_dent_radius_m": 0.4964669631165953,
+      "displacement_m": -0.022811666131019592,
+      "candidate_vs_analytic_m": -0.010986878101298336
+    },
+    {
+      "angle_deg": 45.0,
+      "baseline_radius_m": 0.5005482733249664,
+      "baseline_radius_azimuth90_m": 0.5025053322315216,
+      "candidate_radius_m": 0.5086794197559357,
+      "analytic_dent_radius_m": 0.49989751877160266,
+      "displacement_m": 0.008131146430969238,
+      "candidate_vs_analytic_m": 0.008781900984333013
+    },
+    {
+      "angle_deg": 90.0,
+      "baseline_radius_m": 0.4979790896177292,
+      "baseline_radius_azimuth90_m": 0.4994259923696518,
+      "candidate_radius_m": 0.4996369630098343,
+      "analytic_dent_radius_m": 0.49999999999948935,
+      "displacement_m": 0.0016578733921051025,
+      "candidate_vs_analytic_m": -0.00036303698965506337
+    },
+    {
+      "angle_deg": 180.0,
+      "baseline_radius_m": 0.49840329587459564,
+      "baseline_radius_azimuth90_m": 0.49840329587459564,
+      "candidate_radius_m": 0.48614339530467987,
+      "analytic_dent_radius_m": 0.5,
+      "displacement_m": -0.012259900569915771,
+      "candidate_vs_analytic_m": -0.01385660469532013
+    }
+  ]
+}
