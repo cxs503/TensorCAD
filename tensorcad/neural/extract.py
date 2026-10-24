@@ -26,13 +26,20 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 from .. import mesh as meshlib
 from ..geometry import Mesh, MeshBuilder
 
-FloatArray = np.ndarray
+#: Array annotations are written as ``npt.NDArray[Any]`` on purpose: older NumPy
+#: stubs require the type arguments and newer ones make them optional, so a bare
+#: ``np.ndarray`` or a dtype-pinned alias type-checks differently depending on
+#: which NumPy the environment happens to resolve. Shape and dtype are checked at
+#: runtime by the tests; the alias only has to mean the same thing everywhere.
+Array = npt.NDArray[Any]
 
 #: Corner bit layout of a cell: index ``4*x + 2*y + 1*z`` with each bit 0/1.
 _CORNER_BITS = np.array(
@@ -84,8 +91,8 @@ class ExtractionReport:
 
 
 def _evaluate(
-    field: Callable[[FloatArray], FloatArray], points: FloatArray, chunk: int = 1 << 18
-) -> FloatArray:
+    field: Callable[[Array], Array], points: Array, chunk: int = 1 << 18
+) -> Array:
     values = np.empty(len(points), dtype=np.float64)
     for start in range(0, len(points), chunk):
         block = points[start : start + chunk]
@@ -99,14 +106,14 @@ def _evaluate(
 
 
 def sample_grid(
-    field: Callable[[FloatArray], FloatArray],
+    field: Callable[[Array], Array],
     minimum: Sequence[float],
     maximum: Sequence[float],
     resolution: int,
     margin: int = 3,
     *,
     isovalue: float = 0.0,
-) -> tuple[FloatArray, FloatArray, int]:
+) -> tuple[Array, Array, int]:
     """Sample ``field`` on a padded grid; returns ``(points, values, counts)``."""
     low = np.asarray(minimum, dtype=np.float64).reshape(3)
     high = np.asarray(maximum, dtype=np.float64).reshape(3)
@@ -134,16 +141,16 @@ def sample_grid(
 
 @dataclass
 class _Slab:
-    edge_lo: FloatArray
-    edge_hi: FloatArray
-    triangles: FloatArray
-    inside_ref: FloatArray
-    outside_ref: FloatArray
+    edge_lo: Array
+    edge_hi: Array
+    triangles: Array
+    inside_ref: Array
+    outside_ref: Array
 
 
 def _march_slab(
-    values: FloatArray,
-    corners: FloatArray,
+    values: Array,
+    corners: Array,
     counts: int,
     start: int,
     stop: int,
@@ -171,19 +178,19 @@ def _march_slab(
     ordering = np.argsort(inside[active], axis=1, kind="stable")
     active_corners = tet_corners[active]
 
-    edge_lo: list[FloatArray] = []
-    edge_hi: list[FloatArray] = []
-    triangles: list[FloatArray] = []
-    inside_refs: list[FloatArray] = []
-    outside_refs: list[FloatArray] = []
+    edge_lo: list[Array] = []
+    edge_hi: list[Array] = []
+    triangles: list[Array] = []
+    inside_refs: list[Array] = []
+    outside_refs: list[Array] = []
     edge_total = 0
 
     def emit(
-        group: FloatArray,
-        slot_a: FloatArray,
-        slot_b: FloatArray,
-        inside_slot: FloatArray,
-        outside_slot: FloatArray,
+        group: Array,
+        slot_a: Array,
+        slot_b: Array,
+        inside_slot: Array,
+        outside_slot: Array,
         local_triangles: tuple[tuple[int, int, int], ...],
     ) -> None:
         nonlocal edge_total
@@ -256,7 +263,7 @@ def _march_slab(
 
 
 def extract_surface(
-    field: Callable[[FloatArray], FloatArray],
+    field: Callable[[Array], Array],
     minimum: Sequence[float],
     maximum: Sequence[float],
     resolution: int,

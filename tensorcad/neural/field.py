@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import numpy as np
+import numpy.typing as npt
 import torch
 from safetensors.torch import load_file as load_safetensors
 from safetensors.torch import save_file as save_safetensors
@@ -28,11 +29,14 @@ from torch import Tensor, nn
 
 from ..neural_geometry import sha256_file
 
+#: Same parameterisation as the extraction module, for the same reason.
+Array = npt.NDArray[Any]
+
 ARCHITECTURE_ID = "tensorcad.mlp_fourier.v1"
 DEFAULT_TRUNCATION = 0.15
 
 
-def _to_tensor(array: np.ndarray) -> Tensor:
+def _to_tensor(array: Array) -> Tensor:
     """Convert numpy -> torch without assuming the optional NumPy bridge works.
 
     ``torch`` wheels are compiled against a specific NumPy ABI; a mismatched pair
@@ -47,7 +51,7 @@ def _to_tensor(array: np.ndarray) -> Tensor:
         return torch.tensor(array.tolist(), dtype=torch.float32)
 
 
-def _to_numpy(tensor: Tensor) -> np.ndarray:
+def _to_numpy(tensor: Tensor) -> Array:
     try:
         return np.asarray(tensor.detach().double().numpy(), dtype=np.float64)
     except (RuntimeError, TypeError):  # pragma: no cover - depends on the installed wheel
@@ -131,7 +135,9 @@ def dented_sphere_tsdf(
     return torch.clamp(norm - (radius.reshape(-1) - reduction), -truncation, truncation)
 
 
-def dent_target_radius(radius: float, angle: np.ndarray, depth: float, sigma: float) -> np.ndarray:
+def dent_target_radius(
+    radius: float, angle: Array, depth: float, sigma: float
+) -> Array:
     """Analytic radius of the dented sphere along ``angle`` from the dent axis."""
     return radius - depth * np.exp(-0.5 * (angle / sigma) ** 2)
 
@@ -299,10 +305,12 @@ def load_weights(path: str | Path, config: FieldConfig | None = None) -> Conditi
     return model
 
 
-def field_callable(model: ConditionalTSDF, state_value: float) -> Callable[[np.ndarray], np.ndarray]:
+def field_callable(
+    model: ConditionalTSDF, state_value: float
+) -> Callable[[Array], Array]:
     """Wrap the torch model as a numpy ``points -> values`` callable."""
 
-    def evaluate(points: np.ndarray) -> np.ndarray:
+    def evaluate(points: Array) -> Array:
         tensor = _to_tensor(points)
         state = torch.full((len(tensor),), float(state_value), dtype=torch.float32)
         with torch.no_grad():
