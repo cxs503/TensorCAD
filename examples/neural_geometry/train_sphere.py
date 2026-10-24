@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tensorcad.neural_geometry import load_bundle  # noqa: E402
+from tensorcad.neural_geometry import load_bundle
 
 
 class ConditionalTSDF(nn.Module):
@@ -118,7 +118,7 @@ def main() -> None:
     start = time.perf_counter()
     final_loss = float("nan")
     model.train()
-    for step in range(args.steps):
+    for _step in range(args.steps):
         points = torch.rand((2048, 3)) * 1.6 - 0.8
         radii = torch.rand(2048) * 0.30 + 0.35
         labels = reference_tsdf(points, radii, truncation)
