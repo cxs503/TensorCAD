@@ -9,7 +9,7 @@ import pytest
 pytest.importorskip("torch", reason="the neural geometry CLI needs the 'neural' extra")
 
 from tensorcad.cli_neural import main
-from tensorcad.neural.objects import Tolerances, fit_sphere
+from tensorcad.neural.objects import Tolerances, extract_object, fit_sphere
 
 LOOSE = Tolerances(
     field_mae=1e9,
@@ -113,3 +113,49 @@ def test_fit_refuses_to_reuse_an_existing_bundle(tmp_path: Path, capsys: pytest.
     payload = parse(capsys.readouterr().out)
     assert payload["status"] == "error"
     assert "already holds revision" in payload["error"]
+
+
+def test_verify_skips_the_field_query_when_the_neural_extra_is_missing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Integrity checks are standard-library work and must survive a torch-free env.
+
+    Only the live field query needs torch; the manifest, the hash, the history and
+    the derived artifacts do not, so "skipped" is the correct answer rather than a
+    traceback.
+    """
+    import sys
+    import types
+
+    target = fitted(tmp_path)
+    extract_object(target, resolution=16)
+
+    def unavailable(*_args: object, **_kwargs: object) -> object:
+        raise ImportError("No module named 'torch'")
+
+    fake = types.ModuleType("tensorcad.neural.objects")
+    fake.build_field = unavailable  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "tensorcad.neural.objects", fake)
+
+    assert main(["--json", "verify", "--object", str(target)]) == 0
+    payload = parse(capsys.readouterr().out)
+    assert payload["status"] == "verified"
+    by_name = {check["name"]: check for check in payload["checks"]}
+    assert by_name["field_query"]["severity"] == "skipped"
+    assert "neural extra" in by_name["field_query"]["detail"]
+    assert any(name.startswith("derived_hash:") for name in by_name)
+    assert payload["warnings"] == []
+
+
+def test_verify_reports_a_missing_derived_artifact_as_a_warning(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    target = fitted(tmp_path)
+    extract_object(target, resolution=16)
+    victim = next((target / "derived").iterdir())
+    victim.unlink()
+
+    assert main(["--json", "verify", "--object", str(target)]) == 0
+    payload = parse(capsys.readouterr().out)
+    assert payload["status"] == "verified"
+    assert payload["warnings"], "a lost export is worth reporting even if geometry is intact"

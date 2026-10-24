@@ -136,7 +136,8 @@ apply_edit(request)
 
 不变量（`tests/test_neural_store.py` 覆盖）：
 
-1. 未完成的编辑不可见——候选只在隐藏 staging 目录里；
+1. 未完成的编辑不可见——候选只在隐藏 staging 目录里；派生网格也一样：抽取结果先写
+   临时目录，再随 staging 一起发布，绝不提前落进活动版本；
 2. 校验失败时活动版本**逐字节不变**；
 3. 每次尝试（成功与失败）都进 `history.json`，失败项带 `failed_checks` 与实测指标；
 4. `expected_parent` 不等于磁盘版本时提交失败，两个人不会互相覆盖；
@@ -160,6 +161,20 @@ signed volume 0.515400 m^3   surface area 3.175588 m^2
 
 派生件记录在 `manifest.derived` 里，带哈希与网格质量指标，因此任何人都能确认
 "这个 STL 是哪个 revision、哪个分辨率导出来的"。删掉它们不损失信息，重新导出即可。
+
+**导出本身是一次事务。** `extract` 不带 `--output` 时，网格先写进隐藏的 staging 目录，
+再以一个新 revision（`lineage.operation = "extract"`，权重哈希不变）发布：
+
+* `manifest.derived` 因此始终描述磁盘上真实存在的文件，`info` 能看到它们；
+* 后续 `edit` 的提交会整目录替换，所以它把父版本的派生记录与字节一起带到新版本，
+  并在每条记录上加 `source_revision`——说明这份导出是从哪一版导出的，而不是悄悄删掉；
+* `--output DIR` 则是旁路导出：写到调用者指定的目录，不登记、不产生新 revision。
+  这条差别写在 `extract_object` 的 docstring 里，因为它决定了"这是版本还是文件"。
+
+`tensorcad-neural verify` 会核对每条派生记录的 SHA-256 与字节数；文件缺失记为
+**warning** 而不是失败（几何完整性与导出完整性是两件事）。仓库里提交的那份实验包
+为了控制体积没有包含 20 MB 的网格，所以对它跑 `verify` 会看到两条 missing 警告——
+这是对仓库真实状态的准确描述。
 
 提取实现是 `tensorcad.neural.extract`：Kuhn 六四面体细分 + 逐面局部定向，
 不使用 marching cubes 的 case 表，因此不依赖容差焊接也不会开裂；

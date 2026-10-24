@@ -190,17 +190,22 @@ def export_hull(
     *,
     convergence: bool = False,
     precision: int = ROUND_TRIP_PRECISION,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     """Write the OBJ mesh, the offsets CSV and the metadata JSON for a hull model.
 
     Returns the artifact paths keyed by ``mesh``/``offsets``/``metadata``. Set
     ``convergence=True`` to pay for one refined regeneration and record the
-    measured discretisation error in the metadata.
+    measured discretisation error in the metadata; pass ``metadata`` when the
+    caller already produced that document (the CLI does, so the refined grid is
+    generated once instead of once per consumer).
     """
     output = Path(output_dir)
+    # Build the metadata document *before* writing anything: a failure in the
+    # convergence estimate must not leave a directory holding a mesh without the
+    # parameters that produced it.
+    document = metadata if metadata is not None else model.metadata(with_discretisation=convergence)
     mesh_path = write_obj(model.mesh, output / "hull.obj", precision=precision)
     offsets_path = write_offsets_csv(model.offsets, output / "offsets.csv", precision=precision)
-    metadata_path = write_metadata(
-        model.metadata(with_discretisation=convergence), output / "metadata.json"
-    )
+    metadata_path = write_metadata(document, output / "metadata.json")
     return ExportArtifacts(str(mesh_path), str(offsets_path), str(metadata_path)).as_dict()

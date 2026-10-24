@@ -526,20 +526,38 @@ def apply_dent_edit(
         "equation": "surface target r(a) = R - depth*exp(-a^2/(2*sigma^2))",
     }
 
-    derived: tuple[dict[str, Any], ...] = ()
+    # Derived artifacts are produced in a scratch directory and shipped inside the
+    # staged bundle: writing them into the live object before the commit would
+    # make a rejected transaction leave files behind and would let a reader see a
+    # mesh no manifest describes.
+    carried_records, derived_files = _carry_forward_derived(
+        store, parent_manifest, parent_revision
+    )
+    new_records: list[dict[str, Any]] = []
     if extract_resolution:
-        mesh, _report, derived = _extract_and_write(
-            manifest_state=state,
-            weights_bytes=payload,
-            config=config,
-            truncation=truncation,
-            bounds_min=parent_manifest.raw["coordinates"]["bounds"]["min"],
-            bounds_max=parent_manifest.raw["coordinates"]["bounds"]["max"],
-            resolution=extract_resolution,
-            directory=store.root / "derived",
-            formats=("obj", "stl"),
-        )
-        del mesh
+        scratch = Path(tempfile.mkdtemp(prefix="tensorcad-derived-"))
+        try:
+            _mesh, _report, records, payloads = _extract_and_write(
+                manifest_state=state,
+                weights_bytes=payload,
+                config=config,
+                truncation=truncation,
+                bounds_min=parent_manifest.raw["coordinates"]["bounds"]["min"],
+                bounds_max=parent_manifest.raw["coordinates"]["bounds"]["max"],
+                resolution=extract_resolution,
+                directory=scratch,
+                formats=("obj", "stl"),
+            )
+        finally:
+            shutil.rmtree(scratch, ignore_errors=True)
+        new_records = list(records)
+        derived_files.update(payloads)
+
+    # A regenerated artifact replaces the stale record for the same path.
+    replaced = {record["path"] for record in new_records}
+    derived_records = [record for record in carried_records if record["path"] not in replaced]
+    derived_records.extend(new_records)
+    derived = tuple(derived_records)
 
     manifest = build_manifest(
         object_id=parent_manifest.object_id,
@@ -570,11 +588,8 @@ def apply_dent_edit(
         STATE_FILE: _json_text(state),
         TRAINING_FILE: _json_text(training),
         VALIDATION_FILE: _json_text(validation),
+        **derived_files,
     }
-    for artifact in derived:
-        path = store.root / artifact["path"]
-        if path.is_file():
-            files[artifact["path"]] = path.read_bytes()
 
     record = TransactionRecord(
         revision=next_revision,
@@ -626,7 +641,13 @@ def _extract_and_write(
     resolution: int,
     directory: Path,
     formats: Sequence[str],
-) -> tuple[Mesh, ExtractionReport, tuple[dict[str, Any], ...]]:
+) -> tuple[Mesh, ExtractionReport, tuple[dict[str, Any], ...], dict[str, bytes]]:
+    """Extract a mesh, write it under ``directory`` and return the file bytes.
+
+    The bytes are what a transaction stages: callers never point the extraction at
+    the live bundle, because a candidate that is later rejected must not leave
+    anything behind.
+    """
     directory.mkdir(parents=True, exist_ok=True)
     scratch = Path(tempfile.mkdtemp(prefix="tensorcad-extract-"))
     try:
@@ -648,6 +669,7 @@ def _extract_and_write(
     report = summarise(mesh, resolution, expected_units="m")
     metrics = report.to_dict()
     records: list[dict[str, Any]] = []
+    payloads: dict[str, bytes] = {}
     for fmt in formats:
         if fmt == "obj":
             path = write_obj(mesh, directory / "surface.obj")
@@ -655,17 +677,44 @@ def _extract_and_write(
             path = write_stl(mesh, directory / "surface.stl")
         else:  # pragma: no cover - guarded by the CLI choices
             raise ValueError(f"unsupported derived format {fmt!r}")
+        data = path.read_bytes()
+        relative = f"derived/{path.name}"
+        payloads[relative] = data
         records.append(
             derived_record(
                 kind="surface_mesh",
                 fmt=fmt,
-                path=f"derived/{path.name}",
-                digest=sha256_bytes(path.read_bytes()),
-                size_bytes=path.stat().st_size,
+                path=relative,
+                digest=sha256_bytes(data),
+                size_bytes=len(data),
                 metrics=metrics,
             )
         )
-    return mesh, report, tuple(records)
+    return mesh, report, tuple(records), payloads
+
+
+def _carry_forward_derived(
+    store: ObjectStore, manifest: Any, parent_revision: int
+) -> tuple[list[dict[str, Any]], dict[str, bytes]]:
+    """Keep the parent revision's derived artifacts instead of deleting them.
+
+    A commit swaps the whole bundle directory, so anything the new manifest does
+    not reference disappears. Carrying the records forward -- marked with the
+    revision they were derived from -- keeps an export discoverable and keeps it
+    honest about being stale rather than silently dropping it.
+    """
+    records: list[dict[str, Any]] = []
+    payloads: dict[str, bytes] = {}
+    for artifact in manifest.derived:
+        relative = artifact.get("path")
+        if not isinstance(relative, str):
+            continue
+        source = store.root / relative
+        if not source.is_file():
+            continue
+        payloads[relative] = source.read_bytes()
+        records.append({**artifact, "source_revision": parent_revision})
+    return records, payloads
 
 
 def extract_object(
@@ -677,26 +726,43 @@ def extract_object(
 ) -> tuple[Mesh, ExtractionReport, tuple[dict[str, Any], ...]]:
     """Derive a mesh from the object's active revision.
 
-    Derived files are written next to the object under ``derived/`` (or into
-    ``output``) and are *not* canonical: they carry a hash so a consumer can tell
-    which field revision produced them, but the field remains the source of truth.
+    Without ``output`` the artifacts are published *into the object* under
+    ``derived/`` as part of a new revision, so ``manifest.derived`` describes them
+    and a later commit cannot orphan them. With ``output`` they are written to a
+    directory of the caller's choosing and are not registered in the bundle --
+    that is an export, not a version.
+
+    Either way the field stays the source of truth: the records carry the hash of
+    the exact bytes and the metrics of the mesh that was extracted.
     """
     store = ObjectStore(target)
     manifest = store.manifest()
-    directory = Path(output) if output is not None else store.root / "derived"
     weights_bytes = (store.root / manifest.weights.path).read_bytes()
     config = FieldConfig.from_dict(manifest.architecture_config)
-    return _extract_and_write(
-        manifest_state=manifest.raw.get("state", {}),
-        weights_bytes=weights_bytes,
-        config=config,
-        truncation=float(manifest.field["truncation_distance"]),
-        bounds_min=manifest.raw["coordinates"]["bounds"]["min"],
-        bounds_max=manifest.raw["coordinates"]["bounds"]["max"],
-        resolution=resolution,
-        directory=directory,
-        formats=formats,
-    )
+    scratch = Path(tempfile.mkdtemp(prefix="tensorcad-derived-"))
+    try:
+        mesh, report, records, payloads = _extract_and_write(
+            manifest_state=manifest.raw.get("state", {}),
+            weights_bytes=weights_bytes,
+            config=config,
+            truncation=float(manifest.field["truncation_distance"]),
+            bounds_min=manifest.raw["coordinates"]["bounds"]["min"],
+            bounds_max=manifest.raw["coordinates"]["bounds"]["max"],
+            resolution=resolution,
+            directory=scratch,
+            formats=formats,
+        )
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+    if output is not None:
+        directory = Path(output)
+        directory.mkdir(parents=True, exist_ok=True)
+        for relative, data in payloads.items():
+            (directory / Path(relative).name).write_bytes(data)
+    else:
+        store.publish_derived(files=payloads, derived=records, operation="extract")
+    return mesh, report, records
 
 
 def history_entries(target: str | Path) -> list[dict[str, Any]]:

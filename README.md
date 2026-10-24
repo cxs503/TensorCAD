@@ -109,7 +109,7 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.neural` — optional field runtime: training, local edits, marching-tetrahedra
   extraction to a closed mesh (`neural` extra, consumes torch/numpy).
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
-- `examples/` and `tests/` — runnable benchmark and 129 tests.
+- `examples/` and `tests/` — runnable benchmark and 194 tests (213 with the `neural` extra).
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -127,10 +127,32 @@ python -m pip install -e ".[neural]"
 python examples/neural_geometry/run_object_pipeline.py --output results/object
 ```
 
+## Failure behaviour
+
+The point of a headless geometry library is that a caller can tell "bad input" from
+"bad output" from "I could not finish", so each phase has a defined answer:
+
+- `generate_hull` raises on invalid parameters or a mesh that fails a check, and reports
+  every problem at once;
+- an under-sampled grid is a **warning** that names the measured error against the
+  analytic volume (`nx=3, nz=3` is −35.7 %, the default 41×13 is 0.88 %);
+- `tensorcad-hull` wraps every phase: `--json` prints `{"error": ..., "stage": ...}` on
+  stdout, humans get one line on stderr, and the exit code is 2 — no tracebacks, and no
+  half-written artifact directory (the metadata document is built before anything is
+  written);
+- `tensorcad-neural verify` separates integrity (manifest, hashes, history, derived
+  artifacts — standard library only) from the live field query, which reports `skipped`
+  when the `neural` extra is not installed;
+- a rejected edit leaves the active revision byte-identical and appends the failed gates
+  and their measurements to `history.json`.
+
 ## Status and limitations
 
-0.3.0 adds the neural geometry object layer described above. 0.2.0 delivered the hull milestone:
-a headless, parameterized geometry model with tests, CI, export, and validation that fails loudly.
+0.3.1 fixes the defects the 0.3.0 review found (a legal model could crash the convergence
+estimate, a failed commit could leave derived meshes in the live bundle, and extraction
+could be deleted by the next edit). 0.3.0 added the neural geometry object layer described
+above. 0.2.0 delivered the hull milestone: a headless, parameterized geometry model with
+tests, CI, export, and validation that fails loudly.
 
 What it does **not** provide: any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
