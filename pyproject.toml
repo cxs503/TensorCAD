@@ -71,8 +71,13 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["torch.*", "safetensors.*"]
+# Treat the optional torch/safetensors stack as untyped whether or not it is
+# installed, so `mypy` gives the same answer in the torch-free CI job and in an
+# environment with the `neural` extra. The alternative -- different results per
+# machine -- made the type check environment-dependent.
+module = ["torch", "torch.*", "safetensors", "safetensors.*"]
 ignore_missing_imports = true
+follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = "tests.*"
