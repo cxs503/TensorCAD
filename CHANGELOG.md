@@ -4,6 +4,55 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.8.0 — 2026-10-24
+
+The first release whose input is a *requirement* rather than a parameter set. 0.7.0 could
+measure and hand off a surface; 0.8.0 finds the surface that meets a brief and refuses to
+deliver one that does not.
+
+### Added
+- **`tensorcad.design`** — `DesignTargets` (equalities `displacement_m3`,
+  `beam_to_draft`, `length_to_beam`, `draft_m`; budget `wetted_area_m2_max`),
+  `DesignProblem` (damped Newton on `log` of the free dimensions, central-difference
+  Jacobian, backtracking line search, bounds from the hull model's own specs) and
+  `DesignSolution` (`status`, `solved`, `failed_checks`, `convergence_order`,
+  `sensitivity`, `manifest`). Every iteration is kept with its hydrostatics, its
+  `tensorcad.geometry.handoff/1` record and its full check list. Standard library only.
+- **Measured**: recovering L = 12 m, B = 2.4 m, T = 0.9 m from its own measured
+  displacement (12.063418 m³), B/T and L/B converges in 6 evaluations and 1.1 s to
+  **1e-7 relative** on all three dimensions; observed contraction order **1.940**; the
+  finite-difference sensitivities come out at +1.000000 / −1.000000 for a ratio and
+  +1.000000 for displacement against beam and draft; a replay reproduces the mesh digest
+  `814f4770b0189c58`; re-opening the design for a 15 % heavier brief converges from the
+  previous answer in 5 evaluations.
+- **The verdict is a conjunction.** A 200 m³ target at L = 10 m drives the residual to
+  1.13e-12 and is still refused: at L/B = 0.965 the triangles fail the minimum-angle,
+  aspect-ratio and sliver checks, so `solved` is `False`, `failed_checks` names all
+  three, and the manifest reports `solver.status: "not_ready"`.
+- **Grid sensitivity is part of the record**: the same design measures 12.063418 m³ at
+  (41, 13) and 12.133078 m³ at (81, 25) — +0.577 % — so a reader can see how much of the
+  answer is the sampling grid.
+- **`write_solver_manifest` / `write_design_json`** — the manifest a solver reads
+  (`tensorcad.design/1`: targets, every iteration, handoff, reference quantities,
+  verification) and the cheap per-iteration digest an agent polls between steps.
+- **`examples/design_loop/run_example.py`** — 21 acceptance checks, writes OBJ, gmsh 2.2,
+  the FEM JSON and the solver manifest; in CI.
+
+### Notes
+- Displacement and wetted area are deliberately not both offered as equalities: on this
+  family they both scale with beam times draft, so the pair is nearly rank deficient. The
+  loop stalls at a residual of 4.0e-3 and cannot remove it. Wetted area is a budget
+  instead, and the docs record the measurement.
+- `solver.executed_here` is `false` in every manifest: this repository measures and hands
+  off geometry, it does not run a flow or a structure solve.
+- 369 tests (355 pass without the `neural` extra; 14 skip), 93.2 % line coverage, strict
+  `mypy` clean, `ruff` clean, seven examples in CI.
+
+### Still missing
+- A hydrodynamic objective (resistance, stability, seakeeping), multiple hull families,
+  and topology search. The loop matches the stated targets and proves the geometry; it
+  does not judge whether the ship is good.
+
 ## 0.7.0 — 2026-10-24
 
 Mesh conditioning and the two solver exits. The 0.6.0 release closed with "mesh
