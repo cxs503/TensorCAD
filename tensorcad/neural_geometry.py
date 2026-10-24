@@ -92,6 +92,7 @@ def _required_mapping(parent: dict[str, Any], key: str) -> dict[str, Any]:
 
 def parse_manifest(data: dict[str, Any]) -> NeuralGeometryManifest:
     """Validate a manifest's core contract without opening any payload."""
+    _ensure_finite(data, "manifest")
     if data.get("format") != _FORMAT:
         raise NeuralGeometryFormatError(f"unsupported format: {data.get('format')!r}")
     version = data.get("format_version")
