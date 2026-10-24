@@ -1,0 +1,76 @@
+{
+  "mission": "m241",
+  "library": "TensorCAD",
+  "upstream_head": "54c59449c17778a3b24198deee3240a208eb6755",
+  "version": "0.4.0",
+  "audit_date": "2026-10-24",
+  "checks": {
+    "test_suite": {
+      "total": 262,
+      "passed": 262,
+      "failed": 0,
+      "duration_s": 22.88,
+      "status": "PASS"
+    },
+    "zero_dependency": {
+      "import_without_torch_numpy": true,
+      "status": "PASS"
+    },
+    "hull_volume_default": {
+      "nx": 41,
+      "nz": 13,
+      "measured_volume_m3": 7.446554,
+      "analytic_volume_m3": 7.512698,
+      "error_percent": -0.880,
+      "readme_claim_percent": -0.88,
+      "matches_readme": true,
+      "source": "/tmp/tcad_audit/hull_default.log",
+      "status": "PASS"
+    },
+    "hull_volume_fine": {
+      "nx": 161,
+      "nz": 41,
+      "measured_volume_m3": 7.502488,
+      "analytic_volume_m3": 7.512698,
+      "error_percent": -0.136,
+      "readme_claim_percent": -0.14,
+      "matches_readme": true,
+      "source": "/tmp/tcad_audit/hull_default.log",
+      "status": "PASS"
+    },
+    "ngo_dent_peak": {
+      "measured_m": 0.05269,
+      "target_m": 0.06,
+      "readme_claim_m": 0.0527,
+      "matches_readme": true,
+      "source": "/tmp/tcad_audit/ngo_pipeline.log",
+      "status": "PASS"
+    },
+    "ngo_extract_watertight": {
+      "watertight": true,
+      "euler_characteristic": 2,
+      "vertices": 97332,
+      "triangles": 194660,
+      "source": "/tmp/tcad_audit/ngo_pipeline.log",
+      "status": "PASS"
+    },
+    "defect_fixes_0_3_1": {
+      "total_claimed": 8,
+      "directly_verified": 6,
+      "code_review_only": 2,
+      "status": "PASS"
+    }
+  },
+  "deliverables": {
+    "audit_report": "expand_audit_tensorcad.md",
+    "backlog_section": "backlog_tensorcad_section.md",
+    "proposals": [
+      "proposals/tensorcad-hull-families.txt",
+      "proposals/tensorcad-sdf-voxel-export.txt"
+    ],
+    "context_updated": true
+  },
+  "overall_status": "PASS",
+  "checks_passed": 7,
+  "checks_total": 7
+}
