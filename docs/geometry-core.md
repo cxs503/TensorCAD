@@ -186,10 +186,12 @@ numbers side by side so nobody has to guess which baseline a figure used.
 
 ## Interfaces left open for what comes next
 
-- **SUBOFF** will be another `GeometryField`: `kind = "suboff_hull"`, analytic or
-  offset-table based, with `units` and `coordinate_frame` declared (ship-fixed,
-  x aft→fore). It inherits validation, export, handoff and the edit tests for free; the
-  datum/units provenance has to travel in `parameters()`.
+- **SUBOFF** is another `GeometryField`: `kind = "suboff_bare_hull"` (0.5.0) and
+  `kind = "suboff_sail" / "suboff_fins" / "suboff_full"` (0.6.0), analytic, with
+  `units` and `coordinate_frame` declared (ship-fixed, x bow→stern). They inherited
+  validation, export, handoff and the edit tests for free; the datum/units provenance
+  travels in `parameters()` and `provenance()`. See
+  [docs/suboff.md](suboff.md) and [docs/suboff_appendages.md](suboff_appendages.md).
 - **TensorFEM** consumes `to_mesh(field, resolution).handoff()`: units, frame, digest,
   topology, measured volume and quality metrics. A B-rep/STEP adapter becomes a third
   implementation of the same six methods.

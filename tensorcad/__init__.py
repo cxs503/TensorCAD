@@ -55,6 +55,14 @@ from .suboff import (
     suboff_radius_fraction,
     suboff_reference_geometry,
 )
+from .suboff_appendages import (
+    SuboffAppendagesField,
+    SuboffFinsField,
+    SuboffFullField,
+    SuboffSailField,
+    suboff_fin_chord,
+    suboff_sail_half_width,
+)
 from .validation import (
     Check,
     ValidationReport,
@@ -81,7 +89,11 @@ __all__ = [
     "RatioSpec",
     "SampledField",
     "SphereField",
+    "SuboffAppendagesField",
+    "SuboffFinsField",
+    "SuboffFullField",
     "SuboffHullField",
+    "SuboffSailField",
     "ValidationReport",
     "build_mesh",
     "compute_hydrostatics",
@@ -92,8 +104,10 @@ __all__ = [
     "inspect_mesh_quality",
     "read_metadata",
     "read_obj",
+    "suboff_fin_chord",
     "suboff_radius_fraction",
     "suboff_reference_geometry",
+    "suboff_sail_half_width",
     "surface_point",
     "to_mesh",
     "validate_hull",
@@ -102,4 +116,4 @@ __all__ = [
     "write_offsets_csv",
     "write_stl",
 ]
-__version__ = "0.5.0"
+__version__ = "0.6.0"

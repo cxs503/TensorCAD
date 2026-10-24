@@ -4,6 +4,62 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.6.0 — 2026-10-24
+
+The DARPA SUBOFF appendages (AFF-8): the sail and the four cruciform stern fins, on top
+of the 0.5.0 bare hull. Both are published closed-form predicates, so they are
+implemented as formulas — no boolean engine, no CAD kernel, no CSG tree. The three
+solids are unioned as `min` of their fields, which is exact for the sign and the zero
+set. `examples/suboff_appendages/run_example.py` enforces every claim below;
+`docs/suboff_appendages.md` records the numbers.
+
+### Added
+- **`tensorcad.suboff_appendages.SuboffSailField`** — the published three-segment sail:
+  entrance polynomial, parallel middle, exit polynomial, plus the elliptical cap
+  (`Zmax = 0.109375 ft` half width, body top `1.507813 ft`, axial
+  `[3.032986, 4.241319] ft` of the 14.291667 ft hull). The section is one radial
+  coordinate `ρ = |y|` below the body top and `√(y² + (2(z − YTMP))²)` above it, so the
+  cap and the body need no union. `height` (the cap apex, 0.47625 m) is a property.
+- **`tensorcad.suboff_appendages.SuboffFinsField`** — the swept NACA 4-digit cruciform:
+  chord `c(r) = −0.466308 r + 0.88859` ft, thickness
+  `(0.2969, 0.126, 0.3516, 0.2852, 0.1045)`, span `r ∈ [0.075, 0.825] ft`, trailing edge
+  at `x = 13.146284 ft`. The planform is a convex quadrilateral in `(x, r)`, whose
+  distance is computed exactly (four edge distances), not as a gap.
+- **`SuboffAppendagesField` and `SuboffFullField`** — the sail ∪ fins, and the whole
+  AFF-8 model hull ∪ sail ∪ fins. `sail_scale` / `fin_scale` reproduce TensorLBM's
+  similarity axes (sail about its footprint centre, centreplane and deck plane; fins
+  about their trailing edge and root radius), so a scaled appendage stays attached.
+- **Verified against the source twice.** The section values match TensorLBM's
+  transcription exactly (`0.00e+00 ft` on the sail, `6.9e-18 ft` on the NACA section);
+  containment matches the actual torch predicates on 18 hand-picked labels and on
+  20,000 random points at each of three scales with **0 mismatches**, against a
+  verbatim in-repo transcription of those predicates that CI can run.
+- **An independent volume reference.** Quadrature over the published sections gives
+  sail 0.00916043 m³ (46.2 % of it outside the hull), fins 0.00785718 m³, and the full
+  model 0.70754064 m³ (+1.191 % over the bare hull). The exported
+  `(436, 52, 76)` mesh lands at 0.707120 m³ (−0.059 %) with 569,056 triangles,
+  6.350646 m² of surface, watertight, edge-manifold, genus 0.
+- **The magnitude is measured, not claimed.** The cap and the thickness surface have no
+  closed-form nearest point, so the fields declare `quantity = "implicit_function"` and
+  report the first-order normalised gap. Along the analytic normals: sail 0.0012 mm
+  median error at a 0.5 mm offset, fins 0.00001 mm; `|∇f|` is 0.996 (sail) and 1.000
+  (fins) at the median, and exact on the flat faces.
+
+### Notes
+- The fins alone are a **genus-1** closed shell (`V − E + F = 0`) and that is the
+  published geometry, not a meshing bug: the blades start at `r = 0.075 ft` and touch
+  near the root, leaving the axis column empty. The hull fills it, so the full model is
+  genus 0. Both are asserted.
+- Throughput: 77 k queries/s on a 20,000-point batch for the full model (~1.6× the
+  bare hull's cost).
+- 314 tests (295 without the `neural` extra), 95.9 % line coverage; `suboff_appendages`
+  99 %. Strict `mypy` clean on 19 files, `ruff` clean.
+
+### Still missing
+- Mesh smoothing/decimation: 1.5–3.2 % of the triangles are thinner than 2°, on the
+  NACA knife edges. Reported as warnings; repairing them is the next piece of work.
+- The AFF-2/3/4/7 appendage layouts, explicit intersection curves, and therefore STEP.
+
 ## 0.5.0 — 2026-10-24
 
 The first real hull form on the geometry core: the DARPA SUBOFF bare hull (AFF-1) as an

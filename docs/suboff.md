@@ -135,9 +135,10 @@ frame, profile description); `field.json` and `handoff.json` are written by
 
 ## Not in this scope
 
-- Appendages (sail, rudder/fins) and the AFF-3 / AFF-8 configurations: this is the
-  bare hull (AFF-1) only. The Sail is a separate solid and belongs to the boolean
-  work that does not exist yet.
+- Appendages: this page is the bare hull (AFF-1) only. The sail and the cruciform
+  stern fins (AFF-8) are in [docs/suboff_appendages.md](suboff_appendages.md), as
+  `SuboffSailField`, `SuboffFinsField` and the `SuboffFullField` union — implemented
+  from the published predicates, so they need no boolean engine.
 - A `Cp`/`Cb`-parameterised hull family: the profile is the published one, editable
   only through `length` and `radius`. Deforming the *lines* (block coefficient,
   entrance angle, transom) is the next geometry step, not this one.

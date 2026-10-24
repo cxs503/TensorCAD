@@ -52,5 +52,15 @@ jobs:
           test -s /tmp/tensorcad-suboff/suboff_bare_hull.obj
           test -s /tmp/tensorcad-suboff/suboff_bare_hull.stl
           test -s /tmp/tensorcad-suboff/handoff.json
+      - name: SUBOFF appendages (AFF-8 sail, fins and the full union)
+        run: python examples/suboff_appendages/run_example.py --coarse 218,26,38 --fine 320,38,56 --output /tmp/tensorcad-aff8
+      - name: SUBOFF appendage export artifacts
+        run: |
+          test -s /tmp/tensorcad-aff8/suboff_full_model.obj
+          test -s /tmp/tensorcad-aff8/suboff_full_model.stl
+          test -s /tmp/tensorcad-aff8/suboff_sail.obj
+          test -s /tmp/tensorcad-aff8/suboff_fins.obj
+          test -s /tmp/tensorcad-aff8/handoff.json
+          test -s /tmp/tensorcad-aff8/field.json
       - name: Example artifacts
         run: test -s /tmp/tensorcad-example/hull.obj
