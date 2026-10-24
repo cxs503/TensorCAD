@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tensorcad.dev/schemas/neural-geometry-manifest-v0.1.schema.json",
+  "title": "TensorCAD Neural Geometry Object Manifest v0.1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["format", "format_version", "object_id", "revision", "model", "field", "coordinates", "state_file", "training_file", "validation_file"],
+  "properties": {
+    "format": {"const": "tensorcad.neural-geometry"},
+    "format_version": {"type": "string", "pattern": "^0\\.[0-9]+\\.[0-9]+$"},
+    "object_id": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 1},
+    "model": {
+      "type": "object",
+      "required": ["family", "architecture_id", "architecture_config", "weights"],
+      "properties": {
+        "family": {"const": "conditional_implicit_field"},
+        "architecture_id": {"type": "string", "minLength": 1},
+        "architecture_config": {
+          "type": "object",
+          "required": ["coordinate_dim", "state_dim", "hidden_width", "hidden_layers", "output_dim"],
+          "properties": {
+            "coordinate_dim": {"const": 3},
+            "state_dim": {"type": "integer", "minimum": 0},
+            "hidden_width": {"type": "integer", "minimum": 1},
+            "hidden_layers": {"type": "integer", "minimum": 1},
+            "output_dim": {"const": 1}
+          }
+        },
+        "weights": {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["quantity", "inside_sign", "surface_isovalue", "length_unit", "truncation_distance"],
+      "properties": {
+        "quantity": {"const": "truncated_signed_distance"},
+        "inside_sign": {"const": "negative"},
+        "surface_isovalue": {"const": 0},
+        "length_unit": {"type": "string", "minLength": 1},
+        "truncation_distance": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "coordinates": {
+      "type": "object",
+      "required": ["dimension", "frame"],
+      "properties": {
+        "dimension": {"const": 3},
+        "frame": {"type": "string", "minLength": 1}
+      }
+    },
+    "state_file": {"type": "string", "minLength": 1},
+    "training_file": {"type": "string", "minLength": 1},
+    "validation_file": {"type": "string", "minLength": 1}
+  }
+}
