@@ -4,6 +4,55 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.3.0 — 2026-10-24
+
+Geometry can now be stored as an object rather than a mesh: a learned continuous
+field plus the metadata, versioning and transactions needed to trust it. STL/OBJ
+become derived exports instead of the source of truth.
+
+### Added
+- `tensorcad.neural_geometry` (standard library only) — the NGO v0.2 bundle format:
+  manifest with lineage, field semantics, state, training, validation, provenance
+  and derived-artifact records; SHA-256 verification; path-escape rejection;
+  `history.json`; `ObjectStore` with stage → validate → commit/rollback, atomic
+  directory swaps, optimistic concurrency (`expected_parent`), and JSON-safe
+  history records for failed attempts.
+- `tensorcad.neural` (optional `neural` extra) — `ConditionalTSDF` field runtime,
+  base training, replay-protected local edits, measurement of dent peak / dent-region
+  error / protected-region mean, P95, P99, max, and a marching-tetrahedra
+  `extract_surface` that emits an already-outward-oriented, watertight mesh.
+- `tensorcad.cli_neural` / `tensorcad-neural` — `fit`, `edit`, `extract`, `info`,
+  `verify`; every command prints measured numbers, supports `--json`, and exits
+  non-zero when a gate fails (a rolled-back edit exits 1, not 0).
+- `write_stl` (binary STL) for derived meshes, alongside the existing OBJ writer.
+- `examples/neural_geometry/run_object_pipeline.py` — the end-to-end benchmark:
+  fit → edit → extract → verify → deliberate rejection, with assertions.
+- `schemas/neural-geometry-manifest-v0.2.schema.json` and
+  `docs/neural-geometry-format.md` describing what the format stores, what it
+  replaces, and what it does not.
+- Coverage gate (`fail_under = 90`, currently 96 %) and a torch-free `neural`
+  CLI help check in the default test job.
+
+### Changed
+- Manifest v0.2 keeps the 0.1 top-level file keys, so older bundles still load;
+  unknown fields are preserved rather than dropped.
+- Protected-region gates now include P99 and max, not only the mean, and failed
+  edits report `failed_checks` instead of a single generic reason.
+- The dent metrics are split into `dent_peak_*` (on the axis) and
+  `dent_region_error_mean_m` (inside the cone), so a peak target is never compared
+  against a region average.
+- The dent cone is always sampled with a deterministic stratified grid, so the
+  dent metrics do not silently become infinite when few random rays land in it.
+- Torch↔NumPy conversion falls back to list conversion when the installed wheels
+  have mismatched ABIs (torch 2.2 with NumPy 2.x) rather than failing a run.
+- Test suite: 189 tests (from 142), 96 % branch coverage on the measured modules.
+
+### Known limits
+- The only fitted shape family is the sphere (with radial state and local dents);
+  ellipsoids, cylinders and hulls are not wired into the object layer yet.
+- Field accuracy is about 3 % of the radius at 0.5 m; extraction at 96³ takes
+  several seconds on CPU.
+
 ## 0.2.0 — 2026-10-24
 
 The exported surface becomes a solid a solver can actually use, and the checks

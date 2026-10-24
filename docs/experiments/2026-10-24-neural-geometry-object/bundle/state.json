@@ -1,0 +1,27 @@
+{
+  "controls": {
+    "dent": {
+      "direction": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "edit_mode": "online_fit",
+      "role": "online_edit",
+      "sigma_radians": 0.22,
+      "unit": "m",
+      "value": 0.06
+    },
+    "radius": {
+      "description": "radius the field is conditioned on; continuous, not a mesh parameter",
+      "edit_mode": "conditioned",
+      "role": "field_state",
+      "unit": "m",
+      "value": 0.5
+    }
+  },
+  "field_state": {
+    "radius": 0.5
+  },
+  "schema_version": "0.2.0"
+}
