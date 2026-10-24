@@ -4,6 +4,170 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.7.0 — 2026-10-24
+
+Mesh conditioning and the two solver exits. The 0.6.0 release closed with "mesh
+smoothing/decimation: 1.5–3.2 % of triangles are thinner than 2°; repairing them is the
+next piece of work"; this release repairs them, measures the shape drift that repair
+causes, and hands the result to TensorFEM (and to any tool that reads gmsh or STEP)
+without adding a mandatory dependency.
+
+### Added
+- **`tensorcad.mesh_conditioning`** — `taubin_smooth` (λ 0.5 then μ −0.53, a band-pass so
+  the body does not shrink), `project_to_field` (one Newton step per vertex along the
+  field gradient, with a per-vertex step limit and a 4-step backtracking line search),
+  `decimate` (quadric-error collapse under the link, orientation, duplicate-face and
+  aspect-ratio guards, with every rejected collapse counted), `measure_mesh` and
+  `condition_mesh`, which refuses to return a surface whose watertightness, manifolding,
+  Euler characteristic, volume (0.5 %) or area (1 %) moved beyond its declared tolerance.
+- **Measured on AFF-8 at `(150, 18, 26)`** (65,812 triangles, 1.664 % slivers):
+  Taubin ×30 → min angle 0.0080° → 8.3202°, no slivers, volume −0.127 % of the analytic
+  0.70754064 m³ in 0.4 s; + projection ×30 (53.6 s) → 3.6590°, aspect 17.6, volume
+  −0.117 %, area −0.198 %, worst displacement 18.4 mm, worst residual `|f|` 0.57 mm;
+  + decimation to 45,000 / 30,000 / 20,000 faces in 5.4 / 9.7 / 11.6 s → min angle
+  2.70 / 2.56 / 2.40°, zero slivers, volume drift −0.12 / −0.14 / −0.21 %.
+- **The decimate-first order is reported, not recommended.** `condition_mesh` at the same
+  budgets reaches 2.21° (45 k) and 0.149° with 28 slivers (30 k); at 45 k faces it costs
+  40 s against 5 s smoothing-first. Both pass the shape gates; the example prints both
+  tables.
+- **`tensorcad.adapters.fem`** — solver-neutral handoff needing no extra: node/element
+  tables, boundary patches assigned by nearest analytic component, gmsh 2.2 ASCII with one
+  physical tag per patch, and a JSON manifest. Round trip: worst node displacement **0.0 m**,
+  worst per-patch area difference 2.2e−14 m², digest identical to the source surface.
+- **`tensorcad.adapters.ocp`** — optional STEP bridge (`pip install "tensorcad[ocp]"`):
+  sew → shell → solid → STEP, with the free-edge count, shell closure, `BRepCheck_Analyzer`
+  verdict, kernel volume, written size and re-imported volume all reported. Measured on
+  14,764 AFF-8 triangles: 12.8 s sewing, 4.4 s writing, 0 free edges, kernel volume
+  0.694708267 m³ against a mesh signed volume of 0.694708267 m³ (**+5.3e−15 relative**),
+  re-import −3.1e−13 relative, 37.14 MB. Detached islands are kept and counted
+  (`shells`/`solids`) rather than dropped.
+
+### Notes
+- The STEP file is a **faceted solid**: one planar face per triangle (14,764 faces). That
+  is what a solver-facing exchange file needs; a B-rep feature model is issue #4.
+  `write_step` raises `OcpUnavailable` with the pip command when the extra is absent — it
+  never writes a mesh file with a `.step` extension.
+- 357 tests in the default lane (336 without the `neural` extra), plus 10 OCP tests that
+  run when the wheels are installed; 93.2 % line coverage overall, with
+  `tensorcad/adapters/ocp.py` at 32 % in the default lane because its tests skip there.
+  Strict `mypy` clean on 22 files (OCP is an untyped import behind a documented
+  override), `ruff` clean.
+
+### Still missing
+- Mesh *refinement* or remeshing to a target size field: conditioning only coarsens.
+- A B-rep/STEP feature model, booleans, fillets, sweeps.
+
+## 0.6.0 — 2026-10-24
+
+The DARPA SUBOFF appendages (AFF-8): the sail and the four cruciform stern fins, on top
+of the 0.5.0 bare hull. Both are published closed-form predicates, so they are
+implemented as formulas — no boolean engine, no CAD kernel, no CSG tree. The three
+solids are unioned as `min` of their fields, which is exact for the sign and the zero
+set. `examples/suboff_appendages/run_example.py` enforces every claim below;
+`docs/suboff_appendages.md` records the numbers.
+
+### Added
+- **`tensorcad.suboff_appendages.SuboffSailField`** — the published three-segment sail:
+  entrance polynomial, parallel middle, exit polynomial, plus the elliptical cap
+  (`Zmax = 0.109375 ft` half width, body top `1.507813 ft`, axial
+  `[3.032986, 4.241319] ft` of the 14.291667 ft hull). The section is one radial
+  coordinate `ρ = |y|` below the body top and `√(y² + (2(z − YTMP))²)` above it, so the
+  cap and the body need no union. `height` (the cap apex, 0.47625 m) is a property.
+- **`tensorcad.suboff_appendages.SuboffFinsField`** — the swept NACA 4-digit cruciform:
+  chord `c(r) = −0.466308 r + 0.88859` ft, thickness
+  `(0.2969, 0.126, 0.3516, 0.2852, 0.1045)`, span `r ∈ [0.075, 0.825] ft`, trailing edge
+  at `x = 13.146284 ft`. The planform is a convex quadrilateral in `(x, r)`, whose
+  distance is computed exactly (four edge distances), not as a gap.
+- **`SuboffAppendagesField` and `SuboffFullField`** — the sail ∪ fins, and the whole
+  AFF-8 model hull ∪ sail ∪ fins. `sail_scale` / `fin_scale` reproduce TensorLBM's
+  similarity axes (sail about its footprint centre, centreplane and deck plane; fins
+  about their trailing edge and root radius), so a scaled appendage stays attached.
+- **Verified against the source twice.** The section values match TensorLBM's
+  transcription exactly (`0.00e+00 ft` on the sail, `6.9e-18 ft` on the NACA section);
+  containment matches the actual torch predicates on 18 hand-picked labels and on
+  20,000 random points at each of three scales with **0 mismatches**, against a
+  verbatim in-repo transcription of those predicates that CI can run.
+- **An independent volume reference.** Quadrature over the published sections gives
+  sail 0.00916043 m³ (46.2 % of it outside the hull), fins 0.00785718 m³, and the full
+  model 0.70754064 m³ (+1.191 % over the bare hull). The exported
+  `(436, 52, 76)` mesh lands at 0.707120 m³ (−0.059 %) with 569,056 triangles,
+  6.350646 m² of surface, watertight, edge-manifold, genus 0.
+- **The magnitude is measured, not claimed.** The cap and the thickness surface have no
+  closed-form nearest point, so the fields declare `quantity = "implicit_function"` and
+  report the first-order normalised gap. Along the analytic normals: sail 0.0012 mm
+  median error at a 0.5 mm offset, fins 0.00001 mm; `|∇f|` is 0.996 (sail) and 1.000
+  (fins) at the median, and exact on the flat faces.
+
+### Notes
+- The fins alone are a **genus-1** closed shell (`V − E + F = 0`) and that is the
+  published geometry, not a meshing bug: the blades start at `r = 0.075 ft` and touch
+  near the root, leaving the axis column empty. The hull fills it, so the full model is
+  genus 0. Both are asserted.
+- Throughput: 77 k queries/s on a 20,000-point batch for the full model (~1.6× the
+  bare hull's cost).
+- 314 tests (295 without the `neural` extra), 95.9 % line coverage; `suboff_appendages`
+  99 %. Strict `mypy` clean on 19 files, `ruff` clean.
+
+### Still missing
+- Mesh smoothing/decimation: 1.5–3.2 % of the triangles are thinner than 2°, on the
+  NACA knife edges. Reported as warnings; repairing them is the next piece of work.
+- The AFF-2/3/4/7 appendage layouts, explicit intersection curves, and therefore STEP.
+
+## 0.5.0 — 2026-10-24
+
+The first real hull form on the geometry core: the DARPA SUBOFF bare hull (AFF-1) as an
+analytic signed-distance field, with its offset-table provenance, an analytic reference,
+anisotropic meshing, and a measured export. `examples/suboff/run_example.py` enforces
+every claim below; `docs/suboff.md` records the numbers.
+
+### Added
+- **`tensorcad.suboff.SuboffHullField`** — the four-segment DARPA offset table (bow
+  polynomial, parallel midbody, sextic stern taper, elliptical stern cap) in its
+  published feet, carried as a true signed distance in metres. `L = 4.356100 m`,
+  `R = 0.254000 m`, `L/D = 8.575`, bow at `x = 0`, stern at `x = length`.
+  `|s|` matches a brute-force 400,001-sample meridian to `2.4e-08 m` (0.09 ppm of R);
+  the gradient is the exact unit normal (`1.000000`, agreeing with central differences
+  to `1.7e-08`).
+- **Provenance in the record, not in a document.** `parameters()` / `provenance()`
+  carry the source (Groves, Huang & Chang 1989, DTRC/SHD-1298-01), the transcription
+  (TensorLBM `suboff_cad.suboff_radius_profile`), the unit convention, the axial origin
+  and the profile description. The profile agrees with that transcription to
+  `0.00e+00` at every station tested.
+- **`suboff_reference_geometry()`** — analytic volume, wetted area, midship area and
+  prismatic coefficient by quadrature, reported at two resolutions with their
+  difference (volume 0.000 ppm, area 0.005 ppm between 10⁵ and 10⁶ samples).
+  `V = 0.699211 m³`, `A = 5.988264 m²`, `Cp = 0.79194`.
+- **Anisotropic export.** `to_mesh` and `extract_surface` now accept three cell counts
+  per axis, and `sample_grid` marches a non-cubic grid. A 8.575:1 hull at
+  `(218, 26, 26)` (147,368 cells) reaches −0.138 % volume / −0.066 % wetted-area
+  error with 4.3 % slivers, where an isotropic `64³` (262,144 cells) reaches
+  −0.089 % / −0.080 % with 10.0 % slivers and 64 stations along the hull.
+
+### Fixed
+- **`test_public_surface` poisoned the interpreter.** It deleted `numpy` from
+  `sys.modules` and reloaded `tensorcad` to prove the core needs no third-party stack,
+  which left torch's numpy bridge broken for every later test in the session — a
+  real order-dependent failure, observed when the file was run before
+  `test_geometry_field.py`. The check now runs in a fresh interpreter, like the
+  neighbouring opt-in tests.
+- **A scale-dependent "degenerate face" criterion.** 0.4.0 counted faces with an area
+  below 10⁻¹² m², which is a different geometric claim on a 0.3 m cylinder and a
+  4.4 m hull. Tests and benchmarks now use area below 10⁻⁶ of the longest edge
+  squared. The corrected 0.4.0 record: the cylinder at 40 cells emitted 8,108 faces
+  below 10⁻¹² m² (12.4 %), 2,936 of them with an aspect ratio above 10⁶ — not, as
+  0.4.0's notes said, "exactly zero area".
+
+### Notes
+- 281 tests (262 without the `neural` extra), 95 % line coverage.
+- TensorLBM's `r_over_l` default is `1/(2·8.57) = 0.058343` (`R = 0.254148 m`); the
+  offset table gives `0.058310` (`R = 0.254000 m`). This module uses the table, which
+  makes its wetted area 0.060 % smaller than TensorLBM's published value. At
+  TensorLBM's radius the two implementations agree to `+0.00000 %`, so the whole
+  difference is the radius convention.
+- Mesh quality is reported, not repaired: at `(218, 26, 26)` 4.3 % of triangles are
+  thinner than 2°, concentrated at the two tips where the meridian slope is infinite.
+  There is no smoothing or decimation yet.
+
 ## 0.4.0 — 2026-10-24
 
 The continuous geometry core (CGC v0.1): analytic and learned geometry now answer the
@@ -46,11 +210,12 @@ being true; see `docs/geometry-core.md` for the protocol and the numbers.
   440.00 mm target; conditioned radius 0.45/0.55/0.60 reproduced within 0.33/0.08/0.01 %.
 
 ### Fixed
-- **Zero-area triangles from grid-vertex coincidence.** A radius-0.3 cylinder in a ±0.3
+- **Squashed triangles from grid-vertex coincidence.** A radius-0.3 cylinder in a ±0.3
   box is exactly 20 cells across, so the level set passed through grid vertices and
-  marching tetrahedra emitted 8,108 exactly-zero-area triangles (12.5 % of 65,144;
-  sliver share 22.4 %). `to_mesh` now offsets the sampling box by `1/φ²` of one cell:
-  zero-area faces → 0, sliver share → 2.3 %, volume error unchanged at −0.17 %.
+  marching tetrahedra emitted 8,108 faces with an area below 10⁻¹² m² (12.4 % of
+  65,144), 2,936 of them with an aspect ratio above 10⁶, and a 22.4 % sliver share.
+  `to_mesh` now offsets the sampling box by an irrational fraction of a cell per axis:
+  every count → 0, sliver share → 2.3 %, volume error unchanged at −0.17 %.
 - **Finite differences are the wrong derivative for a float32 field.** At `step=1e-6`
   a central difference of the network is dominated by rounding (0.023 disagreement with
   autograd); at `1e-4` it agrees to `3e-4`. `NeuralGeometryField.gradient` now uses

@@ -287,6 +287,70 @@ def _near(name: str, actual: float, expected: float, tolerance: float, label: st
     )
 
 
+@dataclass(frozen=True)
+class MeshQuality:
+    """The numbers behind :func:`inspect_mesh_quality`, without the prose.
+
+    Exposed separately because callers that *act* on element quality -- a smoother, a
+    decimator, a mesher comparing two candidate meshes -- need the numbers, and parsing
+    them back out of the human-readable ``detail`` string would be a quiet way for the
+    two to drift apart.
+    """
+
+    min_angle_degrees: float
+    max_aspect_ratio: float
+    sliver_count: int
+    triangle_count: int
+
+    @property
+    def sliver_share(self) -> float:
+        return self.sliver_count / self.triangle_count if self.triangle_count else 0.0
+
+
+def measure_quality(
+    mesh: Mesh,
+    *,
+    min_angle_degrees: float = 2.0,
+    max_aspect_ratio: float = 25.0,
+) -> MeshQuality:
+    """Smallest angle, worst aspect ratio and the sliver count of ``mesh``."""
+    if not mesh.faces:
+        return MeshQuality(180.0, 0.0, 0, 0)
+    smallest_angle = 180.0
+    largest_aspect = 0.0
+    slivers = 0
+    for face in mesh.faces:
+        a = mesh.vertices[face[0]]
+        b = mesh.vertices[face[1]]
+        c = mesh.vertices[face[2]]
+        lengths = (math.dist(a, b), math.dist(b, c), math.dist(c, a))
+        longest = max(lengths)
+        shortest = min(lengths)
+        if shortest <= 0.0:  # degenerate; inspect_geometry already reports it
+            slivers += 1
+            continue
+        ux, uy, uz = b[0] - a[0], b[1] - a[1], b[2] - a[2]
+        vx, vy, vz = c[0] - a[0], c[1] - a[1], c[2] - a[2]
+        # |u x v| is twice the area, so longest**2 / area2 is longest edge over height.
+        area2 = math.sqrt(
+            (uy * vz - uz * vy) ** 2 + (uz * vx - ux * vz) ** 2 + (ux * vy - uy * vx) ** 2
+        )
+        if area2 <= 0.0:
+            slivers += 1
+            continue
+        largest_aspect = max(largest_aspect, longest * longest / area2)
+        # Smallest angle from the two shortest sides meeting at its vertex.
+        opposite, side_a, side_b = sorted(lengths)
+        cosine = (side_a * side_a + side_b * side_b - opposite * opposite) / (
+            2.0 * side_a * side_b
+        )
+        angle = math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
+        smallest_angle = min(smallest_angle, angle)
+        if angle < min_angle_degrees:
+            slivers += 1
+    return MeshQuality(smallest_angle, largest_aspect, slivers, len(mesh.faces))
+
+
 def inspect_mesh_quality(
     mesh: Mesh,
     *,
@@ -311,45 +375,14 @@ def inspect_mesh_quality(
     checks: list[Check] = []
     if not mesh.faces:
         return [Check("mesh_quality_measured", False, "no faces to measure", severity=WARNING)]
-    smallest_angle = 180.0
-    largest_aspect = 0.0
-    slivers = 0
-    for face in mesh.faces:
-        a = mesh.vertices[face[0]]
-        b = mesh.vertices[face[1]]
-        c = mesh.vertices[face[2]]
-        lengths = (
-            math.dist(a, b),
-            math.dist(b, c),
-            math.dist(c, a),
-        )
-        longest = max(lengths)
-        shortest = min(lengths)
-        if shortest <= 0.0:  # degenerate; inspect_geometry already reports it
-            slivers += 1
-            continue
-        ux, uy, uz = b[0] - a[0], b[1] - a[1], b[2] - a[2]
-        vx, vy, vz = c[0] - a[0], c[1] - a[1], c[2] - a[2]
-        # |u x v| is twice the area, so longest**2 / area2 is longest edge over height.
-        area2 = math.sqrt(
-            (uy * vz - uz * vy) ** 2 + (uz * vx - ux * vz) ** 2 + (ux * vy - uy * vx) ** 2
-        )
-        if area2 <= 0.0:
-            slivers += 1
-            continue
-        aspect = longest * longest / area2
-        largest_aspect = max(largest_aspect, aspect)
-        # Smallest angle from the two shortest sides meeting at its vertex.
-        ordered = sorted(lengths)
-        opposite, side_a, side_b = ordered[0], ordered[1], ordered[2]
-        cosine = (side_a * side_a + side_b * side_b - opposite * opposite) / (2.0 * side_a * side_b)
-        angle = math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
-        smallest_angle = min(smallest_angle, angle)
-        if angle < min_angle_degrees:
-            slivers += 1
-
-    total = len(mesh.faces)
-    share = slivers / total
+    measured = measure_quality(
+        mesh, min_angle_degrees=min_angle_degrees, max_aspect_ratio=max_aspect_ratio
+    )
+    smallest_angle = measured.min_angle_degrees
+    largest_aspect = measured.max_aspect_ratio
+    slivers = measured.sliver_count
+    total = measured.triangle_count
+    share = measured.sliver_share
     checks.append(
         Check(
             "mesh_min_angle",

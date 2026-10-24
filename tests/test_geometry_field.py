@@ -383,8 +383,15 @@ def test_mesh_quality_reports_slivers_instead_of_hiding_them() -> None:
     assert share.severity == "warning", "a valid solid can still be a poor discretisation"
 
 
-def _degenerate_faces(mesh: object) -> int:
-    """Faces with exactly zero area -- the signature of a grid-vertex coincidence."""
+def _squashed_faces(mesh: object) -> int:
+    """Triangles whose area is below 1e-6 of their longest edge squared.
+
+    A scale-free criterion: the shape of a triangle is the ratio of its area to its
+    longest edge, so a radius-0.3 cylinder and a 4.4 m hull are judged alike. The
+    grid-vertex coincidence left thousands of these (aspect ratio above 10**6) --
+    a solver may reasonably reject such elements, and an absolute area threshold
+    would have missed them on a large model and flagged valid small ones.
+    """
     count = 0
     for face in mesh.faces:  # type: ignore[attr-defined]
         a, b, c = (mesh.vertices[index] for index in face)  # type: ignore[attr-defined]
@@ -393,7 +400,8 @@ def _degenerate_faces(mesh: object) -> int:
         area2 = math.sqrt(
             (uy * vz - uz * vy) ** 2 + (uz * vx - ux * vz) ** 2 + (ux * vy - uy * vx) ** 2
         )
-        if area2 < 1e-12:
+        longest = max(math.dist(a, b), math.dist(b, c), math.dist(c, a))
+        if longest > 0.0 and area2 <= 1e-6 * longest * longest:
             count += 1
     return count
 
@@ -409,14 +417,15 @@ def _degenerate_faces(mesh: object) -> int:
 def test_sampling_does_not_put_the_surface_on_grid_vertices(field: object) -> None:
     """r = 0.3 in a +-0.3 box is exactly 20 cells per axis, and that used to hurt.
 
-    Marching tetrahedra used to emit 8,108 exactly-zero-area faces for the
-    cylinder at 40 cells per axis, because the level set passed through grid
-    vertices. ``to_mesh`` now offsets its sampling box by an irrational fraction
-    of a cell, so the count must be zero -- a solver that sees zero-area elements
-    is entitled to reject the mesh.
+    Marching tetrahedra used to emit thousands of squashed faces for the cylinder
+    at 40 cells per axis (8,108 with an area below 1e-12 m^2, of which 2,936 had an
+    aspect ratio above 10**6), because the level set passed through grid vertices.
+    ``to_mesh`` now offsets its sampling box by an irrational fraction of a cell per
+    axis, so the count must be zero -- a solver that sees such elements is entitled
+    to reject the mesh.
     """
     sampled = to_mesh(field, 40)  # type: ignore[arg-type]
-    assert _degenerate_faces(sampled.mesh) == 0
+    assert _squashed_faces(sampled.mesh) == 0
     assert sampled.report.watertight
     assert sampled.report.euler_characteristic == 2
 
