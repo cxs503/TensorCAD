@@ -1,0 +1,62 @@
+# Proposal: TensorCAD 多船型族扩展
+
+**mission 草案**: m242（建议）
+**角色**: implementer
+**预算**: ~80 tool calls, ~60 min
+**优先级**: P0（TensorShipDesign 直接依赖）
+
+## 目标
+
+在 TensorCAD `tensorcad/hull.py` 中新增多船型参数化族，使 scan_runner 参数扫描线
+和 TensorShipDesign 可使用不同船型分布进行参数研究。
+
+## 背景
+
+当前 TensorCAD 仅支持单船型：
+- 分布函数：`sin(πx/L)^0.7 · √(z/draft)`
+- 前后对称，无艉板
+- 参数：L/B/T/nx/nz
+
+这对初步设计验证足够，但真实船舶设计需要：
+- 系列 60（Washington 实验船型族）
+- Savitsky 计划船型（滑行艇）
+- 用户自定义分布
+
+## 交付物
+
+1. `tensorcad/hull_families.py`：船型族模块
+   - `Series60Parameters` (Cb 为参数)
+   - `SavitskyParameters` (deadrise angle, LCG 等)
+   - `CustomHullDistribution` (用户回调)
+   - 每个族返回与 `HullParameters` 兼容的 offsets 格式
+
+2. `tests/test_hull_families.py`：测试覆盖
+   - 每个族至少 3 个参数组合
+   - 闭固体检查（水密/流形/Euler=2）
+   - 与解析体积对比（如有）
+
+3. `examples/hull_families/run_comparison.py`：对比基准
+   - 同 L/B/T 下三种船型的静水力对比
+   - 输出表格 + JSON
+
+4. README 更新：新增船型族章节
+
+## 验收判据
+
+- [ ] 3 个船型族实现，全部通过闭固体检查
+- [ ] 测试套件新增 ≥ 15 个测试，全部通过
+- [ ] 对比基准脚本可运行，输出数字与代码一致
+- [ ] README 声明与代码一致
+- [ ] 零依赖声明保持（核心包不拉新依赖）
+
+## 风险
+
+- 系列 60 的解析体积可能无闭式，需数值积分
+- Savitsky 船型可能有艉板，需修改 mesh 拓扑
+- 自定义分布需验证用户回调不破坏闭固体性质
+
+## 与既有线的关系
+
+- 不碰 TensorBEM/TensorSPH/TensorDG
+- 为 TensorShipDesign 提供几何源
+- scan_runner 可直接使用新船型族做参数扫描
