@@ -84,7 +84,7 @@ class FieldConfig:
         )
 
 
-class ConditionalTSDF(nn.Module):
+class ConditionalTSDF(nn.Module):  # type: ignore[misc]  # nn is untyped by design
     """MLP over Fourier-encoded coordinates plus the state vector, one scalar out."""
 
     def __init__(self, config: FieldConfig | None = None) -> None:
@@ -183,7 +183,7 @@ def train_base_field(
         labels = sphere_tsdf(points, radii, truncation)
         loss = torch.mean((model(points, radii) - labels) ** 2)
         optimizer.zero_grad(set_to_none=True)
-        loss.backward()  # type: ignore[no-untyped-call]
+        loss.backward()
         optimizer.step()
         final_loss = float(loss.detach())
         if log is not None and log_every and step % log_every == 0:
@@ -265,7 +265,7 @@ def fine_tune_dent(
 
         loss = target_loss + replay_weight * preservation
         optimizer.zero_grad(set_to_none=True)
-        loss.backward()  # type: ignore[no-untyped-call]
+        loss.backward()
         optimizer.step()
         final_loss = float(loss.detach())
     candidate.eval()
