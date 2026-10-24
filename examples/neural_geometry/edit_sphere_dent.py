@@ -61,6 +61,17 @@ def ray_surface_radii(
     return roots, found
 
 
+def json_safe_metrics(metrics: dict[str, float]) -> dict[str, float | int | None]:
+    """Replace non-finite measurements with null so rollback reports remain valid JSON."""
+    safe: dict[str, float | int | None] = {}
+    for name, value in metrics.items():
+        if isinstance(value, float) and not math.isfinite(value):
+            safe[name] = None
+        else:
+            safe[name] = value
+    return safe
+
+
 def build_bundle(output: Path, model: ConditionalTSDF, radius: float, depth: float, sigma: float,
                  steps: int, seed: int, elapsed: float, metrics: dict[str, float], passed: bool) -> str:
     output.mkdir(parents=True, exist_ok=True)
@@ -205,11 +216,11 @@ def main() -> None:
         loaded = load_bundle(args.output)
         assert loaded.revision == 2
         result = {"transaction": "committed", "bundle": str(args.output), "revision": loaded.revision,
-                  "weights_sha256": loaded.weights.sha256, **metrics}
+                  "weights_sha256": loaded.weights.sha256, **json_safe_metrics(metrics)}
     else:
         # Roll back by retaining the parent model; never publish failed candidate as active.
         result = {"transaction": "rolled_back", "reason": "validation thresholds not met",
-                  "active_revision": 1, "candidate_not_published": True, **metrics}
+                  "active_revision": 1, "candidate_not_published": True, **json_safe_metrics(metrics)}
     print(json.dumps(result, indent=2, allow_nan=False))
     if not passed:
         raise SystemExit("online dent candidate failed validation; parent revision retained")
