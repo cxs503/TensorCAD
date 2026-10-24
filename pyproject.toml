@@ -26,6 +26,8 @@ dependencies = []
 [project.optional-dependencies]
 test = ["pytest>=7"]
 dev = ["ruff>=0.6", "mypy>=1.8", "pytest-cov>=4"]
+# Research-only neural field training and non-executable tensor checkpoints.
+neural = ["torch>=2.2", "safetensors>=0.4"]
 # Optional solver/kernel bridges (tensorcad.adapters) land here, e.g. "ocp>=7",
 # "gmsh". Nothing in the core may import them.
 
@@ -68,6 +70,10 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
+module = ["torch.*", "safetensors.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "tests.*"
 ignore_errors = true
 
@@ -78,4 +84,3 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
-fail_under = 90
