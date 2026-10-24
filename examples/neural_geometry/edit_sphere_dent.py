@@ -25,8 +25,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from train_sphere import ConditionalTSDF, reference_tsdf  # noqa: E402
-from tensorcad.neural_geometry import load_bundle  # noqa: E402
+from train_sphere import ConditionalTSDF, reference_tsdf
+from tensorcad.neural_geometry import load_bundle
 
 
 def dent_tsdf(points: Tensor, radius: Tensor, depth: float, sigma: float, truncation: float) -> Tensor:
