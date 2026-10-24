@@ -1,0 +1,587 @@
+{
+  "schema": "tensorcad.benchmark/1",
+  "passed": true,
+  "failures": [],
+  "seconds": 6.067278653000358,
+  "command": "python examples/benchmarks/run_benchmark.py --output docs/benchmarks/full",
+  "environment": {
+    "tensorcad": "0.9.0",
+    "python": "3.11.2",
+    "platform": "Linux-6.1.158+-x86_64-with-glibc2.36",
+    "machine": "x86_64",
+    "processor": "unknown",
+    "numpy": "2.4.6",
+    "torch": "2.14.1+cu130",
+    "safetensors": "0.8.0",
+    "ocp": null,
+    "cpu_count": 2
+  },
+  "cases": [
+    {
+      "identifier": "case_a_sphere_dent",
+      "question": "A local edit with a closed-form reference: how much of the error is the edit, and how much is the representation?",
+      "reference": "sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 rad on +x; 512 stratified rays, dent < 1 sigma, protected > 2.5 sigma + 1.5 cells",
+      "seconds": 3.0584571429999414,
+      "notes": [
+        "the mesh row moves only vertices inside 2.5 sigma and does not re-project: the error it shows is interpolation between vertices, not a defect of meshes",
+        "every row is probed along the same stratified ray set: a third of the rays lie inside the edit cone so a small edit is resolved, the rest are uniform, so no row sees an easier sample",
+        "an unweighted mean over rays is not a volume average: the rows are compared with each other, not with a surface integral"
+      ],
+      "gates": [
+        {
+          "name": "analytic_row_is_the_reference",
+          "passed": true,
+          "detail": "the harness reproduces the closed form to 1e-12 m"
+        },
+        {
+          "name": "mesh_edit_hits_the_target_depth",
+          "passed": true,
+          "detail": "axis depth error 1.276e-04 m (mean over the cone 0.047199 m)"
+        },
+        {
+          "name": "mesh_edit_is_local",
+          "passed": true,
+          "detail": "locality ratio 0.000e+00"
+        },
+        {
+          "name": "every_ray_hits_every_surface",
+          "passed": true,
+          "detail": "1.0000 coverage"
+        },
+        {
+          "name": "the_depth_threshold_is_the_same_for_every_measured_row",
+          "passed": true,
+          "detail": "1 % of the edit depth, applied unchanged to every representation that measured it (the analytic row is the reference and is not a candidate)"
+        },
+        {
+          "name": "no_representation_went_unmeasured_silently",
+          "passed": true,
+          "detail": "every row is measured, imported or explicitly not_supported"
+        }
+      ],
+      "representations": [
+        {
+          "identifier": "analytic_field",
+          "role": "reference: exact closed form",
+          "status": "measured",
+          "seconds": 0.053711303000000044,
+          "artifacts": {
+            "triangulated_surface": "109ae5a9f426fc28430ec07c116bd9b3ca92937ac7d13e78ece2af3b36388740"
+          },
+          "notes": [
+            "the surface radius is a formula, so this row's surface error is the harness's own; its useful numbers are the volume/area of the triangulation a solver would receive"
+          ],
+          "metrics": {
+            "reference_radius_error_max_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "the same formula the reference uses",
+              "tolerance": 1e-12,
+              "note": "ground truth by construction: this row proves the harness is consistent, it does not test an approximation",
+              "passed": true
+            },
+            "volume_m3": {
+              "value": 0.51937430823619,
+              "unit": "m^3",
+              "status": "measured",
+              "reference": "quadrature of the formula",
+              "tolerance": 1e-06,
+              "note": "",
+              "passed": null
+            },
+            "surface_area_m2": {
+              "value": 3.129632591292737,
+              "unit": "m^2",
+              "status": "measured",
+              "reference": "quadrature of the formula",
+              "tolerance": 1e-06,
+              "note": "",
+              "passed": null
+            },
+            "triangulated_volume_error": {
+              "value": 0.0006671227835037818,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "exact volume",
+              "tolerance": null,
+              "note": "an exact surface still has to be triangulated to be exported; this is the cost at 80x160 rings/segments, the ideal parametrisation, not marching tets",
+              "passed": null
+            },
+            "triangulated_area_error": {
+              "value": 0.00033465680742883475,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "exact area",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "watertight": {
+              "value": 1.0,
+              "unit": "bool",
+              "status": "measured",
+              "reference": "every edge shared twice",
+              "tolerance": 1.0,
+              "note": "",
+              "passed": true
+            }
+          }
+        },
+        {
+          "identifier": "mesh",
+          "role": "control: explicit triangles, vertices moved in place",
+          "status": "measured",
+          "seconds": 2.877103975999944,
+          "artifacts": {
+            "edited_surface": "d855050f19d9f15b3c6e0d2799a8233410adf8d96f3b2b416309501e90652a2a"
+          },
+          "notes": [
+            "2241 of 12642 vertices moved; every other vertex is bit-identical, so the protected-region leak is exactly zero wherever no moved vertex is reachable, and the edit region pays for linear interpolation instead",
+            "no re-projection, no fairing, no smoothing: this is what a plain mesh edit costs",
+            "protected_displacement_* is measured against the unedited mesh on the same ray; protected_total_error_* is measured against the analytic surface and includes the chord sag of the triangulation"
+          ],
+          "metrics": {
+            "dent_depth_measured_mean_m": {
+              "value": 0.04719896387589841,
+              "unit": "m",
+              "status": "measured",
+              "reference": "reference mean over the edit cone (0.047197 m)",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "dent_depth_mean_error_m": {
+              "value": 2.255031477944869e-06,
+              "unit": "m",
+              "status": "measured",
+              "reference": "reference mean over the same rays",
+              "tolerance": 0.0006,
+              "note": "",
+              "passed": true
+            },
+            "dent_depth_axis_error_m": {
+              "value": 0.00012758216244901366,
+              "unit": "m",
+              "status": "measured",
+              "reference": "reference depth 0.059912 m on the ray nearest the axis (theta = 0.0119 rad)",
+              "tolerance": 0.0006,
+              "note": "",
+              "passed": true
+            },
+            "dent_depth_peak_m": {
+              "value": 0.059784601141348315,
+              "unit": "m",
+              "status": "measured",
+              "reference": "target 0.06 m at theta = 0; measured on the ray at theta = 0.0119 rad",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "dent_surface_error_mean_m": {
+              "value": 4.546378778863388e-05,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic dent profile",
+              "tolerance": 0.0012,
+              "note": "",
+              "passed": true
+            },
+            "dent_surface_error_max_m": {
+              "value": 0.00014977825967427139,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic dent profile",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "protected_displacement_mean_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "same ray through the unedited mesh: the edit's leak, not the triangulation's sag; rays at theta >= 0.6089 rad",
+              "tolerance": 0.0012,
+              "note": "",
+              "passed": true
+            },
+            "protected_displacement_p95_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "same ray through the unedited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "protected_displacement_max_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "same ray through the unedited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "protected_total_error_mean_m": {
+              "value": 0.0001264037074796009,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface (total error: leak + chord sag, reported not gated)",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "surface_error_mean_m": {
+              "value": 0.00010238401810186491,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface over every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "surface_error_p95_m": {
+              "value": 0.00018369357906574123,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface over every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "surface_error_max_m": {
+              "value": 0.0012220402026749677,
+              "unit": "m",
+              "status": "measured",
+              "reference": "analytic surface over every ray",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "transition_band_displacement_m": {
+              "value": 0.001959814046900765,
+              "unit": "m",
+              "status": "measured",
+              "reference": "band 0.550-0.609 rad where a triangle straddles the edit support edge (reported, not gated)",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "locality_ratio": {
+              "value": 0.0,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "worst protected-ray leak / peak edit depth",
+              "tolerance": 0.05,
+              "note": "",
+              "passed": true
+            },
+            "volume_error": {
+              "value": 0.0003832687695914938,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "exact volume",
+              "tolerance": 0.02,
+              "note": "",
+              "passed": true
+            },
+            "discretisation_floor_m": {
+              "value": 0.0001903833272239308,
+              "unit": "m",
+              "status": "measured",
+              "reference": "same grid, unedited sphere: the chord sag a ray between vertices lands on. The depth gate is 6.0e-4 m, so this is the headroom the gate has",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "ray_coverage": {
+              "value": 1.0,
+              "unit": "fraction",
+              "status": "measured",
+              "reference": "every ray hits the surface",
+              "tolerance": 0.999,
+              "note": "",
+              "passed": true
+            },
+            "vertex_count": {
+              "value": 12642.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "edited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "face_count": {
+              "value": 25280.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "edited mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "rays_per_second": {
+              "value": 177.956724633858,
+              "unit": "1/s",
+              "status": "measured",
+              "reference": "build the mesh, intersect every ray once",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "watertight": {
+              "value": 1.0,
+              "unit": "bool",
+              "status": "measured",
+              "reference": "closed surface",
+              "tolerance": 1.0,
+              "note": "",
+              "passed": true
+            },
+            "euler_characteristic": {
+              "value": 2.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "2 for a genus-0 closed surface",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            }
+          }
+        },
+        {
+          "identifier": "neural_field",
+          "role": "learned representation: versioned .ngo object, queried as an implicit field",
+          "status": "not_supported",
+          "seconds": 0.0,
+          "artifacts": {},
+          "notes": [
+            "this row is deliberately not simulated: a learned field's numbers must come from a trained artifact, and an untrained stand-in would be a mock result"
+          ],
+          "metrics": {
+            "dent_surface_error_mean_m": {
+              "value": null,
+              "unit": "m",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "no bundle supplied; produce one with `python examples/neural_geometry/edit_sphere_dent.py`",
+              "passed": null
+            },
+            "protected_displacement_mean_m": {
+              "value": null,
+              "unit": "m",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "no bundle supplied; produce one with `python examples/neural_geometry/edit_sphere_dent.py`",
+              "passed": null
+            },
+            "protected_total_error_mean_m": {
+              "value": null,
+              "unit": "m",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "no bundle supplied; produce one with `python examples/neural_geometry/edit_sphere_dent.py`",
+              "passed": null
+            },
+            "locality_ratio": {
+              "value": null,
+              "unit": "relative",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "no bundle supplied; produce one with `python examples/neural_geometry/edit_sphere_dent.py`",
+              "passed": null
+            }
+          }
+        },
+        {
+          "identifier": "ocp_step",
+          "role": "kernel path: faceted solid exported as STEP",
+          "status": "not_supported",
+          "seconds": 0.0,
+          "artifacts": {},
+          "notes": [
+            "a faceted solid is not a feature B-rep; when this row runs, it reports the facet count next to the round-trip volume so the distinction is measurable"
+          ],
+          "metrics": {
+            "step_volume_error": {
+              "value": null,
+              "unit": "relative",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "needs the optional wheels: pip install \"tensorcad[ocp]\"",
+              "passed": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "identifier": "case_b_hull_handoff",
+      "question": "The engineering case: can a target become a verified hull, and does the artifact a solver reads describe the same surface?",
+      "reference": "L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3",
+      "seconds": 1.854230016999736,
+      "notes": [
+        "the mesh volume here is a discretisation of an analytic form, so its error is the grid's: the refinement row measures how much"
+      ],
+      "gates": [
+        {
+          "name": "hull_mesh_matches_the_analytic_volume",
+          "passed": true,
+          "detail": "0.880 % error at (41, 13)"
+        },
+        {
+          "name": "design_loop_reaches_the_target",
+          "passed": true,
+          "detail": "converged, 6 evaluations"
+        },
+        {
+          "name": "export_round_trip_is_exact",
+          "passed": true,
+          "detail": "worst node displacement 0.0e+00 m, area 6.8e-16"
+        }
+      ],
+      "representations": [
+        {
+          "identifier": "parametric_hull",
+          "role": "engineering case: three design variables, analytic volume reference",
+          "status": "measured",
+          "seconds": 1.778598673000488,
+          "artifacts": {
+            "hull_surface": "98dfdf8f1bea4dc1218896e54d37dc974fe7919ef86cf04aba118d8add29767e"
+          },
+          "notes": [
+            "the design loop converged from 85 % of the target dimensions in 6 evaluations (converged)",
+            "analytic volume 12.170571 m^3 vs mesh 12.063418 m^3 at (41, 13); refining to (81, 25) moves it by 0.577 %"
+          ],
+          "metrics": {
+            "volume_error": {
+              "value": 0.008804310003371563,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "analytic_volume",
+              "tolerance": 0.01,
+              "note": "",
+              "passed": true
+            },
+            "design_loop_volume_error": {
+              "value": 2.220446049250313e-16,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "analytic_volume",
+              "tolerance": 1e-06,
+              "note": "",
+              "passed": true
+            },
+            "design_loop_solved": {
+              "value": 1.0,
+              "unit": "bool",
+              "status": "measured",
+              "reference": "converged and verified",
+              "tolerance": 1.0,
+              "note": "",
+              "passed": true
+            },
+            "design_loop_evaluations": {
+              "value": 6.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "iteration budget",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "design_loop_seconds": {
+              "value": 1.7607817910002268,
+              "unit": "s",
+              "status": "measured",
+              "reference": "wall clock around solve()",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "watertight": {
+              "value": 1.0,
+              "unit": "bool",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 1.0,
+              "note": "",
+              "passed": true
+            },
+            "euler_characteristic": {
+              "value": 2.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "2",
+              "tolerance": 2.0,
+              "note": "",
+              "passed": true
+            },
+            "export_node_error_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "exact round trip",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "export_area_error": {
+              "value": 6.833155168277856e-16,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "mesh area",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "surface_area_m2": {
+              "value": 51.99228747641454,
+              "unit": "m^2",
+              "status": "measured",
+              "reference": "integrated from the mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "grid_refinement_volume_change": {
+              "value": 0.0057744963242272185,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "(41, 13)",
+              "tolerance": 0.05,
+              "note": "",
+              "passed": true
+            }
+          }
+        },
+        {
+          "identifier": "ocp_step",
+          "role": "kernel path: faceted solid exported as STEP",
+          "status": "not_supported",
+          "seconds": 0.0,
+          "artifacts": {},
+          "notes": [],
+          "metrics": {
+            "step_volume_error": {
+              "value": null,
+              "unit": "relative",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "needs the optional wheels: pip install \"tensorcad[ocp]\"",
+              "passed": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
