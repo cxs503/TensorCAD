@@ -80,6 +80,9 @@ def build_bundle(output: Path, model: ConditionalTSDF, radius: float, depth: flo
     digest = hashlib.sha256(weights_path.read_bytes()).hexdigest()
     (output / "state.json").write_text(json.dumps({
         "schema_version": "0.1.0",
+        # `field_state` is what NeuralGeometryField conditions on; without it the bundle
+        # verifies but cannot be evaluated (`field_from_object` raises a format error).
+        "field_state": {"radius": radius},
         "controls": {
             "radius": {"value": radius, "unit": "m", "edit_mode": "conditioned"},
             "dent_depth": {"value": depth, "unit": "m", "edit_mode": "online_fit"},
@@ -107,8 +110,11 @@ def build_bundle(output: Path, model: ConditionalTSDF, radius: float, depth: flo
                   "weights": {"path": "weights.safetensors", "sha256": digest}},
         "field": {"quantity": "truncated_signed_distance", "inside_sign": "negative",
                   "surface_isovalue": 0.0, "length_unit": "m", "truncation_distance": 0.15},
-        "coordinates": {"dimension": 3, "frame": "object_local"},
+        "coordinates": {"dimension": 3, "frame": "object_local",
+                        "bounds": {"min": [-radius, -radius, -radius],
+                                   "max": [radius, radius, radius]}},
         "state_file": "state.json", "training_file": "training.json", "validation_file": "validation.json",
+        "state": {"field_state": {"radius": radius}},
         "parent_revision": 1, "producer": {"name": "TensorCAD", "experiment": "online-dent-v0.1"},
     }, indent=2) + "\n", encoding="utf-8")
     return digest
