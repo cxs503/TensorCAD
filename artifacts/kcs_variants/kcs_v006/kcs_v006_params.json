@@ -1,0 +1,150 @@
+{
+  "assertions": {
+    "all_passed": true,
+    "displacement_constraint": true,
+    "non_deformed_region": true,
+    "watertight_manifold": true
+  },
+  "coordinate_frame": "x=longitudinal(AP=0\u2192FP), y=transverse(+starboard), z=vertical(baseline=0\u2192DWL=T)",
+  "deformation": {
+    "bow_sharpness": 0.8251556837990232,
+    "bulb_extend": 0.031104770832489373,
+    "bulb_vertical": -0.12037273791103897,
+    "bulb_volume": 0.6989010055928151,
+    "entrance_full": 0.8164282568269654,
+    "flare_angle": 0.6958430569390348,
+    "shoulder_full": 0.9123253317366868,
+    "transom_width": 0.261960603178128
+  },
+  "hydrostatics": {
+    "basis": "closed surface integrals",
+    "block_coefficient": 0.624482,
+    "displacement_mass_kg": 51197813.803,
+    "displacement_volume_m3": 49949.086636985,
+    "longitudinal_centre_buoyancy_m": 101.525517758,
+    "longitudinal_centre_flotation_m": 101.588414873,
+    "maximum_section_area_m2": 263.527745031,
+    "prismatic_coefficient": 0.824088,
+    "vertical_centre_buoyancy_m": 6.190772881,
+    "water_density_kg_per_m3": 1025.0,
+    "waterline_z_m": 10.8,
+    "waterplane_area_m2": 6107.132792897,
+    "wetted_surface_area_m2": 8919.323691593
+  },
+  "mesh": {
+    "bounding_box": {
+      "max": [
+        230.0,
+        16.1,
+        10.800000000000002
+      ],
+      "min": [
+        0.0,
+        -16.1,
+        0.0
+      ],
+      "size": [
+        230.0,
+        32.2,
+        10.800000000000002
+      ]
+    },
+    "coordinate_frame": "x=longitudinal(AP=0\u2192FP), y=transverse(+starboard), z=vertical(baseline=0\u2192DWL=T)",
+    "triangle_count": 2046,
+    "units": "m",
+    "vertex_count": 1025
+  },
+  "model_type": "KCS_container_ship_deformed",
+  "parameters": {
+    "B": 32.2,
+    "Cb_target": 0.6505,
+    "Lpp": 230.0,
+    "T": 10.8,
+    "nx": 41,
+    "nz": 13,
+    "scale": 1.0,
+    "water_density": 1025.0
+  },
+  "schema_version": "kcs_deform/1",
+  "source": "KRISO / Tokyo 2015 Workshop + bow deformation",
+  "units": "m",
+  "validation": {
+    "checks": [
+      {
+        "name": "finite_vertex_coordinates",
+        "passed": true
+      },
+      {
+        "name": "non_empty_mesh",
+        "passed": true
+      },
+      {
+        "name": "face_indices_in_range",
+        "passed": true
+      },
+      {
+        "name": "no_degenerate_faces",
+        "passed": true
+      },
+      {
+        "name": "watertight",
+        "passed": true
+      },
+      {
+        "name": "edge_manifold",
+        "passed": true
+      },
+      {
+        "detail": "V-E+F = 1025-3069+2046 = 2, expected 2 for a closed genus-0 shell",
+        "name": "euler_characteristic_genus_zero",
+        "passed": true
+      },
+      {
+        "detail": "signed volume is 49949.1 m^3; a closed solid must have positive volume",
+        "name": "outward_orientation",
+        "passed": true
+      },
+      {
+        "detail": "volume 49949.0866 exceeds the 79984.8 bounding-box volume, which means self-intersection or inverted faces",
+        "name": "volume_within_bounding_box",
+        "passed": true
+      },
+      {
+        "name": "vertex_manifold",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "name": "length_matches_request",
+        "passed": true
+      },
+      {
+        "name": "draft_matches_request",
+        "passed": true
+      },
+      {
+        "name": "waterline_plane_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "realised beam 32.2 m vs requested 32.2 (grid deficit +0.0000%, allowance 0.0621%)",
+        "name": "beam_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "disp 49949.1 vs target 52030.1 (+4.00%)",
+        "name": "displacement_within_10pct",
+        "passed": true
+      },
+      {
+        "detail": "max deviation in non-deformed region: 0.00e+00 m (threshold: 1e-6 m)",
+        "name": "non_deformed_region_unchanged",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "passed": true,
+    "warnings": []
+  },
+  "variant_id": "kcs_v006"
+}

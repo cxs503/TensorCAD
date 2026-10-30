@@ -1,0 +1,1 @@
+{"type": "sdf_metadata", "bounding_box": {"min": [0.0, -16.1, 0.0], "max": [230.0, 16.1, 10.800000000000002], "size": [230.0, 32.2, 10.800000000000002]}, "n_vertices": 1025, "n_faces": 2046, "min_vertex_to_face_dist": 0.3000010644270221, "max_vertex_to_face_dist": 3.201323081757758, "note": "Full SDF grid available on demand; this is metadata for solver reference"}
