@@ -1,0 +1,578 @@
+{
+  "failed": 0,
+  "pass_rate": 1.0,
+  "passed": 30,
+  "total_variants": 30,
+  "variants": {
+    "v000": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": 0.0,
+        "bulb_extension": 0.0,
+        "bulb_volume": 1.0,
+        "bulb_width": 1.0,
+        "bulb_z": 0.0,
+        "entrance_fullness": 1.0,
+        "shoulder_fullness": 1.0,
+        "stem_angle": 0.0
+      },
+      "volume_m3": 0.4814354458291384
+    },
+    "v001": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.5371759072523888,
+        "bulb_extension": -0.027211464030842326,
+        "bulb_volume": 1.1917507528655866,
+        "bulb_width": 1.1722184718082602,
+        "bulb_z": -0.021799765453047047,
+        "entrance_fullness": 1.125044483216697,
+        "shoulder_fullness": 1.0626081649788826,
+        "stem_angle": -1.6862563458361235
+      },
+      "volume_m3": 0.48284493738622364
+    },
+    "v002": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.1761176272845226,
+        "bulb_extension": -0.03156156360629459,
+        "bulb_volume": 1.1920858053606649,
+        "bulb_width": 1.1459360707877657,
+        "bulb_z": -0.022250896201571172,
+        "entrance_fullness": 1.1377409879646512,
+        "shoulder_fullness": 1.0763482444180965,
+        "stem_angle": -1.8800924497763813
+      },
+      "volume_m3": 0.4826761024089553
+    },
+    "v003": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.4747626733504729,
+        "bulb_extension": -0.03559118755918607,
+        "bulb_volume": 1.2312485978713135,
+        "bulb_width": 1.1733976667243526,
+        "bulb_z": -0.01752455634657739,
+        "entrance_fullness": 1.1152924441855128,
+        "shoulder_fullness": 1.0646643849943533,
+        "stem_angle": -2.1277995867856063
+      },
+      "volume_m3": 0.48307316588729143
+    },
+    "v004": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.4372550702872861,
+        "bulb_extension": -0.020855738555864374,
+        "bulb_volume": 1.2135616181578837,
+        "bulb_width": 1.168204931725179,
+        "bulb_z": -0.023258033252958818,
+        "entrance_fullness": 1.1193522369575057,
+        "shoulder_fullness": 1.0818919536008145,
+        "stem_angle": -1.7542973813804958
+      },
+      "volume_m3": 0.482912308145479
+    },
+    "v005": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.4535358021723046,
+        "bulb_extension": -0.029275438170905985,
+        "bulb_volume": 1.2581181034785558,
+        "bulb_width": 1.1690185863800335,
+        "bulb_z": -0.020971724982333174,
+        "entrance_fullness": 1.139841828407295,
+        "shoulder_fullness": 1.0773205643577028,
+        "stem_angle": -1.7106344797513782
+      },
+      "volume_m3": 0.4831729962242505
+    },
+    "v006": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.1281872207687353,
+        "bulb_extension": -0.02590856327570153,
+        "bulb_volume": 1.1932077068558962,
+        "bulb_width": 1.1478034987498567,
+        "bulb_z": -0.022176813794787625,
+        "entrance_fullness": 1.1280224583620948,
+        "shoulder_fullness": 1.0683392080933027,
+        "stem_angle": -2.319198856472217
+      },
+      "volume_m3": 0.4826920143722478
+    },
+    "v007": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.959719960155798,
+        "bulb_extension": -0.027286311114711994,
+        "bulb_volume": 1.2155382525279057,
+        "bulb_width": 1.1865160023241872,
+        "bulb_z": -0.02103855226306494,
+        "entrance_fullness": 1.124427816384717,
+        "shoulder_fullness": 1.0782739301700095,
+        "stem_angle": -1.8815716918027252
+      },
+      "volume_m3": 0.4830493483362118
+    },
+    "v008": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.3094289844270643,
+        "bulb_extension": -0.03657722703603806,
+        "bulb_volume": 1.2410388758565243,
+        "bulb_width": 1.1701999867919752,
+        "bulb_z": -0.022692780049904573,
+        "entrance_fullness": 1.132075494879094,
+        "shoulder_fullness": 1.080538427529696,
+        "stem_angle": -1.954440204980283
+      },
+      "volume_m3": 0.4829830800325264
+    },
+    "v009": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.9160922567468264,
+        "bulb_extension": -0.023142961596203805,
+        "bulb_volume": 1.244319993808237,
+        "bulb_width": 1.1497257481786638,
+        "bulb_z": -0.022167615424287166,
+        "entrance_fullness": 1.1164445109756818,
+        "shoulder_fullness": 1.0882872914300517,
+        "stem_angle": -2.2312137251309387
+      },
+      "volume_m3": 0.48294692623733054
+    },
+    "v010": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.37690716923351075,
+        "bulb_extension": -0.02247264747054662,
+        "bulb_volume": 1.2120274516558933,
+        "bulb_width": 1.160236851892307,
+        "bulb_z": -0.01875649067764096,
+        "entrance_fullness": 1.1328034355477299,
+        "shoulder_fullness": 1.0673988252308195,
+        "stem_angle": -2.188095866801558
+      },
+      "volume_m3": 0.48297565379786966
+    },
+    "v011": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.8405395453736424,
+        "bulb_extension": -0.028772637316736984,
+        "bulb_volume": 1.2083919125966054,
+        "bulb_width": 1.1470626417536507,
+        "bulb_z": -0.019323312078211675,
+        "entrance_fullness": 1.1554020297621115,
+        "shoulder_fullness": 1.0752857888102938,
+        "stem_angle": -1.6019699148039117
+      },
+      "volume_m3": 0.482888693954059
+    },
+    "v012": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.4871285720733322,
+        "bulb_extension": -0.038181811756524124,
+        "bulb_volume": 1.1932981462797312,
+        "bulb_width": 1.1582187981739827,
+        "bulb_z": -0.02312280695719473,
+        "entrance_fullness": 1.143235071876639,
+        "shoulder_fullness": 1.0714485785951962,
+        "stem_angle": -2.3491778350784345
+      },
+      "volume_m3": 0.482672365156873
+    },
+    "v013": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.1896670802514624,
+        "bulb_extension": -0.020077572395198064,
+        "bulb_volume": 1.2270380041569395,
+        "bulb_width": 1.1746397000648108,
+        "bulb_z": -0.016231372979091056,
+        "entrance_fullness": 1.1537350866005525,
+        "shoulder_fullness": 1.0761091099122637,
+        "stem_angle": -1.8546317047787402
+      },
+      "volume_m3": 0.483254903387544
+    },
+    "v014": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.7916486643037142,
+        "bulb_extension": -0.03466349620094914,
+        "bulb_volume": 1.2348673259005865,
+        "bulb_width": 1.1874598760136594,
+        "bulb_z": -0.02310758261123299,
+        "entrance_fullness": 1.1345644362801097,
+        "shoulder_fullness": 1.0679016715225327,
+        "stem_angle": -1.6993176476974448
+      },
+      "volume_m3": 0.48306408037581705
+    },
+    "v015": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.9313996876962304,
+        "bulb_extension": -0.029988277738994033,
+        "bulb_volume": 1.202505631637109,
+        "bulb_width": 1.1701422222176303,
+        "bulb_z": -0.016698977285241435,
+        "entrance_fullness": 1.1541733356426545,
+        "shoulder_fullness": 1.064585178056489,
+        "stem_angle": -1.912823830849462
+      },
+      "volume_m3": 0.48303388744141695
+    },
+    "v016": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.1994852934848508,
+        "bulb_extension": -0.024749783998496973,
+        "bulb_volume": 1.2277565321083737,
+        "bulb_width": 1.1528285831352572,
+        "bulb_z": -0.017770988170955536,
+        "entrance_fullness": 1.138865915248783,
+        "shoulder_fullness": 1.0878729584879385,
+        "stem_angle": -2.384418606091334
+      },
+      "volume_m3": 0.48302099024092643
+    },
+    "v017": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.4097913607163635,
+        "bulb_extension": -0.022425562443536315,
+        "bulb_volume": 1.2482165870552824,
+        "bulb_width": 1.1870822194913897,
+        "bulb_z": -0.02153988699677871,
+        "entrance_fullness": 1.1176066324922385,
+        "shoulder_fullness": 1.0745797138994984,
+        "stem_angle": -2.331477238345697
+      },
+      "volume_m3": 0.48319864633469517
+    },
+    "v018": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.7722458597111418,
+        "bulb_extension": -0.03861574963063233,
+        "bulb_volume": 1.243242151568006,
+        "bulb_width": 1.165239197642222,
+        "bulb_z": -0.017873324565544097,
+        "entrance_fullness": 1.1207776159024894,
+        "shoulder_fullness": 1.0861729912325577,
+        "stem_angle": -2.1879546968479526
+      },
+      "volume_m3": 0.483061741350671
+    },
+    "v019": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.0189640429492737,
+        "bulb_extension": -0.03153724119598226,
+        "bulb_volume": 1.2048258743809457,
+        "bulb_width": 1.1521443960215494,
+        "bulb_z": -0.019685631289764333,
+        "entrance_fullness": 1.1478468981090488,
+        "shoulder_fullness": 1.0794963417291836,
+        "stem_angle": -1.6038805146712842
+      },
+      "volume_m3": 0.48286380536370405
+    },
+    "v020": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.8957229940672902,
+        "bulb_extension": -0.03123799832170992,
+        "bulb_volume": 1.2262303088724913,
+        "bulb_width": 1.167356979515148,
+        "bulb_z": -0.023031966433053875,
+        "entrance_fullness": 1.12511138016642,
+        "shoulder_fullness": 1.0666065215335467,
+        "stem_angle": -2.2159082139227384
+      },
+      "volume_m3": 0.4828988549968698
+    },
+    "v021": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.42632813977162815,
+        "bulb_extension": -0.03858013827981935,
+        "bulb_volume": 1.2341772070089068,
+        "bulb_width": 1.138897154243876,
+        "bulb_z": -0.022168465729510766,
+        "entrance_fullness": 1.1557439005852757,
+        "shoulder_fullness": 1.0800693333488884,
+        "stem_angle": -2.209596292504804
+      },
+      "volume_m3": 0.4828021033583028
+    },
+    "v022": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.7745960763193852,
+        "bulb_extension": -0.03571526385259123,
+        "bulb_volume": 1.1992618294107515,
+        "bulb_width": 1.1781540683359915,
+        "bulb_z": -0.016515886075354633,
+        "entrance_fullness": 1.1406969391996378,
+        "shoulder_fullness": 1.0657122974308564,
+        "stem_angle": -1.754002401786685
+      },
+      "volume_m3": 0.48302090544353304
+    },
+    "v023": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.5438317354861344,
+        "bulb_extension": -0.03806138371542353,
+        "bulb_volume": 1.2201735827684463,
+        "bulb_width": 1.1720350501011316,
+        "bulb_z": -0.020611371015840634,
+        "entrance_fullness": 1.1360161100616504,
+        "shoulder_fullness": 1.0629525361345586,
+        "stem_angle": -1.612667830907227
+      },
+      "volume_m3": 0.4829660872974482
+    },
+    "v024": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.0288119824032695,
+        "bulb_extension": -0.031947574357954624,
+        "bulb_volume": 1.2137511823776472,
+        "bulb_width": 1.1596737451308223,
+        "bulb_z": -0.01710661970917767,
+        "entrance_fullness": 1.1261895350264128,
+        "shoulder_fullness": 1.068356354340008,
+        "stem_angle": -2.062494688132477
+      },
+      "volume_m3": 0.4829622679441322
+    },
+    "v025": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.7047072187951368,
+        "bulb_extension": -0.03500387104235799,
+        "bulb_volume": 1.2546285919493207,
+        "bulb_width": 1.1377823581238686,
+        "bulb_z": -0.020454954039572346,
+        "entrance_fullness": 1.1537607097142824,
+        "shoulder_fullness": 1.0850808275523984,
+        "stem_angle": -1.6005740252698186
+      },
+      "volume_m3": 0.48298194429082875
+    },
+    "v026": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.7629229870943534,
+        "bulb_extension": -0.020620074854304973,
+        "bulb_volume": 1.2548456888105688,
+        "bulb_width": 1.146756101455955,
+        "bulb_z": -0.017210434124685557,
+        "entrance_fullness": 1.122483999977176,
+        "shoulder_fullness": 1.0617590619991653,
+        "stem_angle": -2.0791677659604377
+      },
+      "volume_m3": 0.48314742731354715
+    },
+    "v027": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.790492469394771,
+        "bulb_extension": -0.032420537620461674,
+        "bulb_volume": 1.2589716190645808,
+        "bulb_width": 1.158265411729459,
+        "bulb_z": -0.021878375534622786,
+        "entrance_fullness": 1.1502831770876856,
+        "shoulder_fullness": 1.0898626806847813,
+        "stem_angle": -1.6341458873122614
+      },
+      "volume_m3": 0.4830871134189709
+    },
+    "v028": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -0.32816157152775705,
+        "bulb_extension": -0.028884633531887634,
+        "bulb_volume": 1.2402885792707428,
+        "bulb_width": 1.1668549159948942,
+        "bulb_z": -0.02276162539780749,
+        "entrance_fullness": 1.1283518521472553,
+        "shoulder_fullness": 1.0824392668113718,
+        "stem_angle": -1.9662438389005805
+      },
+      "volume_m3": 0.4829992410555582
+    },
+    "v029": {
+      "all_passed": true,
+      "gates": {
+        "displacement_constraint": true,
+        "non_deform_region": true,
+        "watertight_manifold": true
+      },
+      "params": {
+        "bow_flare": -1.0583105448544652,
+        "bulb_extension": -0.03885669454185034,
+        "bulb_volume": 1.230892431612128,
+        "bulb_width": 1.1878428396800949,
+        "bulb_z": -0.019977196936643894,
+        "entrance_fullness": 1.1533723951421728,
+        "shoulder_fullness": 1.0655747488294216,
+        "stem_angle": -2.3359108278075307
+      },
+      "volume_m3": 0.4831102758526947
+    }
+  }
+}

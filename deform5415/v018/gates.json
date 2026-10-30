@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "gates": {
+    "displacement_constraint": {
+      "detail": "baseline_vol=0.481435 m^3, deformed_vol=0.483062 m^3, rel_change=+0.3%",
+      "name": "displacement_constraint",
+      "passed": true
+    },
+    "non_deform_region": {
+      "detail": "checked=1961, violations=0, max_deviation=0.00e+00 m",
+      "name": "non_deform_region_unchanged",
+      "passed": true
+    },
+    "watertight_manifold": {
+      "detail": "PB-002/PB-003 passed",
+      "name": "watertight_manifold",
+      "passed": true
+    }
+  },
+  "variant_id": "v018"
+}

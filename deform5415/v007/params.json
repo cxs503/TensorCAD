@@ -1,0 +1,119 @@
+{
+  "gates": {
+    "displacement_constraint": {
+      "detail": "baseline_vol=0.481435 m^3, deformed_vol=0.483049 m^3, rel_change=+0.3%",
+      "name": "displacement_constraint",
+      "passed": true
+    },
+    "non_deform_region": {
+      "detail": "checked=1961, violations=0, max_deviation=0.00e+00 m",
+      "name": "non_deform_region_unchanged",
+      "passed": true
+    },
+    "watertight_manifold": {
+      "detail": "PB-002/PB-003 passed",
+      "name": "watertight_manifold",
+      "passed": true
+    }
+  },
+  "hydrostatics": {
+    "basis": "closed surface integrals",
+    "block_coefficient": 0.481653,
+    "displacement_mass_kg": 495.126,
+    "displacement_volume_m3": 0.483049348,
+    "longitudinal_centre_buoyancy_m": 2.32730225,
+    "longitudinal_centre_flotation_m": null,
+    "maximum_section_area_m2": 0.130408353,
+    "prismatic_coefficient": 0.681658,
+    "vertical_centre_buoyancy_m": -0.143042716,
+    "water_density_kg_per_m3": 1025.0,
+    "waterline_z_m": 0.0,
+    "waterplane_area_m2": 0.0,
+    "wetted_surface_area_m2": 7.250547125
+  },
+  "mesh": {
+    "bounding_box": {
+      "max": [
+        5.577,
+        0.378197019787669,
+        0.0
+      ],
+      "min": [
+        0.143,
+        -0.378197019787669,
+        -0.244
+      ],
+      "size": [
+        5.434,
+        0.756394039575338,
+        0.244
+      ]
+    },
+    "coordinate_frame": "x=longitudinal(+fwd), y=transverse(+stbd), z=vertical(+up), z=0=DWL",
+    "triangle_count": 6320,
+    "units": "m",
+    "vertex_count": 3162
+  },
+  "params": {
+    "bow_flare": -0.959719960155798,
+    "bulb_extension": -0.027286311114711994,
+    "bulb_volume": 1.2155382525279057,
+    "bulb_width": 1.1865160023241872,
+    "bulb_z": -0.02103855226306494,
+    "entrance_fullness": 1.124427816384717,
+    "shoulder_fullness": 1.0782739301700095,
+    "stem_angle": -1.8815716918027252
+  },
+  "validation": {
+    "checks": [
+      {
+        "name": "finite_vertex_coordinates",
+        "passed": true
+      },
+      {
+        "name": "non_empty_mesh",
+        "passed": true
+      },
+      {
+        "name": "face_indices_in_range",
+        "passed": true
+      },
+      {
+        "name": "no_degenerate_faces",
+        "passed": true
+      },
+      {
+        "name": "watertight",
+        "passed": true
+      },
+      {
+        "name": "edge_manifold",
+        "passed": true
+      },
+      {
+        "detail": "V-E+F = 3162-9480+6320 = 2, expected 2 for a closed genus-0 shell",
+        "name": "euler_characteristic_genus_zero",
+        "passed": true
+      },
+      {
+        "detail": "signed volume is 0.483049 m^3; a closed solid must have positive volume",
+        "name": "outward_orientation",
+        "passed": true
+      },
+      {
+        "detail": "volume 0.483049348 exceeds the 1.00289983 bounding-box volume, which means self-intersection or inverted faces",
+        "name": "volume_within_bounding_box",
+        "passed": true
+      },
+      {
+        "name": "vertex_manifold",
+        "passed": true,
+        "severity": "warning"
+      }
+    ],
+    "errors": [],
+    "passed": true,
+    "warnings": []
+  },
+  "variant_id": "v007"
+}
