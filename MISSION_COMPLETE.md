@@ -1,86 +1,62 @@
-# TensorCAD 审计任务完成总结
+# m585: 变形族可视化出图 + 报告升级 — 完成报告
 
-## 任务完成状态
+## 任务概述
 
-✅ **所有交付物已完成并验证**
-
-## 完成的工作
-
-### 1. 环境与测试基线
-- 测试套件：262/262 通过（23.43s）
-- 零依赖验证：✅ 通过（import tensorcad 在 torch/numpy 被拦截时仍可导入）
-- README 声明修正：194+213 为 0.3.x 旧数字，0.4.0 实际为 262
-
-### 2. 数字直读验证（零手抄）
-
-#### 参数化船体两档收敛
-- 默认分辨率 (41×13)：7.446554 m³ / 解析 7.512698 m³ = **-0.880%**
-- 细分辨率 (161×41)：7.502488 m³ / 解析 7.512698 m³ = **-0.136%**
-- 数据来源：`/tmp/tcad_audit/hull_default.log`
-
-#### .ngo 事务管线三连
-- dent peak：**0.05269 m** / 目标 0.06 m
-- 抽取网格：**watertight** + **V-E+F=2**
-- 数据来源：`/tmp/tcad_audit/ngo_pipeline.log`
-
-### 3. README 能力-声明对照
-- ✅ 所有声明的几何检查（水密/流形/Euler/外向/零面积）均通过
-- ✅ 0.3.1 声称修复的 8 项缺陷：6 项直接验证通过，2 项代码审查通过
-- ✅ README 诚实标注能力边界（无 B-rep/无布尔/单船型族/精度限制）
-
-### 4. 对 TensorShipDesign 接棒位评估
-- **参数化船体族** → scan_runner 参数扫描线几何源
-- **SDF 导出** → L2 几何编码器几何源
-- **OCP B-rep 后端** → P0 优先级（TensorShipDesign 核心依赖）
-
-### 5. 开发候选提案
-1. **多船型族扩展**（P0）：系列 60/Savitsky/用户自定义
-2. **SDF 体素网格导出**（P1）：对接 scan_runner SDF 栈
+对 m542 (DTMB 5415) 和 m546 (KCS) 艏部参数化变形族进行可视化出图与报告升级，将原 500 字符 stub 报告 498/499 升级为论文级报告。
 
 ## 交付物清单
 
-### 审计报告
-- `expand_audit_tensorcad.md`：完整审计报告（含两档体积收敛表 + .ngo 事务验证记录）
+### 1. 可视化图（6 张，全部本单真跑）
 
-### Backlog 登记
-- `backlog_tensorcad_section.md`：TensorCAD backlog 节
-- 已追加至 `/nfs/wangxi/tensor_eco/agent_work/expand_follow/backlog.md`
+| 图号 | 文件名 | 内容 | 大小 |
+|------|--------|------|------|
+| Fig 1 | `artifacts/fig01_side_overlay.png` | DTMB 5415 & KCS 侧视叠加图（基线 vs 6 代表变体，标变形区） | 120 KB |
+| Fig 2 | `artifacts/fig02_top_overlay.png` | DTMB 5415 & KCS 俯视叠加图（水线面半宽曲线） | 156 KB |
+| Fig 3 | `artifacts/fig03_non_deform_deviation.png` | 非变形区偏差验证（30+32 变体全零偏差） | 88 KB |
+| Fig 4 | `artifacts/fig04_param_distribution.png` | 排水量分布 + 参数空间散点图 | 253 KB |
+| Fig 5 | `artifacts/fig05_gate_heatmap.png` | 三门禁热力图（62 变体 × 3 门禁 = 全绿） | 76 KB |
+| Fig 6 | `artifacts/fig06_3d_comparison.png` | 3D 线框对比（基线 vs v015） | 978 KB |
 
-### 开发提案
-- `proposals/tensorcad-hull-families.txt`：多船型族扩展（m242 草案）
-- `proposals/tensorcad-sdf-voxel-export.txt`：SDF 体素网格导出（m243 草案）
+### 2. 变体库状态
 
-### 交接笔记
-- 已更新 `/nfs/wangxi/tensor_eco/agent_memory/tensor-expand/context.md`
+| 船型 | 变体数 | 三门禁全通过 | 通过率 | 门禁结果文件 |
+|------|--------|-------------|--------|-------------|
+| DTMB 5415 (m542) | 30 | 30 | 100% | `deform5415/family_summary.json` + 每变体 `gates.json` |
+| KCS (m546) | 32 | 32 | 100% | `kcs_variants/variant_summary.json` |
 
-## 验证证据
+### 3. 升级报告
 
-所有关键数字均从实际运行日志直读，零手抄：
-- `/tmp/tcad_audit/hull_default.log`：参数化船体收敛表
-- `/tmp/tcad_audit/ngo_pipeline.log`：.ngo 事务管线输出
-- `/tmp/tcad_audit/cli-ngo/`：CLI 三连输出
-- `/tmp/tcad_audit/geometry_core.log`：几何核心基准测试
+- **报告 ID**: 通过 tensor_reports API 提交（mission_id: 585）
+- **Markdown 长度**: 3624 字符（≥2500 要求 ✅）
+- **内嵌图**: 6 张 base64 编码 PNG（figures 非空 ✅）
+- **本地副本**: `docs/report_m585.json`
 
-## 下一步
+### 4. 复现脚本
 
-等待门禁通过后：
-1. `git push origin agent/m241`
-2. 开 PR 至 upstream/main
-3. 等待上游审核
+- `generate_figures.py`: 完整可视化脚本，可从 m542/m546 产物复现全部 6 张图
 
-## 任务完成度
+## 判据验证
 
-- [x] 环境测试基线建立
-- [x] 零依赖验证
-- [x] 两档体积收敛验证
-- [x] .ngo 事务管线验证
-- [x] README 能力-声明对照
-- [x] 0.3.1 缺陷修复验证
-- [x] TensorShipDesign 接棒位评估
-- [x] backlog 登记
-- [x] 2 个开发提案
-- [x] 审计报告撰写
-- [x] 交接笔记更新
-- [x] 数字零手抄验证
+| 判据 | 要求 | 实际 | 状态 |
+|------|------|------|------|
+| 图数量 | ≥4 | 6 | ✅ |
+| 图来源 | 本单真跑 | generate_figures.py 从 m542/m546 STL 真跑 | ✅ |
+| 变体门禁结果 | 在 | family_summary.json + variant_summary.json | ✅ |
+| 报告长度 | ≥2500 | 3624 | ✅ |
+| 报告 figures | 非空 | 6 张 base64 PNG | ✅ |
+| ≥30 变体三断言全绿 | 是 | 5415: 30/30, KCS: 32/32 | ✅ |
 
-**任务状态：✅ 完成，可提交验收**
+## 关键数字（零手抄，程序化注入）
+
+- DTMB 5415 基线体积: 0.481435 m³
+- DTMB 5415 基线 Cb: 0.480043
+- KCS 基线排水量: 49440.17 t
+- KCS 基线 Cb: 0.61812
+- 非变形区最大偏差: <1e-6 m（全部 62 变体）
+- 门禁通过率: 100%（186/186 检查项）
+
+## 局限
+
+1. STL 网格分辨率约 6000-8000 三角面，CFD 应用需加密
+2. 变形区边界 C¹ 连续但 C² 可能有微小跳跃
+3. 基线水线面面积计算为零（z=0 离散问题）
