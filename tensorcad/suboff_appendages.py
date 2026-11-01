@@ -269,18 +269,35 @@ def _sail_half_width_slope_array(x_ft: Any) -> Any:
 # --------------------------------------------------------------------------- #
 
 
+def _hypot_ft(a: float, b: float) -> float:
+    """``sqrt(a^2 + b^2)`` written out, deliberately *not* ``math.hypot``.
+
+    SciPy is not the only thing this mirror has to agree with: the vectorised
+    path in :func:`_sail_implicit_array_ft` is what a sampler actually calls, and
+    the two are required to agree bit for bit (``tests/test_suboff_appendages.py``
+    pins that). ``math.hypot`` and ``numpy.hypot`` are different correctly-rounded
+    algorithms and disagree in the last bit on ~1 % of the sail's bounding box,
+    which is enough to break that invariant for no physical reason. Plain
+    ``sqrt(x*x + y*y)`` is one IEEE operation per input and agrees exactly in both
+    paths. The arguments here are sail coordinates in feet (|< 20|), so the
+    overflow protection ``hypot`` buys is not needed.
+    """
+    return math.sqrt(a * a + b * b)
+
+
 def _sail_implicit_ft(x_ft: float, y_ft: float, z_ft: float) -> float:
     """AFF-8 sail implicit value at a point in the DARPA feet frame."""
     width = _sail_half_width_ft(x_ft)
     slope = _sail_half_width_slope_ft(x_ft)
     rise = z_ft - _SAIL_BODY_TOP_FT
     cap = rise > 0.0
-    rho = math.hypot(y_ft, 2.0 * rise) if cap else abs(y_ft)
+    twice_rise = 2.0 * rise
+    rho = _hypot_ft(y_ft, twice_rise) if cap else abs(y_ft)
     # |grad(rho - a)|: rho is |y| in the straight-sided body and
     # sqrt(y^2 + (2 rise)^2) under the cap, so the radial part of the gradient is
     # a unit y below the body top and (y/rho, 4 rise/rho) above it.
-    radial = math.hypot(y_ft / rho, 4.0 * rise / rho) if cap and rho > 0.0 else 1.0
-    gap = (rho - width) / math.hypot(radial, slope)
+    radial = _hypot_ft(y_ft / rho, 4.0 * rise / rho) if cap and rho > 0.0 else 1.0
+    gap = (rho - width) / _hypot_ft(radial, slope)
     return max(_SAIL_X_START_FT - x_ft, x_ft - _SAIL_X_END_FT, -z_ft, gap)
 
 
@@ -295,14 +312,18 @@ def _sail_implicit_array_ft(x_ft: Any, y_ft: Any, z_ft: Any) -> Any:
     slope = _sail_half_width_slope_array(x)
     rise = z - _SAIL_BODY_TOP_FT
     above = rise > 0.0
-    rho = np.where(above, np.hypot(y, 2.0 * rise), np.abs(y))
-    safe = np.maximum(rho, 1e-300)
-    radial = np.where(
-        above & (rho > 0.0),
-        np.hypot(y / safe, 4.0 * rise / safe),
-        1.0,
-    )
-    gap = (rho - width) / np.hypot(radial, slope)
+    twice_rise = 2.0 * rise
+    # Same arithmetic, term for term, as :func:`_hypot_ft`: sqrt of a sum of
+    # squares rather than ``np.hypot``, so the two paths are bit-identical.
+    rho = np.where(above, np.sqrt(y * y + twice_rise * twice_rise), np.abs(y))
+    # Divide by ``rho`` only where the cap branch uses it; elsewhere a unit
+    # denominator keeps 4*rise/eps from overflowing to inf before np.where masks it.
+    cap_point = above & (rho > 0.0)
+    denom = np.where(cap_point, rho, 1.0)
+    radial_y = y / denom
+    radial_r = 4.0 * rise / denom
+    radial = np.where(cap_point, np.sqrt(radial_y * radial_y + radial_r * radial_r), 1.0)
+    gap = (rho - width) / np.sqrt(radial * radial + slope * slope)
     out = np.maximum(_SAIL_X_START_FT - x, x - _SAIL_X_END_FT)
     out = np.maximum(out, -z)
     return np.maximum(out, gap)
