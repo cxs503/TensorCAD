@@ -516,3 +516,37 @@ that matter are now enforced rather than documented.
 
 - Initial package: deterministic parametric sampled hull surface, OBJ/CSV/JSON
   export, CLI entry point, structural validation, and CI.
+
+## Unreleased
+
+Export becomes a verified step instead of a dump.
+
+### Added
+- **`tensorcad.gate`** — `gate_mesh` / `enforce_gate` / `MeshGateReport` / `MeshGateError`:
+  a hard-fail gate over closed, edge- and vertex-manifold, single-component,
+  `V - E + F = 2`, outward-oriented, finite, zero-area-free meshes, plus optional
+  reference-volume, facet-count and sliver limits. Every reference is external to the mesh
+  (analytic displacement, requested component count, genus-0 topology).
+- **`tensorcad.hull.resolve_resolution`** — `ResolutionPlan`: the coarsest grid whose
+  integrated displacement is within a requested relative error of `hull.analytic_volume`,
+  with an honest `accepted = False` when the generator caps or a triangle budget is reached.
+- **`export_hull(..., stl=True, target_volume_error=..., gate=...)`** — resolves the grid,
+  regenerates, gates, writes `hull.stl`, reads it back and re-runs the gate on the recovered
+  soup; the plan, gate evidence and read-back volume error land in `metadata.json`.
+- **`tensorcad.export.read_stl`** — binary STL reader that rebuilds shared vertices by exact
+  float32 welding, so an exported soup can be checked for watertightness; ASCII STL and
+  truncated/non-finite files are rejected with explicit messages.
+- **`examples/hull_stl_export/run_example.py`** — resolution ladder against the analytic
+  volume, a rejected 178-triangle export, a resolution-controlled STL export and its
+  read-back gate; exits non-zero if any claim fails.
+- **CLI** — `--stl`, `--gate`, `--target-volume-error`.
+
+### Measured (reference hull, `L = 10 m`, `B = 2 m`, `T = 0.8 m`; analytic 7.512698 m³)
+- 11×5 / 178 triangles: −5.290 % (gate rejects at the default 2 % tolerance);
+- 41×13 / 1998 triangles: −0.880 %; 161×41 / 25 918 triangles: −0.136 %;
+- `target_volume_error = 0.002` from an 11×5 request resolves to 161×65 / 41 278 triangles,
+  −0.0759 %;
+- STL round trip: watertight, `V - E + F = 2`, volume error **2.4e-8** relative (float32).
+
+### Fixed
+- The STL header no longer claims every STL came from a neural object.

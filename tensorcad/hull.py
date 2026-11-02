@@ -21,7 +21,7 @@ Only the Python standard library is required.
 from __future__ import annotations
 
 import math
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from typing import Any
 
 from . import mesh as meshlib
@@ -65,6 +65,12 @@ MAX_VERTICAL_LEVELS = 513
 #: Above this mesh size the refinement used for the convergence estimate is
 #: skipped rather than doubling an already expensive generation.
 MAX_MESH_SIZE_FOR_CONVERGENCE = 400_000
+#: Grid growth factor used by :func:`resolve_resolution`: both counts grow by the
+#: same factor so the facet aspect ratio stays roughly constant while the
+#: discretisation error falls with the second power of the spacing.
+RESOLUTION_GROWTH = 2.0
+#: Triangle budget for an automatically resolved grid.
+DEFAULT_MAX_TRIANGLES = 2_000_000
 
 PARAMETER_SPECS: tuple[ParameterSpec, ...] = (
     ParameterSpec("length", FLOAT, minimum=0.0, maximum=1.0e4, unit=UNITS,
@@ -488,3 +494,88 @@ def estimate_discretisation_error(parameters: HullParameters) -> dict[str, Any]:
         },
         "note": "relative change is an error estimate for the coarse grid, not a proof of convergence",
     }
+
+
+@dataclass(frozen=True)
+class ResolutionPlan:
+    """The grid :func:`resolve_resolution` settled on, plus the evidence for it."""
+
+    parameters: HullParameters
+    relative_error: float
+    triangles: int
+    vertices: int
+    refinements: int
+    target_volume_error: float
+    accepted: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": "tensorcad.hull.resolution/1",
+            "target_volume_error": self.target_volume_error,
+            "parameters": self.parameters.as_dict(),
+            "relative_error": self.relative_error,
+            "triangles": self.triangles,
+            "vertices": self.vertices,
+            "refinements": self.refinements,
+            "accepted": self.accepted,
+        }
+
+
+def resolve_resolution(
+    parameters: HullParameters,
+    *,
+    target_volume_error: float = 0.01,
+    growth: float = RESOLUTION_GROWTH,
+    max_triangles: int = DEFAULT_MAX_TRIANGLES,
+) -> ResolutionPlan:
+    """Pick the coarsest grid that integrates displacement within a stated error.
+
+    The acceptance quantity is the displaced volume against
+    :func:`analytic_volume`, an integral of the analytic surface that the sampled
+    mesh never sees. That independence matters: converging a mesh against its own
+    refinement shows the numbers moving, not that they are right, and a uniform
+    under-resolution (the historical 300-facet export) is exactly the failure it
+    fails to catch.
+
+    The search only ever refines upwards from the requested grid, so a caller that
+    already over-resolved pays one generation and keeps its grid. ``accepted`` is
+    False when the caps (``MAX_LONGITUDINAL_STATIONS``/``MAX_VERTICAL_LEVELS`` or
+    ``max_triangles``) are reached first; the returned plan then carries the best
+    grid and its measured error, and the caller decides whether that is enough.
+    """
+    if not (math.isfinite(target_volume_error) and target_volume_error > 0.0):
+        raise ValueError("target_volume_error must be positive and finite")
+    if not (math.isfinite(growth) and growth > 1.0):
+        raise ValueError("growth must be finite and > 1.0")
+    if max_triangles < 1:
+        raise ValueError("max_triangles must be >= 1")
+
+    current = parameters
+    refinements = 0
+    while True:
+        model = generate_hull(current)
+        exact = analytic_volume(current.length, current.beam, current.draft)
+        measured = (
+            model.hydrostatics.displacement_volume
+            if model.hydrostatics is not None
+            else meshlib.total_signed_volume(model.mesh)
+        )
+        relative = measured / exact - 1.0
+        triangles = len(model.mesh.faces)
+        next_nx = min(MAX_LONGITUDINAL_STATIONS, math.ceil((current.nx - 1) * growth) + 1)
+        next_nz = min(MAX_VERTICAL_LEVELS, math.ceil((current.nz - 1) * growth) + 1)
+        exhausted = (next_nx, next_nz) == (current.nx, current.nz)
+        predicted = 2 * (2 * next_nz - 1) * (next_nx - 1)
+        accepted = abs(relative) <= target_volume_error
+        if accepted or exhausted or predicted > max_triangles:
+            return ResolutionPlan(
+                parameters=current,
+                relative_error=relative,
+                triangles=triangles,
+                vertices=len(model.mesh.vertices),
+                refinements=refinements,
+                target_volume_error=target_volume_error,
+                accepted=accepted,
+            )
+        current = replace(current, nx=next_nx, nz=next_nz)
+        refinements += 1

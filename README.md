@@ -318,6 +318,23 @@ below the gate. Details, the resolution ladder and the threats to validity:
 [docs/representation_benchmark.md](docs/representation_benchmark.md); the committed runs are in
 `docs/benchmarks/{quick,full,neural}/`.
 
+## Gated, resolution-controlled export (unreleased)
+
+Export is now something the repository can prove rather than assume. `tensorcad.gate`
+turns the geometric checks into a hard gate — closed, edge- and vertex-manifold, one
+component, `V - E + F = 2`, outward-oriented, finite, no zero-area face, plus optional
+reference-volume, facet-count and sliver limits — and `enforce_gate` raises instead of
+returning the mesh. Every reference comes from outside the mesh (analytic displacement,
+requested component count, genus-0 topology), so a self-consistent but wrong export cannot
+pass. `resolve_resolution` then picks the coarsest grid whose integrated displacement is
+within a requested relative error of `hull.analytic_volume`, and `export_hull(...,
+target_volume_error=0.002, stl=True)` resolves, regenerates, gates, writes and **reads the
+STL back** to re-run the gate on the file itself. Measured ladder on the reference hull:
+11×5 (178 triangles) is −5.29 % off the analytic volume and is rejected at the default 2 %
+tolerance; 161×65 (41 278 triangles) reaches −0.076 %; the STL round trip preserves volume
+to 2.4e-8 relative (float32 quantisation). Details and measurements:
+[`docs/mesh_export_gate.md`](docs/mesh_export_gate.md).
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
@@ -377,7 +394,10 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
   aspect ratios), errors versus warnings, `ValidationReport`.
 - `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients.
-- `tensorcad.export` — OBJ/CSV/JSON writers and an OBJ reader (round-trip exact).
+- `tensorcad.export` — OBJ/CSV/JSON writers, an OBJ reader (round-trip exact), a binary STL
+  writer and a topology-reconstructing STL reader, and the gated hull export.
+- `tensorcad.gate` — hard-fail machine gate over mesh artifacts: topology, components, Euler
+  characteristic, orientation, resolution and external reference volume.
 - `tensorcad.hull` — the one ship-specific model.
 - `tensorcad.adapters` — solver/kernel bridges the core must never import: `adapters.fem`
   (node/element tables, gmsh 2.2 + JSON, no extra) and `adapters.ocp` (sew → solid → STEP,
@@ -389,8 +409,9 @@ The boundaries below are the ones the code actually has (they were proposals in 
 - `tensorcad.cli_neural` — `tensorcad-neural` entry point for fit/edit/extract/info/verify.
 - `tensorcad.benchmark` — the representation benchmark: metric schema with explicit missing
   states, ray caster, exact references, and `results.json` / `report.md` generation.
-- `examples/` and `tests/` — runnable benchmarks and 394 tests, 15 of which need the
-  `neural` extra; the OCP bridge adds 10 more when its wheels are installed.
+- `examples/` and `tests/` — runnable benchmarks and 425 collected tests; two neural-extra
+  modules (`test_cli_neural`, `test_neural_pipeline`) need `safetensors` to be collected at
+  all; the OCP bridge adds 10 more when its wheels are installed.
 
 The core package depends on nothing outside the standard library. That is a tested guarantee, not a preference: a B-rep kernel stays an optional backend (see issue #4), and `tensorcad.adapters.ocp` is the planned seam.
 
@@ -456,4 +477,4 @@ format and transaction layer are shape-agnostic, the fitted families are not), a
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape
 ratios, not resistance or stability), a B-rep/STEP *feature model* (the STEP export is a faceted solid),
-mesh refinement or remeshing to a target size field (conditioning only coarsens), a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a real hull form (the breadth distribution is `sin(πx/L)^0.7 · √(z/draft)`, fore-aft symmetric, with a knuckle at the keel and no transom), fairness or surface-fairing checks, lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
