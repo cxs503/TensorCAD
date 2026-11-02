@@ -11,6 +11,12 @@ Two deliberate choices:
 * **Metadata is part of the artifact.** Every export carries units, coordinate
   frame, parameters, validation results, and the engineering limitations, so a
   downstream consumer never has to infer them from filenames.
+* **Artifacts are verified, not assumed.** STL stores a triangle soup with no
+  topology, so :func:`read_stl` reconstructs the topology by exact welding and
+  :func:`export_hull` re-runs the machine gate on the *file* it just wrote.
+  ``target_volume_error`` additionally refines the sampling grid until the
+  integrated displacement reaches the requested accuracy, which is the fix for
+  the low-resolution exports this repository produced before.
 """
 from __future__ import annotations
 
@@ -23,10 +29,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from . import mesh as meshlib
+from .gate import DEFAULT_VOLUME_TOLERANCE, MeshGateError, gate_mesh
 from .geometry import Mesh
 
 #: Significant digits that round-trip a double exactly.
 ROUND_TRIP_PRECISION = 17
+
+#: 80-byte STL header. STL carries no units, frame, topology or provenance, so the
+#: header says so instead of pretending otherwise.
+STL_HEADER = "TensorCAD binary STL; triangle soup: topology, units and provenance live in metadata.json"
+
+#: Relative volume tolerance when the written STL is read back. Binary STL stores
+#: float32 coordinates, so the recovered volume cannot be bit-identical to the
+#: double-precision mesh it came from; 1e-4 is two orders above the float32 floor.
+STL_VOLUME_TOLERANCE = 1e-4
 
 if TYPE_CHECKING:  # imported only for typing, to keep the layering acyclic
     from .hull import HullModel
@@ -42,9 +59,13 @@ class ExportArtifacts:
     mesh: str
     offsets: str
     metadata: str
+    stl: str | None = None
 
     def as_dict(self) -> dict[str, str]:
-        return {"mesh": self.mesh, "offsets": self.offsets, "metadata": self.metadata}
+        artifacts = {"mesh": self.mesh, "offsets": self.offsets, "metadata": self.metadata}
+        if self.stl is not None:
+            artifacts["stl"] = self.stl
+        return artifacts
 
 
 def _format(value: float, precision: int) -> str:
@@ -73,17 +94,18 @@ def write_obj(mesh: Mesh, path: str | Path, *, precision: int = ROUND_TRIP_PRECI
     return target
 
 
-def write_stl(mesh: Mesh, path: str | Path) -> Path:
-    """Write a binary STL for downstream viewers and 3-D printing workflows.
+def write_stl(mesh: Mesh, path: str | Path, *, header: str = STL_HEADER) -> Path:
+    """Write a binary STL for downstream viewers, solvers and 3-D printing.
 
     STL is a *derived* format: it stores one flat triangle soup with no topology,
-    no units and no provenance, which is exactly why a neural object keeps that
-    information and treats the STL as an export. The mesh is assumed closed and
-    outward-oriented (``tensorcad.neural.extract`` guarantees both).
+    no units and no provenance. That is why the geometry of record stays the OBJ
+    plus ``metadata.json``, and why :func:`read_stl` has to rebuild the topology
+    before anything can be checked. ``header`` is truncated/padded to the 80 bytes
+    the format allows; it is informational only.
     """
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
-    header = b"TensorCAD binary STL; derived from a neural geometry object"
+    encoded = header.encode("ascii", "replace")
     records = bytearray()
     for face in mesh.faces:
         ax, ay, az = mesh.vertices[face[0]]
@@ -106,9 +128,73 @@ def write_stl(mesh: Mesh, path: str | Path) -> Path:
             0,
         )
     with target.open("wb") as stream:
-        stream.write(struct.pack("<80sI", header[:80].ljust(80, b" "), len(mesh.faces)))
+        stream.write(struct.pack("<80sI", encoded[:80].ljust(80, b" "), len(mesh.faces)))
         stream.write(records)
     return target
+
+
+def read_stl(
+    path: str | Path,
+    *,
+    units: str = "m",
+    coordinate_frame: str = "unspecified right-handed frame",
+) -> Mesh:
+    """Rebuild a :class:`Mesh` from a binary STL triangle soup.
+
+    The format has no vertex table, so identical float32 coordinates are welded
+    back together by exact key: two faces that shared a corner in double
+    precision still share it after a deterministic double->float32 conversion,
+    which is what makes the recovered surface testable for watertightness. Units
+    and frame are *not* in the file; the caller states them.
+
+    ASCII STL is rejected rather than guessed at: a binary header is allowed to
+    start with ``solid`` too, so the only reliable discriminator is the byte
+    count, and silently accepting one dialect would hide a corrupt file.
+    """
+    source = Path(path)
+    data = source.read_bytes()
+    if len(data) < 84:
+        if data[:5] == b"solid":
+            raise ValueError(
+                f"{source}: ASCII STL is not supported (convert to binary STL first)"
+            )
+        raise ValueError(f"{source}: {len(data)} bytes is too short to be a binary STL")
+    count = struct.unpack_from("<I", data, 80)[0]
+    expected = 84 + 50 * count
+    if len(data) != expected:
+        if data[:5] == b"solid":
+            raise ValueError(
+                f"{source}: {len(data)} bytes is not a binary STL layout; "
+                "ASCII STL is not supported (convert to binary STL first)"
+            )
+        raise ValueError(
+            f"{source}: expected {expected} bytes for {count} triangles but found {len(data)}; "
+            "the file is truncated or corrupt"
+        )
+    vertices: list[tuple[float, float, float]] = []
+    index: dict[tuple[float, float, float], int] = {}
+    faces: list[tuple[int, int, int]] = []
+    for record in range(count):
+        values = struct.unpack_from("<12f", data, 84 + 50 * record)
+        corners = (values[3:6], values[6:9], values[9:12])
+        face: list[int] = []
+        for corner in corners:
+            point = (float(corner[0]), float(corner[1]), float(corner[2]))
+            if not all(math.isfinite(value) for value in point):
+                raise ValueError(f"{source}: triangle {record} carries a non-finite coordinate")
+            existing = index.get(point)
+            if existing is None:
+                existing = len(vertices)
+                index[point] = existing
+                vertices.append(point)
+            face.append(existing)
+        faces.append((face[0], face[1], face[2]))
+    return Mesh(
+        vertices=tuple(vertices),
+        faces=tuple(faces),
+        units=units,
+        coordinate_frame=coordinate_frame,
+    )
 
 
 def read_obj(path: str | Path) -> Mesh:
@@ -191,21 +277,104 @@ def export_hull(
     convergence: bool = False,
     precision: int = ROUND_TRIP_PRECISION,
     metadata: dict[str, Any] | None = None,
+    stl: bool = False,
+    target_volume_error: float | None = None,
+    gate: bool = False,
+    gate_tolerance: float | None = None,
 ) -> dict[str, str]:
-    """Write the OBJ mesh, the offsets CSV and the metadata JSON for a hull model.
+    """Write the hull artifacts and, on request, prove they are usable.
 
-    Returns the artifact paths keyed by ``mesh``/``offsets``/``metadata``. Set
-    ``convergence=True`` to pay for one refined regeneration and record the
-    measured discretisation error in the metadata; pass ``metadata`` when the
-    caller already produced that document (the CLI does, so the refined grid is
-    generated once instead of once per consumer).
+    Returns the artifact paths keyed by ``mesh``/``offsets``/``metadata`` and, when
+    an STL was written, ``stl``.
+
+    * ``convergence=True`` pays for one refined regeneration and records the
+      measured discretisation error in the metadata.
+    * ``metadata=...`` lets the caller supply the document it already produced (the
+      CLI does), so the refined grid is generated once instead of once per consumer.
+    * ``target_volume_error=0.002`` refines the sampling grid until the integrated
+      displacement is within 0.2 % of the **analytic** volume
+      (:func:`tensorcad.hull.analytic_volume`) and forces the gate on at that
+      tolerance. The chosen grid is recorded under ``resolution`` in the metadata.
+      Passing ``metadata`` for a grid that then has to change is an error: that
+      document would describe a different model.
+    * ``stl=True`` also writes ``hull.stl`` and immediately reads it back; the
+      recovered soup must re-weld into a watertight component whose volume matches
+      the double-precision mesh within :data:`STL_VOLUME_TOLERANCE`, otherwise the
+      file is rejected. The round-trip evidence is recorded under ``stl``.
+    * ``gate=True`` runs :func:`tensorcad.gate.gate_mesh` on the in-memory mesh
+      (watertight, edge/vertex manifold, one component, Euler 2, outward, finite,
+      no zero-area face, and — since a reference exists for this family — the
+      analytic volume) and refuses to write anything when a check fails.
     """
+    from .hull import analytic_volume, generate_hull, resolve_resolution
+
     output = Path(output_dir)
-    # Build the metadata document *before* writing anything: a failure in the
-    # convergence estimate must not leave a directory holding a mesh without the
-    # parameters that produced it.
-    document = metadata if metadata is not None else model.metadata(with_discretisation=convergence)
+    plan = None
+    if target_volume_error is not None:
+        plan = resolve_resolution(model.parameters, target_volume_error=target_volume_error)
+        if not plan.accepted:
+            raise MeshGateError(
+                f"no grid within the generator caps reaches {100.0 * target_volume_error:g} % "
+                f"volume error; best measured is {100.0 * plan.relative_error:+.3f} % at "
+                f"{plan.parameters.nx}x{plan.parameters.nz}"
+            )
+        if plan.parameters != model.parameters:
+            if metadata is not None:
+                raise ValueError(
+                    "metadata was produced for a different grid than the resolved "
+                    f"{plan.parameters.nx}x{plan.parameters.nz}; let export_hull regenerate it"
+                )
+            model = generate_hull(plan.parameters)
+        gate = True
+        if gate_tolerance is None:
+            gate_tolerance = max(target_volume_error, 1e-6)
+
+    document = dict(metadata) if metadata is not None else model.metadata(with_discretisation=convergence)
+
+    gate_report = None
+    if gate:
+        reference = analytic_volume(model.parameters.length, model.parameters.beam, model.parameters.draft)
+        gate_report = gate_mesh(
+            model.mesh,
+            reference_volume=reference,
+            volume_tolerance=DEFAULT_VOLUME_TOLERANCE if gate_tolerance is None else gate_tolerance,
+        )
+        if not gate_report.passed:
+            failures = "; ".join(
+                f"{check.name}: {check.detail}" if check.detail else check.name
+                for check in gate_report.failures
+            )
+            raise MeshGateError(f"export refused, the mesh failed the machine gate: {failures}")
+        document["gate"] = gate_report.to_dict()
+    if plan is not None:
+        document["resolution"] = plan.to_dict()
+
     mesh_path = write_obj(model.mesh, output / "hull.obj", precision=precision)
     offsets_path = write_offsets_csv(model.offsets, output / "offsets.csv", precision=precision)
+    stl_path: Path | None = None
+    if stl:
+        stl_path = write_stl(model.mesh, output / "hull.stl")
+        recovered = read_stl(
+            stl_path, units=model.units, coordinate_frame=model.coordinate_frame
+        )
+        double_volume = meshlib.total_signed_volume(model.mesh)
+        roundtrip = gate_mesh(
+            recovered, reference_volume=double_volume, volume_tolerance=STL_VOLUME_TOLERANCE
+        )
+        if not roundtrip.passed:
+            failures = "; ".join(
+                f"{check.name}: {check.detail}" if check.detail else check.name
+                for check in roundtrip.failures
+            )
+            raise MeshGateError(f"{stl_path} failed its read-back gate: {failures}")
+        document["stl"] = {
+            "triangle_count": len(recovered.faces),
+            "watertight": bool(roundtrip.measurements["boundary_edges"] == 0),
+            "signed_volume": roundtrip.measurements["signed_volume"],
+            "relative_volume_error_vs_mesh": roundtrip.measurements["relative_volume_error"],
+            "gate": roundtrip.to_dict(),
+        }
     metadata_path = write_metadata(document, output / "metadata.json")
-    return ExportArtifacts(str(mesh_path), str(offsets_path), str(metadata_path)).as_dict()
+    return ExportArtifacts(
+        str(mesh_path), str(offsets_path), str(metadata_path), None if stl_path is None else str(stl_path)
+    ).as_dict()
