@@ -795,3 +795,46 @@ def test_the_scalar_path_walks_the_sail_entrance_segment(monkeypatch: object) ->
     # The entrance slope is finite at 3.05 ft and unbounded only at the leading tip.
     assert math.isfinite(float(_sail_half_width_slope_array(3.05)))
     assert float(_sail_half_width_slope_array(3.05)) > 0.0
+
+
+def test_the_scalar_and_vectorised_sail_paths_agree_bit_for_bit(monkeypatch: object) -> None:
+    """The sail's two paths must return the *same double*, not merely a close one.
+
+    A caller who samples the sail through ``numpy_callable`` and a caller who
+    evaluates one point through the pure-Python path are describing the same
+    surface; a difference in the last bit is a difference in the reported gap, so
+    the hand-picked points above are not enough. This sweeps the whole bounding
+    box (body, cap and both masks' boundaries) and demands exact equality.
+
+    Regression: the cap branch normalised with ``math.hypot`` in one path and
+    ``numpy.hypot`` in the other. They are different correctly-rounded algorithms
+    and disagreed by 1 ULP on ~1.4 % of this grid, which the four-point test above
+    happened to catch on a single probe; ``_hypot_ft`` / its NumPy mirror now do
+    the same ``sqrt(a*a + b*b)``.
+    """
+    sail = SuboffSailField()
+    box = sail.bounds()
+    low, high = box.minimum, box.maximum
+    steps = 9
+    fractions = [k / (steps - 1) for k in range(steps)]
+    points = [
+        (low[0] + (high[0] - low[0]) * fx, low[1] + (high[1] - low[1]) * fy, low[2] + (high[2] - low[2]) * fz)
+        for fx in fractions
+        for fy in fractions
+        for fz in fractions
+    ]
+    # Plus probes a hair either side of the cap plane and of both axial masks.
+    epsilon = 1e-12
+    points.extend(
+        (x, y, z)
+        for x in (3.032986 / _feet(), 3.358507 / _feet(), 3.559028 / _feet(), 4.241319 / _feet())
+        for y in (0.0, 0.109375 / _feet())
+        for z in ((1.507813 - epsilon) / _feet(), (1.507813 + epsilon) / _feet())
+    )
+    vectorised = sail.signed_distance(points)
+    assert any(value > 0.0 for value in vectorised)
+    assert any(value < 0.0 for value in vectorised)
+
+    monkeypatch.setattr(SuboffSailField, "numpy_callable", lambda self: None)  # type: ignore[arg-type]
+    scalar = sail.signed_distance(points)
+    assert scalar == vectorised
