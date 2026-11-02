@@ -13,7 +13,7 @@ import sys
 from typing import Any
 
 from .export import export_hull
-from .hull import HullParameters, generate_hull
+from .hull import HullParameters, generate_hull, resolve_resolution
 
 SUMMARY_KEYS = (
     ("displacement_volume_m3", "displacement volume"),
@@ -44,6 +44,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-export", action="store_true", help="validate and report only, write no files")
     parser.add_argument("--no-convergence", action="store_true",
                         help="skip the refined-grid discretisation estimate (faster, less informative)")
+    parser.add_argument("--stl", action="store_true",
+                        help="also write a binary STL and verify it by reading it back")
+    parser.add_argument("--gate", action="store_true",
+                        help="refuse to export unless the mesh passes the machine gate "
+                             "(closed, one component, Euler 2, outward, analytic volume)")
+    parser.add_argument("--target-volume-error", type=float, default=None,
+                        help="refine nx/nz until the integrated displacement is within this "
+                             "relative error of the analytic volume (implies --gate)")
     parser.add_argument("--json", action="store_true",
                         help="print the full metadata record instead of a summary")
     return parser
@@ -72,6 +80,7 @@ def _summary(model: Any) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     parameters = HullParameters(args.length, args.beam, args.draft, args.nx, args.nz, args.density)
+    plan = None
 
     def fail(stage: str, exc: Exception) -> int:
         """One error contract: humans on stderr, machines on stdout, exit 2."""
@@ -82,6 +91,16 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
+        if args.target_volume_error is not None:
+            plan = resolve_resolution(parameters, target_volume_error=args.target_volume_error)
+            if not plan.accepted:
+                raise ValueError(
+                    f"no grid within the generator caps reaches "
+                    f"{100.0 * plan.target_volume_error:g} % volume error "
+                    f"(best {100.0 * plan.relative_error:+.3f} % at "
+                    f"{plan.parameters.nx}x{plan.parameters.nz})"
+                )
+            parameters = plan.parameters
         model = generate_hull(parameters)
     except ValueError as exc:
         print(f"tensorcad-hull: invalid model: {exc}", file=sys.stderr)
@@ -93,13 +112,22 @@ def main(argv: list[str] | None = None) -> int:
     # a refined mesh, so paying for it twice (file + stdout) is real work.
     try:
         metadata = model.metadata(with_discretisation=not args.no_convergence)
+        if plan is not None:
+            metadata["resolution"] = plan.to_dict()
     except Exception as exc:
         return fail("metadata", exc)
 
     artifacts: dict[str, str] = {}
     if not args.no_export:
         try:
-            artifacts = export_hull(model, args.output, metadata=metadata)
+            artifacts = export_hull(
+                model,
+                args.output,
+                metadata=metadata,
+                stl=args.stl,
+                gate=args.gate or plan is not None,
+                gate_tolerance=args.target_volume_error,
+            )
         except Exception as exc:
             return fail("export", exc)
 

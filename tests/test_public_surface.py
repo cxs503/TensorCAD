@@ -13,14 +13,14 @@ EXPECTED_API = {
     "DESIGN_SCHEMA", "DesignProblem", "DesignRecord", "DesignSolution", "DesignTargets",
     "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
     "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder",
-    "MeshConditioningError", "MeshMeasurements", "ParameterSpec",
-    "PlaneField", "RatioSpec", "SUBOFF_LENGTH_M", "SUBOFF_RADIUS_M", "SampledField",
+    "MeshConditioningError", "MeshGateError", "MeshGateReport", "MeshMeasurements", "ParameterSpec",
+    "PlaneField", "RatioSpec", "ResolutionPlan", "SUBOFF_LENGTH_M", "SUBOFF_RADIUS_M", "SampledField",
     "SphereField", "SuboffAppendagesField", "SuboffFinsField", "SuboffFullField",
-    "SuboffHullField", "SuboffSailField", "ValidationReport", "build_mesh",
-    "compute_hydrostatics", "condition_mesh", "decimate", "estimate_discretisation_error",
-    "export_hull", "generate_hull",
+    "SuboffHullField", "SuboffSailField", "ValidationReport", "analytic_volume", "build_mesh",
+    "compute_hydrostatics", "condition_mesh", "decimate", "enforce_gate",
+    "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
     "inspect_geometry", "inspect_mesh_quality", "measure_mesh", "project_to_field",
-    "read_metadata", "read_obj",
+    "read_metadata", "read_obj", "read_stl", "resolve_resolution",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
     "taubin_smooth", "to_mesh", "validate_hull", "write_design_json", "write_metadata",
@@ -36,7 +36,7 @@ def test_declared_api_is_importable() -> None:
 
 
 def test_layered_modules_are_all_importable() -> None:
-    for module in ("geometry", "geometry_field", "mesh", "mesh_conditioning", "parameters",
+    for module in ("geometry", "geometry_field", "mesh", "mesh_conditioning", "gate", "parameters",
                    "validation", "hydrostatics", "export", "hull", "design", "suboff",
                    "suboff_appendages", "cli", "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
