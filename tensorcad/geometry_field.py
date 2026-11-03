@@ -265,11 +265,16 @@ class PlaneField(GeometryField):
             import numpy as np
         except ImportError:  # pragma: no cover - numpy is in the test extra
             return None
-        normal = np.asarray(self.normal, dtype=np.float64)
+        nx, ny, nz = self.normal
         offset = self.offset
 
         def evaluate(points: Any) -> Any:
-            return np.asarray(points, dtype=np.float64) @ normal - offset
+            # Term for term what ``signed_distance`` writes: ``nx*x + ny*y + nz*z``
+            # associated left to right. A BLAS ``@`` is a different algorithm and
+            # disagrees with the pure-Python path by up to 2 ULP on ~29 % of
+            # probes (measured, runs/2026-11-03-mirror-contract/).
+            grid = np.asarray(points, dtype=np.float64)
+            return nx * grid[:, 0] + ny * grid[:, 1] + nz * grid[:, 2] - offset
 
         return evaluate
 
@@ -291,10 +296,14 @@ class SphereField(GeometryField):
     def signed_distance(self, points: Iterable[Sequence[float]]) -> list[float]:
         cx, cy, cz = self.center
         radius = self.radius
-        return [
-            math.sqrt((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2) - radius
-            for x, y, z in _points(points)
-        ]
+        values: list[float] = []
+        for x, y, z in _points(points):
+            dx, dy, dz = x - cx, y - cy, z - cz
+            # ``d * d``, not ``d ** 2``: CPython's ``pow`` is not an exact square, and
+            # the NumPy mirror multiplies. Measured: one probe in 4089 disagreed by
+            # 1 ULP while every other field was already exact.
+            values.append(math.sqrt(dx * dx + dy * dy + dz * dz) - radius)
+        return values
 
     def gradient(self, points: Iterable[Sequence[float]]) -> list[Point]:
         cx, cy, cz = self.center
@@ -337,7 +346,8 @@ class SphereField(GeometryField):
 
         def evaluate(points: Any) -> Any:
             delta = np.asarray(points, dtype=np.float64) - center
-            return np.sqrt(np.einsum("ij,ij->i", delta, delta)) - radius
+            dx, dy, dz = delta[:, 0], delta[:, 1], delta[:, 2]
+            return np.sqrt(dx * dx + dy * dy + dz * dz) - radius
 
         return evaluate
 
@@ -378,7 +388,16 @@ class CylinderField(GeometryField):
         values: list[float] = []
         for point in _points(points):
             radial, axial, _, _ = self._components(point)
-            outside = math.hypot(max(radial, 0.0), max(axial, 0.0))
+            # sqrt of a sum of squares rather than ``math.hypot``, so this path
+            # and the NumPy mirror are one arithmetic instead of two correctly
+            # rounded algorithms that disagree by 1 ULP. Safe for
+            # |radial|, |along| < 1e150 -- 44 orders of magnitude above any CAD
+            # extent; see the same trade recorded for the AFF-8 sail.
+            radial_out = max(radial, 0.0)
+            axial_out = max(axial, 0.0)
+            # ``a * a``, not ``a ** 2``: CPython's ``pow`` is not an exact square and
+            # disagrees with ``a * a`` by 1 ULP (measured, one probe in 3497).
+            outside = math.sqrt(radial_out * radial_out + axial_out * axial_out)
             values.append(outside + min(max(radial, axial), 0.0))
         return values
 
@@ -448,16 +467,25 @@ class CylinderField(GeometryField):
             return None
         center = np.asarray(self.center, dtype=np.float64)
         axis = np.asarray(self.axis, dtype=np.float64)
+        ax, ay, az = self.axis
         radius = self.radius
         half = 0.5 * self.height
 
         def evaluate(points: Any) -> Any:
+            # The scalar path, vectorised operation by operation: no BLAS ``@``,
+            # no ``einsum`` reduction, no ``np.hypot``. Three separate algorithms
+            # had drifted from the contract here (2 ULP on ~21 % of probes).
             delta = np.asarray(points, dtype=np.float64) - center
-            axial = delta @ axis
-            radial_vec = delta - axial[:, None] * axis
-            radial = np.sqrt(np.einsum("ij,ij->i", radial_vec, radial_vec)) - radius
+            dx, dy, dz = delta[:, 0], delta[:, 1], delta[:, 2]
+            axial = dx * ax + dy * ay + dz * az
+            rx = dx - axial * ax
+            ry = dy - axial * ay
+            rz = dz - axial * az
+            radial = np.sqrt(rx * rx + ry * ry + rz * rz) - radius
             along = np.abs(axial) - half
-            outside = np.hypot(np.maximum(radial, 0.0), np.maximum(along, 0.0))
+            radial_out = np.maximum(radial, 0.0)
+            along_out = np.maximum(along, 0.0)
+            outside = np.sqrt(radial_out * radial_out + along_out * along_out)
             return outside + np.minimum(np.maximum(radial, along), 0.0)
 
         return evaluate
@@ -539,7 +567,8 @@ class EllipsoidField(GeometryField):
 
         def evaluate(points: Any) -> Any:
             q = (np.asarray(points, dtype=np.float64) - center) / axes
-            return np.sqrt(np.einsum("ij,ij->i", q, q)) - 1.0
+            u, v, w = q[:, 0], q[:, 1], q[:, 2]
+            return np.sqrt(u * u + v * v + w * w) - 1.0
 
         return evaluate
 

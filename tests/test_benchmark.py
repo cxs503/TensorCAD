@@ -14,6 +14,8 @@ tuned away.
 from __future__ import annotations
 
 import json
+import os
+import re
 import math
 import subprocess
 import sys
@@ -340,6 +342,16 @@ def test_a_full_quick_run_passes_and_is_reproducible(quick_run) -> None:
                     # Wall clock and anything derived from it is the one thing that varies.
                     if metric.get("unit") in ("s", "1/s"):
                         metric["value"] = None
+                # Export artifacts are written into a per-run temporary directory, so
+                # the path varies while the file it names does not.
+                for name, path in representation.get("artifacts", {}).items():
+                    representation["artifacts"][name] = os.path.basename(path)
+                # A few notes quote a measured wall clock ("label time 0.6 s"). Blank
+                # the numbers next to a time unit only; physics text stays comparable.
+                representation["notes"] = [
+                    re.sub(r"\d+(?:\.\d+)?\s*s\b", "<time> s", note)
+                    for note in representation.get("notes", [])
+                ]
         return payload
 
     assert strip(first) == strip(second)
@@ -354,6 +366,7 @@ def test_the_documents_are_generated_and_agree(quick_run, tmp_path) -> None:
     assert [case["identifier"] for case in payload["cases"]] == [
         "case_a_sphere_dent",
         "case_b_hull_handoff",
+        "case_b_aff8_roundtrip",
     ]
     report = report_path.read_text(encoding="utf-8")
     assert "verdict: pass" in report
