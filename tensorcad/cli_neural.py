@@ -19,6 +19,7 @@ from .neural_geometry import (
     TransactionError,
     dumps_canonical,
     read_manifest,
+    resolve_in_bundle,
     sha256_file,
 )
 
@@ -314,8 +315,16 @@ def _cmd_verify(args: argparse.Namespace) -> int:
 
     if manifest is not None:
         for artifact in manifest.derived:
-            path = artifact.get("path", "?")
-            target = store.root / str(path)
+            path = str(artifact.get("path", "?"))
+            try:
+                target = resolve_in_bundle(store.root, path, "derived artifact")
+            except NeuralGeometryFormatError as exc:
+                # A recorded path can be a valid relative *string* and still leave
+                # the bundle through a symlink. Hashing the target would turn the
+                # integrity check into a reader that is weaker than the writer, so
+                # the artifact is reported and left unopened.
+                record(f"derived_containment:{path}", False, str(exc))
+                continue
             if not target.is_file():
                 record(
                     f"derived_present:{path}",
@@ -330,12 +339,8 @@ def _cmd_verify(args: argparse.Namespace) -> int:
                 digest == artifact.get("sha256"),
                 f"{digest[:16]} vs recorded {str(artifact.get('sha256'))[:16]}",
             )
-            expected_size = artifact.get("bytes")
-            record(
-                f"derived_size:{path}",
-                expected_size is None or target.stat().st_size == expected_size,
-                f"{target.stat().st_size} bytes",
-            )
+            size = target.stat().st_size
+            record(f"derived_size:{path}", size == artifact.get("bytes"), f"{size} bytes")
 
         try:
             from .neural.objects import build_field
