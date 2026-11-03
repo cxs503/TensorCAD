@@ -1,0 +1,573 @@
+{
+  "schema": "tensorcad.fairness.study/1",
+  "field": {
+    "rows": [
+      {
+        "field": "sphere",
+        "point": [
+          0.5,
+          0.0,
+          0.0
+        ],
+        "quantity": "kappa1 = kappa2 = 1/R",
+        "expected_per_m": [
+          2.0,
+          2.0
+        ],
+        "measured_per_m": [
+          1.9999999999999971,
+          1.9999999999999971
+        ],
+        "max_abs_error_per_m": 2.886579864025407e-15,
+        "max_relative_error": 1.4432899320127035e-15,
+        "step_error_per_m": 8.999998946102039e-08,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "sphere",
+        "point": [
+          0.0,
+          0.5,
+          0.0
+        ],
+        "quantity": "kappa1 = kappa2 = 1/R",
+        "expected_per_m": [
+          2.0,
+          2.0
+        ],
+        "measured_per_m": [
+          1.9999999999999971,
+          1.9999999999999971
+        ],
+        "max_abs_error_per_m": 2.886579864025407e-15,
+        "max_relative_error": 1.4432899320127035e-15,
+        "step_error_per_m": 8.999998946102039e-08,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "sphere",
+        "point": [
+          0.0,
+          0.0,
+          -0.5
+        ],
+        "quantity": "kappa1 = kappa2 = 1/R",
+        "expected_per_m": [
+          2.0,
+          2.0
+        ],
+        "measured_per_m": [
+          1.9999999999999971,
+          1.9999999999999971
+        ],
+        "max_abs_error_per_m": 2.886579864025407e-15,
+        "max_relative_error": 1.4432899320127035e-15,
+        "step_error_per_m": 8.999998946102039e-08,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "cylinder",
+        "point": [
+          0.35,
+          0.0,
+          0.0
+        ],
+        "quantity": "hoop 1/R, axial 0",
+        "expected_per_m": [
+          2.857142857142857,
+          0.0
+        ],
+        "measured_per_m": [
+          2.85714285714285,
+          0.0
+        ],
+        "max_abs_error_per_m": 7.105427357601002e-15,
+        "max_relative_error": 2.4868995751603505e-15,
+        "step_error_per_m": 1.731778160873887e-07,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "cylinder",
+        "point": [
+          0.0,
+          0.35,
+          0.2
+        ],
+        "quantity": "hoop 1/R, axial 0",
+        "expected_per_m": [
+          2.857142857142857,
+          0.0
+        ],
+        "measured_per_m": [
+          2.85714285714285,
+          0.0
+        ],
+        "max_abs_error_per_m": 7.105427357601002e-15,
+        "max_relative_error": 2.4868995751603505e-15,
+        "step_error_per_m": 1.731778160873887e-07,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "plane",
+        "point": [
+          1.0,
+          2.0,
+          0.0
+        ],
+        "quantity": "flat: kappa1 = kappa2 = 0",
+        "expected_per_m": [
+          0.0,
+          0.0
+        ],
+        "measured_per_m": [
+          0.0,
+          0.0
+        ],
+        "max_abs_error_per_m": 0.0,
+        "max_relative_error": 0.0,
+        "step_error_per_m": 0.0,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "plane",
+        "point": [
+          -3.0,
+          0.5,
+          0.0
+        ],
+        "quantity": "flat: kappa1 = kappa2 = 0",
+        "expected_per_m": [
+          0.0,
+          0.0
+        ],
+        "measured_per_m": [
+          0.0,
+          0.0
+        ],
+        "max_abs_error_per_m": 0.0,
+        "max_relative_error": 0.0,
+        "step_error_per_m": 0.0,
+        "gradient_norm": 1.0
+      },
+      {
+        "field": "ellipsoid",
+        "point": [
+          0.6,
+          0.0,
+          0.0
+        ],
+        "quantity": "x pole: a/b^2, a/c^2",
+        "expected_per_m": [
+          3.749999999999999,
+          9.6
+        ],
+        "measured_per_m": [
+          9.599999999999872,
+          3.749999999999993
+        ],
+        "max_abs_error_per_m": 1.2789769243681803e-13,
+        "max_relative_error": 1.3322676295501878e-14,
+        "step_error_per_m": 1.3420795301755106e-06,
+        "gradient_norm": 1.6666666666666667
+      },
+      {
+        "field": "ellipsoid",
+        "point": [
+          0.0,
+          0.4,
+          0.0
+        ],
+        "quantity": "y pole: b/c^2, b/a^2",
+        "expected_per_m": [
+          6.4,
+          1.1111111111111112
+        ],
+        "measured_per_m": [
+          6.399999999999916,
+          1.1111111111111114
+        ],
+        "max_abs_error_per_m": 8.43769498715119e-14,
+        "max_relative_error": 1.3183898417423734e-14,
+        "step_error_per_m": 8.947196858954953e-07,
+        "gradient_norm": 2.5
+      },
+      {
+        "field": "ellipsoid",
+        "point": [
+          0.0,
+          0.0,
+          0.25
+        ],
+        "quantity": "z pole: c/b^2, c/a^2",
+        "expected_per_m": [
+          1.5624999999999998,
+          0.6944444444444444
+        ],
+        "measured_per_m": [
+          1.5624999999999964,
+          0.6944444444444446
+        ],
+        "max_abs_error_per_m": 3.3306690738754696e-15,
+        "max_relative_error": 2.131628207280301e-15,
+        "step_error_per_m": 8.53271369116726e-08,
+        "gradient_norm": 4.0
+      }
+    ],
+    "worst_relative_error": 1.3322676295501878e-14,
+    "worst_step_error_per_m": 1.3420795301755106e-06,
+    "plane_abs_error_per_m": 0.0,
+    "claims": [
+      {
+        "claim": "field curvature vs closed forms: worst relative error",
+        "value": 1.3322676295501878e-14,
+        "limit": 1e-06,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "plane curvature is exactly zero [1/m]",
+        "value": 0.0,
+        "limit": 1e-12,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "reported step error on the primitives [1/m]",
+        "value": 1.3420795301755106e-06,
+        "limit": 1e-05,
+        "direction": "<=",
+        "holds": true
+      }
+    ]
+  },
+  "mesh": {
+    "analytic_mean_curvature_per_m": 1.0,
+    "regular_uv_sphere": {
+      "triangles": 2304,
+      "pointwise_median_relative_error": 0.0017695915589498144,
+      "pointwise_p95_relative_error": 0.9999999999999999,
+      "area_weighted_mean_per_m": 0.9978567641929292,
+      "area_weighted_relative_error": 0.0021432358070707647
+    },
+    "marching_tets": {
+      "raw": {
+        "triangles": 15584,
+        "pointwise_median_relative_error": 0.4893312406348329,
+        "pointwise_p95_relative_error": 3.7665426343506523,
+        "area_weighted_mean_per_m": 1.0004898892860832,
+        "area_weighted_relative_error": 0.0004898892860831783
+      },
+      "taubin_30": {
+        "triangles": 15584,
+        "pointwise_median_relative_error": 0.2235118219270444,
+        "pointwise_p95_relative_error": 2.617429811389458,
+        "area_weighted_mean_per_m": 0.9996448031313723,
+        "area_weighted_relative_error": 0.00035519686862772737
+      },
+      "taubin_30_plus_projection_10": {
+        "triangles": 15584,
+        "pointwise_median_relative_error": 0.01420501751625394,
+        "pointwise_p95_relative_error": 0.9354851747922126,
+        "area_weighted_mean_per_m": 1.0000081258669222,
+        "area_weighted_relative_error": 8.125866922226166e-06
+      }
+    },
+    "fairness": {
+      "dihedral_degrees": {
+        "count": 23376,
+        "mean": 1.8400656700566353,
+        "p50": 1.1215761733310676,
+        "p95": 5.487565694915991,
+        "max": 6.414918510984636,
+        "min": 0.0
+      },
+      "crease_edges": 0,
+      "mesh_curvature_per_m": {
+        "count": 7794,
+        "mean": 19.82810294957494,
+        "p50": 1.0762688895647192,
+        "p95": 4.781773784175935,
+        "max": 22064.682112713897,
+        "area_weighted_mean": 1.0004898892860832
+      },
+      "field_curvature_per_m": {
+        "count": 15584,
+        "mean": 1.0010731143765275,
+        "p50": 1.0010208473599855,
+        "p95": 1.0020135752031796,
+        "max": 1.0026075455052819
+      }
+    },
+    "claims": [
+      {
+        "claim": "area-weighted mean curvature is the analytic 1/R (raw marching tets)",
+        "value": 0.0004898892860831783,
+        "limit": 0.001,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "pointwise median error on the raw mesh [%] (documents the sliver field)",
+        "value": 48.93312406348329,
+        "limit": 10.0,
+        "direction": ">=",
+        "holds": true
+      },
+      {
+        "claim": "pointwise median error after taubin + projection [%]",
+        "value": 1.420501751625394,
+        "limit": 3.0,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "a sphere has no crease above 15 deg",
+        "value": 0,
+        "limit": 0,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "sphere dihedral p95 [deg]",
+        "value": 5.487565694915991,
+        "limit": 6.0,
+        "direction": "<=",
+        "holds": true
+      }
+    ]
+  },
+  "appendages": {
+    "grid": {
+      "nx": 80,
+      "ny": 12,
+      "nz": 16
+    },
+    "triangles": 22060,
+    "raw": {
+      "schema": "tensorcad.curvature.fairness/1",
+      "triangles": 22060,
+      "vertices": 11032,
+      "interior_edges": 33090,
+      "boundary_edges": 0,
+      "watertight": true,
+      "edge_manifold": true,
+      "crease_angle_degrees": 15.0,
+      "dihedral_degrees": {
+        "count": 33090,
+        "mean": 3.293260554667413,
+        "p50": 0.04930269605328559,
+        "p95": 11.944445938554537,
+        "max": 163.49573968706676,
+        "min": 0.0
+      },
+      "crease_edges": 1171,
+      "crease_length_fraction": 0.030374411889771854,
+      "mesh_curvature_per_m": {
+        "count": 11032,
+        "mean": 8.304349892415395,
+        "p50": 2.380127098331638,
+        "p95": 21.797616817919035,
+        "max": 2029.8946424673277,
+        "area_weighted_mean": 2.4754247716414457
+      },
+      "field_curvature_per_m": {
+        "count": 22060,
+        "mean": 3.0601347424457703,
+        "p50": 1.976075710233634,
+        "p95": 4.568090403297637,
+        "max": 3014.691446347917
+      },
+      "curvature_jump_per_m": {
+        "count": 33090,
+        "mean": 1.314071558056742,
+        "p50": 0.0029208851296386174,
+        "p95": 0.23805723632196213,
+        "max": 3017.841094323388
+      }
+    },
+    "taubin_10": {
+      "schema": "tensorcad.curvature.fairness/1",
+      "triangles": 22060,
+      "vertices": 11032,
+      "interior_edges": 33090,
+      "boundary_edges": 0,
+      "watertight": true,
+      "edge_manifold": true,
+      "crease_angle_degrees": 15.0,
+      "dihedral_degrees": {
+        "count": 33090,
+        "mean": 3.3575153633244565,
+        "p50": 1.247326110846428,
+        "p95": 11.15868038921044,
+        "max": 179.53223133351807,
+        "min": 0.0
+      },
+      "crease_edges": 1019,
+      "crease_length_fraction": 0.02921200173959796,
+      "mesh_curvature_per_m": {
+        "count": 11032,
+        "mean": 3.8828701991932286,
+        "p50": 2.0262603898253837,
+        "p95": 10.129894346872312,
+        "max": 434.3642672037225,
+        "area_weighted_mean": 2.522157848223137
+      },
+      "field_curvature_per_m": null,
+      "curvature_jump_per_m": null
+    },
+    "claims": [
+      {
+        "claim": "AFF-8 has designed creases above 15 deg",
+        "value": 1171,
+        "limit": 100,
+        "direction": ">=",
+        "holds": true
+      },
+      {
+        "claim": "AFF-8 has knife edges (min dihedral) [deg]",
+        "value": 0.0,
+        "limit": 1.0,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "AFF-8 audit keeps the creases after taubin",
+        "value": 1019,
+        "limit": 0.5,
+        "direction": ">=",
+        "holds": true
+      },
+      {
+        "claim": "AFF-8 mesh is watertight",
+        "value": 0,
+        "limit": 0,
+        "direction": "<=",
+        "holds": true
+      }
+    ]
+  },
+  "hull": {
+    "default_grid": {
+      "nx": 41,
+      "nz": 13,
+      "triangles": 1998,
+      "dihedral_degrees": {
+        "count": 2997,
+        "mean": 7.2663617203372235,
+        "p50": 1.4555229775398264,
+        "p95": 26.797711886902473,
+        "max": 168.99833416880253,
+        "min": 0.0
+      },
+      "crease_edges": 232,
+      "crease_length_fraction": 0.07552795143517183,
+      "mesh_curvature_per_m": {
+        "count": 1001,
+        "mean": 0.5835792324162609,
+        "p50": 0.31499711578315825,
+        "p95": 2.179346003311751,
+        "max": 9.719050284423242,
+        "area_weighted_mean": 0.6361291551098217
+      }
+    },
+    "fine_grid": {
+      "nx": 161,
+      "nz": 41,
+      "triangles": 25918,
+      "dihedral_degrees": {
+        "count": 38877,
+        "mean": 2.115659234319949,
+        "p50": 0.3906124233197817,
+        "p95": 3.5934470311127598,
+        "max": 170.82555290746362,
+        "min": 0.0
+      },
+      "crease_edges": 628,
+      "crease_length_fraction": 0.014370764069409734,
+      "mesh_curvature_per_m": {
+        "count": 12961,
+        "mean": 0.5365592062973051,
+        "p50": 0.275549250181114,
+        "p95": 1.3315975083975937,
+        "max": 39.46644988473009,
+        "area_weighted_mean": 0.6361360190388355
+      }
+    },
+    "waterline": {
+      "breadth_exponent": 0.7,
+      "expected_slope_exponent": -0.30000000000000004,
+      "fitted_slope_exponent": -0.3000281314082659,
+      "rows": [
+        {
+          "x_over_l": 0.01,
+          "x_m": 0.1,
+          "db_dx": 0.6207404291969087
+        },
+        {
+          "x_over_l": 0.001,
+          "x_m": 0.01,
+          "db_dx": 1.2390847788784631
+        },
+        {
+          "x_over_l": 0.0001,
+          "x_m": 0.001,
+          "db_dx": 2.47231003479894
+        },
+        {
+          "x_over_l": 1e-05,
+          "x_m": 0.0001,
+          "db_dx": 4.932907263460566
+        },
+        {
+          "x_over_l": 1e-06,
+          "x_m": 9.999999999999999e-06,
+          "db_dx": 9.842444603719379
+        },
+        {
+          "x_over_l": 1e-07,
+          "x_m": 1e-06,
+          "db_dx": 19.638385182089806
+        }
+      ],
+      "claims": [
+        {
+          "claim": "waterline slope exponent vs 0.7-1",
+          "value": 2.8131408265852365e-05,
+          "limit": 0.02,
+          "direction": "<=",
+          "holds": true
+        },
+        {
+          "claim": "waterline slope keeps growing as x -> 0 (ratio x/L=1e-7 vs 1e-2)",
+          "value": 31.63703257978094,
+          "limit": 10.0,
+          "direction": ">=",
+          "holds": true
+        }
+      ]
+    },
+    "claims": [
+      {
+        "claim": "hull dihedral p95 falls when the grid is refined [deg]",
+        "value": 3.5934470311127598,
+        "limit": 26.797711886902473,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "hull crease *length fraction* falls under refinement",
+        "value": 0.014370764069409734,
+        "limit": 0.07552795143517183,
+        "direction": "<=",
+        "holds": true
+      },
+      {
+        "claim": "hull crease *count* does not fall under refinement (count alone misleads)",
+        "value": 628.0,
+        "limit": 232.0,
+        "direction": ">=",
+        "holds": true
+      }
+    ]
+  }
+}

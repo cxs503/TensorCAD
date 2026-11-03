@@ -17,6 +17,14 @@ contracts and algorithms, :mod:`tensorcad.parameters` and
 live in :mod:`tensorcad.adapters`.
 """
 
+from .curvature import (
+    CurvatureError,
+    CurvatureSample,
+    FairnessReport,
+    assess_fairness,
+    principal_curvatures,
+    vertex_mean_curvature,
+)
 from .design import (
     DESIGN_SCHEMA,
     DesignProblem,
@@ -100,18 +108,20 @@ from .validation import (
 )
 
 __all__ = [
-    "DESIGN_SCHEMA",
-    "SUBOFF_LENGTH_M",
-    "SUBOFF_RADIUS_M",
+    "ANALYTIC_COMPARABLE_QUANTITIES",
     "BoundingBox",
     "Check",
     "ConditionedMesh",
+    "CurvatureError",
+    "CurvatureSample",
     "CylinderField",
+    "DESIGN_SCHEMA",
     "DesignProblem",
     "DesignRecord",
     "DesignSolution",
     "DesignTargets",
     "EllipsoidField",
+    "FairnessReport",
     "FieldError",
     "GeometryField",
     "HullModel",
@@ -127,6 +137,8 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
+    "SUBOFF_LENGTH_M",
+    "SUBOFF_RADIUS_M",
     "SampledField",
     "SphereField",
     "SuboffAppendagesField",
@@ -134,13 +146,13 @@ __all__ = [
     "SuboffFullField",
     "SuboffHullField",
     "SuboffSailField",
-    "ANALYTIC_COMPARABLE_QUANTITIES",
     "ValidationReport",
     "VoxelGrid",
     "analytic_hydrostatics",
     "analytic_relative_errors",
     "analytic_volume",
     "analytic_wetted_surface_area",
+    "assess_fairness",
     "build_mesh",
     "compute_hydrostatics",
     "condition_mesh",
@@ -153,6 +165,7 @@ __all__ = [
     "inspect_geometry",
     "inspect_mesh_quality",
     "measure_mesh",
+    "principal_curvatures",
     "project_to_field",
     "read_metadata",
     "read_obj",
@@ -167,6 +180,7 @@ __all__ = [
     "to_mesh",
     "to_voxel_grid",
     "validate_hull",
+    "vertex_mean_curvature",
     "write_design_json",
     "write_metadata",
     "write_obj",
@@ -174,4 +188,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.11.0"
+__version__ = "0.12.0"
