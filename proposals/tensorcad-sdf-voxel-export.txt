@@ -1,5 +1,6 @@
 # Proposal: TensorCAD SDF 体素网格导出
 
+**状态**: ✅ 已实现（0.10.0，m2144）——见 tensorcad/voxel.py、docs/voxel_export.md、tests/test_voxel.py
 **mission 草案**: m243（建议）
 **角色**: implementer
 **预算**: ~50 tool calls, ~45 min
