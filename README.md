@@ -74,6 +74,41 @@ VCB at `+0.94 %`, at `161x41` nothing exceeds `0.17 %`. The derivation, the inde
 quadrature that checks the formulas themselves, and the limits of the comparison are in
 [docs/hull_analytic_reference.md](docs/hull_analytic_reference.md).
 
+## Initial stability (0.14)
+
+`hydrostatics` integrates the buoyancy side and stops there. `tensorcad.stability` crosses into
+stability: it cuts the surface with the waterline plane, chains the cut segments into loops
+using the mesh's own vertex/edge identity, and integrates the section's area and second moments
+by Green's theorem — exact for the polygonal waterplane the mesh actually has. `BM = I/∇`, and
+`GM = KB + BM − KG` with `KG` supplied by the caller, because a `GM` is only as meaningful as
+the loading condition behind it.
+
+```python
+from tensorcad import HullParameters, generate_hull, initial_stability
+
+model = generate_hull(HullParameters(length=10.0, beam=2.0, draft=0.8))
+result = initial_stability(model.mesh, kg=0.6)   # KG above the keel
+result.bm_transverse                             # 0.4386 m   (analytic 0.435360, +0.75 %)
+result.km_transverse                             # 0.9216 m
+result.gm_transverse                             # 0.3216 m   (analytic 0.315360, +1.99 %)
+result.waterplane.longitudinal_second_moment     # 76.41 m^4  (quadrature 76.8708, -0.60 %)
+```
+
+Three references, in increasing order of how much they can go wrong:
+
+| reference | what it proves | worst error measured |
+|---|---|---|
+| box `10 × 2 × 0.8 m` | the section integration is exact, not merely converged | `2.2e-16` on `A`, `I_T`, `I_L`, `KB`, `BM`, `GM` |
+| hemisphere `R = 1 m` | `KB = 5R/8` and `BM = 3R/8` sum to `KM = R` — two independent integrations, one identity | `0.16 %` (inscribed n-gon) |
+| the analytic hull waterplane | the mesh's own error, and its order | `I_T` `−0.14 %` at `41×13`, `−0.009 %` at `161×41`, fitted order `2.01` |
+
+`GM` is a difference of nearly equal numbers, so it amplifies: `rel(GM) ≈ (KM/GM)·rel(KM)`
+and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated in
+[docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
+quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
+`7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
+large-angle `GZ`, trim equilibrium, damage stability, class rules.
+
 ## Continuous geometry core (0.4)
 
 Every representation now answers the same questions. `tensorcad.geometry_field`
