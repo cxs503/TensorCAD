@@ -23,7 +23,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tensorcad.neural_geometry import (  # noqa: E402
+from tensorcad.neural_geometry import (
     Lineage,
     NeuralGeometryFormatError,
     ObjectStore,
@@ -52,9 +52,7 @@ def hostile_corpus(contract: Any) -> list[dict[str, Any]]:
     rows = []
     for case, overrides, expected in contract.HOSTILE_DERIVED:
         manifest = contract.make_manifest()
-        if case == "derived_is_not_a_list":
-            manifest["derived"] = overrides
-        elif case == "record_is_not_an_object":
+        if case == "derived_is_not_a_list" or case == "record_is_not_an_object":
             manifest["derived"] = overrides
         else:
             manifest["derived"] = [dict(contract.mesh_record(), **overrides)]
@@ -63,7 +61,7 @@ def hostile_corpus(contract: Any) -> list[dict[str, Any]]:
         except NeuralGeometryFormatError as exc:
             rows.append({"case": case, "rejected": True, "message": str(exc),
                          "raises_other": False, "expected": expected})
-        except Exception as exc:  # noqa: BLE001 - the point of the audit
+        except Exception as exc:
             rows.append({"case": case, "rejected": False, "message": repr(exc),
                          "raises_other": True, "expected": expected})
         else:
@@ -82,7 +80,7 @@ def fuzz(contract: Any, cases: int) -> dict[str, Any]:
             parse_manifest(candidate)
         except NeuralGeometryFormatError:
             rejected += 1
-        except Exception as exc:  # noqa: BLE001 - the property under test
+        except Exception as exc:
             undocumented.append(f"{type(exc).__name__}: {exc}")
         else:
             accepted += 1
@@ -212,7 +210,7 @@ def figure(evidence: dict[str, Any], target: Path) -> str | None:
         f"verify exit {demo['verify_exit_code']}, payload unopened: "
         f"{not demo['verify_hashed_the_escaped_payload']}",
     ]
-    for bar, note in zip(bars, notes):
+    for bar, note in zip(bars, notes, strict=False):
         right.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.06, note,
                    ha="center", va="bottom", fontsize=7.5, wrap=True)
     right.set_xlabel("caught / not caught", fontsize=7.5)

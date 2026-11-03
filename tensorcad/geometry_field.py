@@ -466,7 +466,6 @@ class CylinderField(GeometryField):
         except ImportError:  # pragma: no cover
             return None
         center = np.asarray(self.center, dtype=np.float64)
-        axis = np.asarray(self.axis, dtype=np.float64)
         ax, ay, az = self.axis
         radius = self.radius
         half = 0.5 * self.height
