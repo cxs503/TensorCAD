@@ -307,12 +307,12 @@ HOSTILE_DERIVED: tuple[tuple[str, object, str], ...] = (
 )
 
 
-@pytest.mark.parametrize(("case", "overrides", "expected"), HOSTILE_DERIVED, ids=[c[0] for c in HOSTILE_DERIVED])
+@pytest.mark.parametrize(
+    ("case", "overrides", "expected"), HOSTILE_DERIVED, ids=[c[0] for c in HOSTILE_DERIVED]
+)
 def test_hostile_derived_records_are_rejected(case: str, overrides: object, expected: str) -> None:
     manifest = make_manifest()
-    if case == "derived_is_not_a_list":
-        manifest["derived"] = overrides
-    elif case == "record_is_not_an_object":
+    if case == "derived_is_not_a_list" or case == "record_is_not_an_object":
         manifest["derived"] = overrides
     else:
         manifest["derived"] = [dict(mesh_record(), **overrides)]  # type: ignore[arg-type]
@@ -368,9 +368,11 @@ def _mutations(manifest: dict[str, object], count: int, seed: int = 20261102) ->
     import random
 
     rng = random.Random(seed)
-    replacements = [None, True, False, 0, -1, 1.5, "", "x", [], {}, ["x"], {"x": 1}, float("nan"), float("inf")]
+    replacements = [
+        None, True, False, 0, -1, 1.5, "", "x", [], {}, ["x"], {"x": 1}, float("nan"), float("inf")
+    ]
     mutations: list[dict[str, object]] = []
-    keys = list(manifest) + ["derived"]
+    keys = [*manifest, "derived"]
     while len(mutations) < count:
         candidate = copy.deepcopy(manifest)
         key = rng.choice(keys)

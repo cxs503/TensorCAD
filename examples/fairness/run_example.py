@@ -74,7 +74,7 @@ def field_exactness() -> dict:
         # forms are written in whichever order the derivation gives, so sort both.
         errors = sorted(
             abs(value - target)
-            for value, target in zip(sorted(values), sorted(expected))
+            for value, target in zip(sorted(values), sorted(expected), strict=False)
         )
         scale = max(abs(target) for target in expected) or 1.0
         rows.append(
@@ -168,7 +168,7 @@ def mesh_curvature_study() -> dict:
         reference = [sample.mean_curvature for sample in principal_curvatures(field, mesh.vertices)]
         deviations = sorted(
             abs(value - target) / abs(target)
-            for value, target in zip(values, reference)
+            for value, target in zip(values, reference, strict=False)
             if math.isfinite(value) and abs(target) > 0.0
         )
         weights = [0.0] * len(mesh.vertices)
@@ -187,7 +187,7 @@ def mesh_curvature_study() -> dict:
         total = math.fsum(weights)
         weighted = math.fsum(
             value * weight
-            for value, weight in zip(values, weights)
+            for value, weight in zip(values, weights, strict=False)
             if math.isfinite(value)
         ) / total
         return {
@@ -277,7 +277,7 @@ def hull_waterline_slope(parameters: HullParameters) -> dict:
     logs_s = [math.log(value) for value in slopes]
     mean_x = sum(logs_x) / len(logs_x)
     mean_s = sum(logs_s) / len(logs_s)
-    exponent = sum((u - mean_x) * (v - mean_s) for u, v in zip(logs_x, logs_s)) / sum(
+    exponent = sum((u - mean_x) * (v - mean_s) for u, v in zip(logs_x, logs_s, strict=False)) / sum(
         (u - mean_x) ** 2 for u in logs_x
     )
     expected = BREADTH_EXPONENT - 1.0
@@ -395,7 +395,7 @@ def markdown(results: dict) -> str:
     )
 
     lines.append("## 2. Mesh curvature: integral exact, pointwise needs a conditioned mesh\n")
-    lines.append(f"Reference: a sphere of radius 1 m, analytic mean curvature 1 1/m.\n")
+    lines.append("Reference: a sphere of radius 1 m, analytic mean curvature 1 1/m.\n")
     lines.append("| mesh | triangles | pointwise median | pointwise p95 | area-weighted mean [1/m] | area-weighted error |")
     lines.append("|---|---|---|---|---|---|")
     mesh_section = results["mesh"]

@@ -1874,8 +1874,8 @@ def _corner_displacement(left: Mesh, right: Mesh) -> float:
         return float(numpy.max(numpy.linalg.norm(left_corners - right_corners, axis=1)))
     except ImportError:  # pragma: no cover - NumPy is required to sample the field anyway
         worst = 0.0
-        for face_left, face_right in zip(left.faces, right.faces):
-            for corner_left, corner_right in zip(face_left, face_right):
+        for face_left, face_right in zip(left.faces, right.faces, strict=False):
+            for corner_left, corner_right in zip(face_left, face_right, strict=False):
                 worst = max(
                     worst,
                     math.dist(left.vertices[corner_left], right.vertices[corner_right]),
@@ -2022,14 +2022,14 @@ def aff8_roundtrip_case(
     stl_area = meshlib.surface_area(stl_reimported)
     box, box_after = mesh.bounding_box(), reimported.bounding_box()
     box_drift = max(
-        max(abs(a - b) for a, b in zip(box.minimum, box_after.minimum)),
-        max(abs(a - b) for a, b in zip(box.maximum, box_after.maximum)),
+        max(abs(a - b) for a, b in zip(box.minimum, box_after.minimum, strict=False)),
+        max(abs(a - b) for a, b in zip(box.maximum, box_after.maximum, strict=False)),
     )
 
     labels_after = aff8_patch_labels(field, reimported)
     stl_labels = aff8_patch_labels(field, stl_reimported)
-    identity = sum(1 for a, b in zip(patches, labels_after) if a == b) / max(len(patches), 1)
-    stl_identity = sum(1 for a, b in zip(patches, stl_labels) if a == b) / max(len(patches), 1)
+    identity = sum(1 for a, b in zip(patches, labels_after, strict=False) if a == b) / max(len(patches), 1)
+    stl_identity = sum(1 for a, b in zip(patches, stl_labels, strict=False) if a == b) / max(len(patches), 1)
     patch_counts: dict[str, int] = {}
     for label in patches:
         patch_counts[label] = patch_counts.get(label, 0) + 1
@@ -2144,7 +2144,7 @@ def aff8_roundtrip_case(
         notes=[
             f"sampled at {resolution} with margin {AFF8_MARGIN}: {len(mesh.faces)} triangles, "
             f"{len(mesh.vertices)} vertices, {sample_seconds:.1f} s",
-            f"patches found by measurement, not by tag: "
+            "patches found by measurement, not by tag: "
             + ", ".join(f"{name} {count}" for name, count in sorted(patch_counts.items())),
             f"OBJ is lossless (17 significant digits): worst corner displacement {node_error:.1e} m",
             f"STL is float32 and index-free: worst corner displacement {stl_node_error:.1e} m, "

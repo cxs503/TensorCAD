@@ -46,7 +46,7 @@ import math
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from .geometry import Mesh
 from .geometry_field import GeometryField
@@ -185,7 +185,7 @@ def _batch_gradients(
     gradients = field.gradient(batch)
 
     result: list[tuple[Point, list[list[float]]]] = []
-    for index, point in enumerate(probes):
+    for index, _point in enumerate(probes):
         base = 7 * index
         centre = gradients[base]
         hessian = [[0.0, 0.0, 0.0] for _ in range(3)]
@@ -201,7 +201,7 @@ def _batch_gradients(
                 mean = 0.5 * (hessian[i][j] + hessian[j][i])
                 hessian[i][j] = mean
                 hessian[j][i] = mean
-        result.append((tuple(centre), hessian))
+        result.append((cast(tuple[float, float, float], tuple(centre)), hessian))
     return result
 
 
@@ -388,7 +388,7 @@ def _percentile(sorted_values: Sequence[float], fraction: float) -> float:
     if len(sorted_values) == 1:
         return float(sorted_values[0])
     position = fraction * (len(sorted_values) - 1)
-    lower = int(math.floor(position))
+    lower = math.floor(position)
     upper = min(lower + 1, len(sorted_values) - 1)
     weight = position - lower
     return float(sorted_values[lower] * (1.0 - weight) + sorted_values[upper] * weight)
@@ -536,14 +536,14 @@ def assess_fairness(
 
     mesh_curvature = vertex_mean_curvature(mesh)
     mesh_weights = [0.0] * len(mesh.vertices)
-    for face, area in zip(mesh.faces, face_areas):
+    for face, area in zip(mesh.faces, face_areas, strict=False):
         for index in face:
             mesh_weights[index] += area / 3.0
     mesh_curvature_summary = _distribution([abs(value) for value in mesh_curvature])
     total_weight = math.fsum(mesh_weights)
     weighted_pairs = [
         (value, weight)
-        for value, weight in zip(mesh_curvature, mesh_weights)
+        for value, weight in zip(mesh_curvature, mesh_weights, strict=False)
         if math.isfinite(value) and weight > 0.0
     ]
     mesh_curvature_summary["area_weighted_mean"] = (
@@ -558,7 +558,12 @@ def assess_fairness(
     if field is not None:
         centroids = [
             tuple(
-                (mesh.vertices[face[0]][axis] + mesh.vertices[face[1]][axis] + mesh.vertices[face[2]][axis]) / 3.0
+                (
+                    mesh.vertices[face[0]][axis]
+                    + mesh.vertices[face[1]][axis]
+                    + mesh.vertices[face[2]][axis]
+                )
+                / 3.0
                 for axis in range(3)
             )
             for face in mesh.faces
@@ -591,10 +596,10 @@ def assess_fairness(
 
 
 __all__ = [
-    "CurvatureError",
-    "CurvatureSample",
     "DEFAULT_CREASE_DEGREES",
     "DEFAULT_STEP_FRACTION",
+    "CurvatureError",
+    "CurvatureSample",
     "FairnessReport",
     "assess_fairness",
     "principal_curvatures",

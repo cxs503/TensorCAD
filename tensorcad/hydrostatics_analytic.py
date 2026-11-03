@@ -263,7 +263,8 @@ class AnalyticHydrostatics:
 
     def within(self, measured: Any, tolerance: float = 0.03) -> bool:
         """True when every comparable quantity is within ``tolerance`` (relative)."""
-        return self.compare(measured)["worst_relative_error"] <= tolerance
+        worst: float = self.compare(measured)["worst_relative_error"]
+        return worst <= tolerance
 
 
 def _resolve_parameters(parameters: Any) -> tuple[float, float, float, float]:
