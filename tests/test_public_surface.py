@@ -15,15 +15,19 @@ EXPECTED_API = {
     "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder",
     "MeshConditioningError", "MeshGateError", "MeshGateReport", "MeshMeasurements", "ParameterSpec",
     "PlaneField", "RatioSpec", "ResolutionPlan", "SUBOFF_LENGTH_M", "SUBOFF_RADIUS_M", "SampledField",
-    "SphereField", "SuboffAppendagesField", "SuboffFinsField", "SuboffFullField",
+    "SphereField", "VoxelGrid", "ANALYTIC_COMPARABLE_QUANTITIES",
+    "CurvatureError", "CurvatureSample", "FairnessReport",
+    "SuboffAppendagesField", "SuboffFinsField", "SuboffFullField",
     "SuboffHullField", "SuboffSailField", "ValidationReport", "analytic_volume", "build_mesh",
+    "analytic_hydrostatics", "analytic_relative_errors", "analytic_wetted_surface_area",
     "compute_hydrostatics", "condition_mesh", "decimate", "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
     "inspect_geometry", "inspect_mesh_quality", "measure_mesh", "project_to_field",
     "read_metadata", "read_obj", "read_stl", "resolve_resolution",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
-    "taubin_smooth", "to_mesh", "validate_hull", "write_design_json", "write_metadata",
+    "taubin_smooth", "to_mesh", "to_voxel_grid", "assess_fairness", "principal_curvatures", "vertex_mean_curvature",
+    "validate_hull", "write_design_json", "write_metadata",
     "write_offsets_csv", "write_obj", "write_solver_manifest", "write_stl",
 }
 
@@ -32,11 +36,11 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.11.0"
+    assert tensorcad.__version__ == "0.12.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
-    for module in ("geometry", "geometry_field", "mesh", "mesh_conditioning", "gate", "parameters",
+    for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate", "parameters",
                    "validation", "hydrostatics", "export", "hull", "design", "suboff",
                    "suboff_appendages", "cli", "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None

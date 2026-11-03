@@ -4,6 +4,66 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.12.0 — 2026-11-03
+
+### Added
+- **`tensorcad.curvature`** — the fairness check the backlog had left open (P3). Two
+  independent estimates, because the question has two audiences:
+  - **`principal_curvatures(field, points)`** reads the principal curvatures off the
+    analytic field through the shape operator `M = P (Hess f) P / |grad f|`. `P` kills
+    the normal direction, so the estimate is invariant to whether the field is a true
+    signed distance or only an implicit function — which is what makes it work on the
+    ellipsoid and on the learned `.ngo` fields, not just the exact primitives. The
+    seven gradients per probe (point plus three axis pairs) go out in one batched call;
+    measuring that was worth an order of magnitude on the AFF-8 min-union. Each sample
+    is Richardson-extrapolated from `h` and `h/2` and carries its own `step_error`.
+  - **`vertex_mean_curvature(mesh)`** is the cotangent-Laplacian estimate a consumer of
+    the mesh can recompute, with the standard cotangent clamp against slivers.
+  - **`assess_fairness(mesh, field=...)`** returns the audit: the dihedral distribution
+    over interior edges, the crease count and length fraction above a threshold, the
+    mesh curvature summary, and — when a field is supplied — the curvature jump across
+    each interior edge, which is then a property of the geometry rather than of the
+    triangulation.
+- `tests/test_curvature.py` — 20 tests: the four exact primitives against their closed
+  forms, the invariance to `|grad f| != 1`, input rejection, the mesh estimator's
+  convergence and its integral conservation, twelve creases on a cube, a sphere with
+  none, and the stdlib-only import.
+- `examples/fairness/run_example.py` — writes `docs/fairness/{results.json,report.md,plot.png}`
+  and exits 1 if one of its 15 claims stops holding.
+- `docs/fairness.md` — the derivation, what each estimate is good for, and the limits.
+
+### Measured
+- **The analytic estimate is exact**: sphere `1/R, 1/R`, cylinder `1/R, 0`, plane
+  `0, 0` (exactly zero), ellipsoid at all three poles — worst relative error
+  `1.33e-14`, reported step error below
+  `1.3e-06 1/m`.
+- **The mesh estimate is exact in the integral and needs a conditioned mesh
+  pointwise.** On a raw marching-tet sphere: pointwise median error
+  `48.9 %`, but the
+  area-weighted mean `1.000490 1/m`
+  against the analytic `1.0` (`0.049 %`).
+  The cotangent operator is a discrete divergence, so slivers cannot move the integral;
+  they own the pointwise field. After `taubin_smooth` + `project_to_field` the pointwise
+  median is `1.42 %`.
+- **AFF-8** (22060 triangles): p50 dihedral
+  `0.049°`, p95
+  `11.94°`, min
+  `0°` (the NACA trailing edges),
+  `1171` crease edges over 15° =
+  `3.04 %` of the interior edge length.
+- **The parametric hull family is not G1 at its ends.** `b(x) = B/2 sin(pi x/L)^0.7` gives
+  `db/dx ~ x^-0.3000` (fit over
+  `x/L = 1e-2 .. 1e-7`, expected `-0.3`):
+  infinite waterline slope at the stem and stern, so curvature diverges there. The keel
+  line has the same problem because the section profile is `sqrt(z/T)`. Both are
+  properties of the family, not of a mesher.
+- **A crease threshold on a coarse mesh measures the mesh.** On the hull, p95 dihedral
+  falls `26.80° -> 3.59°`
+  and the crease length fraction `7.55 % -> 1.44 %`
+  between `41x13` and `161x41`, while the crease *count* rises
+  `232 -> 628`. Use the distribution,
+  not the count.
+
 ## 0.11.0 — 2026-11-03
 
 The sampled hull stops being its own reference. `analytic_hydrostatics` returns the
