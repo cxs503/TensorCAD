@@ -1151,3 +1151,146 @@ def suboff_fin_chord(radius: float, length: float = SUBOFF_LENGTH_M) -> float:
     """
     feet = _LENGTH_FT / _positive_length(length)
     return (_FIN_SWEEP_K * float(radius) * feet + _FIN_SWEEP_C) / feet
+
+
+# --------------------------------------------------------------------------- #
+# Reference volumes: quadrature over the sections
+# --------------------------------------------------------------------------- #
+
+
+def _sail_quadrature(stations: int, sections: int) -> tuple[float, float]:
+    """Sail volume and its part outside the hull, ft^3, by quadrature in ``x`` and ``z``.
+
+    Cross-section at a station: a rectangle ``2 a(x) H`` below ``z = H`` plus the half
+    ellipse ``pi a(x)^2 / 4`` above it. The union with the hull only keeps the part with
+    ``|y| > y_hull(z)``, so the outside volume integrates ``2 (w_sail(z) - min(w_sail,
+    w_hull))`` over the section.
+    """
+    import numpy as np
+
+    from .suboff import suboff_radius_fraction_array
+
+    x = np.linspace(_SAIL_X_START_FT, _SAIL_X_END_FT, stations)
+    width = _sail_half_width_array(x)
+    total = float(np.trapezoid(2.0 * width * _SAIL_BODY_TOP_FT + math.pi * width**2 / 4.0, x))
+
+    fraction = np.linspace(0.0, 1.0, sections)
+    half = _sail_half_width_array(x)
+    top = _SAIL_BODY_TOP_FT + half / 2.0
+    z = fraction[None, :] * top[:, None]
+    safe = np.maximum(half[:, None] / 2.0, 1e-12)
+    sail_width = np.where(
+        z <= _SAIL_BODY_TOP_FT,
+        half[:, None],
+        half[:, None] * np.sqrt(np.maximum(1.0 - ((z - _SAIL_BODY_TOP_FT) / safe) ** 2, 0.0)),
+    )
+    hull_radius = suboff_radius_fraction_array(np.clip(x / _LENGTH_FT, 0.0, 1.0)) * _DECK_FT
+    hull_width = np.where(
+        z < hull_radius[:, None],
+        np.sqrt(np.maximum(hull_radius[:, None] ** 2 - z * z, 0.0)),
+        0.0,
+    )
+    outside = 2.0 * (sail_width - np.minimum(sail_width, hull_width))
+    return total, float(np.trapezoid(np.trapezoid(outside, z, axis=1), x))
+
+
+def _fins_quadrature(span_stations: int, chord_samples: int) -> tuple[float, float, float]:
+    """Fin volume, the part outside the hull, and the planform area, ft^3 / ft^2.
+
+    Four blades, each ``2 h(s)`` thick on a trapezoidal planform with the chord law
+    ``c(r) = K r + C``. A blade at span ``r`` and chord station ``s`` sits at radius
+    ``r``, which is outside the hull wherever ``r > R_hull(x)``.
+    """
+    import numpy as np
+
+    from .suboff import suboff_radius_fraction_array
+
+    intercept, r_outer = _fin_chord_coefficients(1.0)
+    s = np.linspace(0.0, 1.0, chord_samples)
+    thickness_integral = float(np.trapezoid(_naca_half_thickness_array(s), s))
+
+    radius = np.linspace(_FIN_R_INNER_FT, r_outer, span_stations)
+    chord = _FIN_SWEEP_K * radius + intercept
+    planform = 4.0 * float(np.trapezoid(chord, radius))
+    total = 4.0 * 2.0 * thickness_integral * float(np.trapezoid(chord, radius))
+
+    along = np.linspace(0.0, 1.0, max(chord_samples // 2, 2))
+    x_probe = _FIN_TRAILING_FT - chord[:, None] + along[None, :] * chord[:, None]
+    in_hull = suboff_radius_fraction_array(np.clip(x_probe / _LENGTH_FT, 0.0, 1.0)) * _DECK_FT
+    fraction_out = np.mean(radius[:, None] > in_hull, axis=1)
+    outside = 4.0 * float(np.trapezoid(2.0 * chord * thickness_integral * fraction_out, radius))
+    return total, outside, planform
+
+
+def suboff_appendage_volumes(
+    *,
+    stations: int = 40_001,
+    sections: int = 4_001,
+    span_stations: int = 4_001,
+) -> dict[str, Any]:
+    """Reference volumes of the AFF-8 model, by quadrature over the sections.
+
+    The companion of :func:`tensorcad.suboff.suboff_reference_geometry`: that one is the
+    bare hull, this one adds the sail and the four stern fins **and subtracts the parts
+    that are inside the hull**, because the exported model is their union. The reference
+    for a sampled mesh has to be the union's volume, not hull + sail + fins, which would
+    double-count 0.0049 m^3 of `appendage` that the hull already includes.
+
+    Computed twice (``stations / 4`` and ``stations``) and reported with the relative
+    change, so the number carries its own convergence check rather than a claim of
+    precision. The trapezoid rule is second order and every integrand here is smooth or
+    has a square-root tip, which is why the coarse-to-fine change is reported instead of
+    an error bar.
+
+    Units: the reference model of the DARPA offset table (L = 4.3561 m, sail and fin
+    scales 1.0), volumes in m^3 and areas in m^2. Scaling the appendages is an edit of
+    the field, not of the published table, so it is deliberately not parameterised here.
+    """
+    import numpy as np  # noqa: F401  (imported for the dependency check and the callers)
+
+    from .suboff import suboff_reference_geometry
+
+    if stations < 8 or sections < 8 or span_stations < 8:
+        raise ValueError("every quadrature needs at least 8 samples")
+
+    hull = suboff_reference_geometry()
+    feet = _LENGTH_FT / hull["length"]
+    per_cubic = 1.0 / feet**3
+    per_square = 1.0 / feet**2
+
+    results: dict[str, Any] = {"length": hull["length"], "radius": hull["radius"]}
+    for label, scale in (("coarse", 4), ("fine", 1)):
+        sail, sail_out = _sail_quadrature(max(stations // scale, 8), max(sections // scale, 8))
+        fins, fins_out, planform = _fins_quadrature(
+            max(span_stations // scale, 8), max(sections // scale, 8)
+        )
+        results[label] = {
+            "sail_volume_m3": sail * per_cubic,
+            "sail_outside_hull_m3": sail_out * per_cubic,
+            "fins_volume_m3": fins * per_cubic,
+            "fins_outside_hull_m3": fins_out * per_cubic,
+            "fin_planform_area_m2": planform * per_square,
+        }
+
+    fine = results["fine"]
+    results.update(fine)
+    results["hull_volume_m3"] = hull["volume"]
+    results["hull_wetted_area_m2"] = hull["wetted_area"]
+    results["full_model_volume_m3"] = hull["volume"] + fine["sail_outside_hull_m3"] + fine["fins_outside_hull_m3"]
+    results["appendage_share"] = (
+        fine["sail_outside_hull_m3"] + fine["fins_outside_hull_m3"]
+    ) / results["full_model_volume_m3"]
+    results["quadrature_rel_difference"] = max(
+        abs(fine["sail_outside_hull_m3"] / results["coarse"]["sail_outside_hull_m3"] - 1.0),
+        abs(fine["fins_outside_hull_m3"] / results["coarse"]["fins_outside_hull_m3"] - 1.0),
+        abs(fine["sail_volume_m3"] / results["coarse"]["sail_volume_m3"] - 1.0),
+        abs(fine["fins_volume_m3"] / results["coarse"]["fins_volume_m3"] - 1.0),
+    )
+    results["stations"] = stations
+    results["sections"] = sections
+    results["span_stations"] = span_stations
+    results["source"] = (
+        "quadrature over the published AFF-8 sections (Groves, Huang & Chang 1989), "
+        "union with the bare hull"
+    )
+    return results
