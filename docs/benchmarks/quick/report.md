@@ -4,8 +4,8 @@ Generated from `results.json` by `tensorcad.benchmark`; every number below was
 produced by the run that wrote this file.
 
 - command: `python examples/benchmarks/run_benchmark.py --quick --output docs/benchmarks/quick`
-- tensorcad 0.9.0, python 3.11.2, numpy 2.4.6, torch 2.14.1+cu130, ocp None
-- wall clock: 3.99 s
+- tensorcad 0.9.0, python 3.11.6, numpy 2.4.6, torch 2.7.1, ocp None
+- wall clock: 41.70 s
 - **verdict: pass**
 
 ![surface error against wall clock](plot.svg)
@@ -22,7 +22,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 - every row is probed along the same stratified ray set: a third of the rays lie inside the edit cone so a small edit is resolved, the rest are uniform, so no row sees an easier sample
 - an unweighted mean over rays is not a volume average: the rows are compared with each other, not with a surface integral
 
-### `analytic_field` — reference: exact closed form (measured, 0.05 s)
+### `analytic_field` — reference: exact closed form (measured, 0.17 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -35,7 +35,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 
 > the surface radius is a formula, so this row's surface error is the harness's own; its useful numbers are the volume/area of the triangulation a solver would receive
 
-### `mesh` — control: explicit triangles, vertices moved in place (measured, 0.82 s)
+### `mesh` — control: explicit triangles, vertices moved in place (measured, 7.03 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -59,7 +59,7 @@ Reference: sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 
 | `ray_coverage` | 1 | fraction | measured | pass |
 | `vertex_count` | 12642 | count | measured | — |
 | `face_count` | 25280 | count | measured | — |
-| `rays_per_second` | 155.158 | 1/s | measured | — |
+| `rays_per_second` | 18.2022 | 1/s | measured | — |
 | `watertight` | 1 | bool | measured | pass |
 | `euler_characteristic` | 2 | count | measured | pass |
 
@@ -105,7 +105,7 @@ Reference: L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3
 
 - the mesh volume here is a discretisation of an analytic form, so its error is the grid's: the refinement row measures how much
 
-### `parametric_hull` — engineering case: three design variables, analytic volume reference (measured, 1.76 s)
+### `parametric_hull` — engineering case: three design variables, analytic volume reference (measured, 8.71 s)
 
 | metric | value | unit | status | gate |
 |---|---|---|---|---|
@@ -113,7 +113,7 @@ Reference: L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3
 | `design_loop_volume_error` | 2.220e-16 | relative | measured | pass |
 | `design_loop_solved` | 1 | bool | measured | pass |
 | `design_loop_evaluations` | 6 | count | measured | — |
-| `design_loop_seconds` | 1.73716 | s | measured | — |
+| `design_loop_seconds` | 8.36422 | s | measured | — |
 | `watertight` | 1 | bool | measured | pass |
 | `euler_characteristic` | 2 | count | measured | pass |
 | `export_node_error_m` | 0 | m | measured | pass |
@@ -137,4 +137,73 @@ Reference: L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3
 | `hull_mesh_matches_the_analytic_volume` | pass | 0.880 % error at (41, 13) |
 | `design_loop_reaches_the_target` | pass | converged, 6 evaluations |
 | `export_round_trip_is_exact` | pass | worst node displacement 0.0e+00 m, area 6.8e-16 |
+
+## case_b_aff8_roundtrip
+
+*Does the exported artifact carry the model -- its topology, its patches, its volume -- or only its triangles?*
+
+Reference: DARPA SUBOFF AFF-8 reference model: union volume 0.707539369 m^3 (quadrature over the sections, rel. change 3.3e-03 coarse-to-fine)
+
+- the reference is the union's volume, not hull + sail + fins: the appendages are only 1.177 % of the model and 45-48 % of them are inside the hull
+- volume error here is the sampler's, and it is reported, not hidden: a coarse grid under-fills a 0.033 m half-wide sail first
+- the re-read mesh is chi = 2: on the reference grid that is the published genus-0 shell, and at 72x9x13 the sampler splits the sail into its own closed component (chi = 4), which is a property of the grid the round trip faithfully preserves -- so the gate is chi-before-equals-chi-after, not chi = 2
+- STL carries no index table, so its soup reports every edge as a boundary; the rebuild row shows the table is recoverable exactly from float32 keys, no tolerance needed
+- the ocp_step row is faceted: sewing a triangle soup into a STEP solid is not a feature B-rep and the row must not be read as one
+- no solver run is claimed; contract Case C is not implemented
+
+### `mesh` — export path: the union as a triangle mesh, written and read back (measured, 0.98 s)
+
+| metric | value | unit | status | gate |
+|---|---|---|---|---|
+| `volume_error` | 0.00512588 | relative | measured | pass |
+| `surface_area_m2` | 6.31176 | m^2 | measured | — |
+| `analytic_reference_volume_m3` | 0.707539 | m^3 | measured | — |
+| `analytic_reference_rel_change` | 0.003328 | relative | measured | — |
+| `round_trip_node_error_m` | 0 | m | measured | pass |
+| `round_trip_volume_drift` | 0 | relative | measured | pass |
+| `round_trip_area_drift` | 0 | relative | measured | pass |
+| `round_trip_bounding_box_drift_m` | 0 | m | measured | pass |
+| `patch_identity` | 1 | fraction | measured | pass |
+| `stl_round_trip_node_error_m` | 2.324e-07 | m | measured | pass |
+| `stl_round_trip_volume_drift` | 4.015e-09 | relative | measured | pass |
+| `stl_round_trip_area_drift` | 2.189e-09 | relative | measured | pass |
+| `stl_patch_identity` | 1 | fraction | measured | pass |
+| `triangles` | 36272 | count | measured | — |
+| `vertices` | 18138 | count | measured | — |
+| `boundary_edges` | 0 | count | measured | pass |
+| `non_manifold_edges` | 0 | count | measured | pass |
+| `degenerate_faces` | 0 | count | measured | pass |
+| `euler_characteristic` | 2 | count | measured | — |
+| `round_trip_euler_delta` | 0 | count | measured | pass |
+| `outward_volume_m3` | 0.703913 | m^3 | measured | pass |
+| `stl_soup_vertices` | 1.088e+05 | count | measured | — |
+| `stl_soup_boundary_edges` | 1.088e+05 | count | measured | — |
+| `stl_shared_vertices` | 18138 | count | measured | pass |
+| `stl_shared_boundary_edges` | 0 | count | measured | pass |
+| `stl_shared_non_manifold_edges` | 0 | count | measured | pass |
+| `stl_shared_volume_drift` | 4.015e-09 | relative | measured | pass |
+| `stl_shared_euler_delta` | 0 | count | measured | pass |
+
+> sampled at (110, 14, 20) with margin 2: 36272 triangles, 18138 vertices, 5.7 s
+> patches found by measurement, not by tag: fin y+ 279, fin y- 270, fin z+ 276, fin z- 264, hull 34257, sail 926
+> OBJ is lossless (17 significant digits): worst corner displacement 0.0e+00 m
+> STL is float32 and index-free: worst corner displacement 2.3e-07 m, 108816 vertices rebuilt from 36272 facets
+> label time 1.6 s is the harness's own cost (one distance evaluation per piece per triangle), not the representation's
+
+### `ocp_step` — kernel path: faceted solid exported as STEP (not_supported, 0.00 s)
+
+| metric | value | unit | status | gate |
+|---|---|---|---|---|
+| `step_volume_error` | — | relative | not_supported | — |
+
+#### gates
+
+| gate | result | detail |
+|---|---|---|
+| `aff8_mesh_matches_the_union_volume` | pass | +0.513 % against 0.70753937 m^3 at (110, 14, 20) |
+| `aff8_export_round_trip_is_exact` | pass | worst corner 0.0e+00 m, volume drift 0.0e+00 %, area drift 0.0e+00 % |
+| `aff8_round_trip_keeps_the_topology` | pass | boundary 0, non-manifold 0, chi 2 (written 2), degenerate 0 |
+| `aff8_patch_identity_survives_the_round_trip` | pass | OBJ 100.00 %, STL 100.00 % of triangles keep their patch |
+| `aff8_stl_quantisation_is_bounded` | pass | worst corner 2.3e-07 m, volume drift 4.0e-07 % |
+| `aff8_stl_topology_is_recoverable` | pass | 108816 corners share down to 18138 vertices (written 18138): watertight True, chi 2 vs 2 |
 

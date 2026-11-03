@@ -17,12 +17,19 @@ import json
 import math
 import subprocess
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 import pytest
 
+from tensorcad.geometry_field import to_mesh
+from tensorcad.suboff_appendages import SuboffFullField, suboff_appendage_volumes
+
 from tensorcad.benchmark import (
     BENCHMARK_SCHEMA,
+    _topology,
+    aff8_patch_labels,
+    aff8_roundtrip_case,
     DENT_DEPTH_M,
     FAILED,
     IMPORTED,
@@ -465,3 +472,72 @@ def test_the_neural_row_is_re_measured_when_a_bundle_is_available(tmp_path) -> N
     assert "the_depth_threshold_is_the_same_for_every_measured_row" in {
         gate.name for gate in case.failed_gates
     }
+
+
+# --------------------------------------------------------------------------- #
+# Contract Case B: the AFF-8 model, exported and re-read
+# --------------------------------------------------------------------------- #
+
+
+@lru_cache(maxsize=1)
+def _aff8_quick() -> CaseResult:
+    """One quick AFF-8 run, shared by the tests below (it samples a real mesh)."""
+    return aff8_roundtrip_case(quick=True)
+
+
+def test_the_aff8_case_passes_every_gate() -> None:
+    case = _aff8_quick()
+    assert case.identifier == "case_b_aff8_roundtrip"
+    assert [row.identifier for row in case.representations] == ["mesh", "ocp_step"]
+    assert case.failed_gates == ()
+    assert case.to_dict()["gates"], "a case without gates is not a case"
+
+
+def test_the_aff8_reference_is_the_union_not_the_sum_of_the_parts() -> None:
+    reference = suboff_appendage_volumes(stations=4_001, sections=501, span_stations=501)
+    # The published union volume, docs/suboff_appendages.md.
+    assert abs(reference["full_model_volume_m3"] / 0.70754064 - 1.0) < 1e-5
+    parts = reference["sail_volume_m3"] + reference["fins_volume_m3"]
+    assert parts > 0.0
+    # 45-48 % of each appendage is inside the hull, so the union is well under the sum.
+    assert reference["full_model_volume_m3"] < reference["hull_volume_m3"] + parts
+    assert 0.0 < reference["appendage_share"] < 0.02
+
+
+def test_the_obj_round_trip_returns_the_same_surface() -> None:
+    row = _aff8_quick().by_id("mesh")
+    assert row.metrics["round_trip_node_error_m"].value == 0.0
+    assert row.metrics["round_trip_volume_drift"].value == 0.0
+    assert row.metrics["round_trip_area_drift"].value == 0.0
+    assert row.metrics["round_trip_bounding_box_drift_m"].value == 0.0
+    assert row.metrics["patch_identity"].value == 1.0
+    assert row.metrics["triangles"].value > 0.0
+
+
+def test_stl_is_lossy_and_its_topology_is_still_recoverable() -> None:
+    row = _aff8_quick().by_id("mesh")
+    triangles = row.metrics["triangles"].value
+    assert row.metrics["stl_round_trip_node_error_m"].value > 0.0, "STL stores float32, not doubles"
+    assert row.metrics["stl_round_trip_node_error_m"].value <= 1e-5
+    assert row.metrics["stl_soup_vertices"].value == 3.0 * triangles
+    assert row.metrics["stl_shared_vertices"].value == row.metrics["vertices"].value
+    assert row.metrics["stl_shared_boundary_edges"].value == 0.0
+    assert row.metrics["stl_shared_euler_delta"].value == 0.0
+    assert row.metrics["stl_patch_identity"].value == 1.0
+
+
+def test_the_patch_labels_are_measured_and_cover_every_blade() -> None:
+    field = SuboffFullField()
+    mesh = to_mesh(field, (110, 14, 20), margin=2).mesh
+    labels = aff8_patch_labels(field, mesh)
+    assert len(labels) == len(mesh.faces)
+    assert {"hull", "sail"} <= set(labels)
+    assert len({label for label in labels if label.startswith("fin ")}) == 4
+
+
+def test_a_coarse_grid_splits_the_sail_into_its_own_shell() -> None:
+    """A sampling fact, pinned: the round trip must preserve whatever chi it was given."""
+    coarse = to_mesh(SuboffFullField(), (72, 9, 13), margin=2).mesh
+    fine = to_mesh(SuboffFullField(), (110, 14, 20), margin=2).mesh
+    assert _topology(coarse)["euler_characteristic"] == 4.0
+    assert _topology(fine)["euler_characteristic"] == 2.0
