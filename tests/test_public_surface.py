@@ -13,23 +13,25 @@ EXPECTED_API = {
     "AsymmetricHullModel", "AsymmetricHullParameters", "DESIGN_SCHEMA", "DesignProblem", "DesignRecord",
     "DesignSolution", "DesignTargets",
     "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
-    "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics", "Mesh", "MeshBuilder",
+    "AnalyticHydrostatics", "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics",
+    "Mesh", "MeshBuilder",
     "MeshConditioningError", "MeshGateError", "MeshGateReport", "MeshMeasurements", "ParameterSpec",
     "PlaneField", "RatioSpec", "ResolutionPlan", "SUBOFF_LENGTH_M", "SUBOFF_RADIUS_M", "SampledField",
     "SphereField", "SuboffAppendagesField", "SuboffFinsField", "SuboffFullField",
     "SuboffHullField", "SuboffSailField", "ValidationReport", "analytic_asymmetric_hydrostatics",
-    "analytic_relative_errors",
-    "analytic_volume", "build_mesh",
-    "VoxelGrid", "ANALYTIC_COMPARABLE_QUANTITIES",
+    "analytic_hydrostatics", "analytic_relative_errors", "analytic_volume", "build_mesh",
+    "VoxelGrid",
+    "ANALYTIC_COMPARABLE_QUANTITIES",
     "CurvatureError", "CurvatureSample", "FairnessReport",
-    "analytic_hydrostatics", "analytic_wetted_surface_area",
+    "analytic_wetted_surface_area",
     "compute_hydrostatics", "condition_mesh", "decimate", "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
     "inspect_geometry", "inspect_mesh_quality", "measure_mesh", "project_to_field",
     "read_metadata", "read_obj", "read_stl", "resolve_resolution",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
-    "generate_asymmetric_hull", "taubin_smooth", "to_mesh", "to_voxel_grid", "validate_hull",
+    "generate_asymmetric_hull", "tanh_sinh_quadrature", "taper_integral", "taubin_smooth", "to_mesh",
+    "to_voxel_grid", "validate_hull",
     "write_design_json", "write_metadata",
     "assess_fairness", "principal_curvatures",
     "vertex_mean_curvature",
@@ -46,8 +48,8 @@ def test_declared_api_is_importable() -> None:
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
-                   "parameters", "validation", "hydrostatics", "export", "hull", "design", "suboff",
-                   "suboff_appendages", "cli", "adapters.fem", "benchmark"):
+                   "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
+                   "hull", "design", "suboff", "suboff_appendages", "cli", "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 
