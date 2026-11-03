@@ -57,6 +57,23 @@ model.validation.warnings                   # [] at nx=41; non-empty when the gr
 
 Measured at the default resolution, the sampled surface sits 0.88 % below the analytic volume of its own generating functions; at `nx=161, nz=41` the gap is 0.14 %. That is reported per export rather than asserted in prose.
 
+Those numbers now have a closed-form baseline behind them rather than a second mesh. The
+generating surface factorises, so its volume, waterplane area, midship section area, LCB,
+LCF, VCB and form coefficients all have exact values, and `analytic_hydrostatics` returns
+them in the same record the mesh path returns:
+
+```python
+from tensorcad import analytic_hydrostatics
+
+analytic_hydrostatics(length=10.0, beam=2.0, draft=0.8).vertical_centre_buoyancy  # -0.32 = -2/5*T
+```
+
+`analytic_relative_errors(HullParameters(nx=41, nz=13))` reports the signed gap per
+quantity; at the default grid the worst is the midship section area at `-0.71 %` and the
+VCB at `+0.94 %`, at `161x41` nothing exceeds `0.17 %`. The derivation, the independent
+quadrature that checks the formulas themselves, and the limits of the comparison are in
+[docs/hull_analytic_reference.md](docs/hull_analytic_reference.md).
+
 ## Continuous geometry core (0.4)
 
 Every representation now answers the same questions. `tensorcad.geometry_field`
@@ -402,7 +419,9 @@ The boundaries below are the ones the code actually has (they were proposals in 
   writer and a topology-reconstructing STL reader, and the gated hull export.
 - `tensorcad.gate` — hard-fail machine gate over mesh artifacts: topology, components, Euler
   characteristic, orientation, resolution and external reference volume.
-- `tensorcad.hull` — the one ship-specific model.
+- `tensorcad.hull` — the one ship-specific model, with the closed-form hydrostatics of
+  its own generating surface (`analytic_hydrostatics`) as the reference the sampled mesh
+  is measured against.
 - `tensorcad.adapters` — solver/kernel bridges the core must never import: `adapters.fem`
   (node/element tables, gmsh 2.2 + JSON, no extra) and `adapters.ocp` (sew → solid → STEP,
   `ocp` extra).
