@@ -77,6 +77,8 @@ from .hydrostatics_analytic import (
     analytic_hydrostatics,
     tanh_sinh_quadrature,
     taper_integral,
+    waterplane_inertia_longitudinal,
+    waterplane_inertia_transverse,
 )
 from .mesh_conditioning import (
     ConditionedMesh,
@@ -89,6 +91,13 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .stability import (
+    InitialStability,
+    StabilityError,
+    WaterplaneMoments,
+    initial_stability,
+    waterplane_moments,
+)
 from .suboff import (
     SUBOFF_LENGTH_M,
     SUBOFF_RADIUS_M,
@@ -135,6 +144,7 @@ __all__ = [
     "HullModel",
     "HullParameters",
     "Hydrostatics",
+    "InitialStability",
     "Mesh",
     "MeshBuilder",
     "MeshConditioningError",
@@ -147,6 +157,7 @@ __all__ = [
     "ResolutionPlan",
     "SampledField",
     "SphereField",
+    "StabilityError",
     "SuboffAppendagesField",
     "SuboffFinsField",
     "SuboffFullField",
@@ -154,6 +165,7 @@ __all__ = [
     "SuboffSailField",
     "ValidationReport",
     "VoxelGrid",
+    "WaterplaneMoments",
     "analytic_hydrostatics",
     "analytic_relative_errors",
     "analytic_volume",
@@ -168,6 +180,7 @@ __all__ = [
     "export_hull",
     "gate_mesh",
     "generate_hull",
+    "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
     "measure_mesh",
@@ -189,6 +202,9 @@ __all__ = [
     "to_voxel_grid",
     "validate_hull",
     "vertex_mean_curvature",
+    "waterplane_inertia_longitudinal",
+    "waterplane_inertia_transverse",
+    "waterplane_moments",
     "write_design_json",
     "write_metadata",
     "write_obj",
