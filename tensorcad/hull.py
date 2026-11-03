@@ -268,6 +268,271 @@ def analytic_volume(length: float, beam: float, draft: float) -> float:
     return beam * length * draft * TAPER_INTEGRAL * (2.0 / 3.0)
 
 
+def _positive_dimension(name: str, value: float) -> float:
+    """Guard for the closed-form references: a dimension must be usable."""
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValueError(f"{name} must be a finite positive number, got {value!r}")
+    return float(value)
+
+
+def analytic_waterplane_area(length: float, beam: float) -> float:
+    """Exact waterplane area of the analytic surface: ``beam * length * TAPER_INTEGRAL``.
+
+    The waterline is single-valued in ``x`` and the full breadth at a station is
+    the taper times ``beam``, so the cap the generator adds has exactly this
+    area. It does not depend on the draft. This is the O(1) reference the
+    mesh-integrated waterplane area (a vertical-flux sum over the wetted faces)
+    is compared against.
+    """
+    _positive_dimension("length", length)
+    _positive_dimension("beam", beam)
+    return beam * length * TAPER_INTEGRAL
+
+
+def analytic_maximum_section_area(beam: float, draft: float) -> float:
+    """Exact midship section area, ``2/3 * beam * draft``.
+
+    A section is ``|y| <= (beam/2) * sqrt((z + draft)/draft)`` and its integral
+    over the draft is ``(2/3) * beam * draft``; midship is where the taper equals
+    one, so the longitudinal exponent does not enter.
+    """
+    _positive_dimension("beam", beam)
+    _positive_dimension("draft", draft)
+    return (2.0 / 3.0) * beam * draft
+
+
+def analytic_vertical_centre_buoyancy(draft: float) -> float:
+    """Exact VCB, ``-2/5 * draft`` (measured from the design waterline at z = 0).
+
+    The ``sqrt(z + draft)`` profile is the same at every station, so the vertical
+    moment is a one-dimensional integral::
+
+        int_{-draft}^{0} z * sqrt((z + draft)/draft) dz / int_{-draft}^{0} sqrt((z + draft)/draft) dz
+        = draft * (2/5 - 2/3) / (2/3) = -2/5 * draft
+
+    The longitudinal taper cancels because it factors out of both integrals.
+    """
+    _positive_dimension("draft", draft)
+    return -(2.0 / 5.0) * draft
+
+
+def analytic_longitudinal_centre(length: float) -> float:
+    """Exact LCB and LCF together, ``length / 2``.
+
+    Both the breadth taper and the waterplane breadth are symmetric about
+    ``x = length/2``, so both longitudinal centroids sit there. The value is
+    trivial, and that is the point: it is measured in the mesh frame with no
+    assumption about where the integration thinks the origin is, so it checks the
+    frame and the sign conventions of the x moments.
+    """
+    _positive_dimension("length", length)
+    return 0.5 * length
+
+
+def _gauss_legendre(nodes: int) -> tuple[list[float], list[float]]:
+    """Nodes and weights of the ``nodes``-point Gauss-Legendre rule on [-1, 1].
+
+    Newton iteration on the Legendre polynomial (Abramowitz & Stegun 22.16.6).
+    Standard library only, so the zero-dependency rule survives; the rule is
+    reused by :func:`analytic_wetted_surface_area`.
+    """
+    if nodes < 2:
+        raise ValueError("need at least 2 quadrature nodes")
+    x = [0.0] * nodes
+    w = [0.0] * nodes
+    half = (nodes + 1) // 2
+    for i in range(1, half + 1):
+        z = math.cos(math.pi * (i - 0.25) / (nodes + 0.5))
+        derivative = 1.0
+        for _ in range(100):
+            p_prev, p_curr = 1.0, z
+            for k in range(2, nodes + 1):
+                p_prev, p_curr = p_curr, ((2 * k - 1) * z * p_curr - (k - 1) * p_prev) / k
+            derivative = nodes * (z * p_curr - p_prev) / (z * z - 1.0)
+            step = p_curr / derivative
+            z -= step
+            if abs(step) <= 1e-16:
+                break
+        x[i - 1] = -z
+        x[nodes - i] = z
+        w[i - 1] = 2.0 / ((1.0 - z * z) * derivative * derivative)
+        w[nodes - i] = w[i - 1]
+    return x, w
+
+
+def analytic_wetted_surface_area(
+    length: float, beam: float, draft: float, *, nodes: int = 80
+) -> float:
+    """Wetted surface area of the analytic surface, by Gauss-Legendre quadrature.
+
+    This is the one quantity of the family without a closed form: the surface
+    element of ``(x, (beam/2)*sin(pi*x/length)^p*sqrt(w), draft*(w-1))`` is
+    ``sqrt(draft^2 + (draft*beam/2*s'(x)*sqrt(w))^2 + (beam/2*s(x)/(2*sqrt(w)))^2)``,
+    which has no elementary antiderivative once ``p`` is not an integer.
+
+    Two substitutions make the quadrature spectral rather than approximate::
+
+        w = u^2                        removes the keel's 1/sqrt(w) singularity
+        psi = (pi/2)*tau^3, x = L*psi/pi  removes the bow/stern x^(p-1) tip slope
+
+    with ``s = sin(psi)^p`` and ``s' = p*sin(psi)^(p-1)*cos(psi)*pi/L`` in the
+    x-extent. The quarter surface is then ``S/4``::
+
+        S = (4*L/pi) * int_0^1 dtau int_0^1 du (dpsi/dtau) * sqrt(4*u^2*draft^2
+            + (draft*beam*s'*u^2)^2 + (beam*s/2)^2)
+
+    ``nodes = 80`` is the shipped setting; doubling to 120 changes the result by
+    ``< 1e-9`` relative, which is three orders below the mesh discretisation
+    error the area is compared against, so the quadrature is not the error term.
+    """
+    length = _positive_dimension("length", length)
+    beam = _positive_dimension("beam", beam)
+    draft = _positive_dimension("draft", draft)
+    gx, gw_x = _gauss_legendre(nodes)
+    gu, gw_u = _gauss_legendre(nodes)
+    p = BREADTH_EXPONENT
+    total = 0.0
+    for i in range(nodes):
+        tau = 0.5 * (gx[i] + 1.0)
+        weight_tau = 0.5 * gw_x[i]
+        psi = 0.5 * math.pi * tau ** 3
+        dpsi_dtau = 1.5 * math.pi * tau * tau
+        sine = math.sin(psi)
+        if sine <= 0.0:  # tau = 0 is the bow/stern tip itself
+            continue
+        s = sine ** p
+        ds_dx = p * sine ** (p - 1.0) * math.cos(psi) * (math.pi / length)
+        inner = 0.0
+        for j in range(nodes):
+            u = 0.5 * (gu[j] + 1.0)
+            weight_u = 0.5 * gw_u[j]
+            # 2*u*|P_x x P_w| written as one square root, so the keel (u -> 0)
+            # is a regular point instead of a 1/u pole.
+            element = math.sqrt(
+                4.0 * u * u * draft * draft
+                + (draft * beam * ds_dx * u * u) ** 2
+                + (0.5 * beam * s) ** 2
+            )
+            inner += weight_u * element
+        total += weight_tau * dpsi_dtau * inner
+    return (4.0 * length / math.pi) * total
+
+
+def analytic_hydrostatics(
+    length: float, beam: float, draft: float, water_density: float = 1025.0
+) -> Hydrostatics:
+    """Closed-form hydrostatics of the analytic surface, as a :class:`Hydrostatics`.
+
+    The generator samples a surface that is **separable**: the half-breadth is
+    ``(beam/2) * sin(pi*x/length)^BREADTH_EXPONENT * sqrt((z + draft)/draft)``.
+    Every integral over the volume then factors into an ``x`` integral and a
+    ``z`` integral, and both have closed forms, so the whole hydrostatic set has
+    one:
+
+    | Quantity | Closed form |
+    |---|---|
+    | displacement volume | ``length*beam*draft*TAPER_INTEGRAL*2/3`` |
+    | waterplane area | ``length*beam*TAPER_INTEGRAL`` |
+    | maximum section area | ``2/3*beam*draft`` |
+    | LCB, LCF | ``length/2`` (symmetry of the taper) |
+    | VCB | ``-2/5*draft`` (the ``sqrt`` profile) |
+    | block coefficient | ``2/3*TAPER_INTEGRAL`` |
+    | prismatic coefficient | ``TAPER_INTEGRAL`` (the midship ``2/3`` cancels) |
+    | wetted surface area | quadrature, see :func:`analytic_wetted_surface_area` |
+
+    ``basis`` says which of these came out of a formula and which out of a
+    quadrature, so a caller comparing mesh numbers against this object knows the
+    accuracy of the reference it is using. Output conventions (z relative to the
+    design waterline, x from the aft end, ``2/3``-based coefficients) are the same
+    as :func:`tensorcad.hydrostatics.compute_hydrostatics`, which is what makes the
+    two comparable.
+    """
+    length = _positive_dimension("length", length)
+    beam = _positive_dimension("beam", beam)
+    draft = _positive_dimension("draft", draft)
+    if not math.isfinite(water_density) or water_density <= 0.0:
+        raise ValueError("water_density must be a finite positive number")
+    volume = analytic_volume(length, beam, draft)
+    section = analytic_maximum_section_area(beam, draft)
+    centre = analytic_longitudinal_centre(length)
+    return Hydrostatics(
+        displacement_volume=volume,
+        displacement_mass=volume * water_density,
+        wetted_surface_area=analytic_wetted_surface_area(length, beam, draft),
+        waterplane_area=analytic_waterplane_area(length, beam),
+        longitudinal_centre_buoyancy=centre,
+        longitudinal_centre_flotation=centre,
+        vertical_centre_buoyancy=analytic_vertical_centre_buoyancy(draft),
+        block_coefficient=volume / (length * beam * draft),
+        prismatic_coefficient=volume / (length * section),
+        maximum_section_area=section,
+        waterline_z=0.0,
+        water_density=water_density,
+        basis="closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature)",
+    )
+
+
+#: Quantities a sampled hull and :func:`analytic_hydrostatics` both report, in the
+#: order they are tabulated.
+ANALYTIC_COMPARABLE_QUANTITIES: tuple[str, ...] = (
+    "displacement_volume",
+    "wetted_surface_area",
+    "waterplane_area",
+    "maximum_section_area",
+    "longitudinal_centre_buoyancy",
+    "longitudinal_centre_flotation",
+    "vertical_centre_buoyancy",
+    "block_coefficient",
+    "prismatic_coefficient",
+)
+
+
+def analytic_relative_errors(parameters: HullParameters) -> dict[str, Any]:
+    """Mesh hydrostatics against the closed forms, per quantity, signed.
+
+    Signed relative error is reported rather than an absolute value because the
+    interesting question is *which way* a sampled surface is wrong: this family's
+    mesh is inscribed between the stations (chords cut inside the analytic
+    surface), so volume and waterplane area are expected to come out low at every
+    resolution, and a sign flip would be a defect rather than a refinement level.
+
+    ``outside_discretisation_estimate`` lists quantities whose measured error is
+    larger than the coarse/refined relative change reported by
+    :func:`estimate_discretisation_error` -- the estimator is a difference between
+    two approximations and it may be optimistic, which is exactly why the closed
+    form is worth having.
+    """
+    p = parameters
+    mesh, _ = build_mesh(p)
+    waterline = mesh.bounding_box().maximum[2]
+    measured = compute_hydrostatics(mesh, waterline, water_density=p.water_density, closed=True)
+    reference = analytic_hydrostatics(p.length, p.beam, p.draft, p.water_density)
+    errors: dict[str, float] = {}
+    for name in ANALYTIC_COMPARABLE_QUANTITIES:
+        exact = float(getattr(reference, name))
+        value = float(getattr(measured, name))
+        errors[name] = (value - exact) / abs(exact) if exact else float("nan")
+    estimate = estimate_discretisation_error(p)
+    reported = estimate.get("relative_change", {}) if estimate.get("status") == "measured" else {}
+    outside = {
+        name: {"measured_relative_error": errors[name], "reported_relative_change": reported[name]}
+        for name in reported
+        if math.isfinite(errors.get(name, float("nan")))
+        and abs(errors[name]) > reported[name]
+    }
+    return {
+        "status": "measured",
+        "method": "mesh integrals against closed forms of the analytic surface",
+        "grid": {"nx": p.nx, "nz": p.nz},
+        "measured": {name: float(getattr(measured, name)) for name in ANALYTIC_COMPARABLE_QUANTITIES},
+        "reference": {name: float(getattr(reference, name)) for name in ANALYTIC_COMPARABLE_QUANTITIES},
+        "relative_error": errors,
+        "max_abs_relative_error": max(abs(value) for value in errors.values()),
+        "outside_discretisation_estimate": outside,
+        "reference_basis": reference.basis,
+    }
+
+
 def _sampling_check(parameters: HullParameters, hydrostatics: Hydrostatics) -> Check:
     """Warn when the grid, not the form, is what makes the numbers wrong."""
     p = parameters

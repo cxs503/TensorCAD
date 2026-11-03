@@ -50,10 +50,14 @@ from .geometry_field import (
     to_mesh,
 )
 from .hull import (
+    ANALYTIC_COMPARABLE_QUANTITIES,
     HullModel,
     HullParameters,
     ResolutionPlan,
+    analytic_hydrostatics,
+    analytic_relative_errors,
     analytic_volume,
+    analytic_wetted_surface_area,
     build_mesh,
     estimate_discretisation_error,
     generate_hull,
@@ -87,6 +91,7 @@ from .suboff_appendages import (
     suboff_fin_chord,
     suboff_sail_half_width,
 )
+from .voxel import VoxelGrid, to_voxel_grid
 from .validation import (
     Check,
     ValidationReport,
@@ -129,8 +134,13 @@ __all__ = [
     "SuboffFullField",
     "SuboffHullField",
     "SuboffSailField",
+    "ANALYTIC_COMPARABLE_QUANTITIES",
     "ValidationReport",
+    "VoxelGrid",
+    "analytic_hydrostatics",
+    "analytic_relative_errors",
     "analytic_volume",
+    "analytic_wetted_surface_area",
     "build_mesh",
     "compute_hydrostatics",
     "condition_mesh",
@@ -155,6 +165,7 @@ __all__ = [
     "surface_point",
     "taubin_smooth",
     "to_mesh",
+    "to_voxel_grid",
     "validate_hull",
     "write_design_json",
     "write_metadata",
@@ -163,4 +174,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.9.0"
+__version__ = "0.11.0"
