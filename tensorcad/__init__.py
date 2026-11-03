@@ -17,6 +17,16 @@ contracts and algorithms, :mod:`tensorcad.parameters` and
 live in :mod:`tensorcad.adapters`.
 """
 
+from .asymmetric_hull import (
+    AsymmetricHullModel,
+    AsymmetricHullParameters,
+)
+from .asymmetric_hull import (
+    analytic_hydrostatics as analytic_asymmetric_hydrostatics,
+)
+from .asymmetric_hull import (
+    generate_hull as generate_asymmetric_hull,
+)
 from .curvature import (
     CurvatureError,
     CurvatureSample,
@@ -99,23 +109,27 @@ from .suboff_appendages import (
     suboff_fin_chord,
     suboff_sail_half_width,
 )
-from .voxel import VoxelGrid, to_voxel_grid
 from .validation import (
     Check,
     ValidationReport,
     inspect_geometry,
     inspect_mesh_quality,
 )
+from .voxel import VoxelGrid, to_voxel_grid
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
+    "DESIGN_SCHEMA",
+    "SUBOFF_LENGTH_M",
+    "SUBOFF_RADIUS_M",
+    "AsymmetricHullModel",
+    "AsymmetricHullParameters",
     "BoundingBox",
     "Check",
     "ConditionedMesh",
     "CurvatureError",
     "CurvatureSample",
     "CylinderField",
-    "DESIGN_SCHEMA",
     "DesignProblem",
     "DesignRecord",
     "DesignSolution",
@@ -137,8 +151,6 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
-    "SUBOFF_LENGTH_M",
-    "SUBOFF_RADIUS_M",
     "SampledField",
     "SphereField",
     "SuboffAppendagesField",
@@ -148,6 +160,7 @@ __all__ = [
     "SuboffSailField",
     "ValidationReport",
     "VoxelGrid",
+    "analytic_asymmetric_hydrostatics",
     "analytic_hydrostatics",
     "analytic_relative_errors",
     "analytic_volume",
@@ -161,6 +174,7 @@ __all__ = [
     "estimate_discretisation_error",
     "export_hull",
     "gate_mesh",
+    "generate_asymmetric_hull",
     "generate_hull",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -188,4 +202,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.12.0"
+__version__ = "0.13.0"
