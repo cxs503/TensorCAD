@@ -4,6 +4,26 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.13.0 — 2026-11-03
+
+- **Closed-form hydrostatics reference** (`tensorcad/hydrostatics_analytic.py`): the
+  coefficients, centres, areas and wetted surface of the analytic hull surface are now
+  available as exact formulas (`analytic_hydrostatics`, `taper_integral`) instead of
+  only as mesh integrals. `Cb = 2I/3`, `Cp = I`, `Cm = 2/3`, `Cw = I`, `LCB = LCF = L/2`,
+  `VCB = -0.4T`, `V = B·L·T·I·2/3`, with `I = ∫₀¹ sin(πx)^0.7 dx` from the gamma
+  function. The wetted area needs quadrature and uses a double-exponential rule
+  (`tanh_sinh_quadrature`) that handles the `ζ^-1/2` keel edge and the `ξ^-0.3` ends;
+  it reports its own convergence (`5e-13` relative).
+- **Verification debt closed**: every hydrostatic quantity the mesh integrator reports
+  now has an independent reference. Worst error is 0.939 % on the default 41×13 grid,
+  0.169 % on 161×41 and 0.061 % on 321×81; the wetted-area reference is independently
+  confirmed by a Richardson extrapolation of the mesh series to +8.8e-6.
+  See `docs/hydrostatics_verification.md`; the self-checking ladder lives in
+  `examples/hydrostatics_verification/run_verification.py`.
+- **Release hygiene**: `tensorcad.__version__` had drifted to "0.9.0" while
+  `pyproject.toml` said 0.10.0. Both now read 0.13.0, and the public-surface test pins
+  the same string in one place.
+
 ## 0.12.0 — 2026-11-03
 
 ### Added

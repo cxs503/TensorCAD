@@ -62,7 +62,6 @@ from .hull import (
     HullModel,
     HullParameters,
     ResolutionPlan,
-    analytic_hydrostatics,
     analytic_relative_errors,
     analytic_volume,
     analytic_wetted_surface_area,
@@ -73,6 +72,12 @@ from .hull import (
     validate_hull,
 )
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .hydrostatics_analytic import (
+    AnalyticHydrostatics,
+    analytic_hydrostatics,
+    tanh_sinh_quadrature,
+    taper_integral,
+)
 from .mesh_conditioning import (
     ConditionedMesh,
     MeshConditioningError,
@@ -99,23 +104,26 @@ from .suboff_appendages import (
     suboff_fin_chord,
     suboff_sail_half_width,
 )
-from .voxel import VoxelGrid, to_voxel_grid
 from .validation import (
     Check,
     ValidationReport,
     inspect_geometry,
     inspect_mesh_quality,
 )
+from .voxel import VoxelGrid, to_voxel_grid
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
+    "DESIGN_SCHEMA",
+    "SUBOFF_LENGTH_M",
+    "SUBOFF_RADIUS_M",
+    "AnalyticHydrostatics",
     "BoundingBox",
     "Check",
     "ConditionedMesh",
     "CurvatureError",
     "CurvatureSample",
     "CylinderField",
-    "DESIGN_SCHEMA",
     "DesignProblem",
     "DesignRecord",
     "DesignSolution",
@@ -137,8 +145,6 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
-    "SUBOFF_LENGTH_M",
-    "SUBOFF_RADIUS_M",
     "SampledField",
     "SphereField",
     "SuboffAppendagesField",
@@ -176,6 +182,8 @@ __all__ = [
     "suboff_reference_geometry",
     "suboff_sail_half_width",
     "surface_point",
+    "tanh_sinh_quadrature",
+    "taper_integral",
     "taubin_smooth",
     "to_mesh",
     "to_voxel_grid",
@@ -188,4 +196,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.12.0"
+__version__ = "0.13.0"
