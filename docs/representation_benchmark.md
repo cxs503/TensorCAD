@@ -19,7 +19,7 @@ document was typed by hand, and every table below comes from the runs committed 
 
 ## What is measured
 
-Two cases, both with an exact reference:
+Three cases, each with its own reference:
 
 - **Case A — `case_a_sphere_dent`.** A sphere R = 0.5 m with a Gaussian dent of depth
   0.06 m and σ = 0.22 rad on +x. The reference radius is a formula, so "the right answer" is
@@ -159,6 +159,79 @@ OpenCASCADE wheel. It is a real row, not a placeholder: with `pip install "tenso
 it exports the faceted solid and re-reads it, reporting facet count beside the round-trip
 volume, because a faceted solid is not a feature B-rep and the row must not be read as one.
 
+
+## Case B: the AFF-8 model, exported and re-read
+
+The contract's Case B asks for one thing: *does the artifact carry the model — its
+topology, its patches, its volume — or only its triangles?* It runs on the DARPA SUBOFF
+AFF-8 model (bare hull + sail + four stern fins) because that model is the hardest thing
+this repository exports: a 4.36 m, 8.6:1 body with a 0.033 m half-width sail and four
+swept, twisted blades whose union is one closed shell.
+
+```bash
+python examples/benchmarks/run_benchmark.py --quick --output docs/benchmarks/quick  # (110, 14, 20)
+python examples/benchmarks/run_benchmark.py           --output docs/benchmarks/full # (218, 26, 38)
+```
+
+| metric | quick `(110, 14, 20)` | full `(218, 26, 38)` | gate |
+|---|---|---|---|
+| triangles / vertices written | 36,272 / 18,138 | 140,752 / 70,378 | — |
+| volume vs analytic union (0.70753937 m³) | **+0.513 %** | **+0.160 %** | ≤ 1 % |
+| surface area | 6.311755 m² | 6.337548 m² | — |
+| OBJ round trip: worst corner displacement | **0 m** | **0 m** | ≤ 1e-12 m |
+| OBJ round trip: volume / area drift | **0 / 0** | **0 / 0** | ≤ 1e-12 |
+| OBJ round trip: χ before → after | 2 → 2 | 2 → 2 | equal |
+| patch identity through the OBJ round trip | **100 %** | **100 %** | = 1.0 |
+| STL round trip: worst corner displacement | 2.32e-7 m | 2.38e-7 m | ≤ 1e-5 m |
+| STL round trip: volume drift | 4.0e-9 | 2.1e-9 | ≤ 1e-6 |
+| STL soup vertices → shared vertices | 108,816 → **18,138** | 422,256 → **70,378** | = written |
+| STL welded: boundary edges / χ | **0 / 2** | **0 / 2** | watertight, χ equal |
+| `ocp_step` | `not_supported` (no OCP wheel) | same | — |
+
+Every number above is read from `docs/benchmarks/{quick,full}/results.json`, which
+`examples/benchmarks/run_benchmark.py` wrote; the run exits 1 if any gate fails.
+
+Four decisions that the numbers depend on:
+
+- **The reference is the union, not the sum.** `suboff_appendage_volumes()` quadratures the
+  published sections and subtracts the parts of the sail and fins that sit inside the hull
+  (48 % and 52 % of them respectively). Adding hull + sail + fins would double-count
+  0.0049 m³ and flatter the mesh by 0.7 % — more than the 1 % gate, i.e. the wrong
+  reference would have hidden a real error. The quadrature reports its own coarse-to-fine
+  relative change (3.3e-3 at the resolution the benchmark uses, 6e-5 at the reference
+  resolution that reproduces 0.70754064 m³).
+- **The OBJ round trip is exact and is measured anyway.** `write_obj` writes 17
+  significant digits so a double survives, and the corner-by-corner comparison confirms
+  0 m on both grids. That is a regression test for a precision setting, not a formality:
+  9 digits would silently move the surface by 1e-9 m and break the exact-position vertex
+  sharing the topology depends on.
+- **STL is lossy, and recovering its topology is a measurement.** Binary STL stores
+  float32 with no index table, so the soup has 3 N corners and every edge looks like a
+  boundary. The row reports the quantisation (2.3e-7 m, 140× smaller than the coarsest
+  facet) and then rebuilds the index table by exact coordinate key: float32 rounding is a
+  function, so identical corners produce identical keys and no tolerance is needed —
+  70,378 shared vertices come back, watertight, χ = 2, volume drift 2e-9. The conclusion
+  is not "STL is fine"; it is "STL loses the topology and the topology is recoverable,
+  which is exactly why a `.ngo` object keeps its own metadata instead".
+- **Patch identity is measured, not assumed.** The union has no face tags, so each
+  triangle is labelled by which analytic piece (hull, sail, or one of four blades) its
+  centroid is closest to, before and after the round trip. A round trip that merged two
+  blades or reordered the sail would pass a volume check and fail this one.
+
+### What this case does not claim
+
+- **`ocp_step` is `not_supported` here** (no OpenCASCADE wheel on this machine). When it
+  is installed the row exports the *faceted* solid and re-reads it; a sewn triangle soup
+  is not a feature B-rep and the row never claims to be one.
+- **A coarse grid can split the sail into its own shell.** At `(72, 9, 13)` the sampler
+  returns χ = 4 — the hull and the sail as two closed components — because 9 cells across
+  a 0.51 m beam cannot resolve a 0.033 m half-width sail touching the deck. The 1 %
+  volume gate fails there too (−1.81 %). The case gates χ-before-equals-χ-after, not
+  χ = 2, because the round trip is not responsible for the sampler's topology; the
+  published χ = 2 is asserted at the resolutions the case actually runs.
+- **No solver run is claimed.** Contract Case C (TensorFEM handoff) remains unimplemented
+  and the document says so.
+
 ## Where this sits against the merged contract
 
 [`docs/benchmarks/representation-comparison.md`](benchmarks/representation-comparison.md)
@@ -168,7 +241,7 @@ volume, because a faceted solid is not a feature B-rep and the row must not be r
 |---|---|
 | row IDs `analytic_field` / `mesh` / `neural_field` / `ocp_step` / `parametric_hull` | **same IDs**, same roles |
 | Case A — localized edit with analytic ground truth | **implemented**, both ray probes and gates |
-| Case B — AFF-8 export round trip | **not implemented**; the committed case B is the design-loop/handoff variant and is named `case_b_hull_handoff` for that reason |
+| Case B — AFF-8 export round trip | **implemented** as `case_b_aff8_roundtrip`: topology, patch identity, volume/area drift and export/import integrity, on both grids (section above). The design-loop/handoff variant is kept as `case_b_hull_handoff`, an extra engineering case |
 | Case C — real solver handoff (TensorFEM) | **not implemented**, no solver run is claimed |
 | `results.json` with metadata, per-row metrics, gate outcomes, hashes | implemented (`tensorcad.benchmark/1`) |
 | `report.md` generated, not hand-written | implemented |

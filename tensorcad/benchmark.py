@@ -81,12 +81,15 @@ from . import mesh as meshlib
 from .geometry import Mesh, MeshBuilder
 
 __all__ = [
+    "AFF8_QUICK_RESOLUTION",
+    "AFF8_REFERENCE_RESOLUTION",
     "BENCHMARK_SCHEMA",
     "BenchmarkResult",
     "CaseResult",
     "Gate",
     "Metric",
     "RepresentationResult",
+    "aff8_roundtrip_case",
     "dent_radius",
     "fibonacci_directions",
     "hull_handoff_case",
@@ -1714,7 +1717,14 @@ def hull_handoff_case(
     )
 
 
-def _ocp_hull_row(mesh: Mesh, exact_volume: float, target: Path | None) -> RepresentationResult:
+def _ocp_hull_row(
+    mesh: Mesh,
+    exact_volume: float,
+    target: Path | None,
+    *,
+    name: str = "hull_solid.step",
+    reference: str = "analytic volume",
+) -> RepresentationResult:
     from .adapters.ocp import have_ocp
 
     if not have_ocp():
@@ -1730,7 +1740,7 @@ def _ocp_hull_row(mesh: Mesh, exact_volume: float, target: Path | None) -> Repre
         )
     from .adapters.ocp import read_step, write_step
 
-    path = (target or Path("results/bench")) / "hull_solid.step"
+    path = (target or Path("results/bench")) / name
     started = time.perf_counter()
     record = write_step(mesh, path, round_trip=True)
     imported = read_step(path)
@@ -1741,7 +1751,7 @@ def _ocp_hull_row(mesh: Mesh, exact_volume: float, target: Path | None) -> Repre
         status=MEASURED,
         metrics={
             "step_volume_error": Metric(
-                abs(record.volume_m3 / exact_volume - 1.0), "relative", reference="analytic volume"
+                abs(record.volume_m3 / exact_volume - 1.0), "relative", reference=reference
             ).within(1e-2),
             "round_trip_volume_error": Metric(
                 abs(record.round_trip_volume_error or 0.0), "relative", reference="written volume"
@@ -1752,6 +1762,494 @@ def _ocp_hull_row(mesh: Mesh, exact_volume: float, target: Path | None) -> Repre
         seconds=seconds,
         artifacts={"step": str(path)},
     )
+
+
+# --------------------------------------------------------------------------- #
+# Case B: the AFF-8 model, exported and re-read
+# --------------------------------------------------------------------------- #
+
+#: Cells per axis for the CI case. Coarse on purpose: this case measures the *export
+#: round trip*, not the discretisation (the volume gate still has to hold, and it says
+#: how much it costs).
+AFF8_QUICK_RESOLUTION = (110, 14, 20)
+#: Cells per axis for the reference run -- the grid `docs/suboff_appendages.md` reports.
+AFF8_REFERENCE_RESOLUTION = (218, 26, 38)
+#: Cells of padding around the model when sampling; `margin=2` is what the appendage
+#: example uses, and the sail is only 0.033 m half-wide, so this matters.
+AFF8_MARGIN = 2
+#: Quadrature resolution for the analytic reference: 0.5 s and ~2e-6 relative against
+#: the 40,001-station run whose 0.70754064 m^3 is quoted throughout the documentation.
+AFF8_QUADRATURE = {"stations": 4_001, "sections": 501, "span_stations": 501}
+
+#: Class name -> patch family. A leaf field is one *piece* of the analytic union.
+AFF8_PIECE_NAMES = {
+    "SuboffHullField": "hull",
+    "SuboffSailField": "sail",
+    "SuboffFinsField": "fins",
+}
+
+
+def _leaf_pieces(field: Any) -> list[tuple[str, Any]]:
+    """Flatten a composite field into ``(patch name, leaf field)`` pairs."""
+    children = getattr(field, "pieces", None)
+    kids = children() if callable(children) else ()
+    if not kids:
+        return [(AFF8_PIECE_NAMES.get(type(field).__name__, type(field).__name__), field)]
+    leaves: list[tuple[str, Any]] = []
+    for kid in kids:
+        leaves.extend(_leaf_pieces(kid))
+    return leaves
+
+
+def _abs_distances(piece: Any, points: Sequence[Sequence[float]]) -> Any:
+    """``|f|`` at every point for one piece, as a NumPy array where NumPy is importable.
+
+    Sampling the field into a mesh needs NumPy anyway (``to_mesh``), so this case is not
+    standard-library-only the way Case A is; the pure-Python branch exists so that the
+    labels can still be computed in a NumPy-free environment.
+    """
+    try:
+        import numpy
+    except ImportError:  # pragma: no cover - to_mesh already requires NumPy
+        return [abs(value) for value in piece.signed_distance(points)]
+    evaluate = getattr(piece, "numpy_callable", lambda: None)()
+    if evaluate is None:
+        return numpy.abs(numpy.asarray(piece.signed_distance(points), dtype=float))
+    return numpy.abs(numpy.asarray(evaluate(numpy.asarray(points, dtype=float))))
+
+
+def aff8_patch_labels(field: Any, mesh: Mesh) -> tuple[str, ...]:
+    """One patch label per triangle: the piece whose surface the triangle lies on.
+
+    The union has no explicit face tags, so the tag is *measured*: for each triangle
+    centroid, the piece whose ``|signed distance|`` is smallest is the piece that
+    surface belongs to. The four fins are separated into blades by which transverse axis
+    carries them and its sign, because "the fins" is one field but four patches, and a
+    round trip that permuted the blades would otherwise look perfect.
+    """
+    leaves = _leaf_pieces(field)
+    centroids = [meshlib.face_centroid(mesh, face) for face in mesh.faces]
+    distances = [_abs_distances(piece, centroids) for _, piece in leaves]
+    try:
+        import numpy
+
+        nearest = numpy.argmin(numpy.vstack([numpy.asarray(row, dtype=float) for row in distances]), axis=0)
+        nearest_list = [int(value) for value in nearest]
+    except ImportError:  # pragma: no cover - NumPy is required to sample the field anyway
+        nearest_list = [
+            min(range(len(leaves)), key=lambda piece: distances[piece][index])
+            for index in range(len(centroids))
+        ]
+    labels: list[str] = []
+    for index, point in enumerate(centroids):
+        name = leaves[nearest_list[index]][0]
+        if name == "fins":
+            _, y, z = point
+            along_y = abs(y) >= abs(z)
+            offset = y if along_y else z
+            name = f"fin {'y' if along_y else 'z'}{'+' if offset >= 0.0 else '-'}"
+        labels.append(name)
+    return tuple(labels)
+
+
+def _corner_displacement(left: Mesh, right: Mesh) -> float:
+    """Worst Euclidean distance between corresponding triangle corners.
+
+    Both round trips here preserve triangle order and corner order, which is a property
+    of the code under test (``write_obj`` writes ``mesh.faces`` in order, ``write_stl``
+    does too), so a corner-by-corner comparison is the strictest form of "the same
+    surface came back". A triangle-count mismatch is reported as infinite, never skipped.
+    """
+    if len(left.faces) != len(right.faces):
+        return math.inf
+    try:
+        import numpy
+
+        left_corners = numpy.asarray(
+            [left.vertices[corner] for face in left.faces for corner in face], dtype=float
+        )
+        right_corners = numpy.asarray(
+            [right.vertices[corner] for face in right.faces for corner in face], dtype=float
+        )
+        return float(numpy.max(numpy.linalg.norm(left_corners - right_corners, axis=1)))
+    except ImportError:  # pragma: no cover - NumPy is required to sample the field anyway
+        worst = 0.0
+        for face_left, face_right in zip(left.faces, right.faces):
+            for corner_left, corner_right in zip(face_left, face_right):
+                worst = max(
+                    worst,
+                    math.dist(left.vertices[corner_left], right.vertices[corner_right]),
+                )
+        return worst
+
+
+def _topology(mesh: Mesh) -> dict[str, float]:
+    """The validity numbers the contract asks for, as counts rather than verdicts."""
+    counts = meshlib.edge_face_counts(mesh)
+    boundary = sum(1 for count in counts.values() if count == 1)
+    non_manifold = sum(1 for count in counts.values() if count > 2)
+    degenerate = len(meshlib.zero_area_faces(mesh))
+    euler = len(mesh.vertices) - len(counts) + len(mesh.faces)
+    return {
+        "boundary_edges": float(boundary),
+        "non_manifold_edges": float(non_manifold),
+        "degenerate_faces": float(degenerate),
+        "euler_characteristic": float(euler),
+        "signed_volume_m3": meshlib.total_signed_volume(mesh),
+    }
+
+
+def _read_binary_stl(path: str | Path) -> Mesh:
+    """Read back what :func:`tensorcad.export.write_stl` writes.
+
+    STL is a triangle soup: three float32 corners per facet, no index table, no units, no
+    patch tags. The reader has to rebuild ``3 N`` vertices from ``N`` facets, and that is
+    the property being measured -- not a shortcoming of the reader.
+    """
+    import struct
+
+    data = Path(path).read_bytes()
+    if len(data) < 84:
+        raise ValueError(f"{path}: too short to be a binary STL")
+    count = struct.unpack_from("<I", data, 80)[0]
+    if len(data) != 84 + 50 * count:
+        raise ValueError(f"{path}: header says {count} facets, file length disagrees")
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, int, int]] = []
+    for index in range(count):
+        record = struct.unpack_from("<12fH", data, 84 + 50 * index)
+        base = len(vertices)
+        vertices.append((record[3], record[4], record[5]))
+        vertices.append((record[6], record[7], record[8]))
+        vertices.append((record[9], record[10], record[11]))
+        faces.append((base, base + 1, base + 2))
+    return Mesh(vertices=tuple(vertices), faces=tuple(faces))
+
+
+def _share_corners(soup: Mesh) -> Mesh:
+    """Rebuild the index table STL does not store, by exact coordinate key.
+
+    Binary STL writes float32, and float32 rounding is a function: the same double corner
+    always lands on the same float32 triple, so adjacent facets produce *identical* keys
+    and a dict recovers the shared vertices with no tolerance at all. A tolerance-based
+    weld (``mesh.weld``) would do it too, but at ``tolerance=0`` it degenerates to
+    all-pairs comparison -- O(n^2) on a 44k-corner soup -- which is why the exact key is
+    the instrument here rather than a distance.
+    """
+    index: dict[tuple[float, float, float], int] = {}
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, int, int]] = []
+    for a, b, c in soup.faces:
+        face = []
+        for corner in (a, b, c):
+            point = soup.vertices[corner]
+            found = index.get(point)
+            if found is None:
+                found = len(vertices)
+                index[point] = found
+                vertices.append(point)
+            face.append(found)
+        faces.append((face[0], face[1], face[2]))
+    return Mesh(vertices=tuple(vertices), faces=tuple(faces))
+
+
+def aff8_roundtrip_case(
+    *,
+    quick: bool = False,
+    write_artifacts: bool = False,
+    artifact_dir: str | Path | None = None,
+) -> CaseResult:
+    """Contract Case B: the AFF-8 model, exported and re-read.
+
+    What is measured, and why each one is not free:
+
+    * **volume against the analytic union.** The reference is a quadrature over the
+      published sections that subtracts the parts of the sail and fins already inside the
+      hull (``suboff_appendage_volumes``); adding hull + sail + fins instead would
+      double-count 0.0049 m^3 and flatter the mesh by 0.7 %.
+    * **the OBJ round trip, corner by corner.** ``write_obj`` writes 17 significant
+      digits precisely so a double survives, so this must come back at exactly 0 m. It is
+      measured rather than assumed because a precision regression would be silent.
+    * **the STL round trip, which cannot be exact.** Binary STL stores float32, drops the
+      index table and carries no units or patch tags; the quantisation error is measured
+      (and gated) rather than waved away, and it is the reason STL is a derived,
+      last-stop format.
+    * **patch identity.** Hull, sail and four blades, labelled per triangle by which
+      analytic piece the surface belongs to, then re-labelled on the re-read geometry. A
+      round trip that reordered or merged patches fails here even when its volume is
+      right.
+    * **topology.** Watertight, edge-manifold, genus 0, outward, no degenerate faces, on
+      the re-read mesh -- not on the mesh that was written.
+    """
+    from .export import read_obj, write_obj, write_stl
+    from .geometry_field import to_mesh
+    from .suboff_appendages import SuboffFullField, suboff_appendage_volumes
+
+    started = time.perf_counter()
+    resolution = AFF8_QUICK_RESOLUTION if quick else AFF8_REFERENCE_RESOLUTION
+    reference = suboff_appendage_volumes(**AFF8_QUADRATURE)
+    field = SuboffFullField()
+    sampled = to_mesh(field, resolution, margin=AFF8_MARGIN)
+    mesh = sampled.mesh
+    sample_seconds = time.perf_counter() - started
+
+    volume = meshlib.total_signed_volume(mesh)
+    area = meshlib.surface_area(mesh)
+    volume_error = abs(volume / reference["full_model_volume_m3"] - 1.0)
+    patches = aff8_patch_labels(field, mesh)
+    labels_seconds = time.perf_counter() - started - sample_seconds
+
+    persistent = Path(artifact_dir) / "aff8" if (write_artifacts and artifact_dir) else None
+    scratch = tempfile.TemporaryDirectory()
+    target = persistent if persistent is not None else Path(scratch.name)
+    target.mkdir(parents=True, exist_ok=True)
+
+    export_started = time.perf_counter()
+    obj_path = write_obj(mesh, target / "aff8.obj")
+    reimported = read_obj(obj_path)
+    obj_seconds = time.perf_counter() - export_started
+
+    stl_started = time.perf_counter()
+    stl_path = write_stl(mesh, target / "aff8.stl")
+    stl_reimported = _read_binary_stl(stl_path)
+    stl_seconds = time.perf_counter() - stl_started
+
+    node_error = _corner_displacement(mesh, reimported)
+    stl_node_error = _corner_displacement(mesh, stl_reimported)
+    reimported_volume = meshlib.total_signed_volume(reimported)
+    stl_volume = meshlib.total_signed_volume(stl_reimported)
+    reimported_area = meshlib.surface_area(reimported)
+    stl_area = meshlib.surface_area(stl_reimported)
+    box, box_after = mesh.bounding_box(), reimported.bounding_box()
+    box_drift = max(
+        max(abs(a - b) for a, b in zip(box.minimum, box_after.minimum)),
+        max(abs(a - b) for a, b in zip(box.maximum, box_after.maximum)),
+    )
+
+    labels_after = aff8_patch_labels(field, reimported)
+    stl_labels = aff8_patch_labels(field, stl_reimported)
+    identity = sum(1 for a, b in zip(patches, labels_after) if a == b) / max(len(patches), 1)
+    stl_identity = sum(1 for a, b in zip(patches, stl_labels) if a == b) / max(len(patches), 1)
+    patch_counts: dict[str, int] = {}
+    for label in patches:
+        patch_counts[label] = patch_counts.get(label, 0) + 1
+
+    written_topology = _topology(mesh)
+    topology = _topology(reimported)
+    # The soup has no index table, so every edge appears once and every edge looks like a
+    # boundary. That is what STL *is*; the honest question is whether the index table can be
+    # rebuilt, which `_share_corners` does exactly (no tolerance) so the same topology
+    # checks can run.
+    stl_soup_topology = _topology(stl_reimported)
+    stl_shared = _share_corners(stl_reimported)
+    stl_topology = _topology(stl_shared)
+
+    metrics = {
+        "volume_error": Metric(
+            volume_error, "relative", reference="analytic AFF-8 union volume"
+        ).within(1e-2),
+        "surface_area_m2": Metric(area, "m^2", reference="mesh"),
+        "analytic_reference_volume_m3": Metric(
+            reference["full_model_volume_m3"], "m^3", reference="quadrature over the sections"
+        ),
+        "analytic_reference_rel_change": Metric(
+            reference["quadrature_rel_difference"],
+            "relative",
+            reference="the same quadrature at a quarter of the resolution",
+        ),
+        "round_trip_node_error_m": Metric(
+            node_error, "m", reference="written vertex table"
+        ).at_most(1e-12),
+        "round_trip_volume_drift": Metric(
+            abs(reimported_volume / volume - 1.0), "relative", reference="written mesh volume"
+        ).at_most(1e-12),
+        "round_trip_area_drift": Metric(
+            abs(reimported_area / area - 1.0), "relative", reference="written mesh area"
+        ).at_most(1e-12),
+        "round_trip_bounding_box_drift_m": Metric(
+            box_drift, "m", reference="written bounds"
+        ).at_most(1e-12),
+        "patch_identity": Metric(
+            identity, "fraction", reference="patch label per triangle before vs after"
+        ).equals(1.0, 1e-12),
+        "stl_round_trip_node_error_m": Metric(
+            stl_node_error, "m", reference="written vertex table (float32 storage)"
+        ).at_most(1e-5),
+        "stl_round_trip_volume_drift": Metric(
+            abs(stl_volume / volume - 1.0), "relative", reference="written mesh volume"
+        ).at_most(1e-5),
+        "stl_round_trip_area_drift": Metric(
+            abs(stl_area / area - 1.0), "relative", reference="written mesh area"
+        ).at_most(1e-5),
+        "stl_patch_identity": Metric(
+            stl_identity, "fraction", reference="patch label per triangle before vs after"
+        ).equals(1.0, 1e-12),
+        "triangles": Metric(float(len(reimported.faces)), "count", reference="written triangles"),
+        "vertices": Metric(float(len(reimported.vertices)), "count", reference="written vertices"),
+        "boundary_edges": Metric(topology["boundary_edges"], "count").at_most(0.0),
+        "non_manifold_edges": Metric(topology["non_manifold_edges"], "count").at_most(0.0),
+        "degenerate_faces": Metric(topology["degenerate_faces"], "count").at_most(0.0),
+        "euler_characteristic": Metric(
+            topology["euler_characteristic"],
+            "count",
+            reference=f"written mesh, chi = {written_topology['euler_characteristic']:.0f}",
+        ),
+        "round_trip_euler_delta": Metric(
+            abs(topology["euler_characteristic"] - written_topology["euler_characteristic"]), "count"
+        ).at_most(0.0),
+        "outward_volume_m3": Metric(
+            topology["signed_volume_m3"], "m^3", reference="signed volume of the re-read mesh"
+        ).at_least(0.0),
+        "stl_soup_vertices": Metric(
+            float(len(stl_reimported.vertices)),
+            "count",
+            reference="three per facet: STL stores no index table",
+        ),
+        "stl_soup_boundary_edges": Metric(
+            stl_soup_topology["boundary_edges"],
+            "count",
+            reference="every edge, because no edge is shared in a soup",
+        ),
+        "stl_shared_vertices": Metric(
+            float(len(stl_shared.vertices)), "count", reference="written shared vertices"
+        ).at_most(float(len(mesh.vertices))),
+        "stl_shared_boundary_edges": Metric(stl_topology["boundary_edges"], "count").at_most(0.0),
+        "stl_shared_non_manifold_edges": Metric(
+            stl_topology["non_manifold_edges"], "count"
+        ).at_most(0.0),
+        "stl_shared_volume_drift": Metric(
+            abs(stl_topology["signed_volume_m3"] / volume - 1.0),
+            "relative",
+            reference="written mesh volume",
+        ).at_most(1e-6),
+        "stl_shared_euler_delta": Metric(
+            abs(stl_topology["euler_characteristic"] - written_topology["euler_characteristic"]),
+            "count",
+        ).at_most(0.0),
+    }
+
+    artifacts = {"aff8_obj": str(obj_path), "aff8_stl": str(stl_path)}
+    if persistent is not None:
+        artifacts["aff8_obj_sha256"] = hashlib.sha256(obj_path.read_bytes()).hexdigest()
+        artifacts["aff8_stl_sha256"] = hashlib.sha256(stl_path.read_bytes()).hexdigest()
+        artifacts["aff8_mesh"] = _digest(mesh)
+
+    row = RepresentationResult(
+        identifier="mesh",
+        role="export path: the union as a triangle mesh, written and read back",
+        status=MEASURED,
+        metrics=metrics,
+        seconds=obj_seconds + stl_seconds,
+        artifacts=artifacts,
+        notes=[
+            f"sampled at {resolution} with margin {AFF8_MARGIN}: {len(mesh.faces)} triangles, "
+            f"{len(mesh.vertices)} vertices, {sample_seconds:.1f} s",
+            f"patches found by measurement, not by tag: "
+            + ", ".join(f"{name} {count}" for name, count in sorted(patch_counts.items())),
+            f"OBJ is lossless (17 significant digits): worst corner displacement {node_error:.1e} m",
+            f"STL is float32 and index-free: worst corner displacement {stl_node_error:.1e} m, "
+            f"{len(stl_reimported.vertices)} vertices rebuilt from {len(stl_reimported.faces)} facets",
+            f"label time {labels_seconds:.1f} s is the harness's own cost (one distance "
+            "evaluation per piece per triangle), not the representation's",
+        ],
+    )
+    ocp = _ocp_hull_row(
+        mesh,
+        reference["full_model_volume_m3"],
+        persistent if persistent is not None else Path(scratch.name),
+        name="aff8_solid.step",
+        reference="analytic AFF-8 union volume",
+    )
+
+    gates = (
+        Gate(
+            "aff8_mesh_matches_the_union_volume",
+            bool(metrics["volume_error"].passed),
+            f"{100 * volume_error:+.3f} % against {reference['full_model_volume_m3']:.8f} m^3 "
+            f"at {resolution}",
+        ),
+        Gate(
+            "aff8_export_round_trip_is_exact",
+            bool(metrics["round_trip_node_error_m"].passed)
+            and bool(metrics["round_trip_volume_drift"].passed)
+            and bool(metrics["round_trip_area_drift"].passed)
+            and bool(metrics["round_trip_bounding_box_drift_m"].passed),
+            f"worst corner {node_error:.1e} m, volume drift "
+            f"{100 * abs(reimported_volume / volume - 1.0):.1e} %, area drift "
+            f"{100 * abs(reimported_area / area - 1.0):.1e} %",
+        ),
+        Gate(
+            "aff8_round_trip_keeps_the_topology",
+            bool(metrics["boundary_edges"].passed)
+            and bool(metrics["non_manifold_edges"].passed)
+            and bool(metrics["degenerate_faces"].passed)
+            and bool(metrics["round_trip_euler_delta"].passed)
+            and bool(metrics["outward_volume_m3"].passed),
+            f"boundary {topology['boundary_edges']:.0f}, non-manifold "
+            f"{topology['non_manifold_edges']:.0f}, chi {topology['euler_characteristic']:.0f} "
+            f"(written {written_topology['euler_characteristic']:.0f}), degenerate "
+            f"{topology['degenerate_faces']:.0f}",
+        ),
+        Gate(
+            "aff8_patch_identity_survives_the_round_trip",
+            bool(metrics["patch_identity"].passed) and bool(metrics["stl_patch_identity"].passed),
+            f"OBJ {100 * identity:.2f} %, STL {100 * stl_identity:.2f} % of triangles keep their patch",
+        ),
+        Gate(
+            "aff8_stl_quantisation_is_bounded",
+            bool(metrics["stl_round_trip_node_error_m"].passed)
+            and bool(metrics["stl_round_trip_volume_drift"].passed),
+            f"worst corner {stl_node_error:.1e} m, volume drift "
+            f"{100 * abs(stl_volume / volume - 1.0):.1e} %",
+        ),
+        Gate(
+            "aff8_stl_topology_is_recoverable",
+            bool(metrics["stl_shared_vertices"].passed)
+            and bool(metrics["stl_shared_boundary_edges"].passed)
+            and bool(metrics["stl_shared_non_manifold_edges"].passed)
+            and bool(metrics["stl_shared_euler_delta"].passed),
+            f"{len(stl_reimported.vertices)} corners share down to {len(stl_shared.vertices)} "
+            f"vertices (written {len(mesh.vertices)}): watertight "
+            f"{stl_topology['boundary_edges'] == 0}, chi "
+            f"{stl_topology['euler_characteristic']:.0f} vs "
+            f"{written_topology['euler_characteristic']:.0f}",
+        ),
+    )
+    case = CaseResult(
+        identifier="case_b_aff8_roundtrip",
+        question=(
+            "Does the exported artifact carry the model -- its topology, its patches, its "
+            "volume -- or only its triangles?"
+        ),
+        reference=(
+            f"DARPA SUBOFF AFF-8 reference model: union volume "
+            f"{reference['full_model_volume_m3']:.9f} m^3 (quadrature over the sections, "
+            f"rel. change {reference['quadrature_rel_difference']:.1e} coarse-to-fine)"
+        ),
+        representations=(row, ocp),
+        gates=gates,
+        notes=[
+            "the reference is the union's volume, not hull + sail + fins: the appendages are "
+            f"only {100 * reference['appendage_share']:.3f} % of the model and 45-48 % of them "
+            "are inside the hull",
+            "volume error here is the sampler's, and it is reported, not hidden: a coarse grid "
+            "under-fills a 0.033 m half-wide sail first",
+            f"the re-read mesh is chi = {topology['euler_characteristic']:.0f}: on the reference "
+            "grid that is the published genus-0 shell, and at 72x9x13 the sampler splits the "
+            "sail into its own closed component (chi = 4), which is a property of the grid the "
+            "round trip faithfully preserves -- so the gate is chi-before-equals-chi-after, not "
+            "chi = 2",
+            "STL carries no index table, so its soup reports every edge as a boundary; the "
+            "rebuild row shows the table is recoverable exactly from float32 keys, no tolerance "
+            "needed",
+            "the ocp_step row is faceted: sewing a triangle soup into a STEP solid is not a "
+            "feature B-rep and the row must not be read as one",
+            "no solver run is claimed; contract Case C is not implemented",
+        ],
+        seconds=time.perf_counter() - started,
+    )
+    scratch.cleanup()
+    return case
 
 
 # --------------------------------------------------------------------------- #
@@ -1790,6 +2288,9 @@ def run_benchmark(
             ocp_artifact=ocp_artifact,
         ),
         hull_handoff_case(write_artifacts=write_artifacts, artifact_dir=artifact_dir),
+        aff8_roundtrip_case(
+            quick=quick, write_artifacts=write_artifacts, artifact_dir=artifact_dir
+        ),
     )
     return BenchmarkResult(
         cases=cases,
