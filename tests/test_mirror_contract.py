@@ -140,7 +140,7 @@ def test_the_two_paths_of_a_field_return_the_same_number(name: str) -> None:
     disagreements = [
         (point, exact, mirrored)
         for point, exact, mirrored in zip(points, scalar, vector, strict=True)
-        if not (exact == mirrored)
+        if exact != mirrored
     ]
     assert not disagreements, (
         f"{name}: {len(disagreements)} of {len(points)} probes disagree between the "

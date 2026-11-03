@@ -28,8 +28,10 @@ for a grid pays for NumPy (same rule as ``to_mesh``).
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field as dataclass_field
-from typing import Any, Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from typing import Any, cast
 
 from .geometry_field import FieldError, GeometryField
 
@@ -69,7 +71,7 @@ def _cells_per_axis(resolution: int | Sequence[int]) -> tuple[int, int, int]:
         cells = (int(resolution),) * 3
     if min(cells) < 2:
         raise FieldError(f"resolution must be at least 2 cells per axis, got {cells}")
-    return cells  # type: ignore[return-value]
+    return cells
 
 
 def _resolve_bounds(
@@ -80,11 +82,12 @@ def _resolve_bounds(
         box = field.bounds()
         if box is None:
             raise FieldError(
-                f"{field.kind} is unbounded and has no grid to sample; pass bounds=((x0, y0, z0), (x1, y1, z1))"
+                f"{field.kind} is unbounded and has no grid to sample; "
+                "pass bounds=((x0, y0, z0), (x1, y1, z1))"
             )
         return (
-            tuple(float(value) for value in box.minimum),  # type: ignore[return-value]
-            tuple(float(value) for value in box.maximum),  # type: ignore[return-value]
+            cast(tuple[float, float, float], tuple(float(value) for value in box.minimum)),
+            cast(tuple[float, float, float], tuple(float(value) for value in box.maximum)),
         )
     corners = list(bounds)
     if len(corners) != 2:
@@ -143,7 +146,8 @@ class VoxelGrid:
         cut and curvature-biased otherwise; on an anisotropic grid the bias scales with
         this length, so the estimator uses it rather than, say, ``min(h)``.
         """
-        return self.cell_volume ** (1.0 / 3.0)
+        size: float = self.cell_volume ** (1.0 / 3.0)
+        return size
 
     @property
     def bounds_min(self) -> tuple[float, float, float]:
@@ -314,7 +318,12 @@ def to_voxel_grid(
         "padding_cells": pad,
         "sampled_on": "cell_centres",
     }
-    return VoxelGrid(sdf=sdf, origin=origin, spacing=spacing, provenance=provenance)
+    return VoxelGrid(
+        sdf=sdf,
+        origin=cast(tuple[float, float, float], origin),
+        spacing=cast(tuple[float, float, float], spacing),
+        provenance=provenance,
+    )
 
 
 __all__ = [

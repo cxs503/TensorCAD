@@ -14,9 +14,9 @@ tuned away.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
-import math
 import subprocess
 import sys
 from functools import lru_cache
@@ -24,14 +24,8 @@ from pathlib import Path
 
 import pytest
 
-from tensorcad.geometry_field import to_mesh
-from tensorcad.suboff_appendages import SuboffFullField, suboff_appendage_volumes
-
 from tensorcad.benchmark import (
     BENCHMARK_SCHEMA,
-    _topology,
-    aff8_patch_labels,
-    aff8_roundtrip_case,
     DENT_DEPTH_M,
     FAILED,
     IMPORTED,
@@ -46,6 +40,9 @@ from tensorcad.benchmark import (
     _lat_long_surface,
     _percentile,
     _RayCaster,
+    _topology,
+    aff8_patch_labels,
+    aff8_roundtrip_case,
     dent_radius,
     fibonacci_directions,
     have_neural,
@@ -54,6 +51,8 @@ from tensorcad.benchmark import (
     sphere_dent_case,
     stratified_directions,
 )
+from tensorcad.geometry_field import to_mesh
+from tensorcad.suboff_appendages import SuboffFullField, suboff_appendage_volumes
 
 
 @pytest.fixture(scope="module")

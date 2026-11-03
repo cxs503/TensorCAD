@@ -1276,7 +1276,9 @@ def suboff_appendage_volumes(
     results.update(fine)
     results["hull_volume_m3"] = hull["volume"]
     results["hull_wetted_area_m2"] = hull["wetted_area"]
-    results["full_model_volume_m3"] = hull["volume"] + fine["sail_outside_hull_m3"] + fine["fins_outside_hull_m3"]
+    results["full_model_volume_m3"] = (
+        hull["volume"] + fine["sail_outside_hull_m3"] + fine["fins_outside_hull_m3"]
+    )
     results["appendage_share"] = (
         fine["sail_outside_hull_m3"] + fine["fins_outside_hull_m3"]
     ) / results["full_model_volume_m3"]

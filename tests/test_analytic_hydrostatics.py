@@ -53,8 +53,8 @@ def simpson_2d(function, panels: int) -> float:
     """Composite Simpson product rule on the unit square."""
     nodes, weights = _simpson_nodes(panels)
     total = 0.0
-    for tau, w_tau in zip(nodes, weights):
-        for u, w_u in zip(nodes, weights):
+    for tau, w_tau in zip(nodes, weights, strict=False):
+        for u, w_u in zip(nodes, weights, strict=False):
             total += w_tau * w_u * function(tau, u)
     return total
 
@@ -93,7 +93,7 @@ def sqrt_profile_by_simpson(panels: int = 2000) -> float:
 
 def test_taper_integral_matches_simpson() -> None:
     """``TAPER_INTEGRAL`` is a Beta function; Simpson on sin^0.7 must find it."""
-    assert TAPER_INTEGRAL == pytest.approx(taper_integral_by_simpson(), rel=1e-11)
+    assert pytest.approx(taper_integral_by_simpson(), rel=1e-11) == TAPER_INTEGRAL
 
 
 def test_closed_form_volume_matches_independent_quadrature() -> None:
