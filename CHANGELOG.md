@@ -4,6 +4,42 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.14.0 — 2026-11-03
+
+### Added
+- **`tensorcad.stability` — initial stability (KM, GM) from the waterplane moments.**
+  `waterplane_moments(mesh, waterline_z)` cuts the surface with the plane, chains the
+  segments into closed loops on the mesh's own vertex/edge identity, and integrates the
+  area and its first/second moments by Green's theorem — exact for the polygonal
+  waterplane the mesh has. Sections are referred to their own centroid
+  (`I_T = ∫y²dA − A·y_c²`), so asymmetric and heeled waterplanes integrate correctly;
+  nested loops are detected by point-in-polygon parity and subtract.
+  `initial_stability(mesh, kg=...)` returns `KB`, `BM_T`, `BM_L`, `KM` and `GM` with `KG`
+  as a required loading input (no silent `KG = 0`). Free-surface corrections, `GZ(φ)`,
+  trim and class rules are explicitly *not* implemented, and `basis` says `solid GM`.
+- **`hydrostatics_analytic.waterplane_inertia_transverse` / `waterplane_inertia_longitudinal`** —
+  the closed form `I_T = (B³L/12)·taper_integral(3e)` (note the `3e`, not `e`) and the
+  quadrature `I_L = 2BL³∫₀^{1/2} u² cos(πu)^e du` with its self-convergence estimate.
+- `examples/stability/run_example.py` writes `docs/stability/{results.json,report.md}` plus
+  three figures and exits non-zero if one of its ten claims stops holding;
+  `tests/test_stability.py` adds 19 tests; `docs/stability.md` derives the formulas, reports
+  the ladder and names the limits.
+
+### Measured
+- **Box** (`10 × 2 × 0.8 m`, `KG = 0.55 m`): every waterplane and metacentric quantity
+  reproduces its closed form to **2.2e-16** — one ulp — so the section integration is exact
+  and the hull's residual error is the mesh's.
+- **Hemisphere** (`R = 1 m`, 32×64): `KB = 0.625075 m` vs `5R/8`, `BM = 0.374624 m` vs
+  `3R/8`, `KM = 0.999699 m` vs `R` (**−0.030 %**): two independent integrations summing to
+  the sphere's radius.
+- **Hull** (`10 × 2 × 0.8 m`, `KG = 0.6 m`): `I_T` `−0.139 %` / `−0.0086 %`, `I_L`
+  `−0.604 %` / `−0.064 %`, `BM_T` `+0.748 %` / `+0.127 %`, `GM_T` `+1.99 %` / `+0.35 %` at
+  `41×13` / `161×41`. Fitted order of `I_T` in the grid step: **2.01**. `I_L`'s reference is
+  rule-independent: tanh-sinh vs Composite Simpson under `u = 1/2 − s²` agree to **7.8e-16**.
+- **`GM` amplifies.** `rel(GM) ≈ (KM/GM)·rel(KM) ≈ 2.87·rel(KM)` at `KG = 0.6 m`, so the
+  coarsest rung (`21×9`) leaves the 3 % band at `+3.47 %` while `I_T` is still inside it at
+  `−0.56 %`; `GM = 0` falls at `KG = KM = 0.915360 m`, bracketed by the `GM(KG)` ladder.
+
 ## 0.13.0 — 2026-11-03
 
 - **Closed-form hydrostatics reference** (`tensorcad/hydrostatics_analytic.py`): the
