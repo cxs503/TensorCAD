@@ -17,6 +17,16 @@ contracts and algorithms, :mod:`tensorcad.parameters` and
 live in :mod:`tensorcad.adapters`.
 """
 
+from .bonjean import (
+    BonjeanCurve,
+    BonjeanTable,
+    SectionProperties,
+    analytic_section_area,
+    bonjean_curve,
+    bonjean_table,
+    section_loops,
+    section_properties,
+)
 from .curvature import (
     CurvatureError,
     CurvatureSample,
@@ -127,6 +137,8 @@ __all__ = [
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
     "AnalyticHydrostatics",
+    "BonjeanCurve",
+    "BonjeanTable",
     "BoundingBox",
     "Check",
     "ConditionedMesh",
@@ -156,6 +168,7 @@ __all__ = [
     "RatioSpec",
     "ResolutionPlan",
     "SampledField",
+    "SectionProperties",
     "SphereField",
     "StabilityError",
     "SuboffAppendagesField",
@@ -168,9 +181,12 @@ __all__ = [
     "WaterplaneMoments",
     "analytic_hydrostatics",
     "analytic_relative_errors",
+    "analytic_section_area",
     "analytic_volume",
     "analytic_wetted_surface_area",
     "assess_fairness",
+    "bonjean_curve",
+    "bonjean_table",
     "build_mesh",
     "compute_hydrostatics",
     "condition_mesh",
@@ -190,6 +206,8 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "section_loops",
+    "section_properties",
     "suboff_fin_chord",
     "suboff_radius_fraction",
     "suboff_reference_geometry",
@@ -212,4 +230,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.13.0"
+__version__ = "0.16.0"

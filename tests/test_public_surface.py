@@ -10,6 +10,8 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "BonjeanCurve", "BonjeanTable", "SectionProperties", "analytic_section_area",
+    "bonjean_curve", "bonjean_table", "section_loops", "section_properties",
     "DESIGN_SCHEMA", "DesignProblem", "DesignRecord", "DesignSolution", "DesignTargets",
     "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
     "AnalyticHydrostatics", "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics",
@@ -24,7 +26,8 @@ EXPECTED_API = {
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
-    "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate", "enforce_gate",
+    "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
+    "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
     "inspect_geometry", "inspect_mesh_quality", "measure_mesh", "project_to_field",
     "read_metadata", "read_obj", "read_stl", "resolve_resolution",
@@ -42,7 +45,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.13.0"
+    assert tensorcad.__version__ == "0.16.0"
 
 
 def test_layered_modules_are_all_importable() -> None:

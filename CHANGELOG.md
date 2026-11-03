@@ -4,6 +4,28 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.16.0 — Bonjean curves: a station's immersed area against the waterline
+
+`section_area_at` could only report the area of a station the mesh had a vertex
+ring on, at the full depth of that ring; nothing in the package could answer "at
+station x, how much area is under waterline z", which is the input to damage
+stability and to the buoyancy curve of a still-water bending calculation.
+
+- `tensorcad/bonjean.py`: `section_loops` (plane cut of a closed mesh, segments
+  matched by shared edge key, plane nudged 1e-9 off vertex rings), `section_properties`
+  (clipped area, perimeter, centroid), `bonjean_curve`, `bonjean_table` with
+  `integrated_volume` (Simpson when the stations are even and odd in number,
+  trapezoid otherwise), and `analytic_section_area` — the closed form
+  `(2/3) B sin(pi x/L)^0.7 zeta^(3/2) / sqrt(draft)` for the parametric family.
+- Verification: bit-exact on a barge; −5.31 % worst on the default 41x13 grid at the
+  shallowest waterline, converging as 5.31 / 2.54 / 0.92 / 0.33 % for nz = 13/21/41/81;
+  the trapezoid integral of the station areas equals the surface-flux displacement to
+  1.1e-16 relative (the loft is linear in x, so the identity is exact), leaving the
+  −0.16 % residual as surface sampling only.
+- `docs/bonjean.md`, `docs/bonjean/{results.json,plot.png}`,
+  `examples/bonjean/run_example.py`, `tests/test_bonjean.py` (37 tests).
+- Additive only: no existing key, function or number changed.
+
 ## 0.14.0 — 2026-11-03
 
 ### Added
