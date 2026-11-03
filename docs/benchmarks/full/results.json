@@ -2,26 +2,26 @@
   "schema": "tensorcad.benchmark/1",
   "passed": true,
   "failures": [],
-  "seconds": 6.067278653000358,
+  "seconds": 103.1082738507539,
   "command": "python examples/benchmarks/run_benchmark.py --output docs/benchmarks/full",
   "environment": {
     "tensorcad": "0.9.0",
-    "python": "3.11.2",
-    "platform": "Linux-6.1.158+-x86_64-with-glibc2.36",
-    "machine": "x86_64",
-    "processor": "unknown",
+    "python": "3.11.6",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "machine": "loongarch64",
+    "processor": "loongarch64",
     "numpy": "2.4.6",
-    "torch": "2.14.1+cu130",
-    "safetensors": "0.8.0",
+    "torch": "2.7.1",
+    "safetensors": null,
     "ocp": null,
-    "cpu_count": 2
+    "cpu_count": 128
   },
   "cases": [
     {
       "identifier": "case_a_sphere_dent",
       "question": "A local edit with a closed-form reference: how much of the error is the edit, and how much is the representation?",
       "reference": "sphere R = 0.5 m with a Gaussian dent of depth 0.06 m and sigma 0.22 rad on +x; 512 stratified rays, dent < 1 sigma, protected > 2.5 sigma + 1.5 cells",
-      "seconds": 3.0584571429999414,
+      "seconds": 24.06181707046926,
       "notes": [
         "the mesh row moves only vertices inside 2.5 sigma and does not re-project: the error it shows is interpolation between vertices, not a defect of meshes",
         "every row is probed along the same stratified ray set: a third of the rays lie inside the edit cone so a small edit is resolved, the rest are uniform, so no row sees an easier sample",
@@ -64,7 +64,7 @@
           "identifier": "analytic_field",
           "role": "reference: exact closed form",
           "status": "measured",
-          "seconds": 0.053711303000000044,
+          "seconds": 0.12291963957250118,
           "artifacts": {
             "triangulated_surface": "109ae5a9f426fc28430ec07c116bd9b3ca92937ac7d13e78ece2af3b36388740"
           },
@@ -132,7 +132,7 @@
           "identifier": "mesh",
           "role": "control: explicit triangles, vertices moved in place",
           "status": "measured",
-          "seconds": 2.877103975999944,
+          "seconds": 23.44872434064746,
           "artifacts": {
             "edited_surface": "d855050f19d9f15b3c6e0d2799a8233410adf8d96f3b2b416309501e90652a2a"
           },
@@ -323,7 +323,7 @@
               "passed": null
             },
             "rays_per_second": {
-              "value": 177.956724633858,
+              "value": 21.834876497416438,
               "unit": "1/s",
               "status": "measured",
               "reference": "build the mesh, intersect every ray once",
@@ -426,7 +426,7 @@
       "identifier": "case_b_hull_handoff",
       "question": "The engineering case: can a target become a verified hull, and does the artifact a solver reads describe the same surface?",
       "reference": "L = 12.0 m, B = 2.4 m, T = 0.9 m; analytic volume 12.170571118 m^3",
-      "seconds": 1.854230016999736,
+      "seconds": 9.042698509991169,
       "notes": [
         "the mesh volume here is a discretisation of an analytic form, so its error is the grid's: the refinement row measures how much"
       ],
@@ -452,7 +452,7 @@
           "identifier": "parametric_hull",
           "role": "engineering case: three design variables, analytic volume reference",
           "status": "measured",
-          "seconds": 1.778598673000488,
+          "seconds": 8.389495059847832,
           "artifacts": {
             "hull_surface": "98dfdf8f1bea4dc1218896e54d37dc974fe7919ef86cf04aba118d8add29767e"
           },
@@ -498,7 +498,7 @@
               "passed": null
             },
             "design_loop_seconds": {
-              "value": 1.7607817910002268,
+              "value": 8.091658079996705,
               "unit": "s",
               "status": "measured",
               "reference": "wall clock around solve()",
@@ -557,6 +557,344 @@
               "status": "measured",
               "reference": "(41, 13)",
               "tolerance": 0.05,
+              "note": "",
+              "passed": true
+            }
+          }
+        },
+        {
+          "identifier": "ocp_step",
+          "role": "kernel path: faceted solid exported as STEP",
+          "status": "not_supported",
+          "seconds": 0.0,
+          "artifacts": {},
+          "notes": [],
+          "metrics": {
+            "step_volume_error": {
+              "value": null,
+              "unit": "relative",
+              "status": "not_supported",
+              "reference": "",
+              "tolerance": null,
+              "note": "needs the optional wheels: pip install \"tensorcad[ocp]\"",
+              "passed": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "identifier": "case_b_aff8_roundtrip",
+      "question": "Does the exported artifact carry the model -- its topology, its patches, its volume -- or only its triangles?",
+      "reference": "DARPA SUBOFF AFF-8 reference model: union volume 0.707539369 m^3 (quadrature over the sections, rel. change 3.3e-03 coarse-to-fine)",
+      "seconds": 58.96302058920264,
+      "notes": [
+        "the reference is the union's volume, not hull + sail + fins: the appendages are only 1.177 % of the model and 45-48 % of them are inside the hull",
+        "volume error here is the sampler's, and it is reported, not hidden: a coarse grid under-fills a 0.033 m half-wide sail first",
+        "the re-read mesh is chi = 2: on the reference grid that is the published genus-0 shell, and at 72x9x13 the sampler splits the sail into its own closed component (chi = 4), which is a property of the grid the round trip faithfully preserves -- so the gate is chi-before-equals-chi-after, not chi = 2",
+        "STL carries no index table, so its soup reports every edge as a boundary; the rebuild row shows the table is recoverable exactly from float32 keys, no tolerance needed",
+        "the ocp_step row is faceted: sewing a triangle soup into a STEP solid is not a feature B-rep and the row must not be read as one",
+        "no solver run is claimed; contract Case C is not implemented"
+      ],
+      "gates": [
+        {
+          "name": "aff8_mesh_matches_the_union_volume",
+          "passed": true,
+          "detail": "+0.160 % against 0.70753937 m^3 at (218, 26, 38)"
+        },
+        {
+          "name": "aff8_export_round_trip_is_exact",
+          "passed": true,
+          "detail": "worst corner 0.0e+00 m, volume drift 0.0e+00 %, area drift 0.0e+00 %"
+        },
+        {
+          "name": "aff8_round_trip_keeps_the_topology",
+          "passed": true,
+          "detail": "boundary 0, non-manifold 0, chi 2 (written 2), degenerate 0"
+        },
+        {
+          "name": "aff8_patch_identity_survives_the_round_trip",
+          "passed": true,
+          "detail": "OBJ 100.00 %, STL 100.00 % of triangles keep their patch"
+        },
+        {
+          "name": "aff8_stl_quantisation_is_bounded",
+          "passed": true,
+          "detail": "worst corner 2.4e-07 m, volume drift 2.1e-07 %"
+        },
+        {
+          "name": "aff8_stl_topology_is_recoverable",
+          "passed": true,
+          "detail": "422256 corners share down to 70378 vertices (written 70378): watertight True, chi 2 vs 2"
+        }
+      ],
+      "representations": [
+        {
+          "identifier": "mesh",
+          "role": "export path: the union as a triangle mesh, written and read back",
+          "status": "measured",
+          "seconds": 3.2835064101964235,
+          "artifacts": {
+            "aff8_obj": "/tmp/tmpe0s_srlb/aff8.obj",
+            "aff8_stl": "/tmp/tmpe0s_srlb/aff8.stl"
+          },
+          "notes": [
+            "sampled at (218, 26, 38) with margin 2: 140752 triangles, 70378 vertices, 22.1 s",
+            "patches found by measurement, not by tag: fin y+ 1165, fin y- 1204, fin z+ 1403, fin z- 1338, hull 131796, sail 3846",
+            "OBJ is lossless (17 significant digits): worst corner displacement 0.0e+00 m",
+            "STL is float32 and index-free: worst corner displacement 2.4e-07 m, 422256 vertices rebuilt from 140752 facets",
+            "label time 7.0 s is the harness's own cost (one distance evaluation per piece per triangle), not the representation's"
+          ],
+          "metrics": {
+            "volume_error": {
+              "value": 0.0016016914894990686,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "analytic AFF-8 union volume",
+              "tolerance": 0.01,
+              "note": "",
+              "passed": true
+            },
+            "surface_area_m2": {
+              "value": 6.337548156897961,
+              "unit": "m^2",
+              "status": "measured",
+              "reference": "mesh",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "analytic_reference_volume_m3": {
+              "value": 0.7075393688763396,
+              "unit": "m^3",
+              "status": "measured",
+              "reference": "quadrature over the sections",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "analytic_reference_rel_change": {
+              "value": 0.0033279986537617656,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "the same quadrature at a quarter of the resolution",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "round_trip_node_error_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "written vertex table",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "round_trip_volume_drift": {
+              "value": 0.0,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "written mesh volume",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "round_trip_area_drift": {
+              "value": 0.0,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "written mesh area",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "round_trip_bounding_box_drift_m": {
+              "value": 0.0,
+              "unit": "m",
+              "status": "measured",
+              "reference": "written bounds",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "patch_identity": {
+              "value": 1.0,
+              "unit": "fraction",
+              "status": "measured",
+              "reference": "patch label per triangle before vs after",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "stl_round_trip_node_error_m": {
+              "value": 2.383740921664313e-07,
+              "unit": "m",
+              "status": "measured",
+              "reference": "written vertex table (float32 storage)",
+              "tolerance": 1e-05,
+              "note": "",
+              "passed": true
+            },
+            "stl_round_trip_volume_drift": {
+              "value": 2.090368100837736e-09,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "written mesh volume",
+              "tolerance": 1e-05,
+              "note": "",
+              "passed": true
+            },
+            "stl_round_trip_area_drift": {
+              "value": 6.653173789672451e-09,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "written mesh area",
+              "tolerance": 1e-05,
+              "note": "",
+              "passed": true
+            },
+            "stl_patch_identity": {
+              "value": 1.0,
+              "unit": "fraction",
+              "status": "measured",
+              "reference": "patch label per triangle before vs after",
+              "tolerance": 1e-12,
+              "note": "",
+              "passed": true
+            },
+            "triangles": {
+              "value": 140752.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "written triangles",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "vertices": {
+              "value": 70378.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "written vertices",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "boundary_edges": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "non_manifold_edges": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "degenerate_faces": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "euler_characteristic": {
+              "value": 2.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "written mesh, chi = 2",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "round_trip_euler_delta": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "outward_volume_m3": {
+              "value": 0.7064061090907249,
+              "unit": "m^3",
+              "status": "measured",
+              "reference": "signed volume of the re-read mesh",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "stl_soup_vertices": {
+              "value": 422256.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "three per facet: STL stores no index table",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "stl_soup_boundary_edges": {
+              "value": 422256.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "every edge, because no edge is shared in a soup",
+              "tolerance": null,
+              "note": "",
+              "passed": null
+            },
+            "stl_shared_vertices": {
+              "value": 70378.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "written shared vertices",
+              "tolerance": 70378.0,
+              "note": "",
+              "passed": true
+            },
+            "stl_shared_boundary_edges": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "stl_shared_non_manifold_edges": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
+              "note": "",
+              "passed": true
+            },
+            "stl_shared_volume_drift": {
+              "value": 2.090368100837736e-09,
+              "unit": "relative",
+              "status": "measured",
+              "reference": "written mesh volume",
+              "tolerance": 1e-06,
+              "note": "",
+              "passed": true
+            },
+            "stl_shared_euler_delta": {
+              "value": 0.0,
+              "unit": "count",
+              "status": "measured",
+              "reference": "",
+              "tolerance": 0.0,
               "note": "",
               "passed": true
             }
