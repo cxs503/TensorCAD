@@ -398,12 +398,27 @@ def parse_manifest(data: dict[str, Any]) -> NeuralGeometryManifest:
     )
 
 
-def _verify_payload(root: Path, manifest: NeuralGeometryManifest) -> None:
-    payload = (root / manifest.weights.path).resolve()
+def resolve_in_bundle(root: str | Path, relative: str, where: str) -> Path:
+    """Resolve ``relative`` under ``root`` and refuse anything that leaves it.
+
+    :func:`_safe_relative_path` rejects escaping *strings* at parse time, which is
+    not the whole story: a bundle can also ship a **symlink** whose target lives
+    outside the bundle, and no amount of string checking can see that. Every
+    reader that is about to open a declared payload must therefore re-check
+    containment *after* resolution -- readers must not be weaker than the writers
+    they accept files from.
+    """
+    root_path = Path(root).resolve()
+    target = (root_path / relative).resolve()
     try:
-        payload.relative_to(root)
+        target.relative_to(root_path)
     except ValueError as exc:
-        raise NeuralGeometryFormatError("weights path escapes bundle root") from exc
+        raise NeuralGeometryFormatError(f"{where} escapes bundle root: {relative!r}") from exc
+    return target
+
+
+def _verify_payload(root: Path, manifest: NeuralGeometryManifest) -> None:
+    payload = resolve_in_bundle(root, manifest.weights.path, "weights path")
     if not payload.is_file():
         raise NeuralGeometryFormatError(f"weights payload is missing: {manifest.weights.path}")
     actual_hash = sha256_file(payload)
