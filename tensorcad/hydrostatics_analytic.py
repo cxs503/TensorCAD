@@ -49,6 +49,7 @@ two rows verify the mesh integrator and say nothing about a real hull's trim.
 
 Only the Python standard library is required.
 """
+
 from __future__ import annotations
 
 import math
@@ -77,8 +78,8 @@ def taper_integral(exponent: float = BREADTH_EXPONENT) -> float:
     """
     if not math.isfinite(exponent) or exponent <= -1.0:
         raise ValueError(f"taper exponent must be finite and > -1, got {exponent!r}")
-    return math.sqrt(math.pi) / math.pi * math.gamma(0.5 * (exponent + 1.0)) / math.gamma(
-        0.5 * (exponent + 2.0)
+    return (
+        math.sqrt(math.pi) / math.pi * math.gamma(0.5 * (exponent + 1.0)) / math.gamma(0.5 * (exponent + 2.0))
     )
 
 
@@ -208,9 +209,7 @@ class AnalyticHydrostatics:
             "wetted_area_quadrature": self.quadrature,
         }
 
-    def compare(
-        self, measured: Any, *, quantities: Sequence[str] | None = None
-    ) -> dict[str, Any]:
+    def compare(self, measured: Any, *, quantities: Sequence[str] | None = None) -> dict[str, Any]:
         """Relative error of a mesh :class:`Hydrostatics` against this reference.
 
         ``measured`` is anything exposing the mesh field names -- normally a
@@ -246,11 +245,7 @@ class AnalyticHydrostatics:
                 "relative_error": relative,
                 "relative_error_percent": 100.0 * relative,
             }
-        finite = [
-            abs(row["relative_error"])
-            for row in rows.values()
-            if math.isfinite(row["relative_error"])
-        ]
+        finite = [abs(row["relative_error"]) for row in rows.values() if math.isfinite(row["relative_error"])]
         return {
             "rows": rows,
             "worst_quantity": max(
@@ -273,9 +268,7 @@ def _resolve_parameters(parameters: Any) -> tuple[float, float, float, float]:
         from .hull import HullParameters
 
         parameters = HullParameters()
-    if hasattr(parameters, "length") and hasattr(parameters, "beam") and hasattr(
-        parameters, "draft"
-    ):
+    if hasattr(parameters, "length") and hasattr(parameters, "beam") and hasattr(parameters, "draft"):
         density = float(getattr(parameters, "water_density", 1025.0))
         return (
             float(parameters.length),
@@ -323,10 +316,7 @@ def _wetted_area(
             return 0.0
         beta = half_beam * s**exponent
         gamma = (
-            half_beam
-            * (math.pi * exponent / length)
-            * math.cos(math.pi * x / length)
-            * s ** (exponent - 1.0)
+            half_beam * (math.pi * exponent / length) * math.cos(math.pi * x / length) * s ** (exponent - 1.0)
         )
         four_t_squared = 4.0 * draft * draft
         beta_squared = beta * beta
@@ -369,9 +359,7 @@ def analytic_hydrostatics(
     volume = beam * length * draft * taper * (2.0 / 3.0)
     waterplane = beam * length * taper
     section_area = (2.0 / 3.0) * beam * draft
-    wetted, wetted_difference = _wetted_area(
-        length, beam, draft, breadth_exponent, int(quadrature_levels)
-    )
+    wetted, wetted_difference = _wetted_area(length, beam, draft, breadth_exponent, int(quadrature_levels))
     return AnalyticHydrostatics(
         length=length,
         beam=beam,
@@ -402,3 +390,62 @@ def analytic_hydrostatics(
             "method": "tanh-sinh, nested (zeta = u**2 substitution for the keel edge)",
         },
     )
+
+
+def waterplane_inertia_transverse(
+    length: float, beam: float, *, breadth_exponent: float = BREADTH_EXPONENT
+) -> float:
+    """``I_T = int y**2 dA`` of the reference waterplane, in closed form.
+
+    The waterplane of the analytic surface is ``|y| <= (B/2) sin(pi x/L)**e``, so
+
+        I_T = int_0^L (2/3) (B/2 sin(pi x/L)**e)**3 dx
+            = (B**3 L / 12) * int_0^1 sin(pi u)**(3e) du
+            = (B**3 L / 12) * taper_integral(3e),
+
+    and ``taper_integral`` is a Beta integral evaluated through ``math.gamma``, so this
+    needs no quadrature at all. Note the exponent is ``3e``, not ``e``: the *half
+    breadth* tapers as ``sin**e`` and the moment integrates its cube. Getting that
+    wrong is a factor-of-two-sized error in ``BM`` that no mesh convergence study would
+    reveal, because both the mesh and the reference would be wrong in the same way --
+    which is why this is derived here and cross-checked against the mesh in
+    ``tests/test_stability.py`` rather than being copied from the mesh integrator.
+    """
+    _check_positive("length", length)
+    _check_positive("beam", beam)
+    return beam**3 * length / 12.0 * taper_integral(3.0 * breadth_exponent)
+
+
+def waterplane_inertia_longitudinal(
+    length: float,
+    beam: float,
+    *,
+    breadth_exponent: float = BREADTH_EXPONENT,
+    quadrature_levels: int = 8,
+) -> tuple[float, float]:
+    """``I_L`` about midship, plus the quadrature's self-convergence evidence.
+
+    Substituting ``u = x/L - 1/2`` (so ``sin(pi x/L) = cos(pi u)``) and using the
+    fore-aft symmetry of the reference form,
+
+        I_L = int_0^L (x - L/2)**2 * 2 y dx = 2 B L**3 int_0^{1/2} u**2 cos(pi u)**e du.
+
+    ``e = 0.7 < 1`` leaves a derivative singularity at ``u = 1/2`` (the waterline closes
+    to a point there) which is integrable but which no fixed-order rule handles well;
+    :func:`tanh_sinh_quadrature` is built for exactly this and its two successive
+    refinements are returned as the second element. Unlike ``I_T`` there is no elementary
+    closed form, so the returned error estimate -- not a promise -- is what the tests
+    hold this to.
+    """
+    _check_positive("length", length)
+    _check_positive("beam", beam)
+    if quadrature_levels < 2:
+        raise ValueError(f"quadrature_levels must be at least 2, got {quadrature_levels!r}")
+
+    def integrand(u: float) -> float:
+        return u * u * math.cos(math.pi * u) ** breadth_exponent
+
+    fine = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels))
+    coarse = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels) - 1)
+    scale = 2.0 * beam * length**3
+    return scale * fine, abs(fine - coarse) * scale

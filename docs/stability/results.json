@@ -1,0 +1,349 @@
+{
+  "box": {
+    "kg": 0.55,
+    "mesh": {
+      "faces": 12
+    },
+    "rows": {
+      "bm_transverse": {
+        "measured": 0.4166666666666667,
+        "reference": 0.41666666666666663,
+        "relative_error": 2.220446049250313e-16
+      },
+      "displacement_volume": {
+        "measured": 16.0,
+        "reference": 16.0,
+        "relative_error": 0.0
+      },
+      "gm_transverse": {
+        "measured": 0.2666666666666666,
+        "reference": 0.2666666666666666,
+        "relative_error": 0.0
+      },
+      "kb": {
+        "measured": 0.4,
+        "reference": 0.4,
+        "relative_error": 0.0
+      },
+      "longitudinal_second_moment": {
+        "measured": 166.66666666666663,
+        "reference": 166.66666666666666,
+        "relative_error": -2.220446049250313e-16
+      },
+      "transverse_second_moment": {
+        "measured": 6.666666666666667,
+        "reference": 6.666666666666667,
+        "relative_error": 0.0
+      },
+      "waterplane_area": {
+        "measured": 20.0,
+        "reference": 20.0,
+        "relative_error": 0.0
+      }
+    },
+    "worst_relative_error": 2.220446049250313e-16
+  },
+  "claims": [
+    {
+      "claim": "box: every waterplane and metacentric quantity is exact to round-off",
+      "holds": true,
+      "threshold": 1e-12,
+      "value": 2.220446049250313e-16
+    },
+    {
+      "claim": "hemisphere: KM reproduces the sphere radius R (KB = 5R/8, BM = 3R/8)",
+      "holds": true,
+      "threshold": 0.02,
+      "value": 0.003208120928185898
+    },
+    {
+      "claim": "default hull grid (41\u00d713): I_T within 3 % of the closed form",
+      "holds": true,
+      "threshold": 0.03,
+      "value": 0.0013861379392112738
+    },
+    {
+      "claim": "default hull grid (41\u00d713): I_L within 3 % of quadrature",
+      "holds": true,
+      "threshold": 0.03,
+      "value": 0.00603817381659133
+    },
+    {
+      "claim": "default hull grid (41\u00d713): GM_T within 3 % of the analytic surface",
+      "holds": true,
+      "threshold": 0.03,
+      "value": 0.0198610641821948
+    },
+    {
+      "claim": "fine hull grid (161\u00d741): I_T within 1 %",
+      "holds": true,
+      "threshold": 0.01,
+      "value": 8.604472263951113e-05
+    },
+    {
+      "claim": "fine hull grid (161\u00d741): GM_T within 1 %",
+      "holds": true,
+      "threshold": 0.01,
+      "value": 0.003469840036317562
+    },
+    {
+      "claim": "the waterplane error is second order in the grid step (fitted order > 1.5)",
+      "holds": true,
+      "threshold": 1.5,
+      "value": 2.005763628647443
+    },
+    {
+      "claim": "the I_L reference is rule-independent (Simpson vs tanh-sinh within 1e-6)",
+      "holds": true,
+      "threshold": 1e-06,
+      "value": 7.771561172376096e-16
+    },
+    {
+      "claim": "the waterplane section is symmetric: |y_c| is round-off (below 1e-9 m)",
+      "holds": true,
+      "threshold": 1e-09,
+      "value": 6.7474076033366735e-18
+    }
+  ],
+  "hemisphere": {
+    "discretisation": {
+      "faces": 4096,
+      "n_lat": 32,
+      "n_lon": 64
+    },
+    "radius": 1.0,
+    "rows": {
+      "bm_transverse": {
+        "measured": 0.3746237161703787,
+        "reference": 0.375,
+        "relative_error": -0.0010034235456567453
+      },
+      "kb": {
+        "measured": 0.6250753293559309,
+        "reference": 0.625,
+        "relative_error": 0.00012052696948949837
+      },
+      "km_transverse": {
+        "measured": 0.9996990455263096,
+        "reference": 1.0,
+        "relative_error": -0.00030095447369038464
+      },
+      "longitudinal_second_moment": {
+        "measured": 0.7828785111124944,
+        "reference": 0.7853981633974483,
+        "relative_error": -0.003208120928185565
+      },
+      "transverse_second_moment": {
+        "measured": 0.7828785111124942,
+        "reference": 0.7853981633974483,
+        "relative_error": -0.003208120928185898
+      },
+      "waterplane_area": {
+        "measured": 3.136548490545937,
+        "reference": 3.141592653589793,
+        "relative_error": -0.001605606964382278
+      }
+    },
+    "worst_relative_error": 0.003208120928185898
+  },
+  "hull": {
+    "fitted_orders": {
+      "displacement_volume": 1.3237194925242397,
+      "longitudinal_second_moment": 1.6172458296325003,
+      "transverse_second_moment": 2.005763628647443,
+      "waterplane_area": 1.7000579055808547
+    },
+    "kg": 0.6,
+    "levels": [
+      {
+        "bm_transverse": 0.44104701488989867,
+        "bm_transverse_error": 0.013063673742657267,
+        "displacement_volume": 7.37434534967499,
+        "displacement_volume_error": -0.01841586970504827,
+        "faces": 678,
+        "gm_reference": 0.3153596188682759,
+        "gm_transverse": 0.32631061168744047,
+        "gm_transverse_error": 0.034725412398911804,
+        "kb": 0.48526359679754183,
+        "kb_error": 0.010965826661545552,
+        "km_transverse": 0.9263106116874404,
+        "km_transverse_error": 0.011963596157654521,
+        "longitudinal_centre_flotation": 4.999999999999999,
+        "longitudinal_second_moment": 75.4882182980457,
+        "longitudinal_second_moment_error": -0.017985544319039426,
+        "loops": 1,
+        "nx": 21,
+        "nz": 9,
+        "step": 0.05,
+        "transverse_centre_flotation": 2.526613266718502e-17,
+        "transverse_second_moment": 3.2524330032413604,
+        "transverse_second_moment_error": -0.005592774875905038,
+        "waterplane_area": 14.00624281368091,
+        "waterplane_area_error": -0.005683983662969405
+      },
+      {
+        "bm_transverse": 0.43861787815566544,
+        "bm_transverse_error": 0.007484064084444464,
+        "displacement_volume": 7.4465540971492254,
+        "displacement_volume_error": -0.00880431000337134,
+        "faces": 1998,
+        "gm_reference": 0.3153596188682759,
+        "gm_transverse": 0.3216229964990912,
+        "gm_transverse_error": 0.0198610641821948,
+        "kb": 0.4830051183434258,
+        "kb_error": 0.0062606632154704744,
+        "km_transverse": 0.9216229964990912,
+        "km_transverse_error": 0.006842532160812542,
+        "longitudinal_centre_flotation": 4.999999999999999,
+        "longitudinal_second_moment": 76.40662200112666,
+        "longitudinal_second_moment_error": -0.00603817381659133,
+        "loops": 1,
+        "nx": 41,
+        "nz": 13,
+        "step": 0.025,
+        "transverse_centre_flotation": -1.6222550400571474e-17,
+        "transverse_second_moment": 3.26619175766297,
+        "transverse_second_moment_error": -0.0013861379392112738,
+        "waterplane_area": 14.06166918630219,
+        "waterplane_area_error": -0.0017492146633222294
+      },
+      {
+        "bm_transverse": 0.43655431157082897,
+        "bm_transverse_error": 0.0027441513883594837,
+        "displacement_volume": 7.48955419641137,
+        "displacement_volume_error": -0.0030806541348963323,
+        "faces": 7838,
+        "gm_reference": 0.3153596188682759,
+        "gm_transverse": 0.31768049044616176,
+        "gm_transverse_error": 0.007359444389914982,
+        "kb": 0.4811261788753328,
+        "kb_error": 0.002346205990276795,
+        "km_transverse": 0.9176804904461617,
+        "km_transverse_error": 0.0025354751619426352,
+        "longitudinal_centre_flotation": 5.0000000000000036,
+        "longitudinal_second_moment": 76.71867288151162,
+        "longitudinal_second_moment_error": -0.0019787525935852646,
+        "loops": 1,
+        "nx": 81,
+        "nz": 25,
+        "step": 0.0125,
+        "transverse_centre_flotation": 8.240066319345776e-18,
+        "transverse_second_moment": 3.2695971761867786,
+        "transverse_second_moment_error": -0.00034495652785804243,
+        "waterplane_area": 14.07872557816496,
+        "waterplane_area_error": -0.0005383657700339661
+      },
+      {
+        "bm_transverse": 0.43591458985945214,
+        "bm_transverse_error": 0.001274741540381985,
+        "displacement_volume": 7.502488060029833,
+        "displacement_volume_error": -0.001359053820660594,
+        "faces": 25918,
+        "gm_reference": 0.3153596188682759,
+        "gm_transverse": 0.3164538662996629,
+        "gm_transverse_error": 0.003469840036317562,
+        "kb": 0.4805392764402107,
+        "kb_error": 0.001123492583772423,
+        "km_transverse": 0.9164538662996629,
+        "km_transverse_error": 0.0011954289973374888,
+        "longitudinal_centre_flotation": 5.000000000000002,
+        "longitudinal_second_moment": 76.82172314137841,
+        "longitudinal_second_moment_error": -0.0006381878388136419,
+        "loops": 1,
+        "nx": 161,
+        "nz": 41,
+        "step": 0.00625,
+        "transverse_centre_flotation": -6.7474076033366735e-18,
+        "transverse_second_moment": 3.2704440056133413,
+        "transverse_second_moment_error": -8.604472263951113e-05,
+        "waterplane_area": 14.083975061972072,
+        "waterplane_area_error": -0.00016570010256344858
+      },
+      {
+        "bm_transverse": 0.43555802836163315,
+        "bm_transverse_error": 0.0004557370154656404,
+        "displacement_volume": 7.509114607890256,
+        "displacement_volume_error": -0.0004770074951901959,
+        "faces": 103038,
+        "gm_reference": 0.3153596188682759,
+        "gm_transverse": 0.31575425921510847,
+        "gm_transverse_error": 0.0012513978430364059,
+        "kb": 0.48019623085347535,
+        "kb_error": 0.00040881427807359927,
+        "km_transverse": 0.9157542592151084,
+        "km_transverse_error": 0.00043113147958240283,
+        "longitudinal_centre_flotation": 4.9999999999999964,
+        "longitudinal_second_moment": 76.85513288465955,
+        "longitudinal_second_moment_error": -0.0002035657003874869,
+        "loops": 1,
+        "nx": 321,
+        "nz": 81,
+        "step": 0.003125,
+        "transverse_centre_flotation": 6.08034102440539e-18,
+        "transverse_second_moment": 3.270655153354218,
+        "transverse_second_moment_error": -2.1487869696801276e-05,
+        "waterplane_area": 14.085590761934647,
+        "waterplane_area_error": -5.1000081169205735e-05
+      }
+    ],
+    "parameters": {
+      "beam": 2.0,
+      "breadth_exponent": 0.7,
+      "draft": 0.8,
+      "length": 10.0
+    },
+    "reference": {
+      "bm_transverse": 0.4353596188682759,
+      "displacement_volume": 7.512698221250894,
+      "kb": 0.48,
+      "km_transverse": 0.9153596188682759,
+      "longitudinal_second_moment": 76.87078113906146,
+      "longitudinal_second_moment_quadrature_evidence": 0.0,
+      "longitudinal_second_moment_simpson": 76.8707811390614,
+      "longitudinal_second_moment_simpson_relative_difference": -7.771561172376096e-16,
+      "longitudinal_second_moment_tanh_sinh_level9": 76.87078113906146,
+      "longitudinal_second_moment_tanh_sinh_level9_relative_difference": 0.0,
+      "transverse_second_moment": 3.2707254342761636,
+      "waterplane_area": 14.086309164845428
+    }
+  },
+  "kg_ladder": [
+    {
+      "gm_transverse": 0.7164538662996629,
+      "kg": 0.2
+    },
+    {
+      "gm_transverse": 0.6164538662996628,
+      "kg": 0.3
+    },
+    {
+      "gm_transverse": 0.5164538662996628,
+      "kg": 0.4
+    },
+    {
+      "gm_transverse": 0.41645386629966286,
+      "kg": 0.5
+    },
+    {
+      "gm_transverse": 0.3164538662996629,
+      "kg": 0.6
+    },
+    {
+      "gm_transverse": 0.2164538662996629,
+      "kg": 0.7
+    },
+    {
+      "gm_transverse": 0.11645386629966281,
+      "kg": 0.8
+    },
+    {
+      "gm_transverse": 0.016453866299662834,
+      "kg": 0.9
+    },
+    {
+      "gm_transverse": -0.08354613370033714,
+      "kg": 1.0
+    }
+  ],
+  "version": "0.13.0"
+}
