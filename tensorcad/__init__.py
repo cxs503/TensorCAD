@@ -72,7 +72,6 @@ from .hull import (
     HullModel,
     HullParameters,
     ResolutionPlan,
-    analytic_hydrostatics,
     analytic_relative_errors,
     analytic_volume,
     analytic_wetted_surface_area,
@@ -83,6 +82,12 @@ from .hull import (
     validate_hull,
 )
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .hydrostatics_analytic import (
+    AnalyticHydrostatics,
+    analytic_hydrostatics,
+    tanh_sinh_quadrature,
+    taper_integral,
+)
 from .mesh_conditioning import (
     ConditionedMesh,
     MeshConditioningError,
@@ -124,6 +129,7 @@ __all__ = [
     "SUBOFF_RADIUS_M",
     "AsymmetricHullModel",
     "AsymmetricHullParameters",
+    "AnalyticHydrostatics",
     "BoundingBox",
     "Check",
     "ConditionedMesh",
@@ -190,6 +196,8 @@ __all__ = [
     "suboff_reference_geometry",
     "suboff_sail_half_width",
     "surface_point",
+    "tanh_sinh_quadrature",
+    "taper_integral",
     "taubin_smooth",
     "to_mesh",
     "to_voxel_grid",
