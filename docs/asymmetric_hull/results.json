@@ -1,0 +1,389 @@
+{
+  "asymmetry": {
+    "aft_exponent": 1.6,
+    "checks": {
+      "lcb_is_off_midship_by_more_than_2_percent_of_length": true,
+      "lcb_moves_towards_the_fuller_half": true,
+      "mirror_identity_holds": true,
+      "volume_invariant_under_mirror": true,
+      "waterplane_invariant_under_mirror": true
+    },
+    "fore_exponent": 0.7,
+    "lcb_m": 5.413279059518409,
+    "lcb_over_length": 0.5413279059518409,
+    "lcb_shift_m": 0.41327905951840904,
+    "mirrored_lcb_m": 4.58672094048159,
+    "symmetric_family_would_report": 5.0
+  },
+  "case": {
+    "aft_exponent": 1.6,
+    "beam": 2.0,
+    "draft": 0.8,
+    "fore_exponent": 0.7,
+    "has_midship_station": true,
+    "length": 10.0,
+    "nx": 81,
+    "nz": 21,
+    "water_density": 1025.0
+  },
+  "checks": {
+    "default_grid_inside_three_percent": true,
+    "displacement_volume_error_shrinks_with_refinement": true,
+    "fine_grid_inside_half_percent": true,
+    "lcb_error_sign_is_stable": true,
+    "lcb_is_off_midship_by_more_than_2_percent_of_length": true,
+    "lcb_moves_towards_the_fuller_half": true,
+    "longitudinal_centre_buoyancy_error_shrinks_with_refinement": true,
+    "mesh_is_a_closed_manifold_on_every_grid": true,
+    "mirror_identity_holds": true,
+    "moment_quadrature_converges_with_nodes": true,
+    "moment_quadrature_is_substitution_independent": true,
+    "symmetric_limit_reproduces_0_11_0_reference": true,
+    "taper_closed_form_hits_shipped_constant": true,
+    "taper_closed_form_matches_simpson": true,
+    "volume_invariant_under_mirror": true,
+    "waterplane_invariant_under_mirror": true,
+    "wetted_quadrature_drift_below_1e-9": true,
+    "wetted_surface_area_error_shrinks_with_refinement": true
+  },
+  "passed": true,
+  "reference_audit": {
+    "case": {
+      "aft_exponent": 1.6,
+      "beam": 2.0,
+      "draft": 0.8,
+      "fore_exponent": 0.7,
+      "has_midship_station": true,
+      "length": 10.0,
+      "nx": 81,
+      "nz": 21,
+      "water_density": 1025.0
+    },
+    "checks": {
+      "moment_quadrature_converges_with_nodes": true,
+      "moment_quadrature_is_substitution_independent": true,
+      "symmetric_limit_reproduces_0_11_0_reference": true,
+      "taper_closed_form_hits_shipped_constant": true,
+      "taper_closed_form_matches_simpson": true,
+      "wetted_quadrature_drift_below_1e-9": true
+    },
+    "symmetric_limit": {
+      "block_coefficient": {
+        "asymmetric_module": 0.4695436388281806,
+        "relative": -5.551115123125783e-16,
+        "shipped_symmetric": 0.4695436388281809
+      },
+      "displacement_volume": {
+        "asymmetric_module": 7.51269822125089,
+        "relative": -5.551115123125783e-16,
+        "shipped_symmetric": 7.512698221250894
+      },
+      "longitudinal_centre_buoyancy": {
+        "asymmetric_module": 5.000000000000001,
+        "relative": 2.220446049250313e-16,
+        "shipped_symmetric": 5.0
+      },
+      "longitudinal_centre_flotation": {
+        "asymmetric_module": 5.000000000000001,
+        "relative": 2.220446049250313e-16,
+        "shipped_symmetric": 5.0
+      },
+      "maximum_section_area": {
+        "asymmetric_module": 1.0666666666666667,
+        "relative": 0.0,
+        "shipped_symmetric": 1.0666666666666667
+      },
+      "prismatic_coefficient": {
+        "asymmetric_module": 0.7043154582422709,
+        "relative": -6.661338147750939e-16,
+        "shipped_symmetric": 0.7043154582422714
+      },
+      "vertical_centre_buoyancy": {
+        "asymmetric_module": -0.32000000000000006,
+        "relative": 0.0,
+        "shipped_symmetric": -0.32000000000000006
+      },
+      "waterplane_area": {
+        "asymmetric_module": 14.086309164845419,
+        "relative": -6.661338147750939e-16,
+        "shipped_symmetric": 14.086309164845428
+      },
+      "wetted_surface_area": {
+        "asymmetric_module": 22.912729522841488,
+        "relative": 6.47177866852644e-11,
+        "shipped_symmetric": 22.912729521358628
+      }
+    },
+    "taper_integral": [
+      {
+        "closed_form": 0.3988097523524241,
+        "closed_vs_simpson_relative": 6.07418251252767e-08,
+        "exponent": 0.4,
+        "moment_node_refinement_relative": 1.3322676295501878e-15,
+        "moment_substitution_relative": -1.2212453270876722e-15,
+        "simpson": 0.39880972812799337
+      },
+      {
+        "closed_form": 0.3521577291211358,
+        "closed_vs_simpson_relative": 1.070500355027093e-09,
+        "exponent": 0.7,
+        "moment_node_refinement_relative": 1.7763568394002505e-15,
+        "moment_substitution_relative": -6.661338147750939e-16,
+        "simpson": 0.3521577287441508
+      },
+      {
+        "closed_form": 0.31830988618379075,
+        "closed_vs_simpson_relative": 3.1086244689504383e-15,
+        "exponent": 1.0,
+        "moment_node_refinement_relative": 8.881784197001252e-16,
+        "moment_substitution_relative": -5.551115123125783e-16,
+        "simpson": 0.31830988618378975
+      },
+      {
+        "closed_form": 0.271823298929961,
+        "closed_vs_simpson_relative": -4.9182879990894435e-14,
+        "exponent": 1.6,
+        "moment_node_refinement_relative": 8.881784197001252e-16,
+        "moment_substitution_relative": 0.0,
+        "simpson": 0.27182329892997437
+      },
+      {
+        "closed_form": 0.24999999999999997,
+        "closed_vs_simpson_relative": 6.217248937900877e-15,
+        "exponent": 2.0,
+        "moment_node_refinement_relative": 0.0,
+        "moment_substitution_relative": -6.661338147750939e-16,
+        "simpson": 0.24999999999999845
+      },
+      {
+        "closed_form": 0.2122065907891937,
+        "closed_vs_simpson_relative": -1.3322676295501878e-15,
+        "exponent": 3.0,
+        "moment_node_refinement_relative": 8.881784197001252e-16,
+        "moment_substitution_relative": 0.0,
+        "simpson": 0.212206590789194
+      }
+    ],
+    "wetted_surface_drift": 2.2634070446431903e-12
+  },
+  "schema": "tensorcad.hull.asymmetric/1",
+  "sweep": [
+    {
+      "grid": "11x5",
+      "h": 0.1,
+      "max_abs_relative_error": 0.0455874488114455,
+      "measured": {
+        "block_coefficient": 0.39702354991700967,
+        "displacement_volume": 6.352376798672155,
+        "longitudinal_centre_buoyancy": 5.3686669315730855,
+        "longitudinal_centre_flotation": 5.3686669315730855,
+        "maximum_section_area": 1.0292528739883946,
+        "prismatic_coefficient": 0.6171832947190568,
+        "vertical_centre_buoyancy": -0.30677830356925134,
+        "waterplane_area": 12.343665894381134,
+        "wetted_surface_area": 21.761654730667917
+      },
+      "nx": 11,
+      "nz": 5,
+      "reference": {
+        "block_coefficient": 0.41598735203407167,
+        "displacement_volume": 6.655797632545147,
+        "longitudinal_centre_buoyancy": 5.413279059518409,
+        "longitudinal_centre_flotation": 5.413279059518409,
+        "maximum_section_area": 1.0666666666666667,
+        "prismatic_coefficient": 0.6239810280511076,
+        "vertical_centre_buoyancy": -0.32000000000000006,
+        "waterplane_area": 12.479620561022152,
+        "wetted_surface_area": 22.006225479710416
+      },
+      "relative_error": {
+        "block_coefficient": -0.0455874488114455,
+        "displacement_volume": -0.0455874488114455,
+        "longitudinal_centre_buoyancy": -0.008241239266407296,
+        "longitudinal_centre_flotation": -0.008241239266407296,
+        "maximum_section_area": -0.035075430635880034,
+        "prismatic_coefficient": -0.010894134639449327,
+        "vertical_centre_buoyancy": -0.041317801346089755,
+        "waterplane_area": -0.010894134639449549,
+        "wetted_surface_area": -0.01111370731286887
+      },
+      "triangles": 178,
+      "vertices": 91,
+      "warnings": [
+        "sampling_error_within_tolerance: 11x5 integrates 6.35238 m^3 against an analytic 6.6558 m^3 (-4.56 %); the discretisation error exceeds 2 %"
+      ]
+    },
+    {
+      "grid": "21x9",
+      "h": 0.05,
+      "max_abs_relative_error": 0.01644873999231844,
+      "measured": {
+        "block_coefficient": 0.40931197223061855,
+        "displacement_volume": 6.548991555689897,
+        "longitudinal_centre_buoyancy": 5.399092946072408,
+        "longitudinal_centre_flotation": 5.399092946072408,
+        "maximum_section_area": 1.053008354599127,
+        "prismatic_coefficient": 0.6219315855459716,
+        "vertical_centre_buoyancy": -0.31473640320245816,
+        "waterplane_area": 12.438631710919429,
+        "wetted_surface_area": 21.894824531098788
+      },
+      "nx": 21,
+      "nz": 9,
+      "reference": {
+        "block_coefficient": 0.41598735203407167,
+        "displacement_volume": 6.655797632545147,
+        "longitudinal_centre_buoyancy": 5.413279059518409,
+        "longitudinal_centre_flotation": 5.413279059518409,
+        "maximum_section_area": 1.0666666666666667,
+        "prismatic_coefficient": 0.6239810280511076,
+        "vertical_centre_buoyancy": -0.32000000000000006,
+        "waterplane_area": 12.479620561022152,
+        "wetted_surface_area": 22.006225479710416
+      },
+      "relative_error": {
+        "block_coefficient": -0.016047073957446645,
+        "displacement_volume": -0.016047073957446645,
+        "longitudinal_centre_buoyancy": -0.002620613733381516,
+        "longitudinal_centre_flotation": -0.002620613733381516,
+        "maximum_section_area": -0.01280466756331855,
+        "prismatic_coefficient": -0.0032844628490340533,
+        "vertical_centre_buoyancy": -0.01644873999231844,
+        "waterplane_area": -0.0032844628490343863,
+        "wetted_surface_area": -0.005062246986169416
+      },
+      "triangles": 678,
+      "vertices": 341,
+      "warnings": []
+    },
+    {
+      "grid": "41x13",
+      "h": 0.025,
+      "max_abs_relative_error": 0.009390994823205823,
+      "measured": {
+        "block_coefficient": 0.41263440281805003,
+        "displacement_volume": 6.6021504450888004,
+        "longitudinal_centre_buoyancy": 5.408837753502693,
+        "longitudinal_centre_flotation": 5.408837753502693,
+        "maximum_section_area": 1.0591280449696674,
+        "prismatic_coefficient": 0.6233571546373207,
+        "vertical_centre_buoyancy": -0.3169948816565742,
+        "waterplane_area": 12.467143092746412,
+        "wetted_surface_area": 21.938371312964556
+      },
+      "nx": 41,
+      "nz": 13,
+      "reference": {
+        "block_coefficient": 0.41598735203407167,
+        "displacement_volume": 6.655797632545147,
+        "longitudinal_centre_buoyancy": 5.413279059518409,
+        "longitudinal_centre_flotation": 5.413279059518409,
+        "maximum_section_area": 1.0666666666666667,
+        "prismatic_coefficient": 0.6239810280511076,
+        "vertical_centre_buoyancy": -0.32000000000000006,
+        "waterplane_area": 12.479620561022152,
+        "wetted_surface_area": 22.006225479710416
+      },
+      "relative_error": {
+        "block_coefficient": -0.008060219137977609,
+        "displacement_volume": -0.008060219137977609,
+        "longitudinal_centre_buoyancy": -0.0008204465291524743,
+        "longitudinal_centre_flotation": -0.0008204465291524743,
+        "maximum_section_area": -0.007067457840936764,
+        "prismatic_coefficient": -0.0009998275359996978,
+        "vertical_centre_buoyancy": -0.009390994823205823,
+        "waterplane_area": -0.0009998275359999198,
+        "wetted_surface_area": -0.003083407775150815
+      },
+      "triangles": 1998,
+      "vertices": 1001,
+      "warnings": []
+    },
+    {
+      "grid": "81x21",
+      "h": 0.0125,
+      "max_abs_relative_error": 0.0045663379364447865,
+      "measured": {
+        "block_coefficient": 0.41447523227019284,
+        "displacement_volume": 6.631603716323085,
+        "longitudinal_centre_buoyancy": 5.411899666828009,
+        "longitudinal_centre_flotation": 5.411899666828009,
+        "maximum_section_area": 1.0631145462826272,
+        "prismatic_coefficient": 0.6237901399723755,
+        "vertical_centre_buoyancy": -0.31853877186033774,
+        "waterplane_area": 12.475802799447512,
+        "wetted_surface_area": 21.969591352562162
+      },
+      "nx": 81,
+      "nz": 21,
+      "reference": {
+        "block_coefficient": 0.41598735203407167,
+        "displacement_volume": 6.655797632545147,
+        "longitudinal_centre_buoyancy": 5.413279059518409,
+        "longitudinal_centre_flotation": 5.413279059518409,
+        "maximum_section_area": 1.0666666666666667,
+        "prismatic_coefficient": 0.6239810280511076,
+        "vertical_centre_buoyancy": -0.32000000000000006,
+        "waterplane_area": 12.479620561022152,
+        "wetted_surface_area": 22.006225479710416
+      },
+      "relative_error": {
+        "block_coefficient": -0.003635013796657427,
+        "displacement_volume": -0.003635013796657427,
+        "longitudinal_centre_buoyancy": -0.0002548164754179183,
+        "longitudinal_centre_flotation": -0.0002548164754179183,
+        "maximum_section_area": -0.0033301128600369267,
+        "prismatic_coefficient": -0.000305919683693312,
+        "vertical_centre_buoyancy": -0.0045663379364447865,
+        "waterplane_area": -0.000305919683693201,
+        "wetted_surface_area": -0.0016647165222418714
+      },
+      "triangles": 6558,
+      "vertices": 3281,
+      "warnings": []
+    },
+    {
+      "grid": "161x41",
+      "h": 0.00625,
+      "max_abs_relative_error": 0.0016852388756587455,
+      "measured": {
+        "block_coefficient": 0.4154518518337441,
+        "displacement_volume": 6.647229629339906,
+        "longitudinal_centre_buoyancy": 5.412852453974625,
+        "longitudinal_centre_flotation": 5.412852453974625,
+        "maximum_section_area": 1.0653935450776497,
+        "prismatic_coefficient": 0.6239224613338005,
+        "vertical_centre_buoyancy": -0.3194607235597893,
+        "waterplane_area": 12.478449226676007,
+        "wetted_surface_area": 21.990381049875026
+      },
+      "nx": 161,
+      "nz": 41,
+      "reference": {
+        "block_coefficient": 0.41598735203407167,
+        "displacement_volume": 6.655797632545147,
+        "longitudinal_centre_buoyancy": 5.413279059518409,
+        "longitudinal_centre_flotation": 5.413279059518409,
+        "maximum_section_area": 1.0666666666666667,
+        "prismatic_coefficient": 0.6239810280511076,
+        "vertical_centre_buoyancy": -0.32000000000000006,
+        "waterplane_area": 12.479620561022152,
+        "wetted_surface_area": 22.006225479710416
+      },
+      "relative_error": {
+        "block_coefficient": -0.0012872992356837143,
+        "displacement_volume": -0.0012872992356837143,
+        "longitudinal_centre_buoyancy": -7.880723293474112e-05,
+        "longitudinal_centre_flotation": -7.880723293474112e-05,
+        "maximum_section_area": -0.0011935514897033483,
+        "prismatic_coefficient": -9.385977245179866e-05,
+        "vertical_centre_buoyancy": -0.0016852388756587455,
+        "waterplane_area": -9.38597724520207e-05,
+        "wetted_surface_area": -0.000719997613856993
+      },
+      "triangles": 25918,
+      "vertices": 12961,
+      "warnings": []
+    }
+  ]
+}

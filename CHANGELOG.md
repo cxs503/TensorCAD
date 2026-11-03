@@ -4,6 +4,64 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.13.0 — 2026-11-03
+
+The symmetric family's LCB/LCF check was `L/2` by construction, so it could not
+catch an antisymmetric bias of any size. `tensorcad.asymmetric_hull` adds a family
+where the two halves of the length carry their own taper exponent, which makes the
+longitudinal centre of buoyancy a number a closed form has to predict.
+
+### Added
+- **`tensorcad.asymmetric_hull`** — `AsymmetricHullParameters(L, B, T,
+  fore_exponent, aft_exponent, nx, nz)`, a sampler whose half-breadth is
+  `(B/2)*sin(pi*x/L)^p(x)*sqrt((z+T)/T)` with `p(x) = fore_exponent` forward of
+  midship and `aft_exponent` aft of it, continuous at midship because
+  `sin(pi/2) = 1` for either exponent. Exponents are restricted to `[0.4, 3.0]`,
+  the calibrated range of the quadratures.
+- **`analytic_hydrostatics(parameters)`** — closed form for volume
+  `L*B*T*(2/3)*(I_f + I_a)`, waterplane `L*B*(I_f + I_a)`, midship area `2/3*B*T`,
+  VCB `-2/5*T`, and `Cb`/`Cp`; `I_p = int_0^{1/2} sin(pi*x)^p dx` from a
+  Beta-function closed form (`math.lgamma`, core stays standard-library only),
+  which reproduces `hull.TAPER_INTEGRAL/2` at `p = 0.7` to 2.2e-16.
+- **`analytic_longitudinal_centre`** — `L*(M_a + I_f - M_f)/(I_a + I_f)` with
+  `M_p = int_0^{1/2} x*sin(pi*x)^p dx` by Gauss-Legendre after
+  `x = (1/2)*tau^m`, `m = max(1, 2/p)`. LCF coincides with LCB for this family by
+  construction, and the docs say so instead of calling it agreement.
+- **`analytic_wetted_surface_area` / `wetted_surface_quadrature_drift`** — per-half
+  quadrature (both sides summed); node doubling moves it by 2.3e-12 relative at the
+  default case and by `< 1e-9` at both exponent extremes.
+- **`generate_hull` / `analytic_relative_errors`** — the mesh path with watertight /
+  EulER / beam-achievable checks, and signed mesh-against-reference errors for
+  nine quantities.
+- **`tests/test_asymmetric_hull.py`** — 46 tests: the closed form against the
+  shipped 0.7 constant and against an independent Simpson rule, the moment
+  quadrature against a second substitution power and against node refinement, the
+  symmetric limit against the 0.11.0 reference (and vertex-identical to
+  `hull.build_mesh`), the mirror identity `LCB(p_f,p_a) + LCB(p_a,p_f) = L`, mesh
+  errors on three grids, determinism, and parameter rejection.
+- **`examples/asymmetric_hull/run_asymmetric_check.py`** — writes
+  `docs/asymmetric_hull/{results.json,report.md,convergence.png}`, exits 1 if a
+  claim stops holding.
+- **`docs/asymmetric_hull.md`** — the derivation, how the reference is checked,
+  the measured table and the limitations.
+
+### Measured (default case `10 x 2 x 0.8 m`, `p_fore = 0.7`, `p_aft = 1.6`)
+- nine quantities inside 3 % at 41x13 and inside 0.2 % at 161x41; volume
+  `-0.806 %` / `-0.129 %`, wetted area `-0.308 %` / `-0.072 %`, LCB
+  `-0.082 %` / `-0.008 %`, VCB `-0.939 %` / `-0.169 %` (same keel-rule bias as the
+  symmetric family);
+- LCB `5.413279060 m` of `10 m`: `+0.413279 m` off midship, where the symmetric
+  family reports `5.000000 m` for any geometry;
+- swapping the exponents gives `4.586720940 m`, summing to `10.000000000000 m`;
+- `Cb = 0.415987352`, `Cp = 0.623981028`, `V = 6.655797633 m^3`,
+  `S = 22.006225480 m^2`.
+
+### Fixed
+- `tests/test_public_surface.py` had drifted again: `to_voxel_grid` (0.10.0) and
+  `analytic_relative_errors` (0.11.0) shipped into `tensorcad.__all__` without the
+  expected-set being updated, so the public-surface test failed on a clean tree.
+  Both are listed now, alongside the new names.
+
 ## 0.12.0 — 2026-11-03
 
 ### Added
