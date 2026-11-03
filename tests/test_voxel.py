@@ -18,7 +18,8 @@ from pathlib import Path
 import pytest
 
 from tensorcad import EllipsoidField, FieldError, PlaneField, SphereField, SuboffHullField, to_voxel_grid
-from tensorcad.voxel import VOXEL_HANDOFF_SCHEMA, VoxelGrid, to_voxel_grid as voxel_export
+from tensorcad.voxel import VOXEL_HANDOFF_SCHEMA, VoxelGrid
+from tensorcad.voxel import to_voxel_grid as voxel_export
 
 #: Published DARPA SUBOFF (AFF-1) displacement volume, via the offset table.
 SUBOFF_VOLUME_M3 = 0.699211

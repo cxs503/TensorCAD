@@ -139,7 +139,7 @@ def test_sample_is_a_frozen_record_with_the_derived_invariants() -> None:
     payload = sample.to_dict()
     assert payload["schema"] == "tensorcad.curvature.sample/1"
     assert payload["mean_curvature_per_m"] == pytest.approx(1.0, rel=1e-12)
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017  # any mutation error is the contract
         sample.kappa_max = 2.0  # frozen
 
 
@@ -196,7 +196,7 @@ def test_mesh_estimate_conserves_the_integral_on_a_raw_marching_tet_mesh() -> No
         area = 0.5 * math.sqrt(sum(component * component for component in cross)) / 3.0
         for index in face:
             weights[index] += area
-    weighted = sum(value * weight for value, weight in zip(values, weights)) / sum(weights)
+    weighted = sum(value * weight for value, weight in zip(values, weights, strict=False)) / sum(weights)
     assert weighted == pytest.approx(1.0 / radius, rel=2e-3)
 
 
@@ -223,7 +223,8 @@ def test_a_cube_has_exactly_twelve_creases() -> None:
     assert report.crease_edges == 12
     assert report.dihedral_degrees["max"] == pytest.approx(90.0, abs=1e-6)
     assert report.dihedral_degrees["min"] == pytest.approx(0.0, abs=1e-9)
-    assert report.crease_length_fraction == pytest.approx(12.0 * 2.0 / (12.0 * 2.0 + 6.0 * 2.0 * math.sqrt(2.0)), rel=1e-9)
+    expected_crease_fraction = 12.0 * 2.0 / (12.0 * 2.0 + 6.0 * 2.0 * math.sqrt(2.0))
+    assert report.crease_length_fraction == pytest.approx(expected_crease_fraction, rel=1e-9)
 
 
 def test_a_field_turns_the_report_into_a_curvature_jump_measurement() -> None:
