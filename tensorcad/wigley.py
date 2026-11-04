@@ -263,6 +263,56 @@ def analytic_maximum_section_area(
     return beam * draft * m / (m + 1.0)
 
 
+def analytic_section_area(
+    length: float,
+    beam: float,
+    draft: float,
+    station: float,
+    waterline_z: float,
+    longitudinal_exponent: float = 2.0,
+    vertical_exponent: float = 2.0,
+) -> float:
+    r"""Exact area of station ``station`` below ``waterline_z`` (a Bonjean value).
+
+    The surface is ``y = (B/2) (1 - |2x/L - 1|^n) (1 - (w/T)^m)`` with ``w`` the
+    depth below the design waterline, so the immersed height ``H = z + T`` gives::
+
+        A(x, H) = 2 int_{-T}^{z} y dw
+                = B (1 - |2x/L - 1|^n) [H - T/(m+1) (1 - (1 - H/T)^(m+1))]
+
+    clamped to ``0 <= H <= T``: below the keel there is no section, above the
+    design waterline the section is complete and the deck cap takes no area. At
+    ``x = L/2`` and ``H = T`` this collapses to
+    :func:`analytic_maximum_section_area`, ``B T m/(m+1)``.
+
+    This is the closed form :func:`tensorcad.bonjean.section_properties` is
+    verified against in ``docs/bonjean_families.md``: unlike the ``sqrt``-tapered
+    ``hull`` family, the Wigley section is smooth at the keel for ``m > 1``, so a
+    mesh of the same resolution resolves it an order of magnitude better.
+    """
+    for name, value in (
+        ("length", length),
+        ("beam", beam),
+        ("draft", draft),
+        ("longitudinal_exponent", longitudinal_exponent),
+        ("vertical_exponent", vertical_exponent),
+    ):
+        if not math.isfinite(value) or value <= 0.0:
+            raise ValueError(f"{name} must be a finite positive number, got {value!r}")
+    if not 0.0 <= station <= length:
+        raise ValueError(f"station must lie in [0, {length}], got {station!r}")
+    if not math.isfinite(waterline_z):
+        raise ValueError(f"waterline_z must be finite, got {waterline_z!r}")
+    n, m = longitudinal_exponent, vertical_exponent
+    u = min(abs(2.0 * station / length - 1.0), 1.0)
+    taper = max(1.0 - math.pow(u, n), 0.0)
+    height = min(max(waterline_z + draft, 0.0), draft)
+    if height <= 0.0:
+        return 0.0
+    rise = draft / (m + 1.0) * (1.0 - math.pow(1.0 - height / draft, m + 1.0))
+    return beam * taper * (height - rise)
+
+
 def analytic_vertical_centre_buoyancy(
     draft: float, vertical_exponent: float = 2.0
 ) -> float:

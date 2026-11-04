@@ -1,0 +1,846 @@
+{
+  "asymmetric_hull": {
+    "coarse_nz13_deepest_waterline_relative_error": 0.05307659992768199,
+    "parameters": {
+      "aft_exponent": 0.7,
+      "beam": 2.0,
+      "draft": 0.8,
+      "fore_exponent": 1.4,
+      "length": 10.0,
+      "nx": 81,
+      "nz": 41
+    },
+    "per_waterline": [
+      {
+        "waterline_z_m": -0.6,
+        "worst_relative_error": 0.009236013582948455
+      },
+      {
+        "waterline_z_m": -0.5,
+        "worst_relative_error": 0.005089863140937068
+      },
+      {
+        "waterline_z_m": -0.4,
+        "worst_relative_error": 0.003330139159049672
+      },
+      {
+        "waterline_z_m": -0.3,
+        "worst_relative_error": 0.002394663022759147
+      },
+      {
+        "waterline_z_m": -0.2,
+        "worst_relative_error": 0.0018283157720579979
+      },
+      {
+        "waterline_z_m": -0.1,
+        "worst_relative_error": 0.0014549715540485009
+      },
+      {
+        "waterline_z_m": -0.02,
+        "worst_relative_error": 0.00123925982025197
+      }
+    ],
+    "samples": [
+      {
+        "closed_form_m2": 0.03638911098524085,
+        "mesh_m2": 0.036053022095381276,
+        "relative_error": -0.009235974190078156,
+        "station_m": 0.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.06685106558050959,
+        "mesh_m2": 0.06651080545035476,
+        "relative_error": -0.005089823583216413,
+        "station_m": 0.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.10292394855605475,
+        "mesh_m2": 0.10258120156320227,
+        "relative_error": -0.0033300995313623183,
+        "station_m": 0.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.14384059092751858,
+        "mesh_m2": 0.1434961468886727,
+        "relative_error": -0.0023946233578769904,
+        "station_m": 0.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.1890833672060997,
+        "mesh_m2": 0.18873767060783025,
+        "relative_error": -0.0018282760846576318,
+        "station_m": 0.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.2382722753531105,
+        "mesh_m2": 0.2379256054302973,
+        "relative_error": -0.001454931851804564,
+        "station_m": 0.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.2802646711584085,
+        "mesh_m2": 0.27991736154194574,
+        "relative_error": -0.0012392201094315602,
+        "station_m": 0.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.07671344249051476,
+        "mesh_m2": 0.07600491842028526,
+        "relative_error": -0.009235983254396563,
+        "station_m": 1.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.1409315928855773,
+        "mesh_m2": 0.14021427465769334,
+        "relative_error": -0.005089832685467144,
+        "station_m": 1.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.2169783815728288,
+        "mesh_m2": 0.21625581998755264,
+        "relative_error": -0.003330108649711949,
+        "station_m": 1.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.30323650677795805,
+        "mesh_m2": 0.3025103667882548,
+        "relative_error": -0.0023946324847849976,
+        "station_m": 1.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.3986147400512541,
+        "mesh_m2": 0.3978859586148408,
+        "relative_error": -0.0018282852167473829,
+        "station_m": 1.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.5023119828291117,
+        "mesh_m2": 0.5015811485368769,
+        "relative_error": -0.0014549409873096941,
+        "station_m": 1.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.5908379498953372,
+        "mesh_m2": 0.5901057662276431,
+        "relative_error": -0.0012392292469091126,
+        "station_m": 1.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.10461121305290014,
+        "mesh_m2": 0.10364502542520923,
+        "relative_error": -0.00923598531643377,
+        "station_m": 2.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.1921830700148884,
+        "mesh_m2": 0.19120488994558618,
+        "relative_error": -0.00508983475613356,
+        "station_m": 2.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.29588519255142537,
+        "mesh_m2": 0.2948998620986253,
+        "relative_error": -0.00333011072403977,
+        "station_m": 2.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.4135121275503759,
+        "mesh_m2": 0.4125219171183263,
+        "relative_error": -0.0023946345610600384,
+        "station_m": 2.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.5435758081471065,
+        "mesh_m2": 0.5425819954036364,
+        "relative_error": -0.0018282872942004813,
+        "station_m": 2.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.6849838066028409,
+        "mesh_m2": 0.6839871941634169,
+        "relative_error": -0.0014549430655399487,
+        "station_m": 2.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.8057033115660549,
+        "mesh_m2": 0.8047048587832318,
+        "relative_error": -0.0012392313255885634,
+        "station_m": 2.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.1229859090189349,
+        "mesh_m2": 0.12185001283882918,
+        "relative_error": -0.009235986375730532,
+        "station_m": 3.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.2259395419865596,
+        "mesh_m2": 0.22478954681263275,
+        "relative_error": -0.005089835819863997,
+        "station_m": 3.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.3478566810307225,
+        "mesh_m2": 0.3466982793961128,
+        "relative_error": -0.003330111789652146,
+        "station_m": 3.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.48614449075759814,
+        "mesh_m2": 0.48498035183983323,
+        "relative_error": -0.0023946356276726144,
+        "station_m": 3.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.6390535291075158,
+        "mesh_m2": 0.6378851549779248,
+        "relative_error": -0.001828288361419017,
+        "station_m": 3.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.8052994861621596,
+        "mesh_m2": 0.8041278203993332,
+        "relative_error": -0.0014549441331576096,
+        "station_m": 3.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.9472230679746461,
+        "mesh_m2": 0.9460492384650008,
+        "relative_error": -0.0012392323934373728,
+        "station_m": 3.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.13218211164261304,
+        "mesh_m2": 0.1309612793596353,
+        "relative_error": -0.009235987137794832,
+        "station_m": 4.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.2428340449860011,
+        "mesh_m2": 0.2415980593797194,
+        "relative_error": -0.00508983658511708,
+        "station_m": 4.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.37386746997619574,
+        "mesh_m2": 0.37262244922005133,
+        "relative_error": -0.003330112556258702,
+        "station_m": 4.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.5224956734016472,
+        "mesh_m2": 0.5212444862458903,
+        "relative_error": -0.002394636394998595,
+        "station_m": 4.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.686838399650242,
+        "mesh_m2": 0.6855826604706577,
+        "relative_error": -0.001828289129180427,
+        "station_m": 4.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.8655153052471812,
+        "mesh_m2": 0.8642560281668955,
+        "relative_error": -0.0014549449012066784,
+        "station_m": 4.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 1.0180511435843143,
+        "mesh_m2": 1.0167895408469263,
+        "relative_error": -0.001239233161652531,
+        "station_m": 4.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.13104082978725154,
+        "mesh_m2": 0.12983053822775253,
+        "relative_error": -0.009235988214237878,
+        "station_m": 5.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.24073737633725173,
+        "mesh_m2": 0.23951206217154097,
+        "relative_error": -0.005089837666063968,
+        "station_m": 5.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.3706394374195107,
+        "mesh_m2": 0.3694051659737652,
+        "relative_error": -0.0033301136391173936,
+        "station_m": 5.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.5179843607576906,
+        "mesh_m2": 0.5167439759939497,
+        "relative_error": -0.0023946374788739178,
+        "station_m": 5.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.6809081251725143,
+        "mesh_m2": 0.6796632275108522,
+        "relative_error": -0.0018282902136712575,
+        "station_m": 5.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.8580423052992985,
+        "mesh_m2": 0.8567939000912966,
+        "relative_error": -0.0014549459861030734,
+        "station_m": 5.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 1.0092611243936371,
+        "mesh_m2": 1.0080104134443415,
+        "relative_error": -0.001239234246783294,
+        "station_m": 5.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.113441503629103,
+        "mesh_m2": 0.1123937590660109,
+        "relative_error": -0.009235989735447259,
+        "station_m": 6.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.2084053496590413,
+        "mesh_m2": 0.2073445999421823,
+        "relative_error": -0.0050898391936408105,
+        "station_m": 6.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.3208610259365482,
+        "mesh_m2": 0.31979252176680906,
+        "relative_error": -0.003330115169395631,
+        "station_m": 6.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.44841691582777804,
+        "mesh_m2": 0.4473431191881294,
+        "relative_error": -0.0023946390105876736,
+        "station_m": 6.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.5894593439178466,
+        "mesh_m2": 0.5883816402646088,
+        "relative_error": -0.0018282917462548731,
+        "station_m": 6.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.742803670036008,
+        "mesh_m2": 0.7417229296789922,
+        "relative_error": -0.001454947519259564,
+        "station_m": 6.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.8737131754392464,
+        "mesh_m2": 0.8726304388105484,
+        "relative_error": -0.00123923578027052,
+        "station_m": 6.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.08207629422299446,
+        "mesh_m2": 0.08131823823880441,
+        "relative_error": -0.009235991845958358,
+        "station_m": 7.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.15078378061865935,
+        "mesh_m2": 0.1500163151027387,
+        "relative_error": -0.00508984131298329,
+        "station_m": 7.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.23214681687896652,
+        "mesh_m2": 0.2313737407496818,
+        "relative_error": -0.0033301172924881106,
+        "station_m": 7.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.3244350395634779,
+        "mesh_m2": 0.32365813407188554,
+        "relative_error": -0.0023946411356728925,
+        "station_m": 7.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.4264809350735949,
+        "mesh_m2": 0.425701202593242,
+        "relative_error": -0.0018282938725463493,
+        "station_m": 7.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.5374274019773724,
+        "mesh_m2": 0.5366454721689287,
+        "relative_error": -0.001454949646346182,
+        "station_m": 7.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.632142005877478,
+        "mesh_m2": 0.6313586315406716,
+        "relative_error": -0.0012392379078163263,
+        "station_m": 7.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.04413714194059137,
+        "mesh_m2": 0.04372949147687588,
+        "relative_error": -0.009235995938844166,
+        "station_m": 8.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.08108510734443282,
+        "mesh_m2": 0.0806723966819425,
+        "relative_error": -0.005089845422997508,
+        "station_m": 8.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.12483868947354129,
+        "mesh_m2": 0.1244229614809578,
+        "relative_error": -0.0033301214097701815,
+        "station_m": 8.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.1744673724280161,
+        "mesh_m2": 0.17404958496216155,
+        "relative_error": -0.0023946452568197607,
+        "station_m": 8.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.2293433170259503,
+        "mesh_m2": 0.22892400909902824,
+        "relative_error": -0.0018282979960327905,
+        "station_m": 8.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.2890056105529313,
+        "mesh_m2": 0.2885851207499087,
+        "relative_error": -0.001454953771375167,
+        "station_m": 8.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.339939098178822,
+        "mesh_m2": 0.339517831359448,
+        "relative_error": -0.0012392420337373755,
+        "station_m": 8.5,
+        "waterline_z_m": -0.02
+      },
+      {
+        "closed_form_m2": 0.009931255487221326,
+        "mesh_m2": 0.009839530276645619,
+        "relative_error": -0.009236013582948455,
+        "station_m": 9.5,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form_m2": 0.01824488133668084,
+        "mesh_m2": 0.018152017387654498,
+        "relative_error": -0.005089863140937068,
+        "station_m": 9.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.02808983240284123,
+        "mesh_m2": 0.027996289351985386,
+        "relative_error": -0.003330139159049672,
+        "station_m": 9.5,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form_m2": 0.03925673420583077,
+        "mesh_m2": 0.03916272755603378,
+        "relative_error": -0.002394663022759147,
+        "station_m": 9.5,
+        "waterline_z_m": -0.3
+      },
+      {
+        "closed_form_m2": 0.051604317260443615,
+        "mesh_m2": 0.05150996827329006,
+        "relative_error": -0.0018283157720579979,
+        "station_m": 9.5,
+        "waterline_z_m": -0.2
+      },
+      {
+        "closed_form_m2": 0.06502887204397657,
+        "mesh_m2": 0.06493425688496073,
+        "relative_error": -0.0014549715540485009,
+        "station_m": 9.5,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form_m2": 0.0764893666801902,
+        "mesh_m2": 0.07639457648138692,
+        "relative_error": -0.00123925982025197,
+        "station_m": 9.5,
+        "waterline_z_m": -0.02
+      }
+    ],
+    "worst_at": [
+      9.5,
+      -0.6
+    ],
+    "worst_relative_error": -0.009236013582948455
+  },
+  "claims": [
+    {
+      "claim": "wigley sections within 1 % of the closed form",
+      "detail": "0.608 % at x=9 m, z=-0.5 m",
+      "holds": true
+    },
+    {
+      "claim": "wigley midship equals the known section area",
+      "detail": "-0.174 % at nz = 13",
+      "holds": true
+    },
+    {
+      "claim": "asymmetric sections within 2 % above z = -0.4 m",
+      "detail": "0.333 % at nz = 41",
+      "holds": true
+    },
+    {
+      "claim": "the split reference is discriminating",
+      "detail": "symmetric 72.76 % vs split 0.18 %",
+      "holds": true
+    },
+    {
+      "claim": "swapping the exponents mirrors the curves",
+      "detail": "max |rel| 5.54e-08 over 10 stations",
+      "holds": true
+    },
+    {
+      "claim": "wigley error falls like the square of the waterline spacing",
+      "detail": "ratios ['3.84', '4.06']",
+      "holds": true
+    },
+    {
+      "claim": "asymmetric error falls with refinement",
+      "detail": "ratios ['2.77', '2.79', '2.80']",
+      "holds": true
+    },
+    {
+      "claim": "integrating the curves recovers the closed-form volume",
+      "detail": "0.142 % over 41 stations",
+      "holds": true
+    }
+  ],
+  "convergence": {
+    "asymmetric_hull": {
+      "ladder": [
+        {
+          "nz": 13,
+          "worst_relative_error": 0.010777774656063333
+        },
+        {
+          "nz": 25,
+          "worst_relative_error": 0.003890403581416235
+        },
+        {
+          "nz": 49,
+          "worst_relative_error": 0.0013954558466028333
+        },
+        {
+          "nz": 97,
+          "worst_relative_error": 0.0004983789624375401
+        }
+      ],
+      "ratios": [
+        2.7703487390220496,
+        2.787908761776466,
+        2.7999894694144927
+      ],
+      "waterline_z_m": -0.2
+    },
+    "wigley": {
+      "ladder": [
+        {
+          "nz": 13,
+          "worst_relative_error": 0.006076398180873577
+        },
+        {
+          "nz": 25,
+          "worst_relative_error": 0.001581110258557894
+        },
+        {
+          "nz": 49,
+          "worst_relative_error": 0.00038947147006251903
+        }
+      ],
+      "ratios": [
+        3.8431210903759268,
+        4.059630499517949
+      ]
+    }
+  },
+  "example": "bonjean_families",
+  "mirror": {
+    "aft_exponent": 0.7,
+    "fore_exponent": 1.4,
+    "worst_relative_difference": 5.536883540546711e-08
+  },
+  "split_discrimination": {
+    "split_reference_worst_relative_error": 0.0018283157720579979,
+    "stations_m": [
+      7.0,
+      8.0,
+      9.0,
+      9.5
+    ],
+    "symmetric_reference_worst_relative_error": 0.7275806485022848
+  },
+  "version": "0.21.0",
+  "volume_closure": {
+    "closed_form_m3": 6.796919415316478,
+    "simpson_m3": 6.787274121943084,
+    "simpson_relative_error": -0.0014190683726010844,
+    "trapezoid_m3": 6.781988769982651,
+    "trapezoid_relative_error": -0.0021966782922542283
+  },
+  "wigley": {
+    "parameters": {
+      "beam": 1.0,
+      "draft": 0.625,
+      "length": 10.0,
+      "longitudinal_exponent": 2.0,
+      "nx": 81,
+      "nz": 13,
+      "vertical_exponent": 2.0
+    },
+    "samples": [
+      {
+        "closed_form_m2": 0.008400000000000006,
+        "mesh_m2": 0.00834895840898437,
+        "relative_error": -0.006076379882813732,
+        "station_m": 1.0,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.04687499999999998,
+        "mesh_m2": 0.04674479207568358,
+        "relative_error": -0.0027777690520832676,
+        "station_m": 1.0,
+        "waterline_z_m": -0.3125
+      },
+      {
+        "closed_form_m2": 0.09492187499999996,
+        "mesh_m2": 0.09472656332885741,
+        "relative_error": -0.002057604436728089,
+        "station_m": 1.0,
+        "waterline_z_m": -0.15625
+      },
+      {
+        "closed_form_m2": 0.13203839999999994,
+        "mesh_m2": 0.13179958448660156,
+        "relative_error": -0.0018086822727205742,
+        "station_m": 1.0,
+        "waterline_z_m": -0.05
+      },
+      {
+        "closed_form_m2": 0.01750000000000002,
+        "mesh_m2": 0.017393663241276048,
+        "relative_error": -0.006076386212798379,
+        "station_m": 2.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.09765624999999999,
+        "mesh_m2": 0.09738498289208984,
+        "relative_error": -0.0027777751849998866,
+        "station_m": 2.5,
+        "waterline_z_m": -0.3125
+      },
+      {
+        "closed_form_m2": 0.19775390625,
+        "mesh_m2": 0.19734700572143557,
+        "relative_error": -0.0020576105740739425,
+        "station_m": 2.5,
+        "waterline_z_m": -0.15625
+      },
+      {
+        "closed_form_m2": 0.27508,
+        "mesh_m2": 0.27458246599170577,
+        "relative_error": -0.001808688411713777,
+        "station_m": 2.5,
+        "waterline_z_m": -0.05
+      },
+      {
+        "closed_form_m2": 0.02333333333333336,
+        "mesh_m2": 0.02319155092472512,
+        "relative_error": -0.006076388940353006,
+        "station_m": 5.0,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.13020833333333331,
+        "mesh_m2": 0.12984664351202618,
+        "relative_error": -0.002777777827638772,
+        "station_m": 5.0,
+        "waterline_z_m": -0.3125
+      },
+      {
+        "closed_form_m2": 0.263671875,
+        "mesh_m2": 0.26312934026462137,
+        "relative_error": -0.0020576132186211904,
+        "station_m": 5.0,
+        "waterline_z_m": -0.15625
+      },
+      {
+        "closed_form_m2": 0.3667733333333333,
+        "mesh_m2": 0.366109953685398,
+        "relative_error": -0.0018086910569705683,
+        "station_m": 5.0,
+        "waterline_z_m": -0.05
+      },
+      {
+        "closed_form_m2": 0.01750000000000002,
+        "mesh_m2": 0.01739366314521122,
+        "relative_error": -0.0060763917022169656,
+        "station_m": 7.5,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.09765624999999999,
+        "mesh_m2": 0.09738498237270334,
+        "relative_error": -0.002777780503517735,
+        "station_m": 7.5,
+        "waterline_z_m": -0.3125
+      },
+      {
+        "closed_form_m2": 0.19775390625,
+        "mesh_m2": 0.19734700466891827,
+        "relative_error": -0.0020576158964330515,
+        "station_m": 7.5,
+        "waterline_z_m": -0.15625
+      },
+      {
+        "closed_form_m2": 0.27508,
+        "mesh_m2": 0.27458246452723817,
+        "relative_error": -0.001808693735501743,
+        "station_m": 7.5,
+        "waterline_z_m": -0.05
+      },
+      {
+        "closed_form_m2": 0.008400000000000006,
+        "mesh_m2": 0.008348958255280668,
+        "relative_error": -0.006076398180873577,
+        "station_m": 9.0,
+        "waterline_z_m": -0.5
+      },
+      {
+        "closed_form_m2": 0.04687499999999998,
+        "mesh_m2": 0.04674479124466503,
+        "relative_error": -0.002777786780478908,
+        "station_m": 9.0,
+        "waterline_z_m": -0.3125
+      },
+      {
+        "closed_form_m2": 0.09492187499999996,
+        "mesh_m2": 0.09472656164482954,
+        "relative_error": -0.002057622177927043,
+        "station_m": 9.0,
+        "waterline_z_m": -0.15625
+      },
+      {
+        "closed_form_m2": 0.13203839999999994,
+        "mesh_m2": 0.13179958214345328,
+        "relative_error": -0.0018087000186814972,
+        "station_m": 9.0,
+        "waterline_z_m": -0.05
+      }
+    ],
+    "stations_m": [
+      1.0,
+      2.5,
+      5.0,
+      7.5,
+      9.0
+    ],
+    "waterlines_m": [
+      -0.5,
+      -0.3125,
+      -0.15625,
+      -0.05
+    ],
+    "worst_at": [
+      9.0,
+      -0.5
+    ],
+    "worst_relative_error": -0.006076398180873577
+  },
+  "wigley_midship": [
+    {
+      "closed_form_m2": 0.4166666666666667,
+      "mesh_m2": 0.41594328701624,
+      "nz": 13.0,
+      "relative_error": -0.001736111161024012
+    },
+    {
+      "closed_form_m2": 0.4166666666666667,
+      "mesh_m2": 0.41648582173843485,
+      "nz": 25.0,
+      "relative_error": -0.00043402782775636695
+    },
+    {
+      "closed_form_m2": 0.4166666666666667,
+      "mesh_m2": 0.41662145541898365,
+      "nz": 49.0,
+      "relative_error": -0.00010850699443931688
+    }
+  ]
+}

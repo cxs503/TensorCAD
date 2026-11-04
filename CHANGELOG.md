@@ -4,6 +4,60 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+Two hull families were measured without a reference to measure them against. The
+station cut was verified on a barge (exact) and on the shipped family, but the
+asymmetric hull (0.17.0) had closed forms for volume, waterplane and centres and
+none for the section-area distribution, and the Wigley family (0.20.0) had
+hydrostatics but no area-under-a-waterline table. Both are the input to damage
+stability and to the still-water shear force, so both were gap-shaped.
+
+### Added
+- **`bonjean.analytic_section_area(..., fore_exponent=, aft_exponent=)`** — the
+  closed form `(2/3) B sin(pi x/L)^p zeta^(3/2) / sqrt(T)` made station-aware,
+  with `p` taken per half. Both exponents default to `BREADTH_EXPONENT`, so the
+  shipped surface keeps the reference bit for bit (asserted against the old
+  expression, not a re-derivation).
+- **`bonjean.taper_exponent_at(length, station, fore, aft)`** — the split rule in
+  one place: midship belongs to the fore half, matching
+  `hull._breadth_exponent`, where `sin(pi/2) = 1` makes the choice immaterial.
+- **`wigley.analytic_section_area(length, beam, draft, station, waterline_z,
+  longitudinal_exponent=2, vertical_exponent=2)`** — exact
+  `B (1-|2x/L-1|^n) [H - T/(m+1)(1-(1-H/T)^(m+1))]` for the immersed height
+  `H = z + T` clamped to `[0, T]`. It collapses to the published
+  `analytic_maximum_section_area` at midship and the design waterline, which is
+  the check that ties it to the hydrostatics already shipped.
+- **`examples/bonjean_families/run_example.py`** — the measurement, writing
+  `docs/bonjean_families/{results.json,plot.png,convergence.png}` and exiting
+  non-zero if one of its eight claims breaks; `docs/bonjean_families.md` reads
+  its numbers from that JSON.
+- **`tests/test_bonjean_families.py`** — 79 tests: the shipped expression bit for
+  bit, both closed forms against Gauss-Legendre quadrature of the surface itself
+  (``zeta = H s^2`` for the sqrt taper, ``T + z`` for the Wigley depth), the
+  limits of each family, the two meshes against the references, and the negative
+  control below.
+
+### Verified
+- **Wigley, 81 x 13**: worst section-area error over 5 stations x 4 waterlines
+  `-0.608 %`; the error falls by `3.84x` and `4.06x` per halving of the waterline
+  spacing, i.e. second order. Midship section at the design waterline `-0.174 %`
+  against the closed form the hydrostatics module already used.
+- **Asymmetric hull** (`fore=1.4`, `aft=0.7`), 81 x 41: worst error `0.333 %` for
+  waterlines at or above `z = -0.4 m`, `0.924 %` at the deepest one, and the
+  refinement ladder reads `2.77x / 2.79x / 2.80x`.
+- **The split is discriminating, not decorative**: reading the same mesh against
+  a symmetric reference (the shipped exponent everywhere) misses by `72.76 %` at
+  `x = 0.9 L`. Without that control the agreement above would not prove that fore
+  and aft are told apart.
+- **Involution and closure**: swapping the two exponents mirrors the measured
+  curves to `5.5e-08` relative, and integrating the Bonjean table over 41
+  stations recovers the asymmetric closed-form volume to `0.142 %`.
+- **The honest edge**: at the coarsest waterline count (81 x 13) the deepest
+  curve of the hull family is `5.31 %` off. That is the `sqrt` keel taper, whose
+  slope is infinite at the keel and which a polygon in `z` cannot follow; it is
+  reported per waterline in the results file rather than averaged away.
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

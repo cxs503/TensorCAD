@@ -515,26 +515,58 @@ def bonjean_table(
     )
 
 
+def taper_exponent_at(
+    length: float,
+    station: float,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
+) -> float:
+    """Taper exponent the generator applies at ``station``.
+
+    The split family (``HullParameters.fore_exponent`` / ``aft_exponent``) indexes
+    the exponent by station *number*, ``2 * i >= nx - 1`` meaning fore, which is
+    exactly the half-open split ``x >= length / 2`` once ``x = L * i / (nx - 1)``.
+    Midship therefore takes the fore exponent, and ``sin(pi/2) = 1`` makes the
+    choice immaterial there. For the shipped family both arguments default to
+    ``BREADTH_EXPONENT`` and the answer is that constant.
+    """
+    for name, value in (("length", length), ("fore_exponent", fore_exponent), ("aft_exponent", aft_exponent)):
+        if not math.isfinite(value) or value <= 0.0:
+            raise ValueError(f"{name} must be a finite positive number, got {value!r}")
+    return fore_exponent if 2.0 * station >= length else aft_exponent
+
+
 def analytic_section_area(
     length: float,
     beam: float,
     draft: float,
     station: float,
     waterline_z: float,
+    *,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
 ) -> float:
     """Closed form for the parametric hull family: area under ``waterline_z``.
 
-    The generator's half breadth is ``(beam/2) * sin(pi x / L)^0.7 * sqrt(zeta/draft)``
+    The generator's half breadth is ``(beam/2) * sin(pi x / L)^p * sqrt(zeta/draft)``
     for ``zeta = z + draft`` measured up from the keel, so the section area is the
     integral of ``2 * half_breadth`` over the immersed depth::
 
-        A(x, zeta) = (2/3) * beam * sin(pi x / L)^0.7 * zeta^(3/2) / sqrt(draft)
+        A(x, zeta) = (2/3) * beam * sin(pi x / L)^p * zeta^(3/2) / sqrt(draft)
 
     At midship and ``zeta = draft`` this is ``(2/3) * beam * draft``, the
     :func:`tensorcad.hull.analytic_maximum_section_area` the hydrostatics module
     already compares against -- but the mesh-facing function here varies with the
     station and with the waterline, which is what a Bonjean curve needs and what
     nothing in the tree had.
+
+    ``fore_exponent`` / ``aft_exponent`` are the per-half sine exponents of the
+    asymmetric family (:mod:`tensorcad.hull` 0.17.0). Both default to
+    ``BREADTH_EXPONENT``, so the shipped surface keeps this reference bit for bit;
+    passing the two exponents the mesh was generated with extends the same closed
+    form to the asymmetric family through :func:`taper_exponent_at`. The vertical
+    taper is ``sqrt`` for every member of this family, which is why the exponent
+    split does not touch the ``zeta^(3/2)`` factor.
     """
     for name, value in (("length", length), ("beam", beam), ("draft", draft)):
         if not math.isfinite(value) or value <= 0.0:
@@ -546,7 +578,8 @@ def analytic_section_area(
         raise ValueError(f"waterline_z must be finite, got {waterline_z!r}")
     if zeta <= 0.0:
         return 0.0
-    taper = math.pow(math.sin(math.pi * station / length), BREADTH_EXPONENT)
+    exponent = taper_exponent_at(length, station, fore_exponent, aft_exponent)
+    taper = math.pow(math.sin(math.pi * station / length), exponent)
     return (2.0 / 3.0) * beam * taper * math.pow(zeta, 1.5) / math.sqrt(draft)
 
 
@@ -562,4 +595,5 @@ __all__ = [
     "default_waterlines",
     "section_loops",
     "section_properties",
+    "taper_exponent_at",
 ]
