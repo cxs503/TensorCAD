@@ -230,4 +230,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.16.0"
+__version__ = "0.17.0"
