@@ -145,6 +145,26 @@ from .validation import (
     inspect_mesh_quality,
 )
 from .voxel import VoxelGrid, to_voxel_grid
+from .wigley import (
+    REFERENCE_CASE as WIGLEY_REFERENCE_CASE,
+)
+from .wigley import (
+    WigleyAnalytic,
+    WigleyModel,
+    WigleyParameters,
+    export_wigley,
+    generate_wigley,
+    wigley_analytic_hydrostatics,
+)
+from .wigley import (
+    analytic_relative_errors as wigley_analytic_relative_errors,
+)
+from .wigley import (
+    convergence_study as wigley_convergence_study,
+)
+from .wigley import (
+    reference_parameters as wigley_reference_parameters,
+)
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
@@ -152,6 +172,7 @@ __all__ = [
     "MAX_TRANSOM_FRACTION",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
+    "WIGLEY_REFERENCE_CASE",
     "AnalyticHydrostatics",
     "BonjeanCurve",
     "BonjeanTable",
@@ -197,6 +218,9 @@ __all__ = [
     "ValidationReport",
     "VoxelGrid",
     "WaterplaneMoments",
+    "WigleyAnalytic",
+    "WigleyModel",
+    "WigleyParameters",
     "analytic_hydrostatics",
     "analytic_relative_errors",
     "analytic_section_area",
@@ -215,9 +239,11 @@ __all__ = [
     "estimate_discretisation_error",
     "estimate_transom_discretisation_error",
     "export_hull",
+    "export_wigley",
     "gate_mesh",
     "generate_hull",
     "generate_transom_hull",
+    "generate_wigley",
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -251,6 +277,10 @@ __all__ = [
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
     "waterplane_moments",
+    "wigley_analytic_hydrostatics",
+    "wigley_analytic_relative_errors",
+    "wigley_convergence_study",
+    "wigley_reference_parameters",
     "write_design_json",
     "write_metadata",
     "write_obj",
@@ -258,4 +288,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.19.0"
+__version__ = "0.21.0"

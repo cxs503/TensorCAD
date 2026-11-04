@@ -1,0 +1,196 @@
+{
+  "analytic": {
+    "basis": "closed forms of the Wigley algebraic surface; wetted area by composite Gauss-Legendre",
+    "block_coefficient": 0.4444444444444444,
+    "displacement_mass_kg": 2847.222222222222,
+    "displacement_volume_m3": 2.7777777777777777,
+    "form": "y = (B/2) (1 - |2x/L - 1|^n) (1 - (w/T)^m)",
+    "inputs": {
+      "beam_m": 1.0,
+      "draft_m": 0.625,
+      "length_m": 10.0,
+      "longitudinal_exponent": 2.0,
+      "vertical_exponent": 2.0,
+      "water_density_kg_per_m3": 1025.0
+    },
+    "longitudinal_centre_buoyancy_m": 5.0,
+    "longitudinal_centre_flotation_m": 5.0,
+    "maximum_section_area_m2": 0.4166666666666667,
+    "midship_coefficient": 0.6666666666666666,
+    "prismatic_coefficient": 0.6666666666666666,
+    "schema": "tensorcad.wigley.analytic/1",
+    "units": "m",
+    "vertical_centre_buoyancy_m": -0.234375,
+    "waterplane_area_m2": 6.666666666666667,
+    "waterplane_coefficient": 0.6666666666666666,
+    "wetted_surface_area_m2": 14.879063104957783
+  },
+  "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+  "engineering_status": "geometry and hydrostatic integration of a standard benchmark hull form; appendages, transom, propeller, stability, resistance and structural checks are not implemented",
+  "generator": {
+    "backend": "tensorcad.geometry (standard library)",
+    "kind": "analytic_lofted_surface",
+    "longitudinal_taper": "1 - |2x/L - 1|^2",
+    "surface": "y = (B/2) (1 - |2x/L - 1|^n) (1 - (w/T)^m)",
+    "topology": "one closed section ring per station, lofted, capped at the design waterline",
+    "vertical_taper": "1 - (w/T)^2"
+  },
+  "hull_form": "wigley",
+  "hydrostatics": {
+    "basis": "closed surface integrals",
+    "block_coefficient": 0.443396,
+    "displacement_mass_kg": 2840.503,
+    "displacement_volume_m3": 2.77122215,
+    "longitudinal_centre_buoyancy_m": 5.0,
+    "longitudinal_centre_flotation_m": 5.0,
+    "maximum_section_area_m2": 0.415943287,
+    "prismatic_coefficient": 0.66625,
+    "vertical_centre_buoyancy_m": -0.23423913,
+    "water_density_kg_per_m3": 1025.0,
+    "waterline_z_m": 0.0,
+    "waterplane_area_m2": 6.6625,
+    "wetted_surface_area_m2": 14.876074557
+  },
+  "mesh": {
+    "bounding_box": {
+      "max": [
+        10.0,
+        0.5,
+        0.0
+      ],
+      "min": [
+        0.0,
+        -0.5,
+        -0.625
+      ],
+      "size": [
+        10.0,
+        1.0,
+        0.625
+      ]
+    },
+    "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+    "triangle_count": 1998,
+    "units": "m",
+    "vertex_count": 1001
+  },
+  "model_type": "closed_sampled_wigley_displacement_hull",
+  "offset_count": 41,
+  "parameters": {
+    "beam": 1.0,
+    "draft": 0.625,
+    "length": 10.0,
+    "longitudinal_exponent": 2.0,
+    "nx": 41,
+    "nz": 13,
+    "vertical_exponent": 2.0,
+    "water_density": 1025.0
+  },
+  "schema_version": "1.0",
+  "units": "m",
+  "validation": {
+    "checks": [
+      {
+        "name": "finite_vertex_coordinates",
+        "passed": true
+      },
+      {
+        "name": "non_empty_mesh",
+        "passed": true
+      },
+      {
+        "name": "face_indices_in_range",
+        "passed": true
+      },
+      {
+        "name": "no_degenerate_faces",
+        "passed": true
+      },
+      {
+        "name": "watertight",
+        "passed": true
+      },
+      {
+        "name": "edge_manifold",
+        "passed": true
+      },
+      {
+        "detail": "V-E+F = 1001-2997+1998 = 2, expected 2 for a closed genus-0 shell",
+        "name": "euler_characteristic_genus_zero",
+        "passed": true
+      },
+      {
+        "detail": "signed volume is 2.77122 m^3; a closed solid must have positive volume",
+        "name": "outward_orientation",
+        "passed": true
+      },
+      {
+        "detail": "volume 2.77122215 exceeds the 6.25 bounding-box volume, which means self-intersection or inverted faces",
+        "name": "volume_within_bounding_box",
+        "passed": true
+      },
+      {
+        "name": "vertex_manifold",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "name": "length_matches_request",
+        "passed": true
+      },
+      {
+        "name": "draft_matches_request",
+        "passed": true
+      },
+      {
+        "name": "waterline_plane_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "realised beam 1 m vs requested 1 (grid deficit +0.0000%, allowance 0.0000%)",
+        "name": "beam_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "41 offset rows for 41 stations",
+        "name": "offset_per_station",
+        "passed": true
+      },
+      {
+        "name": "offsets_close_at_both_ends",
+        "passed": true
+      },
+      {
+        "detail": "realised maximum breadth 1 vs grid-achievable 1",
+        "name": "beam_matches_grid_achievable_maximum",
+        "passed": true
+      },
+      {
+        "detail": "largest deviation of a waterline offset from the analytic breadth is 0.000e+00 m",
+        "name": "waterline_offsets_on_analytic_surface",
+        "passed": true
+      },
+      {
+        "detail": "length_to_beam = 10",
+        "name": "ratio_length_to_beam",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "detail": "beam_to_draft = 1.6",
+        "name": "ratio_beam_to_draft",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "detail": "grid 41x13 integrates 2.77122 m^3 against a closed form 2.77778 m^3 (-0.236 %)",
+        "name": "sampling_error_within_tolerance",
+        "passed": true,
+        "severity": "warning"
+      }
+    ],
+    "errors": [],
+    "passed": true,
+    "warnings": []
+  }
+}

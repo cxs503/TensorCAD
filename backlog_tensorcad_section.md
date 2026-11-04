@@ -21,7 +21,7 @@
 - 标准库-only 核心：零依赖声明成立
 
 ### 缺口（README 自声明 + 审计确认）
-- **单船型族**：仅正弦分布 sin(πx/L)^0.7·√(z/draft)，前后对称，无艉板
+- ~~**单船型族**~~ → **部分已补（0.20.0）**：新增 `tensorcad.wigley`（抛物型 Wigley，指数 n/m 可调），带精确解析静水力（Cb=4/9、Cp=Cm=Cwp=2/3、VCB=5T/8）与收敛证据 `docs/wigley.md`；仍缺系列 60 站型表 / Savitsky / 带艉板非对称族
 - **神经场形状族**：仅球+凹坑编辑，无船体/翼型/通用形状
 - **无 B-rep/STEP**：设计原则 4 声明"evaluate OCP"但未实现
 - **无布尔/扫描操作**
@@ -33,7 +33,7 @@
 ### 对 eco 价值排序（与 TensorShipDesign 接棒位）
 | 优先级 | 项目 | eco 价值 | 接棒位 |
 |---:|---|---|---|
-| P0 | 多船型族扩展 | 系列 60/Savitsky → 实际船舶设计 | scan_runner 参数扫描线几何源 |
+| P1 | 多船型族扩展（Wigley 已补 0.20.0；缺系列 60/Savitsky） | 实际船舶设计 | scan_runner 参数扫描线几何源 |
 | P0 | 非对称船体 + 艉板 | 真实船型 → 工程应用 | TensorShipDesign 刚需 |
 | P0 | OCP B-rep 后端 | 工业标准几何 → 布尔/导出 | TensorShipDesign 核心依赖 |
 | P1 | SDF 体素网格导出 | scan_runner SDF 栈对接 | L2 几何编码器几何源 |

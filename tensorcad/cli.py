@@ -38,6 +38,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--nx", type=int, default=41,
                         help="longitudinal stations (an odd value lands on midship)")
     parser.add_argument("--nz", type=int, default=13, help="vertical levels from keel to waterline")
+    parser.add_argument("--fore-exponent", type=float, default=0.7,
+                        help="sine-taper exponent forward of midship (0.7 is the symmetric form; "
+                             "a different aft exponent gives an asymmetric hull)")
+    parser.add_argument("--aft-exponent", type=float, default=0.7,
+                        help="sine-taper exponent abaft midship")
     parser.add_argument("--density", type=float, default=1025.0,
                         help="water density in kg/m^3 used for displacement mass (1025 seawater, 1000 fresh)")
     parser.add_argument("--output", default="tensorcad-output", help="directory for the exported artifacts")
@@ -79,7 +84,16 @@ def _summary(model: Any) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    parameters = HullParameters(args.length, args.beam, args.draft, args.nx, args.nz, args.density)
+    parameters = HullParameters(
+        args.length,
+        args.beam,
+        args.draft,
+        args.nx,
+        args.nz,
+        args.density,
+        fore_exponent=args.fore_exponent,
+        aft_exponent=args.aft_exponent,
+    )
     plan = None
 
     def fail(stage: str, exc: Exception) -> int:
