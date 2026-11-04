@@ -20,6 +20,7 @@ def test_summary_reports_measured_numbers_and_artifacts(tmp_path, capsys) -> Non
     payload = json.loads(capsys.readouterr().out)
     assert payload["parameters"] == {
         "length": 12.0, "beam": 2.4, "draft": 0.9, "nx": 21, "nz": 9, "water_density": 1025.0,
+        "fore_exponent": 0.7, "aft_exponent": 0.7,
     }
     assert payload["validation"] == {"passed": True, "errors": [], "warnings": []}
     assert payload["hydrostatics"]["displacement_volume_m3"] > 0
