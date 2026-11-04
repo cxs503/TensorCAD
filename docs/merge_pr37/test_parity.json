@@ -1,0 +1,148 @@
+{
+  "scope": "pytest tests, batched to fit a 120 s shell budget; merged worktree vs origin/main worktree, same batches",
+  "batches": [
+    {
+      "files": [
+        "test_public_surface.py",
+        "test_wigley.py"
+      ],
+      "merged": {
+        "passed": 132,
+        "failed": 0,
+        "skipped": 0
+      },
+      "main": {
+        "passed": 36,
+        "failed": 0,
+        "skipped": 0
+      },
+      "note": "merged batch also contains test_transom.py (96 tests), absent on main"
+    },
+    {
+      "files": [
+        "test_hull.py",
+        "test_asymmetric_hull.py",
+        "test_curvature.py",
+        "test_cli.py"
+      ],
+      "merged": {
+        "passed": 111,
+        "failed": 0
+      },
+      "main": {
+        "passed": 111,
+        "failed": 0
+      }
+    },
+    {
+      "files": [
+        "test_hydrostatics.py",
+        "test_hydrostatics_analytic.py",
+        "test_analytic_hydrostatics.py",
+        "test_bonjean.py",
+        "test_stability.py"
+      ],
+      "merged": {
+        "passed": 134,
+        "failed": 0
+      },
+      "main": {
+        "passed": 134,
+        "failed": 0
+      }
+    },
+    {
+      "files": [
+        "test_geometry_field.py",
+        "test_mesh.py",
+        "test_mesh_conditioning.py",
+        "test_gate.py",
+        "test_resolution.py",
+        "test_voxel.py",
+        "test_export.py",
+        "test_artifact_export.py"
+      ],
+      "merged": {
+        "passed": 150,
+        "failed": 2
+      },
+      "main": {
+        "passed": 150,
+        "failed": 2
+      },
+      "note": "same two pre-existing failures on both sides (learned-field tests, no safetensors in the env)"
+    },
+    {
+      "files": [
+        "test_design.py",
+        "test_parameters.py",
+        "test_validation.py",
+        "test_suboff.py",
+        "test_suboff_appendages.py",
+        "test_mirror_contract.py"
+      ],
+      "merged": {
+        "passed": 134,
+        "failed": 0
+      },
+      "main": {
+        "passed": 134,
+        "failed": 0
+      }
+    },
+    {
+      "files": [
+        "test_benchmark.py",
+        "test_adapters_fem.py",
+        "test_adapters_ocp.py"
+      ],
+      "merged": {
+        "passed": 53,
+        "failed": 0,
+        "skipped": 11
+      },
+      "main": {
+        "passed": 53,
+        "failed": 0,
+        "skipped": 11
+      }
+    },
+    {
+      "files": [
+        "test_extract.py",
+        "test_neural_format_contract.py",
+        "test_neural_geometry.py",
+        "test_neural_store.py"
+      ],
+      "merged": {
+        "passed": 88,
+        "failed": 0
+      },
+      "main": {
+        "passed": 88,
+        "failed": 0
+      }
+    }
+  ],
+  "totals": {
+    "merged": {
+      "passed": 813,
+      "failed": 2,
+      "skipped": 11
+    },
+    "main": {
+      "passed": 717,
+      "failed": 2,
+      "skipped": 11
+    },
+    "delta": {
+      "passed": 96,
+      "note": "exactly tests/test_transom.py"
+    }
+  },
+  "uncollectable_both_sides": [
+    "tests/test_cli_neural.py",
+    "tests/test_neural_pipeline.py"
+  ],
+  "uncollectable_reason": "ModuleNotFoundError: safetensors (optional extra not installed in this environment)"
+}

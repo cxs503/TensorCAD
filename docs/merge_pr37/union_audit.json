@@ -1,0 +1,65 @@
+{
+  "parents": {
+    "ours": "origin/agent/m2873",
+    "theirs": "origin/main"
+  },
+  "files": {
+    "ours": 192,
+    "theirs": 199,
+    "union_expected": 210,
+    "present_in_merge": 210,
+    "missing": []
+  },
+  "symbols": {
+    "ours": 110,
+    "theirs": 107,
+    "union_expected": 120,
+    "merged": 120,
+    "ours_only": [
+      "MAX_TRANSOM_FRACTION",
+      "TransomHullParameters",
+      "TransomModel",
+      "analytic_transom_hydrostatics",
+      "build_transom_mesh",
+      "..."
+    ],
+    "theirs_only": [
+      "WIGLEY_REFERENCE_CASE",
+      "WigleyAnalytic",
+      "WigleyModel",
+      "WigleyParameters",
+      "export_wigley",
+      "..."
+    ],
+    "missing": [],
+    "duplicates": []
+  },
+  "imports": {
+    "unresolved_exports": [],
+    "modules": {
+      "transom": "ok",
+      "wigley": "ok",
+      "hull": "ok",
+      "bonjean": "ok"
+    }
+  },
+  "version": {
+    "ours": "0.19.0",
+    "theirs": "0.20.0",
+    "merged": "0.21.0",
+    "tensorcad.__version__": "0.21.0"
+  },
+  "behaviour": {
+    "checks": {
+      "pointed_vs_analytic_relative_error": "8.804e-03",
+      "transom_tau0_volume_m3": 7.446554097149,
+      "transom_tau025_volume_m3": 8.243855449352,
+      "transom_area_ratio_error": "0.000e+00",
+      "wigley_Cb": 0.444444444444,
+      "wigley_Cb_error_vs_4_9": "0.000e+00"
+    },
+    "ok": true
+  },
+  "failures": [],
+  "passed": true
+}

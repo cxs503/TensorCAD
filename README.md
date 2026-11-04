@@ -465,6 +465,9 @@ The boundaries below are the ones the code actually has (they were proposals in 
   Wigley `y = (B/2)(1-|2x/L-1|^n)(1-(w/T)^m)` with exact hydrostatics (`Cb = 4/9`,
   `Cp = Cm = Cwp = 2/3`, `VCB = 5T/8`) and solver-ready exports; it doubles as the
   verification case for `tensorcad.hydrostatics` (`docs/wigley.md`).
+- `tensorcad.transom` — the transom-stern family: the sine-taper hull truncated at a station
+  `tau` and closed by a planar transom plate, with incomplete-taper closed forms for `V`,
+  `A_wp`, `LCB`, `Cb`, `Cp`, `Cwp` and the immersed transom area (`docs/transom_stern.md`).
 - `tensorcad.adapters` — solver/kernel bridges the core must never import: `adapters.fem`
   (node/element tables, gmsh 2.2 + JSON, no extra) and `adapters.ocp` (sew → solid → STEP,
   `ocp` extra).

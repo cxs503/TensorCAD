@@ -1,0 +1,13 @@
+{
+  "pr": 37,
+  "branch": "agent/m2873",
+  "old_sha": "206698a4f723fc70706744cbd2cedd11f46b0d39",
+  "merge_commit_sha": "0502536635dca3a1e279583afe34ca1678fa18aa",
+  "merge_parents": {
+    "ours": "206698a4f723fc70706744cbd2cedd11f46b0d39",
+    "theirs": "8389c7e883554a391931fd1419c7441f33f97236"
+  },
+  "merged_version": "0.21.0",
+  "delivery": "the sandbox refuses a direct remote update of agent/m2873 (command blocked by the security policy), so the cure is committed on agent/m3743; its tip is a merge commit parented on origin/agent/m2873 and origin/main, so #37 can be fast-forwarded to it without another merge",
+  "pushes_performed_by_agent": 0
+}
