@@ -1,0 +1,509 @@
+{
+  "analytic": {
+    "basis": "closed forms of the Wigley algebraic surface; wetted area by composite Gauss-Legendre",
+    "block_coefficient": 0.4444444444444444,
+    "displacement_mass_kg": 2847.222222222222,
+    "displacement_volume_m3": 2.7777777777777777,
+    "form": "y = (B/2) (1 - |2x/L - 1|^n) (1 - (w/T)^m)",
+    "inputs": {
+      "beam_m": 1.0,
+      "draft_m": 0.625,
+      "length_m": 10.0,
+      "longitudinal_exponent": 2.0,
+      "vertical_exponent": 2.0,
+      "water_density_kg_per_m3": 1025.0
+    },
+    "longitudinal_centre_buoyancy_m": 5.0,
+    "longitudinal_centre_flotation_m": 5.0,
+    "maximum_section_area_m2": 0.4166666666666667,
+    "midship_coefficient": 0.6666666666666666,
+    "prismatic_coefficient": 0.6666666666666666,
+    "schema": "tensorcad.wigley.analytic/1",
+    "units": "m",
+    "vertical_centre_buoyancy_m": -0.234375,
+    "waterplane_area_m2": 6.666666666666667,
+    "waterplane_coefficient": 0.6666666666666666,
+    "wetted_surface_area_m2": 14.879063104957783
+  },
+  "artifacts": {
+    "mesh": "docs/wigley/wigley.obj",
+    "metadata": "docs/wigley/wigley.json",
+    "offsets": "docs/wigley/wigley_offsets.csv",
+    "stl": "docs/wigley/wigley.stl"
+  },
+  "case": {
+    "beam": 1.0,
+    "beam_to_draft": 1.6,
+    "draft": 0.625,
+    "length": 10.0,
+    "length_to_beam": 10.0,
+    "longitudinal_exponent": 2.0,
+    "name": "Wigley (ITTC reference proportions)",
+    "vertical_exponent": 2.0
+  },
+  "claims": [
+    {
+      "claim": "V = Cb*L*B*T and V = n*m/((n+1)(m+1))*L*B*T are the same number",
+      "passed": true,
+      "tolerance": 1e-15,
+      "value": 1.0
+    },
+    {
+      "claim": "classic Wigley coefficients are the published rationals (Cb 4/9, Cp 2/3, Cm 2/3, Cwp 2/3, VCB 5T/8)",
+      "passed": true,
+      "tolerance": 1e-15,
+      "value": {
+        "Cb": 0.4444444444444444,
+        "Cm": 0.6666666666666666,
+        "Cp": 0.6666666666666666,
+        "Cwp": 0.6666666666666666,
+        "vcb_over_draft": 0.625
+      }
+    },
+    {
+      "claim": "closed-form volume agrees with a direct midpoint integral of the generating function",
+      "passed": true,
+      "tolerance": 1e-06,
+      "value": 6.250000862451088e-07
+    },
+    {
+      "claim": "default grid integrates the displacement volume within 1 % of the closed form",
+      "passed": true,
+      "tolerance": 0.01,
+      "value": -0.0023600260416665364
+    },
+    {
+      "claim": "sampled quantities approach the closed forms monotonically, from below (chords are inscribed)",
+      "passed": true,
+      "tolerance": 0.0,
+      "value": {
+        "displacement_volume": [
+          -0.006396484374999965,
+          -0.0023600260416665364,
+          -0.0007811523437500157,
+          -0.0001953063964845825
+        ],
+        "waterplane_area": [
+          -0.002500000000000124,
+          -0.0006250000000000977,
+          -0.0001562499999999911,
+          -3.90625000000977e-05
+        ],
+        "wetted_surface_area": [
+          -0.00045695273327293103,
+          -0.00020085591716323552,
+          -7.20334345070394e-05,
+          -1.800668072808373e-05
+        ]
+      }
+    },
+    {
+      "claim": "finest grid is within 0.1 % of the closed forms on every comparable quantity",
+      "passed": true,
+      "tolerance": 0.001,
+      "value": 0.00019530639648458747
+    },
+    {
+      "claim": "observed convergence order for volume is in [1.8, 3.0] (second-order loft)",
+      "passed": true,
+      "tolerance": 0.0,
+      "value": 2.1677967106490303
+    },
+    {
+      "claim": "wetted-area quadrature is self-converged to 1e-9 relative",
+      "passed": true,
+      "tolerance": 1e-09,
+      "value": 0.0
+    },
+    {
+      "claim": "waterline offsets lie on the analytic surface to machine precision",
+      "passed": true,
+      "tolerance": 1e-12,
+      "value": 0.0
+    },
+    {
+      "claim": "default surface is closed, edge-manifold, single-component, Euler-2 and has no zero-area face",
+      "passed": true,
+      "tolerance": 0.0,
+      "value": {
+        "edge_manifold": true,
+        "euler_characteristic": 2,
+        "single_component": true,
+        "triangles": 1998,
+        "vertices": 1001,
+        "watertight": true,
+        "zero_area_faces": 0
+      }
+    }
+  ],
+  "closed_form_cross_check": {
+    "block_coefficient_closed_form": 0.4444444444444444,
+    "maximum_section_area_closed_form_m2": 0.4166666666666667,
+    "relative_difference": 6.250000862451088e-07,
+    "volume_closed_form_m3": 2.7777777777777777,
+    "volume_direct_integral_m3": 2.7777795138891284,
+    "waterplane_area_closed_form_m2": 6.666666666666667
+  },
+  "convergence": {
+    "case": {
+      "beam": 1.0,
+      "draft": 0.625,
+      "length": 10.0,
+      "longitudinal_exponent": 2.0,
+      "nx": 41,
+      "nz": 13,
+      "vertical_exponent": 2.0,
+      "water_density": 1025.0
+    },
+    "note": "order = log(|e_coarse|/|e_fine|)/log(h_coarse/h_fine) fitted across the whole sweep; the loft error is O(h^2) once h is small",
+    "observed_order": {
+      "displacement_volume": 2.1677967106490303,
+      "waterplane_area": 2.584059348438835,
+      "wetted_surface_area": 2.0092959732574154
+    },
+    "reference": {
+      "basis": "closed forms of the Wigley algebraic surface; wetted area by composite Gauss-Legendre",
+      "block_coefficient": 0.4444444444444444,
+      "displacement_mass_kg": 2847.222222222222,
+      "displacement_volume_m3": 2.7777777777777777,
+      "form": "y = (B/2) (1 - |2x/L - 1|^n) (1 - (w/T)^m)",
+      "inputs": {
+        "beam_m": 1.0,
+        "draft_m": 0.625,
+        "length_m": 10.0,
+        "longitudinal_exponent": 2.0,
+        "vertical_exponent": 2.0,
+        "water_density_kg_per_m3": 1025.0
+      },
+      "longitudinal_centre_buoyancy_m": 5.0,
+      "longitudinal_centre_flotation_m": 5.0,
+      "maximum_section_area_m2": 0.4166666666666667,
+      "midship_coefficient": 0.6666666666666666,
+      "prismatic_coefficient": 0.6666666666666666,
+      "schema": "tensorcad.wigley.analytic/1",
+      "units": "m",
+      "vertical_centre_buoyancy_m": -0.234375,
+      "waterplane_area_m2": 6.666666666666667,
+      "waterplane_coefficient": 0.6666666666666666,
+      "wetted_surface_area_m2": 14.879063104957783
+    },
+    "rows": [
+      {
+        "block_coefficient": 0.4416015625,
+        "displacement_volume": 2.760009765625,
+        "h": 0.125,
+        "longitudinal_centre_buoyancy": 5.0,
+        "longitudinal_centre_flotation": 5.0,
+        "max_abs_relative_error": 0.0063964843749999695,
+        "maximum_section_area": 0.4150390625,
+        "nx": 21,
+        "nz": 9,
+        "prismatic_coefficient": 0.665,
+        "relative_error": {
+          "block_coefficient": -0.0063964843749999695,
+          "displacement_volume": -0.006396484374999965,
+          "longitudinal_centre_buoyancy": 0.0,
+          "longitudinal_centre_flotation": 0.0,
+          "maximum_section_area": -0.003906250000000044,
+          "prismatic_coefficient": -0.002499999999999891,
+          "vertical_centre_buoyancy": 0.0013071895424836555,
+          "waterplane_area": -0.002500000000000124,
+          "wetted_surface_area": -0.00045695273327293103
+        },
+        "triangles": 678,
+        "vertical_centre_buoyancy": -0.2340686274509804,
+        "waterplane_area": 6.6499999999999995,
+        "wetted_surface_area": 14.872264076403432
+      },
+      {
+        "block_coefficient": 0.4433955439814815,
+        "displacement_volume": 2.7712221498842595,
+        "h": 0.08333333333333333,
+        "longitudinal_centre_buoyancy": 5.0,
+        "longitudinal_centre_flotation": 5.0,
+        "max_abs_relative_error": 0.0023600260416665464,
+        "maximum_section_area": 0.4159432870370369,
+        "nx": 41,
+        "nz": 13,
+        "prismatic_coefficient": 0.6662500000000002,
+        "relative_error": {
+          "block_coefficient": -0.0023600260416665464,
+          "displacement_volume": -0.0023600260416665364,
+          "longitudinal_centre_buoyancy": 0.0,
+          "longitudinal_centre_flotation": 0.0,
+          "maximum_section_area": -0.0017361111111114267,
+          "prismatic_coefficient": -0.0006249999999995981,
+          "vertical_centre_buoyancy": 0.0005797101449275033,
+          "waterplane_area": -0.0006250000000000977,
+          "wetted_surface_area": -0.00020085591716323552
+        },
+        "triangles": 1998,
+        "vertical_centre_buoyancy": -0.23423913043478262,
+        "waterplane_area": 6.6625,
+        "wetted_surface_area": 14.876074557091307
+      },
+      {
+        "block_coefficient": 0.44409726562499996,
+        "displacement_volume": 2.77560791015625,
+        "h": 0.05,
+        "longitudinal_centre_buoyancy": 5.0,
+        "longitudinal_centre_flotation": 5.0,
+        "max_abs_relative_error": 0.0007811523437500356,
+        "maximum_section_area": 0.4164062499999999,
+        "nx": 81,
+        "nz": 21,
+        "prismatic_coefficient": 0.6665625000000001,
+        "relative_error": {
+          "block_coefficient": -0.0007811523437500356,
+          "displacement_volume": -0.0007811523437500157,
+          "longitudinal_centre_buoyancy": 0.0,
+          "longitudinal_centre_flotation": 0.0,
+          "maximum_section_area": -0.000625000000000231,
+          "prismatic_coefficient": -0.0001562499999998579,
+          "vertical_centre_buoyancy": 0.00020846362309778025,
+          "waterplane_area": -0.0001562499999999911,
+          "wetted_surface_area": -7.20334345070394e-05
+        },
+        "triangles": 6558,
+        "vertical_centre_buoyancy": -0.23432614133833646,
+        "waterplane_area": 6.665625,
+        "wetted_surface_area": 14.877991314940086
+      },
+      {
+        "block_coefficient": 0.4443576416015624,
+        "displacement_volume": 2.777235260009765,
+        "h": 0.025,
+        "longitudinal_centre_buoyancy": 5.0,
+        "longitudinal_centre_flotation": 5.0,
+        "max_abs_relative_error": 0.00019530639648458747,
+        "maximum_section_area": 0.4166015624999999,
+        "nx": 161,
+        "nz": 41,
+        "prismatic_coefficient": 0.666640625,
+        "relative_error": {
+          "block_coefficient": -0.00019530639648458747,
+          "displacement_volume": -0.0001953063964845825,
+          "longitudinal_centre_buoyancy": 0.0,
+          "longitudinal_centre_flotation": 0.0,
+          "maximum_section_area": -0.00015625000000025756,
+          "prismatic_coefficient": -3.906249999996447e-05,
+          "vertical_centre_buoyancy": 5.2091472625666786e-05,
+          "waterplane_area": -3.90625000000977e-05,
+          "wetted_surface_area": -1.800668072808373e-05
+        },
+        "triangles": 25918,
+        "vertical_centre_buoyancy": -0.23436279106110336,
+        "waterplane_area": 6.66640625,
+        "wetted_surface_area": 14.87879518241892
+      }
+    ]
+  },
+  "default_grid_comparison": {
+    "max_abs_relative_error": 0.0023600260416665464,
+    "quantities": {
+      "block_coefficient": {
+        "measured": 0.4433955439814815,
+        "reference": 0.4444444444444444
+      },
+      "displacement_volume": {
+        "measured": 2.7712221498842595,
+        "reference": 2.7777777777777777
+      },
+      "longitudinal_centre_buoyancy": {
+        "measured": 5.0,
+        "reference": 5.0
+      },
+      "longitudinal_centre_flotation": {
+        "measured": 5.0,
+        "reference": 5.0
+      },
+      "maximum_section_area": {
+        "measured": 0.4159432870370369,
+        "reference": 0.4166666666666667
+      },
+      "prismatic_coefficient": {
+        "measured": 0.6662500000000002,
+        "reference": 0.6666666666666666
+      },
+      "vertical_centre_buoyancy": {
+        "measured": -0.23423913043478262,
+        "reference": -0.234375
+      },
+      "waterplane_area": {
+        "measured": 6.6625,
+        "reference": 6.666666666666667
+      },
+      "wetted_surface_area": {
+        "measured": 14.876074557091307,
+        "reference": 14.879063104957783
+      }
+    },
+    "reference_basis": "closed forms of the Wigley algebraic surface; wetted area by composite Gauss-Legendre",
+    "relative_error": {
+      "block_coefficient": -0.0023600260416665464,
+      "displacement_volume": -0.0023600260416665364,
+      "longitudinal_centre_buoyancy": 0.0,
+      "longitudinal_centre_flotation": 0.0,
+      "maximum_section_area": -0.0017361111111114267,
+      "prismatic_coefficient": -0.0006249999999995981,
+      "vertical_centre_buoyancy": 0.0005797101449275033,
+      "waterplane_area": -0.0006250000000000977,
+      "wetted_surface_area": -0.00020085591716323552
+    }
+  },
+  "failed_claims": [],
+  "figures": {
+    "plot.png": "docs/wigley/plot.png"
+  },
+  "mesh_hydrostatics": {
+    "basis": "closed surface integrals",
+    "block_coefficient": 0.443396,
+    "displacement_mass_kg": 2840.503,
+    "displacement_volume_m3": 2.77122215,
+    "longitudinal_centre_buoyancy_m": 5.0,
+    "longitudinal_centre_flotation_m": 5.0,
+    "maximum_section_area_m2": 0.415943287,
+    "prismatic_coefficient": 0.66625,
+    "vertical_centre_buoyancy_m": -0.23423913,
+    "water_density_kg_per_m3": 1025.0,
+    "waterline_z_m": 0.0,
+    "waterplane_area_m2": 6.6625,
+    "wetted_surface_area_m2": 14.876074557
+  },
+  "offset_on_surface_max_deviation_m": 0.0,
+  "parameters": {
+    "beam": 1.0,
+    "draft": 0.625,
+    "length": 10.0,
+    "longitudinal_exponent": 2.0,
+    "nx": 41,
+    "nz": 13,
+    "vertical_exponent": 2.0,
+    "water_density": 1025.0
+  },
+  "topology": {
+    "edge_manifold": true,
+    "euler_characteristic": 2,
+    "single_component": true,
+    "triangles": 1998,
+    "vertices": 1001,
+    "watertight": true,
+    "zero_area_faces": 0
+  },
+  "validation": {
+    "checks": [
+      {
+        "name": "finite_vertex_coordinates",
+        "passed": true
+      },
+      {
+        "name": "non_empty_mesh",
+        "passed": true
+      },
+      {
+        "name": "face_indices_in_range",
+        "passed": true
+      },
+      {
+        "name": "no_degenerate_faces",
+        "passed": true
+      },
+      {
+        "name": "watertight",
+        "passed": true
+      },
+      {
+        "name": "edge_manifold",
+        "passed": true
+      },
+      {
+        "detail": "V-E+F = 1001-2997+1998 = 2, expected 2 for a closed genus-0 shell",
+        "name": "euler_characteristic_genus_zero",
+        "passed": true
+      },
+      {
+        "detail": "signed volume is 2.77122 m^3; a closed solid must have positive volume",
+        "name": "outward_orientation",
+        "passed": true
+      },
+      {
+        "detail": "volume 2.77122215 exceeds the 6.25 bounding-box volume, which means self-intersection or inverted faces",
+        "name": "volume_within_bounding_box",
+        "passed": true
+      },
+      {
+        "name": "vertex_manifold",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "name": "length_matches_request",
+        "passed": true
+      },
+      {
+        "name": "draft_matches_request",
+        "passed": true
+      },
+      {
+        "name": "waterline_plane_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "realised beam 1 m vs requested 1 (grid deficit +0.0000%, allowance 0.0000%)",
+        "name": "beam_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "41 offset rows for 41 stations",
+        "name": "offset_per_station",
+        "passed": true
+      },
+      {
+        "name": "offsets_close_at_both_ends",
+        "passed": true
+      },
+      {
+        "detail": "realised maximum breadth 1 vs grid-achievable 1",
+        "name": "beam_matches_grid_achievable_maximum",
+        "passed": true
+      },
+      {
+        "detail": "largest deviation of a waterline offset from the analytic breadth is 0.000e+00 m",
+        "name": "waterline_offsets_on_analytic_surface",
+        "passed": true
+      },
+      {
+        "detail": "length_to_beam = 10",
+        "name": "ratio_length_to_beam",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "detail": "beam_to_draft = 1.6",
+        "name": "ratio_beam_to_draft",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "detail": "grid 41x13 integrates 2.77122 m^3 against a closed form 2.77778 m^3 (-0.236 %)",
+        "name": "sampling_error_within_tolerance",
+        "passed": true,
+        "severity": "warning"
+      }
+    ],
+    "errors": [],
+    "passed": true,
+    "warnings": []
+  },
+  "vcb_above_keel": 0.390625,
+  "wetted_area_evidence": {
+    "levels": {
+      "2x12": 14.87906310494618,
+      "4x24": 14.879063104957783,
+      "8x48": 14.879063104957783
+    },
+    "method": "composite Gauss-Legendre on the analytic flank (not on the mesh)",
+    "relative_change_coarse_to_fine": 7.798315521019734e-13,
+    "relative_change_fine_to_finer": 0.0
+  }
+}
