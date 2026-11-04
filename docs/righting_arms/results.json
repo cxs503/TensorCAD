@@ -1,0 +1,1348 @@
+{
+  "box": {
+    "analytic_area_m_rad": -0.010667020926718748,
+    "analytic_vanishing_angle_deg": 26.100138782286397,
+    "bm_m": 1.6666666666666667,
+    "curve": {
+      "angle_of_maximum_gz_deg": 40.0,
+      "basis": "heeled displacement integration at constant trim",
+      "displacement_volume_m3": 1000.0,
+      "gy_m": 0.0,
+      "initial_slope_m_per_rad": 0.166534961,
+      "keel_z_m": -10.0,
+      "kg_m_above_keel": 4.0,
+      "maximum_gz_m": 0.484280573,
+      "physical_limit_deg": null,
+      "points": [
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.0,
+            -7.5
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.0,
+          "heel_angle_deg": 0.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.145814439,
+            -7.493621445
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.015081885,
+          "heel_angle_deg": 5.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.293878301,
+            -7.474090663
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.033440472,
+          "heel_angle_deg": 10.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.446581987,
+            -7.440169359
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.058621817,
+          "heel_angle_deg": 15.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.606617057,
+            -7.389604724
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.094760765,
+          "heel_angle_deg": 20.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.77717943,
+            -7.31879764
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.147015803,
+          "heel_angle_deg": 25.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.962250449,
+            -7.222222222
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.222222222,
+          "heel_angle_deg": 30.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            1.167012564,
+            -7.091424503
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.32994535,
+          "heel_angle_deg": 35.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            1.398499385,
+            -6.913259841
+          ],
+          "centre_of_gravity_z_m": -6.0,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.484280573,
+          "heel_angle_deg": 40.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        }
+      ],
+      "schema": "tensorcad.righting_arm.curve/1",
+      "vanishing_angle_deg": null,
+      "zero_crossings_deg": []
+    },
+    "displacement_volume_m3": 1000.0,
+    "geometry": {
+      "beam_m": 10.0,
+      "depth_m": 10.0,
+      "draft_m": 5.0,
+      "enclosed_volume_m3": 2000.0,
+      "length_m": 20.0
+    },
+    "gm_m": 0.16666666666666696,
+    "gm_unstable_m": -0.20000000000000018,
+    "kb_m": 2.5,
+    "kg_m_above_keel": 4.0,
+    "kg_unstable_m_above_keel": 4.366666666666667,
+    "measured_area_m_rad": -0.010663322210823487,
+    "rows": [
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.0,
+          -7.5
+        ],
+        "closed_form_m": 0.0,
+        "difference_m": 0.0,
+        "gz_m": 0.0,
+        "heel_angle_deg": 0.0,
+        "waterline_z_m": -5.0
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.14581443920987341,
+          -7.493621444795372
+        ],
+        "closed_form_m": 0.015081884841125924,
+        "difference_m": 1.5092094240998222e-16,
+        "gz_m": 0.015081884841126075,
+        "heel_angle_deg": 5.0,
+        "waterline_z_m": -5.0
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.2938783011807751,
+          -7.474090663228531
+        ],
+        "closed_form_m": 0.033440472059412904,
+        "difference_m": 1.3877787807814457e-17,
+        "gz_m": 0.03344047205941292,
+        "heel_angle_deg": 10.0,
+        "waterline_z_m": -5.000000000000001
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.4465819873852049,
+          -7.440169358562925
+        ],
+        "closed_form_m": 0.0586218170017021,
+        "difference_m": 1.1102230246251565e-16,
+        "gz_m": 0.058621817001702214,
+        "heel_angle_deg": 15.0,
+        "waterline_z_m": -5.000000000000001
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.6066170571103371,
+          -7.389604723806838
+        ],
+        "closed_form_m": 0.09476076540700688,
+        "difference_m": -1.5265566588595902e-16,
+        "gz_m": 0.09476076540700673,
+        "heel_angle_deg": 20.0,
+        "waterline_z_m": -5.0
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.7771794302583314,
+          -7.318797639955001
+        ],
+        "closed_form_m": 0.14701580338231332,
+        "difference_m": 1.3877787807814457e-16,
+        "gz_m": 0.14701580338231346,
+        "heel_angle_deg": 25.0,
+        "waterline_z_m": -5.0
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          0.9622504486493764,
+          -7.222222222222223
+        ],
+        "closed_form_m": 0.22222222222222232,
+        "difference_m": -3.3306690738754696e-16,
+        "gz_m": 0.222222222222222,
+        "heel_angle_deg": 30.0,
+        "waterline_z_m": -5.000000000000001
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          1.1670125636828494,
+          -7.091424502861915
+        ],
+        "closed_form_m": 0.32994535035399436,
+        "difference_m": -1.6653345369377348e-16,
+        "gz_m": 0.3299453503539942,
+        "heel_angle_deg": 35.0,
+        "waterline_z_m": -5.0
+      },
+      {
+        "centre_of_buoyancy_m": [
+          10.0,
+          1.398499385295467,
+          -6.91325984079846
+        ],
+        "closed_form_m": 0.484280572721347,
+        "difference_m": 6.106226635438361e-16,
+        "gz_m": 0.4842805727213476,
+        "heel_angle_deg": 40.0,
+        "waterline_z_m": -5.000000000000001
+      }
+    ],
+    "unstable_curve": {
+      "angle_of_maximum_gz_deg": 30.0,
+      "basis": "heeled displacement integration at constant trim",
+      "displacement_volume_m3": 1000.0,
+      "gy_m": 0.0,
+      "initial_slope_m_per_rad": -0.200131705,
+      "keel_z_m": -10.0,
+      "kg_m_above_keel": 4.366666667,
+      "maximum_gz_m": 0.038888889,
+      "physical_limit_deg": null,
+      "points": [
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.0,
+            -7.5
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.0,
+          "heel_angle_deg": 0.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.145814439,
+            -7.493621445
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": -0.016875221,
+          "heel_angle_deg": 5.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.293878301,
+            -7.474090663
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": -0.030230526,
+          "heel_angle_deg": 10.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.446581987,
+            -7.440169359
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": -0.0362785,
+          "heel_angle_deg": 15.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.606617057,
+            -7.389604724
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": -0.03064662,
+          "heel_angle_deg": 20.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.77717943,
+            -7.31879764
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": -0.007944226,
+          "heel_angle_deg": 25.0,
+          "iterations": 1,
+          "residual_m3": 0.0,
+          "waterline_z_m": -5.0
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            10.0,
+            0.962250449,
+            -7.222222222
+          ],
+          "centre_of_gravity_z_m": -5.633333333,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1000.0,
+          "gz_m": 0.038888889,
+          "heel_angle_deg": 30.0,
+          "iterations": 1,
+          "residual_m3": -0.0,
+          "waterline_z_m": -5.0
+        }
+      ],
+      "schema": "tensorcad.righting_arm.curve/1",
+      "vanishing_angle_deg": null,
+      "zero_crossings_deg": [
+        26.100138782
+      ]
+    }
+  },
+  "claims": [
+    {
+      "claim": "box GZ vs wall-sided closed form (max |difference|, 0-40 deg)",
+      "measured": 6.106226635438361e-16,
+      "note": "exact polyhedron, so round-off is the only error",
+      "passed": true,
+      "reference": 0.0,
+      "relative_error": 6.106226635438361e-16,
+      "tolerance": 1e-09,
+      "unit": "m"
+    },
+    {
+      "claim": "box with MG = -0.2 m: angle where GZ = 0 vs sqrt(-2 GM / BM)",
+      "measured": 26.100138782286415,
+      "note": "a root of the curve, so it tests the sign change and not only the magnitude",
+      "passed": true,
+      "reference": 26.100138782286397,
+      "relative_error": 6.805928712554684e-16,
+      "tolerance": 1e-06,
+      "unit": "deg"
+    },
+    {
+      "claim": "box: area under GZ, 0-25 deg, vs integral of the closed form",
+      "measured": -0.010663322210823487,
+      "note": "trapezoid on a 0.5 deg grid; the residual is quadrature, not integration",
+      "passed": true,
+      "reference": -0.010667020926718748,
+      "relative_error": 0.000346743099190593,
+      "tolerance": 0.001,
+      "unit": "m*rad"
+    },
+    {
+      "claim": "hull 41x13: GZ'(0) vs KB + BM - KG, BM from the waterplane moment",
+      "measured": 0.19966790332961284,
+      "note": "3-D heeled volume integral against a 2-D plane integral",
+      "passed": true,
+      "reference": 0.1996679033302854,
+      "relative_error": 3.368319802656501e-12,
+      "tolerance": 1e-06,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull 41x13: GZ'(0) vs the analytic GM of the family, light displacement",
+      "measured": 0.19966790332961284,
+      "note": "floating draft 0.5034 m; the residual is the chorded waterplane",
+      "passed": true,
+      "reference": 0.18739984487379902,
+      "relative_error": 0.06546461371980072,
+      "tolerance": 0.08,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull 41x13: GZ'(0) vs the analytic GM of the family, deep displacement",
+      "measured": 0.28552409106440285,
+      "note": "floating draft 0.6498 m; the same scaling law, a second displacement",
+      "passed": true,
+      "reference": 0.27525887001952287,
+      "relative_error": 0.037292970955493325,
+      "tolerance": 0.08,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull 41x13: GZ(0) = 0",
+      "measured": -3.61807299976771e-18,
+      "note": "absolute tolerance; the arm is zero by symmetry in the upright position",
+      "passed": true,
+      "reference": 0.0,
+      "relative_error": 3.61807299976771e-18,
+      "tolerance": 1e-12,
+      "unit": "m"
+    },
+    {
+      "claim": "hull 41x13: GZ(+10) = -GZ(-10)",
+      "measured": 0.03614953589947406,
+      "note": "odd in the heel for a port/starboard symmetric body",
+      "passed": true,
+      "reference": 0.036149535899474075,
+      "relative_error": 3.838994737416908e-16,
+      "tolerance": 1e-12,
+      "unit": "m"
+    },
+    {
+      "claim": "hull 41x13: the waterline descends monotonically as the body heels",
+      "measured": 3.0,
+      "note": "a heeled body sinks until the heeled section displaces the same volume",
+      "passed": true,
+      "reference": 3.0,
+      "relative_error": 0.0,
+      "tolerance": 0.0,
+      "unit": "interval"
+    },
+    {
+      "claim": "hull 161x41: GZ'(0) vs KB + BM - KG, BM from the waterplane moment",
+      "measured": 0.18959581597132388,
+      "note": "3-D heeled volume integral against a 2-D plane integral",
+      "passed": true,
+      "reference": 0.18959581597194164,
+      "relative_error": 3.2582778438975398e-12,
+      "tolerance": 1e-06,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull 161x41: GZ'(0) vs the analytic GM of the family, light displacement",
+      "measured": 0.18959581597132388,
+      "note": "floating draft 0.5034 m; the residual is the chorded waterplane",
+      "passed": true,
+      "reference": 0.18739984487379902,
+      "relative_error": 0.011718105204429088,
+      "tolerance": 0.02,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull 161x41: GZ'(0) vs the analytic GM of the family, deep displacement",
+      "measured": 0.2770188637995292,
+      "note": "floating draft 0.6498 m; the same scaling law, a second displacement",
+      "passed": true,
+      "reference": 0.27525887001952287,
+      "relative_error": 0.006393958457656693,
+      "tolerance": 0.02,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull 161x41: GZ(0) = 0",
+      "measured": 3.7236471863135664e-17,
+      "note": "absolute tolerance; the arm is zero by symmetry in the upright position",
+      "passed": true,
+      "reference": 0.0,
+      "relative_error": 3.7236471863135664e-17,
+      "tolerance": 1e-12,
+      "unit": "m"
+    },
+    {
+      "claim": "hull 161x41: GZ(+10) = -GZ(-10)",
+      "measured": 0.03435480463193412,
+      "note": "odd in the heel for a port/starboard symmetric body",
+      "passed": true,
+      "reference": 0.03435480463193405,
+      "relative_error": 2.019773937953724e-15,
+      "tolerance": 1e-12,
+      "unit": "m"
+    },
+    {
+      "claim": "hull 161x41: the waterline descends monotonically as the body heels",
+      "measured": 3.0,
+      "note": "a heeled body sinks until the heeled section displaces the same volume",
+      "passed": true,
+      "reference": 3.0,
+      "relative_error": 0.0,
+      "tolerance": 0.0,
+      "unit": "interval"
+    },
+    {
+      "claim": "hull refinement: initial slope, [41, 13] vs [161, 41]",
+      "measured": 0.199667903,
+      "note": "the arm inherits the mesh's discretisation error; this is its size",
+      "passed": true,
+      "reference": 0.189595816,
+      "relative_error": 0.05312399404425679,
+      "tolerance": 0.08,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "hull refinement: GZ at 10 deg, [41, 13] vs [161, 41]",
+      "measured": 0.036149536,
+      "note": "the arm inherits the mesh's discretisation error; this is its size",
+      "passed": true,
+      "reference": 0.034354805,
+      "relative_error": 0.05224104750412644,
+      "tolerance": 0.08,
+      "unit": "m"
+    },
+    {
+      "claim": "Wigley: GZ'(0) vs KB + BM - KG, BM from the waterplane moment",
+      "measured": 0.09889871759977657,
+      "note": "second non-box geometry; the same two code paths must agree",
+      "passed": true,
+      "reference": 0.09889871760006147,
+      "relative_error": 2.880695653291726e-12,
+      "tolerance": 1e-06,
+      "unit": "m/rad"
+    },
+    {
+      "claim": "Wigley: GZ(+10) = -GZ(-10)",
+      "measured": 0.01737689343954041,
+      "note": "odd in the heel",
+      "passed": true,
+      "reference": 0.017376893439540405,
+      "relative_error": 1.9965864232435418e-16,
+      "tolerance": 1e-12,
+      "unit": "m"
+    }
+  ],
+  "figures": [
+    "gz_curves.png",
+    "box_vs_closed_form.png",
+    "heeled_sections.png"
+  ],
+  "hull": {
+    "analytic_gm_m": 0.18739984487379902,
+    "curve": {
+      "angle_of_maximum_gz_deg": 20.0,
+      "basis": "heeled displacement integration at constant trim",
+      "displacement_volume_m3": 3.75,
+      "gy_m": 0.0,
+      "initial_slope_m_per_rad": 0.199667903,
+      "keel_z_m": -0.8,
+      "kg_m_above_keel": 0.55,
+      "maximum_gz_m": 0.079062591,
+      "physical_limit_deg": 17.364008387,
+      "points": [
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000001624,
+            0.000384764,
+            -0.491238397
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": false,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.000174243,
+          "heel_angle_deg": 0.05,
+          "iterations": 8,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.291346732
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000003247,
+            0.000769529,
+            -0.491237894
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": false,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.000348488,
+          "heel_angle_deg": 0.1,
+          "iterations": 8,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.291347234
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000236157,
+            0.078029092,
+            -0.48434809
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": false,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.036149536,
+          "heel_angle_deg": 10.0,
+          "iterations": 8,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.29812593
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000478473,
+            0.16127424,
+            -0.461933782
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": true,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.079062591,
+          "heel_angle_deg": 20.0,
+          "iterations": 9,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.319672214
+        }
+      ],
+      "schema": "tensorcad.righting_arm.curve/1",
+      "vanishing_angle_deg": null,
+      "zero_crossings_deg": []
+    },
+    "deep_analytic_gm_m": 0.27525887001952287,
+    "deep_displacement_volume_m3": 5.5,
+    "deep_floating_draft_m": 0.6498320852520785,
+    "deep_initial_slope_m_per_rad": 0.28552409106440285,
+    "displacement_volume_m3": 3.75,
+    "faces": 1998,
+    "floating_draft_m": 0.5034003766758719,
+    "identity_gm_m": 0.1996679033302854,
+    "kg_m_above_keel": 0.55,
+    "resolution": [
+      41,
+      13
+    ],
+    "upper_waterplane_moment_m4": 1.6533992569660758,
+    "upright_equilibrium": {
+      "basis": "clipped-polyhedron volume, signed tetrahedra",
+      "centre_of_buoyancy_m": [
+        5.0,
+        -0.0,
+        -0.491238565
+      ],
+      "centre_of_gravity_z_m": -0.25,
+      "deck_submerged": false,
+      "displacement_volume_m3": 3.75,
+      "gz_m": -0.0,
+      "heel_angle_deg": 0.0,
+      "iterations": 8,
+      "residual_m3": -0.0,
+      "waterline_z_m": -0.291346565
+    },
+    "waterline_enclosed_volume_m3": 7.4465540971492254
+  },
+  "hull_fine": {
+    "analytic_gm_m": 0.18739984487379902,
+    "curve": {
+      "angle_of_maximum_gz_deg": 20.0,
+      "basis": "heeled displacement integration at constant trim",
+      "displacement_volume_m3": 3.75,
+      "gy_m": 0.0,
+      "initial_slope_m_per_rad": 0.189595816,
+      "keel_z_m": -0.8,
+      "kg_m_above_keel": 0.55,
+      "maximum_gz_m": 0.075809637,
+      "physical_limit_deg": 17.628809264,
+      "points": [
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000000086,
+            0.000380817,
+            -0.496787632
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": false,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.000165454,
+          "heel_angle_deg": 0.05,
+          "iterations": 8,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.295748942
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000000172,
+            0.000761635,
+            -0.496787133
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": false,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.000330909,
+          "heel_angle_deg": 0.1,
+          "iterations": 8,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.295749437
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000017436,
+            0.077198082,
+            -0.489970645
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": false,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.034354805,
+          "heel_angle_deg": 10.0,
+          "iterations": 8,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.302521322
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.00003593,
+            0.159903252,
+            -0.467678024
+          ],
+          "centre_of_gravity_z_m": -0.25,
+          "deck_submerged": true,
+          "displacement_volume_m3": 3.75,
+          "gz_m": 0.075809637,
+          "heel_angle_deg": 20.0,
+          "iterations": 8,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.324183248
+        }
+      ],
+      "schema": "tensorcad.righting_arm.curve/1",
+      "vanishing_angle_deg": null,
+      "zero_crossings_deg": []
+    },
+    "deep_analytic_gm_m": 0.27525887001952287,
+    "deep_displacement_volume_m3": 5.5,
+    "deep_floating_draft_m": 0.6498320852520785,
+    "deep_initial_slope_m_per_rad": 0.2770188637995292,
+    "displacement_volume_m3": 3.75,
+    "faces": 25918,
+    "floating_draft_m": 0.5034003766758719,
+    "identity_gm_m": 0.18959581597194164,
+    "kg_m_above_keel": 0.55,
+    "resolution": [
+      161,
+      41
+    ],
+    "upper_waterplane_moment_m4": 1.636438552936415,
+    "upright_equilibrium": {
+      "basis": "clipped-polyhedron volume, signed tetrahedra",
+      "centre_of_buoyancy_m": [
+        5.0,
+        0.0,
+        -0.496787798
+      ],
+      "centre_of_gravity_z_m": -0.25,
+      "deck_submerged": false,
+      "displacement_volume_m3": 3.75,
+      "gz_m": 0.0,
+      "heel_angle_deg": 0.0,
+      "iterations": 8,
+      "residual_m3": -0.0,
+      "waterline_z_m": -0.295748777
+    },
+    "waterline_enclosed_volume_m3": 7.502488060029833
+  },
+  "refinement": {
+    "coarse_analytic_error": 0.06546461196092607,
+    "coarse_faces": 1998,
+    "coarse_gz_10deg_m": 0.036149536,
+    "coarse_initial_slope": 0.199667903,
+    "coarse_resolution": [
+      41,
+      13
+    ],
+    "fine_analytic_error": 0.011718105357450118,
+    "fine_faces": 25918,
+    "fine_gz_10deg_m": 0.034354805,
+    "fine_initial_slope": 0.189595816,
+    "fine_resolution": [
+      161,
+      41
+    ]
+  },
+  "schema": "tensorcad.righting_arm.example/1",
+  "sections": [
+    {
+      "centre_of_buoyancy_world": [
+        -3.61807299976771e-18,
+        -0.4912385651940015
+      ],
+      "centre_of_gravity_world": [
+        -0.0,
+        -0.25
+      ],
+      "gz_m": -3.61807299976771e-18,
+      "heel_angle_deg": 0.0,
+      "outline_world": [
+        [
+          -0.9574271077563381,
+          -0.0666666666666667
+        ],
+        [
+          -0.9128709291752769,
+          -0.1333333333333333
+        ],
+        [
+          -0.8660254037844386,
+          -0.2
+        ],
+        [
+          -0.816496580927726,
+          -0.2666666666666667
+        ],
+        [
+          -0.7637626158259734,
+          -0.3333333333333333
+        ],
+        [
+          -0.7071067811865476,
+          -0.4
+        ],
+        [
+          -0.6454972243679028,
+          -0.4666666666666666
+        ],
+        [
+          -0.5773502691896257,
+          -0.5333333333333334
+        ],
+        [
+          -0.5,
+          -0.6000000000000001
+        ],
+        [
+          -0.408248290463863,
+          -0.6666666666666667
+        ],
+        [
+          -0.28867513459481287,
+          -0.7333333333333334
+        ],
+        [
+          0.0,
+          -0.8
+        ],
+        [
+          0.28867513459481287,
+          -0.7333333333333334
+        ],
+        [
+          0.408248290463863,
+          -0.6666666666666667
+        ],
+        [
+          0.5,
+          -0.6000000000000001
+        ],
+        [
+          0.5773502691896257,
+          -0.5333333333333334
+        ],
+        [
+          0.6454972243679028,
+          -0.4666666666666666
+        ],
+        [
+          0.7071067811865476,
+          -0.4
+        ],
+        [
+          0.7637626158259734,
+          -0.3333333333333333
+        ],
+        [
+          0.816496580927726,
+          -0.2666666666666667
+        ],
+        [
+          0.8660254037844386,
+          -0.2
+        ],
+        [
+          0.9128709291752769,
+          -0.1333333333333333
+        ],
+        [
+          0.9574271077563381,
+          -0.0666666666666667
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          -1.0,
+          0.0
+        ]
+      ],
+      "waterline_world_z": -0.2913465646819663
+    },
+    {
+      "centre_of_buoyancy_world": [
+        -0.007262508517258515,
+        -0.49053936367966655
+      ],
+      "centre_of_gravity_world": [
+        -0.04341204441673258,
+        -0.246201938253052
+      ],
+      "gz_m": 0.03614953589947406,
+      "heel_angle_deg": 10.0,
+      "outline_world": [
+        [
+          -0.9544581838402919,
+          0.10060162230999396
+        ],
+        [
+          -0.9221554589068616,
+          0.02721067289477655
+        ],
+        [
+          -0.8875981674858292,
+          -0.04657781742200634
+        ],
+        [
+          -0.8503983439167657,
+          -0.12083225745387657
+        ],
+        [
+          -0.81004207141528,
+          -0.19564326459576126
+        ],
+        [
+          -0.7658235113867911,
+          -0.27113529723591034
+        ],
+        [
+          -0.7167264873499389,
+          -0.34748753470514904
+        ],
+        [
+          -0.6611913827239916,
+          -0.42497497948622087
+        ],
+        [
+          -0.5965927831062622,
+          -0.5040605629738597
+        ],
+        [
+          -0.5178115333807457,
+          -0.5856469303334493
+        ],
+        [
+          -0.4116315076065633,
+          -0.6720644411488075
+        ],
+        [
+          -0.13891854213354426,
+          -0.7878462024097664
+        ],
+        [
+          0.15694751369506546,
+          -0.7723202632690978
+        ],
+        [
+          0.2862806298248386,
+          -0.7274300736828283
+        ],
+        [
+          0.3882149699059458,
+          -0.67770874064079
+        ],
+        [
+          0.4759666598792659,
+          -0.6254866237268012
+        ],
+        [
+          0.554654854860804,
+          -0.571666368106245
+        ],
+        [
+          0.6269049692532469,
+          -0.5167109051738561
+        ],
+        [
+          0.6942766196373263,
+          -0.4608952374123774
+        ],
+        [
+          0.7577859824944029,
+          -0.40439854415263443
+        ],
+        [
+          0.8181388964190571,
+          -0.3473452837828769
+        ],
+        [
+          0.8758492781956803,
+          -0.2898260736980319
+        ],
+        [
+          0.9313050934847011,
+          -0.23190932271162173
+        ],
+        [
+          0.984807753012208,
+          -0.17364817766693033
+        ],
+        [
+          -0.984807753012208,
+          0.17364817766693033
+        ]
+      ],
+      "waterline_world_z": -0.29359672714128066
+    },
+    {
+      "centre_of_buoyancy_world": [
+        -0.006442445076606879,
+        -0.48923480451271023
+      ],
+      "centre_of_gravity_world": [
+        -0.08550503583141718,
+        -0.2349231551964771
+      ],
+      "gz_m": 0.0790625907548103,
+      "heel_angle_deg": 20.0,
+      "outline_world": [
+        [
+          -0.9224885309874036,
+          0.26481318189964265
+        ],
+        [
+          -0.9034207616527392,
+          0.1869278965962435
+        ],
+        [
+          -0.8822017100145074,
+          0.10825960856884209
+        ],
+        [
+          -0.8584611835482202,
+          0.028673578757577034
+        ],
+        [
+          -0.8317088085656995,
+          -0.05200867426371569
+        ],
+        [
+          -0.8012710817189422,
+          -0.13403228566638814
+        ],
+        [
+          -0.7661783786949494,
+          -0.21775016983879245
+        ],
+        [
+          -0.7249425306732724,
+          -0.3037039759351354
+        ],
+        [
+          -0.6750583963883554,
+          -0.3928055008087108
+        ],
+        [
+          -0.6116413348811334,
+          -0.486832608373696
+        ],
+        [
+          -0.5220806655552817,
+          -0.5903752110009916
+        ],
+        [
+          -0.273616114660535,
+          -0.7517540966287268
+        ],
+        [
+          0.020451122010967493,
+          -0.7878406328183408
+        ],
+        [
+          0.15561447711357507,
+          -0.7660908860075153
+        ],
+        [
+          0.26463422439755296,
+          -0.7348256441343795
+        ],
+        [
+          0.36012104445922577,
+          -0.6986348195698338
+        ],
+        [
+          0.4469595782576587,
+          -0.6592962762280553
+        ],
+        [
+          0.5276549670584073,
+          -0.6177218109623387
+        ],
+        [
+          0.6036953796819203,
+          -0.5744530729268899
+        ],
+        [
+          0.6760504404411968,
+          -0.5298429765100616
+        ],
+        [
+          0.74539365268424,
+          -0.4841366568832055
+        ],
+        [
+          0.8122153900992275,
+          -0.43751259547248567
+        ],
+        [
+          0.8768858452106478,
+          -0.3901055313377638
+        ],
+        [
+          0.9396926207859084,
+          -0.3420201433256687
+        ],
+        [
+          -0.9396926207859084,
+          0.3420201433256687
+        ]
+      ],
+      "waterline_world_z": -0.3003936205676781
+    }
+  ],
+  "version": "0.20.0",
+  "wigley": {
+    "curve": {
+      "angle_of_maximum_gz_deg": 20.0,
+      "basis": "heeled displacement integration at constant trim",
+      "displacement_volume_m3": 1.385611075,
+      "gy_m": 0.0,
+      "initial_slope_m_per_rad": 0.098898718,
+      "keel_z_m": -0.625,
+      "kg_m_above_keel": 0.35,
+      "maximum_gz_m": 0.035530595,
+      "physical_limit_deg": null,
+      "points": [
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000000794,
+            0.000162474,
+            -0.3622829
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 8.6305e-05,
+          "heel_angle_deg": 0.05,
+          "iterations": 10,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.216928186
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000001587,
+            0.000324949,
+            -0.362282687
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 0.000172611,
+          "heel_angle_deg": 0.1,
+          "iterations": 10,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.216928393
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000030207,
+            0.006500084,
+            -0.362169502
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 0.003453953,
+          "heel_angle_deg": 2.0,
+          "iterations": 10,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.217036417
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.00008633,
+            0.016239129,
+            -0.361573686
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 0.008631941,
+          "heel_angle_deg": 5.0,
+          "iterations": 7,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.217574617
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000177212,
+            0.032531706,
+            -0.359426931
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 0.017376893,
+          "heel_angle_deg": 10.0,
+          "iterations": 7,
+          "residual_m3": -0.0,
+          "waterline_z_m": -0.219498733
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.000270485,
+            0.048889561,
+            -0.355797009
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 0.026311885,
+          "heel_angle_deg": 15.0,
+          "iterations": 9,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.222756609
+        },
+        {
+          "basis": "clipped-polyhedron volume, signed tetrahedra",
+          "centre_of_buoyancy_m": [
+            5.00036103,
+            0.065330296,
+            -0.350609003
+          ],
+          "centre_of_gravity_z_m": -0.275,
+          "deck_submerged": false,
+          "displacement_volume_m3": 1.385611075,
+          "gz_m": 0.035530595,
+          "heel_angle_deg": 20.0,
+          "iterations": 8,
+          "residual_m3": 0.0,
+          "waterline_z_m": -0.227425704
+        }
+      ],
+      "schema": "tensorcad.righting_arm.curve/1",
+      "vanishing_angle_deg": null,
+      "zero_crossings_deg": []
+    },
+    "displacement_volume_m3": 1.3856110749421298,
+    "faces": 1998,
+    "identity_gm_m": 0.09889871760006147,
+    "kg_m_above_keel": 0.35,
+    "waterline_enclosed_volume_m3": 2.7712221498842595
+  }
+}

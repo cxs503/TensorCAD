@@ -101,6 +101,19 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting_arm import (
+    DEFAULT_HEEL_ANGLES_DEG,
+    RightingArm,
+    RightingArmCurve,
+    RightingArmError,
+    HeeledEquilibrium,
+    heeled_displacement,
+    heeled_equilibrium,
+    righting_arm,
+    righting_arm_curve,
+    wall_sided_righting_arm,
+    wall_sided_vanishing_angle,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -223,6 +236,17 @@ __all__ = [
     "generate_hull",
     "generate_wigley",
     "initial_stability",
+    "DEFAULT_HEEL_ANGLES_DEG",
+    "HeeledEquilibrium",
+    "RightingArm",
+    "RightingArmCurve",
+    "RightingArmError",
+    "heeled_displacement",
+    "heeled_equilibrium",
+    "righting_arm",
+    "righting_arm_curve",
+    "wall_sided_righting_arm",
+    "wall_sided_vanishing_angle",
     "inspect_geometry",
     "inspect_mesh_quality",
     "measure_mesh",
@@ -260,4 +284,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"

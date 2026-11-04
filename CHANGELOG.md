@@ -4,6 +4,39 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Large-angle stability, the last open item of the hydrostatics backlog**
+  (`tensorcad/righting_arm.py`): `righting_arm`, `righting_arm_curve`,
+  `heeled_equilibrium`, `heeled_displacement` and the closed-form references
+  `wall_sided_righting_arm` / `wall_sided_vanishing_angle`. `stability.py` said in as
+  many words that `GM` is only the *slope* of `GZ(phi)` at `phi = 0`; this is the curve.
+- **The heeled displacement is integrated, not fitted**: the tilted waterline is
+  `z - tan(phi) y = wl` in the body frame, the submerged part is treated as a closed
+  polyhedron (clipped wetted triangles plus a planar cut that enters the signed-
+  tetrahedron sum with exactly zero volume because the apex lies in the cut plane), and
+  `wl` is solved so the submerged volume equals the displacement. Every point reports
+  `waterline_z`, the centre of buoyancy, the residual of that solve and whether the
+  model's own top rim went under water.
+- **Verification** (`docs/righting_arms.md`, `examples/righting_arm/run_example.py` exits
+  non-zero if one of its 19 claims breaks, `tests/test_righting_arm.py` 33 tests): a box
+  reproduces the wall-sided closed form to `6.1e-16` m over 0–40 deg; its arm vanishes at
+  `sqrt(-2 GM / BM)` to `6.8e-16` deg and the area under the curve matches the integral of
+  the closed form to `3.5e-4`; on the parametric hull `GZ'(0)` equals `KB + BM - KG` to
+  `3e-12` relative with `BM` taken from the independent 2-D waterplane cut, and equals the
+  analytic GM of the family at the floating draft to `1.2 %` (161×41) / `6.5 %` (41×13) at
+  two different displacements; antisymmetry `GZ(+10) = -GZ(-10)` holds to `1e-12` m.
+- **Honest limits, reported rather than smoothed over**: a body asked to displace its
+  whole enclosed volume is refused (fully submerged, its centre of buoyancy cannot move —
+  which is exactly what made a naive waterline solve return a flat, wrong curve); an
+  inverted winding is refused instead of returning a negative volume; a curve that starts
+  non-positive reports its zero in `zero_crossings_deg` and leaves `vanishing_angle_deg`
+  as `None`, because that zero is an angle of loll and not a range of stability;
+  `physical_limit_deg` marks where the hull's design-waterline cap becomes wetted surface.
+- Free-surface correction, damage stability, trim change with heel and statutory criteria
+  remain outside the package and outside the module's docstring claims.
+
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
