@@ -352,3 +352,25 @@ print(stability.SCHEMA_STABILITY)
     completed = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr
     assert "tensorcad.stability.initial/1" in completed.stdout
+
+
+def test_waterplane_second_moment_is_taken_about_the_section_centroid() -> None:
+    """The parallel-axis term `A * y_c^2` must be subtracted -- on an offset waterplane.
+
+    Every other fixture in this file is symmetric about `y = 0`, where the term is zero
+    and a dropped transfer is invisible. This box is slid sideways so that the raw
+    integral `total_yy` and the centroidal `I_T` differ by a factor of 28, which is what
+    makes the test able to fail.
+    """
+    base = box(6.0, 2.0, 1.0)
+    offset = 3.0
+    shifted = Mesh(
+        vertices=tuple((x, y + offset, z) for x, y, z in base.vertices),
+        faces=base.faces,
+    )
+    section = waterplane_moments(shifted, -0.5)
+    assert section.transverse_centre_flotation == pytest.approx(offset)
+    assert section.area == pytest.approx(6.0 * 2.0)
+    # raw integral about y = 0 would be 6*2^3/12 + 12*3^2 = 4 + 108 = 112 m^4
+    assert section.transverse_second_moment == pytest.approx(6.0 * 2.0 ** 3 / 12.0)
+    assert section.longitudinal_second_moment == pytest.approx(2.0 * 6.0 ** 3 / 12.0)
