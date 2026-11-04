@@ -10,8 +10,12 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
-    "WIGLEY_REFERENCE_CASE", "WigleyAnalytic", "WigleyModel", "WigleyParameters",
-    "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
+    "MAX_TRANSOM_FRACTION", "TransomHullParameters", "TransomModel", "WIGLEY_REFERENCE_CASE",
+    "WigleyAnalytic", "WigleyModel", "WigleyParameters", "analytic_transom_hydrostatics",
+    "build_transom_mesh", "estimate_transom_discretisation_error", "export_wigley",
+    "generate_transom_hull", "generate_wigley", "parent_length", "sinc_power_coefficients",
+    "transom_area_ratio", "transom_fraction_for_area_ratio", "truncated_taper_integral",
+    "truncated_taper_moment", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
     "wigley_reference_parameters",
     "BonjeanCurve", "BonjeanTable", "SectionProperties", "analytic_section_area",
@@ -49,14 +53,14 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
-                   "wigley", "hull", "design", "suboff", "suboff_appendages", "cli",
-                   "adapters.fem", "benchmark"):
+                   "benchmark", "cli", "design", "hull", "suboff", "suboff_appendages",
+                   "transom", "wigley", "adapters.fem"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 
