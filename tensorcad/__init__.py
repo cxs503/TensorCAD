@@ -67,6 +67,21 @@ from .geometry_field import (
     surface_point,
     to_mesh,
 )
+from .gz import (
+    DEFAULT_HEEL_ANGLES,
+    GZError,
+    HeelPoint,
+    RightingArmCurve,
+    cross_curve_righting_arm,
+    cross_curve_righting_arm_curve,
+    keel_height,
+    righting_arm,
+    righting_arm_curve,
+    solve_waterline,
+    station_offsets,
+    submerged_properties,
+    wall_sided_righting_arm,
+)
 from .hull import (
     ANALYTIC_COMPARABLE_QUANTITIES,
     HullModel,
@@ -153,6 +168,7 @@ from .wigley import (
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
+    "DEFAULT_HEEL_ANGLES",
     "DESIGN_SCHEMA",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
@@ -173,7 +189,9 @@ __all__ = [
     "EllipsoidField",
     "FairnessReport",
     "FieldError",
+    "GZError",
     "GeometryField",
+    "HeelPoint",
     "HullModel",
     "HullParameters",
     "Hydrostatics",
@@ -188,6 +206,7 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
+    "RightingArmCurve",
     "SampledField",
     "SectionProperties",
     "SphereField",
@@ -214,6 +233,8 @@ __all__ = [
     "build_mesh",
     "compute_hydrostatics",
     "condition_mesh",
+    "cross_curve_righting_arm",
+    "cross_curve_righting_arm_curve",
     "decimate",
     "enforce_gate",
     "estimate_discretisation_error",
@@ -225,6 +246,7 @@ __all__ = [
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
+    "keel_height",
     "measure_mesh",
     "principal_curvatures",
     "project_to_field",
@@ -232,8 +254,13 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "righting_arm",
+    "righting_arm_curve",
     "section_loops",
     "section_properties",
+    "solve_waterline",
+    "station_offsets",
+    "submerged_properties",
     "suboff_fin_chord",
     "suboff_radius_fraction",
     "suboff_reference_geometry",
@@ -246,6 +273,7 @@ __all__ = [
     "to_voxel_grid",
     "validate_hull",
     "vertex_mean_curvature",
+    "wall_sided_righting_arm",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
     "waterplane_moments",
@@ -260,4 +288,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"
