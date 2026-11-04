@@ -74,6 +74,32 @@ VCB at `+0.94 %`, at `161x41` nothing exceeds `0.17 %`. The derivation, the inde
 quadrature that checks the formulas themselves, and the limits of the comparison are in
 [docs/hull_analytic_reference.md](docs/hull_analytic_reference.md).
 
+## Righting arms (0.21)
+
+`stability` gives `GM`, which is the slope of the righting-arm curve at zero heel;
+`tensorcad.righting` gives the curve. `righting_arm_curve` cuts each station once, clips the
+section against the heeled waterplane `z cos(phi) - y sin(phi) = offset`, integrates area and
+first moments by Green's theorem, and integrates those along the hull at constant
+displacement (the offset is bisected, never guessed):
+
+```python
+import tensorcad as tc
+
+model = tc.generate_hull(tc.HullParameters(length=10.0, beam=2.0, draft=1.0))
+curve = tc.righting_arm_curve(model.mesh, kg=0.75, waterline_z=-0.3)  # 0.3 m freeboard
+curve.gz_max, curve.angle_gz_max_deg, curve.angle_vanishing_stability_deg
+```
+
+The curve reproduces the wall-sided closed form for a barge to 6e-15
+relative over 0-45 degrees (it is exact there, and the clip is exact, so anything else would
+be a defect), and its slope at zero heel matches `KB + I_T/V - KG` -- with `I_T` from
+`waterplane_moments`, a different integration -- to 6e-05 on a hull.
+The mesh must carry freeboard: a body capped at its waterline is rejected rather than
+answered, and `deck_immersion_onset_deg` marks the angle past which the curve describes a
+watertight box rather than a ship. Free surface, tanks, flooding, damage stability and class
+rules remain absent. [docs/righting.md](docs/righting.md) has the tables, the convergence
+ladder and the figure.
+
 ## Initial stability (0.14)
 
 `hydrostatics` integrates the buoyancy side and stops there. `tensorcad.stability` crosses into

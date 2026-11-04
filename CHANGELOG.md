@@ -4,6 +4,35 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-03
+
+- **Large-angle righting arms** (`tensorcad/righting.py`): `righting_arm_curve` integrates
+  `GZ(phi)` at constant displacement by cutting each station once, clipping the section
+  against the *heeled* waterplane `z cos(phi) - y sin(phi) = offset`, taking its area and
+  first moments by Green's theorem, and integrating those along the hull with composite
+  Simpson. The offset that holds the displacement is solved by bisection on a bracket taken
+  from the body's own vertical extent, so `GZ(0)` is round-off zero rather than the
+  difference of two discretisation errors. Also exported: `submerged_body` (the integral
+  underneath, usable on its own) and `wall_sided_righting_arm` (the closed form the curve
+  is checked against). `RightingArmCurve` reports `GZ_max` and its angle, the angle of
+  vanishing stability, and `deck_immersion_onset_deg`.
+- **Verification debt closed against the one exact reference**: for a rectangular barge the
+  wall-sided formula `GZ = sin(phi)(GM + BM tan^2(phi)/2)` is exact up to deck-edge
+  immersion, and the integration reproduces it to **5.8e-15
+  relative** over 0-45 degrees. The initial slope recovers `KB + BM - KG` to
+  6e-08 (barge, geometry closed form) and
+  `KB + I_T/V - KG` to 6e-05 on the `sin^0.7 sqrt` hull, where
+  `I_T` comes from `tensorcad.stability.waterplane_moments` -- a different integration. The
+  station-area volume matches `compute_hydrostatics`' closed-surface volume to
+  0e+00 relative at the capped waterline.
+- **The honest limit is reported, not assumed away**: the waterline is required to sit
+  below the top of the body (a body capped at its waterline has no freeboard to heel into
+  and is rejected), and `deck_immersion_fraction` per point marks where the low-side deck
+  edge goes under, past which the curve describes a watertight box rather than a ship.
+  Evidence: `docs/righting.md`, `docs/righting/{results.json,report.md,righting_arms.png}`,
+  `examples/righting/run_example.py` (exits non-zero if any of its 8 claims breaks),
+  `tests/test_righting.py` (40 tests).
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

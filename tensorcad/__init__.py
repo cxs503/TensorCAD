@@ -101,6 +101,15 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting import (
+    ImmersedBody,
+    RightingArmCurve,
+    RightingArmPoint,
+    RightingError,
+    righting_arm_curve,
+    submerged_body,
+    wall_sided_righting_arm,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -177,6 +186,7 @@ __all__ = [
     "HullModel",
     "HullParameters",
     "Hydrostatics",
+    "ImmersedBody",
     "InitialStability",
     "Mesh",
     "MeshBuilder",
@@ -188,6 +198,9 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
+    "RightingArmCurve",
+    "RightingArmPoint",
+    "RightingError",
     "SampledField",
     "SectionProperties",
     "SphereField",
@@ -232,8 +245,10 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "righting_arm_curve",
     "section_loops",
     "section_properties",
+    "submerged_body",
     "suboff_fin_chord",
     "suboff_radius_fraction",
     "suboff_reference_geometry",
@@ -246,6 +261,7 @@ __all__ = [
     "to_voxel_grid",
     "validate_hull",
     "vertex_mean_curvature",
+    "wall_sided_righting_arm",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
     "waterplane_moments",
@@ -260,4 +276,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"
