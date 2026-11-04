@@ -4,6 +4,31 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.20.0 — 2026-11-03
+
+- **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
+  parabolic Wigley `y = (B/2)(1-|2x/L-1|^n)(1-(w/T)^m)` lofted with the same
+  ring-per-station topology as `tensorcad.hull`, so it is watertight, outward, Euler-2 and
+  capped at the design waterline without a welding pass. `generate_wigley`,
+  `wigley_analytic_hydrostatics`, `wigley_analytic_relative_errors`,
+  `wigley_convergence_study` and `export_wigley` are exported; the shape exponents `n, m`
+  are exposed because the closed forms hold for any `n, m >= 1`.
+- **Exact hydrostatics, not a fitted reference**: `Cb = nm/((n+1)(m+1))` (= `4/9`),
+  `Cp = Cwp = n/(n+1)` (= `2/3`), `Cm = m/(m+1)` (= `2/3`), `VCB = T - T(m+1)/(2(m+2))`
+  (= `5T/8` above the keel), `V = Cb L B T`; only the wetted area needs quadrature, and it
+  is a composite Gauss-Legendre rule on the analytic flank that reports its own
+  convergence (4e-16 at `n = m = 2`).
+- **Verification debt closed for the family**: on the ITTC reference proportions
+  (`L/B = 10`, `B/T = 1.6`) the default 41×13 grid integrates volume 0.236 % low,
+  waterplane 0.063 %, wetted area 0.020 %, and 161×41 comes down to 0.0195 %; observed
+  order 2.17 / 2.58 / 2.01, every signed error negative (inscribed chords). The same 41×13
+  grid is 0.88 % on the `sin^0.7 sqrt` family -- the parabolic section has a finite keel
+  angle, and that is asserted as a test.
+  Evidence: `docs/wigley.md`, `docs/wigley/{results.json,report.md,plot.png}`,
+  `examples/wigley/run_example.py` (exits non-zero if any of its 10 claims breaks),
+  `tests/test_wigley.py` (30 tests).
+
+
 ## 0.17.0 — 2026-11-03
 
 An asymmetric hull, so that the longitudinal centres stop being an identity. The family
