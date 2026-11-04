@@ -1,0 +1,136 @@
+{
+  "asymmetric": {
+    "aft_exponent": 0.9,
+    "basis": "closed forms of the asymmetric analytic surface except the longitudinal centres, whose x-weighted half-moment has no elementary form: Gauss-Legendre after x = t^3/2, cross-checked against tanh-sinh quadrature to 1e-14; wetted area by Gauss-Legendre quadrature; longitudinal waterplane inertia by tanh-sinh quadrature about the LCF",
+    "fore_exponent": 0.5,
+    "longitudinal_centre_flotation_m": 5.257824171324652,
+    "longitudinal_inertia_quadrature_evidence": 3.7752120502843903e-16,
+    "longitudinal_quadrature_m4": 77.88072254242803,
+    "longitudinal_relative_difference": 1.2101430968414206e-13,
+    "longitudinal_waterplane_inertia_m4": 77.88072254243745,
+    "symmetric_exponent_transverse_relative_error": -0.01866046336755789,
+    "transverse_quadrature_m4": 3.332919251882954,
+    "transverse_relative_difference": 0.0,
+    "transverse_waterplane_inertia_m4": 3.332919251882954
+  },
+  "case": {
+    "asymmetric": {
+      "aft_exponent": 0.9,
+      "fore_exponent": 0.5
+    },
+    "beam_m": 2.0,
+    "breadth_exponent_symmetric": 0.7,
+    "draft_m": 0.8,
+    "grids": [
+      [
+        41,
+        13
+      ],
+      [
+        81,
+        25
+      ],
+      [
+        161,
+        49
+      ],
+      [
+        321,
+        97
+      ]
+    ],
+    "length_m": 10.0
+  },
+  "claims": {
+    "failed": [],
+    "passed": true
+  },
+  "mesh_ladder": {
+    "asymmetric": [
+      {
+        "block_coefficient": 0.4687955674421541,
+        "longitudinal_relative_error": -0.008231652536284328,
+        "longitudinal_waterplane_inertia_m4": 77.23963549519334,
+        "nx": 41,
+        "nz": 13,
+        "transverse_relative_error": -0.0015375101923148504,
+        "transverse_waterplane_inertia_m4": 3.3277948545630216
+      },
+      {
+        "block_coefficient": 0.4716822787390771,
+        "longitudinal_relative_error": -0.0029684209711418053,
+        "longitudinal_waterplane_inertia_m4": 77.6495397723948,
+        "nx": 81,
+        "nz": 25,
+        "transverse_relative_error": -0.0003824229967298587,
+        "transverse_waterplane_inertia_m4": 3.3316446669147903
+      },
+      {
+        "block_coefficient": 0.47270975405370136,
+        "longitudinal_relative_error": -0.001060075204237565,
+        "longitudinal_waterplane_inertia_m4": 77.79816311958211,
+        "nx": 161,
+        "nz": 49,
+        "transverse_relative_error": -9.524722552878284e-05,
+        "transverse_waterplane_inertia_m4": 3.3326018005713007
+      },
+      {
+        "block_coefficient": 0.47307434025846623,
+        "longitudinal_relative_error": -0.00037647212591107593,
+        "longitudinal_waterplane_inertia_m4": 77.85140262125441,
+        "nx": 321,
+        "nz": 97,
+        "transverse_relative_error": -2.3747783698291336e-05,
+        "transverse_waterplane_inertia_m4": 3.3328401024374763
+      }
+    ],
+    "symmetric": [
+      {
+        "block_coefficient": 0.4654096310718266,
+        "longitudinal_relative_error": -0.006038173816592773,
+        "longitudinal_waterplane_inertia_m4": 76.40662200112655,
+        "nx": 41,
+        "nz": 13,
+        "transverse_relative_error": -0.0013861379392113848,
+        "transverse_waterplane_inertia_m4": 3.2661917576629698
+      },
+      {
+        "block_coefficient": 0.4680971372757106,
+        "longitudinal_relative_error": -0.0019787525935808237,
+        "longitudinal_waterplane_inertia_m4": 76.71867288151196,
+        "nx": 81,
+        "nz": 25,
+        "transverse_relative_error": -0.0003449565278583755,
+        "transverse_waterplane_inertia_m4": 3.2695971761867777
+      },
+      {
+        "block_coefficient": 0.4690383612119889,
+        "longitudinal_relative_error": -0.0006381878388120876,
+        "longitudinal_waterplane_inertia_m4": 76.82172314137853,
+        "nx": 161,
+        "nz": 49,
+        "transverse_relative_error": -8.604472263951113e-05,
+        "transverse_waterplane_inertia_m4": 3.2704440056133413
+      },
+      {
+        "block_coefficient": 0.4693672208867407,
+        "longitudinal_relative_error": -0.00020356570039192778,
+        "longitudinal_waterplane_inertia_m4": 76.85513288465921,
+        "nx": 321,
+        "nz": 97,
+        "transverse_relative_error": -2.1487869695691053e-05,
+        "transverse_waterplane_inertia_m4": 3.2706551533542214
+      }
+    ]
+  },
+  "symmetric": {
+    "basis": "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature, longitudinal waterplane inertia by tanh-sinh quadrature)",
+    "longitudinal_centre_flotation_m": 5.0,
+    "longitudinal_quadrature_m4": 76.87078113906148,
+    "longitudinal_relative_difference": -2.220446049250313e-16,
+    "longitudinal_waterplane_inertia_m4": 76.87078113906146,
+    "transverse_quadrature_m4": 3.270725434276164,
+    "transverse_relative_difference": -1.1102230246251565e-16,
+    "transverse_waterplane_inertia_m4": 3.2707254342761636
+  }
+}

@@ -393,7 +393,12 @@ def analytic_hydrostatics(
 
 
 def waterplane_inertia_transverse(
-    length: float, beam: float, *, breadth_exponent: float = BREADTH_EXPONENT
+    length: float,
+    beam: float,
+    *,
+    breadth_exponent: float = BREADTH_EXPONENT,
+    fore_exponent: float | None = None,
+    aft_exponent: float | None = None,
 ) -> float:
     """``I_T = int y**2 dA`` of the reference waterplane, in closed form.
 
@@ -410,10 +415,24 @@ def waterplane_inertia_transverse(
     reveal, because both the mesh and the reference would be wrong in the same way --
     which is why this is derived here and cross-checked against the mesh in
     ``tests/test_stability.py`` rather than being copied from the mesh integrator.
+
+    Split taper: ``fore_exponent`` / ``aft_exponent`` (the asymmetric family of
+    :mod:`tensorcad.hull`) put a different ``p`` on each half of the waterplane, so the
+    cube integrates half by half,
+
+        I_T = (B**3 L / 12) * (1/2) * (taper_integral(3 e_aft) + taper_integral(3 e_fore)),
+
+    still a gamma function and still no quadrature. Equal exponents short-circuit to
+    the symmetric expression, so no published digit moves.
     """
     _check_positive("length", length)
     _check_positive("beam", beam)
-    return beam**3 * length / 12.0 * taper_integral(3.0 * breadth_exponent)
+    fore = breadth_exponent if fore_exponent is None else fore_exponent
+    aft = breadth_exponent if aft_exponent is None else aft_exponent
+    scale = beam**3 * length / 12.0
+    if fore == aft:
+        return scale * taper_integral(3.0 * fore)
+    return scale * 0.5 * (taper_integral(3.0 * aft) + taper_integral(3.0 * fore))
 
 
 def waterplane_inertia_longitudinal(
@@ -421,9 +440,12 @@ def waterplane_inertia_longitudinal(
     beam: float,
     *,
     breadth_exponent: float = BREADTH_EXPONENT,
+    fore_exponent: float | None = None,
+    aft_exponent: float | None = None,
+    longitudinal_centre: float | None = None,
     quadrature_levels: int = 8,
 ) -> tuple[float, float]:
-    """``I_L`` about midship, plus the quadrature's self-convergence evidence.
+    """``I_L`` about the centre of flotation, plus the quadrature's self-convergence.
 
     Substituting ``u = x/L - 1/2`` (so ``sin(pi x/L) = cos(pi u)``) and using the
     fore-aft symmetry of the reference form,
@@ -436,18 +458,47 @@ def waterplane_inertia_longitudinal(
     refinements are returned as the second element. Unlike ``I_T`` there is no elementary
     closed form, so the returned error estimate -- not a promise -- is what the tests
     hold this to.
+
+    Split taper: each half carries its own exponent, ``I_L(midship) = B L**3
+    (J(e_aft) + J(e_fore))`` with the same ``J`` above, and ``longitudinal_centre``
+    moves the result from midship to the centre of flotation by the parallel-axis
+    theorem, ``I_LCF = I_L(midship) - A_wp (LCF - L/2)**2``. The shift is closed form
+    (``A_wp = B L`` times the taper), so the returned evidence stays the quadrature's
+    self-convergence; the symmetric family passes ``LCF = L/2`` and takes the unshifted
+    branch bit for bit.
     """
     _check_positive("length", length)
     _check_positive("beam", beam)
     if quadrature_levels < 2:
         raise ValueError(f"quadrature_levels must be at least 2, got {quadrature_levels!r}")
+    fore = breadth_exponent if fore_exponent is None else fore_exponent
+    aft = breadth_exponent if aft_exponent is None else aft_exponent
+    scale = beam * length**3
 
-    def integrand(u: float) -> float:
-        # ``float ** float`` is annotated ``Any`` in typeshed (it can be complex), so
-        # the cast keeps the declared return type honest for the type checker.
-        return float(u * u * math.cos(math.pi * u) ** breadth_exponent)
+    def half(exponent: float) -> tuple[float, float]:
+        def integrand(u: float) -> float:
+            # ``float ** float`` is annotated ``Any`` in typeshed (it can be complex), so
+            # the cast keeps the declared return type honest for the type checker.
+            return float(u * u * math.cos(math.pi * u) ** exponent)
 
-    fine = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels))
-    coarse = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels) - 1)
-    scale = 2.0 * beam * length**3
-    return scale * fine, abs(fine - coarse) * scale
+        fine = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels))
+        coarse = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels) - 1)
+        return fine, abs(fine - coarse)
+
+    if fore == aft:
+        fine, difference = half(fore)
+        midship = 2.0 * scale * fine
+        error = 2.0 * scale * difference
+    else:
+        fine_fore, difference_fore = half(fore)
+        fine_aft, difference_aft = half(aft)
+        midship = scale * (fine_aft + fine_fore)
+        error = scale * (difference_aft + difference_fore)
+    if longitudinal_centre is None:
+        return midship, error
+    centre = float(longitudinal_centre)
+    area = 0.5 * beam * length * (taper_integral(aft) + taper_integral(fore))
+    shift = centre - 0.5 * length
+    moment = area * shift * shift
+    # The parallel-axis term is exact arithmetic; only its own rounding is added.
+    return midship - moment, error + 4.0e-16 * abs(moment)
