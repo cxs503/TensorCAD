@@ -100,6 +100,21 @@ from .mesh_conditioning import (
     project_to_field,
     taubin_smooth,
 )
+from .large_angle import (
+    GzCurve,
+    HeeledHydrostatics,
+    LargeAngleError,
+    RightingArm,
+    box_dynamical_stability,
+    box_hull_mesh,
+    box_righting_arm,
+    dynamical_stability,
+    extend_freeboard,
+    gz_curve,
+    heeled_hydrostatics,
+    righting_arm,
+    wall_sided_limit_deg,
+)
 from .parameters import ParameterSpec, RatioSpec
 from .stability import (
     InitialStability,
@@ -152,12 +167,25 @@ from .wigley import (
 )
 
 __all__ = [
+    "box_dynamical_stability",
+    "box_hull_mesh",
+    "box_righting_arm",
+    "dynamical_stability",
+    "extend_freeboard",
+    "gz_curve",
+    "heeled_hydrostatics",
+    "righting_arm",
+    "wall_sided_limit_deg",
     "ANALYTIC_COMPARABLE_QUANTITIES",
     "DESIGN_SCHEMA",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
     "WIGLEY_REFERENCE_CASE",
     "AnalyticHydrostatics",
+    "GzCurve",
+    "HeeledHydrostatics",
+    "LargeAngleError",
+    "RightingArm",
     "BonjeanCurve",
     "BonjeanTable",
     "BoundingBox",
@@ -260,4 +288,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"

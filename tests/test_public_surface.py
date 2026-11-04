@@ -42,6 +42,10 @@ EXPECTED_API = {
     "assess_fairness", "principal_curvatures",
     "vertex_mean_curvature",
     "write_offsets_csv", "write_obj", "write_solver_manifest", "write_stl",
+    "GzCurve", "HeeledHydrostatics", "LargeAngleError", "RightingArm",
+    "box_dynamical_stability", "box_hull_mesh", "box_righting_arm", "dynamical_stability",
+    "extend_freeboard", "gz_curve", "heeled_hydrostatics", "righting_arm",
+    "wall_sided_limit_deg",
 }
 
 
@@ -49,13 +53,13 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
-                   "wigley", "hull", "design", "suboff", "suboff_appendages", "cli",
+                   "wigley", "large_angle", "hull", "design", "suboff", "suboff_appendages", "cli",
                    "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 

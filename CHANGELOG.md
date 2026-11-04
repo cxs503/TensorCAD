@@ -4,6 +4,42 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Large-angle stability, from the submerged volume rather than from a waterplane**
+  (`tensorcad/large_angle.py`): `GZ(phi) = KN(phi) - KG sin(phi)` at constant displacement
+  and level trim, i.e. the hull clipped by a **tilted** waterplane whose sinkage is solved so
+  the displaced volume is unchanged -- precisely the geometry `hydrostatics` declines to
+  handle. `heeled_hydrostatics`, `righting_arm`, `gz_curve`, `GzCurve` (peak, vanishing
+  angle by interpolation, dynamical stability) and a waterline-held convention are exposed.
+- **Exact, not grid-convergent**: the cross-section of a triangle mesh is quadratic in `z`
+  between vertex heights, so three samples per band (at 1/4, 1/2, 3/4, never on a vertex)
+  determine it exactly and the band integral -- including a *partial* band, which is what the
+  waterline bisection needs -- is closed form. Volume and all three first moments come out
+  exact to floating point; a box barge reproduces the wall-sided formula
+  `sin(phi)(GM + BM tan^2(phi)/2)` to **2.9e-15** over 0-30 deg. Cut segments are oriented
+  `z_hat x n`, so the shoelace sums are positive without linking loops and a section that
+  splits or develops a hole needs no special case.
+- **The freeboard problem, named and closed**: every generator here caps the surface *at* the
+  design waterline, which means the body displaces its entire volume upright and no tilted
+  waterplane can hold that displacement -- `GZ` does not exist. `heeled_hydrostatics` refuses
+  with that explanation instead of returning a number, and the new
+  `extend_freeboard(mesh, height)` extrudes the deck boundary and re-caps it, watertight and
+  waterline neutral (immersed volume and centre of buoyancy reproduced to 2.4e-16 against
+  `compute_hydrostatics` on the capped mesh, so `GM` cannot move).
+- **Verification against four references that share no code with the integrator**: the
+  wall-sided closed form (2.88e-15); `dGZ/dphi(0)` against `initial_stability`'s `GM` on the
+  capped mesh (7.74e-07 relative); the closed-form `int GZ dphi` against the trapezoid area
+  (6.0e-4 at 2.5 deg, `O(h^2)` on refinement); and rotational symmetry of a circular-section
+  barge, where `GZ = (R - KG) sin(phi)` at every angle (5.1e-4 at 32 facets, 4.0e-6 at 128 --
+  a facet error, so the residual is the polygonal approximation, not the quadrature).
+  Displacement is held to 9.8e-15 and `GZ` is odd in heel to 2.8e-17 across the curve.
+  Negative controls keep it honest: a shallow-freeboard box heeled past its deck-edge limit
+  returns 0.041 m where the formula says 0.153 m, and `KG` above `KM` makes the arm negative.
+  Evidence: `docs/large_angle_stability.md`, `docs/large_angle_stability/{results.json,
+  report.md,gz_curves.png}`, `examples/large_angle_stability/run_example.py` (exits non-zero
+  if any of its 8 claims breaks), `tests/test_large_angle.py` (44 tests).
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
