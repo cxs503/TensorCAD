@@ -1,0 +1,274 @@
+{
+  "barge": {
+    "exact_volume_m3": 16.0,
+    "integrated_volume_m3": 16.000000000000004,
+    "relative_error": 2.220446049250313e-16,
+    "section_area_m2": 1.6,
+    "section_centroid_z_m": -0.39999999999999997
+  },
+  "claims": [
+    {
+      "claim": "barge area exact",
+      "detail": "",
+      "holds": true
+    },
+    {
+      "claim": "barge volume exact",
+      "detail": "",
+      "holds": true
+    },
+    {
+      "claim": "hull section within 6 %",
+      "detail": "5.31 %",
+      "holds": true
+    },
+    {
+      "claim": "vertical convergence monotone",
+      "detail": "ratios ['2.09', '2.75', '2.77']",
+      "holds": true
+    },
+    {
+      "claim": "sections == surface flux",
+      "detail": "max |rel| 1.11e-16",
+      "holds": true
+    }
+  ],
+  "example": "bonjean",
+  "section_table": {
+    "rows": [
+      {
+        "areas": [
+          {
+            "closed_form_m2": 0.05860388284293393,
+            "mesh_m2": 0.05549338982174226,
+            "relative_error": -0.05307656882613376,
+            "waterline_z_m": -0.6
+          },
+          {
+            "closed_form_m2": 0.16575681184840213,
+            "mesh_m2": 0.16252757395196876,
+            "relative_error": -0.019481780932096848,
+            "waterline_z_m": -0.4
+          },
+          {
+            "closed_form_m2": 0.30451470781432666,
+            "mesh_m2": 0.30123272680798735,
+            "relative_error": -0.010777742165217319,
+            "waterline_z_m": -0.2
+          },
+          {
+            "closed_form_m2": 0.46883106274347125,
+            "mesh_m2": 0.4655176219793024,
+            "relative_error": -0.007067451428622307,
+            "waterline_z_m": 0.0
+          }
+        ],
+        "station_m": 1.0
+      },
+      {
+        "areas": [
+          {
+            "closed_form_m2": 0.10461121305290014,
+            "mesh_m2": 0.09905880837037284,
+            "relative_error": -0.053076572964692925,
+            "waterline_z_m": -0.6
+          },
+          {
+            "closed_form_m2": 0.29588519255142537,
+            "mesh_m2": 0.29012082078110507,
+            "relative_error": -0.01948178521748245,
+            "waterline_z_m": -0.4
+          },
+          {
+            "closed_form_m2": 0.5435758081471065,
+            "mesh_m2": 0.5377172858895369,
+            "relative_error": -0.01077774648864449,
+            "waterline_z_m": -0.2
+          },
+          {
+            "closed_form_m2": 0.8368897044232009,
+            "mesh_m2": 0.8309750234542731,
+            "relative_error": -0.007067455768265507,
+            "waterline_z_m": 0.0
+          }
+        ],
+        "station_m": 2.5
+      },
+      {
+        "areas": [
+          {
+            "closed_form_m2": 0.1333333333333334,
+            "mesh_m2": 0.12625645666358737,
+            "relative_error": -0.05307657502309515,
+            "waterline_z_m": -0.6
+          },
+          {
+            "closed_form_m2": 0.3771236166328254,
+            "mesh_m2": 0.3697765745293319,
+            "relative_error": -0.019481787348912483,
+            "waterline_z_m": -0.4
+          },
+          {
+            "closed_form_m2": 0.692820323027551,
+            "mesh_m2": 0.6853532797339728,
+            "relative_error": -0.010777748638995055,
+            "waterline_z_m": -0.2
+          },
+          {
+            "closed_form_m2": 1.0666666666666669,
+            "mesh_m2": 1.0591280448782063,
+            "relative_error": -0.0070674579266817306,
+            "waterline_z_m": 0.0
+          }
+        ],
+        "station_m": 5.0
+      },
+      {
+        "areas": [
+          {
+            "closed_form_m2": 0.10461121305290014,
+            "mesh_m2": 0.09905880793455815,
+            "relative_error": -0.05307657713073477,
+            "waterline_z_m": -0.6
+          },
+          {
+            "closed_form_m2": 0.29588519255142537,
+            "mesh_m2": 0.2901208195047025,
+            "relative_error": -0.01948178953132651,
+            "waterline_z_m": -0.4
+          },
+          {
+            "closed_form_m2": 0.5435758081471065,
+            "mesh_m2": 0.5377172835238199,
+            "relative_error": -0.010777750840782696,
+            "waterline_z_m": -0.2
+          },
+          {
+            "closed_form_m2": 0.8368897044232009,
+            "mesh_m2": 0.8309750197983526,
+            "relative_error": -0.0070674601367269885,
+            "waterline_z_m": 0.0
+          }
+        ],
+        "station_m": 7.5
+      },
+      {
+        "areas": [
+          {
+            "closed_form_m2": 0.058603882842933934,
+            "mesh_m2": 0.0554933890677102,
+            "relative_error": -0.05307658169272267,
+            "waterline_z_m": -0.6
+          },
+          {
+            "closed_form_m2": 0.16575681184840216,
+            "mesh_m2": 0.1625275717435796,
+            "relative_error": -0.019481794255164386,
+            "waterline_z_m": -0.4
+          },
+          {
+            "closed_form_m2": 0.30451470781432666,
+            "mesh_m2": 0.3012327227149028,
+            "relative_error": -0.010777755606553474,
+            "waterline_z_m": -0.2
+          },
+          {
+            "closed_form_m2": 0.46883106274347136,
+            "mesh_m2": 0.4655176156539506,
+            "relative_error": -0.007067464920373134,
+            "waterline_z_m": 0.0
+          }
+        ],
+        "station_m": 9.0
+      }
+    ],
+    "stations_m": [
+      1.0,
+      2.5,
+      5.0,
+      7.5,
+      9.0
+    ],
+    "waterlines_m": [
+      -0.6,
+      -0.4,
+      -0.2,
+      0.0
+    ],
+    "worst_relative_error": 0.05307658169272267
+  },
+  "version": "0.13.0",
+  "vertical_convergence": [
+    {
+      "nz": 13,
+      "relative_error": -0.05307657510484176
+    },
+    {
+      "nz": 21,
+      "relative_error": -0.025392103835788382
+    },
+    {
+      "nz": 41,
+      "relative_error": -0.00923598761086264
+    },
+    {
+      "nz": 81,
+      "relative_error": -0.003330113032144255
+    }
+  ],
+  "vertical_convergence_ratio": [
+    2.0902787515398416,
+    2.7492570264953793,
+    2.7734757113981803
+  ],
+  "volume_closure": [
+    {
+      "analytic_m3": 7.512698221250894,
+      "flux_error": -0.01964881155559617,
+      "nx": 11,
+      "nz": 41,
+      "sections_minus_flux": 0.0,
+      "simpson_error": -0.005770043037156669,
+      "simpson_m3": 7.469349629189106,
+      "surface_flux_m3": 7.365082629627473,
+      "trapezoid_error": -0.01964881155559617,
+      "trapezoid_m3": 7.365082629627473
+    },
+    {
+      "analytic_m3": 7.512698221250894,
+      "flux_error": -0.006870751025504496,
+      "nx": 21,
+      "nz": 41,
+      "sections_minus_flux": 0.0,
+      "simpson_error": -0.0026113976858480603,
+      "simpson_m3": 7.493079578501445,
+      "surface_flux_m3": 7.461080342242929,
+      "trapezoid_error": -0.006870751025504496,
+      "trapezoid_m3": 7.461080342242929
+    },
+    {
+      "analytic_m3": 7.512698221250894,
+      "flux_error": -0.0029406783752584653,
+      "nx": 41,
+      "nz": 41,
+      "sections_minus_flux": -1.1102230246251565e-16,
+      "simpson_error": -0.0016306542633118815,
+      "simpson_m3": 7.500447607867436,
+      "surface_flux_m3": 7.490605792051819,
+      "trapezoid_error": -0.0029406783752585763,
+      "trapezoid_m3": 7.490605792051818
+    },
+    {
+      "analytic_m3": 7.512698221250894,
+      "flux_error": -0.0017312746924704747,
+      "nx": 81,
+      "nz": 41,
+      "sections_minus_flux": 0.0,
+      "simpson_error": -0.0013281401960431038,
+      "simpson_m3": 7.5027203047625095,
+      "surface_flux_m3": 7.499691676948275,
+      "trapezoid_error": -0.0017312746924704747,
+      "trapezoid_m3": 7.499691676948275
+    }
+  ]
+}
