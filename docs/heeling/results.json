@@ -1,0 +1,398 @@
+{
+  "tensorcad_version": "0.20.0",
+  "barge": {
+    "length": 10.0,
+    "beam": 2.0,
+    "depth": 1.5,
+    "draft": 0.8,
+    "kg": 0.5
+  },
+  "closed_form_barge": {
+    "kb": 0.4,
+    "bm": 0.41666666666666663,
+    "gm": 0.31666666666666665,
+    "displacement": 16.0
+  },
+  "barge_solid_volume": 30.0,
+  "wall_sided_table": [
+    {
+      "heel_degrees": 2.0,
+      "gz_measured": 0.011060373652708847,
+      "gz_wall_sided": 0.011060373652708833,
+      "absolute_difference": 1.3877787807814457e-17,
+      "relative_difference": 1.2547304678459576e-15,
+      "waterplane_area": 20.012190885976434,
+      "centre_of_buoyancy": [
+        1.919037845299343e-17,
+        0.014550320621561568,
+        0.4002540541962283
+      ]
+    },
+    {
+      "heel_degrees": 5.0,
+      "gz_measured": 0.027738300465887503,
+      "gz_wall_sided": 0.027738300465887468,
+      "absolute_difference": 3.469446951953614e-17,
+      "relative_difference": 1.2507784881126139e-15,
+      "waterplane_area": 20.076396750866945,
+      "centre_of_buoyancy": [
+        6.5052130349130266e-18,
+        0.036453609802468354,
+        0.40159463880115676
+      ]
+    },
+    {
+      "heel_degrees": 10.0,
+      "gz_measured": 0.056113366873259005,
+      "gz_wall_sided": 0.05611336687325905,
+      "absolute_difference": -4.85722573273506e-17,
+      "relative_difference": 8.656093910219067e-16,
+      "waterplane_area": 20.3085322377149,
+      "centre_of_buoyancy": [
+        1.6479873021779664e-17,
+        0.07346957529519366,
+        0.4064773341928674
+      ]
+    },
+    {
+      "heel_degrees": 15.0,
+      "gz_measured": 0.08583069165361867,
+      "gz_wall_sided": 0.08583069165361872,
+      "absolute_difference": -4.163336342344337e-17,
+      "relative_difference": 4.850638229907362e-16,
+      "waterplane_area": 20.705523608201663,
+      "centre_of_buoyancy": [
+        -4.683753385137378e-17,
+        0.11164549684630104,
+        0.414957660359269
+      ]
+    },
+    {
+      "heel_degrees": 20.0,
+      "gz_measured": 0.11774573076631054,
+      "gz_wall_sided": 0.11774573076631059,
+      "absolute_difference": -5.551115123125783e-17,
+      "relative_difference": 4.714493754464062e-16,
+      "waterplane_area": 21.28355544951824,
+      "centre_of_buoyancy": [
+        -1.0581813203458523e-16,
+        0.15165426427758422,
+        0.4275988190482905
+      ]
+    },
+    {
+      "heel_degrees": 25.0,
+      "gz_measured": 0.15297397282427064,
+      "gz_wall_sided": 0.15297397282427064,
+      "absolute_difference": 0.0,
+      "relative_difference": 0.0,
+      "waterplane_area": 22.067558379249835,
+      "centre_of_buoyancy": [
+        -3.642919299551294e-17,
+        0.1942948575645827,
+        0.4453005900112499
+      ]
+    },
+    {
+      "heel_degrees": 30.0,
+      "gz_measured": 0.1930555555555555,
+      "gz_wall_sided": 0.1930555555555555,
+      "absolute_difference": 0.0,
+      "relative_difference": 0.0,
+      "waterplane_area": 23.09401076758503,
+      "centre_of_buoyancy": [
+        -7.02563007770607e-17,
+        0.24056261216234404,
+        0.4694444444444444
+      ]
+    }
+  ],
+  "wall_sided_worst_relative_difference": 1.2547304678459576e-15,
+  "deck_edge_degrees": 34.99202019855866,
+  "past_deck_edge": {
+    "heel_degrees": 44.99202019855866,
+    "gz_measured": 0.3202764199261754,
+    "gz_wall_sided": 0.3710973201621451
+  },
+  "ninety_degrees": {
+    "kn_measured": 0.7500000000000001,
+    "kn_expected": 0.75,
+    "gz_measured": 0.55,
+    "gz_expected": 0.55
+  },
+  "barge_slope_ladder": [
+    {
+      "step_degrees": 0.8,
+      "slope": 0.31669699708295895,
+      "gm": 0.31666666666666665,
+      "kb": 0.4,
+      "bm": 0.41666666666666663,
+      "difference": 3.0330416292301265e-05
+    },
+    {
+      "step_degrees": 0.4,
+      "slope": 0.31667424850950476,
+      "gm": 0.31666666666666665,
+      "kb": 0.4,
+      "bm": 0.41666666666666663,
+      "difference": 7.581842838111363e-06
+    },
+    {
+      "step_degrees": 0.2,
+      "slope": 0.3166685620797859,
+      "gm": 0.31666666666666665,
+      "kb": 0.4,
+      "bm": 0.41666666666666663,
+      "difference": 1.8954131192350232e-06
+    },
+    {
+      "step_degrees": 0.1,
+      "slope": 0.3166671405170308,
+      "gm": 0.31666666666666665,
+      "kb": 0.4,
+      "bm": 0.41666666666666663,
+      "difference": 4.738503641688041e-07
+    }
+  ],
+  "slope_convergence": [
+    {
+      "step_ratio": 2.0,
+      "error_ratio": 4.000401609466303,
+      "observed_order": 2.000144842725198
+    },
+    {
+      "step_ratio": 2.0,
+      "error_ratio": 4.000100432549157,
+      "observed_order": 2.0000362229304103
+    },
+    {
+      "step_ratio": 2.0,
+      "error_ratio": 4.000024612326356,
+      "observed_order": 2.000008876992984
+    }
+  ],
+  "wigley": {
+    "parameters": {
+      "length": 10.0,
+      "beam": 1.0,
+      "draft": 0.625,
+      "nx": 41,
+      "nz": 13
+    },
+    "waterline_z": -0.1875,
+    "displacement": 1.560945095486111,
+    "solid_volume": 2.7712221498842573,
+    "slope": {
+      "slope": 0.26334215889525375,
+      "gm": 0.263340808285682,
+      "kb": 0.2807058169692479,
+      "bm": 0.1826349913164341,
+      "difference": 1.3506095717374933e-06,
+      "step_degrees": 0.25
+    },
+    "waterplane_area_clip": 6.051770833333332,
+    "waterplane_area_green": 6.051770833333332
+  },
+  "wigley_curve": {
+    "angles_degrees": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0
+    ],
+    "gz": [
+      -1.9357025114280097e-20,
+      0.023004337117825683,
+      0.045939910168842225,
+      0.06877263985708551,
+      0.09144117729738538
+    ],
+    "kn": [
+      -1.9357025114280097e-20,
+      -0.014036853549929038,
+      -0.027860565339603162,
+      -0.041225454311485804,
+      -0.053917383616023835
+    ],
+    "points": [
+      {
+        "heel_degrees": 0.0,
+        "keel_z": -0.625,
+        "heel_radians": 0.0,
+        "displacement_volume": 1.560945095486,
+        "waterline_offset": -0.1875,
+        "centre_of_buoyancy": [
+          5.0,
+          -0.0,
+          -0.344294183
+        ],
+        "waterplane_area": 6.051770833,
+        "kn": -0.0
+      },
+      {
+        "heel_degrees": 5.0,
+        "keel_z": -0.625,
+        "heel_radians": 0.0872664626,
+        "displacement_volume": 1.560945095486,
+        "waterline_offset": -0.187349982176,
+        "centre_of_buoyancy": [
+          5.000075798,
+          0.015970283,
+          -0.343596001
+        ],
+        "waterplane_area": 6.064811672,
+        "kn": -0.01403685355
+      },
+      {
+        "heel_degrees": 10.0,
+        "keel_z": -0.625,
+        "heel_radians": 0.174532925199,
+        "displacement_volume": 1.560945095486,
+        "waterline_offset": -0.186903136165,
+        "centre_of_buoyancy": [
+          5.000144017,
+          0.031924275,
+          -0.341494159
+        ],
+        "waterplane_area": 6.090652462,
+        "kn": -0.02786056534
+      },
+      {
+        "heel_degrees": 15.0,
+        "keel_z": -0.625,
+        "heel_radians": 0.261799387799,
+        "displacement_volume": 1.560945095486,
+        "waterline_offset": -0.18612338201,
+        "centre_of_buoyancy": [
+          5.000212408,
+          0.047875325,
+          -0.337956071
+        ],
+        "waterplane_area": 6.129032758,
+        "kn": -0.041225454311
+      },
+      {
+        "heel_degrees": 20.0,
+        "keel_z": -0.625,
+        "heel_radians": 0.349065850399,
+        "displacement_volume": 1.560945095486,
+        "waterline_offset": -0.184964658853,
+        "centre_of_buoyancy": [
+          5.00028438,
+          0.063799665,
+          -0.332932023
+        ],
+        "waterplane_area": 6.188176332,
+        "kn": -0.053917383616
+      }
+    ]
+  },
+  "wigley_ladder": [
+    {
+      "nx": 21,
+      "nz": 9,
+      "faces": 678,
+      "gz_10deg": 0.04583389688176706,
+      "difference_from_finest": -0.00015989033746510034,
+      "relative_difference": 0.0034763464183319675
+    },
+    {
+      "nx": 41,
+      "nz": 13,
+      "faces": 1998,
+      "gz_10deg": 0.045939910168842225,
+      "difference_from_finest": -5.3877050389936065e-05,
+      "relative_difference": 0.0011713984354697266
+    },
+    {
+      "nx": 81,
+      "nz": 25,
+      "faces": 7838,
+      "gz_10deg": 0.04598388326734587,
+      "difference_from_finest": -9.903951886290618e-06,
+      "relative_difference": 0.0002153323847649865
+    },
+    {
+      "nx": 161,
+      "nz": 41,
+      "faces": 25918,
+      "gz_10deg": 0.04599378721923216,
+      "difference_from_finest": 0.0,
+      "relative_difference": 0.0
+    }
+  ],
+  "claims": [
+    {
+      "claim": "barge GZ reproduces the wall-sided closed form at every angle below deck-edge immersion",
+      "ok": true,
+      "detail": "worst relative difference 1.255e-15 over 7 angles",
+      "measured": 1.2547304678459576e-15,
+      "reference": 1e-12
+    },
+    {
+      "claim": "past deck-edge immersion the measured arm falls below the wall-sided claim",
+      "ok": true,
+      "detail": "at 44.99 deg: measured 0.320276 < wall-sided 0.371097",
+      "measured": 0.3202764199261754,
+      "reference": 0.3710973201621451
+    },
+    {
+      "claim": "at 90 degrees KN equals half the depth, so GZ = D/2 - KG",
+      "ok": true,
+      "detail": "KN 0.750000000000 vs D/2 0.750000000000",
+      "measured": 0.7500000000000001,
+      "reference": 0.75
+    },
+    {
+      "claim": "dGZ/dphi at zero reproduces GM on the barge",
+      "ok": true,
+      "detail": "worst |slope - GM| = 3.033e-05 over steps (0.8, 0.4, 0.2, 0.1)",
+      "measured": 3.0330416292301265e-05,
+      "reference": 0.0001
+    },
+    {
+      "claim": "the slope difference is second order in the step (a central difference of a smooth curve)",
+      "ok": true,
+      "detail": "observed orders 2.00, 2.00, 2.00",
+      "measured": null,
+      "reference": null
+    },
+    {
+      "claim": "the clipped waterplane area matches the Green-theorem waterplane area",
+      "ok": true,
+      "detail": "6.051770833 vs 6.051770833",
+      "measured": null,
+      "reference": null
+    },
+    {
+      "claim": "dGZ/dphi at zero reproduces GM on the curved hull",
+      "ok": true,
+      "detail": "slope 0.263342159 vs GM 0.263340808",
+      "measured": 0.26334215889525375,
+      "reference": 0.263340808285682
+    },
+    {
+      "claim": "every heel angle displaces the same volume (a GZ curve is constant displacement)",
+      "ok": true,
+      "detail": "worst relative volume drift 1.423e-16",
+      "measured": 1.4225010576421457e-16,
+      "reference": 1e-12
+    },
+    {
+      "claim": "the curved hull's righting arm grows monotonically over the sampled range",
+      "ok": true,
+      "detail": "GZ -0.000000, 0.023004, 0.045940, 0.068773, 0.091441",
+      "measured": null,
+      "reference": null
+    },
+    {
+      "claim": "the curved-hull GZ converges as the mesh refines",
+      "ok": true,
+      "detail": "relative difference vs the 161x41 grid: 21x9 3.48e-03, 41x13 1.17e-03, 81x25 2.15e-04",
+      "measured": null,
+      "reference": null
+    }
+  ],
+  "all_claims_hold": true
+}

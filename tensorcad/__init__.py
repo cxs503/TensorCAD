@@ -100,6 +100,21 @@ from .mesh_conditioning import (
     project_to_field,
     taubin_smooth,
 )
+from .heeling import (
+    HeelError,
+    HeeledFloat,
+    RightingArmCurve,
+    barge_mesh,
+    cross_curve,
+    cross_curves,
+    gz_curve,
+    gz_initial_slope,
+    heel_normal,
+    heeled_float,
+    submerged_properties,
+    wall_sided_righting_arm,
+    waterline_offset,
+)
 from .parameters import ParameterSpec, RatioSpec
 from .stability import (
     InitialStability,
@@ -176,7 +191,11 @@ __all__ = [
     "GeometryField",
     "HullModel",
     "HullParameters",
+    "HeelError",
+    "HeeledFloat",
     "Hydrostatics",
+    "RightingArmCurve",
+    "barge_mesh",
     "InitialStability",
     "Mesh",
     "MeshBuilder",
@@ -212,6 +231,8 @@ __all__ = [
     "bonjean_curve",
     "bonjean_table",
     "build_mesh",
+    "cross_curves",
+    "cross_curve",
     "compute_hydrostatics",
     "condition_mesh",
     "decimate",
@@ -222,6 +243,10 @@ __all__ = [
     "gate_mesh",
     "generate_hull",
     "generate_wigley",
+    "gz_curve",
+    "gz_initial_slope",
+    "heel_normal",
+    "heeled_float",
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -232,6 +257,7 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "submerged_properties",
     "section_loops",
     "section_properties",
     "suboff_fin_chord",
@@ -248,6 +274,8 @@ __all__ = [
     "vertex_mean_curvature",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
+    "wall_sided_righting_arm",
+    "waterline_offset",
     "waterplane_moments",
     "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors",
@@ -260,4 +288,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"

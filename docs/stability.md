@@ -153,10 +153,12 @@ round-off), which is a test.
 - **No free-surface correction.** `GM` here is the *solid* `GM`; a slack tank contributes
   `Σ(ρ·i_x)/Δ`, which the caller who knows the tankage must subtract. The report's `basis`
   string says `solid GM` so a consumer cannot miss it.
-- **No large-angle stability.** `GM` is the slope of `GZ(φ)` at `φ = 0`. `GZ` needs a heeled
-  displacement integration per angle (a different computation, not a waterplane moment), and
-  no righting-arm curve, area under it, or statutory criterion (`IS Code 2008`, damage
-  stability, weather criterion) is computed or claimed here.
+- **No large-angle stability *in this module*.** `GM` is the slope of `GZ(φ)` at `φ = 0`.
+  The curve itself is `tensorcad.heeling` (since 0.21.0): it solves a heeled displacement
+  integration per angle, which is a different computation from a waterplane moment, and it is
+  verified against the wall-sided closed form and against this module's `GM` at the initial
+  slope -- see [docs/heeling.md](heeling.md). No statutory criterion (`IS Code 2008`, damage
+  stability, weather criterion) is computed or claimed in either module.
 - **No trim or longitudinal strength.** `GM_L` is reported (`≈ 100 × GM_T` on this hull) and
   is the stiffness that governs trim, but nothing here solves a trim equilibrium or a
   bending moment.

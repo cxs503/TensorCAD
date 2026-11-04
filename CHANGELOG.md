@@ -4,6 +4,39 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-03
+
+- **Large-angle stability** (`tensorcad/heeling.py`): `gz_curve`, `gz_initial_slope`,
+  `heeled_float`, `cross_curve`/`cross_curves` and the `HeeledFloat`/`RightingArmCurve`
+  results. Heeled hydrostatics come from clipping the closed surface against the waterplane
+  and applying the divergence theorem with the origin on the plane, so the closing cap drops
+  out of both the volume and the first-moment integrals and no cap polygon is ever assembled.
+  The waterline offset is solved per heel angle (Illinois on the monotone `V(offset)`), because
+  a `GZ` curve is constant *displacement*, not constant waterline.
+- **Verified against a closed form that is exact for the body tested**: a wall-sided barge has
+  `GZ = sin(phi)(GM + BM tan^2(phi)/2)` at every angle up to deck-edge immersion, and the
+  kernel reproduces it to 1.3e-15 relative over seven angles with a parallelepiped mesh; at
+  90 deg the barge floats on its deck edge and `KN = D/2` is recovered to 1e-16. Past
+  deck-edge immersion the measured arm falls below the wall-sided claim, as it must.
+- **The slope check that ties the two halves together**: `dGZ/dphi` at zero from the curve
+  reproduces `GM = KB + BM - KG`, where `BM` comes from `stability.waterplane_moments`
+  (Green's theorem on the upright waterplane) -- an integration that never sees a heeled
+  equilibrium. Difference is second order in the finite-difference step (observed order
+  2.00/2.00/2.00) on the barge and 5e-6 relative on the curved Wigley hull.
+- **Freeboard is now a stated prerequisite**: `waterline_offset` raises `HeelError` when the
+  target volume leaves no freeboard, so a hull mesh capped at its design waterline refuses to
+  produce a meaningless curve rather than returning one. The curved-hull evidence floats the
+  Wigley at 70 % of its design draught, where the hull above the waterline is genuine
+  freeboard, and the refinement ladder (21x9 -> 161x41) shows the remaining chord error
+  falling monotonically from 3.5e-3 to 2.2e-4 relative at 10 deg of heel.
+  Evidence: `docs/heeling.md`, `docs/heeling/{results.json,report.md,plot.png}`,
+  `examples/heeling/run_example.py` (exits non-zero if any of its 10 claims breaks),
+  `tests/test_heeling.py` (39 tests).
+- Still missing after this change, and listed in `docs/heeling.md` §8: free-surface correction,
+  trim coupling, damage stability and class-rule criteria (righting energy, weathertight
+  range).
+
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

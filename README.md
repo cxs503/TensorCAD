@@ -107,7 +107,11 @@ and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated i
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+trim equilibrium, damage stability, class rules. Large-angle `GZ` is no longer on that list:
+[`tensorcad.heeling`](tensorcad/heeling.py) crosses the line from `GM` to the righting-arm
+curve (`gz_curve`, `cross_curves`), verified against the wall-sided closed form to `1.3e-15`
+over seven heel angles and against `GM` at the initial slope -- see
+[docs/heeling.md](docs/heeling.md).
 
 ## Continuous geometry core (0.4)
 

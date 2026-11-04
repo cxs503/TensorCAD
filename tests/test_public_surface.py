@@ -41,15 +41,28 @@ EXPECTED_API = {
     "write_design_json", "write_metadata",
     "assess_fairness", "principal_curvatures",
     "vertex_mean_curvature",
-    "write_offsets_csv", "write_obj", "write_solver_manifest", "write_stl",
+    "write_offsets_csv", "write_obj", "write_solver_manifest", "write_stl",    "HeelError",
+    "HeeledFloat",
+    "RightingArmCurve",
+    "barge_mesh",
+    "cross_curve",
+    "cross_curves",
+    "gz_curve",
+    "gz_initial_slope",
+    "heel_normal",
+    "heeled_float",
+    "submerged_properties",
+    "wall_sided_righting_arm",
+    "waterline_offset",
 }
+
 
 
 def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
