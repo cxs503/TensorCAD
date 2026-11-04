@@ -27,6 +27,7 @@ from typing import Any
 from . import mesh as meshlib
 from .geometry import Mesh, MeshBuilder
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .hydrostatics_analytic import waterplane_inertia
 from .parameters import (
     FLOAT,
     INT,
@@ -644,6 +645,8 @@ def analytic_hydrostatics(
     | block coefficient | ``2/3*taper`` |
     | prismatic coefficient | ``taper`` (the midship ``2/3`` cancels) |
     | wetted surface area | quadrature, see :func:`analytic_wetted_surface_area` |
+    | transverse waterplane inertia | ``(2/3)*(beam/2)**3*length*I3`` (``I3`` from the gamma identity) |
+    | longitudinal waterplane inertia | ``beam*length**3*int sin(pi*xi)**e*(xi-1/2)**2 dxi`` |
 
     ``taper`` is ``(h(p_aft) + h(p_fore))`` with ``h(p) = int_0^(1/2) sin^p``, so
     volume, waterplane area and the coefficients depend on the exponents but not on
@@ -676,6 +679,17 @@ def analytic_hydrostatics(
             "area by Gauss-Legendre quadrature"
         )
     )
+    # m2925: the two waterplane second moments live in
+    # :mod:`tensorcad.hydrostatics_analytic` (one closed form, one quadrature with its
+    # own convergence evidence) so that the mesh, this compatibility wrapper and the
+    # stability block cannot drift apart. ``waterplane_inertia`` describes the
+    # symmetric surface; the asymmetric generator sums both halves, which reduces to
+    # the same expression when ``fore == aft``.
+    inertia = (
+        waterplane_inertia(length, beam, fore, levels=8)
+        if fore == aft
+        else waterplane_inertia_halves(length, beam, fore, aft, centre, levels=8)
+    )
     return Hydrostatics(
         displacement_volume=volume,
         displacement_mass=volume * water_density,
@@ -693,6 +707,9 @@ def analytic_hydrostatics(
         maximum_section_area=section,
         waterline_z=0.0,
         water_density=water_density,
+        transverse_waterplane_inertia=inertia["transverse"],
+        longitudinal_waterplane_inertia=inertia["longitudinal"],
+        keel_z=-draft,
         basis=basis,
     )
 
@@ -710,6 +727,66 @@ ANALYTIC_COMPARABLE_QUANTITIES: tuple[str, ...] = (
     "block_coefficient",
     "prismatic_coefficient",
 )
+
+
+def waterplane_inertia_halves(
+    length: float,
+    beam: float,
+    fore_exponent: float,
+    aft_exponent: float,
+    centre: float,
+    *,
+    levels: int = 8,
+) -> dict[str, Any]:
+    """Waterplane second moments of a *fore-aft asymmetric* analytic surface.
+
+    ``I_T = (2/3)*(B/2)**3 * L * [H(3*p_aft) + H(3*p_fore)]`` with
+    ``H(q) = int_0^(1/2) sin(pi u)**q du = taper_integral(q)/2`` -- still a gamma
+    identity, because the half integral is half the full one -- and
+
+    ``I_L = B*L**3 * [int_0^(1/2) sin(pi u)**p_aft (u-u_c)**2 du
+                      + int_(1/2)^1 sin(pi u)**p_fore (u-u_c)**2 du]``
+
+    with ``u_c = centre/length``. The longitudinal halves go through tanh-sinh
+    quadrature; with ``fore_exponent == aft_exponent`` and ``u_c = 1/2`` this returns
+    the symmetric closed form to round-off, which ``tests/test_stability.py`` checks.
+    """
+    from .hydrostatics_analytic import tanh_sinh_quadrature, taper_integral
+
+    transverse = (
+        (2.0 / 3.0)
+        * (0.5 * beam) ** 3
+        * length
+        * 0.5
+        * (taper_integral(3.0 * aft_exponent) + taper_integral(3.0 * fore_exponent))
+    )
+    u_c = centre / length
+
+    def ago(u: float) -> float:
+        return float(math.sin(math.pi * u) ** aft_exponent * (u - u_c) ** 2)
+
+    def forward(u: float) -> float:
+        return float(math.sin(math.pi * u) ** fore_exponent * (u - u_c) ** 2)
+
+    fine = tanh_sinh_quadrature(ago, 0.0, 0.5, levels=int(levels)) + tanh_sinh_quadrature(
+        forward, 0.5, 1.0, levels=int(levels)
+    )
+    coarse = tanh_sinh_quadrature(ago, 0.0, 0.5, levels=int(levels) - 1) + tanh_sinh_quadrature(
+        forward, 0.5, 1.0, levels=int(levels) - 1
+    )
+    scale = beam * length**3
+    longitudinal = scale * fine
+    difference = scale * abs(fine - coarse)
+    return {
+        "transverse": transverse,
+        "longitudinal": longitudinal,
+        "longitudinal_quadrature": {
+            "value": longitudinal,
+            "absolute_difference": difference,
+            "relative_difference": difference / longitudinal if longitudinal else float("nan"),
+            "levels": int(levels),
+        },
+    }
 
 
 def analytic_relative_errors(parameters: HullParameters) -> dict[str, Any]:

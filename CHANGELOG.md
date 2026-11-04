@@ -4,6 +4,51 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+<<<<<<< HEAD
+## 0.14.0 — 2026-11-03
+
+### Added
+- **Waterplane second moments on the mesh** (`tensorcad/hydrostatics.py`):
+  `Hydrostatics` now reports `transverse_waterplane_inertia` (`∫ y² dA`) and
+  `longitudinal_waterplane_inertia` (`∫ (x−LCF)² dA`) in m⁴, plus `keel_z`, the datum
+  that stability heights are measured from. Both come out of the flux identity the
+  module already used for the waterplane area (`∫_cap f dA = −∫_wetted f n_z dA` with
+  `f` independent of `z`), so no cap has to exist and no waterline polygon has to be
+  reconstructed. The face integrals are exact — `x` and `y` are linear over a triangle,
+  so `∫ f² dA = A/6(f₁²+f₂²+f₃²+f₁f₂+f₂f₃+f₃f₁)` — and the winding is folded out rather
+  than assumed. An open surface reports `nan` instead of a number that would only say
+  where the shell stops.
+- **`tensorcad.stability`** — `initial_stability(hydrostatics, height_of_gravity=...)`
+  returns KB (over the keel), `BM_T = I_T/∇`, `BM_L = I_L/∇`, `KM`, and `GM_T`/`GM_L`,
+  as a JSON-ready `InitialStability` record with `is_stable_in_roll`. `KG` is an input:
+  the repository has no weight schedule and will not invent one. Negative GM is
+  reported, not raised — an unstable hull is a legitimate answer.
+- **Closed-form references** (`tensorcad/hydrostatics_analytic.py`,
+  `tensorcad.hull.analytic_hydrostatics`): `I_T = (2/3)(B/2)³L·∫ sin^{2.1}(πξ)dξ` from
+  the gamma identity and `I_L = B L³ ∫ sin^{0.7}(πξ)(ξ−1/2)²dξ` by tanh-sinh quadrature
+  (levels 6 and 7 agree to 0.0 in float64), so `AnalyticHydrostatics` and
+  `hydrostatics_analytic()` now carry the inertias, BM, and `KM_T = 0.6T + BM_T`.
+  `compare()` covers the two new inertia rows (the metacentric radii are ratios of
+them and of the volume, so they are reported but not double-counted).
+- `tests/test_stability.py` — 18 tests. A vertex-by-vertex rectangular barge matches
+  `L·B³/12`, `B·L³/12`, `KB = T/2` and `GM = BM_T` to `1e-12` on three tessellations; a
+  circular waterplane converges to `πR⁴/4` from below with the `O(1/n²)` ratio; the
+  gamma form is checked against a direct quadrature of `∫(2/3)b³dx` to `1e-12`; the
+  hull's six quantities are checked against the analytic surface at three hull sizes;
+  rejection paths (no waterplane, open shell, non-finite or negative KG) and the
+  stdlib-only import.
+- `examples/stability/run_example.py` — ladder 21×9 … 321×81, writes
+  `docs/stability/{results.json,report.md,plot.png}`, exits 1 if a claim fails.
+- `docs/stability.md` — derivation, the reference table, the measured error table, and
+  what the number is not (no GZ curve, no free surface, no rule check).
+
+### Measured
+- Default 41×13 grid: `I_T` −0.139 %, `I_L` −0.604 %, `BM_T` +0.748 %, `KM_T` +0.684 %,
+  `GM_T` (KG=0.5 m) +1.508 % against the closed forms; 161×41: 0.009 %, 0.064 %,
+  0.127 %, 0.120 %, 0.263 %. 3 % band holds everywhere.
+- `GM_T` is the weakest because `BM_T = I_T/∇` inherits the volume error with the
+  opposite sign: the mesh loses 0.88 % of the displacement but only 0.14 % of `I_T`.
+=======
 ## 0.21.0 — 2026-11-04
 
 ### Added
@@ -158,6 +203,7 @@ stability and to the buoyancy curve of a still-water bending calculation.
 - **`GM` amplifies.** `rel(GM) ≈ (KM/GM)·rel(KM) ≈ 2.87·rel(KM)` at `KG = 0.6 m`, so the
   coarsest rung (`21×9`) leaves the 3 % band at `+3.47 %` while `I_T` is still inside it at
   `−0.56 %`; `GM = 0` falls at `KG = KM = 0.915360 m`, bracketed by the `GM(KG)` ladder.
+>>>>>>> origin/main
 
 ## 0.13.0 — 2026-11-03
 

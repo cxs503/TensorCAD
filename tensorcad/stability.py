@@ -70,7 +70,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .geometry import Mesh
-from .hydrostatics import compute_hydrostatics
+from .hydrostatics import Hydrostatics, compute_hydrostatics
 
 SCHEMA_WATERPLANE = "tensorcad.stability.waterplane/1"
 SCHEMA_STABILITY = "tensorcad.stability.initial/1"
@@ -165,10 +165,75 @@ class InitialStability:
             "km_longitudinal_m": _round(self.km_longitudinal),
             "gm_transverse_m": _round(self.gm_transverse),
             "gm_longitudinal_m": _round(self.gm_longitudinal),
+            "draft_m": _round(self.waterline_z - self.keel_z),
+            "waterplane_area_m2": _round(self.waterplane.area),
+            "waterplane_inertia_transverse_m4": _round(self.waterplane.transverse_second_moment),
+            "waterplane_inertia_longitudinal_m4": _round(self.waterplane.longitudinal_second_moment),
+            "is_stable_in_roll": self.gm_transverse > 0.0,
             "waterplane": self.waterplane.to_dict(),
             "water_density_kg_per_m3": _round(self.water_density, 3),
             "basis": self.basis,
         }
+
+    # -- m2925 spellings -------------------------------------------------------
+    # The same numbers under the names the waterplane-inertia API used before this
+    # merge, so neither vocabulary is silently dropped: ``kb`` is
+    # ``height_of_centre_of_buoyancy``, ``bm_transverse`` is
+    # ``transverse_metacentric_radius`` and so on. Every one of them reads a field
+    # above rather than recomputing it.
+    @property
+    def is_stable_in_roll(self) -> bool:
+        """True when ``GM_T > 0``: the upright position restores, at small angles."""
+        return self.gm_transverse > 0.0
+
+    @property
+    def draft(self) -> float:
+        """Design draft, ``waterline_z - keel_z`` (m)."""
+        return self.waterline_z - self.keel_z
+
+    @property
+    def waterplane_area(self) -> float:
+        return self.waterplane.area
+
+    @property
+    def transverse_waterplane_inertia(self) -> float:
+        return self.waterplane.transverse_second_moment
+
+    @property
+    def longitudinal_waterplane_inertia(self) -> float:
+        return self.waterplane.longitudinal_second_moment
+
+    @property
+    def height_of_centre_of_buoyancy(self) -> float:
+        return self.kb
+
+    @property
+    def height_of_gravity(self) -> float:
+        return self.kg
+
+    @property
+    def transverse_metacentric_radius(self) -> float:
+        return self.bm_transverse
+
+    @property
+    def longitudinal_metacentric_radius(self) -> float:
+        return self.bm_longitudinal
+
+    @property
+    def height_of_transverse_metacentre(self) -> float:
+        return self.km_transverse
+
+    @property
+    def height_of_longitudinal_metacentre(self) -> float:
+        return self.km_longitudinal
+
+    @property
+    def transverse_metacentric_height(self) -> float:
+        return self.gm_transverse
+
+    @property
+    def longitudinal_metacentric_height(self) -> float:
+        return self.gm_longitudinal
 
 
 def _round(value: float, digits: int = 9) -> float:
@@ -382,35 +447,159 @@ def waterplane_moments(mesh: Mesh, waterline_z: float = 0.0) -> WaterplaneMoment
     )
 
 
+def _resolve_height_of_gravity(kg: float | None, height_of_gravity: float | None) -> float:
+    """Accept either spelling of KG and refuse an ambiguous call.
+
+    ``kg`` is the name the mesh entry point has always used; ``height_of_gravity`` is
+    the name the hydrostatics entry point takes, where it is the only loading input.
+    Both mean metres above the keel, so passing both with different values is a caller
+    error rather than something to disambiguate silently.
+    """
+    if (
+        kg is not None
+        and height_of_gravity is not None
+        and float(kg) != float(height_of_gravity)
+    ):
+        raise StabilityError(
+            f"kg={kg!r} and height_of_gravity={height_of_gravity!r} disagree; they are "
+            "the same quantity (metres above the keel)"
+        )
+    value = kg if kg is not None else height_of_gravity
+    if value is None:
+        raise StabilityError(
+            "kg is required: TensorCAD has no weight schedule, so the loading condition "
+            "has to be supplied rather than defaulted"
+        )
+    return float(value)
+
+
+def _stability_from_hydrostatics(hydrostatics: Hydrostatics, kg: float) -> InitialStability:
+    """Stability from an already integrated :class:`Hydrostatics`.
+
+    The waterplane moments are read off ``hydrostatics``, which obtains them from the
+    flux identity over the closed wetted surface
+    (:func:`tensorcad.hydrostatics.compute_hydrostatics`) -- a different integration
+    route from the plane-section cut in :func:`waterplane_moments`. Running both on the
+    same hull is therefore a cross-check between two independent integrations, not a
+    repetition.
+    """
+    if not math.isfinite(kg):
+        raise StabilityError(f"height_of_gravity must be finite length, got {kg!r}")
+    if kg < 0.0:
+        raise StabilityError(
+            "height_of_gravity is measured above the keel and cannot be negative, "
+            f"got {kg!r}"
+        )
+    volume = hydrostatics.displacement_volume
+    transverse = hydrostatics.transverse_waterplane_inertia
+    longitudinal = hydrostatics.longitudinal_waterplane_inertia
+    for name, value in (
+        ("transverse_waterplane_inertia", transverse),
+        ("longitudinal_waterplane_inertia", longitudinal),
+    ):
+        if not math.isfinite(value) or value <= 0.0:
+            raise StabilityError(
+                f"{name} is {value!r}: the surface has no waterplane to integrate "
+                "(is it closed, and does it cross the waterline?)"
+            )
+    if not math.isfinite(volume) or volume <= 0.0:
+        raise StabilityError(
+            f"displacement volume {volume!r} m^3 is not positive; a metacentric height "
+            "needs a floating body"
+        )
+    keel_z = hydrostatics.keel_z
+    if not math.isfinite(keel_z):
+        raise StabilityError(
+            f"keel_z is {keel_z!r}; recompute the hydrostatics on a closed surface"
+        )
+    draft = hydrostatics.waterline_z - keel_z
+    if draft <= 0.0:
+        raise StabilityError(
+            f"the surface does not extend below the waterline (draft {draft!r}); there "
+            "is no buoyancy to be stable on"
+        )
+    kb = hydrostatics.vertical_centre_buoyancy - keel_z
+    bm_transverse = transverse / volume
+    bm_longitudinal = longitudinal / volume
+    section = WaterplaneMoments(
+        area=hydrostatics.waterplane_area,
+        transverse_second_moment=transverse,
+        longitudinal_second_moment=longitudinal,
+        longitudinal_centre_flotation=hydrostatics.longitudinal_centre_flotation,
+        # The flux identity yields the moments, not the transverse centre of
+        # flotation; ``nan`` says so instead of inventing a zero.
+        transverse_centre_flotation=float("nan"),
+        loops=0,
+        waterline_z=hydrostatics.waterline_z,
+        basis="hydrostatics flux identity over the closed wetted surface (section not cut)",
+    )
+    return InitialStability(
+        waterline_z=hydrostatics.waterline_z,
+        keel_z=keel_z,
+        displacement_volume=volume,
+        displacement_mass=hydrostatics.displacement_mass,
+        kb=kb,
+        kg=kg,
+        bm_transverse=bm_transverse,
+        bm_longitudinal=bm_longitudinal,
+        km_transverse=kb + bm_transverse,
+        km_longitudinal=kb + bm_longitudinal,
+        gm_transverse=kb + bm_transverse - kg,
+        gm_longitudinal=kb + bm_longitudinal - kg,
+        waterplane=section,
+        water_density=hydrostatics.water_density,
+        basis=(
+            "solid GM (no free-surface correction), waterplane from the hydrostatics "
+            "flux identity"
+        ),
+    )
+
+
 def initial_stability(
-    mesh: Mesh,
+    subject: Mesh | Hydrostatics,
     *,
-    kg: float,
+    kg: float | None = None,
     waterline_z: float = 0.0,
     water_density: float = 1025.0,
     closed: bool | None = None,
+    height_of_gravity: float | None = None,
 ) -> InitialStability:
     """Transverse and longitudinal metacentric heights for one loading condition.
 
-    ``kg`` is the height of the centre of gravity **above the keel** (the mesh's lowest
-    vertex); it is a loading input, not a property of the shape, which is why it is a
-    required keyword: a default would invite exactly the silent zero it is meant to
-    avoid. ``KB`` comes from the mesh integration in
-    :func:`tensorcad.hydrostatics.compute_hydrostatics`, and ``BM = I / volume`` uses the
-    waterplane moments measured here, so the two halves of ``KM`` are computed by
-    independent integrations and their agreement with the closed forms is checked
-    separately in ``examples/stability``.
+    Two entry points, one record:
+
+    * ``initial_stability(mesh, kg=...)`` cuts the mesh with the waterline plane and
+      integrates the section (:func:`waterplane_moments`); ``waterline_z``,
+      ``water_density`` and ``closed`` apply.
+    * ``initial_stability(hydrostatics, height_of_gravity=...)`` reuses an already
+      integrated :class:`~tensorcad.hydrostatics.Hydrostatics` and reads its waterplane
+      moments, so a caller that already has hydrostatics does not pay for a second
+      surface integration.
+
+    ``kg`` and ``height_of_gravity`` are the same quantity -- the centre of gravity
+    **above the keel** -- and either spelling is accepted; supplying both with
+    different values is refused. It is a required loading input, not a property of the
+    shape, which is why it has no default: a default would invite exactly the silent
+    zero it is meant to avoid. ``KB`` comes from the volume integration and
+    ``BM = I / volume`` from the waterplane moments, so the two halves of ``KM`` are
+    computed by independent integrations.
     """
-    if not math.isfinite(kg):
-        raise StabilityError(f"kg must be finite, got {kg!r}")
-    hydrostatics = compute_hydrostatics(mesh, waterline_z, water_density=water_density, closed=closed)
+    weight = _resolve_height_of_gravity(kg, height_of_gravity)
+    if isinstance(subject, Hydrostatics):
+        return _stability_from_hydrostatics(subject, weight)
+    if not math.isfinite(weight):
+        raise StabilityError(f"kg must be finite, got {weight!r}")
+    hydrostatics = compute_hydrostatics(
+        subject, waterline_z, water_density=water_density, closed=closed
+    )
     volume = hydrostatics.displacement_volume
     if not math.isfinite(volume) or volume <= 0.0:
         raise StabilityError(
-            f"displacement volume {volume!r} m^3 is not positive; a metacentric height needs a floating body"
+            f"displacement volume {volume!r} m^3 is not positive; a metacentric height "
+            "needs a floating body"
         )
-    section = waterplane_moments(mesh, waterline_z)
-    keel_z = min(vertex[2] for vertex in mesh.vertices)
+    section = waterplane_moments(subject, waterline_z)
+    keel_z = min(vertex[2] for vertex in subject.vertices)
     kb = hydrostatics.vertical_centre_buoyancy - keel_z
     bm_transverse = section.transverse_second_moment / volume
     bm_longitudinal = section.longitudinal_second_moment / volume
@@ -425,13 +614,13 @@ def initial_stability(
         displacement_volume=volume,
         displacement_mass=hydrostatics.displacement_mass,
         kb=kb,
-        kg=kg,
+        kg=weight,
         bm_transverse=bm_transverse,
         bm_longitudinal=bm_longitudinal,
         km_transverse=km_transverse,
         km_longitudinal=km_longitudinal,
-        gm_transverse=km_transverse - kg,
-        gm_longitudinal=km_longitudinal - kg,
+        gm_transverse=km_transverse - weight,
+        gm_longitudinal=km_longitudinal - weight,
         waterplane=section,
         water_density=water_density,
         basis=basis,

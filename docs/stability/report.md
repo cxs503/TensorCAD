@@ -1,6 +1,6 @@
 # Initial stability measured against closed forms
 
-TensorCAD 0.13.0 · `examples/stability/run_example.py` · hull 10.0 × 2.0 × 0.8 m, KG = 0.6 m above keel
+TensorCAD 0.21.0 · `examples/stability/run_example.py` · hull 10.0 × 2.0 × 0.8 m, KG = 0.6 m above keel
 
 ## Claims enforced by this run
 

@@ -453,7 +453,10 @@ The boundaries below are the ones the code actually has (they were proposals in 
   dihedral distribution, crease count and length, curvature jumps. [docs/fairness.md](docs/fairness.md)
 - `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
   aspect ratios), errors versus warnings, `ValidationReport`.
-- `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients.
+- `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients,
+  and the waterplane second moments.
+- `tensorcad.stability` — KB, BM, KM and GM from those moments, with `KG` supplied by
+  the caller; the closed-form reference is in `docs/stability.md`.
 - `tensorcad.export` — OBJ/CSV/JSON writers, an OBJ reader (round-trip exact), a binary STL
   writer and a topology-reconstructing STL reader, and the gated hull export.
 - `tensorcad.gate` — hard-fail machine gate over mesh artifacts: topology, components, Euler
