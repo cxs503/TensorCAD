@@ -27,6 +27,20 @@ from .bonjean import (
     section_loops,
     section_properties,
 )
+from .gz import (
+    DEFAULT_HEEL_ANGLES_DEG,
+    CriterionCheck,
+    GZCurve,
+    GZError,
+    HeelPoint,
+    IMOIntactStability,
+    SubmergedSolid,
+    gz_curve,
+    heel_mesh,
+    imo_intact_stability,
+    solve_waterline,
+    submerged_solid,
+)
 from .curvature import (
     CurvatureError,
     CurvatureSample,
@@ -259,5 +273,17 @@ __all__ = [
     "write_offsets_csv",
     "write_solver_manifest",
     "write_stl",
+    "CriterionCheck",
+    "DEFAULT_HEEL_ANGLES_DEG",
+    "GZCurve",
+    "GZError",
+    "HeelPoint",
+    "IMOIntactStability",
+    "SubmergedSolid",
+    "gz_curve",
+    "heel_mesh",
+    "imo_intact_stability",
+    "solve_waterline",
+    "submerged_solid",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"

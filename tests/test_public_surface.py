@@ -10,6 +10,18 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "CriterionCheck",
+    "DEFAULT_HEEL_ANGLES_DEG",
+    "GZCurve",
+    "GZError",
+    "HeelPoint",
+    "IMOIntactStability",
+    "SubmergedSolid",
+    "gz_curve",
+    "heel_mesh",
+    "imo_intact_stability",
+    "solve_waterline",
+    "submerged_solid",
     "WIGLEY_REFERENCE_CASE", "WigleyAnalytic", "WigleyModel", "WigleyParameters",
     "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
@@ -49,7 +61,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
