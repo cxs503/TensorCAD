@@ -1,13 +1,16 @@
 """Curvature and fairness: the estimator against closed forms, and the audit's claims."""
 from __future__ import annotations
 
+import itertools
 import math
 import subprocess
 import sys
 
 import pytest
 
+from tensorcad import mesh as meshlib
 from tensorcad.curvature import (
+    DEFAULT_CREASE_DEGREES,
     CurvatureError,
     CurvatureSample,
     assess_fairness,
@@ -23,9 +26,53 @@ from tensorcad.geometry_field import (
     SphereField,
     to_mesh,
 )
+from tensorcad.validation import inspect_geometry
 
 
 def _uv_sphere(radius: float, nu: int, nv: int) -> Mesh:
+    """A legal UV sphere: one vertex per pole and a triangle fan onto it.
+
+    ``nu`` is the number of latitude *bands* and ``nv`` the longitude count. The
+    poles are single vertices, so no ring of ``nv`` coincident points collapses
+    onto itself and no face has zero area -- which matters, because the fairness
+    report refuses a degenerate face and a collapsed vertex is *not* a point of
+    zero curvature (see ``test_a_collapsed_pole_is_refused_by_the_fairness_report``).
+    """
+    vertices = [(0.0, 0.0, radius)]
+    for i in range(1, nu):
+        theta = math.pi * i / nu
+        for j in range(nv):
+            phi = 2.0 * math.pi * j / nv
+            vertices.append(
+                (
+                    radius * math.sin(theta) * math.cos(phi),
+                    radius * math.sin(theta) * math.sin(phi),
+                    radius * math.cos(theta),
+                )
+            )
+    south = len(vertices)
+    vertices.append((0.0, 0.0, -radius))
+
+    def ring(i: int, j: int) -> int:
+        return 1 + (i - 1) * nv + (j % nv)
+
+    faces = []
+    for j in range(nv):
+        faces.append((0, ring(1, j), ring(1, j + 1)))
+        faces.append((south, ring(nu - 1, j + 1), ring(nu - 1, j)))
+    for i in range(1, nu - 1):
+        for j in range(nv):
+            faces.append((ring(i, j), ring(i + 1, j), ring(i, j + 1)))
+            faces.append((ring(i, j + 1), ring(i + 1, j), ring(i + 1, j + 1)))
+    return Mesh(vertices=vertices, faces=faces)
+
+
+def _pole_collapsed_sphere(radius: float, nu: int, nv: int) -> Mesh:
+    """The historical fixture: ``nu + 1`` rings, so each pole ring is ``nv`` copies.
+
+    Kept only as the negative control for the degeneracy contract; it is not a
+    sphere mesh in the sense this package's validator accepts.
+    """
     vertices = []
     grid = {}
     for i in range(nu + 1):
@@ -150,7 +197,14 @@ def test_refinement_reports_a_step_error_and_can_be_switched_off() -> None:
     assert refined.step_error < 1e-5
     single = principal_curvatures(sphere, [(1.0, 0.0, 0.0)], refine=False)[0]
     assert math.isnan(single.step_error)
-    assert single.kappa_max == pytest.approx(1.0, rel=1e-12)
+    # The unrefined probe is a *second-order* estimator, so it cannot be exact to
+    # 1e-12 -- demanding that was the defect, not the estimator. On the sphere field
+    # (an exact signed distance) the truncation error is measured at exactly
+    # ``0.5 * step**2``, which is what this pins instead of a tolerance nobody can
+    # meet. ``test_the_unrefined_probe_obeys_its_measured_truncation_law`` measures
+    # the same law over a step ladder and the observed order.
+    assert abs(single.kappa_max - 1.0) == pytest.approx(0.5 * single.step**2, rel=1e-3)
+    assert refined.kappa_max == pytest.approx(1.0, rel=1e-12)
 
 
 def test_bad_probe_points_are_rejected() -> None:
@@ -179,6 +233,53 @@ def test_mesh_estimate_converges_on_a_regular_sphere() -> None:
         assert any(value != 0.0 for value in values)
     assert errors[0] < 0.15
     assert errors[1] < errors[0]
+
+
+def test_the_unrefined_probe_obeys_its_measured_truncation_law() -> None:
+    """Second order in the step, with the measured constant, on a closed form.
+
+    ``kappa(h) - 1/R = 0.5 * h**2`` on the sphere field to better than 1e-3 of the
+    law itself, and the observed order over a halving ladder is 2.00. This is the
+    measurement the ``refine=False`` path is allowed to be judged by; asserting
+    exactness there is a category error, since the difference quotient deletes the
+    O(h^2) term only when ``refine=True`` extrapolates it away.
+    """
+    radius = 1.0
+    sphere = SphereField(center=(0.0, 0.0, 0.0), radius=radius)
+    probe = [(radius, 0.0, 0.0)]
+    errors = []
+    for step in (8e-4, 4e-4, 2e-4, 1e-4):
+        sample = principal_curvatures(sphere, probe, step=step, refine=False)[0]
+        error = abs(sample.kappa_max - 1.0 / radius)
+        errors.append(error)
+        assert error == pytest.approx(0.5 * step**2, rel=1e-3)
+    for coarse, fine in itertools.pairwise(errors):
+        order = math.log(coarse / fine) / math.log(2.0)
+        assert order == pytest.approx(2.0, abs=1e-3)
+
+
+def test_richardson_extrapolation_removes_the_second_order_term() -> None:
+    """Same ladder, ``refine=True``: the analytic answer to round-off."""
+    sphere = SphereField(center=(0.0, 0.0, 0.0), radius=1.0)
+    probe = [(1.0, 0.0, 0.0)]
+    for step in (8e-4, 4e-4, 2e-4, 1e-4, 5e-5):
+        refined = principal_curvatures(sphere, probe, step=step, refine=True)[0]
+        assert refined.kappa_max == pytest.approx(1.0, rel=1e-12)
+        assert refined.step_error == pytest.approx(1.5 * refined.step**2, rel=1e-3)
+
+
+def test_the_cotangent_mean_curvature_is_second_order() -> None:
+    """The mesh estimator's order, measured on a legal sphere instead of assumed."""
+    radius = 1.0
+    errors = []
+    for level in (16, 32, 64):
+        values = [abs(value) for value in vertex_mean_curvature(_uv_sphere(radius, level, 2 * level))]
+        errors.append(abs(sum(values) / len(values) - 1.0 / radius))
+    order = math.log(errors[-2] / errors[-1]) / math.log(2.0)
+    # measured 1.84 (16->32) and 1.93 (32->64): the fan's pole triangles are thin,
+    # so the asymptotic rate is approached from below, not exactly hit.
+    assert order == pytest.approx(2.0, abs=0.1), order
+    assert errors[-1] < 1.0e-3  # 1.8e-4 at level 64
 
 
 def test_mesh_estimate_conserves_the_integral_on_a_raw_marching_tet_mesh() -> None:
@@ -210,10 +311,44 @@ def test_a_sphere_has_no_creases_and_is_watertight() -> None:
     assert report.watertight is True
     assert report.edge_manifold is True
     assert report.crease_edges == 0
-    assert report.dihedral_degrees["p95"] < 6.0
+    # A smooth sphere has no crease edge at any resolution; the largest dihedral in
+    # the mesh is the discretisation of the fan, measured at 11.29 deg on 16x32 and
+    # 5.63 deg on 32x64. The threshold is therefore the measured value at this
+    # resolution, not an aspiration: "no crease" is the ``crease_edges == 0`` claim
+    # above, and the angle only has to stay out of the 15 deg crease band.
+    assert report.dihedral_degrees["p95"] < 12.0
+    assert report.dihedral_degrees["max"] < DEFAULT_CREASE_DEGREES
     assert report.curvature_jump_per_m is None  # no field supplied
     assert report.field_curvature_per_m is None
     assert report.mesh_curvature_per_m["area_weighted_mean"] == pytest.approx(1.0, rel=0.02)
+
+
+def test_the_dihedral_p95_halves_when_the_sphere_is_refined() -> None:
+    """The 16x32 threshold above is a resolution artefact, and this says so."""
+    coarse = assess_fairness(_uv_sphere(1.0, 16, 32))
+    fine = assess_fairness(_uv_sphere(1.0, 32, 64))
+    ratio = coarse.dihedral_degrees["p95"] / fine.dihedral_degrees["p95"]
+    assert ratio == pytest.approx(2.0, rel=0.05), ratio  # first order in h, measured 2.006
+
+
+def test_a_collapsed_pole_is_refused_by_the_fairness_report() -> None:
+    """The historical fixture's contract, pinned: a collapsed vertex is not flat.
+
+    A UV sphere built from ``nu + 1`` rings carries ``nv`` coincident vertices at
+    each pole, hence ``2 * nv`` zero-area faces. The cotangent Laplacian returns
+    *zero* curvature at the collapsed vertices -- a silent "this is flat" -- while
+    ``assess_fairness`` refuses the mesh outright. Both halves are pinned here so
+    that neither can drift into looking like a sphere.
+    """
+    mesh = _pole_collapsed_sphere(1.0, 16, 32)
+    assert len(meshlib.zero_area_faces(mesh)) == 32
+    failed = {check.name for check in inspect_geometry(mesh) if not check.passed}
+    assert {"no_degenerate_faces", "watertight", "vertex_manifold"} <= failed
+    values = vertex_mean_curvature(mesh)
+    assert all(math.isfinite(value) for value in values)
+    assert min(values) == pytest.approx(0.0, abs=1e-9)  # collapsed vertex: reported flat
+    with pytest.raises(CurvatureError):
+        assess_fairness(mesh)
 
 
 def test_a_cube_has_exactly_twelve_creases() -> None:
