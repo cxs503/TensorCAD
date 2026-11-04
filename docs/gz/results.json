@@ -1,0 +1,242 @@
+{
+  "barge": {
+    "beam_m": 2.0,
+    "beyond_wall_sided_validity": [
+      {
+        "formula_valid": false,
+        "gz_measured_m": 0.10740868329226375,
+        "gz_wall_sided_m": 0.1107121466502007,
+        "heel_deg": 25.0,
+        "relative_error": -0.029838310048981076
+      },
+      {
+        "formula_valid": false,
+        "gz_measured_m": 0.12282527428334782,
+        "gz_wall_sided_m": 0.14305555555555552,
+        "heel_deg": 30.0,
+        "relative_error": -0.1414155584076655
+      },
+      {
+        "formula_valid": false,
+        "gz_measured_m": 0.13801625067007428,
+        "gz_wall_sided_m": 0.23355797487548108,
+        "heel_deg": 40.0,
+        "relative_error": -0.40907069971104104
+      }
+    ],
+    "bm_m": 0.41666666666666663,
+    "curve": {
+      "angle_of_max_arm_deg": 40.0,
+      "area_to_30_deg_m_rad": 0.03229601747753959,
+      "area_to_40_deg_m_rad": 0.055058734659340414,
+      "gm_from_slope_m": 0.2182613054678069,
+      "max_arm_m": 0.13801625067007428,
+      "max_volume_error": 9.181544413650045e-13,
+      "vanishing_angle_deg": 90.00000000000003
+    },
+    "deck_edge_immersion_deg": 21.80140948635181,
+    "draft_m": 0.8,
+    "freeboard_m": 0.4,
+    "gm_m": 0.21666666666666667,
+    "kb_m": 0.4,
+    "kg_m": 0.6,
+    "length_m": 10.0,
+    "within_wall_sided_validity": [
+      {
+        "gz_measured_m": 0.003782462517000891,
+        "gz_wall_sided_m": 0.003782462517001192,
+        "heel_deg": 1.0,
+        "relative_error": -7.960299086562372e-14
+      },
+      {
+        "gz_measured_m": 0.019022726191120214,
+        "gz_wall_sided_m": 0.019022726191121653,
+        "heel_deg": 5.0,
+        "relative_error": -7.571721027943568e-14
+      },
+      {
+        "gz_measured_m": 0.03874854910656832,
+        "gz_wall_sided_m": 0.03874854910656602,
+        "heel_deg": 10.0,
+        "relative_error": 5.928590951498336e-14
+      },
+      {
+        "gz_measured_m": 0.059948787143371984,
+        "gz_wall_sided_m": 0.05994878714336664,
+        "heel_deg": 15.0,
+        "relative_error": 8.903988657493755e-14
+      },
+      {
+        "gz_measured_m": 0.08354371643375405,
+        "gz_wall_sided_m": 0.08354371643374373,
+        "heel_deg": 20.0,
+        "relative_error": 1.2367884494324244e-13
+      }
+    ]
+  },
+  "claims": [
+    {
+      "claim": "wall-sided barge matches the closed form to 1e-9",
+      "detail": "worst 1.24e-13",
+      "holds": true
+    },
+    {
+      "claim": "past deck-edge immersion the wall-sided formula over-predicts",
+      "detail": "deck edge at 21.80 deg",
+      "holds": true
+    },
+    {
+      "claim": "barge displacement is held to 1e-12 at every station",
+      "detail": "9.2e-13",
+      "holds": true
+    },
+    {
+      "claim": "barge curve peaks before it vanishes",
+      "detail": "0.1380 m at 40 deg",
+      "holds": true
+    },
+    {
+      "claim": "barge vanishing angle is 90 deg",
+      "detail": "90.00000000000003",
+      "holds": true
+    },
+    {
+      "claim": "cylinder reproduces the exact arm at every heel",
+      "detail": "1.89e-03 at 96 segments",
+      "holds": true
+    },
+    {
+      "claim": "cylinder error is second order in the segment size",
+      "detail": "3.53e-02 -> 1.89e-03",
+      "holds": true
+    },
+    {
+      "claim": "hull GM from the curve slope matches the waterplane integral",
+      "detail": "worst 6.50e-04",
+      "holds": true
+    },
+    {
+      "claim": "hull arm is grid-converged at 10 deg",
+      "detail": "0.02285 -> 0.02211 m",
+      "holds": true
+    },
+    {
+      "claim": "a body at exactly full submergence is refused",
+      "detail": "displacement volume 7.374345349674991 m^3 is the whole body volume 7.37434534967",
+      "holds": true
+    }
+  ],
+  "cylinder": {
+    "arms": [
+      {
+        "gz_exact_m": 0.0,
+        "gz_measured_m": 5.3606534550185286e-17,
+        "heel_deg": 0.0
+      },
+      {
+        "gz_exact_m": 0.0520944533000791,
+        "gz_measured_m": 0.05170061857617852,
+        "heel_deg": 10.0
+      },
+      {
+        "gz_exact_m": 0.10260604299770061,
+        "gz_measured_m": 0.1018957922629356,
+        "heel_deg": 20.0
+      },
+      {
+        "gz_exact_m": 0.14999999999999997,
+        "gz_measured_m": 0.14892946161930176,
+        "heel_deg": 30.0
+      },
+      {
+        "gz_exact_m": 0.21213203435596423,
+        "gz_measured_m": 0.21061806445893982,
+        "heel_deg": 45.0
+      },
+      {
+        "gz_exact_m": 0.25980762113533157,
+        "gz_measured_m": 0.2579533942685098,
+        "heel_deg": 60.0
+      },
+      {
+        "gz_exact_m": 0.2897777478867205,
+        "gz_measured_m": 0.2877096265468203,
+        "heel_deg": 75.0
+      },
+      {
+        "gz_exact_m": 0.3,
+        "gz_measured_m": 0.29785892323860347,
+        "heel_deg": 90.0
+      },
+      {
+        "gz_exact_m": 0.2897777478867205,
+        "gz_measured_m": 0.2877096265468203,
+        "heel_deg": 105.0
+      },
+      {
+        "gz_exact_m": 0.2598076211353316,
+        "gz_measured_m": 0.2579533942685098,
+        "heel_deg": 120.0
+      }
+    ],
+    "centre_of_gravity_above_centre_m": -0.3,
+    "exact_arm_form": "GZ(phi) = -(z_G - z_centre) sin(phi) for every phi",
+    "length_m": 4.0,
+    "radius_m": 1.0,
+    "segments": [
+      {
+        "segments": 24,
+        "worst_relative_error": 0.035265616070419226
+      },
+      {
+        "segments": 48,
+        "worst_relative_error": 0.007136922537988366
+      },
+      {
+        "segments": 96,
+        "worst_relative_error": 0.001890059638566921
+      }
+    ]
+  },
+  "degenerate": {
+    "refused_with": "displacement volume 7.374345349674991 m^3 is the whole body volume 7.374345349674991 m^3: the body floats exactly at full submergence, where the waterplane area vanishes and a righting arm is undefined. Give the body freeboard (a waterline below the lid) or pass a smaller displacement"
+  },
+  "example": "gz",
+  "hull": {
+    "grids": [
+      {
+        "angle_of_max_arm_deg": 10.0,
+        "bm_m": 0.4390284762087461,
+        "displacement_m3": 5.954490364990018,
+        "faces": 1998,
+        "gm_from_slope_m": 0.15631506424011518,
+        "gm_relative_error": 0.000650020881047153,
+        "gm_waterplane_m": 0.15621352218879053,
+        "gz_10deg_m": 0.022845161203297045,
+        "max_arm_m": 0.022845161203297045,
+        "max_volume_error": 8.502087922579449e-13,
+        "nx": 41,
+        "nz": 13,
+        "vanishing_angle_deg": 20.856461185388454
+      },
+      {
+        "angle_of_max_arm_deg": 10.0,
+        "bm_m": 0.43674585532938665,
+        "displacement_m3": 5.995478004674292,
+        "faces": 7838,
+        "gm_from_slope_m": 0.15203804290171513,
+        "gm_relative_error": 0.0006072152050800028,
+        "gm_waterplane_m": 0.1519457791142892,
+        "gz_10deg_m": 0.022106423385817062,
+        "max_arm_m": 0.022106423385817062,
+        "max_volume_error": 9.590106486712102e-13,
+        "nx": 81,
+        "nz": 25,
+        "vanishing_angle_deg": 20.492735381781266
+      }
+    ],
+    "kg_m": 0.7,
+    "waterline_z_m": -0.11
+  },
+  "version": "0.21.0"
+}

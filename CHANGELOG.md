@@ -4,6 +4,38 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-03
+
+- **Large-angle stability, the curve `GM` is only the slope of** (`tensorcad/gz.py`):
+  `gz_curve`, `righting_arm`, `heel_state`, `heel_mesh`, `immersed_moments`, `GZCurve`,
+  `HeeledCondition`, `GZError`. The body is heeled about the longitudinal axis at
+  **constant displacement**, so the waterline height is an unknown solved for by a bracketed
+  Illinois root solve (relative displacement residual `<= 1e-12`, ~15 volume evaluations per
+  station). Immersed volume and centre of buoyancy come from the divergence theorem over the
+  **clipped** surface with the tetrahedra apex on the waterplane, so the waterplane cap is
+  degenerate by construction: no cap polygon is built, and the result is exact for the given
+  triangulation. `GZCurve` also reports peak arm and its heel, vanishing angle, areas to 30
+  and 40 degrees, `GM` from the curve slope, and the displacement residual at every station.
+- **Verification against three closed forms, not against itself**: the wall-sided barge
+  `GZ = sin(phi)(GM + BM tan^2(phi)/2)` is reproduced to `1e-13` relative over 1..20 deg
+  (deck-edge immersion at `tan(phi) = 2f/B = 21.80 deg`, and the ladder runs past it to show
+  the measured arm falling below the invalid formula); the circular cylinder's
+  `GZ = -g sin(phi)`, exact at *every* heel because the section is rotation invariant and the
+  metacentre sits on the axis, is followed from 5 to 120 deg with the polygon error falling
+  as `n^-2`; the hull with `0.11 m` freeboard has its `GM` computed twice by independent code
+  (clipped volume + `waterplane_moments` section integral vs the curve slope) agreeing to
+  `6e-4` relative.
+- **A body floating at exactly full submergence is refused**, with a message naming
+  freeboard: the waterplane area vanishes and `GZ` is undefined. The packaged parametric hull
+  is exactly this case (flat lid on the design waterline), and saying so is the point.
+- **Documented convention trap**: `compute_hydrostatics` / `initial_stability` integrate the
+  *whole closed mesh*, i.e. they assume the lid is the waterline; a barge with `0.4 m` of
+  freeboard reports `V = 24 m3` instead of `16 m3` there. `gz` clips, so a body with
+  freeboard has a righting-arm curve even though it has no `initial_stability` row.
+- Evidence: `docs/gz.md`, `docs/gz/{results.json,tables.md,plot.png}`,
+  `examples/gz/run_example.py` (exits non-zero if any of its 10 claims breaks),
+  `tests/test_gz.py` (39 tests).
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

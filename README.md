@@ -106,8 +106,13 @@ Three references, in increasing order of how much they can go wrong:
 and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated in
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
-`7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+`7.8e-16`), and what the module deliberately does **not** do: free-surface corrections, trim equilibrium, damage stability, class rules.
+
+Large-angle `GZ` is no longer on that list: `tensorcad.gz` (0.21) heels the body at
+constant displacement, solves for the waterline, and returns the arm curve, its peak and
+vanishing angle and the areas to 30 and 40 degrees. It is checked against the wall-sided
+barge formula (`1e-13` relative) and against the circular cylinder's exact
+`GZ = -g sin(phi)` at every angle up to 120 degrees; see [docs/gz.md](docs/gz.md).
 
 ## Continuous geometry core (0.4)
 

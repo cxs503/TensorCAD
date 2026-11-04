@@ -101,6 +101,17 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .gz import (
+    DEFAULT_ANGLES_DEG,
+    GZCurve,
+    GZError,
+    HeeledCondition,
+    gz_curve,
+    heel_mesh,
+    heel_state,
+    immersed_moments,
+    righting_arm,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -222,6 +233,15 @@ __all__ = [
     "gate_mesh",
     "generate_hull",
     "generate_wigley",
+    "DEFAULT_ANGLES_DEG",
+    "GZCurve",
+    "GZError",
+    "HeeledCondition",
+    "gz_curve",
+    "heel_mesh",
+    "heel_state",
+    "immersed_moments",
+    "righting_arm",
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -260,4 +280,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"
