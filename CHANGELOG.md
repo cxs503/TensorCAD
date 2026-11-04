@@ -4,6 +4,32 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Righting arms at finite heel** (`tensorcad.stability.righting_arm_curve`, `GZCurve`,
+  `GZPoint`, `SCHEMA_GZ`, `DEFAULT_HEEL_ANGLES`): the integration the initial-stability solver
+  deliberately left out. At each heel the body is rotated about its longitudinal axis and the
+  waterplane height is solved so that the clipped solid displaces the same volume, giving
+  `GZ(phi) = Y_G - Y_B` with `Y_G = -(keel_z + KG) sin(phi)`; volume, `Y` and `Z` moments come from
+  exact divergence-theorem integrals over the waterplane-clipped triangles (Sutherland-Hodgman
+  clipping, fan triangulation, no cap mesh needed), and the plane solve is Illinois regula falsi
+  converging to `1e-11` of the displacement. Curve features (`gz_max`, `angle_of_gz_max_deg`,
+  `vanishing_angle_deg`, `dynamic_stability_area`, per-point `deck_immersed`) are reported with the
+  grid they were read from.
+- **Wall-sided topsides** (`freeboard=`): `tensorcad.hull` and `tensorcad.wigley` produce wetted
+  surfaces closed at the design waterline, so a body capped there cannot heel at fixed displacement.
+  `freeboard=<h>` extends the design waterplane vertically — stated in `basis`, refused when the
+  mesh already carries topsides, and refused for multi-loop waterplanes rather than guessing.
+- **Verification**: on a `10 x 2 x 0.5 + 1.5` m box the measured arm matches an independent 2-D
+  section clipping to **1.49e-14 m over 0..180 deg**; the classical wall-sided formula is recovered
+  to **4.4e-16 relative inside `tan(phi) < 2T/B = 0.5`** and departs by 2.1 % one step outside it
+  (asserted, not tolerated); on the `10 x 2 x 0.8 m` parametric hull the curve's `GM` equals
+  `initial_stability`'s to the last digit (`0.321622996 m`) while the 1-degree secant slope is
+  0.99 % off `GM`, the `O(phi^2)` truncation.
+  Evidence: `docs/gz_curve.md`, `docs/gz_curve/{results.json,gz_curves.png}`,
+  `examples/gz_curve/run_example.py` (exits non-zero if any of its claims breaks),
+  `tests/test_gz_curve.py` (61 tests).
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

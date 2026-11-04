@@ -30,6 +30,7 @@ EXPECTED_API = {
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
+    "righting_arm_curve", "GZCurve", "GZPoint", "SCHEMA_GZ", "DEFAULT_HEEL_ANGLES",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
@@ -49,7 +50,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
