@@ -1,0 +1,300 @@
+{
+  "asymmetry_sweep": [
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 0.3,
+      "lcb_error_mm": -7.99008164763837,
+      "lcb_mesh_m": 5.4207276942891225,
+      "lcb_reference_m": 5.428717775936761,
+      "volume_m3": 7.9702314557391185
+    },
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 0.4,
+      "lcb_error_mm": -4.90619393115832,
+      "lcb_mesh_m": 5.333921414272801,
+      "lcb_reference_m": 5.338827608203959,
+      "volume_m3": 7.758306053049644
+    },
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 0.5,
+      "lcb_error_mm": -2.923009630918294,
+      "lcb_mesh_m": 5.254901161693733,
+      "lcb_reference_m": 5.257824171324652,
+      "volume_m3": 7.572387433300119
+    },
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 0.7,
+      "lcb_error_mm": -0.8414383161285954,
+      "lcb_mesh_m": 5.116676884916149,
+      "lcb_reference_m": 5.117518323232278,
+      "volume_m3": 7.260684471915901
+    },
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 1.0,
+      "lcb_error_mm": 0.20534042526332286,
+      "lcb_mesh_m": 4.948253414038673,
+      "lcb_reference_m": 4.94804807361341,
+      "volume_m3": 6.8996408139175545
+    },
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 1.4,
+      "lcb_error_mm": 0.4950016368043819,
+      "lcb_mesh_m": 4.775040471956015,
+      "lcb_reference_m": 4.774545470319211,
+      "volume_m3": 6.544905665981483
+    },
+    {
+      "aft_exponent": 0.9,
+      "fore_exponent": 2.0,
+      "lcb_error_mm": 0.5436560920317746,
+      "lcb_mesh_m": 4.585276325903076,
+      "lcb_reference_m": 4.584732669811045,
+      "volume_m3": 6.17100202795712
+    }
+  ],
+  "case": {
+    "beam_m": 2.0,
+    "draft_m": 0.8,
+    "family": "half-breadth (B/2)*sin(pi*x/L)^p*sqrt((z+T)/T), p = aft/fore per half",
+    "grids": [
+      {
+        "nx": 41,
+        "nz": 13
+      },
+      {
+        "nx": 81,
+        "nz": 25
+      },
+      {
+        "nx": 161,
+        "nz": 49
+      },
+      {
+        "nx": 321,
+        "nz": 97
+      }
+    ],
+    "length_m": 10.0,
+    "water_density_kg_per_m3": 1025.0
+  },
+  "claims": {
+    "a_four_tenths_asymmetry_moves_the_centre_over_0.2_m": true,
+    "a_two_tenths_asymmetry_moves_the_centre_over_0.1_m": true,
+    "centre_error_below_1_percent_of_length_at_161x49": true,
+    "centre_error_is_monotone_in_the_grid": true,
+    "half_moment_two_schemes_agree_below_1e-13": true,
+    "involution_holds_on_the_mesh_below_1um": true,
+    "involution_is_exact_in_the_reference": true,
+    "lcb_equals_lcf_on_the_mesh": true,
+    "symmetric_centre_is_exactly_midship": true,
+    "symmetric_volume_uses_the_published_constant": true,
+    "the_centre_leaves_midship_as_soon_as_the_halves_differ": true,
+    "the_reference_centre_is_monotone_in_the_fore_exponent": true,
+    "volume_error_below_1_percent_at_81x25": true
+  },
+  "convergence": [
+    {
+      "aft_exponent": 0.9,
+      "block_coefficient_error": -0.004478647139103342,
+      "fore_exponent": 0.5,
+      "h_over_length": 0.025,
+      "lcb_error_mm": -7.790343559761048,
+      "lcb_mesh_m": 5.250033827764891,
+      "lcb_reference_m": 5.257824171324652,
+      "lcf_error_mm": -7.790343559761048,
+      "nx": 41,
+      "nz": 13,
+      "volume_error_percent": -0.9463112506701732,
+      "waterplane_error_percent": -0.24127063662915393,
+      "wetted_area_error_percent": -0.39010885468186984
+    },
+    {
+      "aft_exponent": 0.9,
+      "block_coefficient_error": -0.0015919358421803698,
+      "fore_exponent": 0.5,
+      "h_over_length": 0.0125,
+      "lcb_error_mm": -2.923009630918294,
+      "lcb_mesh_m": 5.254901161693733,
+      "lcb_reference_m": 5.257824171324652,
+      "lcf_error_mm": -2.923009630918294,
+      "nx": 81,
+      "nz": 25,
+      "volume_error_percent": -0.3363664854610482,
+      "waterplane_error_percent": -0.08220982079724104,
+      "wetted_area_error_percent": -0.17352595877899724
+    },
+    {
+      "aft_exponent": 0.9,
+      "block_coefficient_error": -0.0005644605275560988,
+      "fore_exponent": 0.5,
+      "h_over_length": 0.00625,
+      "lcb_error_mm": -1.0783062684831535,
+      "lcb_mesh_m": 5.2567458650561685,
+      "lcb_reference_m": 5.257824171324652,
+      "lcf_error_mm": -1.0783062684831535,
+      "nx": 161,
+      "nz": 49,
+      "volume_error_percent": -0.11926712044845189,
+      "waterplane_error_percent": -0.02823739106262435,
+      "wetted_area_error_percent": -0.07479280205427985
+    },
+    {
+      "aft_exponent": 0.9,
+      "block_coefficient_error": -0.00019987432279122697,
+      "fore_exponent": 0.5,
+      "h_over_length": 0.003125,
+      "lcb_error_mm": -0.39316993600202466,
+      "lcb_mesh_m": 5.25743100138865,
+      "lcb_reference_m": 5.257824171324652,
+      "lcf_error_mm": -0.393169936003801,
+      "nx": 321,
+      "nz": 97,
+      "volume_error_percent": -0.042232244359241555,
+      "waterplane_error_percent": -0.0097615521240213,
+      "wetted_area_error_percent": -0.031194692649427758
+    },
+    {
+      "aft_exponent": 1.4,
+      "block_coefficient_error": -0.004716401940306647,
+      "fore_exponent": 0.4,
+      "h_over_length": 0.025,
+      "lcb_error_mm": -14.230065582551354,
+      "lcb_mesh_m": 5.548424516027915,
+      "lcb_reference_m": 5.562654581610467,
+      "lcf_error_mm": -14.230065582550466,
+      "nx": 41,
+      "nz": 13,
+      "volume_error_percent": -1.0345055443739204,
+      "waterplane_error_percent": -0.3300926763539991,
+      "wetted_area_error_percent": -0.47506245889950005
+    },
+    {
+      "aft_exponent": 1.4,
+      "block_coefficient_error": -0.0017254584859003885,
+      "fore_exponent": 0.4,
+      "h_over_length": 0.0125,
+      "lcb_error_mm": -5.43982460980974,
+      "lcb_mesh_m": 5.557214757000657,
+      "lcb_reference_m": 5.562654581610467,
+      "lcf_error_mm": -5.439824609808852,
+      "nx": 81,
+      "nz": 25,
+      "volume_error_percent": -0.3784657017876891,
+      "waterplane_error_percent": -0.12441639620791589,
+      "wetted_area_error_percent": -0.21256125475618282
+    },
+    {
+      "aft_exponent": 1.4,
+      "block_coefficient_error": -0.0006292987673212069,
+      "fore_exponent": 0.4,
+      "h_over_length": 0.00625,
+      "lcb_error_mm": -2.0707720582047173,
+      "lcb_mesh_m": 5.560583809552262,
+      "lcb_reference_m": 5.562654581610467,
+      "lcf_error_mm": -2.0707720582047173,
+      "nx": 161,
+      "nz": 49,
+      "volume_error_percent": -0.13803171826766159,
+      "waterplane_error_percent": -0.04701909064120935,
+      "wetted_area_error_percent": -0.09032286226817732
+    },
+    {
+      "aft_exponent": 1.4,
+      "block_coefficient_error": -0.00022914499010057154,
+      "fore_exponent": 0.4,
+      "h_over_length": 0.003125,
+      "lcb_error_mm": -0.7865360624794704,
+      "lcb_mesh_m": 5.561868045547987,
+      "lcb_reference_m": 5.562654581610467,
+      "lcf_error_mm": -0.7865360624803586,
+      "nx": 321,
+      "nz": 97,
+      "volume_error_percent": -0.050261145196017765,
+      "waterplane_error_percent": -0.017793061102022723,
+      "wetted_area_error_percent": -0.0366491410623615
+    }
+  ],
+  "failed_claims": [],
+  "half_moment": [
+    {
+      "exp_sinh": 0.11884637715160179,
+      "exponent": 0.2,
+      "gauss_legendre": 0.11884637715160244,
+      "relative_difference": 5.551115123125783e-15
+    },
+    {
+      "exp_sinh": 0.11356632377045696,
+      "exponent": 0.4,
+      "gauss_legendre": 0.1135663237704576,
+      "relative_difference": 5.551115123125783e-15
+    },
+    {
+      "exp_sinh": 0.10688529483304014,
+      "exponent": 0.7,
+      "gauss_legendre": 0.1068852948330408,
+      "relative_difference": 5.995204332975845e-15
+    },
+    {
+      "exp_sinh": 0.10132118364233732,
+      "exponent": 1.0,
+      "gauss_legendre": 0.10132118364233791,
+      "relative_difference": 5.995204332975845e-15
+    },
+    {
+      "exp_sinh": 0.09516605793036924,
+      "exponent": 1.4,
+      "gauss_legendre": 0.09516605793036981,
+      "relative_difference": 5.995204332975845e-15
+    },
+    {
+      "exp_sinh": 0.08783029591058397,
+      "exponent": 2.0,
+      "gauss_legendre": 0.08783029591058453,
+      "relative_difference": 6.217248937900877e-15
+    },
+    {
+      "exp_sinh": 0.07880536505515115,
+      "exponent": 3.0,
+      "gauss_legendre": 0.07880536505515175,
+      "relative_difference": 7.549516567451064e-15
+    }
+  ],
+  "involution": [
+    {
+      "aft": 0.9,
+      "fore": 0.5,
+      "mesh_pair_sum_m": 10.0,
+      "mesh_residual_m": 0.0,
+      "reference_pair_sum_m": 10.000000000000002,
+      "reference_residual_m": 1.7763568394002505e-15
+    },
+    {
+      "aft": 1.4,
+      "fore": 0.4,
+      "mesh_pair_sum_m": 10.0,
+      "mesh_residual_m": 0.0,
+      "reference_pair_sum_m": 10.0,
+      "reference_residual_m": 0.0
+    },
+    {
+      "aft": 1.2,
+      "fore": 0.7,
+      "mesh_pair_sum_m": 10.000000000000002,
+      "mesh_residual_m": 1.7763568394002505e-15,
+      "reference_pair_sum_m": 9.999999999999998,
+      "reference_residual_m": -1.7763568394002505e-15
+    }
+  ],
+  "symmetric_reference": {
+    "longitudinal_centre_m": 5.0,
+    "taper_integral": 0.7043154582422714,
+    "volume_from_constant_m3": 7.512698221250894,
+    "volume_m3": 7.512698221250894,
+    "waterplane_m2": 14.086309164845428
+  }
+}
