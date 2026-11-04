@@ -51,12 +51,13 @@ Two things this buys that a sampled-field estimate would not:
 **What this is not.** ``GM`` here is the *solid* (no free-surface) metacentric height:
 it says nothing about tanks, so a slack tank's free-surface correction
 ``sum(rho * i_x) / displacement`` must be subtracted by the caller who knows the
-tankage. Nor does it give a righting-arm curve ``GZ(phi)`` for finite heel: ``GM`` is
-the slope of that curve at ``phi = 0``, and stability at large angles is a different
-integration (a heeled displacement integration, not a waterplane moment). Large-angle
-stability, damage stability, free-surface corrections and class rules are all outside
-this module, and nothing here should be read as a check against a statutory
-criterion.
+tankage. The righting-arm curve ``GZ(phi)`` for finite heel *is* computed (see
+:func:`gz_curve` at the end of this module), but it is a different integration from the
+one above -- a heeled displacement integration at held displacement, not a waterplane
+moment -- and its slope at zero heel is used to cross-check ``GM`` rather than being
+derived from it. Damage stability, free-surface corrections, trim, downflooding
+openings, the area under the curve and class rules are still outside this module:
+nothing here should be read as a check against a statutory criterion.
 
 Only the Python standard library is used.
 """
@@ -435,4 +436,455 @@ def initial_stability(
         waterplane=section,
         water_density=water_density,
         basis=basis,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Large-angle stability: the righting-arm curve GZ(phi)
+# ---------------------------------------------------------------------------
+#
+# ``GM`` is the slope of ``GZ`` at zero heel and it is a *waterplane* moment. A
+# righting arm at finite heel is a different integral: the hull is heeled by phi, sunk
+# until it displaces the same volume it displaces upright, and the transverse offset
+# between the centroid of the displaced volume and the centre of gravity is measured.
+# No waterplane enters, so the small-angle slope of this curve is an independent check
+# of ``GM`` rather than a restatement of it.
+#
+# Both references used in ``examples/stability/run_gz.py`` are exact, not asymptotic:
+#
+# * a **wall-sided box** (vertical sides, no deck-edge immersion) has the closed form
+#   ``GZ = sin(phi) * (GM + BM * tan^2(phi) / 2)``;
+# * a **circular section** has its transverse metacentre at the centre of the circle
+#   (``KM = KB + BM = R(1 - 4/3pi) + 4R/3pi = R`` exactly), so ``GZ = (R - KG) sin(phi)``
+#   for *all* heel angles while the section stays a half-disc.
+#
+# The convention is the usual one: heel is positive to starboard, so the starboard
+# side goes down, ``g`` stays on the centreline plane (``y_G = 0`` upright) and
+# ``GZ = y_B - y_G`` is positive when the couple restores the ship.
+
+SCHEMA_SUBMERGED = "tensorcad.stability.submerged/1"
+SCHEMA_GZ = "tensorcad.stability.gz/1"
+
+#: Angles the curve is sampled at when the caller does not say. They stop at 60 deg
+#: because a righting-arm curve past that is a flooding/downflooding question, which
+#: this module does not model (no openings, no compartments).
+DEFAULT_HEEL_ANGLES = (0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0)
+
+
+@dataclass(frozen=True)
+class SubmergedMoments:
+    """Volume, centroid and wetted area of the part of a closed surface below ``z``.
+
+    The surface is clipped by the plane rather than sampled, so for a polyhedral body
+    the result is the *exact* integral of the clipped polyhedron: clipping a triangle
+    by a plane adds at most one vertex per edge and never approximates the cut.
+    """
+
+    volume: float
+    centroid: tuple[float, float, float]
+    wetted_surface_area: float
+    waterline_z: float
+    faces: int
+    basis: str = "plane-clipped surface, tetrahedron moments"
+    schema: str = SCHEMA_SUBMERGED
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": self.schema,
+            "volume_m3": _round(self.volume),
+            "centroid_m": tuple(_round(value) for value in self.centroid),
+            "wetted_surface_area_m2": _round(self.wetted_surface_area),
+            "waterline_z_m": _round(self.waterline_z),
+            "clipped_triangles": self.faces,
+            "basis": self.basis,
+        }
+
+
+@dataclass(frozen=True)
+class RightingArm:
+    """One point of a righting-arm curve, with the sinkage that produced it."""
+
+    heel_angle_deg: float
+    righting_arm: float
+    waterline_z: float
+    sinkage: float
+    transverse_centre_buoyancy: float
+    vertical_centre_buoyancy: float
+    displaced_volume: float
+    displacement_volume: float
+    kg: float
+    y_g: float
+    iterations: int
+    basis: str = "heeled hull, constant displacement"
+    schema: str = SCHEMA_GZ
+
+    @property
+    def volume_residual(self) -> float:
+        """Relative difference between the displaced volume and the target."""
+        if self.displacement_volume == 0.0:
+            return float("nan")
+        return abs(self.displaced_volume - self.displacement_volume) / abs(self.displacement_volume)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "heel_angle_deg": _round(self.heel_angle_deg, 6),
+            "righting_arm_m": _round(self.righting_arm),
+            "waterline_z_m": _round(self.waterline_z),
+            "sinkage_m": _round(self.sinkage),
+            "transverse_centre_buoyancy_m": _round(self.transverse_centre_buoyancy),
+            "vertical_centre_buoyancy_m": _round(self.vertical_centre_buoyancy),
+            "displaced_volume_m3": _round(self.displaced_volume),
+            "displacement_volume_m3": _round(self.displacement_volume),
+            "volume_residual": self.volume_residual,
+            "kg_m": _round(self.kg),
+            "y_g_m": _round(self.y_g),
+            "bisection_iterations": self.iterations,
+            "basis": self.basis,
+        }
+
+
+def _clip_below(
+    polygon: Sequence[tuple[float, float, float]], level: float
+) -> list[tuple[float, float, float]]:
+    """Clip a convex polygon to ``z <= level``, returning it shifted to ``z = level``.
+
+    Shifting the plane to the origin is what makes the missing cap free: on the cut
+    plane ``r . n = z = 0``, so the plane's contribution to the volume and to the first
+    moments is exactly zero and the clipped surface alone gives the closed-body
+    integral. Sutherland-Hodgman, with vertices *on* the plane kept so a face lying in
+    the plane is returned unchanged.
+    """
+    clipped: list[tuple[float, float, float]] = []
+    count = len(polygon)
+    for index in range(count):
+        current = polygon[index]
+        following = polygon[(index + 1) % count]
+        dz_current = current[2] - level
+        dz_following = following[2] - level
+        if dz_current <= 0.0:
+            clipped.append((current[0], current[1], dz_current))
+        if (dz_current < 0.0 < dz_following) or (dz_following < 0.0 < dz_current):
+            fraction = dz_current / (dz_current - dz_following)
+            clipped.append(
+                (
+                    current[0] + fraction * (following[0] - current[0]),
+                    current[1] + fraction * (following[1] - current[1]),
+                    0.0,
+                )
+            )
+    return clipped
+
+
+def submerged_moments(
+    mesh: Mesh,
+    waterline_z: float = 0.0,
+) -> SubmergedMoments:
+    """Integrate the part of a closed surface below ``waterline_z``.
+
+    Unlike :func:`tensorcad.hydrostatics.compute_hydrostatics` this clips faces that
+    *straddle* the waterline, which is what a heeled hull needs: the waterline cuts
+    through the side shell and the deck at every angle. Volume and first moments come
+    from the tetrahedra spanned by the origin and the clipped triangles, so a
+    polyhedral body is integrated exactly.
+    """
+    if not math.isfinite(waterline_z):
+        raise StabilityError(f"waterline_z must be finite, got {waterline_z!r}")
+    if not mesh.faces:
+        raise StabilityError("mesh has no faces; there is no displaced volume to integrate")
+
+    volume_terms: list[float] = []
+    moment_x: list[float] = []
+    moment_y: list[float] = []
+    moment_z: list[float] = []
+    areas: list[float] = []
+    clipped_faces = 0
+    for face in mesh.faces:
+        a, b, c = (mesh.vertices[index] for index in face)
+        clipped = _clip_below((a, b, c), waterline_z)
+        if len(clipped) < 3:
+            continue
+        for fan in range(1, len(clipped) - 1):
+            p, q, r = clipped[0], clipped[fan], clipped[fan + 1]
+            # signed volume of the tetrahedron (origin, p, q, r)
+            volume = (p[0] * (q[1] * r[2] - q[2] * r[1])
+                      + p[1] * (q[2] * r[0] - q[0] * r[2])
+                      + p[2] * (q[0] * r[1] - q[1] * r[0])) / 6.0
+            volume_terms.append(volume)
+            # centroid of that tetrahedron is (p + q + r) / 4
+            moment_x.append(volume * (p[0] + q[0] + r[0]) * 0.25)
+            moment_y.append(volume * (p[1] + q[1] + r[1]) * 0.25)
+            moment_z.append(volume * (p[2] + q[2] + r[2]) * 0.25)
+            ux, uy, uz = q[0] - p[0], q[1] - p[1], q[2] - p[2]
+            vx, vy, vz = r[0] - p[0], r[1] - p[1], r[2] - p[2]
+            cx = uy * vz - uz * vy
+            cy = uz * vx - ux * vz
+            cz = ux * vy - uy * vx
+            areas.append(0.5 * math.sqrt(cx * cx + cy * cy + cz * cz))
+            clipped_faces += 1
+
+    volume = math.fsum(volume_terms)
+    if volume <= 0.0:
+        centroid = (float("nan"), float("nan"), float("nan"))
+    else:
+        centroid = (
+            math.fsum(moment_x) / volume,
+            math.fsum(moment_y) / volume,
+            math.fsum(moment_z) / volume + waterline_z,
+        )
+    return SubmergedMoments(
+        volume=volume,
+        centroid=centroid,
+        wetted_surface_area=math.fsum(areas),
+        waterline_z=waterline_z,
+        faces=clipped_faces,
+    )
+
+
+def _rotate_about_x(mesh: Mesh, angle: float, origin_z: float) -> Mesh:
+    """Heel the surface by ``angle`` radians about the line ``y = 0, z = origin_z``.
+
+    Starboard goes down for a positive angle, so a positive ``GZ`` raises the starboard
+    side. The heeling axis is kept on the centreline plane: heeling about an axis off
+    ``y = 0`` would translate the body transversely, and the sinkage search below only
+    moves it vertically.
+    """
+    cosine, sine = math.cos(angle), math.sin(angle)
+    vertices = tuple(
+        (x, y * cosine + (z - origin_z) * sine, -(y * sine) + (z - origin_z) * cosine + origin_z)
+        for x, y, z in mesh.vertices
+    )
+    return Mesh(vertices=vertices, faces=mesh.faces, units=mesh.units, coordinate_frame=mesh.coordinate_frame)
+
+
+def _bisect_waterline(
+    mesh: Mesh,
+    target: float,
+    lower: float,
+    upper: float,
+    tolerance: float,
+    max_iterations: int,
+) -> tuple[SubmergedMoments, int]:
+    """Solve ``volume(level) = target`` for the level, by bisection.
+
+    ``volume(level)`` is monotone (it is the integral of the waterplane area), so
+    bisection cannot run away; the bracket is closed when the volume matches or when the
+    level bracket collapses, whichever happens first.
+    """
+    low, high = lower, upper
+    scale = max(abs(upper - lower), 1e-12)
+    level_tolerance = tolerance * scale
+    volume_tolerance = tolerance * max(abs(target), 1e-12)
+    moments = submerged_moments(mesh, 0.5 * (low + high))
+    iterations = 0
+    for iterations in range(1, max_iterations + 1):
+        mid = 0.5 * (low + high)
+        moments = submerged_moments(mesh, mid)
+        residual = moments.volume - target
+        if abs(residual) <= volume_tolerance or (high - low) <= level_tolerance:
+            return moments, iterations
+        if residual > 0.0:
+            high = mid
+        else:
+            low = mid
+    return moments, iterations
+
+
+def righting_arm(
+    mesh: Mesh,
+    *,
+    kg: float,
+    heel_degrees: float,
+    displacement: float | None = None,
+    waterline_z: float = 0.0,
+    tolerance: float = 1e-12,
+    max_iterations: int = 100,
+) -> RightingArm:
+    """``GZ`` at one heel angle, at constant displacement.
+
+    ``kg`` is the height of the centre of gravity above the keel (the mesh's lowest
+    vertex), the same datum :func:`initial_stability` takes, and ``g`` is assumed to lie
+    on the centreline plane. ``displacement`` defaults to the volume the upright body
+    displaces below ``waterline_z``; pass it explicitly to hold one displacement across
+    a loading ladder. The hull is heeled about the design waterline and then sunk by
+    ``sinkage`` until it displaces that volume again, which is what makes the curve
+    comparable between angles.
+    """
+    if not math.isfinite(kg):
+        raise StabilityError(f"kg must be finite, got {kg!r}")
+    if not math.isfinite(heel_degrees):
+        raise StabilityError(f"heel angle must be finite, got {heel_degrees!r}")
+    if not math.isfinite(waterline_z):
+        raise StabilityError(f"waterline_z must be finite, got {waterline_z!r}")
+    if tolerance <= 0.0 or not math.isfinite(tolerance):
+        raise StabilityError(f"tolerance must be a finite positive number, got {tolerance!r}")
+    if displacement is not None and (not math.isfinite(displacement) or displacement <= 0.0):
+        raise StabilityError(f"displacement must be a finite positive volume, got {displacement!r}")
+    if not mesh.vertices:
+        raise StabilityError("mesh has no vertices")
+
+    keel_z = min(vertex[2] for vertex in mesh.vertices)
+    z_g = keel_z + kg
+    angle = math.radians(heel_degrees)
+    heeled = _rotate_about_x(mesh, angle, waterline_z)
+    if displacement is None:
+        displacement = submerged_moments(mesh, waterline_z).volume
+    if not math.isfinite(displacement) or displacement <= 0.0:
+        raise StabilityError(
+            f"the upright body displaces {displacement!r} m^3 at z = {waterline_z!r}; "
+            "a righting arm needs a floating body"
+        )
+
+    levels = [vertex[2] for vertex in heeled.vertices]
+    lower, upper = min(levels), max(levels)
+    moments, iterations = _bisect_waterline(heeled, displacement, lower, upper, tolerance, max_iterations)
+    if moments.volume <= 0.0 or abs(moments.volume - displacement) > 1e-6 * displacement:
+        raise StabilityError(
+            f"could not immerse {displacement!r} m^3 by heeling to {heel_degrees!r} deg: "
+            f"the best waterline found holds {moments.volume!r} m^3; "
+            "the body is too small for that displacement"
+        )
+
+    y_b, z_b = moments.centroid[1], moments.centroid[2]
+    # ``g`` is a point of the hull, so it is heeled with it; the sinkage that follows is
+    # vertical and leaves the transverse coordinate alone, which is why y_g needs no
+    # further correction.
+    y_g = (z_g - waterline_z) * math.sin(angle)
+    return RightingArm(
+        heel_angle_deg=heel_degrees,
+        righting_arm=y_b - y_g,
+        waterline_z=moments.waterline_z,
+        sinkage=waterline_z - moments.waterline_z,
+        transverse_centre_buoyancy=y_b,
+        vertical_centre_buoyancy=z_b - moments.waterline_z,
+        displaced_volume=moments.volume,
+        displacement_volume=displacement,
+        kg=kg,
+        y_g=y_g,
+        iterations=iterations,
+    )
+
+
+@dataclass(frozen=True)
+class GZCurve:
+    """A righting-arm curve, plus the loading and displacement it was computed at."""
+
+    arms: tuple[RightingArm, ...]
+    kg: float
+    keel_z: float
+    waterline_z: float
+    displacement_volume: float
+    basis: str = "heeled hull, constant displacement, plane-clipped volume moments"
+    schema: str = SCHEMA_GZ
+
+    @property
+    def heel_angles_deg(self) -> tuple[float, ...]:
+        return tuple(arm.heel_angle_deg for arm in self.arms)
+
+    @property
+    def righting_arms(self) -> tuple[float, ...]:
+        return tuple(arm.righting_arm for arm in self.arms)
+
+    @property
+    def sinkages(self) -> tuple[float, ...]:
+        return tuple(arm.sinkage for arm in self.arms)
+
+    @property
+    def max_arm(self) -> RightingArm:
+        """The sampled angle with the largest righting arm (the curve's crest)."""
+        return max(self.arms, key=lambda arm: arm.righting_arm)
+
+    @property
+    def angle_of_max_arm_deg(self) -> float:
+        return self.max_arm.heel_angle_deg
+
+    @property
+    def vanishing_angle_deg(self) -> float | None:
+        """First angle past the crest where ``GZ`` reaches zero, if the range covers it.
+
+        Interpolated linearly between the two sampled angles that bracket the crossing;
+        ``None`` means the curve is still positive at the last angle sampled, which is a
+        statement about the sampling and not about the ship.
+        """
+        crest = self.max_arm.heel_angle_deg
+        if self.max_arm.righting_arm <= 0.0 or not any(
+            arm.righting_arm > 0.0 for arm in self.arms if arm.heel_angle_deg > 0.0
+        ):
+            # The curve never becomes positive at a real angle: there is no range of
+            # stability to leave, so the question has no answer rather than an answer of
+            # zero (which is what a crossing at the upright angle would report).
+            return None
+        previous: RightingArm | None = None
+        for arm in self.arms:
+            past_crest = previous is not None and arm.heel_angle_deg >= crest
+            if past_crest and previous is not None and previous.righting_arm > 0.0 >= arm.righting_arm:
+                span = arm.righting_arm - previous.righting_arm
+                fraction = previous.righting_arm / -span
+                return previous.heel_angle_deg + fraction * (arm.heel_angle_deg - previous.heel_angle_deg)
+            previous = arm
+        return None
+
+    @property
+    def max_volume_residual(self) -> float:
+        return max(arm.volume_residual for arm in self.arms)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": self.schema,
+            "kg_m": _round(self.kg),
+            "keel_z_m": _round(self.keel_z),
+            "design_waterline_z_m": _round(self.waterline_z),
+            "displacement_volume_m3": _round(self.displacement_volume),
+            "heel_angles_deg": tuple(_round(angle, 6) for angle in self.heel_angles_deg),
+            "righting_arms_m": tuple(_round(arm) for arm in self.righting_arms),
+            "sinkage_m": tuple(_round(sinkage) for sinkage in self.sinkages),
+            "max_arm_m": _round(self.max_arm.righting_arm),
+            "angle_of_max_arm_deg": _round(self.angle_of_max_arm_deg, 6),
+            "vanishing_angle_deg": (
+                None if self.vanishing_angle_deg is None else _round(self.vanishing_angle_deg, 6)
+            ),
+            "max_volume_residual": self.max_volume_residual,
+            "arms": [arm.to_dict() for arm in self.arms],
+            "basis": self.basis,
+        }
+
+
+def gz_curve(
+    mesh: Mesh,
+    *,
+    kg: float,
+    heel_angles_deg: Sequence[float] = DEFAULT_HEEL_ANGLES,
+    displacement: float | None = None,
+    waterline_z: float = 0.0,
+    tolerance: float = 1e-12,
+    max_iterations: int = 100,
+) -> GZCurve:
+    """Righting arms for a list of heel angles at one displacement.
+
+    Every angle is solved independently (heel, then sink until the displacement is
+    recovered), so the curve holds ``displacement`` and not the draft. See
+    :func:`righting_arm` for the datum of ``kg`` and the sign convention; the curve is
+    positive when it restores the ship.
+    """
+    angles = tuple(float(angle) for angle in heel_angles_deg)
+    if not angles:
+        raise StabilityError("at least one heel angle is required")
+    keel_z = min(vertex[2] for vertex in mesh.vertices) if mesh.vertices else float("nan")
+    solved = tuple(
+        righting_arm(
+            mesh,
+            kg=kg,
+            heel_degrees=angle,
+            displacement=displacement,
+            waterline_z=waterline_z,
+            tolerance=tolerance,
+            max_iterations=max_iterations,
+        )
+        for angle in angles
+    )
+    return GZCurve(
+        arms=solved,
+        kg=kg,
+        keel_z=keel_z,
+        waterline_z=waterline_z,
+        displacement_volume=solved[0].displacement_volume,
     )
