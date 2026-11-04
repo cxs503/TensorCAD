@@ -135,7 +135,8 @@ documented as discretisation, not as a modelling assumption.
   as "multi-family / transom / asymmetric").
 - **Stability, resistance, structure, class rules: not implemented, not verified.**
   `Cb`/`Cp`/`VCB` are inputs to those calculations, not substitutes for them;
-  no metacentric height, no added resistance, no longitudinal strength.
+  no added resistance, no longitudinal strength. The metacentric height used to be
+  on that list; it now has its own reference and lives in `docs/stability.md`.
 - **The wetted area is for the bare lofted surface** -- no appendages, no roughness, no
   transom immersion. The SUBOFF appendage fields are separate geometry and are verified
   in `docs/suboff_appendages.md`.
