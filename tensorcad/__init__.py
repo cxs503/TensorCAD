@@ -130,6 +130,15 @@ from .validation import (
     inspect_mesh_quality,
 )
 from .voxel import VoxelGrid, to_voxel_grid
+from .wigley import (
+    WigleyModel,
+    WigleyParameters,
+    generate_wigley,
+)
+from .wigley import analytic_hydrostatics as wigley_analytic_hydrostatics
+from .wigley import (
+    half_breadth as wigley_half_breadth,
+)
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
@@ -179,6 +188,8 @@ __all__ = [
     "ValidationReport",
     "VoxelGrid",
     "WaterplaneMoments",
+    "WigleyModel",
+    "WigleyParameters",
     "analytic_hydrostatics",
     "analytic_relative_errors",
     "analytic_section_area",
@@ -196,6 +207,7 @@ __all__ = [
     "export_hull",
     "gate_mesh",
     "generate_hull",
+    "generate_wigley",
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -223,6 +235,8 @@ __all__ = [
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
     "waterplane_moments",
+    "wigley_analytic_hydrostatics",
+    "wigley_half_breadth",
     "write_design_json",
     "write_metadata",
     "write_obj",
@@ -230,4 +244,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.16.0"
+__version__ = "0.18.0"

@@ -4,6 +4,55 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.18.0 — 2026-11-03
+
+### Added
+- **`tensorcad.wigley`** — the Wigley parabolic hull, the analytic benchmark geometry
+  ship-hydrodynamics solvers share:
+  `b(x,z) = (B/2)(1 - (2x/L - 1)^2)(1 - (z/T)^2)`. It is the second family in the kernel,
+  and the reason to carry it is not the shape but the two properties the sine family
+  lacks:
+  - **closed-form hydrostatics**, derived and pinned by independent quadrature:
+    volume `4LBT/9`, waterplane `2LB/3`, midship section `2BT/3`, LCB/LCF `L/2`,
+    VCB `-3T/8`, `Cb = 4/9` (for every dimension set), `Cp = 2/3`, wetted area by
+    Gauss-Legendre quadrature (no elementary antiderivative).
+  - **fair ends**: the waterline slope is the finite `2B/L` and its curvature the finite
+    `-4B/L^2` at the stem and stern, where the sine family's `db/dx ~ x^-0.3` diverges.
+- `WigleyParameters` / `WigleyModel` / `generate_wigley` / `build_mesh` /
+  `half_breadth` / `analytic_hydrostatics` / `analytic_relative_errors` /
+  `estimate_discretisation_error` / `check_consistency`, plus `wigley_analytic_hydrostatics`
+  and `wigley_half_breadth` re-exported from the package to avoid colliding with the sine
+  family's identically named functions.
+- `tests/test_wigley.py` — 35 tests: the closed forms against independent Simpson
+  quadratures (the check that caught the VCB algebra error described below), the mesh
+  against the closed forms at three resolutions with the *sign* of every error pinned, the
+  second-order convergence ratio, watertight/manifold/Euler validity, the analytic end
+  slope and curvature, the divergence of the sine family at the same probe depths, the
+  fairness audit at equal triangle count, parameter rejection and a stdlib-only import.
+- `examples/wigley/run_wigley.py` — writes `docs/wigley/{results.json,report.md,fig*.png}`
+  and exits 1 if one of its 12 claims stops holding.
+- `docs/wigley.md` — the derivation, the verification, the fairness comparison and the
+  limits.
+
+### Measured (`L=10 m, B=1 m, T=0.625 m`, all signed errors negative, i.e. the inscribed
+loft is below the analytic surface)
+- volume `-0.2360 %` / `-0.0590 %` / `-0.0148 %` at `41x13` / `81x25` / `161x49`; the
+  refinement ratio is `4.00 x` and `4.00 x`, against `4` for a second-order quantity;
+- wetted area `-0.0201 %` / `-0.0050 %` / `-0.0013 %`, waterplane `-0.0625 %` /
+  `-0.0156 %` / `-0.0039 %`, midship section `-0.1736 %` / `-0.0434 %` / `-0.0109 %`,
+  VCB `-0.0580 %` / `-0.0145 %` / `-0.0036 %`;
+- LCB and LCF land on `L/2` to round-off at every grid; the worst quantity at the default
+  grid is `0.236 %`, so the 3 % standard is met with two orders of margin;
+- at equal cost (`81x25`, 7 838 triangles) p95 dihedral `3.57°` against the sine family's
+  `6.99°`, crease length fraction `2.58 %` against `4.18 %` — the fair end shows up in the
+  tail of the distribution, not in its median.
+
+### Fixed
+- Nothing in shipped code. One arithmetic error was caught before release: the VCB closed
+  form was first written `-9/16 T`, the integral gives `-3T/8`, and the mesh's `-33 %`
+  disagreement is what exposed it. The formula, the test and the record of the mistake are
+  in `docs/wigley.md` rather than erased.
+
 ## 0.16.0 — Bonjean curves: a station's immersed area against the waterline
 
 `section_area_at` could only report the area of a station the mesh had a vertex

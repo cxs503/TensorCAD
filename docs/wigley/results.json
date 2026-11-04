@@ -1,0 +1,475 @@
+{
+  "case": {
+    "beam_length_ratio": 0.1,
+    "beam_m": 1.0,
+    "draft_length_ratio": 0.0625,
+    "draft_m": 0.625,
+    "family": "wigley_parabolic_hull",
+    "half_breadth": "(B/2)*(1-(2x/L-1)^2)*(1-(z/T)^2)",
+    "length_m": 10.0,
+    "water_density_kg_m3": 1025.0
+  },
+  "claims": [
+    {
+      "detail": "worst |error| at 41x13 = 0.2360% (limit 0.3%)",
+      "name": "default_grid_within_0.3pct",
+      "passed": true
+    },
+    {
+      "detail": "worst |error| at 81x25 = 0.0590% (limit 0.1%)",
+      "name": "refined_grid_within_0.1pct",
+      "passed": true
+    },
+    {
+      "detail": "worst |error| at 161x49 = 0.0148% (limit 0.03%)",
+      "name": "finest_grid_within_0.03pct",
+      "passed": true
+    },
+    {
+      "detail": "volume |error| 0.2360%, 0.0590%, 0.0148% is strictly decreasing",
+      "name": "volume_error_monotone",
+      "passed": true
+    },
+    {
+      "detail": "error ratios between consecutive refinements 4.00x, 4.00x (second order ~4x)",
+      "name": "volume_second_order",
+      "passed": true
+    },
+    {
+      "detail": "every grid reports a volume below the closed form (an inscribed loft must)",
+      "name": "inscribed_mesh_is_low",
+      "passed": true
+    },
+    {
+      "detail": "closed form Cb = 0.444444444444 = 4/9 = 0.444444444444; mesh at 41x13 = 0.443395544 (-0.2360%)",
+      "name": "block_coefficient_is_4_9",
+      "passed": true
+    },
+    {
+      "detail": "80 vs 160 nodes differ by 4.298e-15 relative, five orders below the finest mesh error 1.255e-05",
+      "name": "wetted_area_quadrature_converged",
+      "passed": true
+    },
+    {
+      "detail": "watertight=True, edge-manifold=True, zero-area faces=0, validation errors=0",
+      "name": "mesh_is_a_closed_solid",
+      "passed": true
+    },
+    {
+      "detail": "Wigley secant slope near the stern stays within \u00b10.2000 1/m for x/L down to 1e-9 (analytic end slope 2B/L = 0.2000)",
+      "name": "wigley_slope_bounded",
+      "passed": true
+    },
+    {
+      "detail": "sine family slope grows 125.9x between x/L=1e-2 and 1e-9, and x^-0.3 predicts 125.9x",
+      "name": "sine_slope_diverges",
+      "passed": true
+    },
+    {
+      "detail": "d2b/dx2 = -4B/L^2 = -0.040000 1/m at the ends and midship, central differences agree to <1e-5",
+      "name": "waterline_curvature_finite",
+      "passed": true
+    }
+  ],
+  "closed_form_hydrostatics": {
+    "basis": "closed forms of the Wigley surface (wetted area by Gauss-Legendre quadrature)",
+    "block_coefficient": 0.4444444444444444,
+    "displacement_mass_kg": 2847.222222222222,
+    "displacement_volume_m3": 2.7777777777777777,
+    "lcb_m": 5.0,
+    "lcf_m": 5.0,
+    "maximum_section_area_m2": 0.4166666666666667,
+    "prismatic_coefficient": 0.6666666666666666,
+    "vcb_m": -0.234375,
+    "waterplane_area_m2": 6.666666666666667,
+    "wetted_surface_area_m2": 14.879063104957757
+  },
+  "discretisation_41x13_to_81x25": {
+    "coarse_grid": {
+      "nx": 41,
+      "nz": 13,
+      "triangles": 1998
+    },
+    "quantities": {
+      "block_coefficient": {
+        "closed_form": 0.4444444444444444,
+        "coarse": 0.4433955439814815,
+        "coarse_error": -0.0023600260416665464,
+        "refined": 0.44418212890625,
+        "refined_error": -0.0005902099609375044,
+        "relative_change": 0.0017740027734724256
+      },
+      "displacement_volume": {
+        "closed_form": 2.7777777777777777,
+        "coarse": 2.7712221498842595,
+        "coarse_error": -0.0023600260416665364,
+        "refined": 2.7761383056640625,
+        "refined_error": -0.0005902099609374645,
+        "relative_change": 0.0017740027734724556
+      },
+      "longitudinal_centre_buoyancy": {
+        "closed_form": 5.0,
+        "coarse": 5.0,
+        "coarse_error": 0.0,
+        "refined": 5.000000000000001,
+        "refined_error": 1.7763568394002506e-16,
+        "relative_change": 1.7763568394002506e-16
+      },
+      "longitudinal_centre_flotation": {
+        "closed_form": 5.0,
+        "coarse": 5.0,
+        "coarse_error": 0.0,
+        "refined": 5.0,
+        "refined_error": 0.0,
+        "relative_change": 0.0
+      },
+      "maximum_section_area": {
+        "closed_form": 0.4166666666666667,
+        "coarse": 0.4159432870370369,
+        "coarse_error": -0.0017361111111114267,
+        "refined": 0.4164858217592593,
+        "refined_error": -0.0004340277777777235,
+        "relative_change": 0.0013043478260873276
+      },
+      "prismatic_coefficient": {
+        "closed_form": 0.6666666666666666,
+        "coarse": 0.6662500000000002,
+        "coarse_error": -0.0006249999999995981,
+        "refined": 0.6665624999999998,
+        "refined_error": -0.00015625000000019096,
+        "relative_change": 0.00046904315196938785
+      },
+      "vertical_centre_buoyancy": {
+        "closed_form": -0.234375,
+        "coarse": -0.23423913043478262,
+        "coarse_error": -0.0005797101449275033,
+        "refined": -0.23434107685627442,
+        "refined_error": -0.00014473874656246722,
+        "relative_change": 0.0004352237019603754
+      },
+      "waterplane_area": {
+        "closed_form": 6.666666666666667,
+        "coarse": 6.6625,
+        "coarse_error": -0.0006250000000000977,
+        "refined": 6.665625,
+        "refined_error": -0.0001562499999999911,
+        "relative_change": 0.0004690431519700879
+      },
+      "wetted_surface_area": {
+        "closed_form": 14.879063104957757,
+        "coarse": 14.876074557091307,
+        "coarse_error": -0.0002008559171614451,
+        "refined": 14.878316269999544,
+        "refined_error": -5.019368174891424e-05,
+        "relative_change": 0.00015069250289340887
+      }
+    },
+    "refined_grid": {
+      "nx": 81,
+      "nz": 25,
+      "triangles": 7838
+    }
+  },
+  "fairness": {
+    "sine_81x25": {
+      "boundary_edges": 0,
+      "crease_angle_degrees": 15.0,
+      "crease_edges": 446,
+      "crease_length_fraction": 0.0417840353062678,
+      "curvature_jump_per_m": null,
+      "dihedral_degrees": {
+        "count": 11757,
+        "max": 175.16043611984315,
+        "mean": 3.575238591229527,
+        "min": 0.0,
+        "p50": 0.5214929524391921,
+        "p95": 6.987530583285148
+      },
+      "edge_manifold": true,
+      "field_curvature_per_m": null,
+      "interior_edges": 11757,
+      "mesh_curvature_per_m": {
+        "area_weighted_mean": 1.0953804123862416,
+        "count": 3921,
+        "max": 32.716952267881084,
+        "mean": 0.8097641060317816,
+        "p50": 0.301404871325802,
+        "p95": 2.882538342233043
+      },
+      "schema": "tensorcad.curvature.fairness/1",
+      "triangles": 7838,
+      "vertices": 3921,
+      "watertight": true
+    },
+    "wigley_81x25": {
+      "boundary_edges": 0,
+      "crease_angle_degrees": 15.0,
+      "crease_edges": 288,
+      "crease_length_fraction": 0.025832966876165993,
+      "curvature_jump_per_m": null,
+      "dihedral_degrees": {
+        "count": 11757,
+        "max": 179.07673257151012,
+        "mean": 3.6054860962154494,
+        "min": 0.0,
+        "p50": 0.5816336539398218,
+        "p95": 3.5731532980157388
+      },
+      "edge_manifold": true,
+      "field_curvature_per_m": null,
+      "interior_edges": 11757,
+      "mesh_curvature_per_m": {
+        "area_weighted_mean": 1.214853100254044,
+        "count": 3921,
+        "max": 38.04667225555337,
+        "mean": 1.1075289644732365,
+        "p50": 0.5131616205308198,
+        "p95": 1.4828213572109297
+      },
+      "schema": "tensorcad.curvature.fairness/1",
+      "triangles": 7838,
+      "vertices": 3921,
+      "watertight": true
+    }
+  },
+  "figures": [
+    "fig1_convergence.png",
+    "fig2_waterline_fairness.png",
+    "fig3_sections.png"
+  ],
+  "grids": [
+    {
+      "nx": 41,
+      "nz": 13,
+      "quantities": {
+        "block_coefficient": {
+          "closed_form": 0.4444444444444444,
+          "mesh": 0.4433955439814815,
+          "relative_error": -0.0023600260416665464
+        },
+        "displacement_volume": {
+          "closed_form": 2.7777777777777777,
+          "mesh": 2.7712221498842595,
+          "relative_error": -0.0023600260416665364
+        },
+        "longitudinal_centre_buoyancy": {
+          "closed_form": 5.0,
+          "mesh": 5.0,
+          "relative_error": 0.0
+        },
+        "longitudinal_centre_flotation": {
+          "closed_form": 5.0,
+          "mesh": 5.0,
+          "relative_error": 0.0
+        },
+        "maximum_section_area": {
+          "closed_form": 0.4166666666666667,
+          "mesh": 0.4159432870370369,
+          "relative_error": -0.0017361111111114267
+        },
+        "prismatic_coefficient": {
+          "closed_form": 0.6666666666666666,
+          "mesh": 0.6662500000000002,
+          "relative_error": -0.0006249999999995981
+        },
+        "vertical_centre_buoyancy": {
+          "closed_form": -0.234375,
+          "mesh": -0.23423913043478262,
+          "relative_error": -0.0005797101449275033
+        },
+        "waterplane_area": {
+          "closed_form": 6.666666666666667,
+          "mesh": 6.6625,
+          "relative_error": -0.0006250000000000977
+        },
+        "wetted_surface_area": {
+          "closed_form": 14.879063104957757,
+          "mesh": 14.876074557091307,
+          "relative_error": -0.0002008559171614451
+        }
+      },
+      "triangles": 1998,
+      "worst_relative_error": 0.0023600260416665464
+    },
+    {
+      "nx": 81,
+      "nz": 25,
+      "quantities": {
+        "block_coefficient": {
+          "closed_form": 0.4444444444444444,
+          "mesh": 0.44418212890625,
+          "relative_error": -0.0005902099609375044
+        },
+        "displacement_volume": {
+          "closed_form": 2.7777777777777777,
+          "mesh": 2.7761383056640625,
+          "relative_error": -0.0005902099609374645
+        },
+        "longitudinal_centre_buoyancy": {
+          "closed_form": 5.0,
+          "mesh": 5.000000000000001,
+          "relative_error": 1.7763568394002506e-16
+        },
+        "longitudinal_centre_flotation": {
+          "closed_form": 5.0,
+          "mesh": 5.0,
+          "relative_error": 0.0
+        },
+        "maximum_section_area": {
+          "closed_form": 0.4166666666666667,
+          "mesh": 0.4164858217592593,
+          "relative_error": -0.0004340277777777235
+        },
+        "prismatic_coefficient": {
+          "closed_form": 0.6666666666666666,
+          "mesh": 0.6665624999999998,
+          "relative_error": -0.00015625000000019096
+        },
+        "vertical_centre_buoyancy": {
+          "closed_form": -0.234375,
+          "mesh": -0.23434107685627442,
+          "relative_error": -0.00014473874656246722
+        },
+        "waterplane_area": {
+          "closed_form": 6.666666666666667,
+          "mesh": 6.665625,
+          "relative_error": -0.0001562499999999911
+        },
+        "wetted_surface_area": {
+          "closed_form": 14.879063104957757,
+          "mesh": 14.878316269999544,
+          "relative_error": -5.019368174891424e-05
+        }
+      },
+      "triangles": 7838,
+      "worst_relative_error": 0.0005902099609375044
+    },
+    {
+      "nx": 161,
+      "nz": 49,
+      "quantities": {
+        "block_coefficient": {
+          "closed_form": 0.4444444444444444,
+          "mesh": 0.4443788599084926,
+          "relative_error": -0.00014756520589165323
+        },
+        "displacement_volume": {
+          "closed_form": 2.7777777777777777,
+          "mesh": 2.7773678744280788,
+          "relative_error": -0.00014756520589161328
+        },
+        "longitudinal_centre_buoyancy": {
+          "closed_form": 5.0,
+          "mesh": 5.0,
+          "relative_error": 0.0
+        },
+        "longitudinal_centre_flotation": {
+          "closed_form": 5.0,
+          "mesh": 5.0,
+          "relative_error": 0.0
+        },
+        "maximum_section_area": {
+          "closed_form": 0.4166666666666667,
+          "mesh": 0.4166214554398148,
+          "relative_error": -0.00010850694444446417
+        },
+        "prismatic_coefficient": {
+          "closed_form": 0.6666666666666666,
+          "mesh": 0.6666406250000002,
+          "relative_error": -3.9062499999631406e-05
+        },
+        "vertical_centre_buoyancy": {
+          "closed_form": -0.234375,
+          "mesh": -0.23436652197504076,
+          "relative_error": -3.617290649273741e-05
+        },
+        "waterplane_area": {
+          "closed_form": 6.666666666666667,
+          "mesh": 6.66640625,
+          "relative_error": -3.90625000000977e-05
+        },
+        "wetted_surface_area": {
+          "closed_form": 14.879063104957757,
+          "mesh": 14.878876415078661,
+          "relative_error": -1.2547152853543547e-05
+        }
+      },
+      "triangles": 31038,
+      "worst_relative_error": 0.00014756520589165323
+    }
+  ],
+  "mesh_validity_81x25": {
+    "edge_manifold": true,
+    "signed_volume_m3": 2.776138305664063,
+    "validation_errors": [],
+    "watertight": true,
+    "zero_area_faces": 0
+  },
+  "passed": true,
+  "waterline_curvature": [
+    {
+      "closed_form": -0.04,
+      "second_difference": -0.04000000008996807,
+      "x_over_L": 0.01
+    },
+    {
+      "closed_form": -0.04,
+      "second_difference": -0.039999999978945766,
+      "x_over_L": 0.5
+    },
+    {
+      "closed_form": -0.04,
+      "second_difference": -0.04000000025650152,
+      "x_over_L": 0.99
+    }
+  ],
+  "waterline_slope_near_stern": [
+    {
+      "sine_analytic_dbdx": 0.31037021460748415,
+      "sine_secant_dbdx": 0.44353194663138545,
+      "wigley_analytic_dbdx": 0.196,
+      "wigley_secant_dbdx": 0.1980000000000004,
+      "x_over_L": 0.01
+    },
+    {
+      "sine_analytic_dbdx": 1.2361550174022673,
+      "sine_secant_dbdx": 1.7659357972430556,
+      "wigley_analytic_dbdx": 0.19996,
+      "wigley_secant_dbdx": 0.1999799999999885,
+      "x_over_L": 0.0001
+    },
+    {
+      "sine_analytic_dbdx": 4.921221981980714,
+      "sine_secant_dbdx": 7.030317117138436,
+      "wigley_analytic_dbdx": 0.1999996,
+      "wigley_secant_dbdx": 0.19999979999352216,
+      "x_over_L": 1e-06
+    },
+    {
+      "sine_analytic_dbdx": 19.59173758920717,
+      "sine_secant_dbdx": 27.988196556010255,
+      "wigley_analytic_dbdx": 0.199999996,
+      "wigley_secant_dbdx": 0.19999999767428278,
+      "x_over_L": 1e-08
+    },
+    {
+      "sine_analytic_dbdx": 39.090655696504335,
+      "sine_secant_dbdx": 55.843793852149055,
+      "wigley_analytic_dbdx": 0.19999999959999998,
+      "wigley_secant_dbdx": 0.20000000544584395,
+      "x_over_L": 1e-09
+    }
+  ],
+  "wetted_area_quadrature": {
+    "nodes": {
+      "20": 14.87906310495792,
+      "40": 14.879063104957817,
+      "80": 14.879063104957757,
+      "160": 14.87906310495782
+    },
+    "relative_change": {
+      "160_vs_80": 4.297908125485452e-15,
+      "80_vs_40": 4.059135451847389e-15
+    }
+  }
+}

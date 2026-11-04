@@ -74,6 +74,26 @@ VCB at `+0.94 %`, at `161x41` nothing exceeds `0.17 %`. The derivation, the inde
 quadrature that checks the formulas themselves, and the limits of the comparison are in
 [docs/hull_analytic_reference.md](docs/hull_analytic_reference.md).
 
+A second, genuinely different family is available since 0.13: the **Wigley parabolic
+hull** (`tensorcad.wigley`), the analytic benchmark geometry that ship-hydrodynamics
+solvers share. Its hydrostatics are closed forms too — `4LBT/9` for the volume, `Cb = 4/9`
+for every dimension set, `VCB = -3T/8`, wetted area by converged quadrature — and, unlike
+the sine family, its waterline arrives at the stem and the stern with a finite slope
+(`2B/L`) and finite curvature (`-4B/L^2`). At equal triangle count its 95th-percentile
+dihedral is `3.57°` against `6.99°` for the sine family, so the two families are also the
+control pair for the fairness checks in `tensorcad.curvature`.
+
+```python
+from tensorcad import WigleyParameters, generate_wigley
+
+model = generate_wigley(WigleyParameters(length=10.0, beam=1.0, draft=0.625))
+model.hydrostatics.block_coefficient        # 0.443396 from the mesh, 4/9 from the formula
+model.validation.errors                     # []
+```
+
+Worst mesh-vs-closed-form error is `0.236 %` at `41x13` and `0.015 %` at `161x49`;
+derivation and limits in [docs/wigley.md](docs/wigley.md).
+
 ## Initial stability (0.14)
 
 `hydrostatics` integrates the buoyancy side and stops there. `tensorcad.stability` crosses into
@@ -534,7 +554,8 @@ tests, CI, export, and validation that fails loudly.
 
 What it does **not** provide: the AFF-2/3/4/7 appendage *layouts* (only AFF-8's sail and
 fins are transcribed), a `Cb`-parameterised hull family (SUBOFF is the published hull,
-editable in length and radius only), any shape family beyond a sphere for the neural objects (the
+editable in length and radius only; the Wigley family added in 0.13 has `Cb = 4/9` for
+every dimension set, so it is a benchmark rather than a design space), any shape family beyond a sphere for the neural objects (the
 format and transaction layer are shape-agnostic, the fitted families are not), a field
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape

@@ -10,6 +10,8 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "WigleyModel", "WigleyParameters", "generate_wigley",
+    "wigley_half_breadth", "wigley_analytic_hydrostatics",
     "BonjeanCurve", "BonjeanTable", "SectionProperties", "analytic_section_area",
     "bonjean_curve", "bonjean_table", "section_loops", "section_properties",
     "DESIGN_SCHEMA", "DesignProblem", "DesignRecord", "DesignSolution", "DesignTargets",
@@ -45,7 +47,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.16.0"
+    assert tensorcad.__version__ == "0.18.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
