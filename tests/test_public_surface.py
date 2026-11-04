@@ -29,6 +29,11 @@ EXPECTED_API = {
     "CurvatureError", "CurvatureSample", "FairnessReport",
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
+    "HeeledFloat", "RightingArmCurve", "RightingArmError", "SubmergedProperties",
+    "analytic_box_righting_arm", "bilge_emergence_deg", "box_mesh",
+    "deck_edge_immersion_deg", "heel_normal", "righting_arm", "righting_arm_curve",
+    "solve_plane_offset", "submerged_properties", "upright_displacement",
+    "wall_sided_righting_arm",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
@@ -49,7 +54,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:

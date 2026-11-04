@@ -4,6 +4,38 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Large-angle righting arms** (`tensorcad/righting.py`): `GM` is the slope of the
+  righting-arm curve at zero heel, and nothing in 0.14.0 went past that slope. The
+  curve is now integrated: for each heel angle the waterline is *solved* until the
+  displaced volume equals the upright displacement (Newton on the plane offset with
+  the exact derivative `dV/dc` = cut area, bisection-safeguarded), and
+  `GZ = (y_B - y_G)cos(phi) + (z_B - z_G)sin(phi)` is read off the buoyancy centroid.
+  Exported: `righting_arm`, `righting_arm_curve`, `RightingArmCurve` (max arm, angle
+  of max arm, vanishing-stability angle, area in `m rad`), `HeeledFloat`,
+  `solve_plane_offset`, `submerged_properties`, `upright_displacement`, plus the
+  reference helpers `box_mesh`, `analytic_box_righting_arm`,
+  `wall_sided_righting_arm`, `bilge_emergence_deg`, `deck_edge_immersion_deg`.
+- **The cut face is never triangulated**: each triangle is clipped against the plane
+  and the tetrahedra are taken about a point *on* the waterplane, so the coplanar cut
+  contributes exactly zero. The cut area is the flux of the submerged hull surface
+  (also exact, and a check on the clipping: `B/cos(phi)` on a box to 1e-12).
+- **Verification, three independent references**: a box's 2D section clip to 2.2e-16 m
+  at every angle up to 90 deg; the wall-sided closed form `sin(phi)(GM + BM tan^2/2)`
+  to 4e-17 m inside its validity window (`bilge_emergence_deg = 26.565 deg`) and a
+  measured departure above it; `dGZ/dphi(0)` against `GM` assembled from the upright
+  waterplane moments (7e-9 relative on the box, 5e-5..2e-4 on the Wigley family).
+  The hull arms converge under refinement (0.062484 -> 0.062520 -> 0.062528 m at
+  20 deg on 41x13 / 81x25 / 161x41) and the odd symmetry in heel holds to 2e-16 m.
+  Evidence: `docs/righting.md`, `docs/righting/{results.json,report.md,plot.png}`,
+  `examples/righting/run_example.py` (exits non-zero if any of its 10 claims breaks),
+  `tests/test_righting.py` (40 tests).
+- Additive only: no existing key, function or number changed. Note in
+  `docs/righting.md`: `compute_hydrostatics` integrates the whole closed surface, so
+  it is the upright, capped-at-the-waterline tool; `upright_displacement` is the one
+  that cuts a body with freeboard.
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
