@@ -29,6 +29,12 @@ EXPECTED_API = {
     "CurvatureError", "CurvatureSample", "FairnessReport",
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
+    "BargeSection", "GZCurve", "HeeledDisplacement", "HeelError", "RightingArm",
+    "barge_deck_edge_angle", "barge_righting_arm", "barge_section", "gz_curve",
+    "heeled_displacement", "keel_z", "righting_arm", "up_direction",
+    "upright_displacement", "wall_sided_dynamical_stability",
+    "wall_sided_metacentric_height", "wall_sided_range", "wall_sided_righting_arm",
+    "waterplane_direction",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
@@ -49,14 +55,14 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
                    "wigley", "hull", "design", "suboff", "suboff_appendages", "cli",
-                   "adapters.fem", "benchmark"):
+                   "adapters.fem", "benchmark", "gz"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 

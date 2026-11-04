@@ -1,0 +1,516 @@
+{
+  "geometry": {
+    "barge": {
+      "length_m": 10.0,
+      "beam_m": 2.0,
+      "draft_m": 0.8,
+      "depth_m": 1.2,
+      "deep_depth_m": 2.4,
+      "deck_edge_deg": 21.801409486351808,
+      "wall_sided_limit_deg": 38.659808254090095
+    },
+    "sphere": {
+      "radius_m": 1.0,
+      "kg_m": 0.5
+    }
+  },
+  "loading": {
+    "loaded_kg_m": 0.78,
+    "deep_kg_m": 0.3,
+    "unstable_kg_m": 0.9
+  },
+  "hydrostatics": {
+    "displaced_volume_m3": 16.0,
+    "km_m": 0.8166666666666667,
+    "gm_loaded_m": 0.036666666666666625,
+    "gm_deep_m": 0.5166666666666666,
+    "gm_unstable_m": -0.08333333333333337
+  },
+  "loaded_curve": {
+    "schema": "tensorcad.stability.gz_curve/1",
+    "kg_m": 0.78,
+    "keel_z_m": -0.8,
+    "angles_deg": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      35.0,
+      40.0,
+      45.0,
+      50.0,
+      55.0,
+      60.0,
+      65.0,
+      70.0,
+      75.0,
+      80.0,
+      85.0,
+      90.0
+    ],
+    "righting_arms_m": [
+      -0.0,
+      0.003334692497,
+      0.007491877127,
+      0.013361359025,
+      0.021980090635,
+      0.031337396179,
+      0.032825274283,
+      0.029067380452,
+      0.022314480926,
+      0.012963624322,
+      -0.001842410511,
+      -0.020531962785,
+      -0.041717906015,
+      -0.064433580337,
+      -0.087958670241,
+      -0.111723554469,
+      -0.135253957535,
+      -0.158137168351,
+      -0.18
+    ],
+    "maximum_arm_m": 0.032825274283,
+    "angle_of_maximum_deg": 30.0,
+    "vanishing_angle_deg": 49.452120717,
+    "loll_angle_deg": null,
+    "dynamical_stability_m_rad": 0.015181390916,
+    "integrated_to_deg": 49.452120717,
+    "integration_rule": "trapezoid + tail",
+    "gm_from_curve_m": 0.038261305468,
+    "worst_relative_volume_error": 6.8e-14,
+    "basis": "heeled displacement at constant displacement"
+  },
+  "deep_curve": {
+    "schema": "tensorcad.stability.gz_curve/1",
+    "kg_m": 0.3,
+    "keel_z_m": -0.8,
+    "angles_deg": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      35.0,
+      40.0,
+      45.0,
+      50.0,
+      55.0,
+      60.0,
+      65.0,
+      70.0,
+      75.0,
+      80.0,
+      85.0,
+      90.0
+    ],
+    "righting_arms_m": [
+      0.0,
+      0.045169449015,
+      0.090843002407,
+      0.137594500674,
+      0.186149759431,
+      0.237497625172,
+      0.293055555556,
+      0.354935144855,
+      0.42564999963,
+      0.494974746831,
+      0.560532437333,
+      0.625358594096,
+      0.693270844157,
+      0.760055055491,
+      0.81117108406,
+      0.848839907557,
+      0.875122126431,
+      0.891686761229,
+      0.9
+    ],
+    "maximum_arm_m": 0.9,
+    "angle_of_maximum_deg": 90.0,
+    "vanishing_angle_deg": null,
+    "loll_angle_deg": null,
+    "dynamical_stability_m_rad": 0.766666031997,
+    "integrated_to_deg": 90.0,
+    "integration_rule": "composite Simpson",
+    "gm_from_curve_m": 0.518261305468,
+    "worst_relative_volume_error": 1e-15,
+    "basis": "heeled displacement at constant displacement"
+  },
+  "unstable_curve": {
+    "schema": "tensorcad.stability.gz_curve/1",
+    "kg_m": 0.9,
+    "keel_z_m": -0.8,
+    "angles_deg": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      35.0,
+      40.0,
+      45.0,
+      50.0,
+      55.0,
+      60.0,
+      65.0,
+      70.0,
+      75.0,
+      80.0,
+      85.0,
+      90.0
+    ],
+    "righting_arms_m": [
+      0.0,
+      -0.007123996633,
+      -0.013345904194,
+      -0.017696926387,
+      -0.019062326564,
+      -0.016073331872,
+      -0.006944444444,
+      0.010789283045,
+      0.039977433819,
+      0.070710678119,
+      0.100905771462,
+      0.133867367523,
+      0.173655601887,
+      0.216270383269,
+      0.247355511589,
+      0.269284411784,
+      0.284237474624,
+      0.293969942374,
+      0.3
+    ],
+    "maximum_arm_m": 0.3,
+    "angle_of_maximum_deg": 90.0,
+    "vanishing_angle_deg": null,
+    "loll_angle_deg": 32.311533237,
+    "dynamical_stability_m_rad": 0.166665838506,
+    "integrated_to_deg": 90.0,
+    "integration_rule": "composite Simpson",
+    "gm_from_curve_m": -0.081738694532,
+    "worst_relative_volume_error": 1e-15,
+    "basis": "heeled displacement at constant displacement"
+  },
+  "curve_table": [
+    {
+      "heel_deg": 0.0,
+      "mesh_m": -9.25185853854297e-18,
+      "section_reference_m": 0.0,
+      "difference_m": 9.25185853854297e-18
+    },
+    {
+      "heel_deg": 5.0,
+      "mesh_m": 0.003334692496543175,
+      "section_reference_m": 0.0033346924965431957,
+      "difference_m": 2.0816681711721685e-17
+    },
+    {
+      "heel_deg": 10.0,
+      "mesh_m": 0.007491877126518581,
+      "section_reference_m": 0.007491877126518581,
+      "difference_m": 0.0
+    },
+    {
+      "heel_deg": 15.0,
+      "mesh_m": 0.013361359024912894,
+      "section_reference_m": 0.013361359024912894,
+      "difference_m": 0.0
+    },
+    {
+      "heel_deg": 20.0,
+      "mesh_m": 0.021980090635123337,
+      "section_reference_m": 0.021980090635123323,
+      "difference_m": 1.3877787807814457e-17
+    },
+    {
+      "heel_deg": 25.0,
+      "mesh_m": 0.031337396178877736,
+      "section_reference_m": 0.031337396178877625,
+      "difference_m": 1.1102230246251565e-16
+    },
+    {
+      "heel_deg": 30.0,
+      "mesh_m": 0.03282527428325002,
+      "section_reference_m": 0.03282527428323562,
+      "difference_m": 1.4405143744511406e-14
+    },
+    {
+      "heel_deg": 35.0,
+      "mesh_m": 0.029067380452063946,
+      "section_reference_m": 0.029067380452063918,
+      "difference_m": 2.7755575615628914e-17
+    },
+    {
+      "heel_deg": 40.0,
+      "mesh_m": 0.022314480926271335,
+      "section_reference_m": 0.02231448092627142,
+      "difference_m": 8.326672684688674e-17
+    },
+    {
+      "heel_deg": 45.0,
+      "mesh_m": 0.012963624321753409,
+      "section_reference_m": 0.012963624321753353,
+      "difference_m": 5.551115123125783e-17
+    },
+    {
+      "heel_deg": 50.0,
+      "mesh_m": -0.001842410510798781,
+      "section_reference_m": -0.0018424105107988087,
+      "difference_m": 2.7755575615628914e-17
+    },
+    {
+      "heel_deg": 55.0,
+      "mesh_m": -0.020531962785220376,
+      "section_reference_m": -0.020531962785220348,
+      "difference_m": 2.7755575615628914e-17
+    },
+    {
+      "heel_deg": 60.0,
+      "mesh_m": -0.04171790601453226,
+      "section_reference_m": -0.04171790601453221,
+      "difference_m": 5.551115123125783e-17
+    },
+    {
+      "heel_deg": 65.0,
+      "mesh_m": -0.06443358033667212,
+      "section_reference_m": -0.06443358033667215,
+      "difference_m": 2.7755575615628914e-17
+    },
+    {
+      "heel_deg": 70.0,
+      "mesh_m": -0.08795867024093154,
+      "section_reference_m": -0.08795867024093157,
+      "difference_m": 2.7755575615628914e-17
+    },
+    {
+      "heel_deg": 75.0,
+      "mesh_m": -0.11172355446925485,
+      "section_reference_m": -0.11172355446925493,
+      "difference_m": 8.326672684688674e-17
+    },
+    {
+      "heel_deg": 80.0,
+      "mesh_m": -0.1352539575354504,
+      "section_reference_m": -0.13525395753545028,
+      "difference_m": 1.1102230246251565e-16
+    },
+    {
+      "heel_deg": 85.0,
+      "mesh_m": -0.158137168351276,
+      "section_reference_m": -0.15813716835127595,
+      "difference_m": 5.551115123125783e-17
+    },
+    {
+      "heel_deg": 90.0,
+      "mesh_m": -0.17999999999999997,
+      "section_reference_m": -0.18000000000000005,
+      "difference_m": 8.326672684688674e-17
+    }
+  ],
+  "wall_sided_table": [
+    {
+      "heel_deg": 5.0,
+      "mesh_m": 0.04516944901541907,
+      "closed_form_m": 0.0451694490154191,
+      "relative_error": 6.144767363922069e-16
+    },
+    {
+      "heel_deg": 10.0,
+      "mesh_m": 0.09084300240664514,
+      "closed_form_m": 0.0908430024066451,
+      "relative_error": 4.583001697486599e-16
+    },
+    {
+      "heel_deg": 15.0,
+      "mesh_m": 0.13759450067412288,
+      "closed_form_m": 0.13759450067412285,
+      "relative_error": 2.0172009404187514e-16
+    },
+    {
+      "heel_deg": 20.0,
+      "mesh_m": 0.1861497594314443,
+      "closed_form_m": 0.1861497594314443,
+      "relative_error": 0.0
+    },
+    {
+      "heel_deg": 25.0,
+      "mesh_m": 0.23749762517241046,
+      "closed_form_m": 0.2374976251724105,
+      "relative_error": 1.1686675012215327e-16
+    },
+    {
+      "heel_deg": 30.0,
+      "mesh_m": 0.29305555555555546,
+      "closed_form_m": 0.29305555555555546,
+      "relative_error": 0.0
+    },
+    {
+      "heel_deg": 35.0,
+      "mesh_m": 0.35493514485524535,
+      "closed_form_m": 0.3549351448552454,
+      "relative_error": 1.5639801252675937e-16
+    }
+  ],
+  "gm_ladder": [
+    {
+      "heel_deg": 4.0,
+      "gm_from_curve_m": 0.5176853664642881,
+      "error_m": 0.0010186997976214807
+    },
+    {
+      "heel_deg": 2.0,
+      "gm_from_curve_m": 0.5169207208628945,
+      "error_m": 0.00025405419622792635
+    },
+    {
+      "heel_deg": 1.0,
+      "gm_from_curve_m": 0.5167301415190931,
+      "error_m": 6.347485242652606e-05
+    },
+    {
+      "heel_deg": 0.5,
+      "gm_from_curve_m": 0.5166825329627955,
+      "error_m": 1.5866296128930202e-05
+    },
+    {
+      "heel_deg": 0.25,
+      "gm_from_curve_m": 0.5166706330896714,
+      "error_m": 3.966423004819752e-06
+    }
+  ],
+  "sphere_ladder": [
+    {
+      "resolution": [
+        12,
+        12,
+        12
+      ],
+      "triangles": 3680,
+      "worst_relative_error": 0.0061776443303395824,
+      "worst_volume_error": 1.2918149851905445e-15
+    },
+    {
+      "resolution": [
+        16,
+        16,
+        16
+      ],
+      "triangles": 6656,
+      "worst_relative_error": 0.0033655558034329535,
+      "worst_volume_error": 6.414272544402125e-16
+    },
+    {
+      "resolution": [
+        20,
+        20,
+        20
+      ],
+      "triangles": 10568,
+      "worst_relative_error": 0.0020404224376434086,
+      "worst_volume_error": 1.2789150114767376e-15
+    }
+  ],
+  "angles_of_interest": {
+    "deck_edge_deg": 21.801409486351808,
+    "wall_sided_limit_deg": 38.659808254090095,
+    "angle_of_maximum_deg": 30.0,
+    "maximum_arm_m": 0.03282527428325002,
+    "vanishing_angle_deg": 49.45212071731248,
+    "dynamical_stability_m_rad": 0.015181390916075203,
+    "loll_angle_deg": 32.3115332374232,
+    "expected_loll_deg": 32.31153323742385
+  },
+  "claims": [
+    {
+      "claim": "barge: mesh arm vs independent 2-D section integration",
+      "measured": 1.4405143744511406e-14,
+      "limit": "< 1e-12 m",
+      "passed": true,
+      "unit": "m"
+    },
+    {
+      "claim": "deep barge: mesh arm vs wall-sided closed form",
+      "measured": 6.144767363922069e-16,
+      "limit": "< 1e-12 relative",
+      "passed": true,
+      "unit": ""
+    },
+    {
+      "claim": "heeled displacement balance (all angles, both barges)",
+      "measured": 6.838973831690964e-14,
+      "limit": "< 1e-13 relative",
+      "passed": true,
+      "unit": ""
+    },
+    {
+      "claim": "GM from the curve at 0.25 deg, minus the BM/2*tan^2 term",
+      "measured": 7.993605777301127e-15,
+      "limit": "< 1e-12 m",
+      "passed": true,
+      "unit": "m"
+    },
+    {
+      "claim": "halving the heel quarters the GM deficit (second order)",
+      "measured": 4.00015230590647,
+      "limit": "> 3.9",
+      "passed": true,
+      "unit": ""
+    },
+    {
+      "claim": "angle of loll vs tan^2(phi) = -2 GM / BM",
+      "measured": 6.536993168992922e-13,
+      "limit": "< 1e-6 deg",
+      "passed": true,
+      "unit": "deg"
+    },
+    {
+      "claim": "GZ at the bisected angle of vanishing stability",
+      "measured": 3.608224830031759e-16,
+      "limit": "< 1e-12 m",
+      "passed": true,
+      "unit": "m"
+    },
+    {
+      "claim": "dynamical stability 0-30 deg vs closed-form integral",
+      "measured": 1.3166387795881191e-05,
+      "limit": "< 1e-3 relative",
+      "passed": true,
+      "unit": ""
+    },
+    {
+      "claim": "sphere (20^3) worst GZ error vs (KM - KG) sin(phi)",
+      "measured": 0.0020404224376434086,
+      "limit": "< 5e-3",
+      "passed": true,
+      "unit": ""
+    },
+    {
+      "claim": "sphere: error ratio between 12^3 and 20^3",
+      "measured": 3.027630071287821,
+      "limit": "> 2",
+      "passed": true,
+      "unit": ""
+    },
+    {
+      "claim": "dGZ/dKG = -sin(phi)",
+      "measured": 2.7755575615628914e-17,
+      "limit": "< 1e-13 m",
+      "passed": true,
+      "unit": "m"
+    },
+    {
+      "claim": "a mesh capped at the design waterline is refused",
+      "measured": 1.0,
+      "limit": "== 1",
+      "passed": true,
+      "unit": ""
+    }
+  ],
+  "all_claims_hold": true
+}

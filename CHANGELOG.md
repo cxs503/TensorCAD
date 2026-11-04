@@ -4,6 +4,36 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Large-angle stability** (`tensorcad/gz.py`): the righting-arm curve `GZ(phi)`, the
+  integration `tensorcad.stability` says in its own docstring it does not do. The heeled
+  displacement is exact for the polytope: triangles are clipped against the tilted
+  waterplane and summed as signed tetrahedra from a point *on* the cut plane, so the cap
+  is never built and no sampling enters. The plane's offset is unknown (the ship heels at
+  constant displacement, it does not re-displace) and is solved by safeguarded secant.
+  `righting_arm`, `gz_curve`, `heeled_displacement`, `upright_displacement`,
+  `up_direction`, `waterplane_direction` and `keel_z` are exported; `GZCurve` reports the
+  peak, the angle of loll (negative `GM`), the angle of vanishing stability (both
+  crossings bisected, not read off the grid), the dynamical stability in metre-radians
+  and `gm_from_curve`.
+- **Three references, two of them closed-form**: `wall_sided_righting_arm`
+  (`sin phi (GM + BM tan^2 phi / 2)`, exact -- and `wall_sided_dynamical_stability`, its
+  exact integral), `barge_righting_arm` (an independent 2-D clip plus shoelace on the same
+  barge), and the sphere's `(KM - KG) sin phi` at every heel.
+- **Measured** (`docs/gz/`): barge vs the 2-D reference `1.44e-14 m` worst over 0–90 deg;
+  vs the wall-sided closed form `6.14e-16` relative; displacement balance `6.8e-14`;
+  `GZ/sin phi - (BM/2) tan^2 phi` reproduces `GM` to `7.99e-15 m` with the deficit
+  quartering as the heel halves (order 4.0002); the loll angle of an unstable barge hits
+  `atan(sqrt(-2 GM/BM))` to `6.5e-13 deg`; the sphere at `20^3` is `0.204 %` off
+  `(R - KG) sin phi`. Twelve claims, `examples/gz/run_example.py` exits non-zero if one
+  breaks.
+- **A trap made loud**: a mesh capped at the design waterline has no freeboard, and
+  "conserving" displacement then submerges the whole body and returns the constant arm
+  `KB - KG`. `heeled_displacement` counts emerged faces and raises `HeelError` instead.
+- `docs/gz.md`, `docs/gz/{results.json,report.md,gz_curves.png}`, `tests/test_gz.py`
+  (62 tests). Additive only: no existing function, key or number changed.
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

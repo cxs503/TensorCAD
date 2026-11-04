@@ -107,7 +107,31 @@ and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated i
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+trim equilibrium, damage stability, class rules. Large-angle `GZ` moved out of that list
+in 0.21 -- see below.
+
+## Large-angle stability (0.21)
+
+`tensorcad.gz` is the integration `initial_stability`'s docstring promises but does not
+do. It heels the waterplane to any angle, solves for the plane offset that still
+displaces the upright volume, and integrates the immersed region as a clipped polytope --
+exact for the mesh, no sampling, no cap to build. `GZ(phi)` comes back with its peak,
+its angle of vanishing stability, its angle of loll when `GM < 0`, and its dynamical
+stability in metre-radians.
+
+```python
+from tensorcad import righting_arm, gz_curve
+
+curve = gz_curve(model.mesh, [5.0 * i for i in range(19)], kg=0.78)
+curve.maximum_arm, curve.vanishing_angle_deg, curve.dynamical_stability_m_rad
+```
+
+The barge in `examples/gz` reproduces the wall-sided closed form
+`sin phi (GM + BM tan^2 phi / 2)` to `6.1e-16` relative and an independent 2-D section
+integration to `1.4e-14 m`; the sphere reproduces `(KM - KG) sin phi` to `0.20 %` at
+`20^3`. A mesh capped at the design waterline has no freeboard and is refused rather than
+given a plausible wrong curve. Free-surface corrections, flooding, trim coupling and
+class criteria are still out of scope -- [docs/gz.md](docs/gz.md).
 
 ## Continuous geometry core (0.4)
 
