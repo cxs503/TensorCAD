@@ -269,13 +269,17 @@ def test_metadata_is_complete_and_json_serialisable(tmp_path) -> None:
     assert "coordinate_frame" in loaded
     assert loaded["parameters"] == {
         "length": 10.0, "beam": 2.0, "draft": 0.8, "nx": 11, "nz": 5, "water_density": 1025.0,
+        "fore_exponent": 0.7, "aft_exponent": 0.7,
     }
     assert loaded["validation"]["passed"] is True
     assert loaded["mesh"]["vertex_count"] == len(model.vertices)
     assert loaded["hydrostatics"]["displacement_volume_m3"] > 0
     assert loaded["discretisation"]["status"] == "measured"
     assert "not implemented" in loaded["engineering_status"]
-    assert loaded["generator"]["longitudinal_taper"] == f"sin(pi*x/length)^{BREADTH_EXPONENT}"
+    assert loaded["generator"]["longitudinal_taper"] == (
+        f"sin(pi*x/length)^{BREADTH_EXPONENT} (aft) / sin(pi*x/length)^{BREADTH_EXPONENT} (fore)"
+    )
+    assert loaded["generator"]["is_symmetric_fore_and_aft"] is True
 
 
 def test_export_writes_reproducible_round_trippable_artifacts(tmp_path) -> None:
