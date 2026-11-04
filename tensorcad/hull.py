@@ -27,6 +27,7 @@ from typing import Any
 from . import mesh as meshlib
 from .geometry import Mesh, MeshBuilder
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .hydrostatics_analytic import waterplane_inertia
 from .parameters import (
     FLOAT,
     INT,
@@ -644,6 +645,13 @@ def analytic_hydrostatics(
     | block coefficient | ``2/3*taper`` |
     | prismatic coefficient | ``taper`` (the midship ``2/3`` cancels) |
     | wetted surface area | quadrature, see :func:`analytic_wetted_surface_area` |
+    | transverse waterplane inertia | ``(2/3)*(beam/2)**3*length*I3`` |
+    | longitudinal waterplane inertia | ``beam*length**3*int sin(pi*xi)**e*(xi-1/2)**2 dxi`` |
+
+    ``I3`` is ``taper_integral(3*e)`` and the longitudinal integral goes through
+    ``tanh_sinh_quadrature``. Both inertias are quoted about the centreline and about
+    midship, which is the flotation axis only on the symmetric surface, so they are
+    reported when ``fore_exponent == aft_exponent`` and left ``nan`` otherwise.
 
     ``taper`` is ``(h(p_aft) + h(p_fore))`` with ``h(p) = int_0^(1/2) sin^p``, so
     volume, waterplane area and the coefficients depend on the exponents but not on
@@ -666,14 +674,25 @@ def analytic_hydrostatics(
     section = analytic_maximum_section_area(beam, draft)
     centre = analytic_longitudinal_centre(length, fore_exponent=fore, aft_exponent=aft)
     symmetric = fore == aft
+    # The two waterplane second moments live in :mod:`tensorcad.hydrostatics_analytic`
+    # (one closed form, one quadrature with its own convergence evidence) so that the
+    # mesh, this compatibility wrapper and the stability block cannot drift apart.
+    # They are quoted about the centreline and about midship, which are the axes a trim
+    # calculation uses *only* on a fore-aft symmetric surface; on the split surface the
+    # centre of flotation is not at midship and the longitudinal moment would be about
+    # the wrong axis, so the pair is reported for the symmetric surface and left ``nan``
+    # otherwise rather than being silently off-axis.
+    inertia = waterplane_inertia(length, beam, fore) if symmetric else None
     basis = (
-        "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature)"
+        "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature, "
+        "longitudinal waterplane inertia by tanh-sinh quadrature)"
         if symmetric
         else (
             "closed forms of the asymmetric analytic surface except the longitudinal "
             "centres, whose x-weighted half-moment has no elementary form: Gauss-Legendre "
             "after x = t^3/2, cross-checked against tanh-sinh quadrature to 1e-14; wetted "
-            "area by Gauss-Legendre quadrature"
+            "area by Gauss-Legendre quadrature; waterplane inertias are not reported "
+            "because their reference axes (centreline, midship) are the symmetric ones"
         )
     )
     return Hydrostatics(
@@ -693,6 +712,13 @@ def analytic_hydrostatics(
         maximum_section_area=section,
         waterline_z=0.0,
         water_density=water_density,
+        transverse_waterplane_inertia=(
+            inertia["transverse"] if inertia is not None else float("nan")
+        ),
+        longitudinal_waterplane_inertia=(
+            inertia["longitudinal"] if inertia is not None else float("nan")
+        ),
+        keel_z=-draft,
         basis=basis,
     )
 

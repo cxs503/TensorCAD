@@ -4,6 +4,57 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.22.0 — 2026-11-05
+
+### Added
+- **Waterplane second moments on the mesh** (`tensorcad/hydrostatics.py`, PR #39):
+  `Hydrostatics` now reports `transverse_waterplane_inertia` (`∫ y² dA` about the
+  centreline) and `longitudinal_waterplane_inertia` (`∫ (x−LCF)² dA`), in m⁴, plus
+  `keel_z`, the datum every stability height is measured from. Both come out of the flux
+  identity the module already used for the waterplane area
+  (`∫_cap f dA = −∫_wetted f n_z dA` for `f` independent of `z`), so no cap has to exist
+  and no waterline polygon has to be reconstructed. The face integrals are exact — `x`
+  and `y` are linear over a triangle, so
+  `∫ f² dA = A/6(f₁²+f₂²+f₃²+f₁f₂+f₂f₃+f₃f₁)` — and the winding is folded out rather than
+  assumed. An open surface reports `nan` instead of a number that would only say where
+  the shell stops.
+- **A hydrostatics-first stability entry point** (`tensorcad.stability`):
+  `initial_stability_from_hydrostatics(hydrostatics, height_of_gravity=...)` returns KB
+  over the keel, `BM_T = I_T/∇`, `BM_L = I_L/∇`, KM and `GM_T`/`GM_L` as a JSON-ready
+  `HydrostaticsInitialStability` record with `is_stable_in_roll`. It takes an existing
+  `Hydrostatics`, so a caller with an analytic surface or a regression fixture needs no
+  mesh. `KG` is an input: the repository has no weight schedule and will not invent one.
+  Negative GM is reported, not raised — an unstable hull is a legitimate answer.
+  (On `agent/m2925` this pair was called `initial_stability`/`InitialStability`; those
+  names already meant the mesh-first pair below on main, so the merge gave it its own
+  names and left behaviour unchanged.)
+- **Closed-form references for the inertias** (`tensorcad/hydrostatics_analytic.py`,
+  `tensorcad.hull.analytic_hydrostatics`):
+  `I_T = (2/3)(B/2)³L·∫ sin^{2.1}(πξ)dξ` from the gamma identity and
+  `I_L = B L³ ∫ sin^{0.7}(πξ)(ξ−1/2)²dξ` by tanh-sinh quadrature (levels 6 and 7 agree
+  to 0.0 in float64), so `AnalyticHydrostatics` and `analytic_hydrostatics` now carry the
+  inertias, the metacentric radii and `KM_T = 0.6T + BM_T`; `compare()` covers the two
+  new inertia rows. The hull-side wrapper reports them for the fore-aft symmetric
+  surface and `nan` on the split surface, where midship is not the flotation axis.
+- `examples/stability/run_hydrostatics_example.py` — ladder 21×9 … 321×81 through the
+  hydrostatics-first route, writes `docs/stability_hydrostatics/{results.json,report.md,
+  plot.png}`, exits 1 if a claim fails. `docs/stability_hydrostatics.md` is the derivation
+  and the measured-error table.
+- `tests/test_stability.py` — the branch's 14 cases (rectangular barge exact on three
+  tessellations, circular waterplane converging to `πR⁴/4`, gamma form vs direct
+  quadrature, hull vs analytic surface, and the rejection paths) plus three new
+  reconciliation cases: the plane cut and the flux identity agree on `A`, `I_T` and `I_L`
+  to round-off (1e-16), the two stability routes agree on KB/KM/GM to round-off, and a
+  split hull reports `nan` rather than an off-axis inertia.
+
+### Measured
+- `agent/m2925` ladder against the closed forms: default 41×13 grid `I_T` −0.139 %,
+  `I_L` −0.604 %, `BM_T` +0.748 %, `KM_T` +0.684 %, `GM_T` (KG = 0.5 m) +1.508 %;
+  161×41: 0.009 %, 0.064 %, 0.127 %, 0.120 %, 0.263 %. The 3 % band holds everywhere.
+- `GM_T` is the weakest quantity because `BM_T = I_T/∇` inherits the volume error with
+  the opposite sign: the default mesh loses 0.88 % of the displacement and only 0.14 %
+  of `I_T`.
+
 ## 0.21.0 — 2026-11-04
 
 ### Added

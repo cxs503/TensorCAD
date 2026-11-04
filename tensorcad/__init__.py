@@ -102,10 +102,12 @@ from .mesh_conditioning import (
 )
 from .parameters import ParameterSpec, RatioSpec
 from .stability import (
+    HydrostaticsInitialStability,
     InitialStability,
     StabilityError,
     WaterplaneMoments,
     initial_stability,
+    initial_stability_from_hydrostatics,
     waterplane_moments,
 )
 from .suboff import (
@@ -193,6 +195,7 @@ __all__ = [
     "HullModel",
     "HullParameters",
     "Hydrostatics",
+    "HydrostaticsInitialStability",
     "InitialStability",
     "Mesh",
     "MeshBuilder",
@@ -245,6 +248,7 @@ __all__ = [
     "generate_transom_hull",
     "generate_wigley",
     "initial_stability",
+    "initial_stability_from_hydrostatics",
     "inspect_geometry",
     "inspect_mesh_quality",
     "measure_mesh",
@@ -288,4 +292,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.21.0"
+__version__ = "0.22.0"

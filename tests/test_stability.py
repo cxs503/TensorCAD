@@ -28,13 +28,18 @@ from tensorcad.hull import HullParameters, generate_hull
 from tensorcad.hydrostatics import compute_hydrostatics
 from tensorcad.hydrostatics_analytic import (
     analytic_hydrostatics,
+    longitudinal_waterplane_inertia,
+    tanh_sinh_quadrature,
+    transverse_waterplane_inertia,
     waterplane_inertia_longitudinal,
     waterplane_inertia_transverse,
 )
 from tensorcad.stability import (
+    HydrostaticsInitialStability,
     StabilityError,
     WaterplaneMoments,
     initial_stability,
+    initial_stability_from_hydrostatics,
     waterplane_moments,
 )
 
@@ -352,3 +357,410 @@ print(stability.SCHEMA_STABILITY)
     completed = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr
     assert "tensorcad.stability.initial/1" in completed.stdout
+
+# ---------------------------------------------------------------------------
+# Hydrostatics-first route (PR #39, ``agent/m2925``)
+#
+# Landed on its own branch as ``initial_stability(hydrostatics, height_of_gravity)``
+# returning ``InitialStability``; both names were already taken on main by the
+# mesh-first pair above, so the pair is exported as
+# ``initial_stability_from_hydrostatics`` / ``HydrostaticsInitialStability``. The
+# tests below are the branch's own, with that rename applied and nothing else
+# changed, plus the reconciliation cases at the end which existed on neither side:
+# they are what makes the two routes one module instead of two.
+# ---------------------------------------------------------------------------
+
+def box_mesh(
+    length: float, beam: float, depth: float, nx: int = 1, ny: int = 1, nz: int = 1
+) -> Mesh:
+    """Outward-oriented barge: ``x`` aft->fore, ``y`` across, ``z`` keel (-depth) -> 0.
+
+    The waterline is the top face at ``z = 0``, so the submerged body is the whole
+    box and every quantity has a closed form. Vertices are shared by construction
+    through :class:`MeshBuilder`, so the surface is watertight without any welding.
+    """
+    builder = MeshBuilder(units="m", coordinate_frame="box test frame")
+
+    def corner(i: int, j: int, k: int) -> int:
+        """Vertex index of a grid corner (``MeshBuilder`` deduplicates by position)."""
+        return builder.add_vertex(
+            (length * i / nx, -0.5 * beam + beam * j / ny, -depth + depth * k / nz)
+        )
+
+    def quad(a: int, b: int, c: int, d: int) -> None:
+        builder.add_quad(a, b, c, d)
+
+    for i in range(nx):
+        for j in range(ny):
+            # bottom (outward -z) and top (outward +z)
+            quad(corner(i, j, 0), corner(i, j + 1, 0), corner(i + 1, j + 1, 0), corner(i + 1, j, 0))
+            quad(
+                corner(i, j, nz),
+                corner(i + 1, j, nz),
+                corner(i + 1, j + 1, nz),
+                corner(i, j + 1, nz),
+            )
+    for j in range(ny):
+        for k in range(nz):
+            quad(corner(0, j, k), corner(0, j, k + 1), corner(0, j + 1, k + 1), corner(0, j + 1, k))
+            quad(
+                corner(nx, j, k),
+                corner(nx, j + 1, k),
+                corner(nx, j + 1, k + 1),
+                corner(nx, j, k + 1),
+            )
+    for i in range(nx):
+        for k in range(nz):
+            quad(corner(i, 0, k), corner(i + 1, 0, k), corner(i + 1, 0, k + 1), corner(i, 0, k + 1))
+            quad(
+                corner(i, ny, k),
+                corner(i, ny, k + 1),
+                corner(i + 1, ny, k + 1),
+                corner(i + 1, ny, k),
+            )
+    return builder.build()
+
+
+def cylinder_mesh(radius: float, depth: float, segments: int) -> Mesh:
+    """Vertical cylinder, closed, with the waterline as its top face at ``z = 0``."""
+    builder = MeshBuilder(units="m", coordinate_frame="cylinder test frame")
+    angles = [2.0 * math.pi * i / segments for i in range(segments)]
+
+    def rim(theta: float, z: float) -> int:
+        return builder.add_vertex(
+            (radius * math.cos(theta), radius * math.sin(theta), z)
+        )
+
+    bottom = builder.add_vertex((0.0, 0.0, -depth))
+    top = builder.add_vertex((0.0, 0.0, 0.0))
+    for index in range(segments):
+        a = angles[index]
+        b = angles[(index + 1) % segments]
+        builder.add_quad(rim(a, -depth), rim(b, -depth), rim(b, 0.0), rim(a, 0.0))
+        builder.add_triangle(bottom, rim(b, -depth), rim(a, -depth))
+        builder.add_triangle(top, rim(a, 0.0), rim(b, 0.0))
+    return builder.build()
+
+
+# --------------------------------------------------------------------------- barge
+
+
+@pytest.mark.parametrize("tessellation", [(1, 1, 1), (4, 3, 2), (20, 6, 4)])
+def test_rectangular_barge_is_exact(tessellation: tuple[int, int, int]) -> None:
+    """A box waterplane is a rectangle: every quantity has an exact closed form."""
+    length, beam, depth = 20.0, 6.0, 2.0
+    mesh = box_mesh(length, beam, depth, *tessellation)
+    hydro = compute_hydrostatics(mesh, 0.0, water_density=1000.0)
+
+    transverse = length * beam**3 / 12.0
+    longitudinal = beam * length**3 / 12.0
+    volume = length * beam * depth
+
+    assert hydro.basis == "closed surface integrals"
+    assert hydro.displacement_volume == pytest.approx(volume, rel=1e-12)
+    assert hydro.waterplane_area == pytest.approx(length * beam, rel=1e-12)
+    assert hydro.transverse_waterplane_inertia == pytest.approx(transverse, rel=1e-12)
+    assert hydro.longitudinal_waterplane_inertia == pytest.approx(longitudinal, rel=1e-12)
+    assert hydro.keel_z == pytest.approx(-depth, abs=1e-12)
+
+    stability = initial_stability_from_hydrostatics(hydro, height_of_gravity=depth / 2.0)
+    assert stability.height_of_centre_of_buoyancy == pytest.approx(depth / 2.0, rel=1e-12)
+    assert stability.transverse_metacentric_radius == pytest.approx(transverse / volume, rel=1e-12)
+    assert stability.longitudinal_metacentric_radius == pytest.approx(
+        longitudinal / volume, rel=1e-12
+    )
+    # KG at half depth = KB, so GM is exactly BM.
+    assert stability.transverse_metacentric_height == pytest.approx(transverse / volume, rel=1e-12)
+
+
+def test_barge_inertia_does_not_depend_on_tessellation() -> None:
+    """Refining a flat waterplane must not move the integrals at all."""
+    coarse = compute_hydrostatics(box_mesh(12.0, 4.0, 1.5, 1, 1, 1), 0.0)
+    fine = compute_hydrostatics(box_mesh(12.0, 4.0, 1.5, 6, 4, 3), 0.0)
+    assert coarse.transverse_waterplane_inertia == pytest.approx(
+        fine.transverse_waterplane_inertia, rel=1e-12
+    )
+    assert coarse.longitudinal_waterplane_inertia == pytest.approx(
+        fine.longitudinal_waterplane_inertia, rel=1e-12
+    )
+
+
+# ------------------------------------------------------------------------ cylinder
+
+
+def test_circular_waterplane_converges_to_the_closed_form() -> None:
+    """An inscribed polygon approaches ``pi*R**4/4`` from below, and stays below."""
+    radius, depth = 1.5, 2.0
+    exact = math.pi * radius**4 / 4.0
+    errors = []
+    for segments in (24, 48, 96, 192):
+        hydro = compute_hydrostatics(cylinder_mesh(radius, depth, segments), 0.0)
+        transverse = hydro.transverse_waterplane_inertia
+        longitudinal = hydro.longitudinal_waterplane_inertia
+        # A waterplane that is symmetric in both axes must give the same two
+        # moments, and an inscribed polygon can only be smaller than the circle.
+        assert transverse == pytest.approx(longitudinal, rel=1e-9)
+        assert transverse < exact
+        errors.append(exact - transverse)
+    # Inscribed regular polygon: the area deficit is O(1/n**2), so each doubling of
+    # the segment count should cut the error by about four.
+    ratios = [errors[i] / errors[i + 1] for i in range(len(errors) - 1)]
+    assert all(3.5 < ratio < 4.5 for ratio in ratios), ratios
+    assert errors[-1] / exact < 5e-4
+
+
+# -------------------------------------------------------------------- analytic hull
+
+
+def test_analytic_closed_forms_match_their_own_quadrature() -> None:
+    """Transverse: gamma identity vs quadrature of ``int (2/3)*b**3 dx``.
+
+    The closed form and the quadrature are derived separately (a gamma function and
+    a double-exponential rule), so agreement is a real check rather than a
+    restatement of the same algebra.
+    """
+    length, beam, exponent = 10.0, 2.0, 0.7
+    closed = transverse_waterplane_inertia(length, beam, exponent)
+
+    def integrand(xi: float) -> float:
+        return (2.0 / 3.0) * (0.5 * beam) ** 3 * math.sin(math.pi * xi) ** (3.0 * exponent)
+
+    numerical = length * tanh_sinh_quadrature(integrand, 0.0, 1.0, levels=7)
+    assert closed == pytest.approx(numerical, rel=1e-12)
+
+
+def test_longitudinal_inertia_quadrature_reports_its_own_error() -> None:
+    """The reference carries its convergence evidence instead of asking to be believed."""
+    evidence = longitudinal_waterplane_inertia(10.0, 2.0)
+    assert evidence["value"] > 0.0
+    assert evidence["relative_difference"] < 1e-10
+    # Scaling laws: I_L goes with beam and with length cubed.
+    doubled = longitudinal_waterplane_inertia(20.0, 2.0)["value"] / 8.0
+    assert doubled == pytest.approx(evidence["value"], rel=1e-9)
+
+
+@pytest.mark.parametrize("parameters", [(10.0, 2.0, 0.8), (60.0, 14.0, 6.0), (4.3561, 1.0, 0.4)])
+def test_hull_mesh_inertia_matches_the_analytic_surface(
+    parameters: tuple[float, float, float]
+) -> None:
+    """The sampled hull against the closed forms of the surface it samples."""
+    length, beam, draft = parameters
+    reference = analytic_hydrostatics((length, beam, draft))
+
+    default = generate_hull(HullParameters(length=length, beam=beam, draft=draft))
+    measured = default.hydrostatics
+    assert measured.transverse_waterplane_inertia == pytest.approx(
+        reference.transverse_waterplane_inertia, rel=0.03
+    )
+    assert measured.longitudinal_waterplane_inertia == pytest.approx(
+        reference.longitudinal_waterplane_inertia, rel=0.03
+    )
+
+    fine = generate_hull(HullParameters(length=length, beam=beam, draft=draft, nx=161, nz=41))
+    assert fine.hydrostatics.transverse_waterplane_inertia == pytest.approx(
+        reference.transverse_waterplane_inertia, rel=0.005
+    )
+    assert fine.hydrostatics.longitudinal_waterplane_inertia == pytest.approx(
+        reference.longitudinal_waterplane_inertia, rel=0.005
+    )
+    # Refining has to help, not just land inside the band by luck.
+    assert abs(
+        fine.hydrostatics.transverse_waterplane_inertia
+        - reference.transverse_waterplane_inertia
+    ) < abs(measured.transverse_waterplane_inertia - reference.transverse_waterplane_inertia)
+
+
+def test_metacentric_heights_of_the_analytic_hull() -> None:
+    """KB/BM/KM/GM of the default hull, against the closed-form reference."""
+    model = generate_hull()
+    reference = analytic_hydrostatics()
+    stability = initial_stability_from_hydrostatics(model.hydrostatics, height_of_gravity=0.6)
+
+    # KB = 0.6*T for the sqrt profile (VCB = -0.4*T with the keel at -T).
+    assert stability.height_of_centre_of_buoyancy == pytest.approx(0.6 * 0.8, rel=0.01)
+    assert stability.height_of_centre_of_buoyancy == pytest.approx(
+        reference.vertical_centre_buoyancy + 0.8, rel=0.01
+    )
+    assert stability.transverse_metacentric_radius == pytest.approx(
+        reference.transverse_metacentric_radius, rel=0.03
+    )
+    assert stability.height_of_transverse_metacentre == pytest.approx(
+        reference.height_of_metacentre_above_keel, rel=0.02
+    )
+    assert stability.transverse_metacentric_height == pytest.approx(
+        stability.height_of_transverse_metacentre - 0.6, rel=1e-12
+    )
+    # A slender hull has a far larger longitudinal metacentric radius; that
+    # ordering is a property of the form, not of the discretisation.
+    assert stability.longitudinal_metacentric_radius > 10.0 * stability.transverse_metacentric_radius
+    assert stability.is_stable_in_roll
+
+
+def test_raising_the_centre_of_gravity_can_make_the_hull_unstable() -> None:
+    """GM is reported through zero rather than clamped: an unstable hull is an answer."""
+    hydro = generate_hull().hydrostatics
+    stable = initial_stability_from_hydrostatics(hydro, height_of_gravity=0.5)
+    unstable = initial_stability_from_hydrostatics(hydro, height_of_gravity=1.2)
+    assert stable.transverse_metacentric_height > 0.0
+    assert unstable.transverse_metacentric_height < 0.0
+    assert not unstable.is_stable_in_roll
+    # KG never changes KB/BM: only the subtraction moves.
+    assert unstable.height_of_transverse_metacentre == pytest.approx(
+        stable.height_of_transverse_metacentre, rel=1e-15
+    )
+
+
+# ------------------------------------------------------------------------ reporting
+
+
+def test_stability_record_is_json_ready() -> None:
+    stability = initial_stability_from_hydrostatics(generate_hull().hydrostatics, height_of_gravity=0.55)
+    record = stability.to_dict()
+    for key in (
+        "kb_m",
+        "bm_transverse_m",
+        "bm_longitudinal_m",
+        "km_transverse_m",
+        "kg_m",
+        "gm_transverse_m",
+        "is_stable_in_roll",
+        "waterplane_inertia_transverse_m4",
+        "waterplane_inertia_longitudinal_m4",
+    ):
+        assert key in record
+    assert record["is_stable_in_roll"] is True
+    assert record["gm_transverse_m"] == pytest.approx(
+        record["km_transverse_m"] - record["kg_m"], abs=1e-8
+    )
+
+
+def test_hydrostatics_payload_carries_the_inertias() -> None:
+    record = generate_hull().hydrostatics.to_dict()
+    assert record["waterplane_inertia_transverse_m4"] > 0.0
+    assert record["waterplane_inertia_longitudinal_m4"] > record["waterplane_inertia_transverse_m4"]
+    assert record["keel_z_m"] == pytest.approx(-0.8, abs=1e-9)
+
+
+# ------------------------------------------------------------------------ rejection
+
+
+def test_height_of_gravity_must_be_a_finite_length() -> None:
+    hydro = generate_hull().hydrostatics
+    with pytest.raises(ValueError, match="finite length"):
+        initial_stability_from_hydrostatics(hydro, height_of_gravity=float("nan"))
+    with pytest.raises(ValueError, match="cannot be negative"):
+        initial_stability_from_hydrostatics(hydro, height_of_gravity=-0.1)
+
+
+def test_a_body_without_a_waterplane_is_rejected() -> None:
+    """A closed surface entirely below the waterline has no free surface to float on."""
+    mesh = box_mesh(4.0, 2.0, 1.0, 2, 2, 2)
+    submerged = compute_hydrostatics(mesh, waterline_z=2.0)
+    assert math.isnan(submerged.transverse_waterplane_inertia)
+    with pytest.raises(ValueError, match="waterplane"):
+        initial_stability_from_hydrostatics(submerged, height_of_gravity=0.5)
+
+
+def test_open_surface_inertia_is_not_claimed() -> None:
+    """An unclosed hull shell gives no trustworthy moments; the value is nan."""
+    mesh = generate_hull().mesh
+    open_faces = tuple(face for face in mesh.faces if max(mesh.vertices[v][2] for v in face) < -0.2)
+    shell = Mesh(vertices=mesh.vertices, faces=open_faces)
+    hydro = compute_hydrostatics(shell, 0.0)
+    assert hydro.basis == "open surface (volume not trustworthy)"
+    assert math.isnan(hydro.transverse_waterplane_inertia)
+    assert math.isnan(hydro.longitudinal_waterplane_inertia)
+    with pytest.raises(ValueError, match="waterplane"):
+        initial_stability_from_hydrostatics(hydro, height_of_gravity=0.5)
+
+
+def test_stability_module_is_standard_library_only() -> None:
+    """The zero-dependency promise has to hold for this module too."""
+
+    class Blocker:
+        blocked: list[str] = []  # noqa: RUF012
+
+        def find_module(self, name, path=None):
+            if name in ("torch", "numpy", "scipy"):
+                self.blocked.append(name)
+                return self
+            return None
+
+        def load_module(self, name):
+            raise ImportError(f"blocked: {name}")
+
+    blocker = Blocker()
+    saved = {name: sys.modules.pop(name) for name in ("tensorcad.stability",) if name in sys.modules}
+    sys.meta_path.insert(0, blocker)
+    try:
+        import tensorcad.stability as module  # noqa: F401
+    finally:
+        sys.meta_path.remove(blocker)
+        sys.modules.update(saved)
+    assert blocker.blocked == []
+
+# ---------------------------------------------------------------------------
+# reconciliation: the plane cut and the flux identity measure one waterplane
+# ---------------------------------------------------------------------------
+def test_plane_cut_and_flux_identity_agree_on_the_hull_waterplane() -> None:
+    """Two integrations of ``I_T``: the cut plane and the wetted flux.
+
+    ``waterplane_moments`` integrates the polygonal section by Green's theorem;
+    ``Hydrostatics.transverse_waterplane_inertia`` is the divergence-theorem flux
+    over the wetted faces. They start from different faces and different theorems,
+    so agreeing to round-off is evidence that both are evaluating the *same*
+    waterplane rather than two different sections that happen to be near each
+    other.
+    """
+    for parameters in (HullParameters(), HullParameters(nx=21, nz=9)):
+        mesh = generate_hull(parameters).mesh
+        hydro = compute_hydrostatics(mesh)
+        section = waterplane_moments(mesh)
+        assert section.area == pytest.approx(hydro.waterplane_area, rel=1e-12)
+        assert section.transverse_second_moment == pytest.approx(
+            hydro.transverse_waterplane_inertia, rel=1e-12
+        )
+        assert section.longitudinal_second_moment == pytest.approx(
+            hydro.longitudinal_waterplane_inertia, rel=1e-12
+        )
+
+
+def test_the_two_stability_routes_report_the_same_metacentric_height() -> None:
+    """``initial_stability(mesh, kg=...)`` and the hydrostatics-first variant."""
+    mesh = generate_hull().mesh
+    hydro = compute_hydrostatics(mesh)
+    cut = initial_stability(mesh, kg=0.6)
+    flux = initial_stability_from_hydrostatics(hydro, height_of_gravity=0.6)
+    assert isinstance(flux, HydrostaticsInitialStability)
+    assert flux.height_of_centre_of_buoyancy == pytest.approx(cut.kb, rel=1e-12)
+    assert flux.height_of_transverse_metacentre == pytest.approx(cut.km_transverse, rel=1e-12)
+    assert flux.transverse_metacentric_height == pytest.approx(cut.gm_transverse, rel=1e-12)
+    # ... and both sit on the closed forms of the analytic surface, not just on
+    # each other: agreeing consistently with a wrong reference would be worse than
+    # disagreeing.
+    reference = analytic_hydrostatics(HullParameters())
+    assert flux.height_of_transverse_metacentre == pytest.approx(
+        reference.height_of_metacentre_above_keel, rel=0.03
+    )
+
+
+def test_split_hull_reports_no_waterplane_inertia_instead_of_an_off_axis_one() -> None:
+    """The inertias are quoted about the centreline and about midship.
+
+    On a split surface the centre of flotation is not at midship, so quoting
+    ``I_L`` about midship would be an inertia about an axis nobody asked for. The
+    reference reports ``nan`` there -- explicitly, and the hydrostatics-first
+    stability block refuses it -- rather than a number that is quietly off-axis.
+    """
+    from tensorcad.hull import analytic_hydrostatics as hull_reference
+
+    symmetric = hull_reference(10.0, 2.0, 0.8)
+    assert math.isfinite(symmetric.transverse_waterplane_inertia)
+    assert math.isfinite(symmetric.longitudinal_waterplane_inertia)
+
+    split = hull_reference(10.0, 2.0, 0.8, fore_exponent=0.5, aft_exponent=0.9)
+    assert math.isnan(split.transverse_waterplane_inertia)
+    assert math.isnan(split.longitudinal_waterplane_inertia)
+    assert "not reported" in split.basis
+    with pytest.raises(ValueError):
+        initial_stability_from_hydrostatics(split, height_of_gravity=0.6)

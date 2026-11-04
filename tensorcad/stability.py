@@ -70,7 +70,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .geometry import Mesh
-from .hydrostatics import compute_hydrostatics
+from .hydrostatics import Hydrostatics, compute_hydrostatics
 
 SCHEMA_WATERPLANE = "tensorcad.stability.waterplane/1"
 SCHEMA_STABILITY = "tensorcad.stability.initial/1"
@@ -435,4 +435,161 @@ def initial_stability(
         waterplane=section,
         water_density=water_density,
         basis=basis,
+    )
+# ---------------------------------------------------------------------------
+# Hydrostatics-driven variant
+#
+# The two halves of this module arrived from two independent lines of work that
+# were merged here (PR #39, ``agent/m2925``). Both answered the same question --
+# what is KM and GM of this hull? -- but from opposite ends of the pipeline, so
+# neither could be dropped without losing a real property:
+#
+# * :func:`initial_stability` above is **mesh-first**: it cuts the surface with
+#   the waterline plane and integrates the resulting polygon by Green's theorem
+#   (``waterplane_moments``), which is exact for the chords the mesh actually
+#   has, handles asymmetric and multi-loop sections, and does not need the
+#   surface to be closed.
+# * :func:`initial_stability_from_hydrostatics` below is **hydrostatics-first**:
+#   it takes a :class:`~tensorcad.hydrostatics.Hydrostatics` record (which now
+#   carries ``transverse_waterplane_inertia`` / ``longitudinal_waterplane_inertia``
+#   from the flux identity in :mod:`tensorcad.hydrostatics`) and turns KB and the
+#   two radii into KM and GM without touching a mesh. That is the entry point a
+#   caller with an existing hydrostatics record -- an analytic surface, a
+#   regression fixture, a CSV-driven design loop -- needs, and it is the one the
+#   closed-form references are checked against.
+#
+# The two are reconciled numerically in ``tests/test_stability.py``: on the same
+# hull at the same waterline, ``I_T`` from the plane cut and ``I_T`` from the flux
+# identity agree to the mesh's own discretisation error, which is what lets the
+# closed forms serve as a reference for both.
+#
+# Naming note: on the ``agent/m2925`` branch this function was called
+# ``initial_stability`` and its record ``InitialStability``. Those names were
+# already taken on ``main`` by the mesh-first pair above, and main's are the ones
+# downstream code (``docs/stability/*``, ``examples/stability``) imports, so the
+# hydrostatics-first pair is exported under its own names here. Nothing about its
+# behaviour changed in the merge.
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class HydrostaticsInitialStability:
+    """KB, BM, KM and GM of one hull at one displacement, at even keel and upright.
+
+    A projection of an existing :class:`~tensorcad.hydrostatics.Hydrostatics`
+    record rather than a new integration, so every number here can be traced back
+    to a field of that record (or to a ratio of two of them).
+    """
+
+    displacement_volume: float
+    waterplane_area: float
+    draft: float
+    transverse_waterplane_inertia: float
+    longitudinal_waterplane_inertia: float
+    height_of_centre_of_buoyancy: float
+    transverse_metacentric_radius: float
+    longitudinal_metacentric_radius: float
+    height_of_transverse_metacentre: float
+    height_of_longitudinal_metacentre: float
+    height_of_gravity: float
+    transverse_metacentric_height: float
+    longitudinal_metacentric_height: float
+    basis: str = "hydrostatics of the surface, small-angle metacentric radii"
+
+    @property
+    def is_stable_in_roll(self) -> bool:
+        """True when ``GM_T > 0``: the upright position restores, at small angles."""
+        return self.transverse_metacentric_height > 0.0
+
+    def to_dict(self) -> dict[str, object]:
+        """JSON-ready record; lengths in metres, inertias in m^4, volume in m^3."""
+        return {
+            "displacement_volume_m3": _round(self.displacement_volume),
+            "waterplane_area_m2": _round(self.waterplane_area),
+            "draft_m": _round(self.draft),
+            "waterplane_inertia_transverse_m4": _round(self.transverse_waterplane_inertia),
+            "waterplane_inertia_longitudinal_m4": _round(self.longitudinal_waterplane_inertia),
+            "kb_m": _round(self.height_of_centre_of_buoyancy),
+            "bm_transverse_m": _round(self.transverse_metacentric_radius),
+            "bm_longitudinal_m": _round(self.longitudinal_metacentric_radius),
+            "km_transverse_m": _round(self.height_of_transverse_metacentre),
+            "km_longitudinal_m": _round(self.height_of_longitudinal_metacentre),
+            "kg_m": _round(self.height_of_gravity),
+            "gm_transverse_m": _round(self.transverse_metacentric_height),
+            "gm_longitudinal_m": _round(self.longitudinal_metacentric_height),
+            "is_stable_in_roll": self.is_stable_in_roll,
+            "basis": self.basis,
+        }
+
+
+def initial_stability_from_hydrostatics(
+    hydrostatics: Hydrostatics, *, height_of_gravity: float
+) -> HydrostaticsInitialStability:
+    """KB, BM, KM and GM for ``hydrostatics`` at a given centre of gravity.
+
+    ``height_of_gravity`` is KG measured **above the keel** of the same surface, in
+    the same units. It is an input rather than something derived here: TensorCAD has
+    no weight schedule, so any KG it invented would be a guess dressed as a result.
+
+    Raises :class:`ValueError` when the hydrostatics carry no waterplane (an open
+    surface, a submerged body with no free surface, or a degenerate mesh) or when
+    ``height_of_gravity`` is not a finite length above the keel. A negative GM is
+    *reported*, not raised: an unstable hull is a legitimate answer.
+    """
+    if not isinstance(height_of_gravity, (int, float)) or not math.isfinite(
+        float(height_of_gravity)
+    ):
+        raise ValueError(f"height_of_gravity must be a finite length, got {height_of_gravity!r}")
+    kg = float(height_of_gravity)
+    if kg < 0.0:
+        raise ValueError(
+            "height_of_gravity is measured above the keel and cannot be negative, "
+            f"got {kg!r}"
+        )
+    volume = hydrostatics.displacement_volume
+    if not math.isfinite(volume) or volume <= 0.0:
+        raise ValueError(
+            "hydrostatics carry no positive displacement volume "
+            f"({volume!r}); a metacentric radius is undefined"
+        )
+    transverse = hydrostatics.transverse_waterplane_inertia
+    longitudinal = hydrostatics.longitudinal_waterplane_inertia
+    for name, value in (
+        ("transverse_waterplane_inertia", transverse),
+        ("longitudinal_waterplane_inertia", longitudinal),
+    ):
+        if not math.isfinite(value) or value <= 0.0:
+            raise ValueError(
+                f"{name} is {value!r}: the surface has no waterplane to integrate "
+                "(is it closed, and does it cross the waterline?)"
+            )
+    keel_z = hydrostatics.keel_z
+    if not math.isfinite(keel_z):
+        raise ValueError(f"keel_z is {keel_z!r}; recompute the hydrostatics on a closed surface")
+
+    draft = hydrostatics.waterline_z - keel_z
+    if draft <= 0.0:
+        raise ValueError(
+            f"the surface does not extend below the waterline (draft {draft!r}); "
+            "there is no buoyancy to be stable on"
+        )
+    kb = hydrostatics.vertical_centre_buoyancy - keel_z
+    bm_t = transverse / volume
+    bm_l = longitudinal / volume
+    km_t = kb + bm_t
+    km_l = kb + bm_l
+    return HydrostaticsInitialStability(
+        displacement_volume=volume,
+        waterplane_area=hydrostatics.waterplane_area,
+        draft=draft,
+        transverse_waterplane_inertia=transverse,
+        longitudinal_waterplane_inertia=longitudinal,
+        height_of_centre_of_buoyancy=kb,
+        transverse_metacentric_radius=bm_t,
+        longitudinal_metacentric_radius=bm_l,
+        height_of_transverse_metacentre=km_t,
+        height_of_longitudinal_metacentre=km_l,
+        height_of_gravity=kg,
+        transverse_metacentric_height=km_t - kg,
+        longitudinal_metacentric_height=km_l - kg,
     )

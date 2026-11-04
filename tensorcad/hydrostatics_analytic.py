@@ -28,7 +28,15 @@ waterplane coefficient ``Cw``        ``I``
 maximum section area                 ``2*B*T/3``, at ``x = L/2``
 ``LCB``, ``LCF``                     ``L/2`` (the form is fore-aft symmetric)
 ``VCB``                              ``-0.4*T`` (``0.6*T`` above the keel)
+transverse waterplane inertia        ``(2/3)*(B/2)**3*L*I3``, ``I3 = int sin**3e``
+longitudinal waterplane inertia      ``B*L**3*int sin(pi*xi)**e*(xi-1/2)**2 dxi``
 ===================================  ==========================================
+
+The two waterplane second moments are what a metacentric radius needs
+(``BM = I/V``); they are listed here because they are integrals of the same
+surface, and the transverse one is again a closed form while the longitudinal one
+carries the ``xi**(-0.3)`` endpoint of the taper and therefore needs the quadrature
+below. :mod:`tensorcad.stability` turns them into KB/BM/KM/GM.
 
 with ``I = int_0^1 sin(pi*x)**e dx = sqrt(pi)*Gamma((e+1)/2) / (pi*Gamma((e+2)/2))``,
 which is :data:`tensorcad.hull.TAPER_INTEGRAL` for ``e = 0.7`` derived from the
@@ -151,6 +159,66 @@ def quadrature_evidence(
     }
 
 
+def transverse_waterplane_inertia(
+    length: float, beam: float, breadth_exponent: float = BREADTH_EXPONENT
+) -> float:
+    """``int y**2 dA`` over the waterplane, in closed form.
+
+    The waterplane is the band ``|y| <= b(x)`` with ``b = (B/2)*sin(pi*x/L)**e``, so
+    ``int y**2 dA = int_0^L 2*b(x)**3/3 dx = (2/3)*(B/2)**3*L*int_0^1 sin(pi*xi)**3e dxi``
+    and the remaining integral is :func:`taper_integral` at ``3e``. Exact on the
+    generating surface; no quadrature.
+    """
+    _check_positive("length", length)
+    _check_positive("beam", beam)
+    return (2.0 / 3.0) * (beam / 2.0) ** 3 * length * taper_integral(3.0 * breadth_exponent)
+
+
+def longitudinal_waterplane_inertia(
+    length: float,
+    beam: float,
+    breadth_exponent: float = BREADTH_EXPONENT,
+    *,
+    levels: int = 7,
+) -> dict[str, Any]:
+    """``int (x - LCF)**2 dA`` over the waterplane, with its own error evidence.
+
+    ``= B*L**3 * int_0^1 sin(pi*xi)**e * (xi - 1/2)**2 dxi``. The integrand carries
+    the ``xi**(e-1) = xi**(-0.3)`` endpoint behaviour of the taper, so it goes through
+    :func:`tanh_sinh_quadrature` rather than a Newton-Cotes rule, and the difference
+    between the last two levels is reported with the value. ``LCF = L/2`` because the
+    surface is fore-aft symmetric -- the same assumption :meth:`compare` makes for
+    ``longitudinal_centre_flotation``.
+    """
+
+    def integrand(xi: float) -> float:
+        return math.sin(math.pi * xi) ** breadth_exponent * (xi - 0.5) ** 2
+
+    evidence = quadrature_evidence(integrand, 0.0, 1.0, levels=levels)
+    evidence["value"] *= beam * length**3
+    evidence["value_at_previous_level"] *= beam * length**3
+    evidence["absolute_difference"] *= beam * length**3
+    return evidence
+
+
+def waterplane_inertia(
+    length: float,
+    beam: float,
+    breadth_exponent: float = BREADTH_EXPONENT,
+    *,
+    levels: int = 7,
+) -> dict[str, Any]:
+    """Both waterplane second moments of the analytic surface, plus evidence."""
+    longitudinal = longitudinal_waterplane_inertia(
+        length, beam, breadth_exponent, levels=levels
+    )
+    return {
+        "transverse": transverse_waterplane_inertia(length, beam, breadth_exponent),
+        "longitudinal": longitudinal["value"],
+        "longitudinal_quadrature": longitudinal,
+    }
+
+
 @dataclass(frozen=True)
 class AnalyticHydrostatics:
     """Exact hydrostatics of the analytic surface the sampled hull approximates.
@@ -178,6 +246,11 @@ class AnalyticHydrostatics:
     prismatic_coefficient: float
     midship_coefficient: float
     waterplane_coefficient: float
+    transverse_waterplane_inertia: float
+    longitudinal_waterplane_inertia: float
+    transverse_metacentric_radius: float
+    longitudinal_metacentric_radius: float
+    height_of_metacentre_above_keel: float
     quadrature: dict[str, Any]
 
     def as_dict(self) -> dict[str, Any]:
@@ -206,6 +279,11 @@ class AnalyticHydrostatics:
             "prismatic_coefficient": self.prismatic_coefficient,
             "midship_coefficient": self.midship_coefficient,
             "waterplane_coefficient": self.waterplane_coefficient,
+            "waterplane_inertia_transverse_m4": self.transverse_waterplane_inertia,
+            "waterplane_inertia_longitudinal_m4": self.longitudinal_waterplane_inertia,
+            "transverse_metacentric_radius_m": self.transverse_metacentric_radius,
+            "longitudinal_metacentric_radius_m": self.longitudinal_metacentric_radius,
+            "height_of_metacentre_above_keel_m": self.height_of_metacentre_above_keel,
             "wetted_area_quadrature": self.quadrature,
         }
 
@@ -229,6 +307,12 @@ class AnalyticHydrostatics:
             "vertical_centre_buoyancy": "vertical_centre_buoyancy",
             "block_coefficient": "block_coefficient",
             "prismatic_coefficient": "prismatic_coefficient",
+            # The metacentric radii and KM are deliberately absent: they are ratios
+            # of the two rows above and of the volume, so comparing them would add a
+            # fourth chance to fail for the same discretisation error. They travel in
+            # ``as_dict`` for a report, and :mod:`tensorcad.stability` compares them.
+            "transverse_waterplane_inertia": "transverse_waterplane_inertia",
+            "longitudinal_waterplane_inertia": "longitudinal_waterplane_inertia",
         }
         selected = list(quantities) if quantities is not None else list(pairs)
         rows: dict[str, Any] = {}
@@ -360,6 +444,17 @@ def analytic_hydrostatics(
     waterplane = beam * length * taper
     section_area = (2.0 / 3.0) * beam * draft
     wetted, wetted_difference = _wetted_area(length, beam, draft, breadth_exponent, int(quadrature_levels))
+    # Waterplane second moments of the reference surface, with their own quadrature
+    # evidence for the longitudinal one (see waterplane_inertia). The two radii and
+    # KM_T then need no further integration: BM = I/V and KB = 0.6*T, because
+    # VCB = -0.4*T is measured from the waterline and the keel sits at -T.
+    inertia = waterplane_inertia(
+        length, beam, breadth_exponent, levels=min(8, int(quadrature_levels) + 1)
+    )
+    transverse_inertia = inertia["transverse"]
+    longitudinal_inertia = inertia["longitudinal"]
+    transverse_radius = transverse_inertia / volume
+    longitudinal_radius = longitudinal_inertia / volume
     return AnalyticHydrostatics(
         length=length,
         beam=beam,
@@ -383,10 +478,16 @@ def analytic_hydrostatics(
         prismatic_coefficient=taper,
         midship_coefficient=2.0 / 3.0,
         waterplane_coefficient=taper,
+        transverse_waterplane_inertia=transverse_inertia,
+        longitudinal_waterplane_inertia=longitudinal_inertia,
+        transverse_metacentric_radius=transverse_radius,
+        longitudinal_metacentric_radius=longitudinal_radius,
+        height_of_metacentre_above_keel=(1.0 - 0.4) * draft + transverse_radius,
         quadrature={
             "wetted_area_levels": int(quadrature_levels),
             "wetted_area_absolute_difference": wetted_difference,
             "wetted_area_relative_difference": wetted_difference / wetted if wetted else float("nan"),
+            "longitudinal_inertia_quadrature": inertia["longitudinal_quadrature"],
             "method": "tanh-sinh, nested (zeta = u**2 substitution for the keel edge)",
         },
     )
