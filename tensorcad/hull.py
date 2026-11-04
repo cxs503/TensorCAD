@@ -27,6 +27,10 @@ from typing import Any
 from . import mesh as meshlib
 from .geometry import Mesh, MeshBuilder
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .hydrostatics_analytic import (
+    waterplane_inertia_longitudinal,
+    waterplane_inertia_transverse,
+)
 from .parameters import (
     FLOAT,
     INT,
@@ -439,6 +443,8 @@ def analytic_hydrostatics(
     | block coefficient | ``2/3*TAPER_INTEGRAL`` |
     | prismatic coefficient | ``TAPER_INTEGRAL`` (the midship ``2/3`` cancels) |
     | wetted surface area | quadrature, see :func:`analytic_wetted_surface_area` |
+    | transverse waterplane inertia | ``(2/3)*(beam/2)**3*length*I3`` (``I3`` from the gamma identity) |
+    | longitudinal waterplane inertia | ``beam*length**3*int sin(pi*xi)**e*(xi-1/2)**2 dxi`` |
 
     ``basis`` says which of these came out of a formula and which out of a
     quadrature, so a caller comparing mesh numbers against this object knows the
@@ -455,6 +461,15 @@ def analytic_hydrostatics(
     volume = analytic_volume(length, beam, draft)
     section = analytic_maximum_section_area(beam, draft)
     centre = analytic_longitudinal_centre(length)
+    # The two waterplane second moments live in :mod:`tensorcad.hydrostatics_analytic`
+    # (one closed form, one quadrature with its own convergence evidence) so that the
+    # mesh, this compatibility wrapper and the stability block cannot drift apart.
+    inertia_transverse = waterplane_inertia_transverse(
+        length, beam, breadth_exponent=BREADTH_EXPONENT
+    )
+    inertia_longitudinal = waterplane_inertia_longitudinal(
+        length, beam, breadth_exponent=BREADTH_EXPONENT
+    )[0]
     return Hydrostatics(
         displacement_volume=volume,
         displacement_mass=volume * water_density,
@@ -468,7 +483,13 @@ def analytic_hydrostatics(
         maximum_section_area=section,
         waterline_z=0.0,
         water_density=water_density,
-        basis="closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature)",
+        transverse_waterplane_inertia=inertia_transverse,
+        longitudinal_waterplane_inertia=inertia_longitudinal,
+        keel_z=-draft,
+        basis=(
+            "closed forms of the analytic surface (wetted area by Gauss-Legendre "
+            "quadrature, longitudinal waterplane inertia by tanh-sinh quadrature)"
+        ),
     )
 
 
