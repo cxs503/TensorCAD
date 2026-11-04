@@ -1,0 +1,80 @@
+{
+  "base": "6c568c3",
+  "ours": "origin/main",
+  "theirs": "origin/agent/m2873",
+  "counts": {
+    "ours_only": 27,
+    "theirs_only": 11,
+    "both": 4
+  },
+  "conflict_files": [
+    {
+      "path": "CHANGELOG.md",
+      "theirs_kept_verbatim": false,
+      "ours_status": "M",
+      "theirs_status": "M"
+    },
+    {
+      "path": "pyproject.toml",
+      "theirs_kept_verbatim": false,
+      "ours_status": "M",
+      "theirs_status": "M"
+    },
+    {
+      "path": "tensorcad/__init__.py",
+      "theirs_kept_verbatim": false,
+      "ours_status": "M",
+      "theirs_status": "M"
+    },
+    {
+      "path": "tests/test_public_surface.py",
+      "theirs_kept_verbatim": false,
+      "ours_status": "M",
+      "theirs_status": "M"
+    }
+  ],
+  "ours_only": {
+    "README.md": "kept verbatim",
+    "backlog_tensorcad_section.md": "kept verbatim",
+    "docs/asymmetric_hull.md": "kept verbatim",
+    "docs/asymmetric_hull/plot.png": "kept verbatim",
+    "docs/asymmetric_hull/report.md": "kept verbatim",
+    "docs/asymmetric_hull/results.json": "kept verbatim",
+    "docs/fairness.md": "kept verbatim",
+    "docs/wigley.md": "kept verbatim",
+    "docs/wigley/plot.png": "kept verbatim",
+    "docs/wigley/report.md": "kept verbatim",
+    "docs/wigley/results.json": "kept verbatim",
+    "docs/wigley/wigley.json": "kept verbatim",
+    "docs/wigley/wigley.obj": "kept verbatim",
+    "docs/wigley/wigley.stl": "kept verbatim",
+    "docs/wigley/wigley_offsets.csv": "kept verbatim",
+    "examples/asymmetric_hull/run_example.py": "kept verbatim",
+    "examples/wigley/publish_report.py": "kept verbatim",
+    "examples/wigley/run_example.py": "kept verbatim",
+    "tensorcad/cli.py": "kept verbatim",
+    "tensorcad/hull.py": "kept verbatim",
+    "tensorcad/hydrostatics_analytic.py": "kept verbatim",
+    "tensorcad/wigley.py": "kept verbatim",
+    "tests/test_asymmetric_hull.py": "kept verbatim",
+    "tests/test_cli.py": "kept verbatim",
+    "tests/test_curvature.py": "kept verbatim",
+    "tests/test_hull.py": "kept verbatim",
+    "tests/test_wigley.py": "kept verbatim"
+  },
+  "theirs_only": {
+    "docs/m2873/outputs/transom_stern/convergence.csv": "kept verbatim",
+    "docs/m2873/outputs/transom_stern/convergence.png": "kept verbatim",
+    "docs/m2873/outputs/transom_stern/design_space.png": "kept verbatim",
+    "docs/m2873/outputs/transom_stern/design_table.csv": "kept verbatim",
+    "docs/m2873/outputs/transom_stern/geometry.png": "kept verbatim",
+    "docs/m2873/outputs/transom_stern/reference_ladder.csv": "kept verbatim",
+    "docs/transom_stern.md": "kept verbatim",
+    "examples/transom_stern/run_example.py": "kept verbatim",
+    "tensorcad/transom.py": "kept verbatim",
+    "tests/test_transom.py": "kept verbatim",
+    "tools/report_m2873.py": "kept verbatim"
+  },
+  "silent_loss": [],
+  "ok": true
+}
