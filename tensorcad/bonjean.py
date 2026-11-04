@@ -41,7 +41,7 @@ import math
 from dataclasses import dataclass
 
 from .geometry import Mesh
-from .hull import BREADTH_EXPONENT
+from .hull import BREADTH_EXPONENT, _positive_exponent
 
 #: Relative offset applied to the cutting plane so that no vertex lies on it.
 STATION_NUDGE = 1e-9
@@ -433,6 +433,36 @@ class BonjeanTable:
         values = [curve.area_at(waterline_z) for curve in self.curves]
         return _integrate(self.stations, values, method=method)
 
+    def integrated_first_moment(
+        self, waterline_z: float | None = None, *, method: str = "simpson"
+    ) -> float:
+        """``int x * A(x) dx`` over the stations, in the mesh frame.
+
+        The companion of :meth:`integrated_volume`: the ratio of the two is the
+        longitudinal centre of the *Bonjean* areas, which uses none of the surface
+        integrals :mod:`tensorcad.hydrostatics` uses, so it can be compared with
+        :func:`tensorcad.hull.analytic_longitudinal_centre` as an independent
+        measurement rather than a restatement.
+        """
+        if not self.stations:
+            return 0.0
+        if waterline_z is None:
+            waterline_z = self.waterlines[-1] if self.waterlines else 0.0
+        values = [
+            station * curve.area_at(waterline_z)
+            for station, curve in zip(self.stations, self.curves, strict=True)
+        ]
+        return _integrate(self.stations, values, method=method)
+
+    def longitudinal_centre(
+        self, waterline_z: float | None = None, *, method: str = "simpson"
+    ) -> float:
+        """``int x A dx / int A dx``; ``inf``-free because an empty table is 0."""
+        volume = self.integrated_volume(waterline_z, method=method)
+        if volume == 0.0:
+            return 0.0
+        return self.integrated_first_moment(waterline_z, method=method) / volume
+
     def to_dict(self) -> dict[str, object]:
         return {
             "stations_m": [_round(value) for value in self.stations],
@@ -515,39 +545,95 @@ def bonjean_table(
     )
 
 
+def _station_exponent(
+    length: float,
+    station: float,
+    fore_exponent: float,
+    aft_exponent: float,
+) -> float:
+    """Taper exponent that applies at ``station``.
+
+    Midship carries ``sin(pi/2) = 1`` for every exponent, so the tie does not bend
+    the closed form; the rule is the generator's own
+    (:func:`tensorcad.hull._breadth_exponent`): ``2 * station >= length`` is
+    forward, everything abaft is after.
+    """
+    return fore_exponent if 2.0 * station >= length else aft_exponent
+
+
 def analytic_section_area(
     length: float,
     beam: float,
     draft: float,
     station: float,
     waterline_z: float,
+    *,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
 ) -> float:
     """Closed form for the parametric hull family: area under ``waterline_z``.
 
-    The generator's half breadth is ``(beam/2) * sin(pi x / L)^0.7 * sqrt(zeta/draft)``
+    The generator's half breadth is ``(beam/2) * sin(pi x / L)^p * sqrt(zeta/draft)``
     for ``zeta = z + draft`` measured up from the keel, so the section area is the
     integral of ``2 * half_breadth`` over the immersed depth::
 
-        A(x, zeta) = (2/3) * beam * sin(pi x / L)^0.7 * zeta^(3/2) / sqrt(draft)
+        A(x, zeta) = (2/3) * beam * sin(pi x / L)^p * zeta^(3/2) / sqrt(draft)
 
     At midship and ``zeta = draft`` this is ``(2/3) * beam * draft``, the
     :func:`tensorcad.hull.analytic_maximum_section_area` the hydrostatics module
     already compares against -- but the mesh-facing function here varies with the
     station and with the waterline, which is what a Bonjean curve needs and what
     nothing in the tree had.
+
+    ``p`` is the per-half taper exponent the asymmetric generator introduced
+    (:class:`tensorcad.HullParameters` ``fore_exponent`` / ``aft_exponent``, 0.17.0):
+    ``station`` forward of midship takes ``fore_exponent``, abaft it
+    ``aft_exponent``. Both default to the shipped :data:`BREADTH_EXPONENT`, so the
+    symmetric closed form is the same expression it always was -- same digits, not
+    merely the same value.
     """
     for name, value in (("length", length), ("beam", beam), ("draft", draft)):
         if not math.isfinite(value) or value <= 0.0:
             raise ValueError(f"{name} must be a finite positive number, got {value!r}")
     if not 0.0 <= station <= length:
         raise ValueError(f"station must lie in [0, {length}], got {station!r}")
+    fore = _positive_exponent("fore_exponent", fore_exponent)
+    aft = _positive_exponent("aft_exponent", aft_exponent)
     zeta = waterline_z + draft
     if not math.isfinite(zeta):
         raise ValueError(f"waterline_z must be finite, got {waterline_z!r}")
     if zeta <= 0.0:
         return 0.0
-    taper = math.pow(math.sin(math.pi * station / length), BREADTH_EXPONENT)
+    exponent = _station_exponent(length, station, fore, aft)
+    taper = math.pow(math.sin(math.pi * station / length), exponent)
     return (2.0 / 3.0) * beam * taper * math.pow(zeta, 1.5) / math.sqrt(draft)
+
+
+def analytic_section_centroid_z(draft: float, waterline_z: float) -> float:
+    r"""Height of the section centroid, exact for the whole hull family.
+
+    Because the breadth falls as ``sqrt(zeta/draft)``, the immersed area is
+    ``A(zeta) = c * zeta^(3/2)`` and its first moment about the keel is
+    ``int_0^zeta s * c * s^(1/2) ds = (2/5) c zeta^(5/2)``, so::
+
+        z_c(zeta) = -draft + (3/5) * zeta
+
+    ``(2/5)/(2/3) = 3/5`` is independent of *both* the station and the taper
+    exponent: the vertical profile is the same at every station, so a measured
+    centroid that drifts with ``x`` or with ``p`` is an error in the cut, not in
+    the formula. At the design waterline (``zeta = draft``) this is the
+    ``(3/5) * draft`` of :func:`tensorcad.hull.analytic_vertical_centre_buoyancy`,
+    reached here per station instead of per hull.
+    """
+    for name, value in (("draft", draft),):
+        if not math.isfinite(value) or value <= 0.0:
+            raise ValueError(f"{name} must be a finite positive number, got {value!r}")
+    zeta = waterline_z + draft
+    if not math.isfinite(zeta):
+        raise ValueError(f"waterline_z must be finite, got {waterline_z!r}")
+    if zeta <= 0.0:
+        raise ValueError("waterline_z must be at or above the keel")
+    return -draft + 0.6 * zeta
 
 
 __all__ = [
@@ -557,6 +643,7 @@ __all__ = [
     "BonjeanTable",
     "SectionProperties",
     "analytic_section_area",
+    "analytic_section_centroid_z",
     "bonjean_curve",
     "bonjean_table",
     "default_waterlines",

@@ -1,0 +1,430 @@
+{
+  "claims": [
+    {
+      "claim": "section area on the 41x13 grid is within 6 % of the split closed form",
+      "evidence": "-5.308%",
+      "holds": true
+    },
+    {
+      "claim": "section-area error shrinks on the two finer grids",
+      "evidence": "-5.308% -> -2.539% -> -0.924%",
+      "holds": true
+    },
+    {
+      "claim": "section centroid is within 1 % of -T + 3/5 zeta on every grid",
+      "evidence": "41x13 +0.939%, 81x21 +0.457%, 161x41 +0.169%",
+      "holds": true
+    },
+    {
+      "claim": "section-centroid error shrinks on the two finer grids",
+      "evidence": "+0.939% -> +0.457% -> +0.169%",
+      "holds": true
+    },
+    {
+      "claim": "Bonjean-integrated volume within 1 % of the split analytic volume",
+      "evidence": "41x13 -0.789%, 81x21 -0.416%, 161x41 -0.203%",
+      "holds": true
+    },
+    {
+      "claim": "Bonjean longitudinal centre within 0.5 % of the split analytic LCB",
+      "evidence": "41x13 -0.0697%, 81x21 -0.0697%, 161x41 -0.0697%",
+      "holds": true
+    },
+    {
+      "claim": "the centre is forward of midship: the split is measured, not assumed",
+      "evidence": "5.254159 m vs midship 5.0 m",
+      "holds": true
+    },
+    {
+      "claim": "the mesh Bonjean LCB equals the closed-form 41-station quadrature to 1e-8 m: the discretisation cancels in the ratio",
+      "evidence": "|mesh - closed-form| = 8.29e-09 m",
+      "holds": true
+    },
+    {
+      "claim": "the LCB residual is station quadrature, not the mesh: refining only the stations on the closed form shrinks it",
+      "evidence": "41 -0.0697%, 81 -0.0248%, 161 -0.0088%",
+      "holds": true
+    },
+    {
+      "claim": "mirror identity LCB(p,q) + LCB(q,p) = L",
+      "evidence": "residual +1.776e-15 m",
+      "holds": true
+    }
+  ],
+  "closed_form_quadrature": {
+    "161": {
+      "lcb_m": 5.257360323782903,
+      "lcb_relative": -8.822043617936387e-05,
+      "volume_m3": 7.5716115227226135,
+      "volume_relative": -0.00010246577903471883
+    },
+    "41": {
+      "lcb_m": 5.254159343084637,
+      "lcb_relative": -0.0006970237346471767,
+      "volume_m3": 7.566077782417765,
+      "volume_relative": -0.0008332445926639979
+    },
+    "81": {
+      "lcb_m": 5.256520164741943,
+      "lcb_relative": -0.0002480125885191524,
+      "volume_m3": 7.570177088062759,
+      "volume_relative": -0.000291895423580699
+    }
+  },
+  "example": "bonjean_asymmetric",
+  "hull": {
+    "aft_exponent": 0.9,
+    "beam_m": 2.0,
+    "draft_m": 0.8,
+    "fore_exponent": 0.5,
+    "length_m": 10.0
+  },
+  "hydrostatics": {
+    "rows": [
+      {
+        "analytic_lcb_m": 5.257824171324652,
+        "analytic_volume_m3": 7.572387433300119,
+        "bonjean_lcb_m": 5.254159333044294,
+        "bonjean_lcb_relative": -0.000697025644247508,
+        "bonjean_volume_m3": 7.5126048453741,
+        "bonjean_volume_relative": -0.007894813683610662,
+        "grid": "41x13",
+        "surface_lcb_m": 5.250033827764891,
+        "surface_volume_m3": 7.500729079074466,
+        "surface_volume_relative": -0.009463112506701744,
+        "symmetric_lcb_m": 5.0
+      },
+      {
+        "analytic_lcb_m": 5.257824171324652,
+        "analytic_volume_m3": 7.572387433300119,
+        "bonjean_lcb_m": 5.254159334314039,
+        "bonjean_lcb_relative": -0.0006970254027511862,
+        "bonjean_volume_m3": 7.54088189086625,
+        "bonjean_volume_relative": -0.004160582473015261,
+        "grid": "81x21",
+        "surface_lcb_m": 5.254901161693733,
+        "surface_volume_m3": 7.54096601316054,
+        "surface_volume_relative": -0.004149473388194731,
+        "symmetric_lcb_m": 5.0
+      },
+      {
+        "analytic_lcb_m": 5.257824171324652,
+        "analytic_volume_m3": 7.572387433300119,
+        "bonjean_lcb_m": 5.254159334793481,
+        "bonjean_lcb_relative": -0.0006970253115647471,
+        "bonjean_volume_m3": 7.557047281474663,
+        "bonjean_volume_relative": -0.0020258012364762156,
+        "grid": "161x41",
+        "surface_lcb_m": 5.2567458650561685,
+        "surface_volume_m3": 7.561213706451268,
+        "surface_volume_relative": -0.0014755883725275838,
+        "symmetric_lcb_m": 5.0
+      }
+    ]
+  },
+  "mirror_identity": {
+    "lcb_aft_fore_m": 4.74217582867535,
+    "lcb_fore_aft_m": 5.257824171324652,
+    "residual_m": 1.7763568394002505e-15,
+    "sum_m": 10.000000000000002
+  },
+  "plot": "plot.png",
+  "section_area": {
+    "rows": [
+      {
+        "closed_form": 0.04633646135219601,
+        "measured": 0.04387708106113583,
+        "relative": -0.05307656690412384,
+        "station_m": 1.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": 0.1310593041533047,
+        "measured": 0.12850603576151096,
+        "relative": -0.019481778941898592,
+        "station_m": 1.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": 0.3034065350669664,
+        "measured": 0.30079790257965966,
+        "relative": -0.008597812458887827,
+        "station_m": 1.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": 0.370691690817568,
+        "measured": 0.3680718460448117,
+        "relative": -0.00706744941322576,
+        "station_m": 1.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": 0.1101794542186613,
+        "measured": 0.10433150636181923,
+        "relative": -0.05307657310805216,
+        "station_m": 3.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": 0.3116345569017926,
+        "measured": 0.30556335935162593,
+        "relative": -0.01948178536592756,
+        "station_m": 3.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": 0.7214440953089566,
+        "measured": 0.7152412495878754,
+        "relative": -0.008597818959797368,
+        "station_m": 3.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": 0.8814356337492901,
+        "measured": 0.8752061262626932,
+        "relative": -0.007067455918589261,
+        "station_m": 3.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": 0.1333333333333334,
+        "measured": 0.12625645666670007,
+        "relative": -0.05307657499974983,
+        "station_m": 5.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": 0.3771236166328254,
+        "measured": 0.36977657453844825,
+        "relative": -0.019481787324739094,
+        "station_m": 5.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": 0.873053390247253,
+        "measured": 0.865547033525056,
+        "relative": -0.00859782094205164,
+        "station_m": 5.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": 1.0666666666666669,
+        "measured": 1.0591280449043183,
+        "relative": -0.007067457902201755,
+        "station_m": 5.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": 0.11992716266319121,
+        "measured": 0.11356183948801328,
+        "relative": -0.053076576096898004,
+        "station_m": 7.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": 0.33920523987041845,
+        "measured": 0.33259691514246403,
+        "relative": -0.019481788460811802,
+        "station_m": 7.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": 0.7852711195937461,
+        "measured": 0.7785194982137127,
+        "relative": -0.008597822091720726,
+        "station_m": 7.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": 0.9594173013055293,
+        "measured": 0.9526366588141404,
+        "relative": -0.0070674590526584235,
+        "station_m": 7.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": 0.07411906270018954,
+        "measured": 0.07018507634689122,
+        "relative": -0.053076579897012935,
+        "station_m": 9.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": 0.20964036740197958,
+        "measured": 0.20555619728648633,
+        "relative": -0.01948179239574585,
+        "station_m": 9.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": 0.48532424229261867,
+        "measured": 0.4811515088680135,
+        "relative": -0.00859782607374738,
+        "station_m": 9.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": 0.5929525016015161,
+        "measured": 0.5887618317135057,
+        "relative": -0.007067463037413228,
+        "station_m": 9.0,
+        "waterline_z_m": 0.0
+      }
+    ],
+    "worst_relative_by_grid": {
+      "161x41": -0.009235992319615298,
+      "41x13": -0.053076579897012935,
+      "81x21": -0.025392108561594864
+    }
+  },
+  "section_centroid": {
+    "rows": [
+      {
+        "closed_form": -0.68,
+        "measured": -0.6752564825590647,
+        "relative": 0.00697576094255202,
+        "station_m": 1.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": -0.56,
+        "measured": -0.5561163187612865,
+        "relative": 0.006935145069131287,
+        "station_m": 1.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": -0.38,
+        "measured": -0.3768331745698105,
+        "relative": 0.008333751132077577,
+        "station_m": 1.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": -0.32000000000000006,
+        "measured": -0.31699488166251033,
+        "relative": 0.00939099480465541,
+        "station_m": 1.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": -0.68,
+        "measured": -0.6752564825398465,
+        "relative": 0.006975760970814053,
+        "station_m": 3.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": -0.56,
+        "measured": -0.5561163187520062,
+        "relative": 0.006935145085703348,
+        "station_m": 3.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": -0.38,
+        "measured": -0.3768331745661232,
+        "relative": 0.008333751141781073,
+        "station_m": 3.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": -0.32000000000000006,
+        "measured": -0.3169948816579282,
+        "relative": 0.009390994818974511,
+        "station_m": 3.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": -0.68,
+        "measured": -0.6752564825339854,
+        "relative": 0.006975760979433303,
+        "station_m": 5.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": -0.56,
+        "measured": -0.5561163187491763,
+        "relative": 0.006935145090756647,
+        "station_m": 5.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": -0.38,
+        "measured": -0.3768331745649988,
+        "relative": 0.008333751144739963,
+        "station_m": 5.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": -0.32000000000000006,
+        "measured": -0.31699488165653106,
+        "relative": 0.009390994823340637,
+        "station_m": 5.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": -0.68,
+        "measured": -0.6752564825305868,
+        "relative": 0.006975760984431266,
+        "station_m": 7.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": -0.56,
+        "measured": -0.5561163187475352,
+        "relative": 0.00693514509368724,
+        "station_m": 7.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": -0.38,
+        "measured": -0.3768331745643469,
+        "relative": 0.00833375114645555,
+        "station_m": 7.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": -0.32000000000000006,
+        "measured": -0.3169948816557208,
+        "relative": 0.009390994825872639,
+        "station_m": 7.0,
+        "waterline_z_m": 0.0
+      },
+      {
+        "closed_form": -0.68,
+        "measured": -0.6752564825188145,
+        "relative": 0.0069757610017433976,
+        "station_m": 9.0,
+        "waterline_z_m": -0.6
+      },
+      {
+        "closed_form": -0.56,
+        "measured": -0.5561163187418507,
+        "relative": 0.006935145103838049,
+        "station_m": 9.0,
+        "waterline_z_m": -0.4
+      },
+      {
+        "closed_form": -0.38,
+        "measured": -0.3768331745620884,
+        "relative": 0.008333751152398894,
+        "station_m": 9.0,
+        "waterline_z_m": -0.1
+      },
+      {
+        "closed_form": -0.32000000000000006,
+        "measured": -0.316994881652914,
+        "relative": 0.009390994834643921,
+        "station_m": 9.0,
+        "waterline_z_m": 0.0
+      }
+    ],
+    "worst_relative_by_grid": {
+      "161x41": 0.0016852388766214889,
+      "41x13": 0.009390994834643921,
+      "81x21": 0.004566337940381005
+    }
+  }
+}

@@ -4,6 +4,39 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## Unreleased
+
+### Added
+- **`bonjean.analytic_section_area(..., fore_exponent=, aft_exponent=)`** — the station
+  area closed form follows the split the asymmetric generator introduced in 0.17.0
+  (`2 * station >= L` is forward, the generator's own rule). Both default to
+  `BREADTH_EXPONENT` and the symmetric value is reproduced by the identical expression,
+  asserted bit for bit.
+- **`bonjean.analytic_section_centroid_z(draft, waterline_z)`** — `-T + (3/5) zeta`,
+  exact for the whole family and independent of both the station and the exponent, so a
+  drifting centroid can only be a cutting error.
+- **`BonjeanTable.integrated_first_moment` / `BonjeanTable.longitudinal_centre`** — the
+  `int x A dx` companion of `integrated_volume`, giving an LCB that uses none of the
+  surface integrals `compute_hydrostatics` uses.
+- `docs/bonjean_asymmetric.md`, `examples/bonjean_asymmetric/run_example.py` (10 claims,
+  exits non-zero if one breaks), `docs/bonjean_asymmetric/{results.json,plot.png}`,
+  `tests/test_bonjean_asymmetric.py` (49 tests).
+
+### Fixed
+- The Bonjean reference was undefined for a hull whose halves differ: the closed form
+  hard-wired one exponent while the geometry carried two.
+
+### Measured
+- Section area on the split family: worst −5.308 % (41×13, `z = -0.6 m`) → −2.539 %
+  (81×21) → −0.924 % (161×41), all negative (inscribed chords), monotone.
+- Section centroid vs `-T + 3/5 zeta`: +0.939 % → +0.457 % → +0.169 %; the centroid is
+  the same number at every station to 4.2e-12 m.
+- Bonjean reduction at the design waterline: volume −0.790 % / −0.416 % / −0.203 %,
+  LCB −0.0697 % on all three grids. The LCB residual is *station quadrature*, not the
+  mesh: the same Simpson rule on the closed-form areas 41 stations gives 5.254159343 m,
+  8.3e-9 m from the mesh number, and refining the stations alone reduces it to −0.0248 %
+  (81) and −0.0088 % (161) — order 1.5, as `A ~ sin^0.5` predicts.
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
