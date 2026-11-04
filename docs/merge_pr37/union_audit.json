@@ -1,0 +1,68 @@
+{
+  "base": "d75dd54",
+  "ours": "33243ef",
+  "theirs": "8389c7e",
+  "files_checked": 76,
+  "files_missing": [],
+  "intended_deletions": {
+    "ours": [],
+    "theirs": []
+  },
+  "lines_dropped": [],
+  "lines_relabelled": [
+    {
+      "side": "ours",
+      "path": "pyproject.toml",
+      "line": "version = \"0.14.0\"",
+      "merged_as": "version = \"0.21.0\""
+    },
+    {
+      "side": "theirs",
+      "path": "pyproject.toml",
+      "line": "version = \"0.20.0\"",
+      "merged_as": "version = \"0.21.0\""
+    },
+    {
+      "side": "ours",
+      "path": "tensorcad/__init__.py",
+      "line": "__version__ = \"0.14.0\"",
+      "merged_as": "__version__ = \"0.21.0\""
+    },
+    {
+      "side": "theirs",
+      "path": "tensorcad/__init__.py",
+      "line": "__version__ = \"0.20.0\"",
+      "merged_as": "__version__ = \"0.21.0\""
+    },
+    {
+      "side": "ours",
+      "path": "tests/test_public_surface.py",
+      "line": "assert tensorcad.__version__ == \"0.14.0\"",
+      "merged_as": "assert tensorcad.__version__ == \"0.21.0\""
+    },
+    {
+      "side": "ours",
+      "path": "tests/test_public_surface.py",
+      "line": "\"transom\",",
+      "merged_as": "\"wigley\", \"transom\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\","
+    },
+    {
+      "side": "theirs",
+      "path": "tests/test_public_surface.py",
+      "line": "assert tensorcad.__version__ == \"0.20.0\"",
+      "merged_as": "assert tensorcad.__version__ == \"0.21.0\""
+    },
+    {
+      "side": "theirs",
+      "path": "tests/test_public_surface.py",
+      "line": "\"wigley\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\",",
+      "merged_as": "\"wigley\", \"transom\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\","
+    }
+  ],
+  "public_surface": {
+    "version": "0.21.0",
+    "len___all__": 120,
+    "duplicates": []
+  },
+  "ok": true
+}

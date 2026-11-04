@@ -123,6 +123,21 @@ from .suboff_appendages import (
     suboff_fin_chord,
     suboff_sail_half_width,
 )
+from .transom import (
+    MAX_TRANSOM_FRACTION,
+    TransomHullParameters,
+    TransomModel,
+    analytic_transom_hydrostatics,
+    build_transom_mesh,
+    estimate_transom_discretisation_error,
+    generate_transom_hull,
+    parent_length,
+    sinc_power_coefficients,
+    transom_area_ratio,
+    transom_fraction_for_area_ratio,
+    truncated_taper_integral,
+    truncated_taper_moment,
+)
 from .validation import (
     Check,
     ValidationReport,
@@ -259,5 +274,19 @@ __all__ = [
     "write_offsets_csv",
     "write_solver_manifest",
     "write_stl",
+    # transom-stern hull family (merged from agent/m2873)
+    "MAX_TRANSOM_FRACTION",
+    "TransomHullParameters",
+    "TransomModel",
+    "analytic_transom_hydrostatics",
+    "build_transom_mesh",
+    "estimate_transom_discretisation_error",
+    "generate_transom_hull",
+    "parent_length",
+    "sinc_power_coefficients",
+    "transom_area_ratio",
+    "transom_fraction_for_area_ratio",
+    "truncated_taper_integral",
+    "truncated_taper_moment",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"
