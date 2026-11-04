@@ -4,6 +4,32 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+### Added
+- **Transom-stern hull family** (`tensorcad/transom.py`): the aft body is truncated at a
+  station `tau` and closed by a planar transom plate, so the parametric hull can carry
+  the stern real displacement vessels have instead of a knife edge. Two parameters —
+  `transom_fraction` (`tau`) and `breadth_exponent` (`p`, the sine-taper exponent) —
+  turn it into a design space: `tau = 0` reproduces the pointed hull exactly (identical
+  faces, LOA-based frame with the transom at `x = 0`), and
+  `transom_fraction_for_area_ratio` inverts `A_t/A_m = sin(pi*tau)^p` in closed form so a
+  loop can dial an immersed transom area directly. Topology is unchanged by the cut:
+  watertight, edge-manifold, `V-E+F = 2`, outward, no zero-area faces for every `tau`
+  tested. See `docs/transom_stern.md`.
+- **Hydrostatic references that survive the truncation.** The incomplete taper integrals
+  `int_tau^1 sin(pi*u)^p du` are evaluated from a `sinc^p` power series (the `p`-singular
+  factor integrates exactly, the even remainder is a series in `s^2`), giving
+  `V`, `A_wp`, `LCB`, `Cb`, `Cp`, `Cwp` and the immersed transom area in closed form.
+  Validated three ways: against `Gamma((1+p)/2)/(sqrt(pi)*Gamma(1+p/2))` at `tau = 0`
+  (2.2e-16), against the `M(0)/J(0) = 1/2` symmetry (1e-14), and against
+  `tanh_sinh_quadrature` for `tau > 0` (1.1e-15). Mesh integration then lands within
+  0.045–0.88 % of the reference depending on grid, monotonically converging, and the
+  transom plate area converges to its analytic section (−0.71 % at `nz = 13`, −0.043 %
+  at `nz = 81`).
+- `examples/transom_stern/run_example.py`: reference ladder, 4 truncations × 4 grids
+  convergence table, design table and three figures.
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
@@ -73,6 +99,7 @@ antisymmetric bias, because the geometry had none.
   identity, here it is two different sums that have to agree.
 - volume error `-0.95 %` at 41x13 and `-0.12 %` at 161x49 for `(0.5, 0.9)`; the analytic
   volume for the symmetric default is still `7.512698221250894 m^3` exactly.
+
 
 ## 0.16.0 — Bonjean curves: a station's immersed area against the waterline
 
