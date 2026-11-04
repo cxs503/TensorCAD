@@ -4,6 +4,23 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Transom-stern family (0.19.0) and parabolic Wigley family (0.20.0) coexist.**  The
+  two releases were developed in parallel on the same base; this release is their
+  semantic union, so both publics are importable from one `tensorcad`:
+  `generate_wigley` / `wigley_analytic_hydrostatics` (exact hydrostatics, `Cb = nm/((n+1)(m+1))`)
+  and `generate_transom_hull` / `analytic_transom_hydrostatics` (truncation at station
+  `tau` with a planar transom plate and incomplete-taper closed forms).  Both references
+  agree with `compute_hydrostatics` on the same quadrature and both mesh families remain
+  watertight and outward.  No published constant of either family moved: `tau = 0` still
+  reproduces the pointed hull bit for bit, and the symmetric Wigley volume is still
+  `2.777777777777778 m^3` (`4/9 x 10 x 1 x 0.625`) on the ITTC proportions.
+  Evidence: `docs/transom_stern.md`, `docs/wigley.md`, `docs/m2873/outputs/transom_stern/`,
+  `docs/wigley/`, `tests/test_transom.py` (96 tests), `tests/test_wigley.py` (30 tests),
+  `tests/test_public_surface.py` (union surface asserted as an exact set).
+
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
@@ -28,6 +45,32 @@ semantic versioning.
   `examples/wigley/run_example.py` (exits non-zero if any of its 10 claims breaks),
   `tests/test_wigley.py` (30 tests).
 
+
+## 0.19.0 — 2026-11-03
+
+### Added
+- **Transom-stern hull family** (`tensorcad/transom.py`): the aft body is truncated at a
+  station `tau` and closed by a planar transom plate, so the parametric hull can carry
+  the stern real displacement vessels have instead of a knife edge. Two parameters —
+  `transom_fraction` (`tau`) and `breadth_exponent` (`p`, the sine-taper exponent) —
+  turn it into a design space: `tau = 0` reproduces the pointed hull exactly (identical
+  faces, LOA-based frame with the transom at `x = 0`), and
+  `transom_fraction_for_area_ratio` inverts `A_t/A_m = sin(pi*tau)^p` in closed form so a
+  loop can dial an immersed transom area directly. Topology is unchanged by the cut:
+  watertight, edge-manifold, `V-E+F = 2`, outward, no zero-area faces for every `tau`
+  tested. See `docs/transom_stern.md`.
+- **Hydrostatic references that survive the truncation.** The incomplete taper integrals
+  `int_tau^1 sin(pi*u)^p du` are evaluated from a `sinc^p` power series (the `p`-singular
+  factor integrates exactly, the even remainder is a series in `s^2`), giving
+  `V`, `A_wp`, `LCB`, `Cb`, `Cp`, `Cwp` and the immersed transom area in closed form.
+  Validated three ways: against `Gamma((1+p)/2)/(sqrt(pi)*Gamma(1+p/2))` at `tau = 0`
+  (2.2e-16), against the `M(0)/J(0) = 1/2` symmetry (1e-14), and against
+  `tanh_sinh_quadrature` for `tau > 0` (1.1e-15). Mesh integration then lands within
+  0.045–0.88 % of the reference depending on grid, monotonically converging, and the
+  transom plate area converges to its analytic section (−0.71 % at `nz = 13`, −0.043 %
+  at `nz = 81`).
+- `examples/transom_stern/run_example.py`: reference ladder, 4 truncations × 4 grids
+  convergence table, design table and three figures.
 
 ## 0.17.0 — 2026-11-03
 

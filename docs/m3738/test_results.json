@@ -1,0 +1,147 @@
+{
+  "provenance": "pytest -q -p no:cacheprovider run per chunk, local CPython 3.11.6 + pytest 9.2.0; excluded: tests/test_cli_neural.py, tests/test_neural_pipeline.py (ModuleNotFoundError: safetensors, pre-existing on main as well)",
+  "chunks": [
+    {
+      "chunk": "basic layer (10 files)",
+      "merged": {
+        "passed": 96,
+        "skipped": 10,
+        "failed": 0
+      },
+      "main": {
+        "passed": 96,
+        "skipped": 10,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "hull + asymmetric",
+      "merged": {
+        "passed": 159,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 159,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "test_hull",
+      "merged": {
+        "passed": 44,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 44,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "mesh/gate/validation/voxel",
+      "merged": {
+        "passed": 97,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 97,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "hydrostatics_analytic",
+      "merged": {
+        "passed": 47,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 47,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "benchmark",
+      "merged": {
+        "passed": 32,
+        "skipped": 1,
+        "failed": 0
+      },
+      "main": {
+        "passed": 32,
+        "skipped": 1,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "stability/suboff/appendages/public",
+      "merged": {
+        "passed": 78,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 78,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "geometry_field",
+      "merged": {
+        "passed": 47,
+        "skipped": 0,
+        "failed": 2
+      },
+      "main": {
+        "passed": 47,
+        "skipped": 0,
+        "failed": 2
+      }
+    },
+    {
+      "chunk": "transom (new in merge)",
+      "merged": {
+        "passed": 96,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 0,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    {
+      "chunk": "wigley (new in merge)",
+      "merged": {
+        "passed": 30,
+        "skipped": 0,
+        "failed": 0
+      },
+      "main": {
+        "passed": 0,
+        "skipped": 0,
+        "failed": 0
+      }
+    }
+  ],
+  "totals": {
+    "merged": {
+      "passed": 726,
+      "skipped": 11,
+      "failed": 2
+    },
+    "main": {
+      "passed": 600,
+      "skipped": 11,
+      "failed": 2
+    }
+  }
+}

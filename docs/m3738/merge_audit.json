@@ -1,0 +1,221 @@
+{
+  "ours": "origin/main",
+  "theirs": "origin/agent/m2873",
+  "declared_conflicts": [
+    "CHANGELOG.md",
+    "pyproject.toml",
+    "tensorcad/__init__.py",
+    "tests/test_public_surface.py"
+  ],
+  "paths": {
+    "only_in_main": [
+      "docs/asymmetric_hull.md",
+      "docs/asymmetric_hull/plot.png",
+      "docs/asymmetric_hull/report.md",
+      "docs/asymmetric_hull/results.json",
+      "docs/wigley.md",
+      "docs/wigley/plot.png",
+      "docs/wigley/report.md",
+      "docs/wigley/results.json",
+      "docs/wigley/wigley.json",
+      "docs/wigley/wigley.obj",
+      "docs/wigley/wigley.stl",
+      "docs/wigley/wigley_offsets.csv",
+      "examples/asymmetric_hull/run_example.py",
+      "examples/wigley/publish_report.py",
+      "examples/wigley/run_example.py",
+      "tensorcad/wigley.py",
+      "tests/test_asymmetric_hull.py",
+      "tests/test_wigley.py"
+    ],
+    "only_in_m2873": [
+      "docs/m2873/outputs/transom_stern/convergence.csv",
+      "docs/m2873/outputs/transom_stern/convergence.png",
+      "docs/m2873/outputs/transom_stern/design_space.png",
+      "docs/m2873/outputs/transom_stern/design_table.csv",
+      "docs/m2873/outputs/transom_stern/geometry.png",
+      "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+      "docs/transom_stern.md",
+      "examples/transom_stern/run_example.py",
+      "tensorcad/transom.py",
+      "tests/test_transom.py",
+      "tools/report_m2873.py"
+    ],
+    "shared": 181,
+    "merged_total": 210
+  },
+  "missing_from_merged": [],
+  "differ_between_sides": [
+    "CHANGELOG.md",
+    "README.md",
+    "backlog_tensorcad_section.md",
+    "docs/asymmetric_hull.md",
+    "docs/asymmetric_hull/plot.png",
+    "docs/asymmetric_hull/report.md",
+    "docs/asymmetric_hull/results.json",
+    "docs/fairness.md",
+    "docs/m2873/outputs/transom_stern/convergence.csv",
+    "docs/m2873/outputs/transom_stern/convergence.png",
+    "docs/m2873/outputs/transom_stern/design_space.png",
+    "docs/m2873/outputs/transom_stern/design_table.csv",
+    "docs/m2873/outputs/transom_stern/geometry.png",
+    "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+    "docs/transom_stern.md",
+    "docs/wigley.md",
+    "docs/wigley/plot.png",
+    "docs/wigley/report.md",
+    "docs/wigley/results.json",
+    "docs/wigley/wigley.json",
+    "docs/wigley/wigley.obj",
+    "docs/wigley/wigley.stl",
+    "docs/wigley/wigley_offsets.csv",
+    "examples/asymmetric_hull/run_example.py",
+    "examples/transom_stern/run_example.py",
+    "examples/wigley/publish_report.py",
+    "examples/wigley/run_example.py",
+    "pyproject.toml",
+    "tensorcad/__init__.py",
+    "tensorcad/cli.py",
+    "tensorcad/hull.py",
+    "tensorcad/hydrostatics_analytic.py",
+    "tensorcad/transom.py",
+    "tensorcad/wigley.py",
+    "tests/test_asymmetric_hull.py",
+    "tests/test_cli.py",
+    "tests/test_curvature.py",
+    "tests/test_hull.py",
+    "tests/test_public_surface.py",
+    "tests/test_transom.py",
+    "tests/test_wigley.py",
+    "tools/report_m2873.py"
+  ],
+  "conflicts": [
+    {
+      "path": "CHANGELOG.md",
+      "markers_left": false,
+      "lost": {},
+      "lines_added_by_resolution": 14,
+      "added_sample": [
+        "## 0.21.0 \u2014 2026-11-04",
+        "- **Transom-stern family (0.19.0) and parabolic Wigley family (0.20.0) coexist.**  The",
+        "Evidence: `docs/transom_stern.md`, `docs/wigley.md`, `docs/m2873/outputs/transom_stern/`,",
+        "`2.777777777777778 m^3` (`4/9 x 10 x 1 x 0.625`) on the ITTC proportions.",
+        "`docs/wigley/`, `tests/test_transom.py` (96 tests), `tests/test_wigley.py` (30 tests),",
+        "`generate_wigley` / `wigley_analytic_hydrostatics` (exact hydrostatics, `Cb = nm/((n+1)(m+1))`)"
+      ]
+    },
+    {
+      "path": "pyproject.toml",
+      "markers_left": false,
+      "lost": {},
+      "superseded": {
+        "origin/main": [
+          "version = \"0.20.0\""
+        ],
+        "origin/agent/m2873": [
+          "version = \"0.19.0\""
+        ]
+      },
+      "lines_added_by_resolution": 1,
+      "added_sample": [
+        "version = \"0.21.0\""
+      ]
+    },
+    {
+      "path": "tensorcad/__init__.py",
+      "markers_left": false,
+      "lost": {},
+      "superseded": {
+        "origin/main": [
+          "__version__ = \"0.20.0\""
+        ],
+        "origin/agent/m2873": [
+          "__version__ = \"0.19.0\""
+        ]
+      },
+      "lines_added_by_resolution": 1,
+      "added_sample": [
+        "__version__ = \"0.21.0\""
+      ]
+    },
+    {
+      "path": "tests/test_public_surface.py",
+      "markers_left": false,
+      "lost": {},
+      "superseded": {
+        "origin/main": [
+          "assert tensorcad.__version__ == \"0.20.0\""
+        ],
+        "origin/agent/m2873": [
+          "assert tensorcad.__version__ == \"0.19.0\""
+        ]
+      },
+      "reflowed": {
+        "origin/main": [
+          "\"wigley\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\",",
+          "\"adapters.fem\", \"benchmark\"):"
+        ],
+        "origin/agent/m2873": [
+          "\"transom\","
+        ]
+      },
+      "lines_added_by_resolution": 3,
+      "added_sample": [
+        "\"wigley\", \"transom\",",
+        "# wigley family (0.20.0)",
+        "assert tensorcad.__version__ == \"0.21.0\""
+      ]
+    }
+  ],
+  "unchanged_between_sides_but_audited_for_presence": [
+    "README.md",
+    "backlog_tensorcad_section.md",
+    "docs/asymmetric_hull.md",
+    "docs/asymmetric_hull/plot.png",
+    "docs/asymmetric_hull/report.md",
+    "docs/asymmetric_hull/results.json",
+    "docs/fairness.md",
+    "docs/m2873/outputs/transom_stern/convergence.csv",
+    "docs/m2873/outputs/transom_stern/convergence.png",
+    "docs/m2873/outputs/transom_stern/design_space.png",
+    "docs/m2873/outputs/transom_stern/design_table.csv",
+    "docs/m2873/outputs/transom_stern/geometry.png",
+    "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+    "docs/transom_stern.md",
+    "docs/wigley.md",
+    "docs/wigley/plot.png",
+    "docs/wigley/report.md",
+    "docs/wigley/results.json",
+    "docs/wigley/wigley.json",
+    "docs/wigley/wigley.obj",
+    "docs/wigley/wigley.stl",
+    "docs/wigley/wigley_offsets.csv",
+    "examples/asymmetric_hull/run_example.py",
+    "examples/transom_stern/run_example.py",
+    "examples/wigley/publish_report.py",
+    "examples/wigley/run_example.py",
+    "tensorcad/cli.py",
+    "tensorcad/hull.py",
+    "tensorcad/hydrostatics_analytic.py",
+    "tensorcad/transom.py",
+    "tensorcad/wigley.py",
+    "tests/test_asymmetric_hull.py",
+    "tests/test_cli.py",
+    "tests/test_curvature.py",
+    "tests/test_hull.py",
+    "tests/test_transom.py",
+    "tests/test_wigley.py",
+    "tools/report_m2873.py"
+  ],
+  "api": {
+    "main": 107,
+    "m2873": 110,
+    "merged": 120,
+    "union_missing_from_merged": [],
+    "merged_outside_union": [],
+    "version": "0.21.0",
+    "both_families_importable": true
+  },
+  "problems": [],
+  "ok": true
+}
