@@ -4,6 +4,46 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.21.0 — 2026-11-04
+
+- **Large-angle stability** (`tensorcad/righting_arm.py`): the righting-arm curve `GZ(phi)`
+  that 0.14 left open. The body is heeled, the waterline is *solved* by bisection so the
+  displaced volume stays at the loading displacement, and the arm is
+  `GZ = y_B - y_G` from the centroid of the heeled displacement. `righting_arms`,
+  `righting_arm`, `immersed_volume`, `heeled_mesh`, `zero_crossings`,
+  `wall_sided_righting_arm`, `wall_sided_validity`, `wall_sided_vanishing_angle`,
+  `box_reference_arm` and the `ImmersedVolume` / `RightingArm` / `RightingArmCurve` /
+  `WallSidedValidity` records are exported.
+- **No waterplane cap, and therefore no degeneracy**: every immersed moment is the flux of a
+  z-directed field carrying a factor `(z - w)` -- `(0,0,z-w)` for the volume,
+  `(0,0,x(z-w))` and `(0,0,y(z-w))` for the horizontal first moments,
+  `(0,0,(z-w)^2/2)` for the vertical one -- so the cap's flux is identically zero. A face
+  lying exactly in the clipping plane, or a plane running exactly along a mesh edge,
+  contributes exactly zero instead of being double counted; the alternative
+  (`F = (x(z-w), 0, 0)`) has divergence `z - w`, and its cap flux does not vanish.
+- **Exact per clipped polygon**: a clip of a triangle is a convex polygon of at most four
+  vertices, fan-triangulated and integrated by the edge-midpoint rule, which is exact for
+  the degree-two integrands above.
+- **Verification**: the barge reproduces the wall-sided closed form to `8.8e-15 m` inside its
+  regime (`45 deg`, bilge emergence) and matches an independent 2D shoelace centroid to
+  `2.9e-14 m` at every heel up to `90 deg`; the closed form is `19.4 %` off at `60 deg`,
+  which is asserted rather than left to be discovered. `GZ(0) = 0` and oddness to `2.2e-16`,
+  the `KG` shift identity to `1.1e-16`, the resting heel of an unstable body to
+  `1.8e-3 deg`, the area under the arm to `1.5e-6 m rad`, and the displacement held to
+  `1e-13` relative at every angle. On a hull with topsides, the slope at zero heel
+  reproduces `KB + I_T/V - KG` from the *waterplane* integrator to `1.9e-5` relative, and
+  the arm converges at order `2.04` (the default `41x13` grid is `+3.05 %` at `20 deg`).
+  Evidence: `docs/righting_arm.md`, `docs/righting_arm/{results.json,report.md,gz_curves.png,deviation.png}`,
+  `examples/righting_arm/run_example.py` (exits non-zero if any of its 14 claims breaks),
+  `tests/test_righting_arm.py` (39 tests).
+- **A ship-form finding, documented rather than papered over**: `generate_hull` and
+  `generate_wigley` cap the surface at the design waterline, which leaves no freeboard. The
+  displacement is then the whole body volume, no heeled waterline can hold it, and the arm
+  of a fully submerged body is identically zero. `righting_arms` raises with that
+  explanation (`RightingArmError`) instead of returning zeros, and the documented way to
+  get a curve is to generate the deeper body and float it lower
+  (`HullParameters(draft=2 t)` with `waterline_z = -t`).
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

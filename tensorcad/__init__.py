@@ -101,6 +101,22 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting_arm import (
+    ImmersedVolume,
+    RightingArm,
+    RightingArmCurve,
+    RightingArmError,
+    WallSidedValidity,
+    box_reference_arm,
+    heeled_mesh,
+    immersed_volume,
+    righting_arm,
+    righting_arms,
+    wall_sided_righting_arm,
+    wall_sided_validity,
+    wall_sided_vanishing_angle,
+    zero_crossings,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -178,6 +194,20 @@ __all__ = [
     "HullParameters",
     "Hydrostatics",
     "InitialStability",
+    "ImmersedVolume",
+    "RightingArm",
+    "RightingArmCurve",
+    "RightingArmError",
+    "WallSidedValidity",
+    "box_reference_arm",
+    "heeled_mesh",
+    "immersed_volume",
+    "righting_arm",
+    "righting_arms",
+    "wall_sided_righting_arm",
+    "wall_sided_validity",
+    "wall_sided_vanishing_angle",
+    "zero_crossings",
     "Mesh",
     "MeshBuilder",
     "MeshConditioningError",
@@ -260,4 +290,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"

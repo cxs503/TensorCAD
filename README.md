@@ -107,7 +107,44 @@ and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated i
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+large-angle `GZ` (that is [0.21](#righting-arms-at-large-heel-021)), trim equilibrium,
+damage stability, class rules.
+
+## Righting arms at large heel (0.21)
+
+`GM` is the slope of the righting-arm curve at zero heel, not the curve. `tensorcad.righting_arm`
+integrates the other half: the body is heeled, the waterline is *solved* so the displaced
+volume stays at the loading displacement, and `GZ(phi) = y_B - y_G` is read off the
+centroid of the heeled displacement. The immersed moments come from the clipped surface
+alone — the flux of `F = (0, 0, z - w)`, `(0, 0, x(z - w))`, `(0, 0, y(z - w))` and
+`(0, 0, (z - w)^2 / 2)` vanishes on the waterplane, so no cap has to be triangulated and a
+face lying exactly in the clipping plane contributes exactly zero instead of doubling it.
+
+```python
+from tensorcad import HullParameters, generate_hull, righting_arms
+
+model = generate_hull(HullParameters(length=10.0, beam=2.0, draft=1.6))  # deeper body
+curve = righting_arms(model.mesh, kg=0.30, waterline_z=-0.9,                # 0.7 m immersed
+                      heel_angles=(0, 10, 20, 30, 45, 60, 90))
+print(curve.max_gz, curve.angle_of_max_gz, curve.area(60.0))
+```
+
+| reference | what it pins | worst error measured |
+|---|---|---|
+| wall-sided barge `10 × 4 × 6 m`, `T = 2 m` | the closed form `GZ = sin(phi)(GM + BM tan(phi)^2/2)`, exact while the waterline spans the full beam | `8.8e-15 m` inside `45 deg`, and `19.4 %` off at `60 deg` where the formula has no claim |
+| independent 2D section solve | the same barge past that limit, through a shoelace centroid instead of a surface flux | `2.9e-14 m` at every heel, `0` to `90 deg` |
+| `KG` identity `GZ(phi; KG + d) = GZ(phi; KG) - d sin(phi)` | the loading side of the integration, on any body | `1.1e-16 m` (barge), `1.7e-16 m` (hull) |
+| unstable barge, `GM < 0` | the resting heel `tan(phi) = sqrt(-2 GM / BM)` | `1.8e-3 deg` |
+| area under the arm | the closed-form integral `GM(1 - cos phi) + BM/2 (cos phi + sec phi - 2)` | `1.5e-6 m rad` |
+| hull slope at zero heel | `KB + I_T/V - KG`, with `I_T` from the waterplane integrator (a different integration) | `1.9e-5` relative |
+| hull refinement `41×13 → 161×41` | the order of the arm's convergence, measured | order `2.04`; the default grid is `+3.05 %` at `20 deg` |
+
+One geometric trap is worth stating in the README rather than only in the docs:
+`generate_hull` and `generate_wigley` cap the surface *at the design waterline*, so the
+shipped family has **no freeboard**, its displacement is its whole volume, and no heeled
+waterline can hold it. `righting_arms` raises with that explanation instead of returning a
+row of zeros; generate the deeper body and float it lower to get a curve. Details, tables
+and the two figures: [docs/righting_arm.md](docs/righting_arm.md).
 
 ## Continuous geometry core (0.4)
 

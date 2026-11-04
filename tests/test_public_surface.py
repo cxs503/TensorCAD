@@ -10,6 +10,20 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "ImmersedVolume",
+    "RightingArm",
+    "RightingArmCurve",
+    "RightingArmError",
+    "WallSidedValidity",
+    "box_reference_arm",
+    "heeled_mesh",
+    "immersed_volume",
+    "righting_arm",
+    "righting_arms",
+    "wall_sided_righting_arm",
+    "wall_sided_validity",
+    "wall_sided_vanishing_angle",
+    "zero_crossings",
     "WIGLEY_REFERENCE_CASE", "WigleyAnalytic", "WigleyModel", "WigleyParameters",
     "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
@@ -49,7 +63,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.20.0"
+    assert tensorcad.__version__ == "0.21.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
