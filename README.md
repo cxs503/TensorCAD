@@ -109,6 +109,39 @@ quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agre
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
 large-angle `GZ`, trim equilibrium, damage stability, class rules.
 
+## Righting arms at finite heel (0.21)
+
+`initial_stability` gives the slope at zero heel; `tensorcad.heel` gives the curve. A body of
+displacement ∇₀ is heeled by `φ` at **constant displacement**: the water surface is the plane
+`u·r = c` with `u = (0, −sin φ, cos φ)`, `c` is solved so the submerged volume stays ∇₀, and
+`GZ = y_B cos φ + (z_B − z_G) sin φ`. Each triangle is clipped against the half-space and split
+into signed tetrahedra with the apex on the water surface, so the waterplane lid contributes
+exactly zero and the result is exact for the polyhedron — a non-convex section or an immersed
+deck needs no special case.
+
+```python
+from tensorcad import gz_curve
+
+curve = gz_curve(mesh, kg=2.2, angles_deg=range(0, 95, 5))   # KG above the keel
+curve.gz                      # righting arms, constant displacement
+curve.max_gz                  # (25.0, 0.147019...) m
+curve.vanishing_angle_deg     # 45.9517... deg, interpolated between samples
+```
+
+| reference | what it proves | worst error measured |
+|---|---|---|
+| rectangular barge vs the wall-sided formula, below its deck edge | the heeled integration is exact, not converged | `1.0e-15` relative (and the solved waterline stays within `9.5e-16 m` of `z = 0`) |
+| elliptical prism, same formula with `I_T = πab³/4` | `BM` comes from the section, not a rectangle | `1e-11 m` |
+| sphere, `GZ = sin φ (z_C − z_G)` at any angle | a curved, deck-free body at large heel | `0.85 mm`, falling `3.8×`/`4.0×` per facet halving (it is the mesh, at second order) |
+
+The wall-sided formula is used as a reference **only where it is one**: on a 1 m-freeboard
+barge it over-predicts by `2.42 m` at `60°`, while the measured curve turns over at
+`GZ_max = 0.147 m / 25°` and vanishes at `45.95°`. A hull mesh capped at the design waterline
+has zero freeboard and raises `HeelError` rather than returning a number. Free-surface
+corrections, damage stability, wind heeling moments and class rules remain out of scope;
+[docs/gz_curve.md](docs/gz_curve.md) has the tables, the figures and the one trap
+(`initial_stability`'s `GM` is not this module's `GM` for a body with freeboard).
+
 ## Continuous geometry core (0.4)
 
 Every representation now answers the same questions. `tensorcad.geometry_field`

@@ -81,6 +81,18 @@ from .hull import (
     resolve_resolution,
     validate_hull,
 )
+from .heel import (
+    DEFAULT_ANGLES_DEG,
+    GZCurve,
+    HeeledSection,
+    HeelError,
+    SubmergedBody,
+    gz_curve,
+    heeled_displacement,
+    righting_arm,
+    wall_sided_gz,
+    waterplane_normal,
+)
 from .hydrostatics import Hydrostatics, compute_hydrostatics
 from .hydrostatics_analytic import (
     AnalyticHydrostatics,
@@ -153,7 +165,9 @@ from .wigley import (
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
+    "DEFAULT_ANGLES_DEG",
     "DESIGN_SCHEMA",
+    "GZCurve",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
     "WIGLEY_REFERENCE_CASE",
@@ -174,6 +188,8 @@ __all__ = [
     "FairnessReport",
     "FieldError",
     "GeometryField",
+    "HeeledSection",
+    "HeelError",
     "HullModel",
     "HullParameters",
     "Hydrostatics",
@@ -191,6 +207,7 @@ __all__ = [
     "SampledField",
     "SectionProperties",
     "SphereField",
+    "SubmergedBody",
     "StabilityError",
     "SuboffAppendagesField",
     "SuboffFinsField",
@@ -221,6 +238,9 @@ __all__ = [
     "export_wigley",
     "gate_mesh",
     "generate_hull",
+    "gz_curve",
+    "heeled_displacement",
+    "righting_arm",
     "generate_wigley",
     "initial_stability",
     "inspect_geometry",
@@ -245,6 +265,8 @@ __all__ = [
     "to_mesh",
     "to_voxel_grid",
     "validate_hull",
+    "wall_sided_gz",
+    "waterplane_normal",
     "vertex_mean_curvature",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
@@ -260,4 +282,4 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.20.0"
+__version__ = "0.21.0"
