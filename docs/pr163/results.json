@@ -1,0 +1,40 @@
+{
+  "schema": "tensorcad.pr163.round2/1",
+  "coverage": {
+    "gate_percent": 90.0,
+    "package_total_percent": 93.43,
+    "trim_module_percent": 92,
+    "gate_satisfied": true,
+    "uncovered_modules": {
+      "tensorcad/adapters/ocp.py": 32,
+      "tensorcad/bonjean.py": 88,
+      "tensorcad/cli.py": 82
+    }
+  },
+  "lint": {
+    "before_total": 11,
+    "before_by_rule": {
+      "W292": 4,
+      "RUF100": 2,
+      "RUF059": 1,
+      "UP031": 1,
+      "F401": 1,
+      "B905": 1,
+      "F841": 1
+    },
+    "after_total": 0
+  },
+  "type_check": {
+    "mypy_errors": 0,
+    "source_files": 35
+  },
+  "pytest": {
+    "passed": 955,
+    "skipped": 10,
+    "failed": 0
+  },
+  "ci_steps": {
+    "pass": 18,
+    "fail": 0
+  }
+}
