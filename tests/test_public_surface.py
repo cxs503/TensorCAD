@@ -34,6 +34,7 @@ EXPECTED_API = {
     "CurvatureError", "CurvatureSample", "FairnessReport",
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
+    "GZCurve", "RightingArm", "SubmergedMoments", "gz_curve", "righting_arm", "submerged_moments",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
