@@ -1,0 +1,432 @@
+{
+  "tests": {
+    "merged_totals": {
+      "passed": 844,
+      "failed": 2,
+      "skipped": 11
+    },
+    "main_totals": {
+      "passed": 818,
+      "failed": 2,
+      "skipped": 11
+    },
+    "regressions": [],
+    "rows": [
+      {
+        "file": "test_adapters_fem.py",
+        "merged_passed": 20,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 20,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_adapters_ocp.py",
+        "merged_passed": 1,
+        "merged_failed": 0,
+        "merged_skipped": 10,
+        "main_passed": 1,
+        "main_failed": 0,
+        "main_skipped": 10,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_analytic_hydrostatics.py",
+        "merged_passed": 21,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 21,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_artifact_export.py",
+        "merged_passed": 13,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 13,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_asymmetric_hull.py",
+        "merged_passed": 35,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 35,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_benchmark.py",
+        "merged_passed": 32,
+        "merged_failed": 0,
+        "merged_skipped": 1,
+        "main_passed": 32,
+        "main_failed": 0,
+        "main_skipped": 1,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_bonjean.py",
+        "merged_passed": 39,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 39,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_cli.py",
+        "merged_passed": 9,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 9,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_curvature.py",
+        "merged_passed": 23,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 23,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_design.py",
+        "merged_passed": 19,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 19,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_export.py",
+        "merged_passed": 9,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 9,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_extract.py",
+        "merged_passed": 12,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 12,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_gate.py",
+        "merged_passed": 12,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 12,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_geometry_field.py",
+        "merged_passed": 47,
+        "merged_failed": 2,
+        "merged_skipped": 0,
+        "main_passed": 47,
+        "main_failed": 2,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_gz.py",
+        "merged_passed": 26,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 0,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 26,
+        "verdict": "new (branch only)"
+      },
+      {
+        "file": "test_hull.py",
+        "merged_passed": 44,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 44,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_hydrostatics.py",
+        "merged_passed": 8,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 8,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_hydrostatics_analytic.py",
+        "merged_passed": 47,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 47,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_hydrostatics_inertia.py",
+        "merged_passed": 16,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 16,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_mesh.py",
+        "merged_passed": 21,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 21,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_mesh_conditioning.py",
+        "merged_passed": 22,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 22,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_mirror_contract.py",
+        "merged_passed": 20,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 20,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_neural_format_contract.py",
+        "merged_passed": 33,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 33,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_neural_geometry.py",
+        "merged_passed": 13,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 13,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_neural_store.py",
+        "merged_passed": 30,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 30,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_parameters.py",
+        "merged_passed": 28,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 28,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_public_surface.py",
+        "merged_passed": 6,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 6,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_resolution.py",
+        "merged_passed": 6,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 6,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_stability.py",
+        "merged_passed": 19,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 19,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_suboff.py",
+        "merged_passed": 19,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 19,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_suboff_appendages.py",
+        "merged_passed": 34,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 34,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_transom.py",
+        "merged_passed": 96,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 96,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_validation.py",
+        "merged_passed": 14,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 14,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_voxel.py",
+        "merged_passed": 20,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 20,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      },
+      {
+        "file": "test_wigley.py",
+        "merged_passed": 30,
+        "merged_failed": 0,
+        "merged_skipped": 0,
+        "main_passed": 30,
+        "main_failed": 0,
+        "main_skipped": 0,
+        "delta_passed": 0,
+        "verdict": "no-regression"
+      }
+    ]
+  },
+  "content_audit": {
+    "counts": {
+      "paths_considered": 120,
+      "touched_by_both": 86,
+      "lost": 0
+    },
+    "flags": [
+      {
+        "path": "CHANGELOG.md",
+        "status": "TRANSFORMED",
+        "note": "1 line(s) deliberately rewrapped (0.21.0 heading)"
+      },
+      {
+        "path": "tests/test_public_surface.py",
+        "status": "SUPERSEDED",
+        "note": "2 unique line(s) absent (superseded by the other side's rewrite)"
+      }
+    ],
+    "merged_commit": "6153c6ad3187c4327dfbc05e077b499fb82fe875"
+  },
+  "gz_vs_closed_form": {
+    "box_worst_abs_error_m": 6.938893903907228e-17,
+    "box_limit_deg": 38.659808254090095,
+    "box_worst_abs_error_beyond_m": 1.252249084368609,
+    "log_worst_abs_error_m": 1.1102230246251565e-16,
+    "log_heel_points": 33,
+    "gm_from_initial_stability_m": 0.4216229964990912,
+    "gm_from_curve_slope_m": 0.4216229957516102,
+    "gm_relative_error": 1.7728657407661466e-09
+  }
+}

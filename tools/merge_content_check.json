@@ -1,0 +1,1151 @@
+{
+  "base": "ca0dde3",
+  "main": "2ff80b2",
+  "branch": "164fc63",
+  "merged_worktree_head": "6153c6ad3187c4327dfbc05e077b499fb82fe875",
+  "counts": {
+    "paths_considered": 120,
+    "touched_by_both": 86,
+    "lost": 0
+  },
+  "touched_by_both": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "backlog_tensorcad_section.md",
+    "docs/PROJECT_CHARTER.md",
+    "docs/analysis/2026-10-31-tensorcad-health-audit.md",
+    "docs/analysis/2026-11-02-neural-format-verification.md",
+    "docs/analytic_hydrostatics/report.md",
+    "docs/analytic_hydrostatics/results.json",
+    "docs/benchmarks/full/plot.svg",
+    "docs/benchmarks/full/report.md",
+    "docs/benchmarks/full/results.json",
+    "docs/benchmarks/quick/plot.svg",
+    "docs/benchmarks/quick/report.md",
+    "docs/benchmarks/quick/results.json",
+    "docs/bonjean.md",
+    "docs/bonjean/plot.png",
+    "docs/bonjean/results.json",
+    "docs/fairness.md",
+    "docs/fairness/plot.png",
+    "docs/fairness/report.md",
+    "docs/fairness/results.json",
+    "docs/hull_analytic_reference.md",
+    "docs/hydrostatics_verification.md",
+    "docs/mesh_export_gate.md",
+    "docs/representation_benchmark.md",
+    "docs/stability.md",
+    "docs/stability/convergence.png",
+    "docs/stability/gm_ladder.png",
+    "docs/stability/report.md",
+    "docs/stability/results.json",
+    "docs/stability/sections.png",
+    "docs/test_baseline_m2093.md",
+    "docs/voxel_export.md",
+    "docs/wigley.md",
+    "docs/wigley/plot.png",
+    "docs/wigley/report.md",
+    "docs/wigley/results.json",
+    "docs/wigley/wigley.json",
+    "docs/wigley/wigley.obj",
+    "docs/wigley/wigley.stl",
+    "docs/wigley/wigley_offsets.csv",
+    "examples/analytic_hydrostatics/run_analytic_check.py",
+    "examples/bonjean/run_example.py",
+    "examples/fairness/run_example.py",
+    "examples/geometry_core/run_voxel_export.py",
+    "examples/hull_stl_export/build_report_figures.py",
+    "examples/hull_stl_export/run_example.py",
+    "examples/hydrostatics_verification/run_verification.py",
+    "examples/neural_format_audit/run_audit.py",
+    "examples/stability/run_example.py",
+    "examples/wigley/publish_report.py",
+    "examples/wigley/run_example.py",
+    "proposals/tensorcad-sdf-voxel-export.txt",
+    "pyproject.toml",
+    "tensorcad/__init__.py",
+    "tensorcad/benchmark.py",
+    "tensorcad/bonjean.py",
+    "tensorcad/cli.py",
+    "tensorcad/cli_neural.py",
+    "tensorcad/curvature.py",
+    "tensorcad/export.py",
+    "tensorcad/gate.py",
+    "tensorcad/geometry_field.py",
+    "tensorcad/hull.py",
+    "tensorcad/hydrostatics_analytic.py",
+    "tensorcad/neural_geometry.py",
+    "tensorcad/stability.py",
+    "tensorcad/suboff_appendages.py",
+    "tensorcad/voxel.py",
+    "tensorcad/wigley.py",
+    "tests/test_analytic_hydrostatics.py",
+    "tests/test_artifact_export.py",
+    "tests/test_benchmark.py",
+    "tests/test_bonjean.py",
+    "tests/test_curvature.py",
+    "tests/test_gate.py",
+    "tests/test_hydrostatics_analytic.py",
+    "tests/test_mirror_contract.py",
+    "tests/test_neural_format_contract.py",
+    "tests/test_public_surface.py",
+    "tests/test_resolution.py",
+    "tests/test_stability.py",
+    "tests/test_suboff_appendages.py",
+    "tests/test_voxel.py",
+    "tests/test_wigley.py"
+  ],
+  "rows": [
+    {
+      "path": "AGENTS.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "TRANSFORMED",
+      "note": "1 line(s) deliberately rewrapped (0.21.0 heading)",
+      "verdict": "three-way blend"
+    },
+    {
+      "path": "README.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 2 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "artifacts/m3768/merge_verification.json",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "artifacts/m3768/merge_verification.png",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "artifacts/m3768/report_body.md",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "artifacts/m3768/report_payload.json",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "backlog_tensorcad_section.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/PROJECT_CHARTER.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/analysis/2026-10-31-tensorcad-health-audit.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/analysis/2026-11-02-neural-format-verification.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/analytic_hydrostatics/report.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/analytic_hydrostatics/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/asymmetric_hull.md",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/asymmetric_hull/plot.png",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/asymmetric_hull/report.md",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/asymmetric_hull/results.json",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/benchmarks/full/plot.svg",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/benchmarks/full/report.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/benchmarks/full/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/benchmarks/quick/plot.svg",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/benchmarks/quick/report.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/benchmarks/quick/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/bonjean.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/bonjean/plot.png",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/bonjean/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/fairness.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/fairness/plot.png",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/fairness/report.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/fairness/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/gz.md",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "docs/hull_analytic_reference.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/hydrostatics_verification.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 1 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/m2873/outputs/transom_stern/convergence.csv",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/m2873/outputs/transom_stern/convergence.png",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/m2873/outputs/transom_stern/design_space.png",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/m2873/outputs/transom_stern/design_table.csv",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/m2873/outputs/transom_stern/geometry.png",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/m3768_pr39_merge_cure.md",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/mesh_export_gate.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/representation_benchmark.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/stability.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/stability/convergence.png",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/stability/gm_ladder.png",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/stability/report.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/stability/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/stability/sections.png",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/test_baseline_m2093.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/transom_stern.md",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "docs/voxel_export.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/plot.png",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/report.md",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/results.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/wigley.json",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/wigley.obj",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/wigley.stl",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "docs/wigley/wigley_offsets.csv",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/analytic_hydrostatics/run_analytic_check.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/asymmetric_hull/run_example.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "examples/bonjean/run_example.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/fairness/run_example.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/geometry_core/run_voxel_export.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/gz/outputs/plot.png",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "examples/gz/outputs/report.md",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "examples/gz/outputs/results.json",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "examples/gz/run_example.py",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "examples/hull_stl_export/build_report_figures.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/hull_stl_export/run_example.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/hydrostatics_verification/run_verification.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/neural_format_audit/run_audit.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/stability/run_example.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/transom_stern/run_example.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "examples/wigley/publish_report.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "examples/wigley/run_example.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "proposals/tensorcad-sdf-voxel-export.txt",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "pyproject.toml",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/__init__.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "every unique line of both sides survives",
+      "verdict": "three-way blend"
+    },
+    {
+      "path": "tensorcad/benchmark.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/bonjean.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/cli.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 1 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/cli_neural.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/curvature.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/export.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/gate.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/geometry_field.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/gz.py",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "tensorcad/hull.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 55 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/hydrostatics.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tensorcad/hydrostatics_analytic.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 1 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/neural_geometry.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/stability.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/suboff_appendages.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/transom.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tensorcad/voxel.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tensorcad/wigley.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_analytic_hydrostatics.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_artifact_export.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_asymmetric_hull.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tests/test_benchmark.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_bonjean.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_cli.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tests/test_curvature.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 2 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_gate.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_gz.py",
+      "main_side": false,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only branch side touched it; merge identical to branch: True"
+    },
+    {
+      "path": "tests/test_hull.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tests/test_hydrostatics_analytic.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_hydrostatics_inertia.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tests/test_mirror_contract.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_neural_format_contract.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_public_surface.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "SUPERSEDED",
+      "note": "2 unique line(s) absent (superseded by the other side's rewrite)",
+      "verdict": "three-way blend",
+      "superseded": [
+        "    \"wigley_reference_parameters\",",
+        "                   \"wigley\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\","
+      ]
+    },
+    {
+      "path": "tests/test_resolution.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_stability.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_suboff_appendages.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_transom.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tests/test_voxel.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tests/test_wigley.py",
+      "main_side": true,
+      "branch_side": true,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "merge == main side; the other side has 0 line(s) it does not",
+      "verdict": "identical to main"
+    },
+    {
+      "path": "tools/report_m2873.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    },
+    {
+      "path": "tools/verify_merge_m2925.py",
+      "main_side": true,
+      "branch_side": false,
+      "present_in_merge": true,
+      "status": "OK",
+      "note": "only main side touched it; merge identical to main: True"
+    }
+  ]
+}

@@ -930,3 +930,4 @@ Export becomes a verified step instead of a dump.
 - The STL header no longer claims every STL came from a neural object.
 ### Added — waterplane second moments, and the transom-stern hull family
 ### Added — large-angle stability: the righting-arm curve, and two exact benchmarks
+### Large-angle stability: the righting-arm curve, and two exact benchmarks
