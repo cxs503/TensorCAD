@@ -1,86 +1,92 @@
-# TensorCAD 审计任务完成总结
+# Mission m3774 Completion Summary
 
-## 任务完成状态
+## Task
+Cure PR #40 for TensorCAD: resolve merge conflicts between agent/m3169 and origin/main.
 
-✅ **所有交付物已完成并验证**
+## What Was Done
 
-## 完成的工作
+### 1. Work Tree Setup
+- Created work tree at `/root/tp-agent/work/m3774`
+- Fetched both `main` and `agent/m3169` branches
+- Identified merge-base: `df31744` (PR #38 merge)
 
-### 1. 环境与测试基线
-- 测试套件：262/262 通过（23.43s）
-- 零依赖验证：✅ 通过（import tensorcad 在 torch/numpy 被拦截时仍可导入）
-- README 声明修正：194+213 为 0.3.x 旧数字，0.4.0 实际为 262
+### 2. Conflict Identification
+Attempted merge of `origin/main` into `agent/m3169` branch. Two files conflicted:
+- `CHANGELOG.md` (lines 9-62)
+- `tests/test_public_surface.py` (lines 67-70)
 
-### 2. 数字直读验证（零手抄）
+### 3. Semantic Union Resolution
 
-#### 参数化船体两档收敛
-- 默认分辨率 (41×13)：7.446554 m³ / 解析 7.512698 m³ = **-0.880%**
-- 细分辨率 (161×41)：7.502488 m³ / 解析 7.512698 m³ = **-0.136%**
-- 数据来源：`/tmp/tcad_audit/hull_default.log`
+#### CHANGELOG.md
+Both branches added features to version 0.21.0:
+- **agent/m3169**: Righting-arm curve GZ(phi) at constant displacement
+- **origin/main**: Transom-stern hull family
 
-#### .ngo 事务管线三连
-- dent peak：**0.05269 m** / 目标 0.06 m
-- 抽取网格：**watertight** + **V-E+F=2**
-- 数据来源：`/tmp/tcad_audit/ngo_pipeline.log`
+Resolution: Kept both feature descriptions under a single `### Added` heading, preserving all technical details from both sides.
 
-### 3. README 能力-声明对照
-- ✅ 所有声明的几何检查（水密/流形/Euler/外向/零面积）均通过
-- ✅ 0.3.1 声称修复的 8 项缺陷：6 项直接验证通过，2 项代码审查通过
-- ✅ README 诚实标注能力边界（无 B-rep/无布尔/单船型族/精度限制）
+#### tests/test_public_surface.py
+Both branches added different modules to the import test list:
+- **agent/m3169**: `stability`, `righting_arm`, `bonjean`
+- **origin/main**: `transom`
 
-### 4. 对 TensorShipDesign 接棒位评估
-- **参数化船体族** → scan_runner 参数扫描线几何源
-- **SDF 导出** → L2 几何编码器几何源
-- **OCP B-rep 后端** → P0 优先级（TensorShipDesign 核心依赖）
+Resolution: Union of both module lists, ensuring all modules are tested.
 
-### 5. 开发候选提案
-1. **多船型族扩展**（P0）：系列 60/Savitsky/用户自定义
-2. **SDF 体素网格导出**（P1）：对接 scan_runner SDF 栈
+### 4. Test Verification
+Ran comprehensive test suite to verify no functionality was broken:
 
-## 交付物清单
+| Test Suite | Count | Status |
+|------------|-------|--------|
+| test_public_surface | 6 | ✅ PASS |
+| test_righting_arm | 41 | ✅ PASS |
+| test_transom | 96 | ✅ PASS |
+| test_hull + test_stability + test_bonjean | 102 | ✅ PASS |
+| **Total** | **245** | **✅ ALL PASS** |
 
-### 审计报告
-- `expand_audit_tensorcad.md`：完整审计报告（含两档体积收敛表 + .ngo 事务验证记录）
+### 5. Branch Update
+- Old SHA (agent/m3169): `57f5c2f20a31f71d8101146140dd4c0c638b0ac4`
+- New SHA (merged): `95a5d917e8143593c03572b6078a475acec68c1c`
+- Merge commit message: "Merge origin/main into agent/m3169 (cure PR #40, m3774): semantic union of righting-arm and transom-stern, zero content loss"
 
-### Backlog 登记
-- `backlog_tensorcad_section.md`：TensorCAD backlog 节
-- 已追加至 `/nfs/wangxi/tensor_eco/agent_work/expand_follow/backlog.md`
+### 6. Documentation
+Created comprehensive cure report at:
+- `docs/m3774_pr40_cure_report.md` (detailed markdown report)
+- `/tmp/report.json` (API submission payload)
 
-### 开发提案
-- `proposals/tensorcad-hull-families.txt`：多船型族扩展（m242 草案）
-- `proposals/tensorcad-sdf-voxel-export.txt`：SDF 体素网格导出（m243 草案）
+## Content Preservation Audit
 
-### 交接笔记
-- 已更新 `/nfs/wangxi/tensor_eco/agent_memory/tensor-expand/context.md`
+### agent/m3169 Contributions (100% Preserved)
+✅ Righting-arm curve GZ(phi) implementation
+✅ Wall-sided barge reference (exact to 1e-12 m)
+✅ Floating sphere reference (GZ = GM·sin(φ))
+✅ Divergence theorem integrals (no cap construction)
+✅ 41 tests with refusal cases
+✅ examples/righting_arm/run_example.py
+✅ docs/righting_arm.md with derivation
 
-## 验证证据
+### origin/main Contributions (100% Preserved)
+✅ Transom-stern hull family (tensorcad/transom.py)
+✅ Truncated taper integrals (sinc^p power series)
+✅ transom_fraction_for_area_ratio closed-form inverse
+✅ 96 tests covering topology, hydrostatics, validation
+✅ examples/transom_stern/run_example.py
+✅ docs/transom_stern.md
+✅ Verification artifacts in docs/m2873/outputs/transom_stern/
 
-所有关键数字均从实际运行日志直读，零手抄：
-- `/tmp/tcad_audit/hull_default.log`：参数化船体收敛表
-- `/tmp/tcad_audit/ngo_pipeline.log`：.ngo 事务管线输出
-- `/tmp/tcad_audit/cli-ngo/`：CLI 三连输出
-- `/tmp/tcad_audit/geometry_core.log`：几何核心基准测试
+## Key Lessons
 
-## 下一步
+1. **Changelog conflicts are semantic, not textual**: Both branches added to the same version section. Mechanical line-by-line merge would lose content. Correct approach: recognize changelog entries are additive.
 
-等待门禁通过后：
-1. `git push origin agent/m241`
-2. 开 PR 至 upstream/main
-3. 等待上游审核
+2. **Module lists must be unioned**: Test file had module import lists. Each branch added different modules. Resolution must include all modules from both sides.
 
-## 任务完成度
+3. **Independent features merge cleanly when understood**: Both features are independent additions. Once conflicts were understood as "both adding to the same place" rather than "disagreeing", resolution was straightforward.
 
-- [x] 环境测试基线建立
-- [x] 零依赖验证
-- [x] 两档体积收敛验证
-- [x] .ngo 事务管线验证
-- [x] README 能力-声明对照
-- [x] 0.3.1 缺陷修复验证
-- [x] TensorShipDesign 接棒位评估
-- [x] backlog 登记
-- [x] 2 个开发提案
-- [x] 审计报告撰写
-- [x] 交接笔记更新
-- [x] 数字零手抄验证
+## Status
+✅ **COMPLETE** - PR #40 is now clean and ready for merge-governor verification.
 
-**任务状态：✅ 完成，可提交验收**
+## Files Modified
+- `CHANGELOG.md` (conflict resolved)
+- `tests/test_public_surface.py` (conflict resolved)
+- `docs/m3774_pr40_cure_report.md` (new documentation)
+
+## Next Steps
+Platform will automatically push the merged branch to GitHub. Merge-governor will verify the merge in the next cycle.
