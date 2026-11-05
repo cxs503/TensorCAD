@@ -1,0 +1,500 @@
+{
+  "barge": {
+    "parameters": {
+      "length": 10.0,
+      "beam": 2.0,
+      "draft": 1.0,
+      "freeboard": 1.0,
+      "kg": 0.8,
+      "depth_m": 2.0
+    },
+    "wall_sided_limit_deg": 45.0,
+    "gm_from_geometry_m": 0.033333333333333215,
+    "bm_m": 0.3333333333333333,
+    "kb_m": 0.5,
+    "displacement_volume_m3": 20.0,
+    "displacement_volume_closed_form_m3": 20.0,
+    "curve": [
+      {
+        "heel_deg": 0.0,
+        "gz_m": 0.0,
+        "gz_wall_sided_m": 0.0,
+        "abs_deviation_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.0,
+        "z_b_m": 0.5,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 5.0,
+        "gz_m": 0.0030163769682251713,
+        "gz_wall_sided_m": 0.003016376968225169,
+        "abs_deviation_m": 2.168404344971009e-18,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.029162887841974662,
+        "z_b_m": 0.5012757110409254,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 10.0,
+        "gz_m": 0.006688094411882534,
+        "gz_wall_sided_m": 0.006688094411882549,
+        "abs_deviation_m": 1.5612511283791264e-17,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.05877566023615497,
+        "z_b_m": 0.5051818673542938,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 15.0,
+        "gz_m": 0.011724363400340443,
+        "gz_wall_sided_m": 0.011724363400340375,
+        "abs_deviation_m": 6.765421556309548e-17,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.08931639747704093,
+        "z_b_m": 0.5119661282874152,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 20.0,
+        "gz_m": 0.018952153081401316,
+        "gz_wall_sided_m": 0.018952153081401316,
+        "abs_deviation_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.12132341142206744,
+        "z_b_m": 0.5220790552386323,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 25.0,
+        "gz_m": 0.029403160676462634,
+        "gz_wall_sided_m": 0.029403160676462585,
+        "abs_deviation_m": 4.85722573273506e-17,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.1554358860516662,
+        "z_b_m": 0.5362404720089999,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_m": 0.04444444444444441,
+        "gz_wall_sided_m": 0.04444444444444438,
+        "abs_deviation_m": 3.469446951953614e-17,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.19245008972987526,
+        "z_b_m": 0.5555555555555555,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 35.0,
+        "gz_m": 0.06598907007079885,
+        "gz_wall_sided_m": 0.06598907007079877,
+        "abs_deviation_m": 8.326672684688674e-17,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.23340251273656992,
+        "z_b_m": 0.581715099427617,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 40.0,
+        "gz_m": 0.0968561145442694,
+        "gz_wall_sided_m": 0.09685611454426928,
+        "abs_deviation_m": 1.249000902703301e-16,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.2796998770590933,
+        "z_b_m": 0.617348031840308,
+        "deck_immersion_fraction": 0.0
+      },
+      {
+        "heel_deg": 45.0,
+        "gz_m": 0.14142135623730942,
+        "gz_wall_sided_m": 0.1414213562373094,
+        "abs_deviation_m": 2.7755575615628914e-17,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.33333333333333326,
+        "z_b_m": 0.6666666666666666,
+        "deck_immersion_fraction": 0.1111111111111111
+      },
+      {
+        "heel_deg": 50.0,
+        "gz_m": 0.18491029601683406,
+        "gz_wall_sided_m": 0.2068673175416877,
+        "abs_deviation_m": 0.021957021524853626,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.38265196815969205,
+        "z_b_m": 0.7203001229409067,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 55.0,
+        "gz_m": 0.2125566260572087,
+        "gz_wall_sided_m": 0.3057630717660006,
+        "abs_deviation_m": 0.09320644570879189,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.41828490057238304,
+        "z_b_m": 0.76659748726343,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 60.0,
+        "gz_m": 0.2287606363124432,
+        "gz_wall_sided_m": 0.4618802153517002,
+        "abs_deviation_m": 0.233119579039257,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.44444444444444436,
+        "z_b_m": 0.8075499102701247,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 65.0,
+        "gz_m": 0.23638204907900714,
+        "gz_wall_sided_m": 0.7248815734603142,
+        "abs_deviation_m": 0.48849952438130706,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.4637595279910001,
+        "z_b_m": 0.8445641139483338,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 70.0,
+        "gz_m": 0.23739039974091403,
+        "gz_wall_sided_m": 1.2135554119535696,
+        "abs_deviation_m": 0.9761650122126556,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.47792094476136765,
+        "z_b_m": 0.8786765885779325,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 75.0,
+        "gz_m": 0.23322461087797733,
+        "gz_wall_sided_m": 2.2744660631972926,
+        "abs_deviation_m": 2.041241452319315,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.4880338717125848,
+        "z_b_m": 0.9106836025229591,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 80.0,
+        "gz_m": 0.22500309172394511,
+        "gz_wall_sided_m": 5.311960690332296,
+        "abs_deviation_m": 5.086957598608351,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.4948181326457061,
+        "z_b_m": 0.941224339763845,
+        "deck_immersion_fraction": 1.0
+      },
+      {
+        "heel_deg": 85.0,
+        "gz_m": 0.21365371119965554,
+        "gz_wall_sided_m": 21.724697791069794,
+        "abs_deviation_m": 21.51104407987014,
+        "submerged_volume_m3": 20.0,
+        "y_b_m": 0.4987242889590746,
+        "z_b_m": 0.9708371121580254,
+        "deck_immersion_fraction": 1.0
+      }
+    ],
+    "first_outside_window": {
+      "heel_deg": 50.0,
+      "abs_deviation_m": 0.021957021524853626
+    },
+    "deck_immersion_onset_deg": 50.0,
+    "deck_immersion_onset_error_deg": 5.0
+  },
+  "hull": {
+    "parameters": {
+      "length": 10.0,
+      "beam": 2.0,
+      "draft": 1.0,
+      "nx": 41,
+      "nz": 13,
+      "kg": 0.5
+    },
+    "freeboard_m": 1.0,
+    "station_intervals": 64,
+    "gz_max_canonical_m": 0.674828002431936,
+    "gz_max_station_m": 0.6746966012062716,
+    "angle_gz_max_canonical_deg": 90.0,
+    "angle_gz_max_station_deg": 90.0,
+    "displacement_canonical_m3": 9.308192621436532,
+    "displacement_station_m3": 9.307568222964436,
+    "displacement_closed_surface_m3": 9.308192621436532,
+    "max_abs_route_difference_m": 0.00016698541112725174,
+    "max_relative_route_difference": 0.00024744884700319484,
+    "max_volume_error_canonical": 4.1602683435819464e-14,
+    "max_volume_error_station": 1.449779015481907e-11,
+    "curve": [
+      {
+        "heel_deg": 0.0,
+        "gz_canonical_m": -2.846920013634749e-17,
+        "gz_station_m": 1.2571288285140824e-13,
+        "abs_difference_m": 1.2574135205154459e-13,
+        "canonical_volume_residual_m3": 0.0,
+        "station_volume_residual_m3": 0.0
+      },
+      {
+        "heel_deg": 5.0,
+        "gz_canonical_m": 0.038857696621750246,
+        "gz_station_m": 0.0388593314148208,
+        "abs_difference_m": 1.6347930705540303e-06,
+        "canonical_volume_residual_m3": 0.0,
+        "station_volume_residual_m3": -5.995026697291905e-11
+      },
+      {
+        "heel_deg": 10.0,
+        "gz_canonical_m": 0.07638390846412126,
+        "gz_station_m": 0.07638708847603744,
+        "abs_difference_m": 3.1800119161817797e-06,
+        "canonical_volume_residual_m3": 0.0,
+        "station_volume_residual_m3": -5.4924953474255744e-11
+      },
+      {
+        "heel_deg": 15.0,
+        "gz_canonical_m": 0.11296559915511958,
+        "gz_station_m": 0.11297025437591582,
+        "abs_difference_m": 4.655220796234705e-06,
+        "canonical_volume_residual_m3": -1.7763568394002505e-15,
+        "station_volume_residual_m3": -7.715428296251048e-11
+      },
+      {
+        "heel_deg": 20.0,
+        "gz_canonical_m": 0.1489683609379022,
+        "gz_station_m": 0.14897449337879884,
+        "abs_difference_m": 6.132440896644553e-06,
+        "canonical_volume_residual_m3": 1.0658141036401503e-14,
+        "station_volume_residual_m3": -9.823253321883385e-12
+      },
+      {
+        "heel_deg": 25.0,
+        "gz_canonical_m": 0.1847873135292276,
+        "gz_station_m": 0.18479477952490087,
+        "abs_difference_m": 7.465995673278103e-06,
+        "canonical_volume_residual_m3": 3.872457909892546e-13,
+        "station_volume_residual_m3": -6.52562448522076e-11
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_canonical_m": 0.22090298744698325,
+        "gz_station_m": 0.22091172864835573,
+        "abs_difference_m": 8.7412013724808e-06,
+        "canonical_volume_residual_m3": 1.7763568394002505e-15,
+        "station_volume_residual_m3": 4.4083847683396016e-11
+      },
+      {
+        "heel_deg": 35.0,
+        "gz_canonical_m": 0.2579520247338575,
+        "gz_station_m": 0.2579623975168898,
+        "abs_difference_m": 1.0372783032341903e-05,
+        "canonical_volume_residual_m3": -1.7763568394002505e-15,
+        "station_volume_residual_m3": -3.455369324001367e-11
+      },
+      {
+        "heel_deg": 40.0,
+        "gz_canonical_m": 0.29682783382605804,
+        "gz_station_m": 0.2968392639116559,
+        "abs_difference_m": 1.1430085597841089e-05,
+        "canonical_volume_residual_m3": 1.7763568394002505e-15,
+        "station_volume_residual_m3": -1.0948220108275564e-10
+      },
+      {
+        "heel_deg": 45.0,
+        "gz_canonical_m": 0.338838838309798,
+        "gz_station_m": 0.3388517447577951,
+        "abs_difference_m": 1.2906447997118597e-05,
+        "canonical_volume_residual_m3": 1.7763568394002505e-15,
+        "station_volume_residual_m3": 6.517453243759519e-11
+      },
+      {
+        "heel_deg": 50.0,
+        "gz_canonical_m": 0.3854212952630662,
+        "gz_station_m": 0.38543592628536,
+        "abs_difference_m": 1.4631022293820628e-05,
+        "canonical_volume_residual_m3": 0.0,
+        "station_volume_residual_m3": 8.887823810255213e-11
+      },
+      {
+        "heel_deg": 55.0,
+        "gz_canonical_m": 0.43249386768885906,
+        "gz_station_m": 0.43251088129518456,
+        "abs_difference_m": 1.7013606325499975e-05,
+        "canonical_volume_residual_m3": 0.0,
+        "station_volume_residual_m3": -5.148592663317686e-11
+      },
+      {
+        "heel_deg": 60.0,
+        "gz_canonical_m": 0.4771685775269482,
+        "gz_station_m": 0.47718776681440794,
+        "abs_difference_m": 1.9189287459753235e-05,
+        "canonical_volume_residual_m3": -1.2789769243681803e-13,
+        "station_volume_residual_m3": -9.876188755697513e-11
+      },
+      {
+        "heel_deg": 65.0,
+        "gz_canonical_m": 0.518963421066698,
+        "gz_station_m": 0.5189818726153888,
+        "abs_difference_m": 1.84515486907344e-05,
+        "canonical_volume_residual_m3": -1.7763568394002505e-15,
+        "station_volume_residual_m3": -1.3493917094820063e-10
+      },
+      {
+        "heel_deg": 70.0,
+        "gz_canonical_m": 0.5578399358387576,
+        "gz_station_m": 0.5578555754462489,
+        "abs_difference_m": 1.563960749129123e-05,
+        "canonical_volume_residual_m3": -1.8829382497642655e-13,
+        "station_volume_residual_m3": 1.0120260185431107e-10
+      },
+      {
+        "heel_deg": 75.0,
+        "gz_canonical_m": 0.5933061304501952,
+        "gz_station_m": 0.5933209372381504,
+        "abs_difference_m": 1.4806787955179423e-05,
+        "canonical_volume_residual_m3": 5.329070518200751e-15,
+        "station_volume_residual_m3": -5.6910920420705224e-11
+      },
+      {
+        "heel_deg": 80.0,
+        "gz_canonical_m": 0.6256054696299136,
+        "gz_station_m": 0.6256317820848005,
+        "abs_difference_m": 2.6312454886934233e-05,
+        "canonical_volume_residual_m3": -1.7763568394002505e-15,
+        "station_volume_residual_m3": -1.0254552762489766e-10
+      },
+      {
+        "heel_deg": 85.0,
+        "gz_canonical_m": 0.6546035673747154,
+        "gz_station_m": 0.6547705527858426,
+        "abs_difference_m": 0.00016698541112725174,
+        "canonical_volume_residual_m3": 7.105427357601002e-15,
+        "station_volume_residual_m3": 1.2791190329153324e-10
+      },
+      {
+        "heel_deg": 90.0,
+        "gz_canonical_m": 0.674828002431936,
+        "gz_station_m": 0.6746966012062716,
+        "abs_difference_m": 0.00013140122566435153,
+        "canonical_volume_residual_m3": 0.0,
+        "station_volume_residual_m3": 3.7140068798180437e-11
+      }
+    ]
+  },
+  "convergence": {
+    "heel_deg": 40.0,
+    "intervals": [
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "sweep": [
+      {
+        "station_intervals": 8,
+        "gz_m": 0.2981909272795019,
+        "abs_error_m": 0.0013666966245362011,
+        "abs_error_relative": 0.004604397092247081
+      },
+      {
+        "station_intervals": 16,
+        "gz_m": 0.2970593368414937,
+        "abs_error_m": 0.0002351061865280002,
+        "abs_error_relative": 0.0007920720825561314
+      },
+      {
+        "station_intervals": 32,
+        "gz_m": 0.29677155999252813,
+        "abs_error_m": 5.267066243758167e-05,
+        "abs_error_relative": 0.00017744731392501132
+      },
+      {
+        "station_intervals": 64,
+        "gz_m": 0.2968392639116559,
+        "abs_error_m": 1.5033256690166752e-05,
+        "abs_error_relative": 5.0646999596342605e-05
+      },
+      {
+        "station_intervals": 128,
+        "gz_m": 0.2968242306549657,
+        "abs_error_m": 0.0,
+        "abs_error_relative": 0.0
+      }
+    ],
+    "converged_gz_m": 0.2968242306549657,
+    "reported_station_intervals": 64,
+    "reported_abs_error_m": 1.5033256690166752e-05,
+    "coarsest_abs_error_m": 0.0013666966245362011,
+    "coarse_over_reported_error": 90.91154715865105,
+    "canonical_gz_m": 0.29682783382605804,
+    "canonical_minus_converged_m": 3.6031710923256632e-06
+  },
+  "controls": {
+    "description": "canonical curve with its displacement target scaled by 1.02",
+    "displacement_scale": 1.02,
+    "gz_shift_at_20deg_m": 0.0016323246834556993,
+    "max_gz_shift_m": 0.003424507870613658
+  },
+  "claims": [
+    {
+      "claim": "barge GZ vs wall-sided closed form, inside the window",
+      "value": 1.249000902703301e-16,
+      "limit": 1e-12,
+      "unit": "m",
+      "passed": true
+    },
+    {
+      "claim": "closed form wrong just above its window (negative control)",
+      "value": 0.021957021524853626,
+      "limit": 0.001,
+      "unit": "m (must exceed)",
+      "passed": true
+    },
+    {
+      "claim": "deck-edge immersion onset vs wall-sided limit",
+      "value": 5.0,
+      "limit": 5.0,
+      "unit": "deg",
+      "passed": true
+    },
+    {
+      "claim": "hull: independent routes agree (relative to max GZ)",
+      "value": 0.00024744884700319484,
+      "limit": 0.0005,
+      "unit": "rel",
+      "passed": true
+    },
+    {
+      "claim": "hull: both routes float the same upright displacement",
+      "value": 6.708052760515657e-05,
+      "limit": 0.001,
+      "unit": "rel",
+      "passed": true
+    },
+    {
+      "claim": "2 % displacement error moves GZ (negative control)",
+      "value": 0.003424507870613658,
+      "limit": 0.0002,
+      "unit": "m (must exceed)",
+      "passed": true
+    },
+    {
+      "claim": "station grid 64 vs 128 at 40 deg",
+      "value": 1.5033256690166752e-05,
+      "limit": 0.0005,
+      "unit": "m",
+      "passed": true
+    },
+    {
+      "claim": "the coarse station grid is measurably worse (convergence is real)",
+      "value": 90.91154715865105,
+      "limit": 4.0,
+      "unit": "x (must exceed)",
+      "passed": true
+    }
+  ],
+  "checks": {
+    "failures": [],
+    "passed": true
+  }
+}

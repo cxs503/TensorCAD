@@ -86,6 +86,21 @@ jobs:
           test -s /tmp/tensorcad-design/design_hull.msh
           test -s /tmp/tensorcad-design/solver_manifest.json
           test -s /tmp/tensorcad-design/design_path.json
+      - name: Righting arms: canonical route vs an independent station integrator
+        # The example is the gate: it exits non-zero if any of its eight claims breaks, so the
+        # cross-route agreement is re-measured on every push rather than trusted from the bundle.
+        run: python examples/righting/run_example.py --output /tmp/tensorcad-righting
+      - name: Righting-arm artifacts
+        run: |
+          test -s /tmp/tensorcad-righting/results.json
+          test -s /tmp/tensorcad-righting/report.md
+          test -s /tmp/tensorcad-righting/righting_arms.png
+          python -c "import json; d=json.load(open('/tmp/tensorcad-righting/results.json')); \
+            assert d['checks']['passed'] is True, d['checks']['failures']; \
+            assert [c for c in d['claims'] if not c['passed']] == [], d['claims']; \
+            assert d['hull']['max_relative_route_difference'] < 5e-4, d['hull']; \
+            assert d['barge']['displacement_volume_m3'] > 0.0, d['barge']"
+
       - name: Representation benchmark (analytic, mesh, neural, STEP in one harness)
         # Every row is measured against the same rays and the same closed form; rows whose
         # extra is not installed (torch, OCP) must report not_supported rather than a zero,

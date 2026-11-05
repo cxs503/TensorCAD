@@ -4,6 +4,40 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.23.0 — 2026-11-06
+
+### Added
+- **The third ``GZ`` integration, published as an oracle instead of a duplicate.**
+  PR #52 (`agent/m3581`) proposed `tensorcad/righting.py`: heeled *section* areas clipped
+  from `bonjean.section_loops` with Sutherland–Hodgman, first moments by Green's theorem,
+  composite Simpson along the hull, bisection on the tilted waterplane. That module is a
+  duplicate of the canonical `tensorcad.gz` route (and of the cross-checked
+  `tensorcad.righting_arm` one), so it is retired — but its *method* is kept as the third,
+  topologically independent integrator in `examples/righting/oracle.py`, documented as a
+  verification oracle and never exported from the package.
+- **`examples/righting/run_example.py`**: eight claims on the canonical meshes, exiting
+  non-zero if one breaks. The station integrator reproduces the wall-sided closed form on a
+  barge to round-off and is already visibly out one step past its validity window; the
+  deck-edge immersion onset lands within one sampling step of
+  `box_wall_sided_limit_deg`; the canonical and station routes agree on the `41x13` hull;
+  both float the same upright displacement; refining `station_intervals` narrows the gap to
+  the finest grid by roughly two orders of magnitude; and two negative controls (a closed
+  form that must go wrong, a 2 % displacement error that must move the curve) keep the
+  agreement falsifiable.
+- **Evidence bundle** `docs/righting/{results.json,report.md,righting_arms.png}`, regenerated
+  by the example and guarded by `tests/test_righting.py` (15 tests), plus `docs/righting.md`
+  recording the PR #52 disposition and where its substance went.
+- **CI**: `examples/righting/run_example.py` is now a gate step, with its artifacts asserted
+  (`results.json` non-empty, `checks.passed` true, figure and report written).
+
+### Fixed
+- **Pre-existing lint debt** that the current `ruff` (0.15) flags and that would have failed the
+  `ruff check .` step before this branch's own files were even reached: an unused unpacked
+  variable and a `%`-format label in `tools/make_report_m3859.py`, a `zip()` without `strict=`
+  and an unused import in `tools/verify_merge_m3391.py`, an unused list and missing trailing
+  newlines in `tools/verify_merge_m3859.py` and `tests/test_merge_cure_m3391.py`. No behaviour
+  change; `ruff check .`, `mypy` and the test suite are green on the branch.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added
