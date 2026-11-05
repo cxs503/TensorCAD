@@ -117,6 +117,28 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting_arm import (
+    # Second, independent route to ``GZ(phi)``: the clipped-section integral with a
+    # bracket-and-bisect waterline solve. Names that ``gz`` already publishes keep the
+    # ``bisection_``/``barge_`` prefix here, so neither route shadows the other (see
+    # docs/m4038_pr40_merge_cure.md).
+    DEFAULT_HEELS_DEG,
+    HeeledDisplacement,
+    RightingArm,
+    RightingArmError,
+    heeled_displacement,
+    righting_arm,
+    wall_sided_validity_deg,
+)
+from .righting_arm import (
+    RightingArmCurve as BisectionRightingArmCurve,
+)
+from .righting_arm import (
+    righting_arm_curve as bisection_righting_arm_curve,
+)
+from .righting_arm import (
+    wall_sided_righting_arm as barge_wall_sided_righting_arm,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -185,12 +207,14 @@ from .wigley import (
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
     "DEFAULT_ANGLES_DEG",
+    "DEFAULT_HEELS_DEG",
     "DESIGN_SCHEMA",
     "MAX_TRANSOM_FRACTION",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
     "WIGLEY_REFERENCE_CASE",
     "AnalyticHydrostatics",
+    "BisectionRightingArmCurve",
     "BonjeanCurve",
     "BonjeanTable",
     "BoundingBox",
@@ -209,6 +233,7 @@ __all__ = [
     "FreeSurfaceCorrection",
     "GeometryField",
     "GzError",
+    "HeeledDisplacement",
     "HeeledHydrostatics",
     "HullModel",
     "HullParameters",
@@ -224,7 +249,9 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
+    "RightingArm",
     "RightingArmCurve",
+    "RightingArmError",
     "SampledField",
     "SectionProperties",
     "SphereField",
@@ -249,6 +276,8 @@ __all__ = [
     "analytic_volume",
     "analytic_wetted_surface_area",
     "assess_fairness",
+    "barge_wall_sided_righting_arm",
+    "bisection_righting_arm_curve",
     "bonjean_curve",
     "bonjean_table",
     "box_righting_arms_analytic",
@@ -269,6 +298,7 @@ __all__ = [
     "generate_hull",
     "generate_transom_hull",
     "generate_wigley",
+    "heeled_displacement",
     "heeled_hydrostatics",
     "initial_stability",
     "inspect_geometry",
@@ -282,6 +312,7 @@ __all__ = [
     "read_stl",
     "rectangular_tank_inertia",
     "resolve_resolution",
+    "righting_arm",
     "righting_arm_curve",
     "section_loops",
     "section_properties",
@@ -303,6 +334,7 @@ __all__ = [
     "validate_hull",
     "vertex_mean_curvature",
     "wall_sided_righting_arm",
+    "wall_sided_validity_deg",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
     "waterplane_moments",
@@ -318,4 +350,5 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 ]
-__version__ = "0.21.0"
+
+__version__ = "0.22.0"

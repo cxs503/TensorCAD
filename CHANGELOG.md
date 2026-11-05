@@ -4,6 +4,48 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.22.0 — 2026-11-05
+
+### Added
+- **A second, independent route to `GZ(phi)`** (`tensorcad/righting_arm.py`), carried over
+  from PR #40 (`agent/m3169`) and redeveloped on the current `main`: the heeled section is
+  clipped face by face and integrated in the body frame (divergence theorem with no cap,
+  each contribution exact for a planar triangle), and the equilibrium waterline is found by
+  **bracket-and-bisect** on the monotone `V(h)` instead of `tensorcad/gz.py`'s Newton
+  iteration on the projected wetted area. It adds `heeled_displacement`, `righting_arm`
+  (one heel, with `lcg`), `RightingArmCurve.peak/vanishing_crossed/area_under_curve`,
+  `wall_sided_validity_deg` and per-point volume residuals.
+- **The overlap between the two routes is now the check.** `tools/verify_merge_m4038.py`
+  puts both on the same meshes and records the agreement: `1.2e-13 m` on a wall-sided barge
+  (`L=10, B=2, T=0.8 m`), `1.6e-13 m` on the `41x13` hull and `6.9e-14 m` on `81x25`
+  (floated at `z=-0.47 m`), `2.8e-16 m` on a sphere of resolution 32 -- round-off, because
+  both integrals are exact for the polygonal hull and only the waterline solver differs.
+  A **negative control** is part of the record: shifting `gz`'s displacement target by 10 %
+  moves `GZ(20 deg)` by 3.2 mm, so the comparison is capable of failing.
+  Evidence: `artifacts/m4038/{merge_verification.json,merge_verification.png}` and
+  `docs/m4038_pr40_merge_cure.md`.
+- **Each route against its own reference on the merged tree.** The barge reproduces the
+  wall-sided closed form to `1.2e-14 m` inside its validity window (21.80 deg here) and the
+  formula is 9.6 cm out at 40 deg; the sphere sits within `1.3e-04 m` of `GM sin(phi)` at
+  resolution 32; the hull's small-angle slope matches `KB + I_T/nabla - KG` from
+  `tensorcad.stability` (a plane-section integration of the *same* mesh) to `6.8e-10`
+  relative on three grids; the volume residual stays below `2.1e-12`.
+- `tests/test_righting_arm.py` (46 tests: PR #40's 41 plus 5 cross-route/alias tests),
+  `examples/righting_arm/run_example.py` (10 claims, exits non-zero if one breaks, writes
+  `docs/righting_arm/{results.json,report.md}` and three figures), `docs/righting_arm.md`
+  and `docs/righting_arm/`.
+
+### Changed
+- `tensorcad/__init__.py` exports the new route **without shadowing `gz`**: the three
+  colliding names are published as `bisection_righting_arm_curve`,
+  `BisectionRightingArmCurve` and `barge_wall_sided_righting_arm`, while
+  `righting_arm_curve`, `RightingArmCurve` and `wall_sided_righting_arm` keep pointing at
+  `tensorcad/gz.py`. `tests/test_righting_arm.py` pins both directions.
+- `README.md`: the "what it does not provide" sentence still listed the righting-arm curve
+  and free-surface stability as absent, and claimed no hull family has a transom; corrected
+  to what the tree has done since 0.21.0 (and to what it still does not do: damage and
+  flooded-compartment stability, free-trim equilibrium, class-rule criteria).
+
 ## 0.21.0 — 2026-11-04
 
 ### Added
