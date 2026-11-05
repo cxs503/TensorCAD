@@ -1,22 +1,3 @@
-"""TensorCAD: deterministic, agent-callable engineering geometry.
-
-Public API at a glance::
-
-    from tensorcad import HullParameters, generate_hull, export_hull
-
-    model = generate_hull(HullParameters(length=12, beam=2.4, draft=0.9))
-    model.hydrostatics.displacement_volume          # integrated from the mesh
-    model.validation.warnings                       # what to look at next
-    export_hull(model, "results/hull", convergence=True)
-
-Layering: :mod:`tensorcad.geometry` and :mod:`tensorcad.mesh` are generic
-contracts and algorithms, :mod:`tensorcad.parameters` and
-:mod:`tensorcad.validation` are the checking layers,
-:mod:`tensorcad.hydrostatics` integrates properties off a surface, and
-:mod:`tensorcad.hull` is the one ship-specific model. Optional solver bridges
-live in :mod:`tensorcad.adapters`.
-"""
-
 from .bonjean import (
     BonjeanCurve,
     BonjeanTable,
@@ -26,23 +7,6 @@ from .bonjean import (
     bonjean_table,
     section_loops,
     section_properties,
-)
-from .curvature import (
-    CurvatureError,
-    CurvatureSample,
-    FairnessReport,
-    assess_fairness,
-    principal_curvatures,
-    vertex_mean_curvature,
-)
-from .design import (
-    DESIGN_SCHEMA,
-    DesignProblem,
-    DesignRecord,
-    DesignSolution,
-    DesignTargets,
-    write_design_json,
-    write_solver_manifest,
 )
 from .export import (
     export_hull,
@@ -102,10 +66,16 @@ from .mesh_conditioning import (
 )
 from .parameters import ParameterSpec, RatioSpec
 from .stability import (
+    GZCurve,
     InitialStability,
+    RightingArm,
     StabilityError,
+    SubmergedMoments,
     WaterplaneMoments,
+    gz_curve,
     initial_stability,
+    righting_arm,
+    submerged_moments,
     waterplane_moments,
 )
 from .suboff import (
@@ -189,6 +159,7 @@ __all__ = [
     "EllipsoidField",
     "FairnessReport",
     "FieldError",
+    "GZCurve",
     "GeometryField",
     "HullModel",
     "HullParameters",
@@ -204,10 +175,12 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
+    "RightingArm",
     "SampledField",
     "SectionProperties",
     "SphereField",
     "StabilityError",
+    "SubmergedMoments",
     "SuboffAppendagesField",
     "SuboffFinsField",
     "SuboffFullField",
@@ -244,6 +217,7 @@ __all__ = [
     "generate_hull",
     "generate_transom_hull",
     "generate_wigley",
+    "gz_curve",
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -255,9 +229,12 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "righting_arm",
     "section_loops",
     "section_properties",
+    "section_properties",
     "sinc_power_coefficients",
+    "submerged_moments",
     "suboff_fin_chord",
     "suboff_radius_fraction",
     "suboff_reference_geometry",

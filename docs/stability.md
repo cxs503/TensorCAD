@@ -148,15 +148,115 @@ which the `GM(KG)` ladder on `gm_ladder.png` brackets between `KG = 0.9 m` (`+0.
 `KG = 1.0 m` (`−0.0836 m`). `GM` falls exactly one-for-one with `KG` (`dGM/dKG = −1` to
 round-off), which is a test.
 
+## Large-angle stability: the righting-arm curve `GZ(phi)`
+
+`GM` is a waterplane moment and the slope of `GZ` at zero heel. `GZ` itself is a
+different integral, and it is now computed by the same module: heel the hull, sink it
+until it displaces the volume it displaces upright, and take the transverse offset
+between the centroid of the displaced volume and the centre of gravity,
+
+    GZ(phi) = y_B(phi) - y_G(phi),     y_G = (z_G - z_waterline) sin(phi)
+
+with `+phi` to starboard, `g` on the centreline plane, and `GZ > 0` when the couple
+restores the ship. Nothing in that chain touches a waterplane, which is why its slope at
+zero heel is an *independent* measurement of `GM` rather than a restatement of it.
+
+Two implementation notes decide whether the number means anything:
+
+* **The waterline cuts faces, so the volume integral has to clip them.**
+  `hydrostatics.compute_hydrostatics` classifies whole faces as wetted or coplanar and
+  says so in its docstring; a heeled hull straddles the plane at every angle, so
+  `stability.submerged_moments` clips each triangle (Sutherland-Hodgman to `z <= level`)
+  and integrates the tetrahedra spanned by the origin and the clipped triangles. Shifting
+  the cut plane to `z = 0` is what makes the missing cap free: on it `r.n = z = 0`, so the
+  surface integral over the clipped shell already *is* the closed-body integral. For a
+  polyhedron the result is exact, and the first reference below is exactly that claim.
+* **The displacement is held, not the draft.** Each angle is solved for the sinkage that
+  recovers the design displacement (bisection on the waterline, bracketed by the lowest
+  and highest point of the heeled body). Without that solve a `GZ` curve is a curve at
+  varying displacement, which is not a righting-arm curve.
+
+### Wall-sided box: an exact reference, and where it stops
+
+`GZ = sin(phi) (GM + BM tan^2(phi) / 2)` with `BM = B^2/(12T)` is exact for a body with
+vertical sides until a deck corner enters the water at `atan(2 f / B)` (`f` = freeboard).
+Box `L = 6.0, B = 4.0, T = 4.0, f = 4.0 m`,
+`KG = 1.0 m`, `BM = 0.333333 m`, `GM = 1.333333 m`,
+deck-corner angle `63.435 deg`:
+
+| heel [deg] | `GZ` from the integration [m] | closed form [m] | difference [m] |
+|---|---|---|---|
+| 0 | 0.000000000 | 0.000000000 | 0.0e+00 |
+| 10 | 0.232430725 | 0.232430725 | -8.3e-17 |
+| 20 | 0.463578339 | 0.463578339 | 1.7e-16 |
+| 30 | 0.694444444 | 0.694444444 | -1.1e-16 |
+| 40 | 0.932480007 | 0.932480007 | -2.2e-16 |
+| 50 | 1.202725094 | 1.202725094 | 0.0e+00 |
+| 60 | 1.587713240 | 1.587713240 | 2.2e-16 |
+
+Max `|difference|` over 0-60 deg is `2.2e-16 m` -- round-off,
+not a discretisation error, because the clipped integral is exact for a polyhedron. Past
+the deck corner the closed form is the wrong reference and the two part company, which is
+itself the check that the solver clips at the waterline instead of evaluating a formula:
+
+| heel [deg] | integration [m] | closed form [m] | difference [m] |
+|---|---|---|---|
+| 65 | 1.892033 | 1.903082 | -1.1e-02 |
+| 70 | 2.188632 | 2.435156 | -2.5e-01 |
+
+Splitting every triangle in four moves the arm by `1.1e-16 m`, and heeling to port negates
+it to `1e-16 m`; both are tests.
+
+### Circular section: the metacentre is the centre of the circle
+
+`KM = KB + BM = R(1 - 4/(3 pi)) + 4R/(3 pi) = R` exactly, so `GZ = (R - KG) sin(phi)` at
+*every* heel angle while the section stays a half-disc. A regular prism inscribed in that
+circle must approach it at second order in the vertex spacing; `R = 1.0`,
+`KG = 0.6 m`, reference `GZ/sin(phi) = 0.400000 m`,
+six angles from 10 to 75 deg:
+
+| polygon sides | max relative error in `GZ/sin(phi)` |
+|---|---|
+| 24 | 2.268e-02 |
+| 48 | 5.670e-03 |
+| 96 | 1.359e-03 |
+| 192 | 3.396e-04 |
+
+Ratios per doubling: `4.00, 4.17, 4.00` --
+second order, as an inscribed polygon should be. The displacement residual is `1.9e-16` at
+every angle.
+
+### What only the curve can say: crest and vanishing angle
+
+Barge `L = 4.0, B = 2.0, `
+`T = 1.0, f = 0.3 m` (the deck edge
+goes under early, so the waterplane shrinks with heel):
+
+| `KG` [m] | `GM` [m] | max arm [m] | at [deg] | vanishing angle [deg] |
+|---|---|---|---|---|
+| 0.60 | 0.2333 | 0.1096 | 45 | 110.7 |
+| 0.65 | 0.1833 | 0.0792 | 35 | 90.0 |
+| 0.70 | 0.1333 | 0.0546 | 25 | 69.3 |
+
+All three have a positive `GM`, and all three lose their righting arm at a finite angle:
+that is the question `GM` cannot answer and the reason the curve exists. The vanishing
+angle is interpolated linearly between the two sampled angles that bracket the crossing,
+and a curve that never becomes positive returns `None` instead of a crossing at zero.
+
 ## What this is **not**
 
 - **No free-surface correction.** `GM` here is the *solid* `GM`; a slack tank contributes
   `Σ(ρ·i_x)/Δ`, which the caller who knows the tankage must subtract. The report's `basis`
   string says `solid GM` so a consumer cannot miss it.
-- **No large-angle stability.** `GM` is the slope of `GZ(φ)` at `φ = 0`. `GZ` needs a heeled
-  displacement integration per angle (a different computation, not a waterplane moment), and
-  no righting-arm curve, area under it, or statutory criterion (`IS Code 2008`, damage
-  stability, weather criterion) is computed or claimed here.
+- **No statutory criterion.** A righting-arm curve *is* computed (`gz_curve`, above), but
+  the area under it, `IS Code 2008`, the weather criterion, damage stability and
+  downflooding openings are not: the curve is a solid-body, one-compartment quantity with
+  no free-surface correction, held at even keel (`x_G` is not used, trim is not solved).
+- **`gz_curve` wants the whole body, not the wetted surface.** The meshes
+  `compute_hydrostatics` and `initial_stability` take are the *wetted* surface closed by a
+  cap at the design waterline, i.e. zero freeboard. Heeling such a body drowns the deck and
+  the arm comes out negative -- a statement about the mesh, not about the ship. A
+  righting-arm run needs the closed body including its freeboard above the waterline.
 - **No trim or longitudinal strength.** `GM_L` is reported (`≈ 100 × GM_T` on this hull) and
   is the stiffness that governs trim, but nothing here solves a trim equilibrium or a
   bending moment.
@@ -177,13 +277,14 @@ round-off), which is a test.
 ## Reproduction
 
 ```bash
-python examples/stability/run_example.py --output docs/stability     # ~6 s, exits non-zero on a broken claim
-python -m pytest -q tests/test_stability.py                          # 19 tests
+python examples/stability/run_example.py --output docs/stability          # ~6 s, GM and the metacentric ladder
+python examples/stability/run_gz.py --output docs/stability               # ~3 s, the righting-arm curves
+python -m pytest -q tests/test_stability.py tests/test_stability_gz.py    # 19 + 19 tests
 ```
 
 `results.json` holds the box and hemisphere rows, the full ladder with every error, the fitted
 orders, the quadrature cross-checks and the `GM(KG)` ladder; `report.md` is the same content
-rendered as markdown; `sections.png` draws the waterline chords the mesh actually has against
+rendered as markdown; `gz_results.json` / `gz_report.md` hold the righting-arm evidence -- the wall-sided ladder with every difference, the inscribed-polygon convergence table, and the `KG` ladder with crest and vanishing angle -- and `gz_curves.png` / `gz_convergence.png` are the same measurements drawn. `sections.png` draws the waterline chords the mesh actually has against
 the analytic planform, `convergence.png` the `|error|` against the grid step, and
 `gm_ladder.png` the `GM = 0` loading limit. matplotlib is optional -- the JSON and the markdown
 are written without it.
