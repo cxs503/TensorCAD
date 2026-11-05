@@ -1,0 +1,96 @@
+{
+  "geometry": {
+    "L": 10.0,
+    "B": 2.0,
+    "T": 0.8
+  },
+  "barge": {
+    "I_T": 6.666666666666666,
+    "I_T_ref": 6.666666666666667,
+    "I_T_rel_err": -1.3322676295501878e-16,
+    "I_L": 166.66666666666669,
+    "I_L_ref": 166.66666666666666,
+    "I_L_rel_err": 1.7053025658242405e-16,
+    "keel_z": -0.8,
+    "keel_z_ref": -0.8
+  },
+  "hull_vs_closed_form": [
+    {
+      "nx": 21,
+      "nz": 9,
+      "I_T_mesh": 3.2524330032413613,
+      "I_T_ref": 3.2707254342761636,
+      "I_T_rel_err": -0.005592774875904716,
+      "I_L_mesh": 75.4882182980457,
+      "I_L_ref": 76.87078113906146,
+      "I_L_rel_err": -0.017985544319039416,
+      "keel_z_mesh": -0.8,
+      "basis_analytic": "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature); longitudinal waterplane inertia by tanh-sinh quadrature"
+    },
+    {
+      "nx": 41,
+      "nz": 13,
+      "I_T_mesh": 3.2661917576629698,
+      "I_T_ref": 3.2707254342761636,
+      "I_T_rel_err": -0.0013861379392113825,
+      "I_L_mesh": 76.40662200112655,
+      "I_L_ref": 76.87078113906146,
+      "I_L_rel_err": -0.006038173816592762,
+      "keel_z_mesh": -0.8,
+      "basis_analytic": "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature); longitudinal waterplane inertia by tanh-sinh quadrature"
+    },
+    {
+      "nx": 81,
+      "nz": 25,
+      "I_T_mesh": 3.2695971761867777,
+      "I_T_ref": 3.2707254342761636,
+      "I_T_rel_err": -0.0003449565278583443,
+      "I_L_mesh": 76.71867288151196,
+      "I_L_ref": 76.87078113906146,
+      "I_L_rel_err": -0.001978752593580802,
+      "keel_z_mesh": -0.8,
+      "basis_analytic": "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature); longitudinal waterplane inertia by tanh-sinh quadrature"
+    },
+    {
+      "nx": 161,
+      "nz": 41,
+      "I_T_mesh": 3.2704440056133413,
+      "I_T_ref": 3.2707254342761636,
+      "I_T_rel_err": -8.604472263952273e-05,
+      "I_L_mesh": 76.82172314137853,
+      "I_L_ref": 76.87078113906146,
+      "I_L_rel_err": -0.0006381878388121135,
+      "keel_z_mesh": -0.8,
+      "basis_analytic": "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature); longitudinal waterplane inertia by tanh-sinh quadrature"
+    }
+  ],
+  "asymmetric": {
+    "LCB": 5.257824171324652,
+    "LCF": 5.257824171324652,
+    "LCB_symmetric": 5.0,
+    "mid": 5.0,
+    "I_T_is_nan": true,
+    "I_L_is_nan": true,
+    "keel_z": -0.8,
+    "basis": "closed forms of the asymmetric analytic surface except the longitudinal centres, whose x-weighted half-moment has no elementary form: Gauss-Legendre after x = t^3/2, cross-checked against tanh-sinh quadrature to 1e-14; wetted area by Gauss-Legendre quadrature; waterplane second moments withheld (nan) because their closed forms assume a fore/aft-symmetric waterplane",
+    "Cb": 0.47327421458125746
+  },
+  "wigley": {
+    "Cb_mesh": 0.4433955439814815,
+    "Cb_ref": 0.4444444444444444,
+    "Cb_rel_err": -0.0023600260416665464,
+    "volume_mesh": 2.7712221498842595,
+    "volume_ref": 2.7777777777777777,
+    "volume_rel_err": -0.0023600260416665364,
+    "analytic_kind": "WigleyAnalytic",
+    "record_has_inertia": false
+  },
+  "transom": {
+    "tau": 0.2,
+    "Cb_mesh": 0.5135390236691488,
+    "Cb_ref": 0.5176035043703695,
+    "Cb_rel_err": -0.00785249842186607,
+    "record_kind": "dict (transom reference ladder)",
+    "volume_rel_err": -0.007852498421866283
+  }
+}
