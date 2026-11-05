@@ -1,0 +1,589 @@
+{
+  "barge": {
+    "angle_gz_max_deg": 45.0,
+    "bm_m": 0.3333333333333333,
+    "classic_deck_edge_deg": 45.0,
+    "deck_immersion_onset_deg": 45.0,
+    "full_curve": [
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.0,
+        "heel_deg": 0.0,
+        "heel_rad": 0.0,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.0,
+        "vertical_centre_buoyancy_m": -0.5,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.003016377,
+        "heel_deg": 5.0,
+        "heel_rad": 0.087266463,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.029162888,
+        "vertical_centre_buoyancy_m": -0.498724289,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.006688094,
+        "heel_deg": 10.0,
+        "heel_rad": 0.174532925,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.05877566,
+        "vertical_centre_buoyancy_m": -0.494818133,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.011724363,
+        "heel_deg": 15.0,
+        "heel_rad": 0.261799388,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.089316397,
+        "vertical_centre_buoyancy_m": -0.488033872,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.018952153,
+        "heel_deg": 20.0,
+        "heel_rad": 0.34906585,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.121323411,
+        "vertical_centre_buoyancy_m": -0.477920945,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.029403161,
+        "heel_deg": 25.0,
+        "heel_rad": 0.436332313,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.155435886,
+        "vertical_centre_buoyancy_m": -0.463759528,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.044444444,
+        "heel_deg": 30.0,
+        "heel_rad": 0.523598776,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.19245009,
+        "vertical_centre_buoyancy_m": -0.444444444,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.06598907,
+        "heel_deg": 35.0,
+        "heel_rad": 0.610865238,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.233402513,
+        "vertical_centre_buoyancy_m": -0.418284901,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.096856115,
+        "heel_deg": 40.0,
+        "heel_rad": 0.698131701,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.279699877,
+        "vertical_centre_buoyancy_m": -0.382651968,
+        "waterplane_offset_m": 0.0
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.111111111,
+        "gz_m": 0.141421356,
+        "heel_deg": 45.0,
+        "heel_rad": 0.785398163,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 20.0,
+        "transverse_centre_buoyancy_m": 0.333333333,
+        "vertical_centre_buoyancy_m": -0.333333333,
+        "waterplane_offset_m": 0.0
+      }
+    ],
+    "gm_m": 0.033333333333333215,
+    "gz_max_m": 0.14142135623730942,
+    "kb_m": 0.5,
+    "parameters": {
+      "beam": 2.0,
+      "draft": 1.0,
+      "freeboard": 1.0,
+      "kg": 0.8,
+      "length": 10.0
+    },
+    "rows": [
+      {
+        "gz_m": 0.0,
+        "gz_wall_sided_m": 0.0,
+        "heel_deg": 0.0,
+        "relative_deviation": 0.0,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.0030163769682251713,
+        "gz_wall_sided_m": 0.003016376968225169,
+        "heel_deg": 5.0,
+        "relative_deviation": 7.188771058170803e-16,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.0066880944118825475,
+        "gz_wall_sided_m": 0.006688094411882549,
+        "heel_deg": 10.0,
+        "relative_deviation": 2.5937484867061276e-16,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.011724363400340443,
+        "gz_wall_sided_m": 0.011724363400340375,
+        "heel_deg": 15.0,
+        "relative_deviation": 5.770395649893569e-15,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.018952153081401343,
+        "gz_wall_sided_m": 0.018952153081401316,
+        "heel_deg": 20.0,
+        "relative_deviation": 1.4645077789534547e-15,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.02940316067646262,
+        "gz_wall_sided_m": 0.029403160676462585,
+        "heel_deg": 25.0,
+        "relative_deviation": 1.1799571447878146e-15,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.04444444444444441,
+        "gz_wall_sided_m": 0.04444444444444438,
+        "heel_deg": 30.0,
+        "relative_deviation": 7.806255641895644e-16,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.0659890700707988,
+        "gz_wall_sided_m": 0.06598907007079877,
+        "heel_deg": 35.0,
+        "relative_deviation": 4.2060867937448333e-16,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.09685611454426936,
+        "gz_wall_sided_m": 0.09685611454426928,
+        "heel_deg": 40.0,
+        "relative_deviation": 8.596950976061368e-16,
+        "submerged_volume_m3": 20.0
+      },
+      {
+        "gz_m": 0.14142135623730942,
+        "gz_wall_sided_m": 0.1414213562373094,
+        "heel_deg": 45.0,
+        "relative_deviation": 1.9626155733547204e-16,
+        "submerged_volume_m3": 20.0
+      }
+    ],
+    "slope_from_curve": 0.0333333313933249,
+    "slope_relative_error": 5.820024941149991e-08,
+    "volume_m3": 20.0,
+    "worst_relative_deviation": 5.770395649893569e-15
+  },
+  "claims": [
+    {
+      "claim": "barge GZ matches the wall-sided closed form (0-45 deg)",
+      "detail": "exact for a polygonal barge below deck-edge immersion",
+      "limit": 1e-09,
+      "measured": 5.770395649893569e-15,
+      "passed": true,
+      "unit": "relative"
+    },
+    {
+      "claim": "barge dGZ/dphi at 0 recovers KB + BM - KG",
+      "detail": "Richardson extrapolation from 1 and 0.5 deg",
+      "limit": 1e-06,
+      "measured": 5.820024941149991e-08,
+      "passed": true,
+      "unit": "relative"
+    },
+    {
+      "claim": "barge deck-edge immersion occurs at the classic angle",
+      "detail": "(B/2) tan(phi) = freeboard",
+      "limit": 1e-09,
+      "measured": 0.0,
+      "passed": true,
+      "unit": "deg"
+    },
+    {
+      "claim": "station-area volume equals the closed-surface volume",
+      "detail": "Green-on-sections vs tetrahedra on the same mesh",
+      "limit": 1e-09,
+      "measured": 0.0,
+      "passed": true,
+      "unit": "relative"
+    },
+    {
+      "claim": "hull dGZ/dphi at 0 recovers KB + I_T/V - KG",
+      "detail": "I_T from tensorcad.stability.waterplane_moments (independent integration)",
+      "limit": 0.002,
+      "measured": 5.545571451903049e-05,
+      "passed": true,
+      "unit": "relative"
+    },
+    {
+      "claim": "hull curve is grid-converged (40 vs 80 intervals)",
+      "detail": "GZ_max over the 0-90 deg curve",
+      "limit": 0.005,
+      "measured": 0.00021587220631741352,
+      "passed": true,
+      "unit": "relative"
+    },
+    {
+      "claim": "hull curve vanishing angle is grid-converged (40 vs 80 intervals)",
+      "detail": "interpolated zero crossing after GZ_max",
+      "limit": 0.01,
+      "measured": 0.0002852370498399045,
+      "passed": true,
+      "unit": "relative"
+    },
+    {
+      "claim": "zero-freeboard hull is rejected rather than answered",
+      "detail": "a body capped at its waterline has no freeboard to heel into",
+      "limit": 0.0,
+      "measured": 0.0,
+      "passed": true,
+      "unit": "bool"
+    }
+  ],
+  "hull": {
+    "angle_gz_max_deg": 23.422027260980556,
+    "angle_vanishing_stability_deg": 36.48459390502925,
+    "bm_m": 0.352171450798765,
+    "curve": [
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.0,
+        "heel_deg": 0.0,
+        "heel_rad": 0.0,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.0,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.0,
+        "vertical_centre_buoyancy_m": -0.575690999,
+        "waterplane_offset_m": -0.3
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.002453341,
+        "heel_deg": 5.0,
+        "heel_rad": 0.087266463,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": -0.000186191,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.03083892,
+        "vertical_centre_buoyancy_m": -0.574341535,
+        "waterplane_offset_m": -0.300186191
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.005691414,
+        "heel_deg": 10.0,
+        "heel_rad": 0.174532925,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": -0.000779528,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.062238843,
+        "vertical_centre_buoyancy_m": -0.570198473,
+        "waterplane_offset_m": -0.300779528
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.0,
+        "gz_m": 0.010576006,
+        "heel_deg": 15.0,
+        "heel_rad": 0.261799388,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": -0.001874414,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.094806993,
+        "vertical_centre_buoyancy_m": -0.562961968,
+        "waterplane_offset_m": -0.301874414
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.358024691,
+        "gz_m": 0.017250372,
+        "heel_deg": 20.0,
+        "heel_rad": 0.34906585,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": -0.003199719,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.128411174,
+        "vertical_centre_buoyancy_m": -0.552370087,
+        "waterplane_offset_m": -0.303199719
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.580246914,
+        "gz_m": 0.01841829,
+        "heel_deg": 25.0,
+        "heel_rad": 0.436332313,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": -0.000420559,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.156014686,
+        "vertical_centre_buoyancy_m": -0.540993186,
+        "waterplane_offset_m": -0.300420559
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.679012346,
+        "gz_m": 0.013252785,
+        "heel_deg": 30.0,
+        "heel_rad": 0.523598776,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.007925011,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.177019327,
+        "vertical_centre_buoyancy_m": -0.530100897,
+        "waterplane_offset_m": -0.292074989
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.75308642,
+        "gz_m": 0.003711438,
+        "heel_deg": 35.0,
+        "heel_rad": 0.610865238,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.021390406,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.19338184,
+        "vertical_centre_buoyancy_m": -0.519707194,
+        "waterplane_offset_m": -0.278609594
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.802469136,
+        "gz_m": -0.008788405,
+        "heel_deg": 40.0,
+        "heel_rad": 0.698131701,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.039441035,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.206445844,
+        "vertical_centre_buoyancy_m": -0.509704906,
+        "waterplane_offset_m": -0.260558965
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.851851852,
+        "gz_m": -0.02325688,
+        "heel_deg": 45.0,
+        "heel_rad": 0.785398163,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.061601382,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.21708381,
+        "vertical_centre_buoyancy_m": -0.499974005,
+        "waterplane_offset_m": -0.238398618
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.87654321,
+        "gz_m": -0.038977896,
+        "heel_deg": 50.0,
+        "heel_rad": 0.872664626,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.08743122,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.225864203,
+        "vertical_centre_buoyancy_m": -0.490404599,
+        "waterplane_offset_m": -0.21256878
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.901234568,
+        "gz_m": -0.055382682,
+        "heel_deg": 55.0,
+        "heel_rad": 0.959931089,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.116560036,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.233178005,
+        "vertical_centre_buoyancy_m": -0.480882768,
+        "waterplane_offset_m": -0.183439964
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.925925926,
+        "gz_m": -0.072046254,
+        "heel_deg": 60.0,
+        "heel_rad": 1.047197551,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.148571035,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.239266958,
+        "vertical_centre_buoyancy_m": -0.47133269,
+        "waterplane_offset_m": -0.151428965
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.950617284,
+        "gz_m": -0.088579606,
+        "heel_deg": 65.0,
+        "heel_rad": 1.134464014,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.183144483,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.244305492,
+        "vertical_centre_buoyancy_m": -0.461658303,
+        "waterplane_offset_m": -0.116855517
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.950617284,
+        "gz_m": -0.104614924,
+        "heel_deg": 70.0,
+        "heel_rad": 1.221730476,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.219892005,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.248413095,
+        "vertical_centre_buoyancy_m": -0.45174385,
+        "waterplane_offset_m": -0.080107995
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.975308642,
+        "gz_m": -0.11996381,
+        "heel_deg": 75.0,
+        "heel_rad": 1.308996939,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.258290433,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.251607885,
+        "vertical_centre_buoyancy_m": -0.441613804,
+        "waterplane_offset_m": -0.041709567
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 0.975308642,
+        "gz_m": -0.1344105,
+        "heel_deg": 80.0,
+        "heel_rad": 1.396263402,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.298003669,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.253903918,
+        "vertical_centre_buoyancy_m": -0.43125411,
+        "waterplane_offset_m": -0.001996331
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 1.0,
+        "gz_m": -0.147633955,
+        "heel_deg": 85.0,
+        "heel_rad": 1.483529864,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.338682286,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.255312801,
+        "vertical_centre_buoyancy_m": -0.420534868,
+        "waterplane_offset_m": 0.038682286
+      },
+      {
+        "converged": true,
+        "deck_immersion_fraction": 1.0,
+        "gz_m": -0.159299302,
+        "heel_deg": 90.0,
+        "heel_rad": 1.570796327,
+        "schema": "tensorcad.righting.point/1",
+        "sinkage_m": 0.380066799,
+        "submerged_volume_m3": 5.424815667,
+        "transverse_centre_buoyancy_m": 0.255799472,
+        "vertical_centre_buoyancy_m": -0.409299302,
+        "waterplane_offset_m": 0.080066799
+      }
+    ],
+    "deck_immersion_onset_deg": 20.0,
+    "displacement_volume_m3": 5.424815667209546,
+    "freeboard_m": 0.3,
+    "gm_m": 0.026480451502220892,
+    "grid_convergence": {
+      "angle_vanishing_deg": [
+        36.47418714709917,
+        36.48459390502925,
+        36.48490348582241
+      ],
+      "gz_max_m": [
+        0.018414313776373564,
+        0.018418289773223503,
+        0.018418140636673838
+      ],
+      "intervals": [
+        40,
+        80,
+        160
+      ],
+      "volume_m3": [
+        5.431943266512867,
+        5.424815667209546,
+        5.424815667209548
+      ]
+    },
+    "gz_max_m": 0.018418289773223503,
+    "kb_m": 0.4243090007034559,
+    "parameters": {
+      "beam": 2.0,
+      "draft": 1.0,
+      "kg": 0.75,
+      "length": 10.0,
+      "nx": 41,
+      "nz": 13,
+      "waterline_z": -0.3
+    },
+    "slope_from_curve": 0.026481919994579734,
+    "slope_relative_error": 5.545571451903049e-05,
+    "surface_integral_volume_m3": 9.308192621436532,
+    "vcb_relative_difference": 5.603739814716375e-16,
+    "volume_relative_difference": 0.0,
+    "zero_freeboard_rejected": true
+  }
+}
