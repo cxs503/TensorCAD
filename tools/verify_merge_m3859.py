@@ -121,7 +121,6 @@ def main() -> int:
         merged_lines = lines(merged)
         superseded: list[str] = []
         transformed: list[str] = []
-        lost: list[str] = []
         for side, blob in (("main", main_b), ("branch", branch_b)):
             other = branch_b if side == "main" else main_b
             unique = lines(blob) - lines(other)

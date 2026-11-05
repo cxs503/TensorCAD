@@ -4,6 +4,36 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.23.0 — 2026-11-05
+
+### Added
+- **A published, rerun-guarded evidence bundle for the righting-arm curve**: `docs/gz/report.md`
+  (case and parameter tables, a claims table, the box/log comparison tables and the sampled
+  hull curve), `docs/gz/results.json` and `docs/gz/gz_curves.png` (three panels: the barge
+  against the wall-sided closed form with its 38.66° limit marked, the log against the exact
+  `(R − KG) sin φ`, and the hull with and without a free surface). Every number is emitted by
+  `examples/gz/run_example.py`; nothing is typed by hand.
+- **The bundle is held to the code** by `tests/test_gz_evidence.py`: it reruns the example into
+  a temporary directory and requires the JSON to reproduce key for key (`1e-9` relative), the
+  Markdown to be the same page (identical once digits are stripped, so a last-digit difference
+  between machines passes and a changed claim does not), the figure to be a real plot-sized
+  PNG, and the bundle's `version` stamp to equal `tensorcad.__version__` — which is what catches
+  "bumped the version, forgot to regenerate".
+- Eight claims, each with its measured value, limit and unit in `results.json`: box barge vs the
+  wall-sided closed form `6.9e-17 m` inside the 38.66° limit and `1.8e-2 m` just past it (so the
+  agreement is falsifiable, not vacuous); log (72-gon, half submerged) vs exact `1.1e-16 m` over
+  0–90°; `GZ'(0)` vs `initial_stability`'s waterplane-moment `GM` `1.8e-9` relative; the box
+  barge's upright displacement equal to `L·B·T` exactly; constant displacement on every point of
+  every curve `9.1e-14`; the free-surface reduction flat to `4.6e-17 m`; and `with_freeboard`
+  leaving the upright displacement bit-identical.
+
+### Changed
+- `examples/gz/run_example.py` now publishes to `docs/gz/` by default (matching
+  `examples/righting_arm`), writes `gz_curves.png` instead of the scratch `plot.png`, records a
+  claim table with measured/limit/unit instead of free-form failures, and runs from a checkout
+  without installing (`REPO_ROOT` on `sys.path`). The old `examples/gz/outputs/` scratch copy is
+  retired; `docs/gz.md` points at the bundle and the version is `0.23.0`.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added

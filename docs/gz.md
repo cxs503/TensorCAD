@@ -152,3 +152,12 @@ point = heeled_hydrostatics(banded, 30.0)             # one angle: V, KB, KN, A_
 
 `examples/gz/run_example.py` exercises all of the above, writes `results.json`,
 `report.md` and `plot.png`, and exits non-zero if a claim breaks.
+
+## Published evidence bundle
+
+`examples/gz/run_example.py` publishes the run to [`docs/gz/`](gz/): `results.json` (the cases
+and the eight claims with their measured values, limits and units), `report.md` (the parameter,
+claim and curve tables) and `gz_curves.png` (barge vs closed form with the bilge limit marked,
+log vs the exact arm, hull with and without a free surface). `tests/test_gz_evidence.py` reruns
+the script and fails if the published page stops being what the code computes, including a
+version stamp, so a forgotten regeneration is a red test rather than a stale number.

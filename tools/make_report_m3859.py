@@ -18,8 +18,8 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
 
 TOP = Path(__file__).resolve().parent.parent
 OUT = TOP / "docs" / "m3859" / "outputs"
@@ -37,7 +37,7 @@ def counts(summary: str) -> tuple[int, int, int]:
 def load_side(side: str) -> dict[str, tuple[int, int, int]]:
     out: dict[str, tuple[int, int, int]] = {}
     for line in (LOGS / side / "RESULTS.tsv").read_text().splitlines():
-        name, rc, summary = line.split("\t")
+        name, _rc, summary = line.split("\t")
         out[name] = counts(summary)
     return out
 
@@ -129,7 +129,7 @@ ax.plot([r["heel_deg"] for r in inside], [r["gz_m"] for r in inside], "o",
         ms=3.2, color="#2b6cb0", label="merged-tree GZ (mesh integration)")
 ax.plot([r["heel_deg"] for r in beyond], [r["wall_sided_m"] for r in beyond],
         "s", ms=4, mfc="none", color="#c53030",
-        label="closed form beyond its %.2f° limit" % box["limit_deg"])
+        label=f"closed form beyond its {box['limit_deg']:.2f}° limit")
 ax.plot([r["heel_deg"] for r in beyond], [r["gz_m"] for r in beyond], "x",
         ms=4, color="#c53030", label="GZ beyond the limit (form no longer valid)")
 ax.axvline(box["limit_deg"], color="#c53030", ls=":", lw=1)
