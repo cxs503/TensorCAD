@@ -101,6 +101,18 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting_arm import (
+    DEFAULT_HEELS_DEG,
+    HeeledDisplacement,
+    RightingArm,
+    RightingArmCurve,
+    RightingArmError,
+    heeled_displacement,
+    righting_arm,
+    righting_arm_curve,
+    wall_sided_righting_arm,
+    wall_sided_validity_deg,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -245,6 +257,16 @@ __all__ = [
     "generate_transom_hull",
     "generate_wigley",
     "initial_stability",
+    "DEFAULT_HEELS_DEG",
+    "HeeledDisplacement",
+    "RightingArm",
+    "RightingArmCurve",
+    "RightingArmError",
+    "heeled_displacement",
+    "righting_arm",
+    "righting_arm_curve",
+    "wall_sided_righting_arm",
+    "wall_sided_validity_deg",
     "inspect_geometry",
     "inspect_mesh_quality",
     "measure_mesh",

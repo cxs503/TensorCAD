@@ -46,6 +46,35 @@ semantic versioning.
 - `examples/transom_stern/run_example.py`: reference ladder, 4 truncations × 4 grids
   convergence table, design table and three figures.
 
+- **Righting-arm curve `GZ(phi)` at constant displacement** (`tensorcad/righting_arm.py`),
+  closing the item `tensorcad/stability.py` names as out of its scope: `GM` is only the
+  slope at zero heel. The immersed volume and its centroid come from the divergence
+  theorem on the heeled hull with **no cap construction** (`V = oint (z-h) n_z dA`,
+  `int y dV = oint (1/2) y^2 n_y dA`, `int z dV = oint (1/2)(z-h)^2 n_z dA + h V`), each
+  contribution exact for a planar triangle; the equilibrium waterline is solved by
+  bracket-and-bisect on the monotone `V(h)` and the residual is reported. The heel rotates
+  about the longitudinal axis through the upright waterline, so a mesh whose `z` origin is
+  not its waterline behaves like an origin-centred one.
+- **Two exact references, not a fit.** A wall-sided barge obeys
+  `GZ = sin(phi)(GM + (1/2) BM tan^2(phi))` exactly until the deck edge immerses or the
+  bilge uncovers; the mesh reproduces it to **1e-12 m** inside that window and diverges
+  from it by centimetres outside, while still agreeing with a 2-D polygon clip of the same
+  section -- so the divergence is the formula's limit. A floating sphere has
+  `GZ = GM sin(phi)` at every heel, and the meshing error falls monotonically with
+  refinement (worst < 1 mm at resolution 32).
+- **The parametric hull** is verified by the small-angle slope against the waterplane
+  moment `KB + I_T/nabla - KG` (independent integration, 1e-6 relative), by a refinement
+  ladder on `GZ(30 deg)`, and by a volume residual below 1e-9 at every heel. The example
+  computes the deck-edge immersion angle from the solved waterlines instead of assuming
+  it, and states that past it the arm belongs to a closed solid rather than a ship.
+- `examples/righting_arm/run_example.py` writes `docs/righting_arm/{results.json,
+  report.md}` plus three figures and exits non-zero if one of its ten claims breaks;
+  `tests/test_righting_arm.py` adds 41 tests, including refusals (non-watertight mesh,
+  `|heel| > 90 deg`, displacement above the whole hull, non-finite inputs).
+- `docs/righting_arm.md` derives the integrals, reports both references and names the
+  limits; a pre-existing `waterplane_moments` failure on a waterline that lands exactly on
+  a vertex ring is recorded there as a finding.
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the
