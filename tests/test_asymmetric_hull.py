@@ -80,7 +80,8 @@ def test_symmetric_references_are_the_published_constants_exactly() -> None:
     assert taper_integral_pair(BREADTH_EXPONENT, BREADTH_EXPONENT) == TAPER_INTEGRAL
     symmetric = analytic_hydrostatics(L, B, T)
     assert symmetric.basis == (
-        "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature)"
+        "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature); "
+        "longitudinal waterplane inertia by tanh-sinh quadrature"
     )
     assert (
         analytic_wetted_surface_area(L, B, T)

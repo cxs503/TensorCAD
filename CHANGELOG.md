@@ -7,6 +7,22 @@ semantic versioning.
 ## 0.21.0 — 2026-11-04
 
 ### Added
+- **Waterplane second moments on the `Hydrostatics` record** (`tensorcad/hydrostatics.py`):
+  `compute_hydrostatics` now reports `transverse_waterplane_inertia` (`∫ y² dA`),
+  `longitudinal_waterplane_inertia` (`∫ (x−LCF)² dA`) and `keel_z` next to the waterplane
+  area. They come out of the flux identity the module already uses for the waterplane area
+  (`∫_cap f dA = −∫_wetted f n_z dA` with `f` independent of `z`), so no cap has to exist
+  and no waterline polygon has to be reconstructed; the per-face second moments are exact
+  (`x`, `y` linear over a triangle). An open or capless surface reports `nan` rather than a
+  number the shell cannot support, and `to_dict` carries all three quantities.
+- `tensorcad.hull.analytic_hydrostatics` reports the same two inertias from the closed forms
+  (`hydrostatics_analytic.waterplane_inertia_transverse` — gamma identity — and
+  `waterplane_inertia_longitudinal` — tanh-sinh quadrature with its own convergence
+  evidence), so the mesh record and the analytic reference speak the same quantities.
+- `tests/test_hydrostatics_inertia.py` — the record against three independent references: a
+  vertex-by-vertex rectangular barge (`L·B³/12`, `B·L³/12`, `keel_z`) exact to `1e-12` on
+  three tessellations, a circular waterplane converging to `πR⁴/4` from below at the
+  `O(1/n²)` rate, and the hull mesh against the closed forms at three sizes.
 - **Transom-stern hull family** (`tensorcad/transom.py`): the aft body is truncated at a
   station `tau` and closed by a planar transom plate, so the parametric hull can carry
   the stern real displacement vessels have instead of a knife edge. Two parameters —
