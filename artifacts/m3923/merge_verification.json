@@ -1,0 +1,216 @@
+{
+  "pull_request": 40,
+  "branch": "agent/m3169",
+  "merge_base": "df31744",
+  "merged_main": "origin/main",
+  "preservation": {
+    "merge_base": "df31744",
+    "paths_touched": 47,
+    "files_missing_from_result": [],
+    "files_touched_by_both_sides": [
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "tensorcad/__init__.py",
+      "tests/test_public_surface.py"
+    ],
+    "files_touched_by_one_side": 43,
+    "one_sided_blob_identity_violations": [],
+    "deletions_declared_by_either_side": [],
+    "added_lines_checked": 6155,
+    "added_line_losses": [],
+    "verdict": "PASS"
+  },
+  "m3169_route": {
+    "barge": {
+      "length": 10.0,
+      "beam": 2.0,
+      "draft": 0.8,
+      "depth": 1.2000000000000002,
+      "kg": 0.55,
+      "wall_sided_window_deg": 38.659808254090095,
+      "deck_edge_immersion_deg": 21.80140948635181,
+      "applied_validity_deg": 21.80140948635181,
+      "rows": [
+        {
+          "heel_deg": 0.0,
+          "gz_mesh": -1.3877787807817612e-17,
+          "gz_closed_form": 0.0,
+          "abs_error": 1.3877787807817612e-17,
+          "volume_residual": -2.2726265314076954e-13
+        },
+        {
+          "heel_deg": 5.0,
+          "gz_mesh": 0.023380513328505773,
+          "gz_closed_form": 0.023380513328504555,
+          "abs_error": 1.2177758801357186e-15,
+          "volume_residual": -7.556177905598815e-13
+        },
+        {
+          "heel_deg": 10.0,
+          "gz_mesh": 0.04743095798991324,
+          "gz_closed_form": 0.04743095798991253,
+          "abs_error": 7.077671781985373e-16,
+          "volume_residual": -1.7907897387203775e-13
+        },
+        {
+          "heel_deg": 15.0,
+          "gz_mesh": 0.07288973939848731,
+          "gz_closed_form": 0.07288973939849266,
+          "abs_error": 5.35682609381638e-15,
+          "volume_residual": 6.512568262451168e-13
+        },
+        {
+          "heel_deg": 20.0,
+          "gz_mesh": 0.10064472360001508,
+          "gz_closed_form": 0.10064472360002714,
+          "abs_error": 1.2059797604990763e-14,
+          "volume_residual": 7.978062654956375e-13
+        }
+      ],
+      "max_abs_error_m": 1.2059797604990763e-14,
+      "max_error_heel_deg": 20.0,
+      "small_angle_slope_m": 0.26826130546783733
+    },
+    "sphere": {
+      "resolution": 32,
+      "kg": 0.9,
+      "gm": 0.09999999999999998,
+      "max_abs_error_m": 0.00011987775268092193,
+      "basis": "GZ = GM sin(phi) is exact for a sphere at any heel; the polyhedral cap centroid is the only error source"
+    }
+  },
+  "main_route_transom": {
+    "rows": [
+      {
+        "transom_fraction": 0.0,
+        "volume_mesh": 7.4465540971492254,
+        "volume_analytic": 7.512698221250894,
+        "volume_relative_error": -0.008804310003371287,
+        "waterplane_area_relative_error": -0.0017492146633222396,
+        "block_coefficient_mesh": 0.4654096310718266,
+        "block_coefficient_analytic": 0.4695436388281809,
+        "transom_immersed_area_analytic": 0.0,
+        "transom_station_x": 0.0
+      },
+      {
+        "transom_fraction": 0.2,
+        "volume_mesh": 8.216624378706381,
+        "volume_analytic": 8.281656069925914,
+        "volume_relative_error": -0.007852498421866283,
+        "waterplane_area_relative_error": -0.0007906283132007485,
+        "block_coefficient_mesh": 0.5135390236691488,
+        "block_coefficient_analytic": 0.5176035043703695,
+        "transom_immersed_area_analytic": 0.735329184952854,
+        "transom_station_x": 0.0
+      },
+      {
+        "transom_fraction": 0.4,
+        "volume_mesh": 7.956441674709339,
+        "volume_analytic": 8.017898872002474,
+        "volume_relative_error": -0.007665000304223906,
+        "waterplane_area_relative_error": -0.0006017956285205094,
+        "block_coefficient_mesh": 0.4973205527058049,
+        "block_coefficient_analytic": 0.5011186795001547,
+        "transom_immersed_area_analytic": 1.0298480511385115,
+        "transom_station_x": 0.0
+      }
+    ],
+    "max_abs_volume_relative_error": 0.008804310003371287
+  },
+  "main_route_inertia": {
+    "rows": [
+      {
+        "length": 10.0,
+        "beam": 2.0,
+        "transverse_inertia": 6.666666666666666,
+        "transverse_reference": 6.666666666666667,
+        "transverse_relative_error": -1.3322676295501878e-16,
+        "longitudinal_inertia": 166.66666666666669,
+        "longitudinal_reference": 166.66666666666666,
+        "longitudinal_relative_error": 1.7053025658242405e-16,
+        "keel_z": -0.8,
+        "keel_z_reference": -1.2000000000000002
+      },
+      {
+        "length": 10.0,
+        "beam": 4.0,
+        "transverse_inertia": 53.33333333333333,
+        "transverse_reference": 53.333333333333336,
+        "transverse_relative_error": -1.3322676295501878e-16,
+        "longitudinal_inertia": 333.33333333333337,
+        "longitudinal_reference": 333.3333333333333,
+        "longitudinal_relative_error": 1.7053025658242405e-16,
+        "keel_z": -0.8,
+        "keel_z_reference": -1.2000000000000002
+      }
+    ],
+    "max_abs_relative_error": 1.7053025658242405e-16
+  },
+  "composition": {
+    "rows": [
+      {
+        "transom_fraction": 0.0,
+        "volume_record": 7.4465540971492254,
+        "volume_heeled_upright": 7.446554097144101,
+        "volume_relative_difference": 6.882095281670824e-13,
+        "kb_record": -0.31699488165657425,
+        "kb_heeled_upright": -0.31699488165679185,
+        "kb_abs_difference_m": 2.1760371282653068e-13,
+        "max_abs_volume_residual": 6.89760086896054e-13,
+        "max_abs_gz": 0.25000000000000006,
+        "gz_minus_kg_sin_max_abs_m": 6.938893903907228e-18
+      },
+      {
+        "transom_fraction": 0.2,
+        "volume_record": 8.216624378706381,
+        "volume_heeled_upright": 8.21662437870074,
+        "volume_relative_difference": 6.866213011459849e-13,
+        "kb_record": -0.31699488165657413,
+        "kb_heeled_upright": -0.3169948816567919,
+        "kb_abs_difference_m": 2.1777024628022446e-13,
+        "max_abs_volume_residual": 6.846755858719579e-13,
+        "max_abs_gz": 0.2500347841075553,
+        "gz_minus_kg_sin_max_abs_m": 1.3877787807814457e-17
+      },
+      {
+        "transom_fraction": 0.4,
+        "volume_record": 7.956441674709339,
+        "volume_heeled_upright": 7.956441674703853,
+        "volume_relative_difference": 6.895391586827784e-13,
+        "kb_record": -0.3169948816565742,
+        "kb_heeled_upright": -0.3169948816567917,
+        "kb_abs_difference_m": 2.1749269052406817e-13,
+        "max_abs_volume_residual": 6.935578424633454e-13,
+        "max_abs_gz": 0.2500704592655456,
+        "gz_minus_kg_sin_max_abs_m": 1.0408340855860843e-17
+      }
+    ],
+    "max_volume_relative_difference": 6.895391586827784e-13,
+    "max_kb_abs_difference_m": 2.1777024628022446e-13,
+    "max_volume_residual": 6.935578424633454e-13,
+    "max_kg_lever_error_m": 1.3877787807814457e-17
+  },
+  "small_angle_cross_module_finding": {
+    "rows": [
+      {
+        "geometry": "parametric hull",
+        "kg": 0.0,
+        "slope_from_heeled_solver_m": 0.48300511834342447,
+        "kb_plus_bm_minus_kg_record_m": 0.9216229964990912,
+        "relative_difference": -0.4759189818633169,
+        "absolute_difference_m": -0.4386178781556667,
+        "bm_m": 0.4386178781556654
+      },
+      {
+        "geometry": "transom hull tau=0.2",
+        "kg": 0.0,
+        "slope_from_heeled_solver_m": 0.4876075975703352,
+        "kb_plus_bm_minus_kg_record_m": 0.9575218975304182,
+        "relative_difference": -0.4907608913927265,
+        "absolute_difference_m": -0.46991429996008294,
+        "bm_m": 0.47451677918699225
+      }
+    ],
+    "verdict": "WITHHELD: the two routes do not agree on a fine hull; see rows"
+  }
+}
