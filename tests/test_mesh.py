@@ -212,3 +212,24 @@ def test_bounding_box_and_metadata() -> None:
     assert box.to_dict()["size"] == (2.0, 4.0, 6.0)
     with pytest.raises(ValueError, match="empty mesh"):
         Mesh(vertices=(), faces=()).bounding_box()
+
+
+def test_a_three_faced_edge_is_not_manifold() -> None:
+    """Manifold means *at most* two faces per edge: a fin on an edge breaks it.
+
+    `is_edge_manifold` was only ever asserted True before this test, so widening it to
+    accept three faces per edge was invisible to the suite (gate-power audit MSH-2).
+    """
+    vertices = (
+        (0.0, 0.0, 0.0),
+        (1.0, 0.0, 0.0),
+        (0.5, 1.0, 0.0),
+        (0.5, -1.0, 0.0),
+        (0.5, 0.0, 1.0),
+    )
+    fins = Mesh(vertices=vertices, faces=((0, 1, 2), (0, 1, 3), (1, 0, 4)))  # type: ignore[arg-type]
+    counts = meshlib.edge_face_counts(fins)
+    assert max(counts.values()) == 3
+    assert not meshlib.is_edge_manifold(fins)
+    assert not meshlib.is_watertight(fins)
+    assert len(meshlib.boundary_edges(fins)) == 6
