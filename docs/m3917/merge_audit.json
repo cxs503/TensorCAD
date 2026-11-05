@@ -1,0 +1,764 @@
+{
+  "base": "e604f02f9645c15e39b6acb562d4079b1755219a",
+  "main": "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+  "branch_pre_merge": "c699a0d",
+  "files_checked": [
+    "CHANGELOG.md",
+    "README.md",
+    "artifacts/m3768/merge_verification.json",
+    "artifacts/m3768/merge_verification.png",
+    "artifacts/m3768/report_body.md",
+    "artifacts/m3768/report_payload.json",
+    "docs/asymmetric_hull.md",
+    "docs/asymmetric_hull/plot.png",
+    "docs/asymmetric_hull/report.md",
+    "docs/asymmetric_hull/results.json",
+    "docs/hydrostatics_verification.md",
+    "docs/m2873/outputs/transom_stern/convergence.csv",
+    "docs/m2873/outputs/transom_stern/convergence.png",
+    "docs/m2873/outputs/transom_stern/design_space.png",
+    "docs/m2873/outputs/transom_stern/design_table.csv",
+    "docs/m2873/outputs/transom_stern/geometry.png",
+    "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+    "docs/m3768_pr39_merge_cure.md",
+    "docs/righting.md",
+    "docs/righting/plot.png",
+    "docs/righting/report.md",
+    "docs/righting/results.json",
+    "docs/transom_stern.md",
+    "examples/asymmetric_hull/run_example.py",
+    "examples/righting/run_example.py",
+    "examples/transom_stern/run_example.py",
+    "pyproject.toml",
+    "tensorcad/__init__.py",
+    "tensorcad/cli.py",
+    "tensorcad/hull.py",
+    "tensorcad/hydrostatics.py",
+    "tensorcad/righting.py",
+    "tensorcad/transom.py",
+    "tests/test_asymmetric_hull.py",
+    "tests/test_cli.py",
+    "tests/test_hull.py",
+    "tests/test_hydrostatics_inertia.py",
+    "tests/test_public_surface.py",
+    "tests/test_righting.py",
+    "tests/test_transom.py",
+    "tools/report_m2873.py",
+    "tools/verify_merge_m2925.py"
+  ],
+  "per_file": {
+    "CHANGELOG.md": {
+      "main": {
+        "added": 80,
+        "kept": 80,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 30,
+        "kept": 30,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "README.md": {
+      "main": {
+        "added": 4,
+        "kept": 2,
+        "extended": 0,
+        "restated": 2,
+        "lost": 0
+      },
+      "branch": {
+        "added": 6,
+        "kept": 5,
+        "extended": 0,
+        "restated": 1,
+        "lost": 0
+      }
+    },
+    "artifacts/m3768/merge_verification.json": {
+      "main": {
+        "added": 71,
+        "kept": 71,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "artifacts/m3768/merge_verification.png": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "artifacts/m3768/report_body.md": {
+      "main": {
+        "added": 72,
+        "kept": 72,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "artifacts/m3768/report_payload.json": {
+      "main": {
+        "added": 1,
+        "kept": 1,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/asymmetric_hull.md": {
+      "main": {
+        "added": 68,
+        "kept": 68,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/asymmetric_hull/plot.png": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/asymmetric_hull/report.md": {
+      "main": {
+        "added": 76,
+        "kept": 76,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/asymmetric_hull/results.json": {
+      "main": {
+        "added": 185,
+        "kept": 185,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/hydrostatics_verification.md": {
+      "main": {
+        "added": 2,
+        "kept": 2,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m2873/outputs/transom_stern/convergence.csv": {
+      "main": {
+        "added": 17,
+        "kept": 17,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m2873/outputs/transom_stern/convergence.png": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m2873/outputs/transom_stern/design_space.png": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m2873/outputs/transom_stern/design_table.csv": {
+      "main": {
+        "added": 16,
+        "kept": 16,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m2873/outputs/transom_stern/geometry.png": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m2873/outputs/transom_stern/reference_ladder.csv": {
+      "main": {
+        "added": 27,
+        "kept": 27,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/m3768_pr39_merge_cure.md": {
+      "main": {
+        "added": 100,
+        "kept": 100,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/righting.md": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 76,
+        "kept": 76,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/righting/plot.png": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/righting/report.md": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 53,
+        "kept": 53,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/righting/results.json": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 300,
+        "kept": 300,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "docs/transom_stern.md": {
+      "main": {
+        "added": 129,
+        "kept": 129,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "examples/asymmetric_hull/run_example.py": {
+      "main": {
+        "added": 262,
+        "kept": 262,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "examples/righting/run_example.py": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 358,
+        "kept": 358,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "examples/transom_stern/run_example.py": {
+      "main": {
+        "added": 213,
+        "kept": 213,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "pyproject.toml": {
+      "main": {
+        "added": 1,
+        "kept": 1,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 1,
+        "kept": 1,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tensorcad/__init__.py": {
+      "main": {
+        "added": 29,
+        "kept": 29,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 33,
+        "kept": 33,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tensorcad/cli.py": {
+      "main": {
+        "added": 15,
+        "kept": 15,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tensorcad/hull.py": {
+      "main": {
+        "added": 245,
+        "kept": 245,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tensorcad/hydrostatics.py": {
+      "main": {
+        "added": 70,
+        "kept": 70,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tensorcad/righting.py": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 548,
+        "kept": 548,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tensorcad/transom.py": {
+      "main": {
+        "added": 501,
+        "kept": 501,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_asymmetric_hull.py": {
+      "main": {
+        "added": 269,
+        "kept": 269,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_cli.py": {
+      "main": {
+        "added": 1,
+        "kept": 1,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_hull.py": {
+      "main": {
+        "added": 5,
+        "kept": 5,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_hydrostatics_inertia.py": {
+      "main": {
+        "added": 221,
+        "kept": 221,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_public_surface.py": {
+      "main": {
+        "added": 8,
+        "kept": 7,
+        "extended": 1,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 6,
+        "kept": 6,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_righting.py": {
+      "main": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 305,
+        "kept": 305,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tests/test_transom.py": {
+      "main": {
+        "added": 248,
+        "kept": 248,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tools/report_m2873.py": {
+      "main": {
+        "added": 146,
+        "kept": 146,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    },
+    "tools/verify_merge_m2925.py": {
+      "main": {
+        "added": 161,
+        "kept": 161,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      },
+      "branch": {
+        "added": 0,
+        "kept": 0,
+        "extended": 0,
+        "restated": 0,
+        "lost": 0
+      }
+    }
+  },
+  "lost": [],
+  "extended": [
+    {
+      "file": "tests/test_public_surface.py",
+      "side": "main",
+      "line": "\"wigley\", \"transom\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\","
+    }
+  ],
+  "restated": [
+    {
+      "file": "README.md",
+      "side": "main",
+      "line": "or any classification-rule compliance (initial GM is reported, and GZ(φ) is not). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it."
+    },
+    {
+      "file": "README.md",
+      "side": "main",
+      "line": "remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore/aft-symmetric by default, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, the righting-arm curve, free-surface or damage stability, resistance,"
+    },
+    {
+      "file": "README.md",
+      "side": "branch",
+      "line": "remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both fore-aft symmetric, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, free-surface or damage stability, stability *criteria* (`GZ` curves exist since 0.21; the rule limits are the caller's), resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it."
+    }
+  ],
+  "api": {
+    "count_main": 120,
+    "count_branch": 122,
+    "count_merged": 135,
+    "count_union": 135,
+    "main_only_missing": [],
+    "branch_only_missing": [],
+    "expected_api_equals_all": true,
+    "expected_api_extra": [],
+    "expected_api_missing": [],
+    "imports": {
+      "righting": true,
+      "transom": true
+    }
+  },
+  "ok": true
+}

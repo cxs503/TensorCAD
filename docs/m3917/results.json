@@ -1,0 +1,932 @@
+{
+  "study": {
+    "box": {
+      "length_m": 6.0,
+      "beam_m": 3.0,
+      "height_m": 4.0,
+      "draft_m": 2.0,
+      "kg_m": 1.0,
+      "km_m": 1.375,
+      "gm_m": 0.375
+    },
+    "rows": [
+      {
+        "heel_deg": 0.0,
+        "gz_numeric_m": 0.0,
+        "gz_analytic_m": 0.0,
+        "abs_err_m": 0.0,
+        "rel_err": 0.0
+      },
+      {
+        "heel_deg": 5.0,
+        "gz_numeric_m": 0.032808487266587937,
+        "gz_analytic_m": 0.03280848726658785,
+        "abs_err_m": 8.326672684688674e-17,
+        "rel_err": 2.5379630023870542e-15
+      },
+      {
+        "heel_deg": 10.0,
+        "gz_numeric_m": 0.06613036617595691,
+        "gz_analytic_m": 0.06613036617595677,
+        "abs_err_m": 1.3877787807814457e-16,
+        "rel_err": 2.0985499718675455e-15
+      },
+      {
+        "heel_deg": 15.0,
+        "gz_numeric_m": 0.10054133654748372,
+        "gz_analytic_m": 0.10054133654748355,
+        "abs_err_m": 1.6653345369377348e-16,
+        "rel_err": 1.6563680115304936e-15
+      },
+      {
+        "heel_deg": 20.0,
+        "gz_numeric_m": 0.13675297058898978,
+        "gz_analytic_m": 0.13675297058898955,
+        "abs_err_m": 2.220446049250313e-16,
+        "rel_err": 1.623691273167187e-15
+      },
+      {
+        "heel_deg": 25.0,
+        "gz_numeric_m": 0.17571221909850648,
+        "gz_analytic_m": 0.17571221909850632,
+        "abs_err_m": 1.6653345369377348e-16,
+        "rel_err": 9.477625093358641e-16
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_numeric_m": 0.21874999999999994,
+        "gz_analytic_m": 0.21874999999999964,
+        "abs_err_m": 3.0531133177191805e-16,
+        "rel_err": 1.3957089452430563e-15
+      },
+      {
+        "heel_deg": 35.0,
+        "gz_numeric_m": 0.2678197510981268,
+        "gz_analytic_m": 0.26781975109812634,
+        "abs_err_m": 4.440892098500626e-16,
+        "rel_err": 1.6581645230763918e-15
+      },
+      {
+        "heel_deg": 40.0,
+        "gz_numeric_m": 0.32590394713151,
+        "gz_analytic_m": 0.3259039471315096,
+        "abs_err_m": 3.885780586188048e-16,
+        "rel_err": 1.19230853765022e-15
+      }
+    ],
+    "max_abs_err_m": 4.440892098500626e-16,
+    "max_rel_err": 2.5379630023870542e-15,
+    "curve": {
+      "kg_m": 1.0,
+      "y_g_m": 0.0,
+      "keel_z_m": -2.0,
+      "displacement_volume_m3": 36.0,
+      "max_arm_m": 0.325903947132,
+      "angle_of_max_arm_deg": 40.0,
+      "zero_crossing_deg": null,
+      "area_to_30_deg_m_rad": 0.054220431676,
+      "area_to_40_deg_m_rad": 0.101357125622,
+      "basis": "heeled displacement integration, solid hull, free trim",
+      "points": [
+        {
+          "heel_deg": 0.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "waterplane_area_m2": 18.0,
+          "kg_m": 1.0,
+          "gz_m": 0.0,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 5.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            0.0,
+            0.032808248822,
+            -0.998564825079
+          ],
+          "waterplane_area_m2": 18.06875707578,
+          "kg_m": 1.0,
+          "gz_m": 0.032808487267,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 10.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            0.0,
+            0.066122617766,
+            -0.994170399226
+          ],
+          "waterplane_area_m2": 18.277679013943,
+          "kg_m": 1.0,
+          "gz_m": 0.066130366176,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 15.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            0.0,
+            0.100480947162,
+            -0.986538105677
+          ],
+          "waterplane_area_m2": 18.634971247381,
+          "kg_m": 1.0,
+          "gz_m": 0.100541336547,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 20.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            -0.0,
+            0.13648883785,
+            -0.975161062857
+          ],
+          "waterplane_area_m2": 19.155199904566,
+          "kg_m": 1.0,
+          "gz_m": 0.136752970589,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 25.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            0.0,
+            0.174865371808,
+            -0.95922946899
+          ],
+          "waterplane_area_m2": 19.860802541325,
+          "kg_m": 1.0,
+          "gz_m": 0.175712219099,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 30.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            0.0,
+            0.216506350946,
+            -0.9375
+          ],
+          "waterplane_area_m2": 20.784609690827,
+          "kg_m": 1.0,
+          "gz_m": 0.21875,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 35.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            -0.0,
+            0.262577826829,
+            -0.908070513144
+          ],
+          "waterplane_area_m2": 21.973942597706,
+          "kg_m": 1.0,
+          "gz_m": 0.267819751098,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        },
+        {
+          "heel_deg": 40.0,
+          "displacement_volume_m3": 36.0,
+          "plane_offset_m": 0.0,
+          "centre_of_buoyancy_m": [
+            -0.0,
+            0.314662361691,
+            -0.86798346418
+          ],
+          "waterplane_area_m2": 23.497331207981,
+          "kg_m": 1.0,
+          "gz_m": 0.325903947132,
+          "volume_residual_m3": 0.0,
+          "iterations": 1
+        }
+      ]
+    },
+    "version": "0.21.0",
+    "api_count": 135,
+    "modules": {
+      "righting": true,
+      "transom": true
+    }
+  },
+  "audit_summary": {
+    "ok": true,
+    "lost_lines": 0,
+    "extended": 1,
+    "restated": 3,
+    "files_checked": 42,
+    "api": {
+      "count_main": 120,
+      "count_branch": 122,
+      "count_merged": 135,
+      "count_union": 135,
+      "main_only_missing": [],
+      "branch_only_missing": [],
+      "expected_api_equals_all": true,
+      "expected_api_extra": [],
+      "expected_api_missing": [],
+      "imports": {
+        "righting": true,
+        "transom": true
+      }
+    },
+    "per_file": {
+      "CHANGELOG.md": {
+        "main": {
+          "added": 80,
+          "kept": 80,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 30,
+          "kept": 30,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "README.md": {
+        "main": {
+          "added": 4,
+          "kept": 2,
+          "extended": 0,
+          "restated": 2,
+          "lost": 0
+        },
+        "branch": {
+          "added": 6,
+          "kept": 5,
+          "extended": 0,
+          "restated": 1,
+          "lost": 0
+        }
+      },
+      "artifacts/m3768/merge_verification.json": {
+        "main": {
+          "added": 71,
+          "kept": 71,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "artifacts/m3768/merge_verification.png": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "artifacts/m3768/report_body.md": {
+        "main": {
+          "added": 72,
+          "kept": 72,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "artifacts/m3768/report_payload.json": {
+        "main": {
+          "added": 1,
+          "kept": 1,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/asymmetric_hull.md": {
+        "main": {
+          "added": 68,
+          "kept": 68,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/asymmetric_hull/plot.png": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/asymmetric_hull/report.md": {
+        "main": {
+          "added": 76,
+          "kept": 76,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/asymmetric_hull/results.json": {
+        "main": {
+          "added": 185,
+          "kept": 185,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/hydrostatics_verification.md": {
+        "main": {
+          "added": 2,
+          "kept": 2,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m2873/outputs/transom_stern/convergence.csv": {
+        "main": {
+          "added": 17,
+          "kept": 17,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m2873/outputs/transom_stern/convergence.png": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m2873/outputs/transom_stern/design_space.png": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m2873/outputs/transom_stern/design_table.csv": {
+        "main": {
+          "added": 16,
+          "kept": 16,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m2873/outputs/transom_stern/geometry.png": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m2873/outputs/transom_stern/reference_ladder.csv": {
+        "main": {
+          "added": 27,
+          "kept": 27,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/m3768_pr39_merge_cure.md": {
+        "main": {
+          "added": 100,
+          "kept": 100,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/righting.md": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 76,
+          "kept": 76,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/righting/plot.png": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/righting/report.md": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 53,
+          "kept": 53,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/righting/results.json": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 300,
+          "kept": 300,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "docs/transom_stern.md": {
+        "main": {
+          "added": 129,
+          "kept": 129,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "examples/asymmetric_hull/run_example.py": {
+        "main": {
+          "added": 262,
+          "kept": 262,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "examples/righting/run_example.py": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 358,
+          "kept": 358,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "examples/transom_stern/run_example.py": {
+        "main": {
+          "added": 213,
+          "kept": 213,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "pyproject.toml": {
+        "main": {
+          "added": 1,
+          "kept": 1,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 1,
+          "kept": 1,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tensorcad/__init__.py": {
+        "main": {
+          "added": 29,
+          "kept": 29,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 33,
+          "kept": 33,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tensorcad/cli.py": {
+        "main": {
+          "added": 15,
+          "kept": 15,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tensorcad/hull.py": {
+        "main": {
+          "added": 245,
+          "kept": 245,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tensorcad/hydrostatics.py": {
+        "main": {
+          "added": 70,
+          "kept": 70,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tensorcad/righting.py": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 548,
+          "kept": 548,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tensorcad/transom.py": {
+        "main": {
+          "added": 501,
+          "kept": 501,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_asymmetric_hull.py": {
+        "main": {
+          "added": 269,
+          "kept": 269,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_cli.py": {
+        "main": {
+          "added": 1,
+          "kept": 1,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_hull.py": {
+        "main": {
+          "added": 5,
+          "kept": 5,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_hydrostatics_inertia.py": {
+        "main": {
+          "added": 221,
+          "kept": 221,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_public_surface.py": {
+        "main": {
+          "added": 8,
+          "kept": 7,
+          "extended": 1,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 6,
+          "kept": 6,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_righting.py": {
+        "main": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 305,
+          "kept": 305,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tests/test_transom.py": {
+        "main": {
+          "added": 248,
+          "kept": 248,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tools/report_m2873.py": {
+        "main": {
+          "added": 146,
+          "kept": 146,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      },
+      "tools/verify_merge_m2925.py": {
+        "main": {
+          "added": 161,
+          "kept": 161,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        },
+        "branch": {
+          "added": 0,
+          "kept": 0,
+          "extended": 0,
+          "restated": 0,
+          "lost": 0
+        }
+      }
+    }
+  },
+  "figure": "/root/tp-agent/work/m3917/docs/m3917/gz_verification.png"
+}
