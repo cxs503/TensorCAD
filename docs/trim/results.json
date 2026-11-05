@@ -1,0 +1,240 @@
+{
+  "box_centimetre_routes": {
+    "from_I_L_cm": 280.9756097560974,
+    "from_MCT_cm": 280.97560975609747
+  },
+  "box_particulars": {
+    "kb": {
+      "exact": 2.5,
+      "measured": 2.5,
+      "rel": 0.0
+    },
+    "lcb": {
+      "exact": 10.0,
+      "measured": 10.0,
+      "rel": 0.0
+    },
+    "lcf": {
+      "exact": 10.0,
+      "measured": 10.0,
+      "rel": 0.0
+    },
+    "longitudinal_second_moment": {
+      "exact": 2666.6666666666665,
+      "measured": 2666.666666666668,
+      "rel": 5.115907697472722e-16
+    },
+    "mct": {
+      "exact": 1.3666666666666665,
+      "measured": 1.3666666666666671,
+      "rel": 4.874149864208005e-16
+    },
+    "tpc": {
+      "exact": 0.82,
+      "measured": 0.82,
+      "rel": 0.0
+    },
+    "transverse_second_moment": {
+      "exact": 106.66666666666667,
+      "measured": 106.66666666666666,
+      "rel": -1.3322676295501878e-16
+    },
+    "volume": {
+      "exact": 400.0,
+      "measured": 400.0,
+      "rel": 0.0
+    },
+    "waterplane_area": {
+      "exact": 80.0,
+      "measured": 80.0,
+      "rel": 0.0
+    }
+  },
+  "box_trim": [
+    {
+      "closed_form_deg": 2.0115127435471747,
+      "iterations": 3,
+      "lcb_residual_m": 2.163602630389505e-12,
+      "mesh_deg": 2.011512743547181,
+      "rel": 3.090832488059287e-15,
+      "shift_m": 4.0,
+      "weight_kg": 24000.0
+    },
+    {
+      "closed_form_deg": 7.997020444046825,
+      "iterations": 3,
+      "lcb_residual_m": -5.329070518200751e-15,
+      "mesh_deg": 7.997020444046782,
+      "rel": -5.442119708185069e-15,
+      "shift_m": 8.0,
+      "weight_kg": 48000.0
+    }
+  ],
+  "box_trim_reference": {
+    "closed_form_deg": 7.997020444046825,
+    "shift_m": 8.0,
+    "weight_kg": 48000.0
+  },
+  "hull_particulars": {
+    "analytic_quadrature_evidence": 0.0,
+    "analytic_volume": 5.375649253490801,
+    "draft": 0.64,
+    "kb": 0.3872774297983012,
+    "km_transverse": 0.8260995919712535,
+    "lcb": 4.999999990814316,
+    "lcb_minus_lcf": -9.185684213264267e-09,
+    "lcf": 5.0,
+    "mct": 0.07831678755115482,
+    "mct_analytic": 0.078792550667538,
+    "tpc": 0.12887323466080575,
+    "tpc_from_dV_dz": 0.12904255963596079,
+    "volume": 5.320602274552836,
+    "volume_rel": -0.010240061496240528,
+    "waterline_z": -0.16000000000000003
+  },
+  "hull_trim": [
+    {
+      "change_of_trim_cm": 4.284168031503568,
+      "iterations": 5,
+      "lcb_residual_m": 7.140954494389007e-13,
+      "mct_t_m_per_cm": 0.07002526460072395,
+      "mesh_deg": 0.24449246162487676,
+      "rel": -0.003954903960461764,
+      "shift_m": 1.0,
+      "small_angle_deg": 0.24546324518540832,
+      "waterline_at_reference_m": -0.16003898348641898,
+      "weight_kg": 300.0
+    },
+    {
+      "change_of_trim_cm": -2.142084015751784,
+      "iterations": 5,
+      "lcb_residual_m": -6.217248937900877e-15,
+      "mct_t_m_per_cm": 0.07002526460072395,
+      "mesh_deg": -0.12224397834385736,
+      "rel": -0.003977826994299722,
+      "shift_m": -1.0,
+      "small_angle_deg": -0.12273218574538476,
+      "waterline_at_reference_m": -0.1600097453409804,
+      "weight_kg": 150.0
+    }
+  ],
+  "hull_trim_convergence": [
+    {
+      "iterations": 5,
+      "rel_to_finest": 0.0008913159021069261,
+      "stations": 21,
+      "trim_deg": 0.24568884207151193
+    },
+    {
+      "iterations": 5,
+      "rel_to_finest": -0.003982518780233628,
+      "stations": 41,
+      "trim_deg": 0.24449246162487676
+    },
+    {
+      "iterations": 5,
+      "rel_to_finest": -1.7465500189788564e-06,
+      "stations": 81,
+      "trim_deg": 0.24546962198609976
+    },
+    {
+      "iterations": 5,
+      "rel_to_finest": 0.0,
+      "stations": 161,
+      "trim_deg": 0.24547005071182149
+    }
+  ],
+  "hydrostatic_table": [
+    {
+      "draft": 0.22399999999999998,
+      "km_transverse": 0.5911097389747219,
+      "lcb_minus_lcf": -9.24882037622865e-09,
+      "mct": 0.04133995982105107,
+      "nudged": false,
+      "tpc": 0.07607957125904956,
+      "volume": 1.0625212465784497
+    },
+    {
+      "draft": 0.28800000000000003,
+      "km_transverse": 0.6242403226730187,
+      "lcb_minus_lcf": -9.217233198910435e-09,
+      "mct": 0.046924876058845114,
+      "nudged": false,
+      "tpc": 0.08635780462461003,
+      "volume": 1.571193737887559
+    },
+    {
+      "draft": 0.35200000000000004,
+      "km_transverse": 0.6594738009149969,
+      "lcb_minus_lcf": -9.201569284300604e-09,
+      "mct": 0.05190510701015802,
+      "nudged": false,
+      "tpc": 0.09552325270803641,
+      "volume": 2.1403477782930502
+    },
+    {
+      "draft": 0.41600000000000004,
+      "km_transverse": 0.6957754940688561,
+      "lcb_minus_lcf": -9.192683947389924e-09,
+      "mct": 0.05644404306314945,
+      "nudged": false,
+      "tpc": 0.10387661375973774,
+      "volume": 2.7640841066024877
+    },
+    {
+      "draft": 0.48000000000000004,
+      "km_transverse": 0.7326890999835256,
+      "lcb_minus_lcf": -9.18715503672729e-09,
+      "mct": 0.060642185537239296,
+      "nudged": false,
+      "tpc": 0.11160284823914168,
+      "volume": 3.43796413344047
+    },
+    {
+      "draft": 0.544,
+      "km_transverse": 0.7699838507283864,
+      "lcb_minus_lcf": -9.18348330714025e-09,
+      "mct": 0.06456669899597399,
+      "nudged": false,
+      "tpc": 0.11882556532311789,
+      "volume": 4.158488142864964
+    },
+    {
+      "draft": 0.6080000000000001,
+      "km_transverse": 0.807531163969636,
+      "lcb_minus_lcf": -9.180918247864156e-09,
+      "mct": 0.06826514695180977,
+      "nudged": false,
+      "tpc": 0.1256323013587556,
+      "volume": 4.922803362948242
+    },
+    {
+      "draft": 0.672,
+      "km_transverse": 0.8452540098448301,
+      "lcb_minus_lcf": -9.179050408647527e-09,
+      "mct": 0.07177269193886143,
+      "nudged": false,
+      "tpc": 0.1320877704921125,
+      "volume": 5.728525639138831
+    },
+    {
+      "draft": 0.736,
+      "km_transverse": 0.8831035658945274,
+      "lcb_minus_lcf": -9.177655968528597e-09,
+      "mct": 0.07511620808940528,
+      "nudged": false,
+      "tpc": 0.13824143323757832,
+      "volume": 6.5736233426725486
+    }
+  ],
+  "wigley": {
+    "draft": 0.5,
+    "i_l_mesh": 31.91106163194445,
+    "mct": 0.03270883817274306,
+    "small_angle_deg": 0.2627518175368128,
+    "tpc": 0.06544518229166664,
+    "tpc_from_dV_dz": 0.06548611110785194,
+    "trim_deg": 0.26248557351120894,
+    "volume": 1.9516782406430842
+  }
+}
