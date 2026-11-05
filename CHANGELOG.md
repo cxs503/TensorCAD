@@ -4,6 +4,40 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.22.1 — 2026-11-05
+
+### Added
+- **The published evidence page for the large-angle route** (`publish_report.py` ->
+  `docs/gz/{results.json,report.md,figures/gz-curve.png}`), the deliverable that the closed
+  PR #48 was missing. Nine claims (`C1`-`C9`), every one a computed comparison: the barge
+  against `sin(phi)(GM0 + BM0/2 tan^2 phi)` (`6.9e-17 m` inside the formula's 38.66 deg
+  window), the log against central symmetry (`1.1e-16 m` to 90 deg), the hull's `GZ'(0)`
+  against `GM` from the waterplane moments (`1.8e-09` relative on the `41x13` mesh), the
+  displacement residual at every heel (`4.8e-16`), a slack tank's flat `sum(i_x)/V` shift
+  (`2.7977 mm`, reproduced to `4.6e-17 m`) and the cross-route agreement with
+  `tensorcad.righting_arm`'s bracket-and-bisect solve (`6.2e-14 m`).
+- **The controls are claims too.** `C2` requires the wall-sided form to be metres out past
+  its validity window (`1.252 m` at 70 deg) and `C7` requires a 10 % displacement error to
+  move `GZ(20 deg)` by `4.3e-03 m`, i.e. eleven orders of magnitude above the `6.2e-14 m`
+  agreement it is meant to police; a `direction` field records which side of the threshold
+  passes, so a control that stops biting fails instead of being read as accuracy. The page
+  also reports, rather than hides, that the log identity is exact only on the 64-gon's
+  symmetry axes: heels between them carry the polygon's own asymmetry (`9.6e-06 m` at 10 deg).
+- **The page is tested, not trusted.** `tests/test_gz.py` pins the artifacts (PNG magic and
+  IHDR size, the verdict table, every claim id, the page's numbers against the JSON's),
+  requires the `C2`/`C7` controls to clear their thresholds by >50x, and runs
+  `publish_report.py --check`, which recomputes all nine claims and fails on any drift. A
+  change to the integrator that moves a published number now fails a test instead of ageing
+  the documentation.
+
+### Changed
+- `pyproject.toml`: `matplotlib` moved behind a `report` extra
+  (`pip install "tensorcad[report]"`), used only to draw `docs/*/figures`; the core package
+  still installs with nothing but the standard library and no check needs it.
+  `tests/test_public_surface.py` now also imports `gz`, `righting_arm`, `stability` and
+  `bonjean`, which the layering test had never listed.
+- `docs/gz.md` points at the measured record and `README.md` at the publisher command.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added

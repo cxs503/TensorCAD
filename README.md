@@ -487,6 +487,7 @@ The core package depends on nothing outside the standard library. That is a test
 ```bash
 python -m pip install -e ".[test,dev]"
 pytest --cov
+python publish_report.py                     # regenerate docs/gz/ (9 claims + figure)
 python examples/parametric_hull/run_example.py --output results/hull-demo
 python examples/geometry_core/run_benchmark.py --resolution 40
 python examples/suboff/run_example.py --output results/suboff
@@ -545,4 +546,4 @@ accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius,
 1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape
 ratios, not resistance or stability), a B-rep/STEP *feature model* (the STEP export is a faceted solid),
 remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore/aft-symmetric by default (a transom-stern variant exists since 0.21.0), series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, damage or flooded-compartment stability, resistance,
-or any classification-rule compliance (initial GM is reported, and so is GZ(φ) at constant displacement through two independent routes since 0.22.0, but a damaged or free-to-trim equilibrium is not). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+or any classification-rule compliance (initial GM is reported, and so is GZ(φ) at constant displacement through two independent routes since 0.22.0 -- with the nine published claims, their controls and the figures in [docs/gz/report.md](docs/gz/report.md) -- but a damaged or free-to-trim equilibrium is not). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.

@@ -64,14 +64,14 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.22.0"
+    assert tensorcad.__version__ == "0.22.1"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
                    "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
-                   "adapters.fem", "benchmark"):
+                   "gz", "righting_arm", "stability", "bonjean", "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 

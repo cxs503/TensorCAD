@@ -1,0 +1,416 @@
+{
+  "generated_by": "publish_report.py",
+  "tensorcad_version": "0.22.1",
+  "barge": {
+    "parameters": {
+      "length_m": 10.0,
+      "beam_m": 2.0,
+      "draft_m": 0.8,
+      "depth_m": 2.0,
+      "freeboard_m": 1.2,
+      "kg_m": 0.5,
+      "waterline_z_m": 0.8
+    },
+    "wall_sided_limit_deg": 38.659808254090095,
+    "bm0_m": 0.41666666666666663,
+    "gm0_m": 0.31666666666666665,
+    "inside": [
+      {
+        "heel_deg": 0.0,
+        "gz_m": -0.0,
+        "reference_m": 0.0,
+        "abs_error_m": 2.6020852139652106e-18
+      },
+      {
+        "heel_deg": 5.0,
+        "gz_m": 0.027738300466,
+        "reference_m": 0.027738300466,
+        "abs_error_m": 6.938893903907228e-18
+      },
+      {
+        "heel_deg": 10.0,
+        "gz_m": 0.056113366873,
+        "reference_m": 0.056113366873,
+        "abs_error_m": 3.469446951953614e-17
+      },
+      {
+        "heel_deg": 15.0,
+        "gz_m": 0.085830691654,
+        "reference_m": 0.085830691654,
+        "abs_error_m": 6.938893903907228e-17
+      },
+      {
+        "heel_deg": 20.0,
+        "gz_m": 0.117745730766,
+        "reference_m": 0.117745730766,
+        "abs_error_m": 5.551115123125783e-17
+      },
+      {
+        "heel_deg": 25.0,
+        "gz_m": 0.152973972824,
+        "reference_m": 0.152973972824,
+        "abs_error_m": 5.551115123125783e-17
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_m": 0.193055555556,
+        "reference_m": 0.193055555556,
+        "abs_error_m": 0.0
+      },
+      {
+        "heel_deg": 35.0,
+        "gz_m": 0.240219857585,
+        "reference_m": 0.240219857585,
+        "abs_error_m": 2.7755575615628914e-17
+      }
+    ],
+    "worst_abs_error_m": 6.938893903907228e-17,
+    "beyond_limit": [
+      {
+        "heel_deg": 45.0,
+        "gz_m": 0.353553390593,
+        "reference_m": 0.371231060123,
+        "abs_error_m": 0.01767766952966371
+      },
+      {
+        "heel_deg": 55.0,
+        "gz_m": 0.456144382735,
+        "reference_m": 0.607470651887,
+        "abs_error_m": 0.15132626915199093
+      },
+      {
+        "heel_deg": 70.0,
+        "gz_m": 0.523110651289,
+        "reference_m": 1.775359735658,
+        "abs_error_m": 1.252249084368609
+      }
+    ],
+    "worst_beyond_abs_error_m": 1.252249084368609
+  },
+  "log": {
+    "parameters": {
+      "radius_m": 1.0,
+      "length_m": 4.0,
+      "segments": 64,
+      "kg_m": 0.5,
+      "waterline_z_m": 1.0
+    },
+    "angles_deg": [
+      0.0,
+      11.25,
+      22.5,
+      33.75,
+      45.0,
+      56.25,
+      67.5,
+      78.75,
+      90.0
+    ],
+    "rows": [
+      {
+        "heel_deg": 0.0,
+        "gz_m": 0.0,
+        "reference_m": 0.0,
+        "abs_error_m": 1.8076938185662238e-17
+      },
+      {
+        "heel_deg": 11.25,
+        "gz_m": 0.097545161008,
+        "reference_m": 0.097545161008,
+        "abs_error_m": 5.551115123125783e-17
+      },
+      {
+        "heel_deg": 22.5,
+        "gz_m": 0.191341716183,
+        "reference_m": 0.191341716183,
+        "abs_error_m": 0.0
+      },
+      {
+        "heel_deg": 33.75,
+        "gz_m": 0.27778511651,
+        "reference_m": 0.27778511651,
+        "abs_error_m": 0.0
+      },
+      {
+        "heel_deg": 45.0,
+        "gz_m": 0.353553390593,
+        "reference_m": 0.353553390593,
+        "abs_error_m": 1.1102230246251565e-16
+      },
+      {
+        "heel_deg": 56.25,
+        "gz_m": 0.415734806151,
+        "reference_m": 0.415734806151,
+        "abs_error_m": 0.0
+      },
+      {
+        "heel_deg": 67.5,
+        "gz_m": 0.461939766256,
+        "reference_m": 0.461939766256,
+        "abs_error_m": 0.0
+      },
+      {
+        "heel_deg": 78.75,
+        "gz_m": 0.490392640202,
+        "reference_m": 0.490392640202,
+        "abs_error_m": 1.1102230246251565e-16
+      },
+      {
+        "heel_deg": 90.0,
+        "gz_m": 0.5,
+        "reference_m": 0.5,
+        "abs_error_m": 0.0
+      }
+    ],
+    "worst_abs_error_m": 1.1102230246251565e-16,
+    "off_axis": [
+      {
+        "heel_deg": 10.0,
+        "gz_m": 0.086814448632,
+        "reference_m": 0.086824088833,
+        "abs_error_m": 9.640201646010649e-06
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_m": 0.250007434957,
+        "reference_m": 0.25,
+        "abs_error_m": 7.434957416535548e-06
+      }
+    ],
+    "worst_off_axis_abs_error_m": 9.640201646010649e-06
+  },
+  "hull": {
+    "parameters": {
+      "length_m": 10.0,
+      "beam_m": 2.0,
+      "draft_m": 0.8,
+      "freeboard_m": 1.0,
+      "kg_m": 0.5,
+      "nx": 41,
+      "nz": 13,
+      "waterline_z_m": 0.0
+    },
+    "watertight": true,
+    "upright": {
+      "displacement_volume_m3": 7.4465540971492254,
+      "kb_m": 0.4830051183434258,
+      "bm_transverse_m": 0.43861787815566544,
+      "gm_transverse_m": 0.4216229964990912,
+      "waterplane_area_m2": 14.06166918630219
+    },
+    "gm_from_curve_slope_m": 0.4216229957516102,
+    "slope_relative_error": 1.7728657407661466e-09,
+    "curve": {
+      "angles_deg": [
+        0.0,
+        15.0,
+        30.0,
+        45.0,
+        60.0,
+        75.0,
+        90.0
+      ],
+      "gz_m": [
+        -2.1456741920005978e-17,
+        0.10096726143389065,
+        0.19360584570249093,
+        0.29614400539994,
+        0.4207319074095376,
+        0.5151408315065493,
+        0.5588590159332503
+      ],
+      "kn_m": [
+        -2.1456741920005978e-17,
+        0.23037678398515102,
+        0.4436058457024909,
+        0.6496973959932137,
+        0.8537446093017569,
+        0.9981037446510834,
+        1.0588590159332503
+      ],
+      "max_gz_m": 0.5588590159332503,
+      "angle_of_max_gz_deg": 90.0,
+      "range_of_stability_deg": null,
+      "area_under_curve_m_rad": 0.472814762649315
+    }
+  },
+  "volume_residual": {
+    "per_curve": {
+      "barge": 2.220446049250313e-16,
+      "log": 2.8317063242517616e-16,
+      "hull": 4.770949935300398e-16
+    },
+    "worst": 4.770949935300398e-16
+  },
+  "cross_route": {
+    "heels_deg": [
+      0.0,
+      10.0,
+      20.0,
+      30.0,
+      40.0
+    ],
+    "hull": {
+      "newton_gz_m": [
+        -2.1456741920005978e-17,
+        0.06897598546579957,
+        0.13203436047681402,
+        0.19360584570249093,
+        0.2591710951766789
+      ],
+      "bisection_gz_m": [
+        1.4004691983338069e-18,
+        0.06897598546579062,
+        0.132034360476801,
+        0.19360584570250364,
+        0.25917109517674086
+      ],
+      "abs_difference_m": [
+        2.2857211118339783e-17,
+        8.951173136040325e-15,
+        1.301736496372996e-14,
+        1.2712053631958042e-14,
+        6.195044477408373e-14
+      ]
+    },
+    "barge": {
+      "heels_deg": [
+        0.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "newton_gz_m": [
+        -2.6020852139652106e-18,
+        0.05611336687325909,
+        0.11774573076631054,
+        0.1930555555555555
+      ],
+      "bisection_gz_m": [
+        0.0,
+        0.05611336687325692,
+        0.11774573076629086,
+        0.19305555555557713
+      ],
+      "abs_difference_m": [
+        2.6020852139652106e-18,
+        2.1649348980190553e-15,
+        1.96787031114809e-14,
+        2.1621593404574924e-14
+      ]
+    },
+    "worst_abs_difference_m": 6.195044477408373e-14,
+    "negative_control": {
+      "heel_deg": 20.0,
+      "volume_shift_fraction": 0.1,
+      "gz_shift_m": 0.004287041186194551
+    }
+  },
+  "free_surface": {
+    "tank": {
+      "length_m": 2.0,
+      "breadth_m": 0.5,
+      "i_x_m4": 0.020833333333333332
+    },
+    "flat_shift_m": 0.0027977146290133026,
+    "worst_shift_error_m": 4.5536491244391186e-17,
+    "max_gz_solid_m": 0.5588590159332503,
+    "max_gz_with_free_surface_m": 0.5560613013042369,
+    "peak_drop_m": 0.002797714629013348
+  },
+  "claims": [
+    {
+      "id": "C1",
+      "statement": "barge reproduces sin(phi)(GM0 + BM0/2 tan^2 phi) inside its validity window",
+      "value": 6.938893903907228e-17,
+      "threshold": 1e-09,
+      "unit": "m",
+      "direction": "upper",
+      "passed": true
+    },
+    {
+      "id": "C2",
+      "statement": "the same closed form is metres out past the window (non-vacuous control)",
+      "value": 1.252249084368609,
+      "threshold": 0.01,
+      "unit": "m",
+      "direction": "lower",
+      "passed": true
+    },
+    {
+      "id": "C3",
+      "statement": "log reproduces (R - KG) sin(phi) from 0 to 90 degrees",
+      "value": 1.1102230246251565e-16,
+      "threshold": 1e-09,
+      "unit": "m",
+      "direction": "upper",
+      "passed": true
+    },
+    {
+      "id": "C4",
+      "statement": "hull GZ'(0) equals GM from the waterplane moments (independent integration)",
+      "value": 1.7728657407661466e-09,
+      "threshold": 1e-06,
+      "unit": "relative",
+      "direction": "upper",
+      "passed": true
+    },
+    {
+      "id": "C5",
+      "statement": "every sampled heel floats at the upright displacement",
+      "value": 4.770949935300398e-16,
+      "threshold": 1e-11,
+      "unit": "relative",
+      "direction": "upper",
+      "passed": true
+    },
+    {
+      "id": "C6",
+      "statement": "Newton and bracket-and-bisect waterline routes agree on GZ",
+      "value": 6.195044477408373e-14,
+      "threshold": 1e-09,
+      "unit": "m",
+      "direction": "upper",
+      "passed": true
+    },
+    {
+      "id": "C7",
+      "statement": "a 10 % displacement shift moves GZ far outside the C6 agreement (negative control)",
+      "value": 0.004287041186194551,
+      "threshold": 1e-08,
+      "unit": "m",
+      "direction": "lower",
+      "passed": true
+    },
+    {
+      "id": "C8",
+      "statement": "a slack tank shifts every heel of the curve by exactly sum(i_x)/V",
+      "value": 4.5536491244391186e-17,
+      "threshold": 1e-12,
+      "unit": "m",
+      "direction": "upper",
+      "passed": true
+    },
+    {
+      "id": "C9",
+      "statement": "the free-surface shift lowers the peak by exactly that amount",
+      "value": 4.5536491244391186e-17,
+      "threshold": 1e-12,
+      "unit": "m",
+      "direction": "upper",
+      "passed": true
+    }
+  ],
+  "recorded_claims": {
+    "C1": 6.938893903907228e-17,
+    "C2": 1.252249084368609,
+    "C3": 1.1102230246251565e-16,
+    "C4": 1.7728657407661466e-09,
+    "C5": 4.770949935300398e-16,
+    "C6": 6.195044477408373e-14,
+    "C7": 0.004287041186194551,
+    "C8": 4.5536491244391186e-17,
+    "C9": 4.5536491244391186e-17
+  },
+  "passed": true
+}

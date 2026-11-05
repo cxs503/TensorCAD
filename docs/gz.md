@@ -152,3 +152,15 @@ point = heeled_hydrostatics(banded, 30.0)             # one angle: V, KB, KN, A_
 
 `examples/gz/run_example.py` exercises all of the above, writes `results.json`,
 `report.md` and `plot.png`, and exits non-zero if a claim breaks.
+
+## Published evidence
+
+`python publish_report.py` writes [docs/gz/report.md](gz/report.md), its `results.json` and
+`figures/gz-curve.png`: nine claims (`C1`-`C9`), each one a computed comparison rather than a
+sentence -- the two exact closed forms, `GZ'(0)` against the waterplane moments, the
+displacement residual, the cross-route agreement with `tensorcad.righting_arm` *and* a
+negative control that shifts the displacement target by 10 % so that agreement cannot pass
+vacuously. `python publish_report.py --check` recomputes all nine and fails if the page and
+the code disagree, which is what `tests/test_gz.py` runs. `matplotlib` is optional
+(`pip install "tensorcad[report]"`): without it the JSON and the Markdown are still written
+and the figure is skipped.

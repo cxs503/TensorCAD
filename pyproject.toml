@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tensorcad"
-version = "0.22.0"
+version = "0.22.1"
 description = "Agent-callable parametric geometry foundation for the Tensor scientific-computing ecosystem"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,6 +28,9 @@ test = ["pytest>=7", "numpy>=1.24"]
 dev = ["ruff>=0.6", "mypy>=1.8", "pytest-cov>=4"]
 # Research-only neural field training and non-executable tensor checkpoints.
 neural = ["torch>=2.2", "safetensors>=0.4", "numpy>=1.24"]
+# Only the evidence pages (``publish_report.py`` -> ``docs/gz/figures``) draw with it; the
+# core package and every check that produces a number run without it.
+report = ["matplotlib>=3.7"]
 # Optional kernel bridge (tensorcad/adapters/ocp.py). Nothing in the core may import
 # it; the FEM handoff (tensorcad/adapters/fem.py) needs no extra at all.
 ocp = ["cadquery-ocp>=7"]

@@ -21,7 +21,12 @@ points float at different displacements is not a righting-arm curve.
 
 from __future__ import annotations
 
+import json
 import math
+import os
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -421,3 +426,117 @@ def test_default_angles_span_a_curve() -> None:
     assert DEFAULT_ANGLES_DEG[0] == 0.0
     assert DEFAULT_ANGLES_DEG[-1] == 90.0
     assert len(DEFAULT_ANGLES_DEG) == 19
+
+
+# --- the published evidence page (publish_report.py -> docs/gz/) ----------------------
+#
+# The page is part of the deliverable, so it is a test: the JSON has to hold every claim,
+# the PNG has to exist, the Markdown has to be the render of that JSON rather than prose
+# typed next to it, and ``publish_report.py --check`` has to agree with the committed
+# numbers when it recomputes them from the geometry. Without this the page is a claim
+# about the past; with it, a change to the integrator that moves a published number fails
+# here instead of silently ageing the documentation.
+
+ROOT = Path(__file__).resolve().parents[1]
+PUBLISHED = ROOT / "docs" / "gz"
+CLAIM_IDS = ("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9")
+
+
+def _published_json() -> dict:
+    return json.loads((PUBLISHED / "results.json").read_text())
+
+
+def test_published_artifacts_exist_and_are_not_empty() -> None:
+    for name in ("results.json", "report.md", "figures/gz-curve.png"):
+        path = PUBLISHED / name
+        assert path.exists(), f"{name} is missing from docs/gz"
+        assert path.stat().st_size > 0, f"{name} is empty"
+
+
+def test_published_figure_is_a_real_png() -> None:
+    """PNG magic + IHDR, without needing an image library: the file must be a drawing."""
+    blob = (PUBLISHED / "figures" / "gz-curve.png").read_bytes()
+    assert blob[:8] == b"\x89PNG\r\n\x1a\n"
+    width = int.from_bytes(blob[16:20], "big")
+    height = int.from_bytes(blob[20:24], "big")
+    assert width > 800 and height > 300, (width, height)
+
+
+def test_published_json_records_every_claim() -> None:
+    data = _published_json()
+    claims = {entry["id"]: entry for entry in data["claims"]}
+    assert tuple(claims) == CLAIM_IDS
+    assert data["passed"] is True
+    assert data["generated_by"] == "publish_report.py"
+    import tensorcad
+
+    assert data["tensorcad_version"] == tensorcad.__version__
+    for entry in claims.values():
+        assert isinstance(entry["threshold"], float) and entry["threshold"] > 0.0
+        direction = entry.get("direction", "upper")
+        assert direction in ("upper", "lower")
+        if direction == "upper":
+            assert entry["value"] <= entry["threshold"], entry
+        else:
+            assert entry["value"] >= entry["threshold"], entry
+        assert entry["passed"] is True
+
+
+def test_published_json_negative_controls_bite() -> None:
+    """C2 and C7 are controls: they only mean anything if they are far from round-off."""
+    claims = {entry["id"]: entry for entry in _published_json()["claims"]}
+    for ident in ("C2", "C7"):
+        assert claims[ident]["direction"] == "lower"
+        # both are controls, so they must clear their threshold by a wide margin: a control
+        # that barely bites is indistinguishable from an environment drift.
+        assert claims[ident]["value"] > 50.0 * claims[ident]["threshold"], claims[ident]
+
+
+def test_published_json_cross_route_is_round_off_not_a_coincidence() -> None:
+    """The two GZ routes must agree to round-off *and* the control must be far larger."""
+    data = _published_json()
+    agreement = data["cross_route"]["worst_abs_difference_m"]
+    control = data["cross_route"]["negative_control"]["gz_shift_m"]
+    assert agreement < 1e-11
+    assert control > 1e3 * agreement
+    hull_curve = data["hull"]["curve"]
+    assert hull_curve["max_gz_m"] > 0.0
+    assert hull_curve["angle_of_max_gz_deg"] > 0.0
+    assert data["hull"]["watertight"] is True
+
+
+def test_published_markdown_is_the_render_of_the_json() -> None:
+    page = (PUBLISHED / "report.md").read_text()
+    data = _published_json()
+    for ident in CLAIM_IDS:
+        assert f"| {ident} |" in page, f"claim {ident} is not in the verdict table"
+    for heading in ("## 1. The case", "## 2. How it was done", "### 3.1 Barge", "### 3.2 Log",
+                    "### 3.3 Hull", "### 3.4 Cross-route", "## 4. Caveats and scope",
+                    "## 5. Error verdict"):
+        assert heading in page, f"{heading} is missing from the page"
+    # the page's numbers have to be the JSON's numbers, printed by the same formatter
+    assert f"{data['barge']['worst_abs_error_m']:.2e}" in page
+    assert f"{data['log']['worst_abs_error_m']:.2e}" in page
+    assert f"{data['cross_route']['worst_abs_difference_m']:.2e}" in page
+    assert f"{data['free_surface']['flat_shift_m'] * 1000:.4f}" in page
+    assert "figures/gz-curve.png" in page
+    assert data["generated_by"] in page
+    assert "FAILED" not in page
+    for marker in ("TODO", "FIXME", "XXX", "TBD"):
+        assert marker not in page
+
+
+def test_published_page_matches_the_code() -> None:
+    """``publish_report.py --check`` recomputes every claim and compares with the page."""
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = str(ROOT) + os.pathsep + environment.get("PYTHONPATH", "")
+    completed = subprocess.run(
+        [sys.executable, str(ROOT / "publish_report.py"), "--check"],
+        cwd=ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=900,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "all 9 claims hold" in completed.stdout
