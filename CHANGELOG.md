@@ -34,6 +34,16 @@ semantic versioning.
   `examples/righting_arm/run_example.py` (10 claims, exits non-zero if one breaks, writes
   `docs/righting_arm/{results.json,report.md}` and three figures), `docs/righting_arm.md`
   and `docs/righting_arm/`.
+- **The `gz` evidence bundle is published, and it is generated**
+  (`docs/gz/{results.json,tables.md,plot.png}`): `examples/gz/publish_evidence.py` runs the
+  example into a scratch directory, publishes its `results.json` and figure verbatim, and
+  renders `tables.md` from that JSON -- the published tables are a *view* of the measurement,
+  not a second copy of it, so a hand-typed number cannot survive `tests/test_gz_evidence.py`
+  (7 tests: byte-equal re-render, the barge row recomputed from the current code, the log
+  rows checked against `(R - KG) sin phi` without the library, the claim ledger, the PNG
+  header). Measured: wall-sided barge `6.9e-17` m, 64-gon log `1.1e-16` m, hull `GZ'(0)` vs
+  `GM` `1.8e-09` relative, displacement held to `8.6e-14` m3 over 19 stations, and the
+  negative control (formula invalid past 38.66 deg) `1.25` m out at 70 deg.
 
 ### Changed
 - `tensorcad/__init__.py` exports the new route **without shadowing `gz`**: the three

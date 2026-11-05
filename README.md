@@ -107,7 +107,11 @@ and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated i
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+large-angle `GZ`, trim equilibrium, damage stability, class rules. `GM` is the slope of the
+righting-arm curve at `φ = 0` and nothing more; the curve itself is
+[docs/gz.md](docs/gz.md) (`tensorcad/gz.py`, plus the independent bisection route in
+`tensorcad/righting_arm.py`), whose measurements are published as a generated bundle in
+[docs/gz/](docs/gz/) — `results.json`, `tables.md` rendered from it, and the figure.
 
 ## Continuous geometry core (0.4)
 

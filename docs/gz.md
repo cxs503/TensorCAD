@@ -152,3 +152,26 @@ point = heeled_hydrostatics(banded, 30.0)             # one angle: V, KB, KN, A_
 
 `examples/gz/run_example.py` exercises all of the above, writes `results.json`,
 `report.md` and `plot.png`, and exits non-zero if a claim breaks.
+
+## Evidence
+
+`python examples/gz/publish_evidence.py` regenerates the published bundle in `docs/gz/`:
+
+| file | what it is |
+|---|---|
+| `results.json` | the example's own output -- every curve row with its displacement residual, both closed-form comparisons, the free-surface case and the claim ledger |
+| `tables.md` | that JSON rendered as markdown tables by `publish_evidence.py`; no number in it is typed |
+| `plot.png` | the example's figure: integrated vs exact for the log, and the hull / barge / free-surface curves |
+
+The published measurements: worst `|GZ - wall-sided| = 6.9e-17` m inside the 38.66 deg
+validity window; worst `|GZ - (R-KG)sin phi| = 1.1e-16` m over a full 0-90 deg sweep of the
+64-gon log; `GZ'(0)` against `GM` from the waterplane moments agreeing to `1.8e-09`
+relative on the `41x13` hull; the displacement held to `8.6e-14` m3 on all 19 heel stations.
+The check that this is not vacuous: past 38.66 deg the wall-sided formula is `1.25` m away
+from the integrated arm at 70 deg, which is why it is only compared inside its window.
+
+`tests/test_gz_evidence.py` holds the bundle down: it re-renders `tables.md` from
+`results.json` and demands byte equality, re-heels the barge to reproduce a stored row with
+the current code, checks the log rows against the analytic reference without going through
+`tensorcad.gz`, and asserts the claim ledger. The four headline numbers above are also
+pinned to `results.json`, so they cannot drift away from the measurement either.
