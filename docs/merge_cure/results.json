@@ -1,0 +1,434 @@
+{
+  "state": {
+    "branch": "1b8fd067f16744d77b6e52b3f21cbc3886f06238",
+    "merge_commit": "1b8fd067f16744d77b6e52b3f21cbc3886f06238",
+    "head_before": "fcf15adccd0dcbae671868dcf51e064c5e398946",
+    "main": "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+    "base": "df31744cd5659c1fbb31b54607a13f833aa4a555",
+    "main_only_commits": 12,
+    "branch_only_commits": 1,
+    "parents": [
+      "fcf15adccd0dcbae671868dcf51e064c5e398946",
+      "2ff80b2b9c2285da440648b354382d9ff0cb90a8"
+    ]
+  },
+  "conflicts": [
+    "CHANGELOG.md",
+    "tests/test_public_surface.py"
+  ],
+  "audit": {
+    "files": [
+      {
+        "path": "CHANGELOG.md",
+        "kind": "both_changed",
+        "equals_main": false,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "README.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "artifacts/m3768/merge_verification.json",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "artifacts/m3768/merge_verification.png",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "artifacts/m3768/report_body.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "artifacts/m3768/report_payload.json",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/asymmetric_hull.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/asymmetric_hull/plot.png",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/asymmetric_hull/report.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/asymmetric_hull/results.json",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/fairness.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/hydrostatics_verification.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/convergence.csv",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/convergence.png",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/design_space.png",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/design_table.csv",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/geometry.png",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/m3768_pr39_merge_cure.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/righting_arm.md",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/righting_arm/barge_vs_closed_form.png",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/righting_arm/hull_curve.png",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/righting_arm/report.md",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/righting_arm/results.json",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/righting_arm/sphere_vs_analytic.png",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "docs/transom_stern.md",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "examples/asymmetric_hull/run_example.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "examples/righting_arm/run_example.py",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "examples/transom_stern/run_example.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "pyproject.toml",
+        "kind": "both_changed",
+        "equals_main": true,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/__init__.py",
+        "kind": "both_changed",
+        "equals_main": false,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/cli.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/hull.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/hydrostatics.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/hydrostatics_analytic.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/righting_arm.py",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tensorcad/transom.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_asymmetric_hull.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_cli.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_curvature.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_hull.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_hydrostatics_inertia.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_public_surface.py",
+        "kind": "both_changed",
+        "equals_main": false,
+        "equals_branch": false,
+        "branch_lines_missing": [
+          "                   \"stability\", \"righting_arm\", \"bonjean\","
+        ],
+        "main_lines_missing": [
+          "                   \"wigley\", \"transom\", \"hull\", \"design\", \"suboff\", \"suboff_appendages\", \"cli\","
+        ]
+      },
+      {
+        "path": "tests/test_righting_arm.py",
+        "kind": "branch_only",
+        "equals_main": false,
+        "equals_branch": true,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tests/test_transom.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tools/report_m2873.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      },
+      {
+        "path": "tools/verify_merge_m2925.py",
+        "kind": "main_only",
+        "equals_main": true,
+        "equals_branch": false,
+        "branch_lines_missing": [],
+        "main_lines_missing": []
+      }
+    ],
+    "loss": []
+  },
+  "baseline": {
+    "log": "runs/baseline_main.log",
+    "summary": "2 failed, 818 passed, 11 skipped, 4 warnings in 711.46s (0:11:51)",
+    "passed": 818,
+    "failed": 2,
+    "skipped": 11,
+    "seconds": 711.46,
+    "failed_tests": [
+      "tests/test_geometry_field.py::test_the_learned_field_gradient_is_autograd_and_points_outward",
+      "tests/test_geometry_field.py::test_the_learned_revision_speaks_the_same_protocol"
+    ],
+    "safetensors_missing": 2
+  },
+  "merged": {
+    "log": "runs/merged_tests.log",
+    "summary": "2 failed, 859 passed, 11 skipped, 4 warnings in 697.74s (0:11:37)",
+    "passed": 859,
+    "failed": 2,
+    "skipped": 11,
+    "seconds": 697.74,
+    "failed_tests": [
+      "tests/test_geometry_field.py::test_the_learned_field_gradient_is_autograd_and_points_outward",
+      "tests/test_geometry_field.py::test_the_learned_revision_speaks_the_same_protocol"
+    ],
+    "safetensors_missing": 2
+  },
+  "verdict": {
+    "content_losses": 0,
+    "tests_not_below_baseline": true
+  }
+}

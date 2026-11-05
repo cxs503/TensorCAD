@@ -1,0 +1,28 @@
+{
+  "title": "PR #40 cure: TensorCAD agent/m3169 re-dirtied on main, resolved as a two-parent merge (0 content losses, 859 vs 818 tests)",
+  "summary": "PR #40 branch was 12 commits behind main with 2 textual conflicts; cured by a --no-ff merge with both conflicts resolved as semantic union (CHANGELOG 0.21.0 entries, public-surface module list). Audit: 34 main-only + 9 branch-only + 4 three-way, 0 losses. pytest 859 passed / 2 failed / 11 skipped vs main baseline 818 / 2 / 11 (same two environmental safetensors failures).",
+  "scenario_key": "tensorcad_pr_cure",
+  "mission_id": 3777,
+  "tags": [
+    "TensorCAD",
+    "merge-cure",
+    "PR-40",
+    "m3169",
+    "pytest",
+    "no-content-loss"
+  ],
+  "markdown": "## PR #40 cure — TensorCAD `agent/m3169` re-dirtied on `main`, now a clean two-parent merge\n\n### ① Case: what was broken\nPR #40's branch reached GitHub at `fcf15adccd0d` whose three-way base with\n`main` (`2ff80b2b9c22`, PR #39) was `df31744cd565`. Measured *before* the cure the branch was\n**12 commits behind and 1 ahead** of `main`, i.e. `mergeable=false` was real, not a\nstale status: two files conflicted textually (`CHANGELOG.md`, `tests/test_public_surface.py`)\nand 34 files were changed on `main` only. Repo: TensorCAD 0.21.0 (parametric hull geometry,\nhydrostatics, stability). No physics run is involved: the deliverable is a repaired branch\nplus machine-checked evidence that neither side's content was dropped.\n\n### ② How it was done\n1. Worktree `work/m3777_cure` on a fresh branch from the PR head; `main` fetched at\n   `2ff80b2b9c22`; three-way base confirmed at `df31744cd565`.\n2. `git merge --no-ff origin/main` → 2 conflicts, both resolved by **semantic union**:\n   - `CHANGELOG.md`: one `### Added` list holding the branch's 5 righting-arm/stability\n     entries **and** `main`'s 6 waterplane-inertia/transom entries (0 duplicate bullets);\n   - `tests/test_public_surface.py`: the module tuple keeps `stability`, `righting_arm`,\n     `bonjean` (branch) **and** `transom` (`main`).\n3. Preservation audit over all {paths}: every file classified as main-only (34), branch-only (9)\n   or both-changed (4), and for both-changed files every line either side added relative to\n   the base is checked for presence in the result (quoted identifiers for the two conflicting\n   lines). **Detected losses: 0.** No file of either side is missing from the result.\n4. Full `pytest tests` on the `main` baseline and on the cured merge, same environment,\n   same exclusions (`test_cli_neural.py`, `test_neural_pipeline.py` cannot even be collected\n   without the optional `safetensors`).\n\n### ③ Results (programmatic, from `docs/merge_cure/results.json`)\n| quantity | `main` baseline `2ff80b2` | cured merge `1b8fd06` |\n|---|---|---|\n| tests passed | 818 | 859 |\n| tests failed | 2 | 2 |\n| tests skipped | 11 | 11 |\n| wall time | 711 s | 698 s |\n\n| audit class | files | content kept |\n|---|---|---|\n| changed on `main` only | 34 | `main` version |\n| changed on the branch only | 9 | branch version |\n| changed on both sides (3-way) | 4 | union, 0 lines lost |\n| detected losses | **0** | — |\n\nThe +41 passing tests are exactly the branch's `tests/test_righting_arm.py` cases, so the merge adds\nthe branch's work on top of `main` without dropping any of the trunk's suite.\n\n### ④ Figures\n`merge_dag.png` — the repaired history: base `df31744`, `main` `2ff80b2`, PR head `fcf15ad`\nand the cure merge `1b8fd06` with its two parents. `test_outcomes.png` — passed/failed/skipped for\nthe baseline and the cured branch side by side (no bar below its baseline counterpart).\n\n### ⑤ Notes / limits\n- Both failures (`test_geometry_field.py::test_the_learned_revision_speaks_the_same_protocol`,\n  `::test_the_learned_field_gradient_is_autograd_and_points_outward`) are `ModuleNotFoundError:\n  safetensors`, i.e. the environment, and they fail **identically on `main`**; they are not a\n  regression of this merge and were not patched here.\n- No test or algorithm was modified to make the merge look green; the only test edit is the\n  unioned module list, which the module-import test then validates.\n- Publication: the merge commit `1b8fd067f167` and its evidence child are committed locally; this shell is not\n  permitted to push, so updating `agent/m3169` from `fcf15adccd0d` to the evidence tip is left to the\n  platform/merge-governor (fast-forward, see `docs/merge_cure/PUBLISH.md`).\n\n### ⑥ Error judgement\n- Content preservation (key quantity, vs a file-by-file audit of both parents):\n  **0 of 47 changed files lost, 0 of the added lines of either side lost → 0 % error < 3 %**.\n- Test parity (key quantity, vs the `main` baseline): passed 859 vs 818 (**+41, 0 negative**),\n  failed 2 vs 2 (**identical set**), skipped 11 vs 11 → **deviation 0 % < 3 %**.\n- Residual risk (stated, not measured): the merge is textual+semantic union only; no numerical\n  result changes because the two sides touch disjoint modules (`righting_arm`/`stability` vs\n  `transom`/waterplane inertia), which the 4 three-way merges confirm.\n",
+  "figures": [
+    {
+      "name": "merge_dag.png",
+      "caption": "Repaired merge DAG: main 2ff80b2 merged into PR #40 head fcf15ad → cure merge commit 1b8fd06",
+      "png_sha256_len": 73712
+    },
+    {
+      "name": "test_outcomes.png",
+      "caption": "pytest outcomes, main baseline (818/2/11) vs cured merge (859/2/11)",
+      "png_sha256_len": 57388
+    }
+  ],
+  "published_report_id": 4034
+}
