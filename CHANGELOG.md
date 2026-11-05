@@ -4,6 +4,23 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## Unreleased
+
+### Changed
+- **The GZ evidence is a check now, not a snapshot.** `examples/gz/run_example.py` also
+  renders `tables.md` from the same result dict it dumps to `results.json`, and
+  `tests/test_gz_evidence.py` reruns the example and holds the committed
+  `examples/gz/outputs/{results.json,report.md,tables.md}` to that fresh run (round-off
+  tolerance `1e-15` absolute / `1e-9` relative, i.e. libm noise is allowed and a changed
+  method or parameter is not), re-renders the tables from the committed JSON so no number in
+  them can be hand-typed, and checks the committed `plot.png` is a real PNG.
+  **Negative control:** perturbs one published number by 0.1 % and two of the eight tests
+  go red, so the guard is capable of failing.
+- The example is part of CI (`tests.yml`), so the `6.9e-17 m` wall-sided and `1.1e-16 m`
+  circular-section agreements it asserts are re-checked on every push instead of only when
+  someone runs the script by hand.
+- `docs/gz.md` names the committed evidence files and the test that keeps them honest.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added

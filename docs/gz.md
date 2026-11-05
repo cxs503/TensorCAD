@@ -150,5 +150,8 @@ curve.to_dict()                                       # JSON-ready, per-point vo
 point = heeled_hydrostatics(banded, 30.0)             # one angle: V, KB, KN, A_w, residuals
 ```
 
-`examples/gz/run_example.py` exercises all of the above, writes `results.json`,
-`report.md` and `plot.png`, and exits non-zero if a claim breaks.
+`examples/gz/run_example.py` exercises all of the above and exits non-zero if a claim
+breaks. It writes `results.json`, `tables.md` (rendered from that JSON) and `report.md`, plus
+`plot.png` where matplotlib is installed; the copy under `examples/gz/outputs/` is committed,
+and `tests/test_gz_evidence.py` reruns the example and holds those files to the fresh run, so
+a published number cannot go stale quietly.

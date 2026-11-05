@@ -86,6 +86,13 @@ jobs:
           test -s /tmp/tensorcad-design/design_hull.msh
           test -s /tmp/tensorcad-design/solver_manifest.json
           test -s /tmp/tensorcad-design/design_path.json
+      - name: Righting-arm curves (two closed forms, exit code is the verdict)
+        run: python examples/gz/run_example.py --output /tmp/tensorcad-gz
+      - name: Righting-arm artifacts
+        run: |
+          test -s /tmp/tensorcad-gz/results.json
+          test -s /tmp/tensorcad-gz/report.md
+          test -s /tmp/tensorcad-gz/tables.md
       - name: Representation benchmark (analytic, mesh, neural, STEP in one harness)
         # Every row is measured against the same rays and the same closed form; rows whose
         # extra is not installed (torch, OCP) must report not_supported rather than a zero,
