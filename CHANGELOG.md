@@ -57,6 +57,52 @@ two things the package did not have: a heeled waterplane and a sinkage solve.
   `examples/wigley/run_example.py` (exits non-zero if any of its 10 claims breaks),
   `tests/test_wigley.py` (30 tests).
 
+
+## 0.17.0 — 2026-11-03
+
+An asymmetric hull, so that the longitudinal centres stop being an identity. The family
+was mirror-symmetric, which made `LCB = LCF = length/2` a consequence of the symmetry: the
+check validated the frame and the sign of the `x` moments and could not detect an
+antisymmetric bias, because the geometry had none.
+
+### Added
+- **`HullParameters.fore_exponent` / `aft_exponent`** — the sine-taper exponent per half,
+  both defaulting to the shipped `BREADTH_EXPONENT`, so the default surface is the previous
+  one bit for bit (same vertices, faces and hydrostatics). Midship belongs to both halves
+  and `sin(pi/2) = 1` for every exponent, so the halves meet at the requested beam without
+  a step and the maximum section stays at `x = L/2`.
+- **`hull.taper_integral(exponent)`**, **`hull.taper_integral_pair(fore, aft)`** — the
+  closed form `Gamma((p+1)/2)/(sqrt(pi) Gamma(p/2+1))` of `int_0^1 sin(pi x)^p dx`; the
+  shipped exponent returns `TAPER_INTEGRAL` verbatim so no published digit moves.
+- **Analytic references now take the split**: `analytic_volume`,
+  `analytic_waterplane_area`, `analytic_longitudinal_centre`, `analytic_wetted_surface_area`
+  and `analytic_hydrostatics` accept `fore_exponent`/`aft_exponent`. Volume, waterplane
+  area, section area, VCB and both coefficients stay closed form; LCB and LCF are
+  `L*(m(p_aft) + h(p_fore) - m(p_fore))/(h(p_aft) + h(p_fore))`.
+- **`hull._half_first_moment`** — `int_0^(1/2) x sin(pi x)^p dx`, the one quantity of this
+  family without an elementary form, by Gauss-Legendre after `x = t^3/2`;
+  **`hull._half_first_moment_exp_sinh`** recomputes it with an exponential substitution and
+  a different rule. They agree to `5e-15` relative.
+- `tests/test_asymmetric_hull.py` — 35 tests: bit-for-bit back-compatibility, the taper
+  integral against Simpson and the half moment across two schemes, the involution on the
+  reference and on the mesh, monotonicity and continuity in the exponent, mesh vs reference
+  on a four-grid ladder, closedness of asymmetric meshes, parameter validation, metadata,
+  refinement plumbing and the CLI.
+- `examples/asymmetric_hull/run_example.py` → `docs/asymmetric_hull/{results.json,report.md,plot.png}`,
+  exiting 1 if any of its 13 claims stops holding; `docs/asymmetric_hull.md`.
+- CLI: `--fore-exponent`, `--aft-exponent`.
+
+### Measured (`docs/asymmetric_hull/`)
+- mesh LCB error for `(p_f, p_a) = (0.5, 0.9)`: `-7.79 mm` at 41x13, `-2.92` at 81x25,
+  `-1.08` at 161x49, `-0.39` at 321x97 — one sign throughout, so a discretisation bias and
+  not noise; `0.011 %` of the length at 161x49.
+- the involution `LCB(p_a, p_f) = L - LCB(p_f, p_a)` holds to `1e-12 m` on the reference and
+  `1e-6 m` on the mesh, while the mesh volume is unchanged to `1e-15` under the swap.
+- `LCB == LCF` on an asymmetric mesh to `1e-9` — on the symmetric family that is one
+  identity, here it is two different sums that have to agree.
+- volume error `-0.95 %` at 41x13 and `-0.12 %` at 161x49 for `(0.5, 0.9)`; the analytic
+  volume for the symmetric default is still `7.512698221250894 m^3` exactly.
+
 ## 0.16.0 — Bonjean curves: a station's immersed area against the waterline
 
 `section_area_at` could only report the area of a station the mesh had a vertex
