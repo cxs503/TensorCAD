@@ -443,7 +443,9 @@ def waterplane_inertia_longitudinal(
         raise ValueError(f"quadrature_levels must be at least 2, got {quadrature_levels!r}")
 
     def integrand(u: float) -> float:
-        return u * u * math.cos(math.pi * u) ** breadth_exponent
+        # ``float ** float`` is annotated ``Any`` in typeshed (it can be complex), so
+        # the cast keeps the declared return type honest for the type checker.
+        return float(u * u * math.cos(math.pi * u) ** breadth_exponent)
 
     fine = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels))
     coarse = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels) - 1)
