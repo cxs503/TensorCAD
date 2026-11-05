@@ -13,7 +13,8 @@ EXPECTED_API = {
     "WIGLEY_REFERENCE_CASE", "WigleyAnalytic", "WigleyModel", "WigleyParameters",
     "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
-    "wigley_reference_parameters",    # transom-stern family (0.21.0)
+    "wigley_reference_parameters",
+    # transom-stern family (0.21.0)
     "MAX_TRANSOM_FRACTION", "TransomHullParameters", "TransomModel",
     "analytic_transom_hydrostatics", "build_transom_mesh",
     "estimate_transom_discretisation_error", "generate_transom_hull", "parent_length",
@@ -34,12 +35,14 @@ EXPECTED_API = {
     "CurvatureError", "CurvatureSample", "FairnessReport",
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
+    "DEFAULT_HEELS_DEG", "HeeledDisplacement", "RightingArm", "RightingArmCurve",
+    "RightingArmError", "heeled_displacement", "righting_arm", "righting_arm_curve",
+    "wall_sided_righting_arm", "wall_sided_validity_deg",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
     "DEFAULT_ANGLES_DEG", "FreeSurfaceCorrection", "GzError", "HeeledHydrostatics",
-    "RightingArmCurve", "box_righting_arms_analytic", "box_wall_sided_limit_deg",
+    "box_righting_arms_analytic", "box_wall_sided_limit_deg",
     "deck_edge_immersion_deg", "free_surface_correction", "heeled_hydrostatics",
-    "rectangular_tank_inertia", "righting_arm_curve", "wall_sided_righting_arm",
-    "with_freeboard",
+    "rectangular_tank_inertia", "with_freeboard",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
@@ -65,7 +68,8 @@ def test_declared_api_is_importable() -> None:
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
-                   "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
+                   "stability", "righting_arm", "bonjean", "wigley", "hull", "design", "suboff",
+                   "suboff_appendages", "cli", "transom",
                    "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 

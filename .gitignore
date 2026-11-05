@@ -11,3 +11,4 @@ htmlcov/
 results/
 tensorcad-output/
 .venv*/
+.coverage.*
