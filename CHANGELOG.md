@@ -45,6 +45,29 @@ semantic versioning.
   at `nz = 81`).
 - `examples/transom_stern/run_example.py`: reference ladder, 4 truncations × 4 grids
   convergence table, design table and three figures.
+- **Large-angle stability: the righting-arm curve** (`tensorcad/gz.py`). `tensorcad.stability`
+  stops at `GM`, the slope of `GZ(phi)` at the upright; this module is the integration it
+  pointed at. A hull heeled by `phi` floats on the half-space `p . (0, -sin phi, cos phi) <= d`;
+  the offset `d` is solved by bisection so the **displacement is held** (not the draft), the
+  submerged volume and centroid come from an exact clip of the faceted surface (apex of the
+  tetrahedral fan in the cutting plane, so the cap is never built), and the arm is the
+  transverse lever `GZ = (B - G) . (0, cos phi, sin phi)` about a `KG` measured from the keel.
+- **Two independent routes.** `righting_arm` / `righting_arm_curve` integrate the 3-D heeled
+  displacement; `cross_curve_righting_arm` / `cross_curve_righting_arm_curve` integrate the
+  classical cross curves from station cuts (`bonjean.section_loops` + inclined waterline). They
+  share only the mesh, and they agree to 1.2e-3 relative on the parametric hull.
+- **Verified, not asserted** (`docs/gz.md`, `docs/gz/report.md`, 7 self-checking claims in
+  `examples/gz/run_example.py`, 45 cases in `tests/test_gz.py`): a wall-sided box reproduces
+  `sin(phi)(GM + BM tan²(phi)/2)` to 2.3e-15 relative inside the closed form's validity window
+  (phi < 38.66 deg for that box); the curve's slope at the origin equals `KB + BM - KG` to
+  2.3e-5; `GZ(-phi) = -GZ(phi)` to 8.6e-16 m; the heeled displacement stays on target to
+  1.1e-15; a KG ladder lowers `GZ_max` monotonically and goes negative past `KM`.
+- **Summary numbers on the curve**: `maximum_righting_arm`, `angle_of_maximum`,
+  `range_of_stability` (interpolated crossing) and `area_under_curve(limit)` — the dynamical
+  stability `integral GZ dphi` that statutory criteria consume. No free-surface correction, no
+  wind arm, no damage case and no rule pass/fail: the curve is the input to those, not a
+  verdict. Also exported: `submerged_properties`, `solve_waterline`, `keel_height`,
+  `station_offsets`, `wall_sided_righting_arm`, `HeelPoint`, `RightingArmCurve`, `GZError`.
 
 ## 0.20.0 — 2026-11-03
 
