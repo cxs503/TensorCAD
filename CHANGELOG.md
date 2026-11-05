@@ -4,6 +4,36 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## Unreleased — Large-angle stability: the righting-arm curve, and two exact benchmarks
+
+`stability.py` stopped at `GM` and said so; the backlog tracked 大倾角 GZ as missing. This
+release adds the curve itself, by integrating the **heeled displacement** instead of a
+waterplane moment.
+
+- `tensorcad/gz.py`: `heeled_hydrostatics` (rotate about the keel line, cut at the waterline,
+  solve the waterline that restores the displacement by Newton with the exact derivative
+  `dV/dc = A(c)`; two to five iterations to a `1e-13` relative volume residual),
+  `righting_arm_curve` (`GZ = KN − KG sin φ` with `KG` above the keel, matching
+  `initial_stability`'s datum), `max_gz` / `angle_of_max_gz_deg` / `range_of_stability_deg`
+  (interpolated) / `area_under_curve` (dynamical stability, m·rad, truncatable).
+- **Verified against two closed forms**, both exact for the polygonal mesh: the box barge
+  wall-sided trapezoid `GZ = sin φ (GM₀ + ½BM₀ tan²φ)` — *derived* in the module docstring,
+  not quoted — agrees to `6.9e-17 m` over 0–35° on a 10×2×2 m barge, and provably stops
+  agreeing past its 38.66° limit (4.0e-04 m at 45°, 1.25 m at 70°); and the half-submerged
+  log `GZ = (R − KG) sin φ`, exact at all 33 symmetry-aligned heels from 0 to 90°
+  (`1.1e-16 m`). Third check: `KB` (0.4830051 m) and `dGZ/dφ` at zero (0.421622996 m/rad vs
+  `GM` 0.421622996 m) both reproduce `initial_stability`, which integrates the waterplane
+  loops by Green's theorem instead.
+- `with_freeboard`: a hull generated to its design waterline cannot be heeled (the waterline
+  leaves the modelled surface on the dipping side immediately), so this removes the waterline
+  cap, extrudes the boundary ring with vertical walls and closes it with a fan — watertight,
+  outward, Euler-2, upright displacement unchanged to round-off.
+- `free_surface_correction` / `rectangular_tank_inertia`: the flat `Σi_x/V` reduction a slack
+  tank takes off every point of the curve (2.0 × 0.5 m tank in the 7.45 m³ example: 2.80 mm).
+- Evidence: `docs/gz.md`, `examples/gz/run_example.py` (writes `results.json`, `report.md`,
+  `plot.png`; exits non-zero if a claim breaks), `tests/test_gz.py` (26 tests; the suite
+  pins the public surface, which grew by 14 names).
+
 ## 0.21.0 — 2026-11-04
 
 ### Added
