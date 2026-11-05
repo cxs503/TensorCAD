@@ -33,6 +33,7 @@ from tensorcad.hydrostatics import compute_hydrostatics
 from tensorcad.mesh import is_watertight, total_signed_volume
 from tensorcad.stability import initial_stability
 
+
 # ---------------------------------------------------------------------------
 # reference geometries
 # ---------------------------------------------------------------------------
@@ -296,7 +297,9 @@ def test_area_under_a_linear_curve_is_exact() -> None:
     # computed here from the sampled arms rather than from the module's own interpolation
     angles = curve.angles
     expected = 0.0
-    for left, right, gz_left, gz_right in zip(angles, angles[1:], curve.points, curve.points[1:]):
+    for left, right, gz_left, gz_right in zip(
+        angles, angles[1:], curve.points, curve.points[1:], strict=False
+    ):
         expected += 0.5 * (gz_left.gz + gz_right.gz) * math.radians(right - left)
     assert curve.area(0.0, 40.0) == pytest.approx(expected, rel=1e-13)
     # a single chord over the whole interval would *not* be the integral of a curved arm

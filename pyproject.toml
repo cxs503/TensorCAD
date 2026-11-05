@@ -66,6 +66,9 @@ ignore = [
 # Example scripts prepend the checkout to sys.path before importing tensorcad,
 # so import-order rules do not apply to them.
 "examples/*" = ["E501", "E402", "I001"]
+# publish_report.py renders a wide Markdown table into an f-string; splitting those
+# physical lines would break the table, so long lines are allowed here.
+"publish_report.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"

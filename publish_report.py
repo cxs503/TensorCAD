@@ -1,4 +1,7 @@
-import base64, json, os, urllib.request as u
+import base64
+import json
+import os
+import urllib.request as u
 from pathlib import Path
 
 out = Path("docs/gz")
@@ -14,13 +17,12 @@ def fmt(value, digits=6):
     return f"{value:.{digits}f}"
 
 def wall_worst():
-    entry = [c for c in claims if c["claim"].startswith("wall-sided")][0]
-    return entry
+    return next(c for c in claims if c["claim"].startswith("wall-sided"))
 
 wall = wall_worst()
-round_claim = [c for c in claims if c["claim"].startswith("round bilge: max |GZ")][0]
-float_claim = [c for c in claims if c["claim"].startswith("round bilge: max |float")][0]
-gm_claim = [c for c in claims if c["claim"].startswith("hull:")][0]
+round_claim = next(c for c in claims if c["claim"].startswith("round bilge: max |GZ"))
+float_claim = next(c for c in claims if c["claim"].startswith("round bilge: max |float"))
+gm_claim = next(c for c in claims if c["claim"].startswith("hull:"))
 
 barge_table = "\n".join(
     "| {} | {} | {} | {} | {} | {} |".format(

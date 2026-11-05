@@ -49,6 +49,7 @@ curve, not a stability booklet.
 """
 from __future__ import annotations
 
+import itertools
 import math
 from dataclasses import dataclass
 from typing import Any
@@ -267,9 +268,9 @@ def submerged_solid(mesh: Mesh, waterline_z: float = 0.0) -> SubmergedSolid:
         # The waterline coincides with the mesh's own cap: those faces *are* the section,
         # already outward-facing, so they close the solid with no extra area.
         triangles.extend(coplanar)
-        for first, second, third in coplanar:
-            edge = (second[0] - first[0], second[1] - first[1], second[2] - first[2])
-            other = (third[0] - first[0], third[1] - first[1], third[2] - first[2])
+        for cap_a, cap_b, cap_c in coplanar:
+            edge = (cap_b[0] - cap_a[0], cap_b[1] - cap_a[1], cap_b[2] - cap_a[2])
+            other = (cap_c[0] - cap_a[0], cap_c[1] - cap_a[1], cap_c[2] - cap_a[2])
             section_area += 0.5 * (edge[0] * other[1] - edge[1] * other[0])
 
     six_volume = 0.0
@@ -503,7 +504,7 @@ class GZCurve:
             )
         breaks = sorted({start_deg, stop} | {angle for angle in angles if start_deg < angle < stop})
         total = 0.0
-        for left, right in zip(breaks, breaks[1:]):
+        for left, right in itertools.pairwise(breaks):
             total += 0.5 * (self.gz_at(left) + self.gz_at(right)) * math.radians(right - left)
         return total
 
@@ -702,9 +703,16 @@ def imo_intact_stability(curve: GZCurve, *, gm_upright: float | None = None) -> 
     area_30_40 = curve.area(30.0, 40.0)
     gz_30 = curve.gz_at(30.0)
     checks = (
-        CriterionCheck("area_0_30", ">= 0.055 m rad", area_0_30, "m rad", area_0_30 >= 0.055, area_0_30 - 0.055),
-        CriterionCheck("area_0_40", ">= 0.090 m rad", area_0_40, "m rad", area_0_40 >= 0.090, area_0_40 - 0.090),
-        CriterionCheck("area_30_40", ">= 0.030 m rad", area_30_40, "m rad", area_30_40 >= 0.030, area_30_40 - 0.030),
+        CriterionCheck(
+            "area_0_30", ">= 0.055 m rad", area_0_30, "m rad", area_0_30 >= 0.055, area_0_30 - 0.055
+        ),
+        CriterionCheck(
+            "area_0_40", ">= 0.090 m rad", area_0_40, "m rad", area_0_40 >= 0.090, area_0_40 - 0.090
+        ),
+        CriterionCheck(
+            "area_30_40", ">= 0.030 m rad", area_30_40, "m rad", area_30_40 >= 0.030,
+            area_30_40 - 0.030,
+        ),
         CriterionCheck("gz_at_30", ">= 0.20 m", gz_30, "m", gz_30 >= 0.20, gz_30 - 0.20),
         CriterionCheck("max_gz", ">= 0.20 m", maximum, "m", maximum >= 0.20, maximum - 0.20),
         CriterionCheck(
@@ -725,15 +733,15 @@ def imo_intact_stability(curve: GZCurve, *, gm_upright: float | None = None) -> 
 
 
 __all__ = [
-    "CriterionCheck",
     "DEFAULT_HEEL_ANGLES_DEG",
+    "SCHEMA_GZ_CURVE",
+    "SCHEMA_IMO",
+    "SCHEMA_SUBMERGED",
+    "CriterionCheck",
     "GZCurve",
     "GZError",
     "HeelPoint",
     "IMOIntactStability",
-    "SCHEMA_GZ_CURVE",
-    "SCHEMA_IMO",
-    "SCHEMA_SUBMERGED",
     "SubmergedSolid",
     "gz_curve",
     "heel_mesh",

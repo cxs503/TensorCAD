@@ -20,7 +20,7 @@ import math
 from pathlib import Path
 
 from tensorcad import HullParameters, MeshBuilder, generate_hull
-from tensorcad.gz import gz_curve, heel_mesh, imo_intact_stability, submerged_solid
+from tensorcad.gz import gz_curve, heel_mesh, imo_intact_stability
 from tensorcad.stability import initial_stability
 
 LENGTH, BEAM, DRAFT, DEPTH = 30.0, 6.0, 2.0, 10.0
@@ -225,7 +225,7 @@ def main() -> int:
     keel = 0.0
     angle = math.radians(heel_deg)
     corners = []
-    for x in (0.0, LENGTH):
+    for _x in (0.0, LENGTH):
         for y in (-BEAM / 2.0, BEAM / 2.0):
             for z in (0.0, DEPTH):
                 corners.append(
@@ -312,7 +312,6 @@ def main() -> int:
             color="0.6",
             linewidth=0.6,
         )
-    width = max(point[0] for point in corners) - min(point[0] for point in corners)
     right_axis.axhline(solved_z, color="tab:blue", linewidth=1.0)
     right_axis.plot([solid.centroid[1]], [solid.centroid[2]], "o", color="tab:red", label="B")
     right_axis.plot([0.0], [0.0], "s", color="black", label="K")
