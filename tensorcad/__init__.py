@@ -117,6 +117,23 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting import (
+    # Third route to ``GZ(phi)``: the per-station clipped section is integrated with
+    # Green's theorem and the stations are summed with Simpson, with the heeled
+    # waterplane offset found by bisection. The names ``gz``/``righting_arm`` already
+    # publish keep the ``section_``/``Section`` prefix here, so no route shadows
+    # another (see docs/righting.md, "Public surface").
+    ImmersedBody,
+    RightingArmPoint,
+    RightingError,
+    submerged_body,
+)
+from .righting import (
+    RightingArmCurve as SectionRightingArmCurve,
+)
+from .righting import (
+    righting_arm_curve as section_righting_arm_curve,
+)
 from .righting_arm import (
     # Second, independent route to ``GZ(phi)``: the clipped-section integral with a
     # bracket-and-bisect waterline solve. Names that ``gz`` already publishes keep the
@@ -238,6 +255,7 @@ __all__ = [
     "HullModel",
     "HullParameters",
     "Hydrostatics",
+    "ImmersedBody",
     "InitialStability",
     "Mesh",
     "MeshBuilder",
@@ -252,8 +270,11 @@ __all__ = [
     "RightingArm",
     "RightingArmCurve",
     "RightingArmError",
+    "RightingArmPoint",
+    "RightingError",
     "SampledField",
     "SectionProperties",
+    "SectionRightingArmCurve",
     "SphereField",
     "StabilityError",
     "SuboffAppendagesField",
@@ -316,7 +337,9 @@ __all__ = [
     "righting_arm_curve",
     "section_loops",
     "section_properties",
+    "section_righting_arm_curve",
     "sinc_power_coefficients",
+    "submerged_body",
     "suboff_fin_chord",
     "suboff_radius_fraction",
     "suboff_reference_geometry",
@@ -351,4 +374,4 @@ __all__ = [
     "write_stl",
 ]
 
-__version__ = "0.22.0"
+__version__ = "0.23.0"

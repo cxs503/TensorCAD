@@ -74,6 +74,36 @@ VCB at `+0.94 %`, at `161x41` nothing exceeds `0.17 %`. The derivation, the inde
 quadrature that checks the formulas themselves, and the limits of the comparison are in
 [docs/hull_analytic_reference.md](docs/hull_analytic_reference.md).
 
+## Righting arms from station sections (0.23)
+
+`stability` gives `GM`, the slope of the righting-arm curve at zero heel; `tensorcad.righting`
+gives the curve. It cuts each station once (`bonjean.section_loops`), clips the section
+against the heeled waterplane `z cos(phi) - y sin(phi) = offset`, takes area and first
+moments by Green's theorem, and sums the stations with composite Simpson at constant
+displacement (the offset is bisected, never guessed):
+
+```python
+import tensorcad as tc
+
+model = tc.generate_hull(tc.HullParameters(length=10.0, beam=2.0, draft=1.0))
+curve = tc.section_righting_arm_curve(model.mesh, kg=0.75, waterline_z=-0.3)  # 0.3 m freeboard
+curve.gz_max, curve.angle_gz_max_deg, curve.angle_vanishing_stability_deg
+```
+
+This is the **third** route to `GZ` in the package and it publishes under its own names:
+`righting_arm_curve`/`RightingArmCurve` stay with `tensorcad.gz` (0.21.0, closed-surface
+integral + Newton), `bisection_*` with `tensorcad.righting_arm` (0.22.0), and `section_*`
+here. The overlap is the check: on a wall-sided barge the three agree to `7.9e-14 m`; on a
+`41x13` hull the station route and `gz` agree to `7.3e-07 m`, and `docs/righting.md` lists
+the full table. The curve reproduces the wall-sided closed form to `5.8e-15` relative over
+0-45 degrees (it is exact there) and its slope at zero heel matches `KB + I_T/V - KG` with
+`I_T` from `waterplane_moments` -- a surface cut, not a station sum -- to `5.5e-05` on the
+hull. The mesh must carry freeboard: a body capped at its waterline is rejected rather than
+answered, and `deck_immersion_onset_deg` marks the angle past which the curve describes a
+watertight box rather than a ship. Free surface, tanks, flooding, damage stability and class
+rules remain absent. [docs/righting.md](docs/righting.md) has the tables, the convergence
+ladder and the figure.
+
 ## Initial stability (0.14)
 
 `hydrostatics` integrates the buoyancy side and stops there. `tensorcad.stability` crosses into

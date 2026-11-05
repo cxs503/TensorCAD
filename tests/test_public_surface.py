@@ -45,6 +45,9 @@ EXPECTED_API = {
     "heeled_displacement", "righting_arm", "wall_sided_validity_deg",
     "BisectionRightingArmCurve", "bisection_righting_arm_curve",
     "barge_wall_sided_righting_arm",
+    # third GZ route (0.23.0): station section areas (Green), Simpson along the hull
+    "ImmersedBody", "RightingArmPoint", "RightingError", "submerged_body",
+    "SectionRightingArmCurve", "section_righting_arm_curve",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
@@ -64,13 +67,13 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.22.0"
+    assert tensorcad.__version__ == "0.23.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
-                   "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
+                   "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli", "righting",
                    "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 

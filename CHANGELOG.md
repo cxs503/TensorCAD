@@ -4,6 +4,45 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.23.0 — 2026-11-05
+
+### Added
+- **A third, independent route to `GZ(phi)`** (`tensorcad/righting.py`), carried over from
+  PR #52 (`agent/m3581`) and redeveloped on the current `main`: each station is cut once
+  (`bonjean.section_loops`), the section polygon is clipped against the heeled waterplane
+  `z cos(phi) - y sin(phi) = offset`, area and first moments come from Green's theorem, and
+  the stations are summed with composite Simpson at constant displacement -- the offset is
+  found by **bisection** on a bracket taken from the body's own vertical extent, so no
+  initial guess enters and `GZ(0)` is round-off zero. Adds `submerged_body`/`ImmersedBody`
+  (the integral underneath, without the displacement constraint), `RightingArmPoint` with
+  `deck_immersion_fraction`, and `RightingArmCurve.gz_at/gz_max/angle_gz_max_deg/
+  angle_vanishing_stability_deg/deck_immersion_onset_deg`. A mesh capped at its waterline is
+  **rejected** rather than answered, because every heel would then flood the deck.
+- **The three routes are now each other's check.** `tools/verify_merge_m4534.py` puts them
+  on one tree and records the numbers in `artifacts/m4534/merge_verification.{json,png}`:
+  on a wall-sided barge (`L=10, B=2, T=1, 1 m freeboard`) the station-Simpson, closed-surface
+  Newton and bisection routes agree to **7.9e-14 m** over 0-45 deg, and the wall-sided closed
+  form is reproduced to **2.4e-14** relative; on the `41x13` parametric hull floated at
+  `z=-0.3 m` the station route and `gz` agree to **7.3e-07 m** (`7e-5` relative, the two
+  discretisations differ). The station-area volume equals the closed-surface tetrahedron
+  volume of the same capped body to **0.0** relative, 40 vs 80 stations change `GZ_max` by
+  `4.8e-04` relative, and a **negative control** shows the comparison can fail: `KG + 5 mm`
+  moves `GZ(20 deg)` by `1.7e-03 m`, ~2300x the inter-route gap.
+- `tests/test_righting.py` (43 tests: PR #52's 40 plus 3 cross-route/alias tests),
+  `examples/righting/run_example.py` (8 claims, exits non-zero if one breaks, writes
+  `docs/righting/{results.json,report.md,righting_arms.png}`), `docs/righting.md`,
+  `docs/m4534_pr52_merge_cure.md` and `docs/righting/`.
+
+### Changed
+- `tensorcad/__init__.py` exports the new route **without shadowing either existing one**:
+  `section_righting_arm_curve` / `SectionRightingArmCurve`, while `righting_arm_curve`,
+  `RightingArmCurve` and `wall_sided_righting_arm` stay `gz`'s and `bisection_*` stays
+  `righting_arm`'s. `tests/test_righting.py` asserts all four rows of that table from the
+  package, so a later edit cannot quietly re-introduce the collision that closed PR #52.
+- `pyproject.toml` / `__version__` to `0.23.0`; four trivial lint debts on `main`
+  (missing trailing newlines, an unused `math` import, an unused local, a bare `zip`)
+  fixed so `ruff check .` is clean.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added
