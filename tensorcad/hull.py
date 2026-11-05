@@ -27,6 +27,10 @@ from typing import Any
 from . import mesh as meshlib
 from .geometry import Mesh, MeshBuilder
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+from .hydrostatics_analytic import (
+    waterplane_inertia_longitudinal,
+    waterplane_inertia_transverse,
+)
 from .parameters import (
     FLOAT,
     INT,
@@ -644,6 +648,8 @@ def analytic_hydrostatics(
     | block coefficient | ``2/3*taper`` |
     | prismatic coefficient | ``taper`` (the midship ``2/3`` cancels) |
     | wetted surface area | quadrature, see :func:`analytic_wetted_surface_area` |
+    | transverse waterplane inertia | ``(2/3)*(beam/2)**3*length*I3`` (``I3`` from the gamma identity) |
+    | longitudinal waterplane inertia | ``beam*length**3*int sin(pi*xi)**e*(xi-1/2)**2 dxi`` |
 
     ``taper`` is ``(h(p_aft) + h(p_fore))`` with ``h(p) = int_0^(1/2) sin^p``, so
     volume, waterplane area and the coefficients depend on the exponents but not on
@@ -666,16 +672,34 @@ def analytic_hydrostatics(
     section = analytic_maximum_section_area(beam, draft)
     centre = analytic_longitudinal_centre(length, fore_exponent=fore, aft_exponent=aft)
     symmetric = fore == aft
-    basis = (
-        "closed forms of the analytic surface (wetted area by Gauss-Legendre quadrature)"
-        if symmetric
-        else (
+    # The two waterplane second moments live in :mod:`tensorcad.hydrostatics_analytic`
+    # (one closed form, one quadrature with its own convergence evidence) so that the
+    # mesh, this compatibility wrapper and the stability block cannot drift apart. Both
+    # are derived for the fore/aft-symmetric breadth distribution and are measured about
+    # midship, which is the centre of flotation only when ``fore == aft``: the
+    # asymmetric form would need its x-moment re-taken about a displaced LCF, so it
+    # withholds the two numbers (``nan``) instead of reporting the symmetric ones.
+    if symmetric:
+        inertia_transverse = waterplane_inertia_transverse(
+            length, beam, breadth_exponent=BREADTH_EXPONENT
+        )
+        inertia_longitudinal = waterplane_inertia_longitudinal(
+            length, beam, breadth_exponent=BREADTH_EXPONENT
+        )[0]
+        basis = (
+            "closed forms of the analytic surface (wetted area by Gauss-Legendre "
+            "quadrature); longitudinal waterplane inertia by tanh-sinh quadrature"
+        )
+    else:
+        inertia_transverse = float("nan")
+        inertia_longitudinal = float("nan")
+        basis = (
             "closed forms of the asymmetric analytic surface except the longitudinal "
             "centres, whose x-weighted half-moment has no elementary form: Gauss-Legendre "
             "after x = t^3/2, cross-checked against tanh-sinh quadrature to 1e-14; wetted "
-            "area by Gauss-Legendre quadrature"
+            "area by Gauss-Legendre quadrature; waterplane second moments withheld (nan) "
+            "because their closed forms assume a fore/aft-symmetric waterplane"
         )
-    )
     return Hydrostatics(
         displacement_volume=volume,
         displacement_mass=volume * water_density,
@@ -693,6 +717,9 @@ def analytic_hydrostatics(
         maximum_section_area=section,
         waterline_z=0.0,
         water_density=water_density,
+        transverse_waterplane_inertia=inertia_transverse,
+        longitudinal_waterplane_inertia=inertia_longitudinal,
+        keel_z=-draft,
         basis=basis,
     )
 

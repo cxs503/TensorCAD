@@ -43,7 +43,7 @@ imo_table = "\n".join(
     for c in imo["checks"]
 )
 
-markdown = f"""# 大倾角稳性：从倾斜剖切得到 GZ 曲线（TensorCAD 0.21.0）
+markdown = f"""# 大倾角稳性：从倾斜剖切得到 GZ 曲线（TensorCAD 0.22.0）
 
 ## ① 案例介绍
 
@@ -140,14 +140,14 @@ honest 声明：本单没有实验/船模数据可比，因此判据用的是**�
 
 ## ⑥ 局限与待办
 
-自由纵倾求解、自由液面修正、带干舷的船型族、破舱稳性仍缺；`docs/gz.md` 与 CHANGELOG 0.21.0 已记录。
+自由纵倾求解、自由液面修正、带干舷的船型族、破舱稳性仍缺；`docs/gz.md` 与 CHANGELOG 0.22.0 已记录。
 """
 
 figure_bytes = (out / "figures" / "gz-curve.png").read_bytes()
 print("figure bytes", len(figure_bytes))
 
 payload = {
-    "title": "大倾角稳性 GZ 曲线：倾斜剖切+下沉量求解，直舷驳船对闭式解 3.3e-16 m（TensorCAD 0.21.0）",
+    "title": "大倾角稳性 GZ 曲线：倾斜剖切+下沉量求解，直舷驳船对闭式解 3.3e-16 m（TensorCAD 0.22.0）",
     "summary": (
         "tensorcad.gz 补齐 stability.py 明确留下的欠账：倾斜水线面剖切 + 排水量守恒下沉量求解，"
         "给出 GZ(φ)=KN(φ)−KG·sinφ 与 IMO 2008 IS Code Part A 2.2 六条衡准筛查。"

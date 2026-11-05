@@ -4,7 +4,7 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
-## 0.21.0 — Large-angle stability: the GZ curve
+## 0.22.0 — Large-angle stability: the GZ curve
 
 `stability.py` gives `GM`, the slope of the righting-arm curve at upright. This gives the
 curve, which is what an intact-stability screen and a `KG` limit actually need, and it needed
@@ -32,6 +32,48 @@ two things the package did not have: a heeled waterplane and a sinkage solve.
   (31 tests). Limits stated: constant trim (classical cross curve), no free-surface or grain
   correction, no damage or class approval, and hull generators cap at the design waterline so
   their `GZ` is quoted only over 0-20 deg.
+
+## 0.21.0 — 2026-11-04
+
+### Added
+- **Waterplane second moments on the `Hydrostatics` record** (`tensorcad/hydrostatics.py`):
+  `compute_hydrostatics` now reports `transverse_waterplane_inertia` (`∫ y² dA`),
+  `longitudinal_waterplane_inertia` (`∫ (x−LCF)² dA`) and `keel_z` next to the waterplane
+  area. They come out of the flux identity the module already uses for the waterplane area
+  (`∫_cap f dA = −∫_wetted f n_z dA` with `f` independent of `z`), so no cap has to exist
+  and no waterline polygon has to be reconstructed; the per-face second moments are exact
+  (`x`, `y` linear over a triangle). An open or capless surface reports `nan` rather than a
+  number the shell cannot support, and `to_dict` carries all three quantities.
+- `tensorcad.hull.analytic_hydrostatics` reports the same two inertias from the closed forms
+  (`hydrostatics_analytic.waterplane_inertia_transverse` — gamma identity — and
+  `waterplane_inertia_longitudinal` — tanh-sinh quadrature with its own convergence
+  evidence), so the mesh record and the analytic reference speak the same quantities.
+- `tests/test_hydrostatics_inertia.py` — the record against three independent references: a
+  vertex-by-vertex rectangular barge (`L·B³/12`, `B·L³/12`, `keel_z`) exact to `1e-12` on
+  three tessellations, a circular waterplane converging to `πR⁴/4` from below at the
+  `O(1/n²)` rate, and the hull mesh against the closed forms at three sizes.
+- **Transom-stern hull family** (`tensorcad/transom.py`): the aft body is truncated at a
+  station `tau` and closed by a planar transom plate, so the parametric hull can carry
+  the stern real displacement vessels have instead of a knife edge. Two parameters —
+  `transom_fraction` (`tau`) and `breadth_exponent` (`p`, the sine-taper exponent) —
+  turn it into a design space: `tau = 0` reproduces the pointed hull exactly (identical
+  faces, LOA-based frame with the transom at `x = 0`), and
+  `transom_fraction_for_area_ratio` inverts `A_t/A_m = sin(pi*tau)^p` in closed form so a
+  loop can dial an immersed transom area directly. Topology is unchanged by the cut:
+  watertight, edge-manifold, `V-E+F = 2`, outward, no zero-area faces for every `tau`
+  tested. See `docs/transom_stern.md`.
+- **Hydrostatic references that survive the truncation.** The incomplete taper integrals
+  `int_tau^1 sin(pi*u)^p du` are evaluated from a `sinc^p` power series (the `p`-singular
+  factor integrates exactly, the even remainder is a series in `s^2`), giving
+  `V`, `A_wp`, `LCB`, `Cb`, `Cp`, `Cwp` and the immersed transom area in closed form.
+  Validated three ways: against `Gamma((1+p)/2)/(sqrt(pi)*Gamma(1+p/2))` at `tau = 0`
+  (2.2e-16), against the `M(0)/J(0) = 1/2` symmetry (1e-14), and against
+  `tanh_sinh_quadrature` for `tau > 0` (1.1e-15). Mesh integration then lands within
+  0.045–0.88 % of the reference depending on grid, monotonically converging, and the
+  transom plate area converges to its analytic section (−0.71 % at `nz = 13`, −0.043 %
+  at `nz = 81`).
+- `examples/transom_stern/run_example.py`: reference ladder, 4 truncations × 4 grids
+  convergence table, design table and three figures.
 
 ## 0.20.0 — 2026-11-03
 
@@ -102,6 +144,7 @@ antisymmetric bias, because the geometry had none.
   identity, here it is two different sums that have to agree.
 - volume error `-0.95 %` at 41x13 and `-0.12 %` at 161x49 for `(0.5, 0.9)`; the analytic
   volume for the symmetric default is still `7.512698221250894 m^3` exactly.
+
 
 ## 0.16.0 — Bonjean curves: a station's immersed area against the waterline
 

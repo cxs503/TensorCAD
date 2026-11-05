@@ -454,7 +454,8 @@ The boundaries below are the ones the code actually has (they were proposals in 
   dihedral distribution, crease count and length, curvature jumps. [docs/fairness.md](docs/fairness.md)
 - `tensorcad.validation` — named geometric checks (including mesh-quality slivers and
   aspect ratios), errors versus warnings, `ValidationReport`.
-- `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients.
+- `tensorcad.hydrostatics` — mesh-integrated displacement, areas, centres, coefficients,
+  and the waterplane second moments.
 - `tensorcad.export` — OBJ/CSV/JSON writers, an OBJ reader (round-trip exact), a binary STL
   writer and a topology-reconstructing STL reader, and the gated hull export.
 - `tensorcad.gate` — hard-fail machine gate over mesh artifacts: topology, components, Euler
@@ -544,4 +545,5 @@ format and transaction layer are shape-agnostic, the fitted families are not), a
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape
 ratios, not resistance or stability), a B-rep/STEP *feature model* (the STEP export is a faceted solid),
-remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both fore-aft symmetric, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, stability, resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore/aft-symmetric by default, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, the righting-arm curve, free-surface or damage stability, resistance,
+or any classification-rule compliance (initial GM is reported, and GZ(φ) is not). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
