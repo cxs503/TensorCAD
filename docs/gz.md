@@ -119,6 +119,72 @@ waterline cap, extrudes the boundary ring upwards with vertical walls and closes
 fan; the upright displacement is unchanged (asserted to round-off in the tests) and the body
 stays watertight, outward-oriented and Euler-2 (`V − E + F = 2`).
 
+## A third route: cross curves and the IMO screen
+
+`tensorcad.righting_arm` is a second *waterline solver* for the same `GZ`. The block
+`submerged_solid` → `solve_waterline` → `gz_curve` → `imo_intact_stability` in this module
+is a second *integration*: it clips crossing triangles into polygons, closes the section
+from the oriented crossing segments, and reports the **cross curve** `KN(phi)` separately
+from the loading, which is what makes an intact-stability screen possible at all.
+
+| function | what it returns |
+|---|---|
+| `submerged_solid(mesh, waterline_z)` | `SubmergedSolid`: volume, centroid, waterplane area, section segments, per-face counts (below / clipped / coplanar) |
+| `solve_waterline(mesh, volume)` | `(z, SubmergedSolid)` — the sinkage solve, Newton on `V(z) - V_target` with `dV/dz = A_w`, safeguarded by bisection |
+| `heel_mesh(mesh, phi, pivot_z=...)` | the model rotated about a longitudinal axis through the keel (`phi > 0` = starboard down) |
+| `gz_curve(mesh, kg, ...)` | `GZCurve`: one `HeelPoint` per angle (`kn`, `gz`, `waterline_z`, `centre_of_buoyancy`, `waterplane_area`, `displacement_volume`), plus `gz_at`, `area`, `max_gz`, `gm_upright` |
+| `imo_intact_stability(curve)` | `IMOIntactStability`: seven `CriterionCheck`s, each with the measured value and its margin over the threshold |
+
+**How the cut is closed.** A triangle wholly below the waterline is kept, wholly above is
+dropped, a crossing one is clipped (Sutherland-Hodgman) and fan-triangulated. The section is
+**not** chained into loops: each crossing triangle's outward normal gives the section
+direction `z_hat x n`, which walks the material counter-clockwise seen from above, so the
+oriented segments' signed sum is the area with holes already subtracted, and the cap's
+volume and moment contributions follow in closed form. Concave waterplanes are therefore
+exact, and the failure mode that point-identity loop chaining has on a facetted cylinder
+(two faces meeting at a shallow angle key the same point twice, so the ring splits) cannot
+happen. A plane running *along* mesh edges has no section at all, so a per-point parity
+count raises `GZError` rather than reporting half an area.
+
+**What it is checked against** — the same two closed forms, both exact for the polygonal
+mesh, so the comparison is of the integrator:
+
+| case | reference | measured |
+|---|---|---|
+| wall-sided barge `L=30, B=6, T=2 m`, `KG=1 m` | `GZ = sin(phi)(GM + BM tan^2(phi)/2)`, valid while the waterline cuts both side walls (`phi < 33.7 deg`) | worst deviation **3.33e-16 m** over 0-30 deg |
+| round bilge `R=3, L=20 m`, 360 facets, `KG=1.5 m` | a chord through the centre is the only area-bisecting chord of a circle, so `KN = R sin(phi)` and the floatation is `R cos(phi)` | worst `GZ` deviation **9.89e-05 m**, floatation **5.71e-05 m** — the facetting, not the cut |
+
+Past 33.7 deg the wall-sided formula *must* fail, and the barge table in
+`docs/gz/report.md` shows it failing (1.069 measured against
+1.071 at 35 deg, 1.251 against
+1.304 at 40 deg, 1.875 against
+3.248 at 60 deg): agreement below the limit and
+disagreement above it are both asserted in `tests/test_gz.py`, so the comparison cannot pass
+by being vacuous. Cross-module, `gz_curve(...).gm_upright` on a hull capped at its design
+waterline equals `initial_stability(...).gm_transverse` to rounding.
+
+**IMO screening.** `imo_intact_stability` evaluates the numerical criteria of the 2008 IS
+Code Part A 2.2 on the measured curve, and the areas are trapezoids on the *segments* —
+which for a piecewise-linear curve is the integral, not an approximation of it:
+
+| criterion | requirement | measured (barge, `KG=1.0 m`) | met |
+|---|---|---:|---|
+| `area_0_30` | >= 0.055 m rad | 0.2169 m rad | yes |
+| `area_0_40` | >= 0.090 m rad | 0.4029 m rad | yes |
+| `area_30_40` | >= 0.030 m rad | 0.1861 m rad | yes |
+| `gz_at_30` | >= 0.20 m | 0.875 m | yes |
+| `max_gz` | >= 0.20 m | 1.875 m | yes |
+| `angle_at_max_gz` | >= 25 deg | 60.0 deg | yes |
+| `gm_upright` | >= 0.15 m | 1.500 m | yes |
+
+The curve must span 0-40 deg or the screen refuses to run (`GZError`), because an area
+extrapolated past the last sampled angle would be a number nobody measured. A **negative
+control** is part of the test set: raising `KG` to 2.45 m (`GM = 0.05 m`) flips the screen to
+`passed=False` on `gm_upright` and on the area terms, so a green screen means something.
+
+This is a screening, not a stability booklet: no weather criterion (2.3), no free-surface or
+grain correction, no damage or floodable-length case, no class approval.
+
 ## Limitations
 
 - **Sealed body.** `GZ` is for an intact, sealed hull. Deck-edge immersion
@@ -130,9 +196,11 @@ stays watertight, outward-oriented and Euler-2 (`V − E + F = 2`).
   asymmetric waterplanes because `y_B` is measured, not assumed zero.
 - **No tanks, no damage.** `KG` is the only loading input. No compartment contents, no
   flooding, no grain heeling, no statutory maxima, no class rules.
-- **No weather criterion.** Nothing here computes a wind heeling arm, a `GZ` area criterion
-  or an IMO/IS-Code check; the areas `area_under_curve` returns are the input to such a check,
-  not the check.
+- **No weather criterion.** Nothing here computes a wind heeling arm, and no class-rule
+  approval exists. `imo_intact_stability` does screen the *numerical* criteria of the 2008 IS
+  Code Part A 2.2 (areas, `GZ(30)`, `GZ_max`, the angle at `GZ_max`, `GM`), but the weather
+  criterion (2.3) is not implemented and a pass is a screening of a measured, constant-trim
+  curve -- not a stability booklet.
 - **Mesh resolution is the accuracy.** The integrator is exact for the polyhedron it is
   given; the hull's chord-wise waterplane (a 41-station mesh) is what limits `KN`, exactly as
   it limits `KB`/`BM`.
@@ -148,6 +216,20 @@ curve.max_gz, curve.angle_of_max_gz_deg, curve.range_of_stability_deg
 curve.area_under_curve(30.0)                          # dynamical stability, m·rad
 curve.to_dict()                                       # JSON-ready, per-point volume residuals
 point = heeled_hydrostatics(banded, 30.0)             # one angle: V, KB, KN, A_w, residuals
+```
+
+The third route reports the cross curve and screens it:
+
+```python
+from tensorcad import gz_curve, imo_intact_stability, solve_waterline, submerged_solid
+
+z, solid = solve_waterline(banded, displacement_volume=360.0)   # sinkage solve + the solid
+solid.volume, solid.centroid, solid.waterplane_area            # exact for the polyhedron
+
+curve = gz_curve(banded, kg=1.0, heel_angles_deg=range(0, 41, 5))  # KN cross curve + GZ
+curve.max_gz(), curve.area(0.0, 40.0), curve.gm_upright
+screen = imo_intact_stability(curve)                           # 2008 IS Code Part A 2.2
+screen.passed, [(c.key, c.measured, c.margin) for c in screen.checks]
 ```
 
 `examples/gz/run_example.py` exercises all of the above, writes `results.json`,

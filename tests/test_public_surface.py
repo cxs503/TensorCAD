@@ -45,6 +45,11 @@ EXPECTED_API = {
     "heeled_displacement", "righting_arm", "wall_sided_validity_deg",
     "BisectionRightingArmCurve", "bisection_righting_arm_curve",
     "barge_wall_sided_righting_arm",
+    # third GZ route (0.23.0): clipped crossing-triangle sections, Newton sinkage solve,
+    # KN cross curve and the 2008 IS Code Part A 2.2 screening on top of it
+    "CriterionCheck", "DEFAULT_HEEL_ANGLES_DEG", "GZCurve", "GZError", "HeelPoint",
+    "IMOIntactStability", "SubmergedSolid", "gz_curve", "heel_mesh", "imo_intact_stability",
+    "solve_waterline", "submerged_solid",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",

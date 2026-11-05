@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tensorcad"
-version = "0.22.0"
+version = "0.23.0"
 description = "Agent-callable parametric geometry foundation for the Tensor scientific-computing ecosystem"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -66,6 +66,9 @@ ignore = [
 # Example scripts prepend the checkout to sys.path before importing tensorcad,
 # so import-order rules do not apply to them.
 "examples/*" = ["E501", "E402", "I001"]
+# publish_report.py renders wide Markdown tables inside f-strings; splitting those physical
+# lines would break the table, so long lines are allowed there.
+"publish_report.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
