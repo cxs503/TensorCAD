@@ -107,7 +107,8 @@ and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated i
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+trim equilibrium, damage stability, class rules (initial *and* large-angle `GZ`
+landed in `tensorcad.gz`: `docs/gz.md`).
 
 ## Continuous geometry core (0.4)
 

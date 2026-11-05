@@ -6,6 +6,44 @@ semantic versioning.
 
 ## 0.21.0 — 2026-11-04
 
+### Large-angle stability: the GZ curve
+
+`stability.py` gives `GM`, the slope of the righting-arm curve at upright. This gives the
+curve, which is what an intact-stability screen and a `KG` limit actually need, and it needed
+two things the package did not have: a heeled waterplane and a sinkage solve.
+
+- `tensorcad/gz.py`: `submerged_solid` (volume, centre of buoyancy and waterplane area of the
+  clipped solid), `solve_waterline` (Newton on `V(z) - V_target` with the waterplane area as
+  `dV/dz`, bisection-safeguarded), `heel_mesh` (positive heel = starboard down),
+  `gz_curve` (`GZ = KN - KG sin(phi)` at constant displacement) and `imo_intact_stability`
+  (the six 2008 IS Code Part A 2.2 numerical criteria, as a screening).
+- **The cap is integrated, not triangulated**: section segments are oriented from each
+  crossing triangle's outward normal (`z_hat x n` walks the material counter-clockwise from
+  above), so the signed sum is the area with holes subtracted and the cap's first moments are
+  closed form. Chaining the segments into loops -- what `stability.py` does for the upright
+  waterplane -- halves the area on a facetted cylinder, where two faces meeting at a shallow
+  angle key the same crossing point differently. A plane along mesh edges raises `GZError`
+  instead of reporting half an area.
+- Two exact references, not fits: the wall-sided barge reproduces
+  `sin(phi)(GM + BM tan^2(phi)/2)` to **3.3e-16 m** over seven angles, and a 360-facet round
+  bilge reproduces the circular-segment result `KN = R sin(phi)` to **9.9e-5 m** (facetting).
+  `gz_curve(...).gm_upright` equals `initial_stability(...).gm_transverse` bit-for-bit on a
+  hull capped at its waterline.
+- Evidence: `docs/gz.md`, `docs/gz/{results.json,report.md,figures/gz-curve.png}`,
+  `examples/gz/run_example.py` (exits non-zero if a claim breaks), `tests/test_gz.py`
+  (31 tests). Limits stated: constant trim (classical cross curve), no free-surface or grain
+  correction, no damage or class approval, and hull generators cap at the design waterline so
+  their `GZ` is quoted only over 0-20 deg.
+
+### Fixed
+- **The sinkage solve starts off the mesh's own rings.** The transom family emits a ring at
+  half draft, which is exactly the bracket midpoint `solve_waterline` used as its initial
+  guess; a section that runs along mesh edges has no area, so `gz_curve` raised `GZError` on
+  the family's default grid even though a valid waterline exists. The start now steps off
+  the coincidence by a fixed fraction of the span (displacement is continuous, so the
+  converged height is unchanged), while `submerged_solid` still refuses a *requested*
+  waterline that lies on edges.
+
 ### Added
 - **Waterplane second moments on the `Hydrostatics` record** (`tensorcad/hydrostatics.py`):
   `compute_hydrostatics` now reports `transverse_waterplane_inertia` (`∫ y² dA`),
