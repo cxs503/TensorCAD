@@ -10,6 +10,8 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "DEFAULT_ANGLES_DEG", "GZCurve", "HeeledSection", "HeelError", "SubmergedBody",
+    "gz_curve", "heeled_displacement", "righting_arm", "wall_sided_gz", "waterplane_normal",
     "WIGLEY_REFERENCE_CASE", "WigleyAnalytic", "WigleyModel", "WigleyParameters",
     "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
@@ -60,7 +62,7 @@ def test_declared_api_is_importable() -> None:
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
-                   "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
+                   "heel", "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
                    "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
