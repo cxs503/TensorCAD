@@ -1,0 +1,21 @@
+124	60	tests/test_adapters_fem.py	
+0	2	tests/test_adapters_ocp.py	1 passed, 10 skipped, 1 warning in 0.18s
+124	20	tests/test_analytic_hydrostatics.py	
+124	20	tests/test_artifact_export.py	
+0	19	tests/test_asymmetric_hull.py	35 passed, 1 warning in 18.59s
+124	20	tests/test_benchmark.py	
+0	7	tests/test_bonjean.py	39 passed, 1 warning in 5.87s
+0	4	tests/test_cli.py	9 passed, 1 warning in 2.54s
+0	4	tests/test_curvature.py	23 passed, 1 warning in 3.44s
+124	20	tests/test_design.py	
+0	2	tests/test_export.py	9 passed, 1 warning in 0.34s
+0	18	tests/test_extract.py	12 passed, 1 warning in 10.43s
+0	5	tests/test_gate.py	12 passed, 1 warning in 2.66s
+124	20	tests/test_geometry_field.py	
+0	8	tests/test_heel.py	30 passed, 1 warning in 5.73s
+124	20	tests/test_hull.py	
+0	2	tests/test_hydrostatics.py	8 passed, 1 warning in 0.51s
+124	20	tests/test_hydrostatics_analytic.py	
+0	11	tests/test_hydrostatics_inertia.py	16 passed, 1 warning in 9.72s
+0	1	tests/test_mesh.py	21 passed, 1 warning in 0.15s
+124	20	tests/test_mesh_conditioning.py	
