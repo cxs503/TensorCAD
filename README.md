@@ -107,7 +107,11 @@ and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated i
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+trim equilibrium, damage stability, class rules. Large-angle `GZ` moved out of that list
+in 0.21: `tensorcad.righting` solves the constant-displacement waterline at every heel and
+integrates the arm off the buoyancy centroid, against a box section reference to `2.2e-16 m`
+and the wall-sided closed form to `4e-17 m` inside its validity window
+([docs/righting.md](docs/righting.md)).
 
 ## Continuous geometry core (0.4)
 
@@ -544,5 +548,4 @@ format and transaction layer are shape-agnostic, the fitted families are not), a
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape
 ratios, not resistance or stability), a B-rep/STEP *feature model* (the STEP export is a faceted solid),
-remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore/aft-symmetric by default, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, the righting-arm curve, free-surface or damage stability, resistance,
-or any classification-rule compliance (initial GM is reported, and GZ(φ) is not). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore-aft symmetric, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, free-surface or damage stability, stability *criteria* (`GZ` curves exist since 0.21; the rule limits are the caller's), resistance, or any classification-rule compliance. `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
