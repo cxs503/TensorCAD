@@ -117,6 +117,15 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .righting_arm import (
+    DEFAULT_HEELS_DEG,
+    HeeledDisplacement,
+    RightingArm,
+    RightingArmError,
+    heeled_displacement,
+    righting_arm,
+    wall_sided_validity_deg,
+)
 from .stability import (
     InitialStability,
     StabilityError,
@@ -185,6 +194,7 @@ from .wigley import (
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
     "DEFAULT_ANGLES_DEG",
+    "DEFAULT_HEELS_DEG",
     "DESIGN_SCHEMA",
     "MAX_TRANSOM_FRACTION",
     "SUBOFF_LENGTH_M",
@@ -209,6 +219,7 @@ __all__ = [
     "FreeSurfaceCorrection",
     "GeometryField",
     "GzError",
+    "HeeledDisplacement",
     "HeeledHydrostatics",
     "HullModel",
     "HullParameters",
@@ -224,7 +235,10 @@ __all__ = [
     "PlaneField",
     "RatioSpec",
     "ResolutionPlan",
+    "RightingArm",
     "RightingArmCurve",
+    "RightingArmCurve",
+    "RightingArmError",
     "SampledField",
     "SectionProperties",
     "SphereField",
@@ -269,6 +283,7 @@ __all__ = [
     "generate_hull",
     "generate_transom_hull",
     "generate_wigley",
+    "heeled_displacement",
     "heeled_hydrostatics",
     "initial_stability",
     "inspect_geometry",
@@ -282,6 +297,8 @@ __all__ = [
     "read_stl",
     "rectangular_tank_inertia",
     "resolve_resolution",
+    "righting_arm",
+    "righting_arm_curve",
     "righting_arm_curve",
     "section_loops",
     "section_properties",
@@ -303,6 +320,8 @@ __all__ = [
     "validate_hull",
     "vertex_mean_curvature",
     "wall_sided_righting_arm",
+    "wall_sided_righting_arm",
+    "wall_sided_validity_deg",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
     "waterplane_moments",
