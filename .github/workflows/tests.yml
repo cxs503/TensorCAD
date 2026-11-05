@@ -9,6 +9,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      # A red job used to cancel its three siblings (the matrix default), so a
+      # single failure was reported as "test (3.12)=failure, rest cancelled" and
+      # the label carried no information about whether the break was version
+      # specific. Every version now reports its own verdict.
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
