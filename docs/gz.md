@@ -152,3 +152,22 @@ point = heeled_hydrostatics(banded, 30.0)             # one angle: V, KB, KN, A_
 
 `examples/gz/run_example.py` exercises all of the above, writes `results.json`,
 `report.md` and `plot.png`, and exits non-zero if a claim breaks.
+
+## Evidence bundle
+
+`docs/gz/report.md` is the *published* form of this module's evidence: the two exact benchmarks
+(box barge against the wall-sided trapezoid, circular section against `(R − KG) sin φ`) plus the
+hull's `dGZ/dφ(0)` against `initial_stability.gm_transverse`, with the full numeric tables in
+`docs/gz/results.json` and the curves in `docs/gz/figures/gz-curve.png`. Every number in the
+report is injected from the JSON — none is transcribed.
+
+```
+python publish_report.py            # regenerate report.md, results.json, figures/gz-curve.png
+python publish_report.py --check    # exit non-zero if the committed bundle drifted from the code
+```
+
+`--check` rebuilds the claims and compares them field by field with the committed `results.json`
+(relative tolerance `1e-9`), so an integrator change that moves a righting arm cannot leave a
+stale report behind; `tests/test_gz_report.py` runs exactly that comparison in the suite.
+`publish_report.py --publish` additionally POSTs the report (markdown + figure) to the Tensor
+platform, which needs the `report` extra (`pip install -e '.[report]'`) for the figure only.
