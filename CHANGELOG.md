@@ -931,3 +931,34 @@ Export becomes a verified step instead of a dump.
 ### Added — waterplane second moments, and the transom-stern hull family
 ### Added — large-angle stability: the righting-arm curve, and two exact benchmarks
 ### Large-angle stability: the righting-arm curve, and two exact benchmarks
+## 0.23.0 — 2026-11-04
+- **Trim, and the two constants that price it** (`tensorcad/trim.py`): `TPC`
+  (`rho A_wp / 1e5`), `MCT` (`rho_t I_L / (100 L)`), `LCB - LCF`, a
+  `hydrostatic_table` over drafts, and `equilibrium_trim` — the angle a hull takes
+  when `weight` is shifted `shift` along it. `hydrostatic_particulars` now reports
+  volume, LCB, KB, KM and the centimetre constants from one waterline;
+  `trimmed_hydrostatics` / `waterline_for_displacement` float a hull at a trim angle
+  with the displaced volume held by a safeguarded secant.
+- **No linearisation anywhere in the solve**: at a fixed station "below the tilted
+  plane" is a half plane, so the station clip is reused at a per-station waterline.
+  On the `20x4x5` m box that reproduces the wallsided closed form at 8 degrees of
+  trim to 5.4e-15 relative, and the two centimetre routes (`w d / MCT` against
+  `100 L tan(theta)`) agree to 2.0e-16.
+- **Two routes, one answer**: section areas integrated in `x` (Simpson) against the
+  plane section's own moments. All nine box particulars reproduce their closed forms
+  to <=5.1e-16; on the parametric hull `TPC` equals `dV/dz` to 1.3e-3 and `MCT` at
+  the design waterline equals the analytic `I_L` route to 6.0e-3; the trim solve
+  agrees with the small-angle answer to 4.0e-3 at 0.25 deg.
+- `_SectionCutter` indexes stations to the faces that can straddle them: a sweep
+  drops from 75 ms to 37 ms on the default hull while reproducing
+  `bonjean.section_properties` to 1e-12 (asserted).
+- Honest limits, in `docs/trim.md`: a hull capped at its own waterline cannot be
+  trimmed at that displacement (`TrimError`, not a wrong angle), ring waterlines are
+  nudged by 1e-6 of the mesh scale and flagged `waterline_nudged`, and a
+  `station_count` equal to the mesh's `nx` puts every plane on a vertex ring and
+  costs 0.4 % on the change of trim.
+- `docs/trim.md`, `docs/trim/{results.json,trim.png}`,
+  `examples/trim/run_example.py` (exits non-zero if any of its 20 claims breaks),
+  `tests/test_trim.py` (24 tests, incl. the indexed cutter against the reference
+  route, the refusals, and the stdlib-only guarantee).
+  segments into closed loops on the mesh's own vertex/edge identity, and
