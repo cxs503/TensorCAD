@@ -250,3 +250,53 @@ def test_open_surface_inertia_is_not_claimed() -> None:
     assert hydro.basis == "open surface (volume not trustworthy)"
     assert math.isnan(hydro.transverse_waterplane_inertia)
     assert math.isnan(hydro.longitudinal_waterplane_inertia)
+
+
+# ------------------------------------------------- asymmetric waterplane (0.21 route)
+#
+# ``tensorcad.hull.analytic_hydrostatics`` grew independent fore/aft exponents (main) at
+# the same time as the waterplane second moments (agent/m2925). The two closed forms are
+# derived about midship and assume a fore/aft-symmetric waterplane, which is the centre
+# of flotation only in that case, so the merge withholds them where the assumption fails
+# instead of reporting symmetric numbers for an asymmetric body.
+
+
+def test_symmetric_analytic_hull_reports_the_inertias_and_says_how() -> None:
+    hydro = analytic_hydrostatics(10.0, 2.0, 0.8)
+    assert math.isfinite(hydro.transverse_waterplane_inertia)
+    assert math.isfinite(hydro.longitudinal_waterplane_inertia)
+    assert hydro.keel_z == pytest.approx(-0.8, abs=1e-12)
+    assert "tanh-sinh quadrature" in hydro.basis
+    # I_T is 2/3 * B**3/12 ~ O(B**3 L); I_L carries L**3, so the ordering is structural.
+    assert hydro.longitudinal_waterplane_inertia > hydro.transverse_waterplane_inertia
+
+
+def test_asymmetric_analytic_hull_withholds_the_inertias_it_cannot_derive() -> None:
+    symmetric = analytic_hydrostatics(10.0, 2.0, 0.8)
+    asymmetric = analytic_hydrostatics(10.0, 2.0, 0.8, fore_exponent=0.5, aft_exponent=0.9)
+    # main's route is alive: the centre of flotation leaves midship for a split taper.
+    assert symmetric.longitudinal_centre_flotation == pytest.approx(5.0, abs=1e-12)
+    assert asymmetric.longitudinal_centre_flotation != pytest.approx(5.0, abs=1e-6)
+    # m2925's numbers are not silently reused where they would be wrong.
+    assert math.isnan(asymmetric.transverse_waterplane_inertia)
+    assert math.isnan(asymmetric.longitudinal_waterplane_inertia)
+    assert "withheld" in asymmetric.basis
+    # Everything both routes do agree on survives: the datum and the closed-form volume.
+    assert asymmetric.keel_z == pytest.approx(-0.8, abs=1e-12)
+    assert asymmetric.displacement_volume > 0.0
+    assert asymmetric.block_coefficient == pytest.approx(
+        asymmetric.displacement_volume / (10.0 * 2.0 * 0.8), rel=1e-12
+    )
+
+
+def test_the_mesh_record_and_the_symmetric_reference_agree_closely() -> None:
+    """The two merged routes meet: mesh integrator vs the closed forms on the same hull."""
+    reference = analytic_hydrostatics(10.0, 2.0, 0.8)
+    mesh = compute_hydrostatics(generate_hull(HullParameters(10.0, 2.0, 0.8, 81, 25)).mesh)
+    assert mesh.transverse_waterplane_inertia == pytest.approx(
+        reference.transverse_waterplane_inertia, rel=5e-3
+    )
+    assert mesh.longitudinal_waterplane_inertia == pytest.approx(
+        reference.longitudinal_waterplane_inertia, rel=1e-2
+    )
+    assert mesh.keel_z == pytest.approx(reference.keel_z, abs=1e-9)

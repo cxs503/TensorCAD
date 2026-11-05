@@ -99,3 +99,38 @@ umbilic/singularity classification. The finite-difference Hessian needs a field 
 gradient is defined at and around the probe point; on a mesh with no field behind it
 the report degrades to the dihedral and cotangent parts, which is the intended
 fallback and is labelled as such in the JSON.
+
+## Measured tolerances, not aspirations (m3313)
+
+Two tests in this suite used to demand more than the estimators can give, and the
+numbers behind their replacement are measured by
+`runs/2026-11-04-curvature-adjudication/measure.py` (JSON + figure alongside).
+
+**The unrefined probe is second order, and that is the whole of its error.**
+`|kappa_max - 1/R| / (0.5 h^2) = 1.000000` (worst deviation 4.8e-5) over fourteen
+steps from `8e-3` to `9.8e-7 m`, and the observed order over the halving ladder is
+2.00 at every rung. At the default step (`1e-4` of the bbox diagonal, `3.464e-4 m`
+on the unit sphere) the error is `6.0e-8`, which is exactly `0.5 h^2` -- **not** a
+float32 bandwidth floor: a float32 field (gradients and point rounded to binary32)
+sits on a flat `2.5e-8` floor below `h = 2e-4` and cannot improve, while the double
+precision path keeps falling to `4.8e-13` at `h = 9.8e-7`. The test therefore pins
+`0.5 * step**2` for `refine=False` and `1e-12` only for the Richardson-extrapolated
+`refine=True` path, where the `O(h^2)` term is the thing being removed.
+
+**A sphere fixture must be a legal mesh.** A UV sphere built from `nu + 1` rings has
+`nv` coincident vertices at each pole, hence `2 nv` zero-area faces; `assess_fairness`
+refuses such a mesh (a face with no normal has no dihedral), and the cotangent
+estimator reports `H = 0` at the collapsed vertices -- a silent "this is flat". The
+suite's fixture is now a pole-fan sphere (single pole vertex, no zero-area face, all
+validator checks pass, area-weighted mean `1.000004` at `16x32`) and the collapsed
+mesh is kept as the negative control that pins both halves: 32 zero-area faces, four
+failed validator checks, `CurvatureError` from the fairness report.
+
+**The dihedral threshold is resolution-dependent by construction.** On the pole-fan
+sphere p95 is `22.80 -> 11.29 -> 5.63 deg` at `8x16 -> 16x32 -> 32x64`, halving with
+the grid (ratios 2.020 and 2.005), so the `16x32` assertion is `< 12 deg` *and*
+`max < DEFAULT_CREASE_DEGREES` with a separate refinement test pinning the halving.
+Note the consequence: at `8x16` the fan's own dihedral p95 (22.8 deg) is inside the
+15 deg crease band, i.e. a coarse enough sphere is audited as creased -- the
+threshold says nothing about a mesh this under-resolved, which is why the refinement
+trend is asserted rather than a single number.

@@ -64,6 +64,12 @@ TAPER_INTEGRAL = (2.0 / math.pi) * math.sqrt(math.pi) * math.gamma(0.85) / (2.0 
 #: fattens the run of shoulders; the keel-side ``sqrt`` profile is fixed.
 BREADTH_EXPONENT = 0.7
 
+#: Accepted range for the fore/aft taper exponents. The floor keeps the taper
+#: integrable with a well-defined tip (``p -> 0`` turns ``sin^p`` into a step),
+#: the ceiling keeps the ends from collapsing onto the centreline.
+TAPER_EXPONENT_MINIMUM = 0.05
+TAPER_EXPONENT_MAXIMUM = 5.0
+
 MAX_LONGITUDINAL_STATIONS = 4001
 MAX_VERTICAL_LEVELS = 513
 #: Above this mesh size the refinement used for the convergence estimate is
@@ -91,6 +97,12 @@ PARAMETER_SPECS: tuple[ParameterSpec, ...] = (
                   unit="levels", description="vertical levels from keel to waterline, inclusive"),
     ParameterSpec("water_density", FLOAT, minimum=300.0, maximum=2000.0, unit="kg/m^3",
                   description="density used to convert displaced volume to mass"),
+    ParameterSpec("fore_exponent", FLOAT, minimum=TAPER_EXPONENT_MINIMUM,
+                  maximum=TAPER_EXPONENT_MAXIMUM, unit="dimensionless",
+                  description="sine-taper exponent forward of midship; 0.7 is the shipped symmetric form"),
+    ParameterSpec("aft_exponent", FLOAT, minimum=TAPER_EXPONENT_MINIMUM,
+                  maximum=TAPER_EXPONENT_MAXIMUM, unit="dimensionless",
+                  description="sine-taper exponent abaft midship; 0.7 is the shipped symmetric form"),
 )
 
 RATIO_SPECS: tuple[RatioSpec, ...] = (
@@ -111,6 +123,12 @@ class HullParameters:
     calls it for you) to get every problem at once. ``water_density`` is kept here
     rather than passed to a reporting call so that a stored parameter set alone
     reproduces the numbers in the metadata (1025 is seawater, 1000 is fresh).
+
+    ``fore_exponent`` and ``aft_exponent`` are the sine-taper exponents forward of
+    and abaft midship. They default to the single shipped exponent, so the default
+    surface is the mirror-symmetric one; making them differ is what produces an
+    asymmetric hull, whose longitudinal centres are no longer ``length/2`` by
+    symmetry and therefore become a measurable quantity instead of an identity.
     """
 
     length: float = 10.0
@@ -119,6 +137,8 @@ class HullParameters:
     nx: int = 41
     nz: int = 13
     water_density: float = 1025.0
+    fore_exponent: float = BREADTH_EXPONENT
+    aft_exponent: float = BREADTH_EXPONENT
 
     def as_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = asdict(self)
@@ -143,6 +163,11 @@ class HullParameters:
             raise ValueError("; ".join(errors))
 
     @property
+    def is_symmetric_fore_and_aft(self) -> bool:
+        """True when both halves share one exponent, i.e. the family is mirror-symmetric."""
+        return self.fore_exponent == self.aft_exponent
+
+    @property
     def grid_is_symmetric(self) -> bool:
         """True when the station grid lands exactly on the widest section.
 
@@ -151,6 +176,19 @@ class HullParameters:
         requested beam. The deficit is reported, not silently absorbed.
         """
         return self.nx % 2 == 1
+
+
+def _breadth_exponent(parameters: HullParameters, index: int) -> float:
+    """Taper exponent that applies at station ``index``.
+
+    Midship belongs to both halves and ``sin(pi/2) = 1`` whatever the exponent is,
+    so the tie does not bend the surface: the two halves meet at the requested
+    beam without a step, and the maximum section stays at ``x = length/2``. Abaft
+    midship the exponent is ``aft_exponent``, forward of it ``fore_exponent``.
+    """
+    if 2 * index >= parameters.nx - 1:
+        return parameters.fore_exponent
+    return parameters.aft_exponent
 
 
 def _longitudinal_taper(parameters: HullParameters, index: int) -> float:
@@ -163,7 +201,10 @@ def _longitudinal_taper(parameters: HullParameters, index: int) -> float:
     if index == 0 or index == parameters.nx - 1:
         return 0.0
     # math.pow rather than ** because ``float ** float`` is typed Any in typeshed.
-    return math.pow(math.sin(math.pi * index / (parameters.nx - 1)), BREADTH_EXPONENT)
+    return math.pow(
+        math.sin(math.pi * index / (parameters.nx - 1)),
+        _breadth_exponent(parameters, index),
+    )
 
 
 def _vertical_taper(parameters: HullParameters, level: int) -> float:
@@ -212,7 +253,11 @@ class HullModel:
             "coordinate_frame": self.coordinate_frame,
             "generator": {
                 "kind": "analytic_lofted_surface",
-                "longitudinal_taper": f"sin(pi*x/length)^{BREADTH_EXPONENT}",
+                "longitudinal_taper": (
+                    f"sin(pi*x/length)^{self.parameters.aft_exponent} (aft) / "
+                    f"sin(pi*x/length)^{self.parameters.fore_exponent} (fore)"
+                ),
+                "is_symmetric_fore_and_aft": self.parameters.is_symmetric_fore_and_aft,
                 "vertical_taper": "sqrt((z+draft)/draft)",
                 "topology": "one closed section ring per station, lofted, capped at the design waterline",
                 "backend": "tensorcad.geometry (standard library)",
@@ -260,16 +305,69 @@ def _section_point(parameters: HullParameters, i: int, j: int) -> tuple[float, f
 SAMPLING_ERROR_WARNING = 0.02
 
 
-def analytic_volume(length: float, beam: float, draft: float) -> float:
+def _positive_exponent(name: str, value: float) -> float:
+    """Guard for the reference formulas: a taper exponent must be usable."""
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValueError(f"{name} must be a finite positive number, got {value!r}")
+    return float(value)
+
+
+def taper_integral(exponent: float = BREADTH_EXPONENT) -> float:
+    r"""Exact ``int_0^1 sin(pi*x)**p dx``: the taper's share of the length.
+
+    This is ``Gamma((p+1)/2) / (sqrt(pi) * Gamma(p/2 + 1))`` -- the Beta function
+    at ``(1/2, (p+1)/2)`` scaled by ``1/pi`` -- evaluated through ``lgamma`` so no
+    factor overflows. The shipped exponent returns :data:`TAPER_INTEGRAL`
+    verbatim: that constant is the number every stored result was computed with,
+    and re-deriving it in another order would move the last bits of published
+    volumes for no gain. :func:`taper_integral` and ``TAPER_INTEGRAL`` are
+    therefore the same object for ``p = BREADTH_EXPONENT``, and
+    ``tests/test_asymmetric_hull.py`` pins the constant against the Gamma form.
+    """
+    p = _positive_exponent("exponent", exponent)
+    if p == BREADTH_EXPONENT:
+        return TAPER_INTEGRAL
+    return math.exp(
+        math.lgamma(0.5 * (p + 1.0)) - 0.5 * math.log(math.pi) - math.lgamma(0.5 * p + 1.0)
+    )
+
+
+def taper_integral_pair(
+    fore_exponent: float = BREADTH_EXPONENT, aft_exponent: float = BREADTH_EXPONENT
+) -> float:
+    """``int_0^1`` of the asymmetric taper: the mean of the two half integrals.
+
+    Both halves integrate the same ``sin(pi*x)^p`` shape, so half of the sum of
+    the two full-range integrals is the integral of the piecewise taper. With
+    equal exponents ``0.5*(T + T)`` is exactly ``T``, which is why the symmetric
+    volume does not move.
+    """
+    return 0.5 * (taper_integral(aft_exponent) + taper_integral(fore_exponent))
+
+
+def analytic_volume(
+    length: float,
+    beam: float,
+    draft: float,
+    *,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
+) -> float:
     """Exact displaced volume of the analytic surface the generator samples.
 
-    ``length * beam * draft * TAPER_INTEGRAL * 2/3``: the breadth taper integrated
-    over ``x``, the ``sqrt(z/draft)`` profile integrated over ``z``, and the port
-    and starboard halves. This is the O(1) reference a sampled grid has to be
+    ``length * beam * draft * taper * 2/3``: the breadth taper integrated over
+    ``x``, the ``sqrt(z/draft)`` profile integrated over ``z``, and the port and
+    starboard halves. This is the O(1) reference a sampled grid has to be
     compared against -- a formula the mesh never got to see, which is exactly why
     it is useful as an independent check.
+
+    The taper is the mean of the two half integrals, so the volume depends on the
+    exponents and not on *where* midship is: an asymmetric fore/aft distribution
+    keeps the magnitude of the integral and moves only the longitudinal centres.
+    That separation is what lets a mesh comparison tell an error in the ``x``
+    weighting apart from an error in the quadrature.
     """
-    return beam * length * draft * TAPER_INTEGRAL * (2.0 / 3.0)
+    return beam * length * draft * taper_integral_pair(fore_exponent, aft_exponent) * (2.0 / 3.0)
 
 
 def _positive_dimension(name: str, value: float) -> float:
@@ -279,8 +377,14 @@ def _positive_dimension(name: str, value: float) -> float:
     return float(value)
 
 
-def analytic_waterplane_area(length: float, beam: float) -> float:
-    """Exact waterplane area of the analytic surface: ``beam * length * TAPER_INTEGRAL``.
+def analytic_waterplane_area(
+    length: float,
+    beam: float,
+    *,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
+) -> float:
+    """Exact waterplane area of the analytic surface: ``beam * length * taper``.
 
     The waterline is single-valued in ``x`` and the full breadth at a station is
     the taper times ``beam``, so the cap the generator adds has exactly this
@@ -290,7 +394,7 @@ def analytic_waterplane_area(length: float, beam: float) -> float:
     """
     _positive_dimension("length", length)
     _positive_dimension("beam", beam)
-    return beam * length * TAPER_INTEGRAL
+    return beam * length * taper_integral_pair(fore_exponent, aft_exponent)
 
 
 def analytic_maximum_section_area(beam: float, draft: float) -> float:
@@ -320,17 +424,44 @@ def analytic_vertical_centre_buoyancy(draft: float) -> float:
     return -(2.0 / 5.0) * draft
 
 
-def analytic_longitudinal_centre(length: float) -> float:
-    """Exact LCB and LCF together, ``length / 2``.
+def analytic_longitudinal_centre(
+    length: float,
+    *,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
+) -> float:
+    r"""Exact LCB and LCF of the analytic surface, measured from the aft end.
 
-    Both the breadth taper and the waterplane breadth are symmetric about
-    ``x = length/2``, so both longitudinal centroids sit there. The value is
-    trivial, and that is the point: it is measured in the mesh frame with no
-    assumption about where the integration thinks the origin is, so it checks the
-    frame and the sign conventions of the x moments.
+    Symmetric form: ``length/2`` exactly, because both the volume and the
+    waterplane breadth are mirror images about midship. The value is trivial and
+    that is the point -- it is measured in the mesh frame with no assumption about
+    where the integration thinks the origin is, so it checks the frame and the sign
+    conventions of the ``x`` moments. It cannot, however, detect an antisymmetric
+    bias, because the geometry has none.
+
+    Asymmetric form: write ``h(p) = int_0^(1/2) sin(pi*x)^p dx = taper/2`` and
+    ``m(p) = int_0^(1/2) x sin(pi*x)^p dx``. The first moment of the taper about
+    ``x = 0`` is ``m(p_aft) + (h(p_fore) - m(p_fore))`` -- the after half as it
+    stands, the forward half mirrored onto ``[0, 1/2]`` -- over a total
+    ``h(p_aft) + h(p_fore)``, so ``LCB = length * moment / total``. LCF is the same
+    number because the waterplane breadth is proportional to the same taper: a
+    quantity that is *identical* for the symmetric family is a joint test of the
+    volume moment and the waterplane moment once the halves differ.
+
+    The weighted half-moment is the one quantity without an elementary form (only
+    the unweighted integral is a Beta function), so it is quadrature: see
+    :func:`_half_first_moment`. Equal exponents short-circuit the whole thing, so
+    a stored symmetric number is untouched bit for bit.
     """
-    _positive_dimension("length", length)
-    return 0.5 * length
+    length = _positive_dimension("length", length)
+    fore = _positive_exponent("fore_exponent", fore_exponent)
+    aft = _positive_exponent("aft_exponent", aft_exponent)
+    if fore == aft:
+        return 0.5 * length
+    half_fore = 0.5 * taper_integral(fore)
+    half_aft = 0.5 * taper_integral(aft)
+    moment = _half_first_moment(aft) + half_fore - _half_first_moment(fore)
+    return length * moment / (half_aft + half_fore)
 
 
 def _gauss_legendre(nodes: int) -> tuple[list[float], list[float]]:
@@ -364,8 +495,68 @@ def _gauss_legendre(nodes: int) -> tuple[list[float], list[float]]:
     return x, w
 
 
+def _half_first_moment(exponent: float, nodes: int = 120) -> float:
+    r"""``int_0^(1/2) x sin(pi*x)^p dx`` by Gauss-Legendre after ``x = t^3/2``.
+
+    The antisymmetric part of the breadth distribution is what the asymmetric
+    family needs and the symmetric one never did. It has no elementary closed
+    form: the ``x``-weighted integral of ``sin^p`` is not a Beta function, only the
+    unweighted one is. The substitution ``x = t^3/2`` removes the tip singularity
+    -- the integrand behaves like ``x^(p+1)`` at the stem, so in ``t`` it behaves
+    like ``t^(3p+5)`` -- and makes the Gauss rule converge to machine precision at
+    ``nodes = 120``: doubling the nodes moves the result by ``< 1e-15`` relative,
+    and :func:`_half_first_moment_exp_sinh`, a different substitution and a different
+    rule, agrees to ``5e-15`` relative.
+    """
+    p = _positive_exponent("exponent", exponent)
+    gx, gw = _gauss_legendre(nodes)
+    total = 0.0
+    for i in range(nodes):
+        tau = 0.5 * (gx[i] + 1.0)
+        x = 0.5 * tau ** 3
+        sine = math.sin(0.5 * math.pi * tau ** 3)  # = sin(pi*x), exactly the argument
+        total += 0.5 * gw[i] * x * sine ** p * (1.5 * tau * tau)  # dx/dt = 1.5 t^2
+    return total
+
+
+def _half_first_moment_exp_sinh(
+    exponent: float, nodes: int = 200, extent: float = 50.0
+) -> float:
+    r"""Independent check of :func:`_half_first_moment`, by exponential substitution.
+
+    With ``x = exp(-v)/2`` the half moment becomes
+
+    .. math::
+
+        \int_0^{1/2} x\,\sin^p(\pi x)\,dx
+        = \int_0^\infty \tfrac14 e^{-2v}\sin^p(\tfrac{\pi}{2}e^{-v})\,dv,
+
+    an integral over ``v in [0, inf)`` whose integrand decays like
+    ``e^{-(p+2)v}``. Truncating at ``v = 50`` (below ``1e-21`` for every accepted
+    exponent) leaves a smooth analytic integrand, so plain Gauss-Legendre lands on
+    machine precision with no tip handling at all. The point of keeping it beside
+    :func:`_half_first_moment` is that it shares neither the substitution nor the
+    rule: two schemes that agree are evidence, one scheme checked against itself
+    is not. They agree to ``5e-15`` relative over ``p in [0.2, 3]``.
+    """
+    p = _positive_exponent("exponent", exponent)
+    gx, gw = _gauss_legendre(nodes)
+    total = 0.0
+    for i in range(nodes):
+        v = 0.5 * (gx[i] + 1.0) * extent
+        sine = math.sin(0.5 * math.pi * math.exp(-v))
+        total += 0.5 * extent * gw[i] * 0.25 * math.exp(-2.0 * v) * sine ** p
+    return total
+
+
 def analytic_wetted_surface_area(
-    length: float, beam: float, draft: float, *, nodes: int = 80
+    length: float,
+    beam: float,
+    draft: float,
+    *,
+    nodes: int = 80,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
 ) -> float:
     """Wetted surface area of the analytic surface, by Gauss-Legendre quadrature.
 
@@ -392,9 +583,10 @@ def analytic_wetted_surface_area(
     length = _positive_dimension("length", length)
     beam = _positive_dimension("beam", beam)
     draft = _positive_dimension("draft", draft)
+    p_aft = _positive_exponent("aft_exponent", aft_exponent)
+    p_fore = _positive_exponent("fore_exponent", fore_exponent)
     gx, gw_x = _gauss_legendre(nodes)
     gu, gw_u = _gauss_legendre(nodes)
-    p = BREADTH_EXPONENT
     total = 0.0
     for i in range(nodes):
         tau = 0.5 * (gx[i] + 1.0)
@@ -404,53 +596,69 @@ def analytic_wetted_surface_area(
         sine = math.sin(psi)
         if sine <= 0.0:  # tau = 0 is the bow/stern tip itself
             continue
-        s = sine ** p
-        ds_dx = p * sine ** (p - 1.0) * math.cos(psi) * (math.pi / length)
+        cosine = math.cos(psi)
         inner = 0.0
         for j in range(nodes):
             u = 0.5 * (gu[j] + 1.0)
             weight_u = 0.5 * gw_u[j]
-            # 2*u*|P_x x P_w| written as one square root, so the keel (u -> 0)
-            # is a regular point instead of a 1/u pole.
-            element = math.sqrt(
-                4.0 * u * u * draft * draft
-                + (draft * beam * ds_dx * u * u) ** 2
-                + (0.5 * beam * s) ** 2
-            )
-            inner += weight_u * element
+            element = 0.0
+            # psi spans the aft end to midship, so the same quadrature node is
+            # evaluated once per half with that half's own exponent.
+            for p in (p_aft, p_fore):
+                s = sine ** p
+                ds_dx = p * sine ** (p - 1.0) * cosine * (math.pi / length)
+                # 2*u*|P_x x P_w| written as one square root, so the keel (u -> 0)
+                # is a regular point instead of a 1/u pole.
+                element += math.sqrt(
+                    4.0 * u * u * draft * draft
+                    + (draft * beam * ds_dx * u * u) ** 2
+                    + (0.5 * beam * s) ** 2
+                )
+            inner += weight_u * 0.5 * element
         total += weight_tau * dpsi_dtau * inner
     return (4.0 * length / math.pi) * total
 
 
 def analytic_hydrostatics(
-    length: float, beam: float, draft: float, water_density: float = 1025.0
+    length: float,
+    beam: float,
+    draft: float,
+    water_density: float = 1025.0,
+    *,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
 ) -> Hydrostatics:
     """Closed-form hydrostatics of the analytic surface, as a :class:`Hydrostatics`.
 
     The generator samples a surface that is **separable**: the half-breadth is
-    ``(beam/2) * sin(pi*x/length)^BREADTH_EXPONENT * sqrt((z + draft)/draft)``.
-    Every integral over the volume then factors into an ``x`` integral and a
-    ``z`` integral, and both have closed forms, so the whole hydrostatic set has
-    one:
+    ``(beam/2) * sin(pi*x/length)^p * sqrt((z + draft)/draft)``, with ``p`` equal
+    to ``aft_exponent`` abaft midship and ``fore_exponent`` forward of it. Every
+    integral over the volume then factors into an ``x`` integral and a ``z``
+    integral; the ``z`` integral has a closed form and so does the unweighted
+    ``x`` integral, so almost the whole hydrostatic set does:
 
     | Quantity | Closed form |
     |---|---|
-    | displacement volume | ``length*beam*draft*TAPER_INTEGRAL*2/3`` |
-    | waterplane area | ``length*beam*TAPER_INTEGRAL`` |
+    | displacement volume | ``length*beam*draft*taper*2/3`` |
+    | waterplane area | ``length*beam*taper`` |
     | maximum section area | ``2/3*beam*draft`` |
-    | LCB, LCF | ``length/2`` (symmetry of the taper) |
+    | LCB | ``length/2`` if symmetric, else a quadrature half-moment |
+    | LCF | same number as LCB (the waterplane breadth is the same taper) |
     | VCB | ``-2/5*draft`` (the ``sqrt`` profile) |
-    | block coefficient | ``2/3*TAPER_INTEGRAL`` |
-    | prismatic coefficient | ``TAPER_INTEGRAL`` (the midship ``2/3`` cancels) |
+    | block coefficient | ``2/3*taper`` |
+    | prismatic coefficient | ``taper`` (the midship ``2/3`` cancels) |
     | wetted surface area | quadrature, see :func:`analytic_wetted_surface_area` |
     | transverse waterplane inertia | ``(2/3)*(beam/2)**3*length*I3`` (``I3`` from the gamma identity) |
     | longitudinal waterplane inertia | ``beam*length**3*int sin(pi*xi)**e*(xi-1/2)**2 dxi`` |
 
-    ``basis`` says which of these came out of a formula and which out of a
-    quadrature, so a caller comparing mesh numbers against this object knows the
-    accuracy of the reference it is using. Output conventions (z relative to the
-    design waterline, x from the aft end, ``2/3``-based coefficients) are the same
-    as :func:`tensorcad.hydrostatics.compute_hydrostatics`, which is what makes the
+    ``taper`` is ``(h(p_aft) + h(p_fore))`` with ``h(p) = int_0^(1/2) sin^p``, so
+    volume, waterplane area and the coefficients depend on the exponents but not on
+    where midship is. Only the two longitudinal centres depend on the split, and
+    ``basis`` says so.
+
+    Output conventions (z relative to the design waterline, x from the aft end,
+    ``2/3``-based coefficients) are the same as
+    :func:`tensorcad.hydrostatics.compute_hydrostatics`, which is what makes the
     two comparable.
     """
     length = _positive_dimension("length", length)
@@ -458,23 +666,49 @@ def analytic_hydrostatics(
     draft = _positive_dimension("draft", draft)
     if not math.isfinite(water_density) or water_density <= 0.0:
         raise ValueError("water_density must be a finite positive number")
-    volume = analytic_volume(length, beam, draft)
+    fore = _positive_exponent("fore_exponent", fore_exponent)
+    aft = _positive_exponent("aft_exponent", aft_exponent)
+    volume = analytic_volume(length, beam, draft, fore_exponent=fore, aft_exponent=aft)
     section = analytic_maximum_section_area(beam, draft)
-    centre = analytic_longitudinal_centre(length)
+    centre = analytic_longitudinal_centre(length, fore_exponent=fore, aft_exponent=aft)
+    symmetric = fore == aft
     # The two waterplane second moments live in :mod:`tensorcad.hydrostatics_analytic`
     # (one closed form, one quadrature with its own convergence evidence) so that the
-    # mesh, this compatibility wrapper and the stability block cannot drift apart.
-    inertia_transverse = waterplane_inertia_transverse(
-        length, beam, breadth_exponent=BREADTH_EXPONENT
-    )
-    inertia_longitudinal = waterplane_inertia_longitudinal(
-        length, beam, breadth_exponent=BREADTH_EXPONENT
-    )[0]
+    # mesh, this compatibility wrapper and the stability block cannot drift apart. Both
+    # are derived for the fore/aft-symmetric breadth distribution and are measured about
+    # midship, which is the centre of flotation only when ``fore == aft``: the
+    # asymmetric form would need its x-moment re-taken about a displaced LCF, so it
+    # withholds the two numbers (``nan``) instead of reporting the symmetric ones.
+    if symmetric:
+        inertia_transverse = waterplane_inertia_transverse(
+            length, beam, breadth_exponent=BREADTH_EXPONENT
+        )
+        inertia_longitudinal = waterplane_inertia_longitudinal(
+            length, beam, breadth_exponent=BREADTH_EXPONENT
+        )[0]
+        basis = (
+            "closed forms of the analytic surface (wetted area by Gauss-Legendre "
+            "quadrature); longitudinal waterplane inertia by tanh-sinh quadrature"
+        )
+    else:
+        inertia_transverse = float("nan")
+        inertia_longitudinal = float("nan")
+        basis = (
+            "closed forms of the asymmetric analytic surface except the longitudinal "
+            "centres, whose x-weighted half-moment has no elementary form: Gauss-Legendre "
+            "after x = t^3/2, cross-checked against tanh-sinh quadrature to 1e-14; wetted "
+            "area by Gauss-Legendre quadrature; waterplane second moments withheld (nan) "
+            "because their closed forms assume a fore/aft-symmetric waterplane"
+        )
     return Hydrostatics(
         displacement_volume=volume,
         displacement_mass=volume * water_density,
-        wetted_surface_area=analytic_wetted_surface_area(length, beam, draft),
-        waterplane_area=analytic_waterplane_area(length, beam),
+        wetted_surface_area=analytic_wetted_surface_area(
+            length, beam, draft, fore_exponent=fore, aft_exponent=aft
+        ),
+        waterplane_area=analytic_waterplane_area(
+            length, beam, fore_exponent=fore, aft_exponent=aft
+        ),
         longitudinal_centre_buoyancy=centre,
         longitudinal_centre_flotation=centre,
         vertical_centre_buoyancy=analytic_vertical_centre_buoyancy(draft),
@@ -486,10 +720,7 @@ def analytic_hydrostatics(
         transverse_waterplane_inertia=inertia_transverse,
         longitudinal_waterplane_inertia=inertia_longitudinal,
         keel_z=-draft,
-        basis=(
-            "closed forms of the analytic surface (wetted area by Gauss-Legendre "
-            "quadrature, longitudinal waterplane inertia by tanh-sinh quadrature)"
-        ),
+        basis=basis,
     )
 
 
@@ -527,7 +758,14 @@ def analytic_relative_errors(parameters: HullParameters) -> dict[str, Any]:
     mesh, _ = build_mesh(p)
     waterline = mesh.bounding_box().maximum[2]
     measured = compute_hydrostatics(mesh, waterline, water_density=p.water_density, closed=True)
-    reference = analytic_hydrostatics(p.length, p.beam, p.draft, p.water_density)
+    reference = analytic_hydrostatics(
+        p.length,
+        p.beam,
+        p.draft,
+        p.water_density,
+        fore_exponent=p.fore_exponent,
+        aft_exponent=p.aft_exponent,
+    )
     errors: dict[str, float] = {}
     for name in ANALYTIC_COMPARABLE_QUANTITIES:
         exact = float(getattr(reference, name))
@@ -557,7 +795,10 @@ def analytic_relative_errors(parameters: HullParameters) -> dict[str, Any]:
 def _sampling_check(parameters: HullParameters, hydrostatics: Hydrostatics) -> Check:
     """Warn when the grid, not the form, is what makes the numbers wrong."""
     p = parameters
-    exact = analytic_volume(p.length, p.beam, p.draft)
+    exact = analytic_volume(
+        p.length, p.beam, p.draft,
+        fore_exponent=p.fore_exponent, aft_exponent=p.aft_exponent,
+    )
     measured = hydrostatics.displacement_volume
     error = (measured / exact - 1.0) if exact else float("nan")
     ok = math.isfinite(error) and abs(error) <= SAMPLING_ERROR_WARNING
@@ -752,7 +993,14 @@ def estimate_discretisation_error(parameters: HullParameters) -> dict[str, Any]:
             ),
         }
     refined = HullParameters(
-        p.length, p.beam, p.draft, refined_nx, refined_nz, p.water_density
+        p.length,
+        p.beam,
+        p.draft,
+        refined_nx,
+        refined_nz,
+        p.water_density,
+        fore_exponent=p.fore_exponent,
+        aft_exponent=p.aft_exponent,
     )
     coarse_mesh, _ = build_mesh(p)
     fine_mesh, _ = build_mesh(refined)
@@ -840,7 +1088,13 @@ def resolve_resolution(
     refinements = 0
     while True:
         model = generate_hull(current)
-        exact = analytic_volume(current.length, current.beam, current.draft)
+        exact = analytic_volume(
+            current.length,
+            current.beam,
+            current.draft,
+            fore_exponent=current.fore_exponent,
+            aft_exponent=current.aft_exponent,
+        )
         measured = (
             model.hydrostatics.displacement_volume
             if model.hydrostatics is not None
