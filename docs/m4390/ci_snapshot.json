@@ -1,0 +1,116 @@
+{
+ "repo": "cxs503/TensorCAD",
+ "pr": 122,
+ "branch": "agent/m3753",
+ "runs": {
+  "before": {
+   "run_id": 42018626196,
+   "head_sha": "b061e9a9e734f9caf87e5e034f0f52dc52c973d8",
+   "status": "completed",
+   "conclusion": "failure",
+   "created_at": "2026-11-05T11:23:51Z",
+   "html_url": "https://github.com/cxs503/TensorCAD/actions/runs/42018626196",
+   "jobs": [
+    {
+     "name": "test (3.10)",
+     "conclusion": "cancelled",
+     "status": "completed",
+     "failed_step": null
+    },
+    {
+     "name": "test (3.11)",
+     "conclusion": "cancelled",
+     "status": "completed",
+     "failed_step": null
+    },
+    {
+     "name": "test (3.12)",
+     "conclusion": "cancelled",
+     "status": "completed",
+     "failed_step": null
+    },
+    {
+     "name": "test (3.13)",
+     "conclusion": "failure",
+     "status": "completed",
+     "failed_step": "Lint"
+    }
+   ]
+  },
+  "after": {
+   "run_id": 42072130478,
+   "head_sha": "fce741e8957b37cf2685efbf89fc8ed5d3711020",
+   "status": "queued",
+   "conclusion": null,
+   "created_at": "2026-11-05T17:11:21Z",
+   "html_url": "https://github.com/cxs503/TensorCAD/actions/runs/42072130478",
+   "jobs": [
+    {
+     "name": "test (3.10)",
+     "conclusion": null,
+     "status": "queued",
+     "failed_step": null
+    },
+    {
+     "name": "test (3.11)",
+     "conclusion": null,
+     "status": "queued",
+     "failed_step": null
+    },
+    {
+     "name": "test (3.12)",
+     "conclusion": null,
+     "status": "queued",
+     "failed_step": null
+    },
+    {
+     "name": "test (3.13)",
+     "conclusion": null,
+     "status": "queued",
+     "failed_step": null
+    }
+   ]
+  }
+ },
+ "lint": {
+  "before": [
+   {
+    "file": ".m3753_scratch/audit_merge.py",
+    "code": "E401",
+    "row": 3,
+    "col": 1
+   },
+   {
+    "file": ".m3753_scratch/audit_merge.py",
+    "code": "I001",
+    "row": 3,
+    "col": 1
+   },
+   {
+    "file": ".m3753_scratch/audit_merge.py",
+    "code": "SIM115",
+    "row": 26,
+    "col": 29
+   },
+   {
+    "file": ".m3753_scratch/audit_merge.py",
+    "code": "W292",
+    "row": 45,
+    "col": 31
+   },
+   {
+    "file": ".m3753_scratch/resolve_changelog.py",
+    "code": "I001",
+    "row": 15,
+    "col": 1
+   },
+   {
+    "file": ".m3753_scratch/resolve_changelog.py",
+    "code": "W292",
+    "row": 122,
+    "col": 26
+   }
+  ],
+  "after": []
+ }
+}
