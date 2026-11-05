@@ -40,6 +40,11 @@ EXPECTED_API = {
     "deck_edge_immersion_deg", "free_surface_correction", "heeled_hydrostatics",
     "rectangular_tank_inertia", "righting_arm_curve", "wall_sided_righting_arm",
     "with_freeboard",
+    # second GZ route (0.22.0): clipped-section integral, bisection waterline solve
+    "DEFAULT_HEELS_DEG", "HeeledDisplacement", "RightingArm", "RightingArmError",
+    "heeled_displacement", "righting_arm", "wall_sided_validity_deg",
+    "BisectionRightingArmCurve", "bisection_righting_arm_curve",
+    "barge_wall_sided_righting_arm",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
@@ -59,7 +64,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.21.0"
+    assert tensorcad.__version__ == "0.22.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
