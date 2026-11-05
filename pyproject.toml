@@ -25,7 +25,10 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest>=7", "numpy>=1.24"]
-dev = ["ruff>=0.6", "mypy>=1.8", "pytest-cov>=4"]
+# The linter is pinned to a known-clean range: an unpinned `ruff>=0.6` picks up
+# newly-added default rules on pre-existing files and turns the whole test
+# matrix red without any source change (ruff 0.15 flagged 11 such lines).
+dev = ["ruff>=0.15,<0.16", "mypy>=1.8", "pytest-cov>=4"]
 # Research-only neural field training and non-executable tensor checkpoints.
 neural = ["torch>=2.2", "safetensors>=0.4", "numpy>=1.24"]
 # Optional kernel bridge (tensorcad/adapters/ocp.py). Nothing in the core may import
@@ -66,6 +69,9 @@ ignore = [
 # Example scripts prepend the checkout to sys.path before importing tensorcad,
 # so import-order rules do not apply to them.
 "examples/*" = ["E501", "E402", "I001"]
+# The report/verification tools emit markdown tables, whose rows are single lines
+# by definition; wrapping them would break the tables rather than the code.
+"tools/*" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
