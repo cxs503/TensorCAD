@@ -1,0 +1,125 @@
+.....................ssssssssss......................................... [  8%]
+......................................................s................. [ 16%]
+........................................................................ [ 25%]
+........................................................................ [ 33%]
+...............FF....................................................... [ 41%]
+........................................................................ [ 50%]
+........................................................................ [ 58%]
+........................................................................ [ 66%]
+........................................................................ [ 75%]
+........................................................................ [ 83%]
+........................................................................ [ 91%]
+.....................................................................    [100%]
+=================================== FAILURES ===================================
+______________ test_the_learned_revision_speaks_the_same_protocol ______________
+
+    def test_the_learned_revision_speaks_the_same_protocol() -> None:
+        pytest.importorskip("torch")
+        from tensorcad.geometry_field import TRUNCATED_SIGNED_DISTANCE
+>       from tensorcad.neural.objects import field_from_object
+
+tests/test_geometry_field.py:446: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tensorcad/neural/objects.py:50: in <module>
+    from .field import (
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """The learned field: one state-conditioned implicit architecture for every object.
+    
+    The field maps a point ``x`` and an editable state ``c`` to a truncated signed
+    distance: negative inside, positive outside, ``|value| <= truncation`` near the
+    surface. Nothing here is shape-specific — a sphere, an ellipsoid and a dented
+    sphere are the same network with different weights and states, which is the
+    whole point: the geometry *is* the parameters plus the field, and a mesh is only
+    what you get when you ask for one.
+    
+    Reference signed-distance functions in this module are *oracles*: they generate
+    training labels and expected values for tests. They are never used at query time
+    to answer what the geometry is.
+    """
+    from __future__ import annotations
+    
+    import math
+    import time
+    from collections.abc import Callable, Sequence
+    from dataclasses import dataclass
+    from pathlib import Path
+    from typing import Any, cast
+    
+    import numpy as np
+    import numpy.typing as npt
+    import torch
+>   from safetensors.torch import load_file as load_safetensors
+E   ModuleNotFoundError: No module named 'safetensors'
+
+tensorcad/neural/field.py:26: ModuleNotFoundError
+________ test_the_learned_field_gradient_is_autograd_and_points_outward ________
+
+    def test_the_learned_field_gradient_is_autograd_and_points_outward() -> None:
+        """The learned field's gradient is taken with autograd, not a finite difference.
+    
+        A float32 network makes central differences unreliable below ~1e-4 of the
+        object size; the adapter therefore overrides ``gradient`` with autograd and
+        keeps the protocol's numerical version only as a fallback. The two must agree
+        once the step is coarse enough to see past the rounding.
+        """
+        pytest.importorskip("torch")
+>       from tensorcad.neural.objects import field_from_object
+
+tests/test_geometry_field.py:485: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tensorcad/neural/objects.py:50: in <module>
+    from .field import (
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """The learned field: one state-conditioned implicit architecture for every object.
+    
+    The field maps a point ``x`` and an editable state ``c`` to a truncated signed
+    distance: negative inside, positive outside, ``|value| <= truncation`` near the
+    surface. Nothing here is shape-specific — a sphere, an ellipsoid and a dented
+    sphere are the same network with different weights and states, which is the
+    whole point: the geometry *is* the parameters plus the field, and a mesh is only
+    what you get when you ask for one.
+    
+    Reference signed-distance functions in this module are *oracles*: they generate
+    training labels and expected values for tests. They are never used at query time
+    to answer what the geometry is.
+    """
+    from __future__ import annotations
+    
+    import math
+    import time
+    from collections.abc import Callable, Sequence
+    from dataclasses import dataclass
+    from pathlib import Path
+    from typing import Any, cast
+    
+    import numpy as np
+    import numpy.typing as npt
+    import torch
+>   from safetensors.torch import load_file as load_safetensors
+E   ModuleNotFoundError: No module named 'safetensors'
+
+tensorcad/neural/field.py:26: ModuleNotFoundError
+=============================== warnings summary ===============================
+../../../../usr/lib/python3.11/site-packages/anyio/pytest_plugin.py:14
+  /usr/lib/python3.11/site-packages/anyio/pytest_plugin.py:14: PytestRemovedIn10Warning: _pytest.python.CallSpec2 has been renamed to CallSpec.
+  The CallSpec2 alias will be removed in pytest 10.
+  Update imports to use CallSpec instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#callspec2-renamed
+    from _pytest.python import CallSpec2
+
+../../../../usr/lib64/python3.11/site-packages/torch/cuda/__init__.py:61
+  /usr/lib64/python3.11/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+    import pynvml  # type: ignore[import]
+
+tests/test_mirror_contract.py::test_the_two_paths_of_a_field_return_the_same_number[suboff_appendages]
+tests/test_mirror_contract.py::test_the_two_paths_of_a_field_return_the_same_number[suboff_full]
+  /root/tp-agent/work/m3213/tensorcad/suboff_appendages.py:473: RuntimeWarning: overflow encountered in square
+    denom = np.sqrt(1.0 + (slope * ds_dx) ** 2 + (slope * ds_dr) ** 2)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_geometry_field.py::test_the_learned_revision_speaks_the_same_protocol
+FAILED tests/test_geometry_field.py::test_the_learned_field_gradient_is_autograd_and_points_outward
+2 failed, 848 passed, 11 skipped, 4 warnings in 724.15s (0:12:04)
