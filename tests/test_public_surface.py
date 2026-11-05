@@ -35,6 +35,7 @@ EXPECTED_API = {
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
+    "righting_arm_curve", "GZCurve", "GZPoint", "SCHEMA_GZ", "DEFAULT_HEEL_ANGLES",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
