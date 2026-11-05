@@ -1,0 +1,532 @@
+{
+  "coverage": {
+    "base": "e604f02f9645c15e39b6acb562d4079b1755219a",
+    "pr44_tip_before_cure": "9f1572f19ce751f2a8d82e08cb1560c6fee46a9c",
+    "main": "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+    "files_touched_by_either_side": 41,
+    "pr44_added_lines": 1593,
+    "pr44_added_lines_kept": 1593,
+    "main_added_lines": 3243,
+    "main_added_lines_kept": 3243,
+    "pr44_coverage": 1.0,
+    "main_coverage": 1.0,
+    "per_file": [
+      {
+        "path": "CHANGELOG.md",
+        "pr44_added_lines": 24,
+        "pr44_kept": 24,
+        "main_added_lines": 80,
+        "main_kept": 80,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "README.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 4,
+        "main_kept": 4,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "artifacts/m3768/merge_verification.json",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 71,
+        "main_kept": 71,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "artifacts/m3768/report_body.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 72,
+        "main_kept": 72,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "artifacts/m3768/report_payload.json",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 1,
+        "main_kept": 1,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/asymmetric_hull.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 68,
+        "main_kept": 68,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/asymmetric_hull/report.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 76,
+        "main_kept": 76,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/asymmetric_hull/results.json",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 185,
+        "main_kept": 185,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/gz_curve.md",
+        "pr44_added_lines": 98,
+        "pr44_kept": 98,
+        "main_added_lines": 0,
+        "main_kept": 0,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/gz_curve/results.json",
+        "pr44_added_lines": 379,
+        "pr44_kept": 379,
+        "main_added_lines": 0,
+        "main_kept": 0,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/hydrostatics_verification.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 2,
+        "main_kept": 2,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/convergence.csv",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 17,
+        "main_kept": 17,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/design_table.csv",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 16,
+        "main_kept": 16,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/m2873/outputs/transom_stern/reference_ladder.csv",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 27,
+        "main_kept": 27,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/m3768_pr39_merge_cure.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 100,
+        "main_kept": 100,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "docs/transom_stern.md",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 129,
+        "main_kept": 129,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "examples/asymmetric_hull/run_example.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 262,
+        "main_kept": 262,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "examples/gz_curve/run_example.py",
+        "pr44_added_lines": 325,
+        "pr44_kept": 325,
+        "main_added_lines": 0,
+        "main_kept": 0,
+        "rewritten_pr44": [
+          "f\"{row['centre_of_buoyancy_y']:10.6f} {str(row['deck_immersed']):>6}\"",
+          "if int(row[\"heel_deg\"]) % 15 and not row[\"heel_deg\"] in (0.0, 60.0):"
+        ],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "examples/transom_stern/run_example.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 213,
+        "main_kept": 213,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "pyproject.toml",
+        "pr44_added_lines": 1,
+        "pr44_kept": 1,
+        "main_added_lines": 1,
+        "main_kept": 1,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tensorcad/__init__.py",
+        "pr44_added_lines": 11,
+        "pr44_kept": 11,
+        "main_added_lines": 29,
+        "main_kept": 29,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tensorcad/cli.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 15,
+        "main_kept": 15,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tensorcad/hull.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 245,
+        "main_kept": 245,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tensorcad/hydrostatics.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 70,
+        "main_kept": 70,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tensorcad/stability.py",
+        "pr44_added_lines": 479,
+        "pr44_kept": 479,
+        "main_added_lines": 0,
+        "main_kept": 0,
+        "rewritten_pr44": [
+          "for previous, following in zip(angles, angles[1:]):",
+          "keel (hence ``keel_z + KG`` in the mesh's own frame). ``KG`` is a loading input (as in :func:`initial_stability`), so it is a"
+        ],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tensorcad/transom.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 501,
+        "main_kept": 501,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_asymmetric_hull.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 269,
+        "main_kept": 269,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_cli.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 1,
+        "main_kept": 1,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_gz_curve.py",
+        "pr44_added_lines": 274,
+        "pr44_kept": 274,
+        "main_added_lines": 0,
+        "main_kept": 0,
+        "rewritten_pr44": [
+          "assert all(abs(b - a) < 0.05 for a, b in zip(arms, arms[1:]))",
+          "for left, right in zip(skirted.points, solid.points):"
+        ],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_hull.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 5,
+        "main_kept": 5,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_hydrostatics_inertia.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 221,
+        "main_kept": 221,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_public_surface.py",
+        "pr44_added_lines": 2,
+        "pr44_kept": 2,
+        "main_added_lines": 8,
+        "main_kept": 8,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tests/test_transom.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 248,
+        "main_kept": 248,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tools/report_m2873.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 146,
+        "main_kept": 146,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      },
+      {
+        "path": "tools/verify_merge_m2925.py",
+        "pr44_added_lines": 0,
+        "pr44_kept": 0,
+        "main_added_lines": 161,
+        "main_kept": 161,
+        "rewritten_pr44": [],
+        "missing_pr44": [],
+        "missing_main": []
+      }
+    ]
+  },
+  "surface": {
+    "count_pr44": 112,
+    "count_main": 120,
+    "count_merged": 125,
+    "missing_from_pr44": [],
+    "missing_from_main": [],
+    "is_exact_union": true,
+    "importable_names": true
+  },
+  "gz_curve": {
+    "feature": "tensorcad.stability.righting_arm_curve (PR #44 side)",
+    "box": {
+      "length": 10.0,
+      "beam": 2.0,
+      "draft": 0.5,
+      "freeboard": 1.5,
+      "kg": 0.45
+    },
+    "displacement_volume": 10.0,
+    "points": 19,
+    "gz_max_m": 0.5549476914261585,
+    "angle_of_gz_max_deg": 85.0,
+    "gm_from_merged_solver_m": 0.46666666666666673,
+    "max_abs_error_vs_section_clipping_m": 1.4876988529977098e-14,
+    "max_rel_error_vs_wall_sided_in_regime": 5.026031542344268e-16,
+    "wall_sided_regime_max_heel_deg": 25.0,
+    "heel_deg": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      35.0,
+      40.0,
+      45.0,
+      50.0,
+      55.0,
+      60.0,
+      65.0,
+      70.0,
+      75.0,
+      80.0,
+      85.0,
+      90.0
+    ],
+    "gz_m": [
+      -2.775557561562892e-17,
+      0.04089505103551361,
+      0.0828354598905373,
+      0.12697634484168902,
+      0.17471236349307012,
+      0.22785362604920487,
+      0.2828354265099394,
+      0.3258262920276832,
+      0.36013505006357566,
+      0.3889087296526011,
+      0.41472257897945863,
+      0.44017437232433754,
+      0.4684785455715017,
+      0.5030557007783371,
+      0.5302296567682973,
+      0.5466333344236851,
+      0.5543153019829887,
+      0.5549476914261585,
+      0.5499999999999998
+    ],
+    "gz_analytic_m": [
+      0.0,
+      0.040895051035513656,
+      0.08283545989053724,
+      0.12697634484168907,
+      0.17471236349307023,
+      0.22785362604920492,
+      0.28283542650992455,
+      0.3258262920276823,
+      0.36013505006357566,
+      0.3889087296526011,
+      0.41472257897945874,
+      0.44017437232433865,
+      0.4684785455715166,
+      0.5030557007783371,
+      0.5302296567682973,
+      0.5466333344236849,
+      0.5543153019829887,
+      0.5549476914261585,
+      0.5499999999999998
+    ]
+  },
+  "transom": {
+    "feature": "tensorcad.transom.generate_transom_hull (main side)",
+    "transom_fraction": 0.2,
+    "rows": [
+      {
+        "nx": 21,
+        "nz": 9,
+        "volume_m3": 8.153922427945597,
+        "volume_analytic_m3": 8.281656069925914,
+        "volume_rel_error": -0.015423683488157662
+      },
+      {
+        "nx": 41,
+        "nz": 13,
+        "volume_m3": 8.216624378706381,
+        "volume_analytic_m3": 8.281656069925914,
+        "volume_rel_error": -0.007852498421866283
+      },
+      {
+        "nx": 81,
+        "nz": 25,
+        "volume_m3": 8.25863368368265,
+        "volume_analytic_m3": 8.281656069925914,
+        "volume_rel_error": -0.002779925421784642
+      },
+      {
+        "nx": 161,
+        "nz": 41,
+        "volume_m3": 8.271181814355332,
+        "volume_analytic_m3": 8.281656069925914,
+        "volume_rel_error": -0.0012647537499918906
+      }
+    ],
+    "converging": true
+  },
+  "tests": {
+    "main_baseline": {
+      "summary": "2 failed, 818 passed, 11 skipped, 4 warnings in 533.30s (0:08:53)",
+      "passed": 818,
+      "failed": 2,
+      "skipped": 11,
+      "errors": 0,
+      "failing_modules": [
+        "tests/test_geometry_field.py"
+      ]
+    },
+    "merged": {
+      "summary": "2 failed, 879 passed, 11 skipped, 4 warnings in 677.28s (0:11:17)",
+      "passed": 879,
+      "failed": 2,
+      "skipped": 11,
+      "errors": 0,
+      "failing_modules": [
+        "tests/test_geometry_field.py"
+      ]
+    },
+    "excluded_modules": [
+      "tests/test_cli_neural.py",
+      "tests/test_neural_pipeline.py"
+    ],
+    "exclusion_reason": "ModuleNotFoundError: safetensors in this image, pre-existing on main"
+  },
+  "merged_tip": "6614eed92ceb04ec9a08dc20787439a40661271d",
+  "merge_commit": "94219106fa0053c9e69495c8a896920d64e561a8",
+  "first_parent": "9f1572f19ce751f2a8d82e08cb1560c6fee46a9c",
+  "second_parent": "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+  "main_is_ancestor": true
+}

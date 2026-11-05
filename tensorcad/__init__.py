@@ -102,10 +102,15 @@ from .mesh_conditioning import (
 )
 from .parameters import ParameterSpec, RatioSpec
 from .stability import (
+    DEFAULT_HEEL_ANGLES,
+    SCHEMA_GZ,
+    GZCurve,
+    GZPoint,
     InitialStability,
     StabilityError,
     WaterplaneMoments,
     initial_stability,
+    righting_arm_curve,
     waterplane_moments,
 )
 from .suboff import (
@@ -168,8 +173,10 @@ from .wigley import (
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
+    "DEFAULT_HEEL_ANGLES",
     "DESIGN_SCHEMA",
     "MAX_TRANSOM_FRACTION",
+    "SCHEMA_GZ",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
     "WIGLEY_REFERENCE_CASE",
@@ -189,6 +196,8 @@ __all__ = [
     "EllipsoidField",
     "FairnessReport",
     "FieldError",
+    "GZCurve",
+    "GZPoint",
     "GeometryField",
     "HullModel",
     "HullParameters",
@@ -255,6 +264,7 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "righting_arm_curve",
     "section_loops",
     "section_properties",
     "sinc_power_coefficients",
