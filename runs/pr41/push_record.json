@@ -1,0 +1,15 @@
+{
+  "repo": "cxs503/TensorCAD",
+  "pr": 41,
+  "branch": "agent/m3213",
+  "old_sha": "292d794f5199db997323a0b6962748ad01058569",
+  "new_sha": "4b700660d0354c93d13e821a77fd089c0c2d556c",
+  "main_at_push": "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+  "local_equivalent": "d3f4071dd8bd7b546c0d60e2155f495ac9313cad",
+  "mergeable": false,
+  "mergeable_state": "dirty",
+  "parents": [
+    "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+    "292d794f5199db997323a0b6962748ad01058569"
+  ]
+}

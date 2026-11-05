@@ -1,0 +1,18 @@
+[gz_curve] barge worst relative error vs wall-sided 1.036e-15 (deck edge 33.69 deg)
+[gz_curve] shallow barge max GZ 0.1470 m at 25 deg, vanishing 45.95 deg
+[gz_curve] sphere worst |error| 8.505e-04 m at 24 rings
+[gz_curve] sphere 12 rings  error 2.896e-03 m
+[gz_curve] sphere 24 rings  error 7.603e-04 m  (3.81x per doubling)
+[gz_curve] sphere 48 rings  error 1.892e-04 m  (4.02x per doubling)
+[gz_curve] PASS  barge GZ vs the wall-sided formula below the deck edge (worst relative)  (1.036e-15 vs 1e-09)
+[gz_curve] PASS  barge waterline offset stays on z = 0 while the sides are wall-sided  (9.474e-16 vs 1e-09)
+[gz_curve] PASS  barge GM from the waterplane moments vs KB + BM - KG  (0.000e+00 vs 1e-12)
+[gz_curve] PASS  GZ(0) = 0  (0.000e+00 vs 1e-15)
+[gz_curve] PASS  odd symmetry |GZ(phi) + GZ(-phi)|  (2.220e-16 vs 1e-12)
+[gz_curve] PASS  small-angle chord slope vs GM (relative)  (4.062e-04 vs 2e-03)
+[gz_curve] PASS  sphere GZ vs sin(phi)(z_C - z_G) at 24 rings (worst |error|, m)  (8.505e-04 vs 2e-03)
+[gz_curve] PASS  sphere refinement: error falls at least 3x per doubling (48 vs 24 rings)  (4.018e+00 vs 3e+00)
+[gz_curve] PASS  sphere 48-ring error (m)  (1.892e-04 vs 5e-04)
+[gz_curve] PASS  constant displacement held at every sampled angle (relative, both bodies)  (9.792e-13 vs 1e-09)
+[gz_curve] PASS  shallow barge has a finite range of stability (deg)  (4.595e+01 vs 1e+01)
+[gz_curve] PASS  wall-sided formula over-predicts past the deck edge (m, largest sample <= 60 deg)  (2.424e+00 vs 5e-01)

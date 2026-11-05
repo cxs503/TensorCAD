@@ -1,0 +1,31 @@
+area	check	status	note
+A1	217 main paths present in merge	ok	
+A2	docs/gz_curve.md	ok	branch-owned path changed or lost by the merge
+A2	docs/gz_curve/report.md	ok	branch-owned path changed or lost by the merge
+A2	docs/gz_curve/results.json	ok	branch-owned path changed or lost by the merge
+A2	examples/gz_curve/run_example.py	ok	branch-owned path changed or lost by the merge
+A2	tensorcad/heel.py	ok	branch-owned path changed or lost by the merge
+A2	tests/test_heel.py	ok	branch-owned path changed or lost by the merge
+A2b	docs/gz_curve/gz_barge.png	ok	re-encoded vs branch original, PSNR 45.0 dB (>= 40.0 dB)
+A2b	docs/gz_curve/gz_sphere.png	ok	re-encoded vs branch original, PSNR 45.7 dB (>= 40.0 dB)
+A2b	docs/gz_curve/sphere_ladder.png	ok	re-encoded vs branch original, PSNR 45.8 dB (>= 40.0 dB)
+A2	9 branch-owned paths intact	ok	gz_curve.md, gz_barge.png, gz_sphere.png, report.md, results.json, sphere_ladder.png ...
+B	CHANGELOG.md	ok	0 main line(s) missing, allowance 0
+B	README.md	ok	0 main line(s) missing, allowance 0
+B	tensorcad/__init__.py	ok	0 main line(s) missing, allowance 0
+B	tests/test_public_surface.py	ok	1 main line(s) missing, allowance 1 (the layered-module tuple was re-wrapped onto fewer lines when `heel` w)
+C	tensorcad/heel.py byte-identical to branch tip	ok	
+C	tests/test_heel.py byte-identical to branch tip	ok	
+C	examples/gz_curve/run_example.py byte-identical to branch tip	ok	
+C	tensorcad/heel.py byte-identical to branch tip	ok	
+C	docs/gz_curve.md byte-identical to branch tip	ok	
+C	docs/gz_curve/report.md byte-identical to branch tip	ok	
+C	docs/gz_curve/results.json byte-identical to branch tip	ok	
+C	docs/gz_curve/gz_barge.png re-encoded	ok	PSNR floor 40.0 dB asserted in check B
+C	docs/gz_curve/gz_sphere.png re-encoded	ok	PSNR floor 40.0 dB asserted in check B
+C	docs/gz_curve/sphere_ladder.png re-encoded	ok	PSNR floor 40.0 dB asserted in check B
+C	117 branch __all__ names survive	ok	missing []
+C	21 branch module-tuple members survive	ok	missing []
+C	CHANGELOG carries the heel feature bullet	ok	count=1
+C	cli.py is main's blob, untouched by this branch	ok	
+D	artifact-class bytes in PR delta 50.7 KB < 200 KB	ok	gz_barge.png=19KB, gz_sphere.png=19KB, sphere_ladder.png=12KB

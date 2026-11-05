@@ -1,0 +1,23 @@
+{
+  "merge_commit": "d3f4071dd8bd7b546c0d60e2155f495ac9313cad",
+  "merge_parents": [
+    "6fdd23461db13104e7bac408e978a24f3e49598c"
+  ],
+  "main": "2ff80b2b9c2285da440648b354382d9ff0cb90a8",
+  "branch_tip_github_sees": "292d794f5199db997323a0b6962748ad01058569",
+  "shallow_clone": true,
+  "method": "base-free whole-tree containment (merge-base unavailable: grafted history)",
+  "main_paths": 217,
+  "branch_owned_paths": 9,
+  "main_side_files_checked": 4,
+  "artifact_bytes": 51885,
+  "artifact_cap_bytes": 204800,
+  "artifact_files": {
+    "docs/gz_curve/gz_barge.png": 19579,
+    "docs/gz_curve/gz_sphere.png": 19611,
+    "docs/gz_curve/sphere_ladder.png": 12695
+  },
+  "checks": 30,
+  "failures": [],
+  "verdict": "union holds on both sides; PR ready to push"
+}
