@@ -1,0 +1,773 @@
+{
+ "schema": "tensorcad.wetted_uncertainty/1",
+ "mission": 3767,
+ "repo": "TensorCAD",
+ "commit": "e7461f0cac2b1587cd03a7257942ec67354c80fb",
+ "design": {
+  "length_m": 100.0,
+  "beam_m": 16.0,
+  "draft_m": 6.0,
+  "fore_exponent": 0.7,
+  "aft_exponent": 0.7,
+  "water_density_kg_per_m3": 1025.0
+ },
+ "design_cb": 0.4695436388281809,
+ "design_cwp": 0.7043154582422714,
+ "design_cm": 0.6666666666666666,
+ "quadrature": {
+  "path_a_nodes": [
+   80,
+   160,
+   320,
+   640
+  ],
+  "path_a_values": [
+   1762.7045359027209,
+   1762.7045359868016,
+   1762.7045359914382,
+   1762.7045359916876
+  ],
+  "path_a_windows": [
+   {
+    "coarse": 0,
+    "p_observed": 4.18063492916815,
+    "richardson": 1762.7045359917088,
+    "gci_fine_relative": 3.4798872664778684e-12
+   },
+   {
+    "coarse": 1,
+    "p_observed": 4.216367847619009,
+    "richardson": 1762.7045359917017,
+    "gci_fine_relative": 1.8693573941852832e-13
+   }
+  ],
+  "path_a_finest": 1762.7045359916876,
+  "tanh_sinh_levels": [
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "tanh_sinh_values": [
+   1762.704534777661,
+   1762.7045359913977,
+   1762.7045359910828,
+   1762.704535990733,
+   1762.7045359906874
+  ],
+  "tanh_sinh_self_difference_relative": 2.5798274276912997e-14,
+  "tanh_sinh_spread_relative": 6.885650988377855e-10,
+  "tanh_sinh_applicable": true,
+  "adaptive_S_m2": 1762.7045359916667,
+  "path_a_vs_adaptive_relative": 1.176836406102666e-14,
+  "tanh_sinh_vs_adaptive_relative": -5.555556015224283e-13,
+  "u_quadrature_relative": 5.555556015224283e-13
+ },
+ "mesh": {
+  "ratio": 2.0,
+  "levels": [
+   {
+    "nx": 41,
+    "nz": 21,
+    "faces": 3278,
+    "h_m": 2.5,
+    "S_mesh_m2": 1759.6298688604354,
+    "cb_mesh": 0.46716140803037653,
+    "volume_mesh_m3": 4484.7495170916145,
+    "error_relative": -0.0017442895661705649
+   },
+   {
+    "nx": 81,
+    "nz": 41,
+    "faces": 12958,
+    "h_m": 1.25,
+    "S_mesh_m2": 1761.365515497768,
+    "cb_mesh": 0.46873072980926705,
+    "volume_mesh_m3": 4499.815006168964,
+    "error_relative": -0.0007596397840350377,
+    "p_observed": 1.2194525352970307,
+    "gci_relative_95": 0.000927113752017945,
+    "richardson_S_m2": 1762.6719044511665,
+    "richardson_relative_error": -1.8512200413045576e-05,
+    "gci_brackets_true_error": true
+   },
+   {
+    "nx": 161,
+    "nz": 81,
+    "faces": 51518,
+    "h_m": 0.625,
+    "S_mesh_m2": 1762.1108813971425,
+    "cb_mesh": 0.46926582927223087,
+    "volume_mesh_m3": 4504.951961013417,
+    "error_relative": -0.0003367862177363623,
+    "p_observed": 1.1958441410213256,
+    "gci_relative_95": 0.00040962955067852964,
+    "richardson_S_m2": 1762.6883315480165,
+    "richardson_relative_error": -9.192943263180986e-06,
+    "gci_brackets_true_error": true
+   },
+   {
+    "nx": 321,
+    "nz": 161,
+    "faces": 205438,
+    "h_m": 0.3125,
+    "S_mesh_m2": 1762.436256683426,
+    "cb_mesh": 0.46944849630253754,
+    "volume_mesh_m3": 4506.70556450436,
+    "error_relative": -0.0001521975475196058
+   }
+  ],
+  "finest_gci_relative": 0.00040962955067852964,
+  "finest_p_observed": 1.1958441410213256,
+  "richardson_S_m2": 1762.6883315480165,
+  "richardson_vs_analytic_relative": -9.192943263180986e-06,
+  "analytic_S_m2": 1762.7045359908057,
+  "gci_brackets_all_levels": true,
+  "mesh_cb_relative_error_finest": -0.00020262765326950483,
+  "volume_check": {
+   "LBT_Cb_m3": 4507.618932750536,
+   "mesh_volume_finest_m3": 4506.70556450436
+  }
+ },
+ "closure": {
+  "S_exact_m2": 1762.7045359908057,
+  "S_platform_m2": 1915.888072853639,
+  "cb": 0.4695436388281809,
+  "cm_true": 0.6666666666666666,
+  "cwp_true": 0.7043154582422714,
+  "cm_closure": 0.973477181941409,
+  "cwp_closure": 0.8673859097070452,
+  "total_relative": 0.08690256009168884,
+  "structure_relative": -0.06482287277051724,
+  "closure_relative": 0.16224245487237443
+ },
+ "sensitivities": {
+  "length_m": {
+   "exact": 0.9871178342280017,
+   "platform": 1.0000000000509601
+  },
+  "beam_m": {
+   "exact": 0.4773186926154693,
+   "platform": 0.5580972451291188
+  },
+  "draft_m": {
+   "exact": 0.5355634731252223,
+   "platform": 0.4419027549218412
+  },
+  "cb": {
+   "exact": 0.8877127460991078,
+   "platform": 0.7763468488409363
+  }
+ },
+ "budget": {
+  "components": [
+   {
+    "name": "u(length_m)",
+    "input_absolute": 0.05,
+    "input_relative": 0.0005,
+    "d_ln_platform": 1.0000000000509601,
+    "d_ln_exact": 0.9871178342280017,
+    "contribution_relative": 6.441082911479213e-06
+   },
+   {
+    "name": "u(beam_m)",
+    "input_absolute": 0.08,
+    "input_relative": 0.005,
+    "d_ln_platform": 0.5580972451291188,
+    "d_ln_exact": 0.4773186926154693,
+    "contribution_relative": 0.00040389276256824785
+   },
+   {
+    "name": "u(draft_m)",
+    "input_absolute": 0.02,
+    "input_relative": 0.0033333333333333335,
+    "d_ln_platform": 0.4419027549218412,
+    "d_ln_exact": 0.5355634731252223,
+    "contribution_relative": -0.0003122023940112704
+   },
+   {
+    "name": "u(cb)",
+    "input_absolute": 0.0009390872776563618,
+    "input_relative": 0.002,
+    "d_ln_platform": 0.7763468488409363,
+    "d_ln_exact": 0.8877127460991078,
+    "contribution_relative": -0.00022273179451634295
+   },
+   {
+    "name": "u(quadrature)",
+    "input_absolute": 5.555556015224283e-13,
+    "input_relative": 5.555556015224283e-13,
+    "d_ln_platform": 0.0,
+    "d_ln_exact": 1.0,
+    "contribution_relative": 5.555556015224283e-13
+   },
+   {
+    "name": "u(platform rounding)",
+    "input_absolute": 1.5067432105511404e-06,
+    "input_relative": 1.5067432105511404e-06,
+    "d_ln_platform": 1.0,
+    "d_ln_exact": 0.0,
+    "contribution_relative": 1.5067432105511404e-06
+   }
+  ],
+  "combined_standard": 0.0005570035086011803,
+  "expanded_95": 0.0011140070172023606,
+  "worst_case_sum": 0.0009467747777734473,
+  "dominant": "u(beam_m)"
+ },
+ "propagation": [
+  {
+   "speed_kn": 6.0,
+   "froude": 0.09854968223497625,
+   "reynolds": 259383753.50140056,
+   "rf_kn": 20.8,
+   "rt_kn": 55.77,
+   "pi": 0.37296037296037293,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.03241121122300749,
+   "u95_drt_relative": 0.000415480472616265,
+   "rf_identity_relative_residual": 0.00018390019331400334
+  },
+  {
+   "speed_kn": 8.0,
+   "froude": 0.13139957631330168,
+   "reynolds": 345845004.6685341,
+   "rf_kn": 35.83,
+   "rt_kn": 104.83,
+   "pi": 0.34179147190689685,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.02970255392621588,
+   "u95_drt_relative": 0.0003807580981242066,
+   "rf_identity_relative_residual": 0.00018335624710722343
+  },
+  {
+   "speed_kn": 10.0,
+   "froude": 0.16424947039162707,
+   "reynolds": 432306255.8356676,
+   "rf_kn": 54.65,
+   "rt_kn": 173.17,
+   "pi": 0.31558584050355143,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.02742521746844601,
+   "u95_drt_relative": 0.00035156484085066124,
+   "rf_identity_relative_residual": 2.202427617511081e-05
+  },
+  {
+   "speed_kn": 12.0,
+   "froude": 0.1970993644699525,
+   "reynolds": 518767507.0028011,
+   "rf_kn": 77.21,
+   "rt_kn": 263.26,
+   "pi": 0.2932842057281774,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.025487148312236172,
+   "u95_drt_relative": 0.0003267206632158104,
+   "rf_identity_relative_residual": 0.00016226329949395866
+  },
+  {
+   "speed_kn": 14.0,
+   "froude": 0.2299492585482779,
+   "reynolds": 605228758.1699346,
+   "rf_kn": 103.43,
+   "rt_kn": 434.91,
+   "pi": 0.23781931893955072,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.020667107655108822,
+   "u95_drt_relative": 0.00026493239012494575,
+   "rf_identity_relative_residual": 0.00014011472621900206
+  },
+  {
+   "speed_kn": 16.0,
+   "froude": 0.26279915262660336,
+   "reynolds": 691690009.3370682,
+   "rf_kn": 133.25,
+   "rt_kn": 675.66,
+   "pi": 0.1972145753781488,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.017138451487756473,
+   "u95_drt_relative": 0.00021969842086584166,
+   "rf_identity_relative_residual": 1.1308635242354083e-05
+  },
+  {
+   "speed_kn": 18.0,
+   "froude": 0.2956490467049288,
+   "reynolds": 778151260.5042018,
+   "rf_kn": 166.65,
+   "rt_kn": 991.66,
+   "pi": 0.16805154992638607,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.014604109915979213,
+   "u95_drt_relative": 0.00018721060586972694,
+   "rf_identity_relative_residual": 0.0001683279908796296
+  },
+  {
+   "speed_kn": 20.0,
+   "froude": 0.32849894078325415,
+   "reynolds": 864612511.6713352,
+   "rf_kn": 203.59,
+   "rt_kn": 1318.94,
+   "pi": 0.15435880328142296,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.013414175177845036,
+   "u95_drt_relative": 0.00017195679002246394,
+   "rf_identity_relative_residual": 0.0001828370060848145
+  },
+  {
+   "speed_kn": 22.0,
+   "froude": 0.36134883486157954,
+   "reynolds": 951073762.8384687,
+   "rf_kn": 244.02,
+   "rt_kn": 1697.07,
+   "pi": 0.14378900104297407,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.012495632303660964,
+   "u95_drt_relative": 0.00016018195615839065,
+   "rf_identity_relative_residual": 8.49862928296518e-05
+  },
+  {
+   "speed_kn": 24.0,
+   "froude": 0.394198728939905,
+   "reynolds": 1037535014.0056022,
+   "rf_kn": 287.93,
+   "rt_kn": 2140.3,
+   "pi": 0.1345278699247769,
+   "wetted_surface_platform_m2": 1915.89,
+   "drt_relative": 0.011690816300144824,
+   "u95_drt_relative": 0.00014986499110548787,
+   "rf_identity_relative_residual": 0.00018896993141744657
+  }
+ ],
+ "family_sweep": [
+  {
+   "exponent": 0.35,
+   "cb": 0.5445414309200474,
+   "cwp": 0.816812146380071,
+   "S_exact_m2": 1896.6837172037137,
+   "S_platform_m2": 2027.6433180963388,
+   "total_relative": 0.06904662053286303,
+   "structure_relative": -0.040763276296468365,
+   "closure_relative": 0.11447632697522736,
+   "u95_relative": 0.001174558311887816,
+   "integrator_agreement": 3.038489237994213e-09,
+   "tanh_sinh_applicable": false,
+   "u_num_self_gci": 1.626690523855792e-08,
+   "budget": {
+    "components": [
+     {
+      "name": "u(length_m)",
+      "input_absolute": 0.05,
+      "input_relative": 0.0005,
+      "d_ln_platform": 1.0000000000509601,
+      "d_ln_exact": 0.9755277073697498,
+      "contribution_relative": 1.2236146340605159e-05
+     },
+     {
+      "name": "u(beam_m)",
+      "input_absolute": 0.08,
+      "input_relative": 0.005,
+      "d_ln_platform": 0.5588077741869313,
+      "d_ln_exact": 0.5416632448795866,
+      "contribution_relative": 8.572264653672335e-05
+     },
+     {
+      "name": "u(draft_m)",
+      "input_absolute": 0.02,
+      "input_relative": 0.0033333333333333335,
+      "d_ln_platform": 0.44119222577521094,
+      "d_ln_exact": 0.4828090477193569,
+      "contribution_relative": -0.00013872273981381986
+     },
+     {
+      "name": "u(cb)",
+      "input_absolute": 0.0009390872776563618,
+      "input_relative": 0.0017245469753691595,
+      "d_ln_platform": 0.7362395054402017,
+      "d_ln_exact": 1.0633110548125788,
+      "contribution_relative": -0.0005640502511994377
+     },
+     {
+      "name": "u(quadrature)",
+      "input_absolute": 1.626690523855792e-08,
+      "input_relative": 1.626690523855792e-08,
+      "d_ln_platform": 0.0,
+      "d_ln_exact": 1.0,
+      "contribution_relative": 1.626690523855792e-08
+     },
+     {
+      "name": "u(platform rounding)",
+      "input_absolute": 1.4236978072940202e-06,
+      "input_relative": 1.4236978072940202e-06,
+      "d_ln_platform": 1.0,
+      "d_ln_exact": 0.0,
+      "contribution_relative": 1.4236978072940202e-06
+     }
+    ],
+    "combined_standard": 0.000587279155943908,
+    "expanded_95": 0.001174558311887816,
+    "worst_case_sum": 0.0008021717486031186,
+    "dominant": "u(cb)"
+   }
+  },
+  {
+   "exponent": 0.45,
+   "cb": 0.5197609566193121,
+   "cwp": 0.7796414349289682,
+   "S_exact_m2": 1848.6182828942865,
+   "S_platform_m2": 1990.6724871841373,
+   "total_relative": 0.07684344875538285,
+   "structure_relative": -0.046373482330263505,
+   "closure_relative": 0.12920879275330655,
+   "u95_relative": 0.0010792685339422077,
+   "integrator_agreement": 3.2211167066975577e-10,
+   "tanh_sinh_applicable": false,
+   "u_num_self_gci": 2.6121073778436736e-09,
+   "budget": {
+    "components": [
+     {
+      "name": "u(length_m)",
+      "input_absolute": 0.05,
+      "input_relative": 0.0005,
+      "d_ln_platform": 1.0000000000065512,
+      "d_ln_exact": 0.9799850959613109,
+      "contribution_relative": 1.0007452022620156e-05
+     },
+     {
+      "name": "u(beam_m)",
+      "input_absolute": 0.08,
+      "input_relative": 0.005,
+      "d_ln_platform": 0.558581532494884,
+      "d_ln_exact": 0.5208721505223224,
+      "contribution_relative": 0.00018854690986280787
+     },
+     {
+      "name": "u(draft_m)",
+      "input_absolute": 0.02,
+      "input_relative": 0.0033333333333333335,
+      "d_ln_platform": 0.4414184675116672,
+      "d_ln_exact": 0.4991427535738779,
+      "contribution_relative": -0.00019241428687403567
+     },
+     {
+      "name": "u(cb)",
+      "input_absolute": 0.0009390872776563618,
+      "input_relative": 0.0018067676413489756,
+      "d_ln_platform": 0.7490113065978788,
+      "d_ln_exact": 1.0077449630163977,
+      "contribution_relative": -0.00046747159814488357
+     },
+     {
+      "name": "u(quadrature)",
+      "input_absolute": 2.6121073778436736e-09,
+      "input_relative": 2.6121073778436736e-09,
+      "d_ln_platform": 0.0,
+      "d_ln_exact": 1.0,
+      "contribution_relative": 2.6121073778436736e-09
+     },
+     {
+      "name": "u(platform rounding)",
+      "input_absolute": 1.4501387669407742e-06,
+      "input_relative": 1.4501387669407742e-06,
+      "d_ln_platform": 1.0,
+      "d_ln_exact": 0.0,
+      "contribution_relative": 1.4501387669407742e-06
+     }
+    ],
+    "combined_standard": 0.0005396342669711039,
+    "expanded_95": 0.0010792685339422077,
+    "worst_case_sum": 0.0008598929977786659,
+    "dominant": "u(cb)"
+   }
+  },
+  {
+   "exponent": 0.55,
+   "cb": 0.4979142740781491,
+   "cwp": 0.7468714111172237,
+   "S_exact_m2": 1809.384977463321,
+   "S_platform_m2": 1958.115587940191,
+   "total_relative": 0.08219953869926777,
+   "structure_relative": -0.05321388644591396,
+   "closure_relative": 0.14302430422945345,
+   "u95_relative": 0.0010461059424878938,
+   "integrator_agreement": 6.725064949364423e-12,
+   "tanh_sinh_applicable": false,
+   "u_num_self_gci": 8.260010692987507e-11,
+   "budget": {
+    "components": [
+     {
+      "name": "u(length_m)",
+      "input_absolute": 0.05,
+      "input_relative": 0.0005,
+      "d_ln_platform": 1.0000000000509601,
+      "d_ln_exact": 0.9834900193794737,
+      "contribution_relative": 8.254990335743229e-06
+     },
+     {
+      "name": "u(beam_m)",
+      "input_absolute": 0.08,
+      "input_relative": 0.005,
+      "d_ln_platform": 0.5583752401339126,
+      "d_ln_exact": 0.5020502474639699,
+      "contribution_relative": 0.00028162496334971365
+     },
+     {
+      "name": "u(draft_m)",
+      "input_absolute": 0.02,
+      "input_relative": 0.0033333333333333335,
+      "d_ln_platform": 0.44162475987263855,
+      "d_ln_exact": 0.5144597331696588,
+      "contribution_relative": -0.00024278324432340073
+     },
+     {
+      "name": "u(cb)",
+      "input_absolute": 0.0009390872776563618,
+      "input_relative": 0.0018860420890624424,
+      "d_ln_platform": 0.7606560120076723,
+      "d_ln_exact": 0.955653819901482,
+      "contribution_relative": -0.0003677740729626377
+     },
+     {
+      "name": "u(quadrature)",
+      "input_absolute": 8.260010692987507e-11,
+      "input_relative": 8.260010692987507e-11,
+      "d_ln_platform": 0.0,
+      "d_ln_exact": 1.0,
+      "contribution_relative": 8.260010692987507e-11
+     },
+     {
+      "name": "u(platform rounding)",
+      "input_absolute": 1.4742497142289756e-06,
+      "input_relative": 1.4742497142289756e-06,
+      "d_ln_platform": 1.0,
+      "d_ln_exact": 0.0,
+      "contribution_relative": 1.4742497142289756e-06
+     }
+    ],
+    "combined_standard": 0.0005230529712439469,
+    "expanded_95": 0.0010461059424878938,
+    "worst_case_sum": 0.0009019116032858312,
+    "dominant": "u(cb)"
+   }
+  },
+  {
+   "exponent": 0.7,
+   "cb": 0.4695436388281809,
+   "cwp": 0.7043154582422714,
+   "S_exact_m2": 1762.7045359908057,
+   "S_platform_m2": 1915.888072853639,
+   "total_relative": 0.08690256009168884,
+   "structure_relative": -0.06482287277051724,
+   "closure_relative": 0.16224245487237443,
+   "u95_relative": 0.0011140070172023606,
+   "integrator_agreement": 1.176836406102666e-14,
+   "tanh_sinh_applicable": true,
+   "u_num_self_gci": 1.8693573941852832e-13,
+   "budget": {
+    "components": [
+     {
+      "name": "u(length_m)",
+      "input_absolute": 0.05,
+      "input_relative": 0.0005,
+      "d_ln_platform": 1.0000000000509601,
+      "d_ln_exact": 0.9871178342280017,
+      "contribution_relative": 6.441082911479213e-06
+     },
+     {
+      "name": "u(beam_m)",
+      "input_absolute": 0.08,
+      "input_relative": 0.005,
+      "d_ln_platform": 0.5580972451291188,
+      "d_ln_exact": 0.4773186926154693,
+      "contribution_relative": 0.00040389276256824785
+     },
+     {
+      "name": "u(draft_m)",
+      "input_absolute": 0.02,
+      "input_relative": 0.0033333333333333335,
+      "d_ln_platform": 0.4419027549218412,
+      "d_ln_exact": 0.5355634731252223,
+      "contribution_relative": -0.0003122023940112704
+     },
+     {
+      "name": "u(cb)",
+      "input_absolute": 0.0009390872776563618,
+      "input_relative": 0.002,
+      "d_ln_platform": 0.7763468488409363,
+      "d_ln_exact": 0.8877127460991078,
+      "contribution_relative": -0.00022273179451634295
+     },
+     {
+      "name": "u(quadrature)",
+      "input_absolute": 1.8693573941852832e-13,
+      "input_relative": 1.8693573941852832e-13,
+      "d_ln_platform": 0.0,
+      "d_ln_exact": 1.0,
+      "contribution_relative": 1.8693573941852832e-13
+     },
+     {
+      "name": "u(platform rounding)",
+      "input_absolute": 1.5067432105511404e-06,
+      "input_relative": 1.5067432105511404e-06,
+      "d_ln_platform": 1.0,
+      "d_ln_exact": 0.0,
+      "contribution_relative": 1.5067432105511404e-06
+     }
+    ],
+    "combined_standard": 0.0005570035086011803,
+    "expanded_95": 0.0011140070172023606,
+    "worst_case_sum": 0.0009467747774048274,
+    "dominant": "u(beam_m)"
+   }
+  },
+  {
+   "exponent": 0.9,
+   "cb": 0.43804192016130666,
+   "cwp": 0.65706288024196,
+   "S_exact_m2": 1715.7962974779366,
+   "S_platform_m2": 1869.0686526201987,
+   "total_relative": 0.0893301584620263,
+   "structure_relative": -0.08109995488515676,
+   "closure_relative": 0.18547187395761044,
+   "u95_relative": 0.0013415500926577156,
+   "integrator_agreement": -6.039613253960852e-13,
+   "tanh_sinh_applicable": false,
+   "u_num_self_gci": 3.680527982649205e-14,
+   "budget": {
+    "components": [
+     {
+      "name": "u(length_m)",
+      "input_absolute": 0.05,
+      "input_relative": 0.0005,
+      "d_ln_platform": 1.0000000000509601,
+      "d_ln_exact": 0.9894057750425843,
+      "contribution_relative": 5.297112504187907e-06
+     },
+     {
+      "name": "u(beam_m)",
+      "input_absolute": 0.08,
+      "input_relative": 0.005,
+      "d_ln_platform": 0.5577743604323615,
+      "d_ln_exact": 0.45022728398791395,
+      "contribution_relative": 0.0005377353822222378
+     },
+     {
+      "name": "u(draft_m)",
+      "input_absolute": 0.02,
+      "input_relative": 0.0033333333333333335,
+      "d_ln_platform": 0.44222563961859856,
+      "d_ln_exact": 0.560366940982604,
+      "contribution_relative": -0.00039380433788001806
+     },
+     {
+      "name": "u(cb)",
+      "input_absolute": 0.0009390872776563618,
+      "input_relative": 0.0021438296985606944,
+      "d_ln_platform": 0.7945696028706766,
+      "d_ln_exact": 0.8296857008432186,
+      "contribution_relative": -7.528293373110253e-05
+     },
+     {
+      "name": "u(quadrature)",
+      "input_absolute": 3.680527982649205e-14,
+      "input_relative": 3.680527982649205e-14,
+      "d_ln_platform": 0.0,
+      "d_ln_exact": 1.0,
+      "contribution_relative": 3.680527982649205e-14
+     },
+     {
+      "name": "u(platform rounding)",
+      "input_absolute": 1.5444865237567745e-06,
+      "input_relative": 1.5444865237567745e-06,
+      "d_ln_platform": 1.0,
+      "d_ln_exact": 0.0,
+      "contribution_relative": 1.5444865237567745e-06
+     }
+    ],
+    "combined_standard": 0.0006707750463288578,
+    "expanded_95": 0.0013415500926577156,
+    "worst_case_sum": 0.0010136642528981083,
+    "dominant": "u(beam_m)"
+   }
+  },
+  {
+   "exponent": 1.1,
+   "cb": 0.4119402440395793,
+   "cwp": 0.617910366059369,
+   "S_exact_m2": 1679.6746994744026,
+   "S_platform_m2": 1830.3296881383505,
+   "total_relative": 0.08969295585096937,
+   "structure_relative": -0.09675553182180807,
+   "closure_relative": 0.20642084645017156,
+   "u95_relative": 0.0015915451958344044,
+   "integrator_agreement": 0.0,
+   "tanh_sinh_applicable": false,
+   "u_num_self_gci": 3.931170833134901e-14,
+   "budget": {
+    "components": [
+     {
+      "name": "u(length_m)",
+      "input_absolute": 0.05,
+      "input_relative": 0.0005,
+      "d_ln_platform": 1.0000000000065512,
+      "d_ln_exact": 0.9900694076581117,
+      "contribution_relative": 4.965296174219758e-06
+     },
+     {
+      "name": "u(beam_m)",
+      "input_absolute": 0.08,
+      "input_relative": 0.005,
+      "d_ln_platform": 0.5574947334441305,
+      "d_ln_exact": 0.42823665502567104,
+      "contribution_relative": 0.0006462903920922972
+     },
+     {
+      "name": "u(draft_m)",
+      "input_absolute": 0.02,
+      "input_relative": 0.0033333333333333335,
+      "d_ln_platform": 0.4425052665624207,
+      "d_ln_exact": 0.5816939372849106,
+      "contribution_relative": -0.0004639622357416331
+     },
+     {
+      "name": "u(cb)",
+      "input_absolute": 0.0009390872776563618,
+      "input_relative": 0.00227966869283627,
+      "d_ln_platform": 0.8103495458660311,
+      "d_ln_exact": 0.8030797024446155,
+      "contribution_relative": 1.6572834449623037e-05
+     },
+     {
+      "name": "u(quadrature)",
+      "input_absolute": 3.931170833134901e-14,
+      "input_relative": 3.931170833134901e-14,
+      "d_ln_platform": 0.0,
+      "d_ln_exact": 1.0,
+      "contribution_relative": 3.931170833134901e-14
+     },
+     {
+      "name": "u(platform rounding)",
+      "input_absolute": 1.577175611943593e-06,
+      "input_relative": 1.577175611943593e-06,
+      "d_ln_platform": 1.0,
+      "d_ln_exact": 0.0,
+      "contribution_relative": 1.577175611943593e-06
+     }
+    ],
+    "combined_standard": 0.0007957725979172022,
+    "expanded_95": 0.0015915451958344044,
+    "worst_case_sum": 0.0011333679341090283,
+    "dominant": "u(beam_m)"
+   }
+  }
+ ],
+ "cross_checks": {
+  "wigley_superellipse_full_S_m2": 2550.562093319745,
+  "wigley_superellipse_one_side_S_m2": 1275.2810466598726,
+  "wigley_report_3871_S_m2": 1275.281,
+  "relative_difference_vs_3871_one_side": 3.658791492000546e-08,
+  "prolate_spheroid_closed_form_m2": 2478.7757636023016,
+  "prolate_spheroid_report_3871_m2": 2478.7758,
+  "relative_difference_prolate_vs_3871": -1.4683739557597164e-08,
+  "platform_wetted_vs_local_holtrop_relative": 1.0058762767162222e-06
+ }
+}
