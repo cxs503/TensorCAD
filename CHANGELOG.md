@@ -4,6 +4,48 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.22.0 — 2026-11-05
+
+### Added
+- **Large-angle stability** (`tensorcad/gz.py`): the righting-arm curve `GZ(phi)` that
+  `tensorcad.stability` explicitly leaves out. A hull heeled by `phi` floats on the plane
+  with up-normal `n = (0, -sin phi, cos phi)`; the submerged set is the half-space
+  `p . n <= d`, and `d` is not free — it is the root of `V(d) = displacement volume`,
+  solved by bisection on a volume that is monotone for a closed body (a Newton step can
+  be trapped where `dV/dd` — the waterplane area — collapses at a deck edge).
+  `righting_arm`/`righting_arm_curve` integrate volume and first moments exactly for the
+  faceted body: every triangle is clipped against the inclined plane and summed as a fan
+  of tetrahedra whose apex lies *in* the cutting plane, so the closing cap contributes
+  nothing and is never built.
+- **A second, independent route.** `cross_curve_righting_arm` /
+  `cross_curve_righting_arm_curve` implement the classical cross curves: station cuts via
+  `bonjean.section_loops`, each `(y, z)` outline clipped with the *inclined* waterline,
+  area and centroid integrated along `x`. It shares nothing with the 3-D route except the
+  mesh, so their agreement is evidence about the integration rather than about one
+  implementation's habits.
+- **Curve summaries**: `maximum_righting_arm`, `angle_of_maximum`,
+  `range_of_stability` (first-order interpolation, reported as a diagnostic) and
+  `area_under_curve(limit)` — the dynamical stability `int GZ dphi` that statutory
+  criteria consume, reported as a quantity and never as a pass/fail. `wall_sided_righting_arm`
+  is the textbook closed form `sin(phi) (GM + BM tan^2(phi) / 2)` a box must reproduce.
+- `examples/gz/run_example.py` writes `docs/gz/results.json`, `docs/gz/report.md` and three
+  figures, and exits non-zero if a claim stops holding. `docs/gz.md` is the narrative page.
+- `tests/test_gz.py` — 45 cases against three independent references: a wall-sided box
+  against its closed form (worst relative error `2.3e-15`, and the window in which the
+  closed form applies is stated rather than assumed), the parametric hull at three
+  resolutions for the `dGZ/dphi = GM = KB + BM - KG` identity (`2.3e-5`), the two routes
+  against each other (`1.2e-3`, heels <= 60 deg), heel symmetry (`8.6e-16 m`), the
+  displacement balance under heel (`1.1e-15`), a KG ladder (positive until `KM`, negative
+  past it, no range of stability), and synthetic curves with known integrals for the
+  quadrature.
+
+### Notes
+- Not a rule check and not a loading calculator: no free-surface correction, no wind
+  heeling arm, no damage/permeability case, no `SOLAS`/`IS Code` criterion, no trim.
+  `waterline_z` is a draft, so the displacement is the part of the hull below the waterline
+  — the same convention the loft uses, and the reason `initial_stability` (which integrates
+  the whole closed surface) is only directly comparable at the design waterline.
+
 ## 0.21.0 — 2026-11-04
 
 ### Added

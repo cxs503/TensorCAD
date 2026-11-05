@@ -53,10 +53,11 @@ it says nothing about tanks, so a slack tank's free-surface correction
 ``sum(rho * i_x) / displacement`` must be subtracted by the caller who knows the
 tankage. Nor does it give a righting-arm curve ``GZ(phi)`` for finite heel: ``GM`` is
 the slope of that curve at ``phi = 0``, and stability at large angles is a different
-integration (a heeled displacement integration, not a waterplane moment). Large-angle
-stability, damage stability, free-surface corrections and class rules are all outside
-this module, and nothing here should be read as a check against a statutory
-criterion.
+integration (a heeled displacement integration, not a waterplane moment) -- that
+integration is :mod:`tensorcad.gz`, which reproduces the ``dGZ/dphi = GM`` identity
+checked here from the other side. Damage stability, free-surface corrections and class
+rules are outside both modules, and nothing in either should be read as a check against a
+statutory criterion.
 
 Only the Python standard library is used.
 """

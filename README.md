@@ -106,8 +106,48 @@ Three references, in increasing order of how much they can go wrong:
 and the default grid shows `+1.99 %` where `KM` shows `0.71 %`. That is stated in
 [docs/stability.md](docs/stability.md) with the full ladder, the run-independent `I_L`
 quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agreeing to
-`7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
-large-angle `GZ`, trim equilibrium, damage stability, class rules.
+`7.8e-16`), and what the module deliberately does **not** do: anything past the slope at the
+upright. The curve itself is [the next section](#large-angle-stability-the-righting-arm-022).
+
+## Large-angle stability: the righting arm (0.22)
+
+`GM` is the slope of `GZ(phi)` at `phi = 0`; `tensorcad.gz` integrates the curve. A hull
+heeled by `phi` floats on the plane whose up-normal is exactly `n = (0, -sin phi, cos phi)`,
+so the submerged set is the half-space `p . n <= d` — and the displacement does not change
+with heel, so `d` is the root of `V(d) = displacement volume`. The clip is exact for the
+faceted body (each triangle is cut at the inclined plane and summed as a fan of tetrahedra
+with its apex *in* the plane, so no cap has to be built), and the offset is found by
+bisection, which cannot be trapped by the waterplane area collapsing at a deck edge.
+
+```python
+from tensorcad import HullParameters, generate_hull, righting_arm_curve
+
+model = generate_hull(HullParameters(length=10.0, beam=2.0, draft=0.8))
+# The loft caps the hull at the design waterline (z = 0), so floating it *at* that
+# waterline leaves no freeboard and every arm would be negative. Float it lower:
+curve = righting_arm_curve(model.mesh, kg=0.6, waterline_z=-0.3)   # heels 0 ... 90 deg
+curve.displacement_volume                            # 3.6534 m^3 (part below z = -0.3)
+curve.maximum_righting_arm                           # 0.0742 m at 30 deg
+curve.area_under_curve(30.0)                         # 0.02159 m rad (dynamical stability)
+curve.range_of_stability                             # None: still positive at 90 deg
+```
+
+`cross_curve_righting_arm_curve` reaches the same numbers by the classical cross curves
+(station cuts, inclined waterline, integration along `x`), so the two routes check each
+other rather than one implementation's habits:
+
+| reference | what it proves | worst error measured |
+|---|---|---|
+| wall-sided box `40 × 10 × 8 m` at 4 m, `KG = 3 m` | the clip, the volume balance and the lever direction, against the closed form `sin(phi)(GM + BM tan²(phi)/2)` | `2.3e-15` relative, for heels below the wall-sided limit `38.66°` where the closed form itself stops applying |
+| the example hull's `dGZ/dphi` at 0 | the curve's slope against `KB + BM − KG`, a different pair of integrals | `2.3e-5` at three resolutions |
+| the cross-curve route | the 3-D integration (nothing shared but the mesh) | `1.2e-3`, heels ≤ 60° |
+| heel symmetry / displacement balance | the integration, without any reference | `8.6e-16 m` / `1.1e-15` relative |
+
+Faceting is the only error left: doubling the hull's stations/levels moves `GZ_max` by
+−2.0 % then −0.6 %. [docs/gz.md](docs/gz.md) has the tables, the KG ladder (`GZ_max`
+monotone in `KG` while stable, negative arms past `KM`), and the limits stated rather than
+hidden: no free-surface correction, no wind heeling arm, no damage case, no class-rule
+verdict — the `∫GZ dφ` the criteria use is *computed*, not *judged*.
 
 ## Continuous geometry core (0.4)
 
@@ -544,5 +584,6 @@ format and transaction layer are shape-agnostic, the fitted families are not), a
 accurate enough to replace a CAD surface (mean radial error 0.8 % of the radius, worst
 1.9 %), booleans or sweeps, a hydrodynamic objective (the design loop matches displacement and shape
 ratios, not resistance or stability), a B-rep/STEP *feature model* (the STEP export is a faceted solid),
-remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore/aft-symmetric by default, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, the righting-arm curve, free-surface or damage stability, resistance,
-or any classification-rule compliance (initial GM is reported, and GZ(φ) is not). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.
+remeshing an arbitrary imported surface to a target size field (mesh conditioning only coarsens; `resolve_resolution` instead regenerates the *parametric* hull at a grid resolved to a stated analytic error), a hull form that is a ship rather than a benchmark (two families exist -- `sin(πx/L)^0.7 · √(z/draft)` and the parabolic Wigley -- both parametric and fore/aft-symmetric by default, neither with a transom, series-60 station data, parallel middle body or appendages), curvature-driven remeshing or an automatic fairing loop (the fairness audit reports where the surface is unfair, it does not repair it), lightship weight, free-surface or damage stability, resistance, a wind heeling arm or any
+classification-rule compliance (initial GM and GZ(φ) are reported as measured quantities; no
+criterion is applied to them). `metadata.json` carries that as `engineering_status`, and no number in this repository is reported without a check that produced it.

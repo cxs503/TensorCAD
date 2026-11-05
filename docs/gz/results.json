@@ -1,0 +1,1690 @@
+{
+  "schema": "tensorcad.gz_example/1",
+  "version": "0.22.0",
+  "heel_grid_degrees": [
+    0.0,
+    5.0,
+    10.0,
+    15.0,
+    20.0,
+    25.0,
+    30.0,
+    40.0,
+    50.0,
+    60.0,
+    75.0,
+    90.0
+  ],
+  "box": {
+    "length_m": 40.0,
+    "beam_m": 10.0,
+    "depth_m": 8.0,
+    "draft_m": 4.0,
+    "kg_m": 3.0,
+    "displacement_volume_m3": 1600.0,
+    "kb_m": 2.0,
+    "bm_m": 2.0833333333333335,
+    "gm_m": 1.083333333333334,
+    "curve": {
+      "method": "heeled displacement (half-space clip + bisection on volume)",
+      "basis": "3-D clip: exact for the faceted hull, no free-surface correction",
+      "kg_above_keel_m": 3.0,
+      "displacement_volume_m3": 1600.0,
+      "water_density_kg_m3": 1025.0,
+      "maximum_righting_arm_m": 1.49380318156,
+      "angle_of_maximum_degrees": 60.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": 0.167335057906,
+      "area_under_curve_0_40_m_rad": 0.331029350022,
+      "points": [
+        {
+          "heel_degrees": 0.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 7.105427357601e-16,
+          "transverse_centre_buoyancy_m": 0.0,
+          "centre_buoyancy_above_keel_m": 2.0,
+          "waterline_offset_m": 4.0,
+          "righting_arm_m": 0.0,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 5.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 1.13686837721616e-15,
+          "transverse_centre_buoyancy_m": 0.182268049012,
+          "centre_buoyancy_above_keel_m": 2.00797319401,
+          "waterline_offset_m": 3.98477879237,
+          "righting_arm_m": 0.0951136309556,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 10.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 1.13686837721616e-15,
+          "transverse_centre_buoyancy_m": 0.367347876476,
+          "centre_buoyancy_above_keel_m": 2.03238667096,
+          "waterline_offset_m": 3.93923101205,
+          "righting_arm_m": 0.193742745533,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 15.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 1.13686837721616e-15,
+          "transverse_centre_buoyancy_m": 0.558227484232,
+          "centre_buoyancy_above_keel_m": 2.0747883018,
+          "waterline_offset_m": 3.86370330516,
+          "righting_arm_m": 0.299743935717,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 20.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 9.9475983006414e-16,
+          "transverse_centre_buoyancy_m": 0.758271321388,
+          "centre_buoyancy_above_keel_m": 2.13799409524,
+          "waterline_offset_m": 3.75877048314,
+          "righting_arm_m": 0.417718582169,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 25.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 8.5265128291212e-16,
+          "transverse_centre_buoyancy_m": 0.971474287823,
+          "centre_buoyancy_above_keel_m": 2.22650295006,
+          "waterline_offset_m": 3.62523114815,
+          "righting_arm_m": 0.553560733251,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 30.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 9.9475983006414e-16,
+          "transverse_centre_buoyancy_m": 1.20281306081,
+          "centre_buoyancy_above_keel_m": 2.34722222222,
+          "waterline_offset_m": 3.46410161514,
+          "righting_arm_m": 0.715277777778,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 40.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 8.5265128291212e-16,
+          "transverse_centre_buoyancy_m": 1.74251913309,
+          "centre_buoyancy_above_keel_m": 2.7287961679,
+          "waterline_offset_m": 3.06417777248,
+          "righting_arm_m": 1.16052063596,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 50.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 7.105427357601e-16,
+          "transverse_centre_buoyancy_m": 2.12448629811,
+          "centre_buoyancy_above_keel_m": 3.10496039341,
+          "waterline_offset_m": 2.57115043875,
+          "righting_arm_m": 1.44599779549,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 60.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 9.9475983006414e-16,
+          "transverse_centre_buoyancy_m": 2.32222222222,
+          "centre_buoyancy_above_keel_m": 3.38415971286,
+          "waterline_offset_m": 2.0,
+          "righting_arm_m": 1.49380318156,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 75.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 1.4210854715202e-16,
+          "transverse_centre_buoyancy_m": 2.46170838948,
+          "centre_buoyancy_above_keel_m": 3.71418752807,
+          "waterline_offset_m": 1.03527618041,
+          "righting_arm_m": 1.32698919287,
+          "waterline_iterations": 1
+        },
+        {
+          "heel_degrees": 90.0,
+          "submerged_volume_m3": 1600.0,
+          "target_volume_m3": 1600.0,
+          "volume_relative_error": 0.0,
+          "transverse_centre_buoyancy_m": 2.5,
+          "centre_buoyancy_above_keel_m": 4.0,
+          "waterline_offset_m": 4.4408920985e-16,
+          "righting_arm_m": 1.0,
+          "waterline_iterations": 1
+        }
+      ]
+    },
+    "rows": [
+      {
+        "heel_degrees": 0.0,
+        "wall_sided_closed_form_m": 0.0,
+        "measured_righting_arm_m": 0.0,
+        "relative_error": 0.0,
+        "submerged_volume_m3": 1600.0000000000011,
+        "volume_relative_error": 7.105427357601002e-16,
+        "transverse_centre_buoyancy_m": 0.0,
+        "centre_buoyancy_above_keel_m": 2.0000000000000018,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 5.0,
+        "wall_sided_closed_form_m": 0.09511363095560832,
+        "measured_righting_arm_m": 0.0951136309556081,
+        "relative_error": -2.334519276513211e-15,
+        "submerged_volume_m3": 1600.0000000000018,
+        "volume_relative_error": 1.1368683772161603e-15,
+        "transverse_centre_buoyancy_m": 0.18226804901234128,
+        "centre_buoyancy_above_keel_m": 2.007973194005786,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 10.0,
+        "wall_sided_closed_form_m": 0.1937427455328302,
+        "measured_righting_arm_m": 0.19374274553283005,
+        "relative_error": -7.162997391023774e-16,
+        "submerged_volume_m3": 1600.0000000000018,
+        "volume_relative_error": 1.1368683772161603e-15,
+        "transverse_centre_buoyancy_m": 0.36734787647596834,
+        "centre_buoyancy_above_keel_m": 2.0323866709643386,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 15.0,
+        "wall_sided_closed_form_m": 0.29974393571683333,
+        "measured_righting_arm_m": 0.2997439357168331,
+        "relative_error": -7.40780974914521e-16,
+        "submerged_volume_m3": 1600.0000000000018,
+        "volume_relative_error": 1.1368683772161603e-15,
+        "transverse_centre_buoyancy_m": 0.558227484231505,
+        "centre_buoyancy_above_keel_m": 2.0747883017963464,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 20.0,
+        "wall_sided_closed_form_m": 0.41771858216871877,
+        "measured_righting_arm_m": 0.4177185821687183,
+        "relative_error": -1.0631301282897982e-15,
+        "submerged_volume_m3": 1600.0000000000016,
+        "volume_relative_error": 9.947598300641404e-16,
+        "transverse_centre_buoyancy_m": 0.7582713213879206,
+        "centre_buoyancy_above_keel_m": 2.137994095241454,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 25.0,
+        "wall_sided_closed_form_m": 0.5535607332510037,
+        "measured_righting_arm_m": 0.5535607332510033,
+        "relative_error": -8.022411691703159e-16,
+        "submerged_volume_m3": 1600.0000000000014,
+        "volume_relative_error": 8.526512829121202e-16,
+        "transverse_centre_buoyancy_m": 0.9714742878229128,
+        "centre_buoyancy_above_keel_m": 2.2265029500562505,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 30.0,
+        "wall_sided_closed_form_m": 0.715277777777778,
+        "measured_righting_arm_m": 0.715277777777777,
+        "relative_error": -1.396940815450682e-15,
+        "submerged_volume_m3": 1600.0000000000016,
+        "volume_relative_error": 9.947598300641404e-16,
+        "transverse_centre_buoyancy_m": 1.202813060811719,
+        "centre_buoyancy_above_keel_m": 2.347222222222223,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 40.0,
+        "wall_sided_closed_form_m": 1.1677898743774058,
+        "measured_righting_arm_m": 1.1605206359563647,
+        "relative_error": -0.006224782883065,
+        "submerged_volume_m3": 1600.0000000000014,
+        "volume_relative_error": 8.526512829121202e-16,
+        "transverse_centre_buoyancy_m": 1.7425191330873553,
+        "centre_buoyancy_above_keel_m": 2.728796167899511,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 50.0,
+        "wall_sided_closed_form_m": 1.9632096223646547,
+        "measured_righting_arm_m": 1.4459977954945857,
+        "relative_error": -0.2634521657687759,
+        "submerged_volume_m3": 1600.0000000000011,
+        "volume_relative_error": 7.105427357601002e-16,
+        "transverse_centre_buoyancy_m": 2.1244862981110133,
+        "centre_buoyancy_above_keel_m": 3.1049603934109014,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 60.0,
+        "wall_sided_closed_form_m": 3.6445235742595115,
+        "measured_righting_arm_m": 1.493803181562215,
+        "relative_error": -0.5901238800833595,
+        "submerged_volume_m3": 1600.0000000000016,
+        "volume_relative_error": 9.947598300641404e-16,
+        "transverse_centre_buoyancy_m": 2.32222222222222,
+        "centre_buoyancy_above_keel_m": 3.3841597128643985,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 75.0,
+        "wall_sided_closed_form_m": 15.060597992986018,
+        "measured_righting_arm_m": 1.3269891928658608,
+        "relative_error": -0.9118900063939119,
+        "submerged_volume_m3": 1600.0000000000002,
+        "volume_relative_error": 1.4210854715202004e-16,
+        "transverse_centre_buoyancy_m": 2.461708389480271,
+        "centre_buoyancy_above_keel_m": 3.7141875280734693,
+        "waterline_iterations": 1
+      },
+      {
+        "heel_degrees": 90.0,
+        "wall_sided_closed_form_m": 2.778222695951637e+32,
+        "measured_righting_arm_m": 1.0000000000000002,
+        "relative_error": -1.0,
+        "submerged_volume_m3": 1600.0,
+        "volume_relative_error": 0.0,
+        "transverse_centre_buoyancy_m": 2.4999999999999996,
+        "centre_buoyancy_above_keel_m": 4.0,
+        "waterline_iterations": 1
+      }
+    ],
+    "worst_relative_error": 2.334519276513211e-15,
+    "closed_form_valid_below_degrees": 38.659808254090095
+  },
+  "hull": {
+    "length_m": 12.0,
+    "beam_m": 2.4,
+    "draft_m": 0.9,
+    "waterline_z_m": -0.31,
+    "kg_m": 0.55,
+    "metacentric_height": {
+      "waterline_z_m": -0.31,
+      "displacement_volume_m3": 6.425778223163164,
+      "kb_m": 0.3555145541036484,
+      "bm_m": 0.559857577399613,
+      "km_m": 0.9153721315032614,
+      "kg_m": 0.55,
+      "gm_m": 0.3653721315032613
+    },
+    "curves": {
+      "41x13": {
+        "faces": 1998,
+        "volume_route": {
+          "method": "heeled displacement (half-space clip + bisection on volume)",
+          "basis": "3-D clip: exact for the faceted hull, no free-surface correction",
+          "kg_above_keel_m": 0.55,
+          "displacement_volume_m3": 6.36393241751,
+          "water_density_kg_m3": 1025.0,
+          "maximum_righting_arm_m": 0.163398038836,
+          "angle_of_maximum_degrees": 30.0,
+          "range_of_stability_degrees": null,
+          "area_under_curve_0_30_m_rad": 0.0501548524662,
+          "area_under_curve_0_40_m_rad": 0.0783846439956,
+          "points": [
+            {
+              "heel_degrees": 0.0,
+              "submerged_volume_m3": 6.36393241813,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 9.67484157869353e-11,
+              "transverse_centre_buoyancy_m": 5.89468786016e-18,
+              "centre_buoyancy_above_keel_m": 0.357970769349,
+              "waterline_offset_m": -0.309999999962,
+              "righting_arm_m": 5.89468786016e-18,
+              "waterline_iterations": 29
+            },
+            {
+              "heel_degrees": 5.0,
+              "submerged_volume_m3": 6.36393241728,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -3.6192817574841e-11,
+              "transverse_centre_buoyancy_m": 0.0494145321922,
+              "centre_buoyancy_above_keel_m": 0.360133356449,
+              "waterline_offset_m": -0.310948893895,
+              "righting_arm_m": 0.0326785266369,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 10.0,
+              "submerged_volume_m3": 6.36393241752,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 1.76158187704961e-12,
+              "transverse_centre_buoyancy_m": 0.0998569026491,
+              "centre_buoyancy_above_keel_m": 0.366790202951,
+              "waterline_offset_m": -0.313837688451,
+              "righting_arm_m": 0.0665258045324,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 15.0,
+              "submerged_volume_m3": 6.3639324173,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -3.25369280748161e-11,
+              "transverse_centre_buoyancy_m": 0.152440999071,
+              "centre_buoyancy_above_keel_m": 0.37847672117,
+              "waterline_offset_m": -0.318809122911,
+              "righting_arm_m": 0.102853206748,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 20.0,
+              "submerged_volume_m3": 6.36393241777,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 4.09014413561672e-11,
+              "transverse_centre_buoyancy_m": 0.201563823987,
+              "centre_buoyancy_above_keel_m": 0.393864824773,
+              "waterline_offset_m": -0.323345673269,
+              "righting_arm_m": 0.136006663009,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 25.0,
+              "submerged_volume_m3": 6.36393241747,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -6.86810376734972e-12,
+              "transverse_centre_buoyancy_m": 0.236995130396,
+              "centre_buoyancy_above_keel_m": 0.408450322092,
+              "waterline_offset_m": -0.321907553133,
+              "righting_arm_m": 0.15496905334,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 30.0,
+              "submerged_volume_m3": 6.36393241729,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -3.47385565101241e-11,
+              "transverse_centre_buoyancy_m": 0.262707078433,
+              "centre_buoyancy_above_keel_m": 0.421774070317,
+              "waterline_offset_m": -0.314628133561,
+              "righting_arm_m": 0.163398038836,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 40.0,
+              "submerged_volume_m3": 6.36393241802,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 7.97064858358361e-11,
+              "transverse_centre_buoyancy_m": 0.296796732533,
+              "centre_buoyancy_above_keel_m": 0.445349656277,
+              "waterline_offset_m": -0.285384117196,
+              "righting_arm_m": 0.160091543398,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 50.0,
+              "submerged_volume_m3": 6.36393241719,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -5.10306069314033e-11,
+              "transverse_centre_buoyancy_m": 0.317697823252,
+              "centre_buoyancy_above_keel_m": 0.466079976381,
+              "waterline_offset_m": -0.240330053603,
+              "righting_arm_m": 0.139925756651,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 60.0,
+              "submerged_volume_m3": 6.3639324175,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -2.29862569442299e-12,
+              "transverse_centre_buoyancy_m": 0.331106158976,
+              "centre_buoyancy_above_keel_m": 0.485112026902,
+              "waterline_offset_m": -0.183005566283,
+              "righting_arm_m": 0.109358446385,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 75.0,
+              "submerged_volume_m3": 6.3639324177,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 3.04426246643418e-11,
+              "transverse_centre_buoyancy_m": 0.342225414523,
+              "centre_buoyancy_above_keel_m": 0.511696737121,
+              "waterline_offset_m": -0.0814226764122,
+              "righting_arm_m": 0.0515763441504,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 90.0,
+              "submerged_volume_m3": 6.36393241752,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 8.01099665208742e-13,
+              "transverse_centre_buoyancy_m": 0.345754366461,
+              "centre_buoyancy_above_keel_m": 0.538708698413,
+              "waterline_offset_m": 0.0311911512399,
+              "righting_arm_m": -0.0112913015871,
+              "waterline_iterations": 35
+            }
+          ]
+        },
+        "cross_curve_route": {
+          "method": "cross curves (station cuts + inclined waterline, integrated along x)",
+          "basis": "2-D station integration: independent of the 3-D surface route",
+          "kg_above_keel_m": 0.55,
+          "displacement_volume_m3": 6.36393241751,
+          "water_density_kg_m3": 1025.0,
+          "maximum_righting_arm_m": 0.163493860406,
+          "angle_of_maximum_degrees": 30.0,
+          "range_of_stability_degrees": null,
+          "area_under_curve_0_30_m_rad": 0.0501533105583,
+          "area_under_curve_0_40_m_rad": 0.0784034962642,
+          "points": [
+            {
+              "heel_degrees": 0.0,
+              "submerged_volume_m3": 6.36393241767,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 2.48699576726833e-11,
+              "transverse_centre_buoyancy_m": 5.49345096606e-12,
+              "centre_buoyancy_above_keel_m": 0.35766624369,
+              "waterline_offset_m": -0.310509579653,
+              "righting_arm_m": 5.49345096606e-12,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 5.0,
+              "submerged_volume_m3": 6.36393241746,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -7.70423409736115e-12,
+              "transverse_centre_buoyancy_m": 0.049418996275,
+              "centre_buoyancy_above_keel_m": 0.359829033158,
+              "waterline_offset_m": -0.311456719791,
+              "righting_arm_m": 0.03265645021,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 10.0,
+              "submerged_volume_m3": 6.36393241805,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 8.48008656231967e-11,
+              "transverse_centre_buoyancy_m": 0.0998673562662,
+              "centre_buoyancy_above_keel_m": 0.366486688189,
+              "waterline_offset_m": -0.314340199386,
+              "righting_arm_m": 0.0664833945502,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 15.0,
+              "submerged_volume_m3": 6.36393241708,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -6.74798068688889e-11,
+              "transverse_centre_buoyancy_m": 0.152460458077,
+              "centre_buoyancy_above_keel_m": 0.378175242417,
+              "waterline_offset_m": -0.319302799157,
+              "righting_arm_m": 0.102793974262,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 20.0,
+              "submerged_volume_m3": 6.36393241704,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -7.45529307421954e-11,
+              "transverse_centre_buoyancy_m": 0.201662783752,
+              "centre_buoyancy_above_keel_m": 0.393588968948,
+              "waterline_offset_m": -0.323858380068,
+              "righting_arm_m": 0.136005306521,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 25.0,
+              "submerged_volume_m3": 6.3639324179,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 6.19798529304663e-11,
+              "transverse_centre_buoyancy_m": 0.237174024977,
+              "centre_buoyancy_above_keel_m": 0.408207460079,
+              "waterline_offset_m": -0.322453194071,
+              "righting_arm_m": 0.155028548971,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 30.0,
+              "submerged_volume_m3": 6.36393241763,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 1.81613760163673e-11,
+              "transverse_centre_buoyancy_m": 0.262941511176,
+              "centre_buoyancy_above_keel_m": 0.421559664035,
+              "waterline_offset_m": -0.315203624021,
+              "righting_arm_m": 0.163493860406,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 40.0,
+              "submerged_volume_m3": 6.36393241804,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 8.26628785550203e-11,
+              "transverse_centre_buoyancy_m": 0.297111212038,
+              "centre_buoyancy_above_keel_m": 0.445189375031,
+              "waterline_offset_m": -0.286022492837,
+              "righting_arm_m": 0.160229421876,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 50.0,
+              "submerged_volume_m3": 6.36393241793,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 6.6374735936986e-11,
+              "transverse_centre_buoyancy_m": 0.318071940053,
+              "centre_buoyancy_above_keel_m": 0.465976190272,
+              "waterline_offset_m": -0.241034941163,
+              "righting_arm_m": 0.140086729523,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 60.0,
+              "submerged_volume_m3": 6.36393241803,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 8.20179514552067e-11,
+              "transverse_centre_buoyancy_m": 0.331499662139,
+              "centre_buoyancy_above_keel_m": 0.485038881869,
+              "waterline_offset_m": -0.183759763363,
+              "righting_arm_m": 0.10949185251,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 75.0,
+              "submerged_volume_m3": 6.36393241688,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": -9.92753688423829e-11,
+              "transverse_centre_buoyancy_m": 0.342704218778,
+              "centre_buoyancy_above_keel_m": 0.51180924811,
+              "waterline_offset_m": -0.0823441943625,
+              "righting_arm_m": 0.0518089450808,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 90.0,
+              "submerged_volume_m3": 6.36393241755,
+              "target_volume_m3": 6.36393241751,
+              "volume_relative_error": 6.79329724808981e-12,
+              "transverse_centre_buoyancy_m": 0.346228533645,
+              "centre_buoyancy_above_keel_m": 0.538774056652,
+              "waterline_offset_m": 0.0307415771629,
+              "righting_arm_m": -0.0112259433476,
+              "waterline_iterations": 35
+            }
+          ]
+        }
+      },
+      "81x25": {
+        "faces": 7838,
+        "volume_route": {
+          "method": "heeled displacement (half-space clip + bisection on volume)",
+          "basis": "3-D clip: exact for the faceted hull, no free-surface correction",
+          "kg_above_keel_m": 0.55,
+          "displacement_volume_m3": 6.42577822316,
+          "water_density_kg_m3": 1025.0,
+          "maximum_righting_arm_m": 0.160110628514,
+          "angle_of_maximum_degrees": 30.0,
+          "range_of_stability_degrees": null,
+          "area_under_curve_0_30_m_rad": 0.0492297609507,
+          "area_under_curve_0_40_m_rad": 0.0768398627336,
+          "points": [
+            {
+              "heel_degrees": 0.0,
+              "submerged_volume_m3": 6.42577822378,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 9.59437194083243e-11,
+              "transverse_centre_buoyancy_m": -1.32872499034e-18,
+              "centre_buoyancy_above_keel_m": 0.355514554126,
+              "waterline_offset_m": -0.309999999962,
+              "righting_arm_m": -1.32872499034e-18,
+              "waterline_iterations": 29
+            },
+            {
+              "heel_degrees": 5.0,
+              "submerged_volume_m3": 6.42577822321,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 7.1156245139837e-12,
+              "transverse_centre_buoyancy_m": 0.0490267376644,
+              "centre_buoyancy_above_keel_m": 0.357660146514,
+              "waterline_offset_m": -0.310946258045,
+              "righting_arm_m": 0.0320766533355,
+              "waterline_iterations": 31
+            },
+            {
+              "heel_degrees": 10.0,
+              "submerged_volume_m3": 6.42577822363,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 7.19952474863771e-11,
+              "transverse_centre_buoyancy_m": 0.0990754270188,
+              "centre_buoyancy_above_keel_m": 0.364264942594,
+              "waterline_offset_m": -0.313830165583,
+              "righting_arm_m": 0.0653176944137,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 15.0,
+              "submerged_volume_m3": 6.4257782233,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 2.16494396270543e-11,
+              "transverse_centre_buoyancy_m": 0.15125641709,
+              "centre_buoyancy_above_keel_m": 0.375861809056,
+              "waterline_offset_m": -0.318794102147,
+              "righting_arm_m": 0.101032199363,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 20.0,
+              "submerged_volume_m3": 6.42577822313,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -5.11169436239598e-12,
+              "transverse_centre_buoyancy_m": 0.199983564977,
+              "centre_buoyancy_above_keel_m": 0.391125815362,
+              "waterline_offset_m": -0.323307643794,
+              "righting_arm_m": 0.133584908886,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 25.0,
+              "submerged_volume_m3": 6.42577822349,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 5.15121178758145e-11,
+              "transverse_centre_buoyancy_m": 0.235123574378,
+              "centre_buoyancy_above_keel_m": 0.405591685519,
+              "waterline_offset_m": -0.321839403164,
+              "righting_arm_m": 0.152064735528,
+              "waterline_iterations": 31
+            },
+            {
+              "heel_degrees": 30.0,
+              "submerged_volume_m3": 6.42577822287,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -4.53903033901048e-11,
+              "transverse_centre_buoyancy_m": 0.260624690505,
+              "centre_buoyancy_above_keel_m": 0.418806051366,
+              "waterline_offset_m": -0.314528884731,
+              "righting_arm_m": 0.160110628514,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 40.0,
+              "submerged_volume_m3": 6.42577822289,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -4.3263218198852e-11,
+              "transverse_centre_buoyancy_m": 0.294457845188,
+              "centre_buoyancy_above_keel_m": 0.442203952453,
+              "waterline_offset_m": -0.28520627887,
+              "righting_arm_m": 0.156277832303,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 50.0,
+              "submerged_volume_m3": 6.42577822366,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 7.70404574783141e-11,
+              "transverse_centre_buoyancy_m": 0.315241096859,
+              "centre_buoyancy_above_keel_m": 0.462818983192,
+              "waterline_offset_m": -0.240033711093,
+              "righting_arm_m": 0.135848537654,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 60.0,
+              "submerged_volume_m3": 6.42577822287,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -4.59232841229315e-11,
+              "transverse_centre_buoyancy_m": 0.328611119362,
+              "centre_buoyancy_above_keel_m": 0.481804435219,
+              "waterline_offset_m": -0.182538997362,
+              "righting_arm_m": 0.105246468155,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 75.0,
+              "submerged_volume_m3": 6.42577822357,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 6.31349956877099e-11,
+              "transverse_centre_buoyancy_m": 0.33995837574,
+              "centre_buoyancy_above_keel_m": 0.508959234667,
+              "waterline_offset_m": -0.0798794431785,
+              "righting_arm_m": 0.0483453670178,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 90.0,
+              "submerged_volume_m3": 6.42577822368,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 8.08691831783403e-11,
+              "transverse_centre_buoyancy_m": 0.343548091731,
+              "centre_buoyancy_above_keel_m": 0.536333573757,
+              "waterline_offset_m": 0.0336395633407,
+              "righting_arm_m": -0.0136664262429,
+              "waterline_iterations": 33
+            }
+          ]
+        },
+        "cross_curve_route": {
+          "method": "cross curves (station cuts + inclined waterline, integrated along x)",
+          "basis": "2-D station integration: independent of the 3-D surface route",
+          "kg_above_keel_m": 0.55,
+          "displacement_volume_m3": 6.42577822316,
+          "water_density_kg_m3": 1025.0,
+          "maximum_righting_arm_m": 0.160124250231,
+          "angle_of_maximum_degrees": 30.0,
+          "range_of_stability_degrees": null,
+          "area_under_curve_0_30_m_rad": 0.0492235429473,
+          "area_under_curve_0_40_m_rad": 0.0768370711215,
+          "points": [
+            {
+              "heel_degrees": 0.0,
+              "submerged_volume_m3": 6.42577822332,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 2.42593312757147e-11,
+              "transverse_centre_buoyancy_m": 1.37664575435e-12,
+              "centre_buoyancy_above_keel_m": 0.35541989291,
+              "waterline_offset_m": -0.310158050228,
+              "righting_arm_m": 1.37664575435e-12,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 5.0,
+              "submerged_volume_m3": 6.4257782228,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -5.59194372863212e-11,
+              "transverse_centre_buoyancy_m": 0.049024000578,
+              "centre_buoyancy_above_keel_m": 0.35756536707,
+              "waterline_offset_m": -0.311103575986,
+              "righting_arm_m": 0.0320656660917,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 10.0,
+              "submerged_volume_m3": 6.42577822294,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -3.4632551721042e-11,
+              "transverse_centre_buoyancy_m": 0.0990703811946,
+              "centre_buoyancy_above_keel_m": 0.364169863438,
+              "waterline_offset_m": -0.313985309891,
+              "righting_arm_m": 0.0652962149248,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 15.0,
+              "submerged_volume_m3": 6.42577822273,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -6.7467399237949e-11,
+              "transverse_centre_buoyancy_m": 0.15124994281,
+              "centre_buoyancy_above_keel_m": 0.375766421894,
+              "waterline_offset_m": -0.3189456726,
+              "righting_arm_m": 0.101001257675,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 20.0,
+              "submerged_volume_m3": 6.42577822349,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 5.1586619072649e-11,
+              "transverse_centre_buoyancy_m": 0.199998771,
+              "centre_buoyancy_above_keel_m": 0.391037448994,
+              "waterline_offset_m": -0.323464474455,
+              "righting_arm_m": 0.133568974797,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 25.0,
+              "submerged_volume_m3": 6.42577822323,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 1.07674271491711e-11,
+              "transverse_centre_buoyancy_m": 0.235161771921,
+              "centre_buoyancy_above_keel_m": 0.405512796003,
+              "waterline_offset_m": -0.322005896427,
+              "righting_arm_m": 0.152066014108,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 30.0,
+              "submerged_volume_m3": 6.42577822257,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -9.20082869848172e-11,
+              "transverse_centre_buoyancy_m": 0.260680637776,
+              "centre_buoyancy_above_keel_m": 0.418736391285,
+              "waterline_offset_m": -0.314705828413,
+              "righting_arm_m": 0.160124250231,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 40.0,
+              "submerged_volume_m3": 6.42577822338,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 3.38138678827295e-11,
+              "transverse_centre_buoyancy_m": 0.294536511126,
+              "centre_buoyancy_above_keel_m": 0.442150093654,
+              "waterline_offset_m": -0.285402396763,
+              "righting_arm_m": 0.156303474139,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 50.0,
+              "submerged_volume_m3": 6.42577822262,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -8.45334257165242e-11,
+              "transverse_centre_buoyancy_m": 0.315333255294,
+              "centre_buoyancy_above_keel_m": 0.462778439681,
+              "waterline_offset_m": -0.240246386782,
+              "righting_arm_m": 0.135876717822,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 60.0,
+              "submerged_volume_m3": 6.42577822341,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 3.85794564995347e-11,
+              "transverse_centre_buoyancy_m": 0.328714313374,
+              "centre_buoyancy_above_keel_m": 0.481779444976,
+              "waterline_offset_m": -0.182770741592,
+              "righting_arm_m": 0.105276422976,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 75.0,
+              "submerged_volume_m3": 6.4257782233,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": 2.1543976893873e-11,
+              "transverse_centre_buoyancy_m": 0.340078831047,
+              "centre_buoyancy_above_keel_m": 0.508983516098,
+              "waterline_offset_m": -0.0801743104553,
+              "righting_arm_m": 0.0483999972066,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 90.0,
+              "submerged_volume_m3": 6.42577822288,
+              "target_volume_m3": 6.42577822316,
+              "volume_relative_error": -4.36408383653672e-11,
+              "transverse_centre_buoyancy_m": 0.34366685072,
+              "centre_buoyancy_above_keel_m": 0.536337576245,
+              "waterline_offset_m": 0.0335006702374,
+              "righting_arm_m": -0.0136624237553,
+              "waterline_iterations": 33
+            }
+          ]
+        }
+      },
+      "161x41": {
+        "faces": 25918,
+        "volume_route": {
+          "method": "heeled displacement (half-space clip + bisection on volume)",
+          "basis": "3-D clip: exact for the faceted hull, no free-surface correction",
+          "kg_above_keel_m": 0.55,
+          "displacement_volume_m3": 6.44440996042,
+          "water_density_kg_m3": 1025.0,
+          "maximum_righting_arm_m": 0.159077141579,
+          "angle_of_maximum_degrees": 30.0,
+          "range_of_stability_degrees": null,
+          "area_under_curve_0_30_m_rad": 0.0489386108755,
+          "area_under_curve_0_40_m_rad": 0.0763535222768,
+          "points": [
+            {
+              "heel_degrees": 0.0,
+              "submerged_volume_m3": 6.44440996104,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 9.57178772518754e-11,
+              "transverse_centre_buoyancy_m": 2.59846709917e-17,
+              "centre_buoyancy_above_keel_m": 0.354731546527,
+              "waterline_offset_m": -0.309999999962,
+              "righting_arm_m": 2.59846709917e-17,
+              "waterline_iterations": 29
+            },
+            {
+              "heel_degrees": 5.0,
+              "submerged_volume_m3": 6.44440996066,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 3.67869084535466e-11,
+              "transverse_centre_buoyancy_m": 0.0489055929643,
+              "centre_buoyancy_above_keel_m": 0.356871833447,
+              "waterline_offset_m": -0.310945487471,
+              "righting_arm_m": 0.0318872636167,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 10.0,
+              "submerged_volume_m3": 6.44440996002,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -6.13839163312931e-11,
+              "transverse_centre_buoyancy_m": 0.098831322319,
+              "centre_buoyancy_above_keel_m": 0.363460400024,
+              "waterline_offset_m": -0.313827990583,
+              "righting_arm_m": 0.0649375908616,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 15.0,
+              "submerged_volume_m3": 6.4444099598,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -9.68192090720753e-11,
+              "transverse_centre_buoyancy_m": 0.150885359037,
+              "centre_buoyancy_above_keel_m": 0.375029050035,
+              "waterline_offset_m": -0.318789530578,
+              "righting_arm_m": 0.100458250912,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 20.0,
+              "submerged_volume_m3": 6.44440996043,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 1.02332483606358e-12,
+              "transverse_centre_buoyancy_m": 0.199489618312,
+              "centre_buoyancy_above_keel_m": 0.390254508428,
+              "waterline_offset_m": -0.323296848874,
+              "righting_arm_m": 0.132822746328,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 25.0,
+              "submerged_volume_m3": 6.44440996064,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 3.45515811113088e-11,
+              "transverse_centre_buoyancy_m": 0.234538828705,
+              "centre_buoyancy_above_keel_m": 0.4046830007,
+              "waterline_offset_m": -0.321821026317,
+              "righting_arm_m": 0.151150749172,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 30.0,
+              "submerged_volume_m3": 6.44440996086,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 6.75647983411171e-11,
+              "transverse_centre_buoyancy_m": 0.259975298369,
+              "centre_buoyancy_above_keel_m": 0.41786385767,
+              "waterline_offset_m": -0.314501985555,
+              "righting_arm_m": 0.159077141579,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 40.0,
+              "submerged_volume_m3": 6.44440996099,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 8.80679555885023e-11,
+              "transverse_centre_buoyancy_m": 0.293725710847,
+              "centre_buoyancy_above_keel_m": 0.441204582483,
+              "waterline_offset_m": -0.285160917928,
+              "righting_arm_m": 0.155074602225,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 50.0,
+              "submerged_volume_m3": 6.44440996071,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 4.45652797798438e-11,
+              "transverse_centre_buoyancy_m": 0.314465117759,
+              "centre_buoyancy_above_keel_m": 0.461776425001,
+              "waterline_offset_m": -0.239964379075,
+              "righting_arm_m": 0.134551101994,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 60.0,
+              "submerged_volume_m3": 6.44440996078,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 5.6423168297721e-11,
+              "transverse_centre_buoyancy_m": 0.327814138382,
+              "centre_buoyancy_above_keel_m": 0.480732975006,
+              "waterline_offset_m": -0.182438439009,
+              "righting_arm_m": 0.103920065902,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 75.0,
+              "submerged_volume_m3": 6.44440996099,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 8.79968396807031e-11,
+              "transverse_centre_buoyancy_m": 0.339188013136,
+              "centre_buoyancy_above_keel_m": 0.507976205368,
+              "waterline_offset_m": -0.0795917955187,
+              "righting_arm_m": 0.0471964491166,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 90.0,
+              "submerged_volume_m3": 6.44440995981,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -9.43282227977301e-11,
+              "transverse_centre_buoyancy_m": 0.342812972166,
+              "centre_buoyancy_above_keel_m": 0.535583733365,
+              "waterline_offset_m": 0.0343368062284,
+              "righting_arm_m": -0.014416266635,
+              "waterline_iterations": 34
+            }
+          ]
+        },
+        "cross_curve_route": {
+          "method": "cross curves (station cuts + inclined waterline, integrated along x)",
+          "basis": "2-D station integration: independent of the 3-D surface route",
+          "kg_above_keel_m": 0.55,
+          "displacement_volume_m3": 6.44440996042,
+          "water_density_kg_m3": 1025.0,
+          "maximum_righting_arm_m": 0.159076843909,
+          "angle_of_maximum_degrees": 30.0,
+          "range_of_stability_degrees": null,
+          "area_under_curve_0_30_m_rad": 0.0489352958048,
+          "area_under_curve_0_40_m_rad": 0.0763504598074,
+          "points": [
+            {
+              "heel_degrees": 0.0,
+              "submerged_volume_m3": 6.44440996019,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -3.60294413425694e-11,
+              "transverse_centre_buoyancy_m": 4.15337306041e-13,
+              "centre_buoyancy_above_keel_m": 0.354702319199,
+              "waterline_offset_m": -0.31004875613,
+              "righting_arm_m": 4.15337306041e-13,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 5.0,
+              "submerged_volume_m3": 6.44440996043,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 1.16197329196661e-12,
+              "transverse_centre_buoyancy_m": 0.048903762268,
+              "centre_buoyancy_above_keel_m": 0.356842526562,
+              "waterline_offset_m": -0.310993977444,
+              "righting_arm_m": 0.0318828856234,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 10.0,
+              "submerged_volume_m3": 6.44440995988,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -8.44931408278535e-11,
+              "transverse_centre_buoyancy_m": 0.0988277828611,
+              "centre_buoyancy_above_keel_m": 0.363430869398,
+              "waterline_offset_m": -0.313875683621,
+              "righting_arm_m": 0.0649289772367,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 15.0,
+              "submerged_volume_m3": 6.44440996035,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -1.04672693130447e-11,
+              "transverse_centre_buoyancy_m": 0.150880375702,
+              "centre_buoyancy_above_keel_m": 0.374999201745,
+              "waterline_offset_m": -0.318835901498,
+              "righting_arm_m": 0.100445712075,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 20.0,
+              "submerged_volume_m3": 6.44440996031,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -1.7706482826725e-11,
+              "transverse_centre_buoyancy_m": 0.199490627691,
+              "centre_buoyancy_above_keel_m": 0.39022661014,
+              "waterline_offset_m": -0.323344673241,
+              "righting_arm_m": 0.132814153057,
+              "waterline_iterations": 32
+            },
+            {
+              "heel_degrees": 25.0,
+              "submerged_volume_m3": 6.44440996006,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -5.54941133859493e-11,
+              "transverse_centre_buoyancy_m": 0.234546464453,
+              "centre_buoyancy_above_keel_m": 0.404657834515,
+              "waterline_offset_m": -0.321871698021,
+              "righting_arm_m": 0.151147033821,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 30.0,
+              "submerged_volume_m3": 6.44440995983,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -9.0860633184887e-11,
+              "transverse_centre_buoyancy_m": 0.259987973631,
+              "centre_buoyancy_above_keel_m": 0.417841308133,
+              "waterline_offset_m": -0.314555687628,
+              "righting_arm_m": 0.159076843909,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 40.0,
+              "submerged_volume_m3": 6.44440996016,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -4.09555961729291e-11,
+              "transverse_centre_buoyancy_m": 0.293744964155,
+              "centre_buoyancy_above_keel_m": 0.441186603571,
+              "waterline_offset_m": -0.285220390604,
+              "righting_arm_m": 0.155077794493,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 50.0,
+              "submerged_volume_m3": 6.44440996077,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 5.42691556562614e-11,
+              "transverse_centre_buoyancy_m": 0.314488095777,
+              "centre_buoyancy_above_keel_m": 0.461762121659,
+              "waterline_offset_m": -0.240028653983,
+              "righting_arm_m": 0.134554914983,
+              "waterline_iterations": 34
+            },
+            {
+              "heel_degrees": 60.0,
+              "submerged_volume_m3": 6.4444099603,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -1.86089381838353e-11,
+              "transverse_centre_buoyancy_m": 0.327840186469,
+              "centre_buoyancy_above_keel_m": 0.480723023664,
+              "waterline_offset_m": -0.182508509078,
+              "righting_arm_m": 0.10392447183,
+              "waterline_iterations": 28
+            },
+            {
+              "heel_degrees": 75.0,
+              "submerged_volume_m3": 6.44440996062,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": 3.08519000474313e-11,
+              "transverse_centre_buoyancy_m": 0.339216591892,
+              "centre_buoyancy_above_keel_m": 0.507972339142,
+              "waterline_offset_m": -0.0796703509308,
+              "righting_arm_m": 0.0472001113551,
+              "waterline_iterations": 33
+            },
+            {
+              "heel_degrees": 90.0,
+              "submerged_volume_m3": 6.44440996034,
+              "target_volume_m3": 6.44440996042,
+              "volume_relative_error": -1.19342416436926e-11,
+              "transverse_centre_buoyancy_m": 0.342843176656,
+              "centre_buoyancy_above_keel_m": 0.535582005585,
+              "waterline_offset_m": 0.0342695338348,
+              "righting_arm_m": -0.014417994415,
+              "waterline_iterations": 33
+            }
+          ]
+        }
+      }
+    },
+    "route_comparison": [
+      {
+        "resolution": "41x13",
+        "heel_degrees": 0.0,
+        "gz_volume_route_m": 5.8946878601586316e-18,
+        "gz_cross_curve_route_m": 5.493450966058536e-12,
+        "difference_m": 5.493445071370676e-12,
+        "difference_relative": null,
+        "submerged_volume_m3": 6.363932418126196,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 29
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 5.0,
+        "gz_volume_route_m": 0.032678526636863665,
+        "gz_cross_curve_route_m": 0.03265645021002221,
+        "difference_m": -2.207642684145389e-05,
+        "difference_relative": -0.0006755637145693751,
+        "submerged_volume_m3": 6.363932417280167,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 10.0,
+        "gz_volume_route_m": 0.06652580453236939,
+        "gz_cross_curve_route_m": 0.06648339455016977,
+        "difference_m": -4.2409982199620444e-05,
+        "difference_relative": -0.0006374967202235798,
+        "submerged_volume_m3": 6.363932417521706,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 32
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 15.0,
+        "gz_volume_route_m": 0.10285320674789983,
+        "gz_cross_curve_route_m": 0.10279397426223662,
+        "difference_m": -5.923248566321038e-05,
+        "difference_relative": -0.0005758934265257592,
+        "submerged_volume_m3": 6.363932417303433,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 20.0,
+        "gz_volume_route_m": 0.13600666300853223,
+        "gz_cross_curve_route_m": 0.13600530652083137,
+        "difference_m": -1.356487700859832e-06,
+        "difference_relative": -9.973685633142357e-06,
+        "submerged_volume_m3": 6.36393241777079,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 25.0,
+        "gz_volume_route_m": 0.15496905333993954,
+        "gz_cross_curve_route_m": 0.15502854897063684,
+        "difference_m": 5.949563069729269e-05,
+        "difference_relative": 0.0003839194304606307,
+        "submerged_volume_m3": 6.3639324174667875,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 32
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 30.0,
+        "gz_volume_route_m": 0.16339803883559317,
+        "gz_cross_curve_route_m": 0.16349386040586372,
+        "difference_m": 9.582157027054894e-05,
+        "difference_relative": 0.0005864303571413246,
+        "submerged_volume_m3": 6.363932417289422,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 33
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 40.0,
+        "gz_volume_route_m": 0.16009154339816933,
+        "gz_cross_curve_route_m": 0.1602294218762378,
+        "difference_m": 0.00013787847806845388,
+        "difference_relative": 0.0008612477282796346,
+        "submerged_volume_m3": 6.363932418017742,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 50.0,
+        "gz_volume_route_m": 0.1399257566511534,
+        "gz_cross_curve_route_m": 0.14008672952340817,
+        "difference_m": 0.00016097287225477763,
+        "difference_relative": 0.0011504163072428221,
+        "submerged_volume_m3": 6.36393241718574,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "41x13",
+        "heel_degrees": 60.0,
+        "gz_volume_route_m": 0.10935844638526218,
+        "gz_cross_curve_route_m": 0.10949185251040952,
+        "difference_m": 0.00013340612514733952,
+        "difference_relative": 0.0012198977724807742,
+        "submerged_volume_m3": 6.363932417495867,
+        "target_volume_m3": 6.363932417510496,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 0.0,
+        "gz_volume_route_m": -1.3287249903407336e-18,
+        "gz_cross_curve_route_m": 1.3766457543477002e-12,
+        "difference_m": 1.3766470830726906e-12,
+        "difference_relative": null,
+        "submerged_volume_m3": 6.425778223779677,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 29
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 5.0,
+        "gz_volume_route_m": 0.03207665333549574,
+        "gz_cross_curve_route_m": 0.03206566609165043,
+        "difference_m": -1.0987243845309025e-05,
+        "difference_relative": -0.00034253086599750224,
+        "submerged_volume_m3": 6.425778223208887,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 31
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 10.0,
+        "gz_volume_route_m": 0.06531769441369006,
+        "gz_cross_curve_route_m": 0.06529621492482462,
+        "difference_m": -2.1479488865439045e-05,
+        "difference_relative": -0.0003288464030802826,
+        "submerged_volume_m3": 6.425778223625789,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 32
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 15.0,
+        "gz_volume_route_m": 0.10103219936282115,
+        "gz_cross_curve_route_m": 0.10100125767506746,
+        "difference_m": -3.094168775369388e-05,
+        "difference_relative": -0.0003062557080696406,
+        "submerged_volume_m3": 6.425778223302278,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 33
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 20.0,
+        "gz_volume_route_m": 0.13358490888635005,
+        "gz_cross_curve_route_m": 0.13356897479675411,
+        "difference_m": -1.5934089595937007e-05,
+        "difference_relative": -0.00011928061132633809,
+        "submerged_volume_m3": 6.425778223130317,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 32
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 25.0,
+        "gz_volume_route_m": 0.1520647355275037,
+        "gz_cross_curve_route_m": 0.15206601410829018,
+        "difference_m": 1.27858078646792e-06,
+        "difference_relative": 8.40813474624868e-06,
+        "submerged_volume_m3": 6.425778223494169,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 31
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 30.0,
+        "gz_volume_route_m": 0.16011062851364954,
+        "gz_cross_curve_route_m": 0.16012425023077076,
+        "difference_m": 1.362171712121496e-05,
+        "difference_relative": 8.50769074337479e-05,
+        "submerged_volume_m3": 6.425778222871496,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 40.0,
+        "gz_volume_route_m": 0.15627783230312187,
+        "gz_cross_curve_route_m": 0.15630347413883094,
+        "difference_m": 2.5641835709078187e-05,
+        "difference_relative": 0.0001640785217659175,
+        "submerged_volume_m3": 6.425778222885164,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 50.0,
+        "gz_volume_route_m": 0.13584853765397892,
+        "gz_cross_curve_route_m": 0.13587671782244642,
+        "difference_m": 2.8180168467506483e-05,
+        "difference_relative": 0.00020743814364262392,
+        "submerged_volume_m3": 6.425778223658209,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 33
+      },
+      {
+        "resolution": "81x25",
+        "heel_degrees": 60.0,
+        "gz_volume_route_m": 0.105246468155172,
+        "gz_cross_curve_route_m": 0.10527642297570801,
+        "difference_m": 2.995482053601284e-05,
+        "difference_relative": 0.0002846159216654037,
+        "submerged_volume_m3": 6.425778222868071,
+        "target_volume_m3": 6.425778223163164,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 0.0,
+        "gz_volume_route_m": 2.5984670991723888e-17,
+        "gz_cross_curve_route_m": 4.1533730604100264e-13,
+        "difference_m": 4.153113213700109e-13,
+        "difference_relative": null,
+        "submerged_volume_m3": 6.444409961036954,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 29
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 5.0,
+        "gz_volume_route_m": 0.03188726361673156,
+        "gz_cross_curve_route_m": 0.03188288562335835,
+        "difference_m": -4.377993373209932e-06,
+        "difference_relative": -0.00013729598832408924,
+        "submerged_volume_m3": 6.444409960657179,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 10.0,
+        "gz_volume_route_m": 0.06493759086164289,
+        "gz_cross_curve_route_m": 0.06492897723665172,
+        "difference_m": -8.613624991160584e-06,
+        "difference_relative": -0.00013264466508332466,
+        "submerged_volume_m3": 6.444409960024526,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 15.0,
+        "gz_volume_route_m": 0.10045825091166549,
+        "gz_cross_curve_route_m": 0.10044571207462064,
+        "difference_m": -1.2538837044856477e-05,
+        "difference_relative": -0.00012481639816606076,
+        "submerged_volume_m3": 6.444409959796166,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 33
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 20.0,
+        "gz_volume_route_m": 0.1328227463276958,
+        "gz_cross_curve_route_m": 0.13281415305723057,
+        "difference_m": -8.593270465234726e-06,
+        "difference_relative": -6.46972804193771e-05,
+        "submerged_volume_m3": 6.444409960426704,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 25.0,
+        "gz_volume_route_m": 0.1511507491719231,
+        "gz_cross_curve_route_m": 0.15114703382098835,
+        "difference_m": -3.7153509347409575e-06,
+        "difference_relative": -2.458043347515938e-05,
+        "submerged_volume_m3": 6.444409960642774,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 34
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 30.0,
+        "gz_volume_route_m": 0.1590771415793531,
+        "gz_cross_curve_route_m": 0.15907684390915078,
+        "difference_m": -2.9767020232052133e-07,
+        "difference_relative": -1.8712317770182795e-06,
+        "submerged_volume_m3": 6.444409960855524,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 33
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 40.0,
+        "gz_volume_route_m": 0.15507460222490943,
+        "gz_cross_curve_route_m": 0.15507779449255976,
+        "difference_m": 3.1922676503315373e-06,
+        "difference_relative": 2.0585367329859045e-05,
+        "submerged_volume_m3": 6.444409960987655,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 33
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 50.0,
+        "gz_volume_route_m": 0.13455110199358739,
+        "gz_cross_curve_route_m": 0.13455491498337366,
+        "difference_m": 3.812989786272647e-06,
+        "difference_relative": 2.8338599459812463e-05,
+        "submerged_volume_m3": 6.444409960707306,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 32
+      },
+      {
+        "resolution": "161x41",
+        "heel_degrees": 60.0,
+        "gz_volume_route_m": 0.10392006590196896,
+        "gz_cross_curve_route_m": 0.10392447183021175,
+        "difference_m": 4.405928242787183e-06,
+        "difference_relative": 4.2397281069311794e-05,
+        "submerged_volume_m3": 6.444409960783723,
+        "target_volume_m3": 6.444409960420109,
+        "waterline_iterations": 34
+      }
+    ],
+    "worst_route_difference": 0.0012198977724807742
+  },
+  "slope_check": {
+    "rows": [
+      {
+        "waterline_z_m": -0.31,
+        "displacement_volume_m3": 6.363932417510496,
+        "kb_m": 0.35797076932669114,
+        "bm_m": 0.5644680301178486,
+        "km_m": 0.9224387994445398,
+        "kg_m": 0.55,
+        "gm_m": 0.3724387994445397,
+        "resolution": "41x13",
+        "curvature_slope_dgz_dphi": 0.37244729842409025,
+        "relative_error": 2.2819801704857807e-05
+      },
+      {
+        "waterline_z_m": -0.31,
+        "displacement_volume_m3": 6.425778223163164,
+        "kb_m": 0.3555145541036484,
+        "bm_m": 0.559857577399613,
+        "km_m": 0.9153721315032614,
+        "kg_m": 0.55,
+        "gm_m": 0.3653721315032613,
+        "resolution": "81x25",
+        "curvature_slope_dgz_dphi": 0.3653804933632846,
+        "relative_error": 2.288587251820123e-05
+      },
+      {
+        "waterline_z_m": -0.31,
+        "displacement_volume_m3": 6.444409960420109,
+        "kb_m": 0.3547315465048613,
+        "bm_m": 0.5584987619447084,
+        "km_m": 0.9132303084495696,
+        "kg_m": 0.55,
+        "gm_m": 0.3632303084495696,
+        "resolution": "161x41",
+        "curvature_slope_dgz_dphi": 0.3632385886903532,
+        "relative_error": 2.27961174796528e-05
+      }
+    ],
+    "worst_relative_error": 2.288587251820123e-05
+  },
+  "symmetry": {
+    "worst_absolute_error_m": 8.604228440844963e-16
+  },
+  "kg_ladder": [
+    {
+      "kg_m": 0.55,
+      "gm_m": 0.3653721315032613,
+      "maximum_righting_arm_m": 0.16339803883559317,
+      "angle_of_maximum_degrees": 30.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": 0.050154852466242544,
+      "area_under_curve_0_40_m_rad": 0.07838464399564309,
+      "gz_at_5_degrees_m": 0.032678526636863665
+    },
+    {
+      "kg_m": 0.65,
+      "gm_m": 0.26537213150326133,
+      "maximum_righting_arm_m": 0.1133980388355932,
+      "angle_of_maximum_degrees": 30.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": 0.03676589621482128,
+      "area_under_curve_0_40_m_rad": 0.055022984524208854,
+      "gz_at_5_degrees_m": 0.02396295236209785
+    },
+    {
+      "kg_m": 0.75,
+      "gm_m": 0.16537213150326135,
+      "maximum_righting_arm_m": 0.07044540099179966,
+      "angle_of_maximum_degrees": 25.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": 0.0233769399634,
+      "area_under_curve_0_40_m_rad": 0.0316613250527746,
+      "gz_at_5_degrees_m": 0.015247378087332036
+    },
+    {
+      "kg_m": 0.8500000000000001,
+      "gm_m": 0.06537213150326127,
+      "maximum_righting_arm_m": 0.033400620010831605,
+      "angle_of_maximum_degrees": 20.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": 0.009987983711978713,
+      "area_under_curve_0_40_m_rad": 0.008299665581340326,
+      "gz_at_5_degrees_m": 0.0065318038125662115
+    },
+    {
+      "kg_m": 1.05,
+      "gm_m": -0.1346278684967387,
+      "maximum_righting_arm_m": 5.8946878601586316e-18,
+      "angle_of_maximum_degrees": 0.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": -0.016789928790863832,
+      "area_under_curve_0_40_m_rad": -0.03842365336152817,
+      "gz_at_5_degrees_m": -0.010899344736965418
+    },
+    {
+      "kg_m": 1.55,
+      "gm_m": -0.6346278684967387,
+      "maximum_righting_arm_m": 5.8946878601586316e-18,
+      "angle_of_maximum_degrees": 0.0,
+      "range_of_stability_degrees": null,
+      "area_under_curve_0_30_m_rad": -0.08373471004797021,
+      "area_under_curve_0_40_m_rad": -0.15523195071869944,
+      "gz_at_5_degrees_m": -0.05447721611079449
+    }
+  ],
+  "claims": [
+    {
+      "claim": "box GZ reproduces the wall-sided closed form to <1e-8 relative",
+      "holds": true,
+      "detail": "worst relative error 2.335e-15 over the heel angles below the wall-sided limit 38.66 deg (beyond it the closed form does not apply)"
+    },
+    {
+      "claim": "box heeled displacement stays on the target volume",
+      "holds": true,
+      "detail": "worst relative volume error 1.137e-15"
+    },
+    {
+      "claim": "3-D heeled-displacement and cross-curve routes agree within 0.5%",
+      "holds": true,
+      "detail": "worst difference 1.220e-03 (relative, or absolute metres near the origin) for heels up to 60 deg"
+    },
+    {
+      "claim": "GZ slope at the origin equals GM = KB + BM - KG within 0.5%",
+      "holds": true,
+      "detail": "worst relative error 2.289e-05 on three resolutions"
+    },
+    {
+      "claim": "GZ is an odd function of the heel angle to <1e-8 m",
+      "holds": true,
+      "detail": "worst |GZ(phi) + GZ(-phi)| = 8.604e-16 m"
+    },
+    {
+      "claim": "a stable loading has positive arms and a vanishing one does not",
+      "holds": true,
+      "detail": "GM +0.365 m -> GZ(5deg) +0.0327 m; GM -0.635 m -> GZ(5deg) -0.0545 m"
+    },
+    {
+      "claim": "raising KG lowers the maximum righting arm for the loadings still stable",
+      "holds": true,
+      "detail": "KG=0.55 -> GZmax=0.1634; KG=0.65 -> GZmax=0.1134; KG=0.75 -> GZmax=0.0704; KG=0.85 -> GZmax=0.0334; KG=1.05 -> GZmax=0.0000; KG=1.55 -> GZmax=0.0000"
+    }
+  ]
+}

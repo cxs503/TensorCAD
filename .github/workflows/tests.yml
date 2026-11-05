@@ -72,6 +72,18 @@ jobs:
           test -s /tmp/tensorcad-conditioning/aff8_conditioned.msh
           test -s /tmp/tensorcad-conditioning/aff8_conditioned.json
           test -s /tmp/tensorcad-conditioning/conditioning.json
+      - name: Righting-arm curve (large-angle stability, closed form and two routes)
+        # Figures need matplotlib, which the test extra does not install; the measured
+        # record and the claim table are stdlib-only and are what this gate checks.
+        run: python examples/gz/run_example.py --output /tmp/tensorcad-gz
+      - name: Righting-arm artifacts
+        run: |
+          test -s /tmp/tensorcad-gz/results.json
+          test -s /tmp/tensorcad-gz/report.md
+          python -c "import json,sys; d=json.load(open('/tmp/tensorcad-gz/results.json')); \
+            assert d['schema'] == 'tensorcad.gz_example/1', d['schema']; \
+            failed=[c['claim'] for c in d['claims'] if not c['holds']]; \
+            assert not failed, failed"
       - name: FEM handoff and STEP export (STEP part needs the optional OCP extra)
         run: python examples/step_export/run_example.py --resolution 60,8,11 --output /tmp/tensorcad-step
       - name: FEM handoff artifacts

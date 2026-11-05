@@ -14,6 +14,20 @@ EXPECTED_API = {
     "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
     "wigley_reference_parameters",    # transom-stern family (0.21.0)
+    # large-angle stability (0.22.0)
+    "DEFAULT_HEEL_ANGLES",
+    "GZError",
+    "HeelPoint",
+    "RightingArmCurve",
+    "cross_curve_righting_arm",
+    "cross_curve_righting_arm_curve",
+    "keel_height",
+    "righting_arm",
+    "righting_arm_curve",
+    "solve_waterline",
+    "station_offsets",
+    "submerged_properties",
+    "wall_sided_righting_arm",
     "MAX_TRANSOM_FRACTION", "TransomHullParameters", "TransomModel",
     "analytic_transom_hydrostatics", "build_transom_mesh",
     "estimate_transom_discretisation_error", "generate_transom_hull", "parent_length",
@@ -54,7 +68,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.21.0"
+    assert tensorcad.__version__ == "0.22.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
