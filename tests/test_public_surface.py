@@ -36,6 +36,10 @@ EXPECTED_API = {
     "InitialStability", "StabilityError", "WaterplaneMoments",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
+    "DEFAULT_HEEL_ANGLES", "GZError", "HeelPoint", "RightingArmCurve",
+    "cross_curve_righting_arm", "cross_curve_righting_arm_curve", "keel_height",
+    "righting_arm", "righting_arm_curve", "solve_waterline", "station_offsets",
+    "submerged_properties", "wall_sided_righting_arm",
     "enforce_gate",
     "estimate_discretisation_error", "export_hull", "gate_mesh", "generate_hull",
     "inspect_geometry", "inspect_mesh_quality", "measure_mesh", "project_to_field",
@@ -60,7 +64,8 @@ def test_declared_api_is_importable() -> None:
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
-                   "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
+                   "wigley", "transom", "gz", "hull", "design", "suboff",
+                   "suboff_appendages", "cli",
                    "adapters.fem", "benchmark"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
