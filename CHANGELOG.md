@@ -46,6 +46,34 @@ semantic versioning.
 - `examples/transom_stern/run_example.py`: reference ladder, 4 truncations × 4 grids
   convergence table, design table and three figures.
 
+- **Righting arms at finite heel** (`tensorcad/heel.py`): the gap `tensorcad.stability`
+  names in its own docstring -- `GZ(phi)` -- is closed by a *heeled* displacement
+  integration rather than a waterplane moment. Each triangle is clipped against
+  `u·r <= c` with `u = (0, -sin phi, cos phi)`, the clipped polygon is split into signed
+  tetrahedra with the apex **on the water surface** (so the waterplane lid contributes
+  exactly zero), and the offset `c` is solved by bracketed regula falsi so the submerged
+  volume equals the upright displacement. `GZ = y_B cos phi + (z_B - z_G) sin phi`,
+  `z_G = z_keel + KG`. Exports `gz_curve`, `heeled_displacement`, `righting_arm`,
+  `wall_sided_gz`, `waterplane_normal`, `GZCurve`, `HeeledSection`, `SubmergedBody`,
+  `HeelError`, `DEFAULT_ANGLES_DEG`.
+- **Exact to round-off where a closed form exists**: the rectangular barge reproduces the
+  wall-sided formula `sin phi (GM + BM tan^2 phi / 2)` to `1.0e-15` relative below its
+  deck edge (33.69 deg), keeps its solved waterline inside `9.5e-16` m of `z = 0`, and the
+  elliptical prism reproduces the same formula with **its own** `I_T` to `1e-11 m`. The
+  sphere gives `GZ = sin phi (z_C - z_G)` at any heel (rotational symmetry, no deck to
+  immerse); the residual there is facet error, falling `3.81x` then `4.02x` per halving
+  of the facet size -- second order, as a faceted sphere should.
+- **Honest where the reference stops**: past deck-edge immersion the wall-sided formula
+  over-predicts by 2.42 m at 60 deg on a 1 m-freeboard barge, whose measured curve turns
+  over at `GZ_max = 0.147 m / 25 deg` and vanishes at `45.95 deg`.
+- **Refuses the meaningless case**: a hull mesh capped at the design waterline has zero
+  freeboard, so no heeled equilibrium exists and `HeelError` is raised instead of a
+  number. `GM` here is `KB + BM - KG` with the *submerged* volume (not the closed one),
+  which is what makes it right for a body with freeboard.
+  Evidence: `docs/gz_curve.md`, `docs/gz_curve/{results.json,report.md,*.png}`,
+  `examples/gz_curve/run_example.py` (exits non-zero if any of its 12 claims breaks),
+  `tests/test_heel.py` (30 tests).
+
 ## 0.20.0 — 2026-11-03
 
 - **A second hull family, and the one benchmarks use** (`tensorcad/wigley.py`): the

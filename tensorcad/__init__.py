@@ -81,6 +81,18 @@ from .hull import (
     resolve_resolution,
     validate_hull,
 )
+from .heel import (
+    DEFAULT_ANGLES_DEG,
+    GZCurve,
+    HeeledSection,
+    HeelError,
+    SubmergedBody,
+    gz_curve,
+    heeled_displacement,
+    righting_arm,
+    wall_sided_gz,
+    waterplane_normal,
+)
 from .hydrostatics import Hydrostatics, compute_hydrostatics
 from .hydrostatics_analytic import (
     AnalyticHydrostatics,
@@ -168,7 +180,9 @@ from .wigley import (
 
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
+    "DEFAULT_ANGLES_DEG",
     "DESIGN_SCHEMA",
+    "GZCurve",
     "MAX_TRANSOM_FRACTION",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
@@ -190,6 +204,8 @@ __all__ = [
     "FairnessReport",
     "FieldError",
     "GeometryField",
+    "HeeledSection",
+    "HeelError",
     "HullModel",
     "HullParameters",
     "Hydrostatics",
@@ -207,6 +223,7 @@ __all__ = [
     "SampledField",
     "SectionProperties",
     "SphereField",
+    "SubmergedBody",
     "StabilityError",
     "SuboffAppendagesField",
     "SuboffFinsField",
@@ -244,6 +261,8 @@ __all__ = [
     "generate_hull",
     "generate_transom_hull",
     "generate_wigley",
+    "gz_curve",
+    "heeled_displacement",
     "initial_stability",
     "inspect_geometry",
     "inspect_mesh_quality",
@@ -255,6 +274,7 @@ __all__ = [
     "read_obj",
     "read_stl",
     "resolve_resolution",
+    "righting_arm",
     "section_loops",
     "section_properties",
     "sinc_power_coefficients",
@@ -273,6 +293,8 @@ __all__ = [
     "truncated_taper_integral",
     "truncated_taper_moment",
     "validate_hull",
+    "wall_sided_gz",
+    "waterplane_normal",
     "vertex_mean_curvature",
     "waterplane_inertia_longitudinal",
     "waterplane_inertia_transverse",
