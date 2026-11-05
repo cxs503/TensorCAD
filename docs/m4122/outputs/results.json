@@ -1,0 +1,40 @@
+{
+  "schema": "tensorcad.ci_verify/1",
+  "pr": 81,
+  "branch": "agent/m3823 -> agent/m4122",
+  "before": {
+    "ruff_errors": 21
+  },
+  "lint": {
+    "name": "Lint (ruff check .)",
+    "returncode": 0,
+    "passed": true,
+    "errors_remaining": 0,
+    "output": "All checks passed!"
+  },
+  "mypy": {
+    "name": "Type check (mypy)",
+    "returncode": 0,
+    "passed": true,
+    "output": "Success: no issues found in 33 source files"
+  },
+  "tests": {
+    "log": "artifacts/m4122/logs/pytest_cov.log",
+    "statements": 7131,
+    "missed": 7131,
+    "summary": "866 passed, 10 skipped, 22 warnings in 594.38s (0:09:54)",
+    "passed": true,
+    "skipped": 10,
+    "warnings": 22,
+    "coverage_failed": false,
+    "coverage": {
+      "log": "artifacts/m4122/logs/pytest_cov_serial.log",
+      "passed": false,
+      "coverage_failed": false
+    },
+    "coverage_measured": false
+  },
+  "figure": "docs/m4122/outputs/plot.png",
+  "passed": true,
+  "coverage_note": "not measurable in this sandbox (no C tracer)"
+}

@@ -66,6 +66,11 @@ ignore = [
 # Example scripts prepend the checkout to sys.path before importing tensorcad,
 # so import-order rules do not apply to them.
 "examples/*" = ["E501", "E402", "I001"]
+# The m3823 merge-cure report generators build their output as one literal markdown
+# document (long table rows), so a line in the source is a line of the published
+# report: wrapping it would change the artifact. Everything else stays enforced.
+"tools/publish_report_m3823.py" = ["E501"]
+"tools/report_m3823.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
