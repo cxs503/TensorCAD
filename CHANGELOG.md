@@ -931,3 +931,14 @@ Export becomes a verified step instead of a dump.
 ### Added — waterplane second moments, and the transom-stern hull family
 ### Added — large-angle stability: the righting-arm curve, and two exact benchmarks
 ### Large-angle stability: the righting-arm curve, and two exact benchmarks
+- **PR #95 (`agent/m3923`) cured: one righting-arm integrator.** The branch shipped
+  `tensorcad/righting_arm.py`, a second heeled-displacement integrator whose public names
+  (`RightingArmCurve`, `righting_arm_curve`, `wall_sided_righting_arm`) collide with
+  `tensorcad/gz.py`, which reached `main` first; the package surface would have rebound
+  those names to the last import. The module and its dependants are dropped and the
+  branch's verification claims are ported onto the surviving engine in
+  `tests/test_pr95_supersession.py`: a floating sphere reproduces `GZ = (R - KG) sin(phi)`
+  to 1.3e-4 m at resolution 32 (falling monotonically with refinement, upright slope equal
+  to the metacentric height), and both generated hull families hold one displacement along
+  the whole curve (residual <= 2e-14 relative). `ruff check .` is back to zero findings,
+  which was the CI red. See `docs/m4095_pr95_cure.md`.

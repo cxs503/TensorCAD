@@ -1,0 +1,36 @@
+{
+  "sphere_ladder": [
+    {
+      "resolution": 16,
+      "faces": 6656,
+      "worst_error_m": 0.000517545831108724,
+      "max_volume_error": 5.2383225779283995e-14
+    },
+    {
+      "resolution": 24,
+      "faces": 15584,
+      "worst_error_m": 0.00022221268952352837,
+      "max_volume_error": 3.362337195494102e-14
+    },
+    {
+      "resolution": 32,
+      "faces": 28032,
+      "worst_error_m": 0.00012659359470218717,
+      "max_volume_error": 8.923594234925792e-14
+    }
+  ],
+  "hulls": {
+    "parametric_hull": {
+      "max_volume_error": 5.605866173977967e-15,
+      "gz_max_m": 0.1677939230897767,
+      "angle_of_max_gz_deg": 45.0,
+      "area_0_30_m_rad": 0.048399782126552326
+    },
+    "transom_stern_hull": {
+      "max_volume_error": 1.5998103364232645e-14,
+      "gz_max_m": 0.17721265768887284,
+      "angle_of_max_gz_deg": 45.0,
+      "area_0_30_m_rad": 0.05223903512944393
+    }
+  }
+}
