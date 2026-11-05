@@ -51,12 +51,12 @@ Two things this buys that a sampled-field estimate would not:
 **What this is not.** ``GM`` here is the *solid* (no free-surface) metacentric height:
 it says nothing about tanks, so a slack tank's free-surface correction
 ``sum(rho * i_x) / displacement`` must be subtracted by the caller who knows the
-tankage. Nor does it give a righting-arm curve ``GZ(phi)`` for finite heel: ``GM`` is
-the slope of that curve at ``phi = 0``, and stability at large angles is a different
-integration (a heeled displacement integration, not a waterplane moment). Large-angle
-stability, damage stability, free-surface corrections and class rules are all outside
-this module, and nothing here should be read as a check against a statutory
-criterion.
+tankage. The righting-arm curve ``GZ(phi)`` for finite heel is a *different*
+integration -- a heeled displacement integration, not a waterplane moment -- and it is
+:func:`righting_arm_curve` below, which holds the displacement fixed and reports the
+same ``GM`` from that route as a cross-check. Damage stability, flooding,
+free-surface corrections and class rules are all outside this module, and nothing here
+should be read as a check against a statutory criterion.
 
 Only the Python standard library is used.
 """
@@ -65,11 +65,14 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
-from collections.abc import Hashable, Sequence
+from collections.abc import Hashable, Iterable, Sequence
 from dataclasses import dataclass
+from itertools import pairwise
 from typing import Any
 
+from . import mesh as meshlib
 from .geometry import Mesh
+from .gz import GzError, _integrate_below, _rotate_vertices, _shifted, _solve_level, with_freeboard
 from .hydrostatics import compute_hydrostatics
 
 SCHEMA_WATERPLANE = "tensorcad.stability.waterplane/1"
@@ -435,4 +438,309 @@ def initial_stability(
         waterplane=section,
         water_density=water_density,
         basis=basis,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Righting arms at finite heel
+# ---------------------------------------------------------------------------
+#
+# ``initial_stability`` stops at ``GM``: the slope of the righting-arm curve at
+# ``phi = 0``, read off a waterplane second moment. The curve itself is a different
+# integral -- at every heel the body is rotated about its longitudinal axis and the
+# waterplane *height* is solved so that the immersed part of the closed solid displaces
+# the same volume as at the design waterline. The buoyancy centre of that clipped solid
+# gives the lever
+#
+#     GZ(phi) = KN(phi) - KG sin(phi),
+#
+# with ``KN`` measured about the keel line and ``KG`` above the same keel datum that
+# ``initial_stability`` uses. Nothing here assumes a wall-sided body or a small angle.
+#
+# **One integrator, not two.** The heeled-displacement integration already exists in
+# :mod:`tensorcad.gz` (Sutherland-Hodgman cut of every triangle, the exact divergence-
+# theorem integrals of the clipped polyhedron, a waterline solve that holds the
+# displacement fixed). This module reuses those primitives instead of growing a second
+# copy of the numerics: what it adds is the stability-side reading of the result -- the
+# arm spelled in ``KG``, the point-level flags a curve is judged by (``deck_immersed``,
+# ``immersion_depth``, ``waterplane_height``), the ``GM`` consistency check against
+# :func:`initial_stability`, and the validation a loading-condition input needs.
+# ``tensorcad.righting_arm_curve`` is the ``gz`` spelling of the same physics.
+
+SCHEMA_GZ = "tensorcad.stability.gz/1"
+
+#: The heel grid :func:`righting_arm_curve` samples when the caller does not choose one.
+DEFAULT_GZ_ANGLES: tuple[float, ...] = tuple(float(angle) for angle in range(0, 91, 5))
+
+#: A vanishing angle is reported where the arm is *negative*, not where it merely touches
+#: zero: the inversion of a symmetric body lands on ``GZ = 0`` to round-off, and "no
+#: crossing inside the grid" is the honest answer there. The threshold is this fraction of
+#: the peak arm, i.e. the numerical floor of the integral rather than a physical angle.
+VANISHING_TOLERANCE = 1e-12
+
+
+@dataclass(frozen=True)
+class GZPoint:
+    """One heel angle of a righting-arm curve, with the geometry it was read from.
+
+    ``gz`` is the righting lever in metres, positive when restoring. ``immersion_depth`` is
+    how far the deepest point of the heeled body sits below the solved waterplane, and
+    ``waterplane_height`` how far that waterplane sits from the design one (the body's
+    sinkage: negative when it floats higher), so a caller can see *why* an arm bends
+    without re-running the integration.
+    """
+
+    heel_deg: float
+    gz: float
+    displacement_volume: float
+    immersion_depth: float
+    centre_of_buoyancy_y: float
+    waterplane_height: float
+    deck_immersed: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "heel_deg": _round(self.heel_deg),
+            "gz_m": _round(self.gz),
+            "displacement_volume_m3": _round(self.displacement_volume),
+            "immersion_depth_m": _round(self.immersion_depth),
+            "centre_of_buoyancy_y_m": _round(self.centre_of_buoyancy_y),
+            "waterplane_height_m": _round(self.waterplane_height),
+            "deck_immersed": self.deck_immersed,
+        }
+
+
+@dataclass(frozen=True)
+class GZCurve:
+    """``GZ`` over a heel grid, with the summary numbers a curve is read for."""
+
+    points: tuple[GZPoint, ...]
+    displacement_volume: float
+    enclosed_volume: float
+    kg: float
+    keel_z: float
+    waterline_z: float
+    #: ``KB + BM - KG`` from the *upright* condition: the same number
+    #: :func:`initial_stability` reports, obtained from the clipped buoyancy centroid.
+    initial_gm_transverse: float
+    basis: str
+    notes: tuple[str, ...]
+    schema: str = SCHEMA_GZ
+
+    @property
+    def gz_max(self) -> float:
+        """Peak righting arm on the sampled grid, in metres."""
+        return max(point.gz for point in self.points)
+
+    @property
+    def angle_of_gz_max_deg(self) -> float:
+        """Heel at which :attr:`gz_max` occurs (first one, on a flat top)."""
+        return max(self.points, key=lambda point: point.gz).heel_deg
+
+    @property
+    def vanishing_angle_deg(self) -> float | None:
+        """First heel past the peak where the arm goes negative, linearly interpolated.
+
+        ``None`` when the sampled grid ends while the arm is still positive, and also when
+        the arm only returns to *zero* -- an inverted symmetric body does exactly that, and
+        quoting the inversion as a vanishing angle would be an artefact of where the grid
+        stops rather than a property of the curve.
+        """
+        peak = max(range(len(self.points)), key=lambda index: self.points[index].gz)
+        floor = -VANISHING_TOLERANCE * max(1.0, abs(self.gz_max))
+        for index in range(peak + 1, len(self.points)):
+            previous, current = self.points[index - 1], self.points[index]
+            if current.gz >= 0.0 or current.gz > floor:
+                continue
+            span = previous.gz - current.gz
+            if span <= 0.0:  # pragma: no cover - degenerate flat segment
+                return previous.heel_deg
+            crossing = previous.gz / span
+            return previous.heel_deg + (current.heel_deg - previous.heel_deg) * crossing
+        return None
+
+    @property
+    def dynamic_stability_area(self) -> float:
+        """Dynamical stability ``int GZ dphi`` over the grid in m*rad (trapezoidal)."""
+        total = 0.0
+        for previous, current in pairwise(self.points):
+            span = math.radians(current.heel_deg - previous.heel_deg)
+            total += 0.5 * (previous.gz + current.gz) * span
+        return total
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": self.schema,
+            "kg": _round(self.kg),
+            "keel_z_m": _round(self.keel_z),
+            "waterline_z_m": _round(self.waterline_z),
+            "displacement_volume_m3": _round(self.displacement_volume),
+            "enclosed_volume_m3": _round(self.enclosed_volume),
+            "initial_gm_transverse_m": _round(self.initial_gm_transverse),
+            "gz_max_m": _round(self.gz_max),
+            "angle_of_gz_max_deg": _round(self.angle_of_gz_max_deg),
+            "vanishing_angle_deg": (
+                None if self.vanishing_angle_deg is None else _round(self.vanishing_angle_deg)
+            ),
+            "dynamic_stability_area_m_rad": _round(self.dynamic_stability_area),
+            "basis": self.basis,
+            "notes": list(self.notes),
+            "points": [point.to_dict() for point in self.points],
+        }
+
+
+def righting_arm_curve(
+    mesh: Mesh,
+    *,
+    kg: float,
+    waterline_z: float = 0.0,
+    freeboard: float | None = None,
+    angles_deg: Iterable[float] = DEFAULT_GZ_ANGLES,
+    tolerance: float = 1e-13,
+) -> GZCurve:
+    """Righting arms at finite heel, holding the upright displacement fixed.
+
+    ``kg`` is the centre of gravity **above the keel** (the mesh's lowest vertex), the same
+    datum :func:`initial_stability` takes, so ``initial_gm_transverse`` here and
+    ``initial_stability(...).gm_transverse`` are the same number computed by two different
+    integrals. ``tolerance`` is the relative residual the waterline solve is driven to; the
+    volume actually achieved is reported per point rather than assumed equal to the target.
+
+    A hull from :mod:`tensorcad.hull` or :mod:`tensorcad.wigley` is modelled only up to its
+    design waterline -- a body capped there displaces its whole enclosed volume upright, so
+    heeling it would submerge it completely and leave no waterplane at all. That case is
+    refused rather than answered with zeros; ``freeboard=<h>`` adds the vertical, wall-sided
+    topsides the classical arm assumes (recorded in ``basis``, never presented as measured
+    geometry) and is refused on a mesh that already rises above the waterline, where it
+    would double-count.
+
+    ``basis`` names the integration; ``notes`` carries what the curve is *not* (no
+    free-surface correction, no flooding or damage case, no class rule).
+    """
+    if not math.isfinite(kg):
+        raise StabilityError(f"kg must be finite, got {kg!r}")
+    if not math.isfinite(tolerance) or tolerance <= 0.0:
+        raise StabilityError(
+            f"tolerance must be a finite positive fraction of the displacement, got {tolerance!r}"
+        )
+    if freeboard is not None and (not math.isfinite(freeboard) or freeboard < 0.0):
+        raise StabilityError(
+            f"freeboard must be a finite non-negative height in metres, got {freeboard!r}"
+        )
+    angles = tuple(float(angle) for angle in angles_deg)
+    if len(angles) < 2:
+        raise StabilityError(f"a righting-arm curve needs at least two heel angles, got {len(angles)}")
+    if not all(math.isfinite(angle) for angle in angles):
+        raise StabilityError(f"heel angles must be finite, got {angles!r}")
+    if angles[0] != 0.0:
+        raise StabilityError(f"the heel grid must be 0 degrees at its first point, got {angles[0]!r}")
+    if any(later <= earlier for earlier, later in pairwise(angles)):
+        raise StabilityError(f"heel angles must be strictly increasing, got {angles!r}")
+    if not meshlib.is_watertight(mesh):
+        raise StabilityError(
+            "a righting arm needs a closed mesh: an open surface has no inside, so the heeled "
+            "displacement is not defined (see mesh.weld/orient_outward)"
+        )
+    keel_z = min(vertex[2] for vertex in mesh.vertices)
+    if waterline_z <= keel_z:
+        raise StabilityError(f"the waterline ({waterline_z!r}) must sit above the keel ({keel_z!r})")
+    base_level = waterline_z - keel_z
+    shifted = _shifted(mesh, keel_z)
+    upright = _integrate_below(shifted, mesh.faces, base_level)
+    target = upright.volume
+    if not math.isfinite(target) or target <= 0.0:
+        raise StabilityError(f"the displaced volume at the waterline must be positive: {target!r}")
+
+    scale = _bounding_scale(mesh)
+    above = abs(meshlib.total_signed_volume(mesh)) - target
+    floor = 1e-9 * scale**3
+    if freeboard is None or freeboard == 0.0:
+        if above <= floor:
+            raise StabilityError(
+                "the mesh has no volume above the design waterline: a wetted surface closed at "
+                "its waterline displaces its whole enclosed volume upright, so any heel would "
+                "submerge it completely and leave no waterplane -- pass freeboard=<height> to add "
+                "wall-sided topsides"
+            )
+        body = mesh
+    else:
+        if above > floor:
+            raise StabilityError(
+                f"the mesh already rises {above!r} m^3 above the design waterline; "
+                f"freeboard={freeboard!r} would double-count the topsides it already has"
+            )
+        try:
+            body = with_freeboard(mesh, freeboard, waterline_z=waterline_z)
+        except GzError as error:  # the skirt needs the waterline cap a generated hull is closed with
+            raise StabilityError(str(error)) from error
+
+    body_vertices = _shifted(body, keel_z)
+    faces = body.faces
+    # KB from the clipped buoyancy centroid, BM from the waterplane's second moment: the two
+    # halves of KM by the two routes initial_stability already uses, on the same mesh.
+    kb = upright.moment[2] / target + base_level
+    section = waterplane_moments(mesh, waterline_z)
+    initial_gm = kb + section.transverse_second_moment / target - kg
+
+    deck_z = max(vertex[2] for vertex in body_vertices)
+    deck_tolerance = PLANE_TOLERANCE * scale
+    deck = [index for index, vertex in enumerate(body_vertices) if vertex[2] >= deck_z - deck_tolerance]
+
+    points: list[GZPoint] = []
+    for angle in angles:
+        heel_rad = math.radians(angle)
+        cos_heel, sin_heel = math.cos(heel_rad), math.sin(heel_rad)
+        rotated = _rotate_vertices(body_vertices, heel_rad)
+        heights = [vertex[2] for vertex in rotated]
+        level, integral, _iterations = _solve_level(
+            rotated, faces, target, base_level, min(heights), max(heights), tolerance * target
+        )
+        volume = integral.volume
+        if volume <= 0.0:  # pragma: no cover - a closed body entirely above the plane
+            raise StabilityError(f"the solved waterline leaves no displaced volume at {angle!r} deg")
+        # ``kn`` is the lever of the buoyancy centre about the keel line, which is what the
+        # heeled integration measures and what the arm is built from; the buoyancy centre
+        # itself is reported in the body frame (positive toward the side that dips), rotated
+        # back exactly as :func:`tensorcad.gz.heeled_hydrostatics` does, so the two modules
+        # cannot disagree about where ``B`` is.
+        kn = integral.moment[1] / volume
+        heeled_b_z = integral.moment[2] / volume + level
+        # Both heights below are in the *heeled* body frame, whose ``z`` is still the world
+        # vertical: the sinkage is how far the solved waterline sits from the design one, and
+        # the deck comparison has to be made in that same frame -- mixing it with an
+        # unrotated height would compare two different axes.
+        sinkage = level - base_level
+        deck_z_heeled = min(rotated[index][2] for index in deck)
+        points.append(
+            GZPoint(
+                heel_deg=angle,
+                gz=kn - kg * sin_heel,
+                displacement_volume=volume,
+                immersion_depth=level - min(heights),
+                centre_of_buoyancy_y=kn * cos_heel - heeled_b_z * sin_heel,
+                waterplane_height=sinkage,
+                deck_immersed=level > deck_z_heeled - deck_tolerance,
+            )
+        )
+
+    basis = "heeled displacement integration on the clipped polyhedron (divergence theorem)"
+    if body is not mesh:
+        basis += "; wall-sided topsides over the design waterplane"
+    return GZCurve(
+        points=tuple(points),
+        displacement_volume=target,
+        enclosed_volume=abs(meshlib.total_signed_volume(body)),
+        kg=kg,
+        keel_z=keel_z,
+        waterline_z=waterline_z,
+        initial_gm_transverse=initial_gm,
+        basis=basis,
+        notes=(
+            "solid righting arms: no free-surface correction (slack tanks), no flooding or "
+            "damage case and no class rule.",
+            "beyond the heel at which the deck edge immerses (deck_immersed) the arm belongs to a "
+            "closed watertight body and is optimistic.",
+            "the waterline is solved to hold the upright displacement fixed; the volume achieved "
+            "is reported per point as displacement_volume, not assumed equal to the target.",
+        ),
     )

@@ -1,0 +1,664 @@
+{
+  "tensorcad_version": "0.21.0",
+  "box": {
+    "length": 10.0,
+    "beam": 2.0,
+    "draft": 0.5,
+    "freeboard": 1.5,
+    "kg": 0.45,
+    "displacement_volume": 10.0,
+    "enclosed_volume": 40.0,
+    "gm_transverse": 0.46666666666666673,
+    "gm_closed_form": 0.4666666666666666,
+    "small_angle_slope": 0.4686227654614069,
+    "gz_max": 0.5549476914261584,
+    "angle_of_gz_max_deg": 85.0,
+    "vanishing_angle_deg": null,
+    "dynamic_stability_area": 1.099301829793665,
+    "wall_sided_limit_deg": 26.56505117707799,
+    "worst_reference_error": 1.4432899320127035e-15,
+    "worst_wall_sided_relative_error_inside": 1.2212453270876722e-15,
+    "first_wall_sided_relative_error_outside": 0.020954292850260847,
+    "deck_immersion_deg": 65.0,
+    "rows": [
+      {
+        "heel_deg": 0.0,
+        "gz": 0.0,
+        "gz_reference": 0.0,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 0.0,
+        "wall_sided_relative_error": 0.0,
+        "waterplane_height": -5.551115123125783e-17,
+        "deck_immersed": false,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 5.0,
+        "gz": 0.04089505103551357,
+        "gz_reference": 0.040895051035513656,
+        "absolute_error": 8.326672684688674e-17,
+        "gz_wall_sided": 0.04089505103551362,
+        "wall_sided_relative_error": 1.2212453270876722e-15,
+        "waterplane_height": -5.529991454154813e-17,
+        "deck_immersed": false,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 10.0,
+        "gz": 0.08283545989053727,
+        "gz_reference": 0.08283545989053724,
+        "absolute_error": 2.7755575615628914e-17,
+        "gz_wall_sided": 0.08283545989053726,
+        "wall_sided_relative_error": 2.220446049250313e-16,
+        "waterplane_height": 5.4667812111175904e-17,
+        "deck_immersed": false,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 15.0,
+        "gz": 0.1269763448416891,
+        "gz_reference": 0.12697634484168907,
+        "absolute_error": 2.7755575615628914e-17,
+        "gz_wall_sided": 0.12697634484168907,
+        "wall_sided_relative_error": 2.220446049250313e-16,
+        "waterplane_height": 5.3619654621310155e-17,
+        "deck_immersed": false,
+        "displacement": 9.999999999999998
+      },
+      {
+        "heel_deg": 20.0,
+        "gz": 0.1747123634930702,
+        "gz_reference": 0.17471236349307023,
+        "absolute_error": 2.7755575615628914e-17,
+        "gz_wall_sided": 0.17471236349307018,
+        "wall_sided_relative_error": 2.220446049250313e-16,
+        "waterplane_height": -7.221596391720598e-17,
+        "deck_immersed": false,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 25.0,
+        "gz": 0.22785362604920503,
+        "gz_reference": 0.22785362604920492,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 0.22785362604920498,
+        "wall_sided_relative_error": 2.220446049250313e-16,
+        "waterplane_height": 5.0310188628258105e-17,
+        "deck_immersed": false,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 30.0,
+        "gz": 0.28283542650992455,
+        "gz_reference": 0.28283542650992455,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 0.2888888888888888,
+        "wall_sided_relative_error": 0.020954292850260847,
+        "waterplane_height": -0.0024078427901196853,
+        "deck_immersed": false,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 35.0,
+        "gz": 0.3258262920276824,
+        "gz_reference": 0.3258262920276823,
+        "absolute_error": 5.551115123125783e-17,
+        "gz_wall_sided": 0.361408714682016,
+        "wall_sided_relative_error": 0.09845479981200977,
+        "waterplane_height": -0.013775018699304475,
+        "deck_immersed": false,
+        "displacement": 9.999999999999998
+      },
+      {
+        "heel_deg": 40.0,
+        "gz": 0.3601350500635757,
+        "gz_reference": 0.36013505006357566,
+        "absolute_error": 5.551115123125783e-17,
+        "gz_wall_sided": 0.45082727296315434,
+        "wall_sided_relative_error": 0.2011684481807976,
+        "waterplane_height": -0.03343502654157189,
+        "deck_immersed": false,
+        "displacement": 9.999999999999998
+      },
+      {
+        "heel_deg": 45.0,
+        "gz": 0.3889087296526011,
+        "gz_reference": 0.3889087296526011,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 0.5656854249492378,
+        "wall_sided_relative_error": 0.3124999999999998,
+        "waterplane_height": -0.06066017177982133,
+        "deck_immersed": false,
+        "displacement": 10.000000000000005
+      },
+      {
+        "heel_deg": 50.0,
+        "gz": 0.41472257897945936,
+        "gz_reference": 0.41472257897945874,
+        "absolute_error": 6.106226635438361e-16,
+        "gz_wall_sided": 0.7201524123309667,
+        "wall_sided_relative_error": 0.42411832290181695,
+        "waterplane_height": -0.09506344325779137,
+        "deck_immersed": false,
+        "displacement": 10.000000000000087
+      },
+      {
+        "heel_deg": 55.0,
+        "gz": 0.44017437232433854,
+        "gz_reference": 0.44017437232433865,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 0.939186961247598,
+        "wall_sided_relative_error": 0.5313240169565181,
+        "waterplane_height": -0.1365628226682773,
+        "deck_immersed": false,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 60.0,
+        "gz": 0.46847854557151636,
+        "gz_reference": 0.4684785455715166,
+        "absolute_error": 2.220446049250313e-16,
+        "gz_wall_sided": 1.2701705922171762,
+        "wall_sided_relative_error": 0.6311687985518917,
+        "waterplane_height": -0.18542054468233893,
+        "deck_immersed": false,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 65.0,
+        "gz": 0.503055700778337,
+        "gz_reference": 0.5030557007783371,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 1.8122862617352886,
+        "wall_sided_relative_error": 0.722419293574154,
+        "waterplane_height": -0.24184476264797528,
+        "deck_immersed": true,
+        "displacement": 9.999999999999995
+      },
+      {
+        "heel_deg": 70.0,
+        "gz": 0.5302296567682974,
+        "gz_reference": 0.5302296567682973,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 2.8029878722215025,
+        "wall_sided_relative_error": 0.8108341238208552,
+        "waterplane_height": -0.2988362387301198,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 75.0,
+        "gz": 0.5466333344236848,
+        "gz_reference": 0.5466333344236849,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 4.935302456910213,
+        "wall_sided_relative_error": 0.8892401551482806,
+        "waterplane_height": -0.35355339059327384,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 80.0,
+        "gz": 0.5543153019829888,
+        "gz_reference": 0.5543153019829887,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 11.017844481869476,
+        "wall_sided_relative_error": 0.949689315101956,
+        "waterplane_height": -0.4055797876726387,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 85.0,
+        "gz": 0.5549476914261584,
+        "gz_reference": 0.5549476914261585,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 43.84787346137629,
+        "wall_sided_relative_error": 0.9873437946331654,
+        "waterplane_height": -0.4545194776720437,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 90.0,
+        "gz": 0.5499999999999998,
+        "gz_reference": 0.5499999999999998,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 8.890312627045237e+31,
+        "wall_sided_relative_error": 1.0,
+        "waterplane_height": -0.5,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 95.0,
+        "gz": 0.5408664764747617,
+        "gz_reference": 0.5408664764747617,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 43.84787346137619,
+        "wall_sided_relative_error": 0.9876649325547979,
+        "waterplane_height": -0.5416752204197022,
+        "deck_immersed": true,
+        "displacement": 9.999999999999996
+      },
+      {
+        "heel_deg": 100.0,
+        "gz": 0.5289732263304402,
+        "gz_reference": 0.52897322633044,
+        "absolute_error": 2.220446049250313e-16,
+        "gz_wall_sided": 11.017844481869492,
+        "wall_sided_relative_error": 0.9519894088901966,
+        "waterplane_height": -0.5792279653395691,
+        "deck_immersed": true,
+        "displacement": 9.999999999999995
+      },
+      {
+        "heel_deg": 105.0,
+        "gz": 0.5158850744942903,
+        "gz_reference": 0.5158850744942903,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 4.935302456910209,
+        "wall_sided_relative_error": 0.8954704237484029,
+        "waterplane_height": -0.6123724356957947,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 110.0,
+        "gz": 0.5034322260962021,
+        "gz_reference": 0.5034322260962021,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 2.802987872221504,
+        "wall_sided_relative_error": 0.8203944329958133,
+        "waterplane_height": -0.6408563820557887,
+        "deck_immersed": true,
+        "displacement": 9.999999999999996
+      },
+      {
+        "heel_deg": 115.0,
+        "gz": 0.4938828649619779,
+        "gz_reference": 0.4938828649619778,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 1.8122862617352904,
+        "wall_sided_relative_error": 0.7274807653791526,
+        "waterplane_height": -0.6644630243886747,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 120.0,
+        "gz": 0.4841493985913658,
+        "gz_reference": 0.4841493985913659,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 1.2701705922171778,
+        "wall_sided_relative_error": 0.6188312014481088,
+        "waterplane_height": -0.6854205446823389,
+        "deck_immersed": true,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 125.0,
+        "gz": 0.46089287639355236,
+        "gz_reference": 0.4608928763935523,
+        "absolute_error": 5.551115123125783e-17,
+        "gz_wall_sided": 0.9391869612475977,
+        "wall_sided_relative_error": 0.5092639746815573,
+        "waterplane_height": -0.7101392590193234,
+        "deck_immersed": true,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 130.0,
+        "gz": 0.42792630845141616,
+        "gz_reference": 0.4279263084514172,
+        "absolute_error": 1.0547118733938987e-15,
+        "gz_wall_sided": 0.7201524123309667,
+        "wall_sided_relative_error": 0.40578369089076893,
+        "waterplane_height": -0.7378510529443307,
+        "deck_immersed": true,
+        "displacement": 10.000000000000139
+      },
+      {
+        "heel_deg": 135.0,
+        "gz": 0.38890872965260115,
+        "gz_reference": 0.38890872965260115,
+        "absolute_error": 0.0,
+        "gz_wall_sided": 0.5656854249492381,
+        "wall_sided_relative_error": 0.3125000000000001,
+        "waterplane_height": -0.7677669529663689,
+        "deck_immersed": true,
+        "displacement": 10.00000000000046
+      },
+      {
+        "heel_deg": 140.0,
+        "gz": 0.3469313205916189,
+        "gz_reference": 0.34693132059161746,
+        "absolute_error": 1.4432899320127035e-15,
+        "gz_wall_sided": 0.4508272729631548,
+        "wall_sided_relative_error": 0.23045622703493163,
+        "waterplane_height": -0.7994794696605498,
+        "deck_immersed": true,
+        "displacement": 10.000000000000227
+      },
+      {
+        "heel_deg": 145.0,
+        "gz": 0.30510778795846827,
+        "gz_reference": 0.30510778795846816,
+        "absolute_error": 1.1102230246251565e-16,
+        "gz_wall_sided": 0.36140871468201596,
+        "wall_sided_relative_error": 0.15578187364154694,
+        "waterplane_height": -0.8329270629882966,
+        "deck_immersed": true,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 150.0,
+        "gz": 0.2671645734900753,
+        "gz_reference": 0.26716457349007533,
+        "absolute_error": 5.551115123125783e-17,
+        "gz_wall_sided": 0.2888888888888888,
+        "wall_sided_relative_error": 0.0751995533035853,
+        "waterplane_height": -0.8684332465745583,
+        "deck_immersed": true,
+        "displacement": 10.0
+      },
+      {
+        "heel_deg": 155.0,
+        "gz": 0.23702646186556442,
+        "gz_reference": 0.23702646186556436,
+        "absolute_error": 5.551115123125783e-17,
+        "gz_wall_sided": 0.227853626049205,
+        "wall_sided_relative_error": 0.04025758104186816,
+        "waterplane_height": -0.9063077870366498,
+        "deck_immersed": true,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 160.0,
+        "gz": 0.20150979416516557,
+        "gz_reference": 0.2015097941651654,
+        "absolute_error": 1.6653345369377348e-16,
+        "gz_wall_sided": 0.17471236349307026,
+        "wall_sided_relative_error": 0.1533802767951118,
+        "waterplane_height": -0.9396926207859082,
+        "deck_immersed": true,
+        "displacement": 10.000000000000004
+      },
+      {
+        "heel_deg": 165.0,
+        "gz": 0.15772460477108374,
+        "gz_reference": 0.15772460477108377,
+        "absolute_error": 2.7755575615628914e-17,
+        "gz_wall_sided": 0.12697634484168924,
+        "wall_sided_relative_error": 0.24215738740732085,
+        "waterplane_height": -0.9659258262890682,
+        "deck_immersed": true,
+        "displacement": 9.999999999999998
+      },
+      {
+        "heel_deg": 170.0,
+        "gz": 0.10817753554308597,
+        "gz_reference": 0.10817753554308607,
+        "absolute_error": 9.71445146547012e-17,
+        "gz_wall_sided": 0.08283545989053723,
+        "wall_sided_relative_error": 0.3059326970120886,
+        "waterplane_height": -0.9848077530122079,
+        "deck_immersed": true,
+        "displacement": 10.000000000000002
+      },
+      {
+        "heel_deg": 175.0,
+        "gz": 0.05497626598691043,
+        "gz_reference": 0.05497626598691034,
+        "absolute_error": 9.020562075079397e-17,
+        "gz_wall_sided": 0.040895051035513635,
+        "wall_sided_relative_error": 0.34432564808804234,
+        "waterplane_height": -0.9961946980917458,
+        "deck_immersed": true,
+        "displacement": 9.999999999999998
+      },
+      {
+        "heel_deg": 180.0,
+        "gz": 9.199544480120237e-17,
+        "gz_reference": 4.313066814990865e-17,
+        "absolute_error": 4.886477665129372e-17,
+        "gz_wall_sided": 5.71501839602098e-17,
+        "wall_sided_relative_error": 0.6097138876272594,
+        "waterplane_height": -1.0,
+        "deck_immersed": true,
+        "displacement": 9.999999999999998
+      }
+    ]
+  },
+  "hull": {
+    "length": 10.0,
+    "beam": 2.0,
+    "draft": 0.8,
+    "kg": 0.6,
+    "freeboard": 0.4,
+    "displacement_volume": 7.4465540971492254,
+    "enclosed_volume": 13.071221771670087,
+    "gm_transverse": 0.3216229964990912,
+    "gm_initial_stability": 0.3216229964990912,
+    "small_angle_slope": 0.31843945374473254,
+    "slope_relative_error": 0.009898367930813223,
+    "gz_max": 0.15753008755854425,
+    "angle_of_gz_max_deg": 45.0,
+    "vanishing_angle_deg": null,
+    "dynamic_stability_area": 0.18327900502200087,
+    "deck_immersion_deg": 25.0,
+    "rows": [
+      {
+        "heel_deg": 0.0,
+        "gz": -2.1456741920005978e-17,
+        "immersion_depth": 0.8,
+        "centre_of_buoyancy_y": -2.1456741920005978e-17,
+        "deck_immersed": false
+      },
+      {
+        "heel_deg": 1.0,
+        "gz": 0.005557816936097748,
+        "immersion_depth": 0.7998444583540425,
+        "centre_of_buoyancy_y": 0.0075996619265433045,
+        "deck_immersed": false
+      },
+      {
+        "heel_deg": 5.0,
+        "gz": 0.026805812941667846,
+        "immersion_depth": 0.7961289206698265,
+        "centre_of_buoyancy_y": 0.037004025310894535,
+        "deck_immersed": false
+      },
+      {
+        "heel_deg": 10.0,
+        "gz": 0.051611167699106564,
+        "immersion_depth": 0.7845705896162019,
+        "centre_of_buoyancy_y": 0.0719453479394603,
+        "deck_immersed": false
+      },
+      {
+        "heel_deg": 15.0,
+        "gz": 0.07508535692363857,
+        "immersion_depth": 0.7757302053819926,
+        "centre_of_buoyancy_y": 0.1054359505517702,
+        "deck_immersed": false
+      },
+      {
+        "heel_deg": 20.0,
+        "gz": 0.09783234614424721,
+        "immersion_depth": 0.7748432436703697,
+        "centre_of_buoyancy_y": 0.138002085294179,
+        "deck_immersed": false
+      },
+      {
+        "heel_deg": 25.0,
+        "gz": 0.11998511730392503,
+        "immersion_depth": 0.7665791938098693,
+        "centre_of_buoyancy_y": 0.16969197570641847,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 30.0,
+        "gz": 0.1371282745581907,
+        "immersion_depth": 0.7560425413163018,
+        "centre_of_buoyancy_y": 0.19649747571454118,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 35.0,
+        "gz": 0.14836014508630951,
+        "immersion_depth": 0.7524396625666071,
+        "centre_of_buoyancy_y": 0.21787732372401833,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 40.0,
+        "gz": 0.15483602268579155,
+        "immersion_depth": 0.7536524184449334,
+        "centre_of_buoyancy_y": 0.23510843797976877,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 45.0,
+        "gz": 0.15753008755854425,
+        "immersion_depth": 0.7620684693573531,
+        "centre_of_buoyancy_y": 0.249199778792034,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 50.0,
+        "gz": 0.1571644206356584,
+        "immersion_depth": 0.7802862196072943,
+        "centre_of_buoyancy_y": 0.2608529281943734,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 55.0,
+        "gz": 0.15428913887531193,
+        "immersion_depth": 0.8125292451720718,
+        "centre_of_buoyancy_y": 0.2705523608311574,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 60.0,
+        "gz": 0.14935157657284903,
+        "immersion_depth": 0.863431203474913,
+        "centre_of_buoyancy_y": 0.2786346052512809,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 65.0,
+        "gz": 0.1427046159545189,
+        "immersion_depth": 0.9144337594523996,
+        "centre_of_buoyancy_y": 0.2853149985450206,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 70.0,
+        "gz": 0.13467952601895072,
+        "immersion_depth": 0.9599464015166637,
+        "centre_of_buoyancy_y": 0.2907382725346297,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 75.0,
+        "gz": 0.1255624066777472,
+        "immersion_depth": 0.9994921940858058,
+        "centre_of_buoyancy_y": 0.2949792130201984,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 80.0,
+        "gz": 0.11552176010968662,
+        "immersion_depth": 1.0325326666798944,
+        "centre_of_buoyancy_y": 0.2980375579843534,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 85.0,
+        "gz": 0.10481110500964508,
+        "immersion_depth": 1.0588021366057327,
+        "centre_of_buoyancy_y": 0.2999077174838379,
+        "deck_immersed": true
+      },
+      {
+        "heel_deg": 90.0,
+        "gz": 0.093730968587726,
+        "immersion_depth": 1.0781714026833735,
+        "centre_of_buoyancy_y": 0.300547756980813,
+        "deck_immersed": true
+      }
+    ]
+  },
+  "wigley": {
+    "freeboard": 0.3,
+    "kg": 0.4,
+    "displacement_volume": 2.7712221498842595,
+    "gm_transverse": 0.1280278052173912,
+    "gz_max": 0.12218226025880091,
+    "angle_of_gz_max_deg": 60.0,
+    "dynamic_stability_area": 0.07030730836162447,
+    "rows": [
+      {
+        "heel_deg": 0.0,
+        "gz": -2.5535128858848018e-18
+      },
+      {
+        "heel_deg": 5.0,
+        "gz": 0.01115763366036425
+      },
+      {
+        "heel_deg": 10.0,
+        "gz": 0.022369107270015703
+      },
+      {
+        "heel_deg": 15.0,
+        "gz": 0.03369174177190237
+      },
+      {
+        "heel_deg": 20.0,
+        "gz": 0.04521003909800042
+      },
+      {
+        "heel_deg": 25.0,
+        "gz": 0.057047001685645554
+      },
+      {
+        "heel_deg": 30.0,
+        "gz": 0.06938567667650183
+      },
+      {
+        "heel_deg": 35.0,
+        "gz": 0.08206351732916267
+      },
+      {
+        "heel_deg": 40.0,
+        "gz": 0.09331294826858899
+      },
+      {
+        "heel_deg": 45.0,
+        "gz": 0.10276483016566179
+      },
+      {
+        "heel_deg": 50.0,
+        "gz": 0.11058515567260802
+      },
+      {
+        "heel_deg": 55.0,
+        "gz": 0.11698362588133288
+      },
+      {
+        "heel_deg": 60.0,
+        "gz": 0.12218226025880091
+      }
+    ]
+  },
+  "figure": "gz_curves.png",
+  "claims": {
+    "box_matches_exact_section": true,
+    "wall_sided_inside_window": true,
+    "wall_sided_departs_outside_window": true,
+    "hull_gm_matches_initial_stability": true,
+    "hull_slope_matches_gm": true
+  }
+}
