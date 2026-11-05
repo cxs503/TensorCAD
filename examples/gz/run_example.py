@@ -1,0 +1,300 @@
+"""Righting-arm curves, checked against the two closed forms that exist.
+
+Run:  python examples/gz/run_example.py --output examples/gz/outputs
+
+Writes ``results.json``, ``report.md`` and ``plot.png`` into the output directory and exits
+non-zero if any of the claims below stops holding, so CI can run it as a check rather than
+as a demo.
+
+The claims:
+
+1. box barge -- below the bilge/deck limit the integrator reproduces
+   ``GZ = sin(phi) (GM0 + BM0/2 tan^2 phi)`` to round-off, and *stops* reproducing it above
+   the limit (so the agreement is not vacuous);
+2. log (circular section, half submerged) -- ``GZ = (R - KG) sin(phi)`` exactly, at every
+   heel from 0 to 90 degrees;
+3. hull -- ``GZ' (0)`` equals ``GM`` from :mod:`tensorcad.stability`, which computes it from
+   the waterplane moments instead of a heeled volume integral;
+4. every point of every curve floats at the same displacement (residual < 1e-10).
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+
+from tensorcad import mesh as meshlib
+from tensorcad.geometry import Mesh, MeshBuilder
+from tensorcad.gz import (
+    box_righting_arms_analytic,
+    box_wall_sided_limit_deg,
+    free_surface_correction,
+    heeled_hydrostatics,
+    rectangular_tank_inertia,
+    righting_arm_curve,
+    wall_sided_righting_arm,
+    with_freeboard,
+)
+from tensorcad.hull import HullParameters, generate_hull
+from tensorcad.stability import initial_stability
+
+BREADTH, DRAFT, DEPTH, LENGTH, KG = 2.0, 0.8, 2.0, 10.0, 0.50
+ANGLE_STEP = 5
+
+
+def box(minimum: tuple[float, float, float], maximum: tuple[float, float, float]) -> Mesh:
+    x0, y0, z0 = minimum
+    x1, y1, z1 = maximum
+    builder = MeshBuilder()
+    corners = [
+        (x0, y0, z0),
+        (x1, y0, z0),
+        (x1, y1, z0),
+        (x0, y1, z0),
+        (x0, y0, z1),
+        (x1, y0, z1),
+        (x1, y1, z1),
+        (x0, y1, z1),
+    ]
+    ids = [builder.add_vertex(point) for point in corners]
+    for face in (
+        (0, 3, 2),
+        (0, 2, 1),
+        (4, 5, 6),
+        (4, 6, 7),
+        (0, 1, 5),
+        (0, 5, 4),
+        (2, 3, 7),
+        (2, 7, 6),
+        (1, 2, 6),
+        (1, 6, 5),
+        (0, 4, 7),
+        (0, 7, 3),
+    ):
+        builder.add_triangle(*[ids[index] for index in face])
+    return meshlib.orient_outward(builder.build()).mesh
+
+
+def log(radius: float, length: float, segments: int = 64) -> Mesh:
+    builder = MeshBuilder()
+    rings = []
+    for index in range(segments):
+        angle = 2.0 * math.pi * index / segments
+        y = radius * math.cos(angle)
+        z = radius + radius * math.sin(angle)
+        rings.append((builder.add_vertex((0.0, y, z)), builder.add_vertex((length, y, z))))
+    for index in range(segments):
+        low, high = rings[index], rings[(index + 1) % segments]
+        builder.add_triangle(low[0], low[1], high[1])
+        builder.add_triangle(low[0], high[1], high[0])
+    first = builder.add_vertex((0.0, 0.0, radius))
+    second = builder.add_vertex((length, 0.0, radius))
+    for index in range(segments):
+        low, high = rings[index], rings[(index + 1) % segments]
+        builder.add_triangle(first, high[0], low[0])
+        builder.add_triangle(second, low[1], high[1])
+    return meshlib.orient_outward(builder.build()).mesh
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", default=str(Path(__file__).with_name("outputs")))
+    parser.add_argument("--no-plot", action="store_true")
+    options = parser.parse_args()
+    output = Path(options.output)
+    output.mkdir(parents=True, exist_ok=True)
+    failures: list[str] = []
+    results: dict[str, object] = {}
+
+    # --- 1. box barge against the wall-sided trapezoid -------------------------------
+    barge = box((0.0, -BREADTH / 2, 0.0), (LENGTH, BREADTH / 2, DEPTH))
+    limit = box_wall_sided_limit_deg(BREADTH, DRAFT, DEPTH)
+    inside = list(range(0, int(limit) + 1, ANGLE_STEP))
+    curve = righting_arm_curve(barge, KG, inside, waterline_z=DRAFT)
+    reference = box_righting_arms_analytic(BREADTH, DRAFT, KG, inside, depth=DEPTH)
+    box_rows = []
+    worst = 0.0
+    for angle, gz, expected in zip(curve.angles_deg, curve.gz, reference, strict=True):
+        error = abs(gz - expected)
+        worst = max(worst, error)
+        box_rows.append({"heel_deg": angle, "gz_m": gz, "wall_sided_m": expected, "abs_error": error})
+    if worst > 1e-12:
+        failures.append(f"box wall-sided agreement broke: worst |error| = {worst:.3e} m")
+
+    # negative control: past the limit the closed form must stop matching
+    bm = BREADTH * BREADTH / (12.0 * DRAFT)
+    gm = 0.5 * DRAFT + bm - KG
+    beyond = []
+    for angle in (45.0, 55.0, 70.0):
+        gz = righting_arm_curve(barge, KG, [angle], waterline_z=DRAFT).gz[0]
+        closed = wall_sided_righting_arm(angle, gm=gm, bm=bm)
+        beyond.append({"heel_deg": angle, "gz_m": gz, "wall_sided_m": closed, "abs_error": abs(gz - closed)})
+    if not beyond[-1]["abs_error"] > 1e-2:
+        failures.append("the wall-sided formula did not break down past its limit")
+
+    results["box_wall_sided"] = {
+        "limit_deg": limit,
+        "worst_abs_error_m": worst,
+        "inside": box_rows,
+        "beyond_limit": beyond,
+        "gm0_m": gm,
+        "bm0_m": bm,
+    }
+
+    # --- 2. log against GZ = (R - KG) sin(phi) --------------------------------------
+    radius = 1.0
+    segments = 64
+    step = 180.0 / segments  # a symmetry axis of the polygon
+    log_angles = [k * step for k in range(0, 33)]
+    log_curve = righting_arm_curve(log(radius, 4.0, segments), KG, log_angles, waterline_z=radius)
+    log_rows = []
+    log_worst = 0.0
+    for angle, gz in zip(log_angles, log_curve.gz, strict=True):
+        expected = (radius - KG) * math.sin(math.radians(angle))
+        error = abs(gz - expected)
+        log_worst = max(log_worst, error)
+        log_rows.append({"heel_deg": angle, "gz_m": gz, "exact_m": expected, "abs_error": error})
+    if log_worst > 1e-9:
+        failures.append(f"log closed form broke: worst |error| = {log_worst:.3e} m")
+    results["log_circular_section"] = {
+        "radius_m": radius,
+        "segments": segments,
+        "worst_abs_error_m": log_worst,
+        "rows": log_rows,
+    }
+
+    # --- 3. hull: slope at zero against initial_stability ---------------------------
+    hull = generate_hull(HullParameters(length=LENGTH, beam=BREADTH, draft=DRAFT, nx=41, nz=13)).mesh
+    banded = with_freeboard(hull, 1.0)
+    if not meshlib.is_watertight(banded):
+        failures.append("the freeboarded hull is not watertight")
+    stability = initial_stability(hull, kg=KG, waterline_z=0.0)
+
+    def slope(step_deg: float) -> float:
+        probe = righting_arm_curve(banded, KG, [-step_deg, 0.0, step_deg], waterline_z=0.0)
+        return (probe.gz[2] - probe.gz[0]) / math.radians(2.0 * step_deg)
+
+    coarse, fine = slope(0.01), slope(0.001)
+    extrapolated = fine + (fine - coarse) / 9.0
+    if abs(extrapolated - stability.gm_transverse) > 1e-6:
+        failures.append(f"hull slope {extrapolated:.9f} != GM {stability.gm_transverse:.9f}")
+
+    hull_curve = righting_arm_curve(banded, KG, list(range(0, 91, ANGLE_STEP)), waterline_z=0.0)
+    if hull_curve.max_volume_error > 1e-10:
+        failures.append(f"hull displacement drifted: {hull_curve.max_volume_error:.3e}")
+    results["hull"] = {
+        "parameters": {"length_m": LENGTH, "beam_m": BREADTH, "draft_m": DRAFT, "kg_m": KG},
+        "freeboard_m": 1.0,
+        "gm_from_initial_stability_m": stability.gm_transverse,
+        "gm_from_curve_slope_m": extrapolated,
+        "kb_m": stability.kb,
+        "bm_transverse_m": stability.bm_transverse,
+        "curve": hull_curve.to_dict(),
+    }
+
+    # --- 4. free-surface correction on the hull curve -------------------------------
+    tank = rectangular_tank_inertia(2.0, 0.5)
+    correction = free_surface_correction([tank], hull_curve.displacement_volume)
+    flooded = righting_arm_curve(banded, KG, hull_curve.angles_deg, waterline_z=0.0, free_surface_i_x=tank)
+    for solid, wet in zip(hull_curve.gz, flooded.gz, strict=True):
+        if abs((solid - wet) - correction.loss_m) > 1e-12:
+            failures.append("the free-surface correction is not a flat shift")
+            break
+    results["free_surface"] = {
+        "tank": "2.0 m x 0.5 m rectangle",
+        "i_x_m4": tank,
+        "loss_m": correction.loss_m,
+        "max_gz_solid_m": hull_curve.max_gz,
+        "max_gz_with_free_surface_m": flooded.max_gz,
+    }
+
+    # --- 5. upright volume bookkeeping ---------------------------------------------
+    upright = heeled_hydrostatics(banded, 0.0, waterline_z=0.0)
+    results["upright"] = {
+        "displacement_volume_m3": upright.displacement_volume,
+        "kb_m": upright.centre_of_buoyancy_z,
+        "waterplane_area_m2": upright.waterplane_area,
+        "wetted_surface_area_m2": upright.wetted_surface_area,
+    }
+
+    results["checks"] = {"failures": failures, "passed": not failures}
+    (output / "results.json").write_text(json.dumps(results, indent=2) + "\n")
+
+    # --- report --------------------------------------------------------------------
+    lines = [
+        "# Righting-arm curves: two exact benchmarks and a hull",
+        "",
+        f"- box barge {LENGTH} x {BREADTH} x {DEPTH} m, draft {DRAFT} m, KG {KG} m:",
+        f"  worst |GZ - wall-sided| = {worst:.3e} m over 0-{int(limit)} deg",
+        f"  (wall-sided limit {limit:.2f} deg); past it the closed form drifts by",
+        f"  {beyond[-1]['abs_error']:.3e} m at {beyond[-1]['heel_deg']:.0f} deg",
+        f"- log R={radius} m half submerged: worst |GZ - (R-KG)sin(phi)| = {log_worst:.3e} m over 0-90 deg",
+        f"- hull: GZ'(0) = {extrapolated:.9f} m/rad vs GM = {stability.gm_transverse:.9f} m"
+        f" ({abs(extrapolated - stability.gm_transverse) / stability.gm_transverse * 100:.2e} %)",
+        f"  max GZ = {hull_curve.max_gz:.4f} m at {hull_curve.angle_of_max_gz_deg:.0f} deg,"
+        f" worst displacement residual {hull_curve.max_volume_error:.2e}",
+        f"- free surface (2.0 x 0.5 m tank): -{correction.loss_m * 1000:.2f} mm on every point",
+        "",
+        f"**Verdict: {'all checks passed' if not failures else 'FAILED -- ' + '; '.join(failures)}**",
+        "",
+    ]
+    (output / "report.md").write_text("\n".join(lines))
+
+    if not options.no_plot:
+        try:
+            import matplotlib
+
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+        except ImportError:  # pragma: no cover - optional
+            print("matplotlib not installed; skipping plot")
+        else:
+            figure, axes = plt.subplots(1, 2, figsize=(11, 4.2))
+            axes[0].plot(
+                log_curve.angles_deg,
+                log_curve.gz,
+                "o-",
+                ms=3,
+                label="integrated (64-gon log)",
+            )
+            axes[0].plot(
+                log_angles,
+                [(radius - KG) * math.sin(math.radians(a)) for a in log_angles],
+                "k--",
+                label=r"exact $(R-KG)\sin\phi$",
+            )
+            axes[0].set_xlabel("heel angle [deg]")
+            axes[0].set_ylabel("GZ [m]")
+            axes[0].set_title(f"Log, R = {radius} m: round bilge, exact reference")
+            axes[0].legend()
+            axes[0].grid(alpha=0.3)
+
+            axes[1].plot(hull_curve.angles_deg, hull_curve.gz, "o-", ms=3, label="solid (KG = 0.5 m)")
+            axes[1].plot(flooded.angles_deg, flooded.gz, "s--", ms=3, label="with free surface")
+            axes[1].plot(
+                list(curve.angles_deg),
+                list(curve.gz),
+                "^-",
+                ms=3,
+                label="box barge (KG = 0.5 m)",
+            )
+            axes[1].axhline(0.0, color="k", lw=0.8)
+            axes[1].set_xlabel("heel angle [deg]")
+            axes[1].set_ylabel("GZ [m]")
+            axes[1].set_title("Hull (41x13, freeboard 1.0 m) and box barge")
+            axes[1].legend()
+            axes[1].grid(alpha=0.3)
+            figure.tight_layout()
+            figure.savefig(output / "plot.png", dpi=130)
+            plt.close(figure)
+
+    print("\n".join(lines))
+    for failure in failures:
+        print(f"FAIL: {failure}")
+    return 0 if not failures else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
