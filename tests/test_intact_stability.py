@@ -493,3 +493,98 @@ def test_weather_criterion_refuses_an_impossible_roll_amplitude() -> None:
             roll_amplitude_deg=50.0,
             downflooding_angle_deg=50.0,
         )
+
+
+# ---------------------------------------------------------------------------
+# clause 2.3.3: the windward roll amplitude shall not exceed the flooding angle
+# ---------------------------------------------------------------------------
+def test_clause_2_3_3_compares_the_roll_amplitude_with_the_flooding_angle() -> None:
+    """2.3.3 is a "shall not exceed" clause like 2.3.1, judged on the supplied theta_1."""
+    angles, values = analytic_curve(0.25, 55.0)
+    report = weather_criterion(
+        (angles, values),
+        wind_area_m2=10.0,
+        wind_arm_m=2.0,
+        displacement_t=DISPLACEMENT_T,
+        roll_amplitude_deg=8.0,
+        flooding_angle_deg=20.0,
+    )
+    assert report.flooding_angle_deg == 20.0
+    assert report.clauses == "2.3.1, 2.3.2 and 2.3.3"
+    assert [item.clause for item in report.criteria] == ["2.3.1", "2.3.2", "2.3.3"]
+    roll = report.criteria[2]
+    assert roll.comparison == "not more than"
+    assert (roll.attained, roll.required) == (8.0, 20.0)
+    assert roll.satisfied is True
+    assert roll.margin == pytest.approx(12.0)
+    assert report.satisfied
+    assert report.verdict() == "passes IS Code 2008 part A 2.3.1, 2.3.2 and 2.3.3 (weather criterion)"
+
+
+def test_the_flooding_angle_caps_theta_two_and_moves_the_gust_areas() -> None:
+    """theta_f enters 2.3.2's minimum too, so the gust areas stop at it, not at 50 deg."""
+    angles, values = analytic_curve(0.25, 55.0)
+    kwargs = {"wind_area_m2": 10.0, "wind_arm_m": 2.0, "displacement_t": DISPLACEMENT_T}
+    uncapped = weather_criterion((angles, values), roll_amplitude_deg=8.0, **kwargs)
+    capped = weather_criterion((angles, values), roll_amplitude_deg=8.0, flooding_angle_deg=20.0, **kwargs)
+    assert uncapped.theta2_deg == 50.0
+    assert capped.theta2_deg == pytest.approx(20.0)
+    assert capped.area_b_m_rad == pytest.approx(wall_sided_area(8.0, 20.0), rel=1e-5)  # 0.25 deg grid
+    assert capped.area_a_m_rad == pytest.approx(capped.levers.gust_m * math.radians(20.0 - 8.0))
+    assert capped.area_b_m_rad < uncapped.area_b_m_rad
+
+
+def test_a_roll_amplitude_reaching_the_flooding_angle_fails_2_3_3() -> None:
+    """theta_1 >= theta_f is a failure of 2.3.3, not an exception and not a fake area."""
+    angles, values = analytic_curve(0.25, 55.0)
+    report = weather_criterion(
+        (angles, values),
+        wind_area_m2=10.0,
+        wind_arm_m=2.0,
+        displacement_t=DISPLACEMENT_T,
+        roll_amplitude_deg=25.0,
+        flooding_angle_deg=20.0,
+    )
+    assert report.satisfied is False
+    assert [item.clause for item in report.failures] == ["2.3.3"]
+    assert report.criteria[-1].margin == pytest.approx(-5.0)
+    # the gust areas have no span between theta_1 and theta_2: they are unmeasured, not zero
+    assert report.area_b_m_rad is None and report.area_a_m_rad is None
+    assert report.theta2_deg == pytest.approx(20.0)
+    assert report.clauses == "2.3.1 and 2.3.3"
+    assert report.verdict() == "fails IS Code 2008 part A 2.3.3"
+    payload = json.loads(json.dumps(report.to_dict()))
+    assert payload["area_b_m_rad"] is None and payload["area_a_m_rad"] is None
+    assert payload["flooding_angle_deg"] == 20.0
+    assert payload["clauses"] == "2.3.1 and 2.3.3"
+
+
+def test_clause_2_3_3_is_not_evaluated_without_a_flooding_angle() -> None:
+    """No theta_f supplied: the clause is absent and said to be absent, not passed."""
+    angles, values = analytic_curve(0.25, 55.0)
+    report = weather_criterion(
+        (angles, values),
+        wind_area_m2=10.0,
+        wind_arm_m=2.0,
+        displacement_t=DISPLACEMENT_T,
+    )
+    assert report.flooding_angle_deg is None
+    assert "2.3.3" not in [item.clause for item in report.criteria]
+    assert report.clauses == "2.3.1 and 2.3.2"
+    assert report.verdict() == "passes IS Code 2008 part A 2.3.1 and 2.3.2 (weather criterion)"
+    payload = report.to_dict()
+    assert payload["flooding_angle_deg"] is None
+    assert "2.3.3" not in json.dumps(payload)
+
+
+@pytest.mark.parametrize("flooding", [0.0, -5.0, 90.0, 130.0])
+def test_a_flooding_angle_outside_zero_to_ninety_is_refused(flooding: float) -> None:
+    angles, values = analytic_curve(1.0, 55.0)
+    with pytest.raises(IntactStabilityError, match="flooding_angle_deg must be in"):
+        weather_criterion(
+            (angles, values),
+            wind_area_m2=10.0,
+            wind_arm_m=2.0,
+            displacement_t=DISPLACEMENT_T,
+            flooding_angle_deg=flooding,
+        )

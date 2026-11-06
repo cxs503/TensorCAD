@@ -18,8 +18,8 @@ than trusted.
 
 Everything on this page is written by `python examples/intact_stability/run_example.py
 --output docs/intact_stability`, which also writes `results.json`, `report.md` and four
-figures into that directory and **exits non-zero if one of its 15 claims stops holding**. The
-numbers below are read from that JSON. `tests/test_intact_stability.py` pins 39 cases of the
+figures into that directory and **exits non-zero if one of its 17 claims stops holding**. The
+numbers below are read from that JSON. `tests/test_intact_stability.py` pins 47 cases of the
 same content.
 
 ## 1. The clauses, as implemented
@@ -34,18 +34,23 @@ same content.
 | 2.2.6 | initial `GM_0` | ≥ 0.15 m | **input** (usually from `initial_stability`) |
 | 2.3.1 | steady wind heel `θ_0`, `lw1 = P A Z/(1000 g Δ)`, `P = 504 Pa` | ≤ `min(16°, 0.8 θ_deck-edge)` | first upward crossing of `GZ` with `lw1` |
 | 2.3.2 | gust areas, `lw2 = 1.5 lw1` | `b ≥ a` | `b = ∫GZ`, `a = lw2·(θ_2 − θ_1)` |
+| 2.3.3 | windward roll amplitude `θ_1` | ≤ `θ_f` | **input** `θ_1` compared with the supplied `flooding_angle_deg` |
 
 Three details are decisions rather than transcription, and each is encoded in the code so it
 cannot drift:
 
 * **Comparison direction.** 2.2.x are "shall be at least" clauses and 2.2.5 is "shall not be
-  less than"; 2.3.1 is a "shall not exceed" one. A single `>=` would report every ship
+  less than"; 2.3.1 and 2.3.3 are "shall not exceed" ones. A single `>=` would report every ship
   compliant on the weather heel, so `Criterion.comparison` carries `at least` or
   `not more than` and `margin` is the slack in the passing direction — non-negative exactly
   when `satisfied`, which is what `failures` and `verdict()` are built on.
 * **The flooding angle replaces 40°, not 30°.** When `θ_f < 40°` it is the upper limit of
   2.2.2 and 2.2.3; when `θ_f < 30°` the two clauses cannot be evaluated and the call is
   refused rather than quietly evaluated at 30°.
+* **`θ_f` is an input to 2.3.3.** Passing `flooding_angle_deg` adds the clause *and* puts
+  the same angle into 2.3.2's `θ_2 = min(θ_f, 50°, θ_c)` — one number where the code uses
+  one. Omit it and 2.3.3 is reported as **not evaluated** (`clauses` says `2.3.1 and 2.3.2`,
+  `flooding_angle_deg` is `null`), never as passed.
 * **`θ_1` is an input.** Clause 2.3.4 computes the windward roll amplitude from
   `θ_1 = 109 k X₁ X₂ √(r s)`, whose factors are read off three tables keyed on `Ak/B`, `B/d`,
   `Cb` and the roll period. Those tables are not transcribed anywhere in this repository, and
@@ -166,6 +171,14 @@ With `Δ = 80 m³ × 1.025 = 82 t`, `A = 10 m²` and `Z = 2 m`: `lw1 = 504·10·
 | moderate wind (`A = 10 m²`) | 1.538 | 16.0 | 50.0 | 0.231617 | 0.016403 | passes 2.3.1, 2.3.2 |
 | storm (`A = 240 m²`) | 30.881 | 16.0 | 50.0 | 0.231617 | 0.393666 | **fails both** |
 | deck edge at 12° (`lw1 = 0.1 m`) | 11.982 | 9.6 | 50.0 | 0.231617 | 0.130900 | **fails 2.3.1** |
+| `θ_f = 20°, θ_1 = 8°` | 1.538 | 16.0 | 20.0 | 0.024862 | 0.003937 | passes 2.3.1, 2.3.2, 2.3.3 |
+| `θ_f = 20°, θ_1 = 25°` | 1.538 | 16.0 | 20.0 | not measured | not measured | **fails 2.3.3** |
+
+The last two rows are clause 2.3.3, which needs one more input, the flooding angle. At
+`θ_1 = 8° < θ_f = 20°` it passes, and because `θ_f` also enters 2.3.2's minimum the gust areas
+stop at 20° instead of 50° (`b = 0.024862` against `0.231617` m rad on the same curve). At
+`θ_1 = 25° > θ_f` the span `θ_2 − θ_1` is empty: 2.3.3 fails and 2.3.2 is **not measured** —
+the two cells say so rather than quoting a zero the arithmetic does not produce.
 
 The third row is why the 80 % deck-edge rule is implemented instead of the 16° limit alone:
 with `θ_deck-edge = 12°` the limit is 9.6°, and a heel of 11.98° is legal under the 16° rule and
@@ -235,13 +248,14 @@ plain `(angles, gz)` pair, so the criteria can be applied to a curve measured el
 | file | what it is |
 |---|---|
 | `tensorcad/intact_stability.py` | the module (standard library only) |
-| `tests/test_intact_stability.py` | 39 cases: closed-form areas, all six clauses, negative controls, weather, malformed input |
-| `examples/intact_stability/run_example.py` | the run behind this page; 15 claims, non-zero exit on failure |
+| `tests/test_intact_stability.py` | 47 cases: closed-form areas, all six clauses, negative controls, weather (2.3.1-2.3.3), malformed input |
+| `examples/intact_stability/run_example.py` | the run behind this page; 17 claims, non-zero exit on failure |
 | `docs/intact_stability/{results.json,report.md,fig_*.png}` | its output |
 
 ## 8. What this is **not**
 
 * **No clause 2.3.4 roll amplitude.** `θ_1` is an input; the tables behind it are not here.
+  2.3.3 is implemented, but only for a `θ_1` the caller brings.
 * **No damage stability** (part B), no grain / timber-deck codes, none of the 2.2 variants for
   special ship types, no class-society rule sets.
 * **No `GM_0` computation.** It comes from `tensorcad.stability` (or from a loading manual);

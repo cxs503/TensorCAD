@@ -1,8 +1,8 @@
 {
   "schema": "tensorcad.intact-stability-example/1",
-  "tensorcad_version": "0.22.0",
-  "generated_utc": "2026-11-06T09:21:29Z",
-  "runtime_s": 4.943,
+  "tensorcad_version": "0.23.0",
+  "generated_utc": "2026-11-06T14:17:29Z",
+  "runtime_s": 2.76,
   "barge": {
     "length_m": 10.0,
     "breadth_m": 4.0,
@@ -978,6 +978,8 @@
         },
         "theta0_deg": 1.537690637,
         "deck_edge_angle_deg": null,
+        "flooding_angle_deg": null,
+        "clauses": "2.3.1 and 2.3.2",
         "steady_heel_limit_deg": 16.0,
         "roll_amplitude_deg": 0.0,
         "theta2_deg": 50.0,
@@ -1029,6 +1031,8 @@
         },
         "theta0_deg": 30.881385501,
         "deck_edge_angle_deg": null,
+        "flooding_angle_deg": null,
+        "clauses": "2.3.1 and 2.3.2",
         "steady_heel_limit_deg": 16.0,
         "roll_amplitude_deg": 0.0,
         "theta2_deg": 50.0,
@@ -1081,6 +1085,8 @@
         },
         "theta0_deg": 11.982016175,
         "deck_edge_angle_deg": 12.0,
+        "flooding_angle_deg": null,
+        "clauses": "2.3.1 and 2.3.2",
         "steady_heel_limit_deg": 9.6,
         "roll_amplitude_deg": 0.0,
         "theta2_deg": 50.0,
@@ -1111,6 +1117,122 @@
         ],
         "failures": [
           "2.3.1"
+        ]
+      }
+    },
+    "flooding_angle": {
+      "flooding_angle_deg": 20.0,
+      "roll_amplitude_deg": 8.0,
+      "report": {
+        "schema": "tensorcad.intact-stability/1",
+        "code": "IMO IS Code 2008, part A, 2.3",
+        "satisfied": true,
+        "verdict": "passes IS Code 2008 part A 2.3.1, 2.3.2 and 2.3.3 (weather criterion)",
+        "levers": {
+          "steady_lever_m": 0.012530768,
+          "gust_lever_m": 0.018796151,
+          "wind_area_m2": 10.0,
+          "wind_arm_m": 2.0,
+          "displacement_t": 82.0,
+          "pressure_pa": 504.0,
+          "gravity": 9.81
+        },
+        "theta0_deg": 1.537690637,
+        "deck_edge_angle_deg": null,
+        "flooding_angle_deg": 20.0,
+        "clauses": "2.3.1, 2.3.2 and 2.3.3",
+        "steady_heel_limit_deg": 16.0,
+        "roll_amplitude_deg": 8.0,
+        "theta2_deg": 20.0,
+        "theta_c_deg": null,
+        "area_b_m_rad": 0.024862463,
+        "area_a_m_rad": 0.003936657,
+        "criteria": [
+          {
+            "clause": "2.3.1",
+            "quantity": "steady wind heel angle theta0 (limit min(16 deg, 0.8 deck edge))",
+            "required": 16.0,
+            "attained": 1.537690637,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": true,
+            "margin": 14.462309363
+          },
+          {
+            "clause": "2.3.2",
+            "quantity": "area b under GZ >= area a under the gust lever lw2",
+            "required": 0.003936657,
+            "attained": 0.024862463,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.020925806
+          },
+          {
+            "clause": "2.3.3",
+            "quantity": "windward roll amplitude theta1 <= flooding angle theta_f",
+            "required": 20.0,
+            "attained": 8.0,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": true,
+            "margin": 12.0
+          }
+        ],
+        "failures": []
+      }
+    },
+    "roll_past_flooding": {
+      "flooding_angle_deg": 20.0,
+      "roll_amplitude_deg": 25.0,
+      "report": {
+        "schema": "tensorcad.intact-stability/1",
+        "code": "IMO IS Code 2008, part A, 2.3",
+        "satisfied": false,
+        "verdict": "fails IS Code 2008 part A 2.3.3",
+        "levers": {
+          "steady_lever_m": 0.012530768,
+          "gust_lever_m": 0.018796151,
+          "wind_area_m2": 10.0,
+          "wind_arm_m": 2.0,
+          "displacement_t": 82.0,
+          "pressure_pa": 504.0,
+          "gravity": 9.81
+        },
+        "theta0_deg": 1.537690637,
+        "deck_edge_angle_deg": null,
+        "flooding_angle_deg": 20.0,
+        "clauses": "2.3.1 and 2.3.3",
+        "steady_heel_limit_deg": 16.0,
+        "roll_amplitude_deg": 25.0,
+        "theta2_deg": 20.0,
+        "theta_c_deg": null,
+        "area_b_m_rad": null,
+        "area_a_m_rad": null,
+        "criteria": [
+          {
+            "clause": "2.3.1",
+            "quantity": "steady wind heel angle theta0 (limit min(16 deg, 0.8 deck edge))",
+            "required": 16.0,
+            "attained": 1.537690637,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": true,
+            "margin": 14.462309363
+          },
+          {
+            "clause": "2.3.3",
+            "quantity": "windward roll amplitude theta1 <= flooding angle theta_f",
+            "required": 20.0,
+            "attained": 25.0,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": false,
+            "margin": -5.0
+          }
+        ],
+        "failures": [
+          "2.3.3"
         ]
       }
     },
@@ -1239,6 +1361,18 @@
       "holds": true,
       "measured": "limit = 9.6 deg, theta0 = 11.982 deg, fails IS Code 2008 part A 2.3.1",
       "expected": "limit 0.8 x 12 = 9.6 deg < theta0 < 16 deg, so 2.3.1 fails"
+    },
+    {
+      "claim": "clause 2.3.3 passes and theta_f caps the gust areas",
+      "holds": true,
+      "measured": "theta_f = 20 deg, theta_1 = 8 deg, theta_2 = 20 deg, b = 0.024862, a = 0.003937 m rad",
+      "expected": "theta_1 < theta_f, theta_2 = theta_f = 20 deg (not 50 deg), 2.3.3 satisfied"
+    },
+    {
+      "claim": "a roll amplitude past theta_f fails 2.3.3 and leaves the gust areas unmeasured",
+      "holds": true,
+      "measured": "fails IS Code 2008 part A 2.3.3; theta_1 = 25 deg > theta_f = 20 deg, b = None",
+      "expected": "fails 2.3.3 alone; theta_2 - theta_1 span is empty, so b and a are None"
     },
     {
       "claim": "the criteria's grid error falls as the step squared",
