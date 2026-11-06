@@ -4,6 +4,27 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.23.0 — 2026-11-06
+
+### Added
+- **`tensorcad.statutory`: the IS Code 2008 section 2.2 intact-stability criteria**, the
+  check the stability stack explicitly left out. `check_intact_stability(curve, ...)`
+  evaluates the six general criteria (areas 0-30 / 0-40 / 30-40 deg, GZ at 30 deg, heel of
+  maximum GZ, GM0) against the thresholds of IMO Resolution MSC.267(85) and returns one
+  `CriterionCheck` per rule plus the areas, the peak, the vanishing angle and a three-valued
+  verdict. Accepts a callable `GZ(angle)`, an `(angles, levers)` pair, or either
+  `RightingArmCurve` of this package.
+- Areas come with an error bar: adaptive Simpson (callable) or monotone-Hermite integration
+  with the trapezoidal spread reported (table), plus a self-convergence error for a
+  table-derived GM0. A margin inside the stated uncertainty is reported `indeterminate`
+  (`passed is None`) instead of being rounded to a verdict; a curve that stops, floods or
+  vanishes before the angle a rule needs is `not_assessed`, never a silent pass.
+- `docs/intact_stability.md` + `tools/intact_stability_validation.py`: the areas reproduce
+  the closed forms (`GM(1-cos)`, `GM0(1-cos) + BM0/2(sec+cos-2)`) to 4e-16 relative, GM0 to
+  2.5e-7, and the mesh route (`gz.righting_arm_curve` on a box barge) to 8.9e-16 m in GZ.
+- Section 2.3 (weather criterion), 2.4-2.5 (ship-type criteria) and damage stability are
+  **not** implemented; every assessment says so in its `scope` field.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added

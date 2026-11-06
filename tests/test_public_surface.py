@@ -57,6 +57,10 @@ EXPECTED_API = {
     "assess_fairness", "principal_curvatures",
     "vertex_mean_curvature",
     "write_offsets_csv", "write_obj", "write_solver_manifest", "write_stl",
+    # 0.23.0: IS Code 2008 s. 2.2 intact-stability criteria
+    "INTACT_STABILITY_CRITERIA", "CriterionCheck", "IntactStabilityAssessment", "StatutoryError",
+    "area_under_gz_curve", "check_intact_stability", "gm0_from_gz_curve",
+
 }
 
 
@@ -64,7 +68,7 @@ def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == EXPECTED_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
-    assert tensorcad.__version__ == "0.22.0"
+    assert tensorcad.__version__ == "0.23.0"
 
 
 def test_layered_modules_are_all_importable() -> None:
