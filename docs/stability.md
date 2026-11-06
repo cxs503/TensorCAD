@@ -153,10 +153,11 @@ round-off), which is a test.
 - **No free-surface correction.** `GM` here is the *solid* `GM`; a slack tank contributes
   `Σ(ρ·i_x)/Δ`, which the caller who knows the tankage must subtract. The report's `basis`
   string says `solid GM` so a consumer cannot miss it.
-- **No large-angle stability.** `GM` is the slope of `GZ(φ)` at `φ = 0`. `GZ` needs a heeled
-  displacement integration per angle (a different computation, not a waterplane moment), and
-  no righting-arm curve, area under it, or statutory criterion (`IS Code 2008`, damage
-  stability, weather criterion) is computed or claimed here.
+- **No large-angle stability here.** `GM` is the slope of `GZ(φ)` at `φ = 0`. `GZ` needs a
+  heeled displacement integration per angle (a different computation, not a waterplane
+  moment): that is [`docs/gz.md`](gz.md) and [`docs/righting_arm.md`](righting_arm.md), and the
+  statutory criteria on top of it (IS Code 2008 part A 2.2 and 2.3) are
+  [`docs/intact_stability.md`](intact_stability.md). Damage stability remains unimplemented.
 - **No trim or longitudinal strength.** `GM_L` is reported (`≈ 100 × GM_T` on this hull) and
   is the stiffness that governs trim, but nothing here solves a trim equilibrium or a
   bending moment.

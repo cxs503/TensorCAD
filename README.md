@@ -109,6 +109,14 @@ quadrature (tanh-sinh vs Simpson after a singularity-removing substitution, agre
 `7.8e-16`), and what the module deliberately does **not** do: free-surface corrections,
 large-angle `GZ`, trim equilibrium, damage stability, class rules.
 
+
+The loop closes on the statutory side too: `tensorcad.intact_stability` (0.23.0) evaluates the
+IS Code 2008 part A criteria on any measured `GZ` curve — the six general criteria 2.2.1-2.2.6
+and the weather criterion 2.3 (`lw1 = P A Z/(1000 g Δ)`, gust factor 1.5, the 80 % deck-edge
+heel limit, `b ≥ a`) — with the areas verified against the antiderivative of the wall-sided
+barge (`1.1e-4` relative on a 1° grid) and negative controls that make the comparison fail
+before it is trusted. [docs/intact_stability.md](docs/intact_stability.md).
+
 ## Continuous geometry core (0.4)
 
 Every representation now answers the same questions. `tensorcad.geometry_field`
