@@ -4,6 +4,35 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.23.0 — 2026-11-06
+
+### Added
+- **`tensorcad.box_gz`: exact righting arms for a rectangular barge in all four section
+  regimes** (`box_section`, `box_gz`, `box_gz_curve`, `box_regime_bounds_deg`,
+  `box_vanishing_angle_deg`). `box_righting_arms_analytic` is exact only while the heeled
+  waterline still cuts both side walls, and it refuses past that; large-angle stability --
+  the peak of `GZ`, the range of stability, the area under the curve -- lives exactly there.
+  The new solution clips the rotated section against the waterline (one Sutherland-Hodgman
+  pass) and reads area and first moments off the shoelace sums, which are exact; the only
+  numerical step is the waterline position, fixed by holding the immersed area at `B*T` and
+  solved by Newton on the exact chord-length derivative. Nothing in it is discretised, so the
+  "skipped discretisation error" the package reports elsewhere is zero for this geometry.
+- **That reference certifies both merged integrators past the wall-sided limit.**
+  `tools/verify_box_large_heel.py` walks four barges over `0..85 deg` (1 degree, four
+  geometries, both regime orderings) and records: the new solution reproduces the wall-sided
+  closed form inside its window to `2.5e-16 m`; `tensorcad.gz`'s Newton route follows it to
+  `1.8e-14 m` and the bracket-and-bisect route from PR #40 to `1.2e-12 m`; immersed area is
+  conserved to `3.0e-16` relative; and the computed bilge-emergence heel equals the classical
+  `atan(2T/B)` on the geometry whose deck never interferes. Negative controls (1 mm of `KG`,
+  0.5 % of displacement) are recorded, so the comparison is capable of failing. Evidence:
+  `artifacts/m4762/{box_large_heel.json,box_large_heel_gz.png,box_large_heel_sections.png}`
+  and `docs/box_large_heel.md`.
+- `tests/test_box_gz_exact.py` (87 tests): the closed form inside its window, `GZ'(0) = GM`,
+  the classical bilge heel, continuity across every regime boundary, odd symmetry in heel
+  (which caught a real defect: the signed body-frame expression swapped the two walls at
+  negative heel and mislabelled the regime), area conservation, the vanishing angle, the
+  refusals, and both mesh integrators against the reference at large heel.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added
