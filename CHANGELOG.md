@@ -7,6 +7,32 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.statutory`: section 2.2 of the IS Code 2008 as a rule check that carries its
+  own error bars** (`tensorcad/statutory.py`, standard library only).
+  `check_intact_stability(curve, ...)` returns one `CriterionCheck` per rule of
+  MSC.267(85) part A s. 2.2 — areas 0-30 / 0-40 / 30-40 deg (the last two capped by the
+  flooding angle `theta_f` when supplied), `GZ(30 deg)`, heel of maximum `GZ`, `GM_0` — plus
+  the areas, the peak, the vanishing angle and a **three-valued** verdict: a margin inside
+  the stated numerical uncertainty is `indeterminate` (`passed is None`), never rounded to a
+  verdict, and a curve that stops or floods before the angle a rule needs is `not_assessed`.
+  Accepts a callable `GZ(angle)`, an `(angles, levers)` pair, or either `RightingArmCurve` of
+  this package. Callable curves are integrated by adaptive Simpson with the `|S2-S1|/15`
+  error accumulated; tables go through monotone-Hermite (Fritsch-Carlson, no overshoot at the
+  peak) with the trapezoid-vs-Hermite spread reported, plus a self-convergence error on
+  `GM_0`; `gm0_from_gz_curve` reads `GM_0` off the slope by Richardson, exact for
+  `GM sin(phi)`.
+  `docs/statutory.md` + `tools/statutory_validation.py`: the areas reproduce the closed forms
+  (`GM(1-cos)`, `GM0(1-cos) + BM0/2(sec+cos-2)`) to 1.8e-16 relative, `GM_0` to 2.5e-7, the
+  mesh route (`gz.righting_arm_curve` on a box barge) to 8.9e-16 m in `GZ`, and the reported
+  uncertainty bounds the true error on every ladder from 20 deg down to 1 deg.
+- **The new module is cross-checked against `tensorcad.intact_stability`**, which reaches the
+  same six thresholds by a different route (trapezoidal areas, caller-supplied `GM_0`): same
+  thresholds, same failed-rule sets after a clause crosswalk, and areas agreeing to the
+  sibling route's own `O(h^2)` grid error (1.1e-5 relative) while both are read against the
+  closed form. `docs/statutory.md` s. 6 records it, including the finding that the sibling's
+  `IS_CODE_2008_GENERAL` keys flatten the code's `2.2.1a/b/c` into `2.2.1-2.2.3` and shift the
+  rest by one — thresholds and verdicts unaffected, clause citations in a report would be —
+  left for its own change set rather than edited here.
 - **IS Code 2008 part A clause 2.3.3** — *the angle of heel* `θ_1` *shall not exceed the
   flooding angle* `θ_f` — in `tensorcad.intact_stability.weather_criterion`. The call takes a
   new keyword `flooding_angle_deg`; supplying it adds the clause to the report *and* puts the
