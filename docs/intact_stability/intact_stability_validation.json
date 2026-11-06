@@ -1,0 +1,241 @@
+{
+  "schema": "tensorcad.intact-stability-validation/1",
+  "tensorcad_version": "0.23.0",
+  "runtime_s": 0.012,
+  "reference": {
+    "body": "wall-sided box barge, closed in the bilge; second curve GZ = 0.3 sin(2 phi)",
+    "breadth_m": 6.0,
+    "draft_m": 3.0,
+    "depth_m": 8.0,
+    "length_m": 10.0,
+    "kg_m": 2.0,
+    "bm0_m": 1.0,
+    "gm0_m": 0.5,
+    "wind_arm_m": 5.0,
+    "displacement_t": 1000.0,
+    "gravity_m_s2": 9.81,
+    "wind_pressure_pa": 504.0,
+    "gust_factor": 1.5,
+    "theta2_cap_deg": 50.0
+  },
+  "claims": [
+    {
+      "claim": "the flooding angle replaces 40 deg and both areas cut at theta_f match the antiderivative (code 2.2.1b/2.2.1c, sibling 2.2.2/2.2.3)",
+      "holds": true,
+      "measured": "upper limit 35.0 deg; A(0,35) = 0.110405289 vs 0.110387294 (rel 1.63e-04); A(30,35) = 0.033043286 vs 0.033037025 (rel 1.90e-04) on a 1 deg grid",
+      "expected": "upper limit 35 deg, both areas inside 5e-4 / 2e-3 relative (1 deg trapezoid on the barge)",
+      "error": 0.000189515612715665,
+      "tolerance": 0.002,
+      "numbers": {
+        "upper_limit_deg": 35.0,
+        "area_to_limit_m_rad": 0.11040528859853053,
+        "reference_to_limit_m_rad": 0.11038729438072808,
+        "error_to_limit": 0.0001630098636206047,
+        "area_30_to_limit_m_rad": 0.03304328622317369,
+        "reference_30_to_limit_m_rad": 0.0330370251911023,
+        "error_30_to_limit": 0.000189515612715665
+      },
+      "name": "area_limits_with_flooding_angle"
+    },
+    {
+      "claim": "theta_f is actually used, not accepted and ignored",
+      "holds": true,
+      "measured": "A(0,40) = 0.152730850 without theta_f vs 0.110405289 at theta_f = 35 deg (difference 4.23e-02 m rad)",
+      "expected": "40 deg used when theta_f is omitted; the two areas differ by more than 1e-3 m rad",
+      "error": 0.042325561370767026,
+      "tolerance": 0.001,
+      "numbers": {
+        "area_with_theta_f_m_rad": 0.11040528859853053,
+        "area_without_theta_f_m_rad": 0.15273084996929756,
+        "difference_m_rad": 0.042325561370767026
+      },
+      "name": "flooding_angle_is_substituted"
+    },
+    {
+      "claim": "gust area b over [theta_1, theta_2] matches the antiderivative of GZ",
+      "holds": true,
+      "measured": "theta_1 = 8 deg, theta_2 = 50.0 deg, b = 0.273010630 vs A(50) - A(8) = 0.272948127 (rel 2.29e-04)",
+      "expected": "theta_2 = 50 deg (the code's cap), b inside 1e-3 relative of the antiderivative on a 1 deg grid",
+      "error": 0.000228990737980368,
+      "tolerance": 0.001,
+      "numbers": {
+        "theta1_deg": 8.0,
+        "theta2_deg": 50.0,
+        "area_b_m_rad": 0.2730106297639684,
+        "reference_m_rad": 0.27294812717089717,
+        "relative_error": 0.000228990737980368
+      },
+      "name": "gust_area_b"
+    },
+    {
+      "claim": "gust area a is lw2 times the span (the lever is constant)",
+      "holds": true,
+      "measured": "a = 0.021991148575129 vs lw2 (theta_2 - theta_1) = 0.021991148575129 (rel 0.00e+00), lw2 = 0.030000000 m",
+      "expected": "rel < 1e-12: exact geometry, no quadrature involved",
+      "error": 0.0,
+      "tolerance": 1e-12,
+      "numbers": {
+        "area_a_m_rad": 0.021991148575128558,
+        "reference_m_rad": 0.021991148575128558,
+        "lw2_m": 0.030000000000000006,
+        "span_deg": 42.0,
+        "relative_error": 0.0
+      },
+      "name": "gust_area_a"
+    },
+    {
+      "claim": "theta_2 is the least of the 50 deg, down-flooding and flooding caps",
+      "holds": true,
+      "measured": "no cap but the code's 50 deg: theta_2 = 50.0 deg, b rel 2.27e-04; down-flooding at 38 deg: theta_2 = 38.0 deg, b rel 1.72e-04; flooding angle 35 deg: theta_2 = 35.0 deg, b rel 1.63e-04",
+      "expected": "theta_2 equals the binding cap in all three cases and b stays inside 2e-3 relative of the antiderivative",
+      "error": 0.0002272121743672182,
+      "tolerance": 0.002,
+      "rows": [
+        {
+          "cap": "no cap but the code's 50 deg",
+          "theta2_deg": 50.0,
+          "expected_theta2_deg": 50.0,
+          "area_b_m_rad": 0.27792504703973053,
+          "reference_m_rad": 0.2778619134302062,
+          "relative_error": 0.0002272121743672182,
+          "holds": true
+        },
+        {
+          "cap": "down-flooding at 38 deg",
+          "theta2_deg": 38.0,
+          "expected_theta2_deg": 38.0,
+          "area_b_m_rad": 0.1345321833148174,
+          "reference_m_rad": 0.13450910753628936,
+          "relative_error": 0.0001715555098884696,
+          "holds": true
+        },
+        {
+          "cap": "flooding angle 35 deg",
+          "theta2_deg": 35.0,
+          "expected_theta2_deg": 35.0,
+          "area_b_m_rad": 0.11040528859853053,
+          "reference_m_rad": 0.11038729438072808,
+          "relative_error": 0.0001630098636206047,
+          "holds": true
+        }
+      ],
+      "name": "theta2_is_the_least_cap"
+    },
+    {
+      "claim": "the second intercept theta_c is solved right and b is measured to it",
+      "holds": true,
+      "measured": "theta_c = 48.309682 deg vs bisection 48.309814 deg (|diff| 1.32e-04 deg); b = 0.167290763 vs A(theta_c) = 0.167291616 (rel 5.10e-06); theta_2 = 48.309682 deg",
+      "expected": "|theta_c - bisection| < 5e-3 deg, b inside 1e-3 relative, theta_2 = theta_c because the cap is 50 deg",
+      "error": 0.00013150562763541984,
+      "tolerance": 0.005,
+      "numbers": {
+        "theta_c_deg": 48.3096823920143,
+        "theta_c_bisection_deg": 48.30981389764194,
+        "theta_c_error_deg": 0.00013150562763541984,
+        "theta2_deg": 48.3096823920143,
+        "lw2_m": 0.298,
+        "area_b_m_rad": 0.16729076266559845,
+        "reference_m_rad": 0.16729161646579058,
+        "area_relative_error": 5.103663950216397e-06
+      },
+      "name": "second_intercept"
+    },
+    {
+      "claim": "2.3.2 passes below the analytic lever where b = a and fails above it",
+      "holds": true,
+      "measured": "b = a at lw1 = 0.212270866 m; margin +2.936e-04 at -0.1 % (2.3.2 satisfied True) and -2.621e-04 at +0.1 % (satisfied False); reported margin vs b - a rel 0.0e+00",
+      "expected": "margin positive below the crossing, negative above, equal to b - a to 1e-6 relative, verdict flags following the sign",
+      "error": 0.0,
+      "tolerance": 1e-06,
+      "numbers": {
+        "crossing_lw1_m": 0.21227086569307016,
+        "margin_below_m_rad": 0.0002936470059085039,
+        "margin_above_m_rad": -0.000262076820951862,
+        "analytic_margin_below_m_rad": 0.0002936470059085039,
+        "margin_relative_error": 0.0
+      },
+      "name": "gust_boundary"
+    },
+    {
+      "claim": "2.3.3 at equality passes, one step above fails, and the empty span reports no areas rather than a zero",
+      "holds": true,
+      "measured": "theta_1 = theta_f = 20 deg: 2.3.3 satisfied True (margin 0.0); theta_1 = 20.5 deg: satisfied False (margin -0.5); areas at equality b = None, a = None; at theta_1 = 8 deg b = 0.027178862",
+      "expected": "equality passes with margin 0, 20.5 deg fails, and the empty theta_2 - theta_1 span is reported as None (not 0) for both areas",
+      "error": 0.0,
+      "tolerance": 0.0,
+      "numbers": {
+        "flooding_angle_deg": 20.0,
+        "theta1_at_limit_deg": 20.0,
+        "satisfied_at_limit": true,
+        "margin_at_limit": 0.0,
+        "theta1_over_deg": 20.5,
+        "satisfied_over": false,
+        "margin_over": -0.5,
+        "area_b_at_limit_m_rad": null,
+        "area_a_at_limit_m_rad": null
+      },
+      "name": "roll_amplitude_boundary"
+    },
+    {
+      "claim": "both implementations of 2.2 land on the same closed form at theta_f = 35",
+      "holds": true,
+      "measured": "statutory A(0,35) = 0.110387295151 (rel 6.98e-09, its own uncertainty 1.80e-05); sibling = 0.110405289 (rel 1.63e-04); spread 1.63e-04",
+      "expected": "statutory inside 1e-7 relative (adaptive Simpson on the wall-sided curve), sibling inside 5e-4 (1 deg trapezoid), spread inside 5e-4",
+      "error": 0.0001630098636206047,
+      "tolerance": 0.0005,
+      "numbers": {
+        "area_limit_deg": 35.0,
+        "statutory_m_rad": 0.11038729515111328,
+        "statutory_uncertainty_m_rad": 1.7993447418291657e-05,
+        "statutory_relative_error": 6.9789299973260824e-09,
+        "sibling_m_rad": 0.11040528859853053,
+        "sibling_relative_error": 0.0001630098636206047,
+        "spread": 0.00016300288355302166,
+        "reference_m_rad": 0.11038729438072808
+      },
+      "name": "cross_module"
+    },
+    {
+      "claim": "the gust-area residual falls as the step squared (trapezoid signature)",
+      "holds": true,
+      "measured": "errors 5.70e-03 at 5.0 deg, 1.43e-03 at 2.5 deg, 3.58e-04 at 1.25 deg, 8.94e-05 at 0.625 deg; successive ratios 3.98, 4.00, 4.00",
+      "expected": "successive ratios in 3.5-4.5 from 2.5 deg down, i.e. O(h^2), so the residual is the grid and not the rule",
+      "error": 0.0009798093768695892,
+      "tolerance": 0.5,
+      "rows": [
+        {
+          "step_deg": 5.0,
+          "samples": 11,
+          "area_b_m_rad": 0.2745032373029038,
+          "relative_error": 0.005697456685727595
+        },
+        {
+          "step_deg": 2.5,
+          "samples": 21,
+          "area_b_m_rad": 0.27333868314521464,
+          "relative_error": 0.0014308798465319432
+        },
+        {
+          "step_deg": 1.25,
+          "samples": 41,
+          "area_b_m_rad": 0.27304579008723684,
+          "relative_error": 0.0003578076074452083
+        },
+        {
+          "step_deg": 0.625,
+          "samples": 81,
+          "area_b_m_rad": 0.2729725404838605,
+          "relative_error": 8.944304991709017e-05
+        }
+      ],
+      "ratios": [
+        3.9817855423267394,
+        3.9990201906231304,
+        4.000395869515636
+      ],
+      "name": "grid_convergence"
+    }
+  ],
+  "failures": [],
+  "all_claims_hold": true
+}
