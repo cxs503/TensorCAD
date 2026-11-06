@@ -146,6 +146,15 @@ from .stability import (
     initial_stability,
     waterplane_moments,
 )
+from .statutory import (
+    INTACT_STABILITY_CRITERIA,
+    CriterionCheck,
+    IntactStabilityAssessment,
+    StatutoryError,
+    area_under_gz_curve,
+    check_intact_stability,
+    gm0_from_gz_curve,
+)
 from .suboff import (
     SUBOFF_LENGTH_M,
     SUBOFF_RADIUS_M,
@@ -209,6 +218,7 @@ __all__ = [
     "DEFAULT_ANGLES_DEG",
     "DEFAULT_HEELS_DEG",
     "DESIGN_SCHEMA",
+    "INTACT_STABILITY_CRITERIA",
     "MAX_TRANSOM_FRACTION",
     "SUBOFF_LENGTH_M",
     "SUBOFF_RADIUS_M",
@@ -220,6 +230,7 @@ __all__ = [
     "BoundingBox",
     "Check",
     "ConditionedMesh",
+    "CriterionCheck",
     "CurvatureError",
     "CurvatureSample",
     "CylinderField",
@@ -239,6 +250,7 @@ __all__ = [
     "HullParameters",
     "Hydrostatics",
     "InitialStability",
+    "IntactStabilityAssessment",
     "Mesh",
     "MeshBuilder",
     "MeshConditioningError",
@@ -256,6 +268,7 @@ __all__ = [
     "SectionProperties",
     "SphereField",
     "StabilityError",
+    "StatutoryError",
     "SuboffAppendagesField",
     "SuboffFinsField",
     "SuboffFullField",
@@ -275,6 +288,7 @@ __all__ = [
     "analytic_transom_hydrostatics",
     "analytic_volume",
     "analytic_wetted_surface_area",
+    "area_under_gz_curve",
     "assess_fairness",
     "barge_wall_sided_righting_arm",
     "bisection_righting_arm_curve",
@@ -284,6 +298,7 @@ __all__ = [
     "box_wall_sided_limit_deg",
     "build_mesh",
     "build_transom_mesh",
+    "check_intact_stability",
     "compute_hydrostatics",
     "condition_mesh",
     "decimate",
@@ -298,6 +313,7 @@ __all__ = [
     "generate_hull",
     "generate_transom_hull",
     "generate_wigley",
+    "gm0_from_gz_curve",
     "heeled_displacement",
     "heeled_hydrostatics",
     "initial_stability",
@@ -351,4 +367,4 @@ __all__ = [
     "write_stl",
 ]
 
-__version__ = "0.22.0"
+__version__ = "0.23.0"
