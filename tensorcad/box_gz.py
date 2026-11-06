@@ -57,13 +57,16 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from itertools import pairwise
 
 __all__ = [
     "DEFAULT_ANGLES_DEG",
     "MAX_HEEL_DEG",
+    "BoxGzArea",
     "BoxGzError",
     "BoxGzPoint",
     "box_gz",
+    "box_gz_area",
     "box_gz_curve",
     "box_regime_bounds_deg",
     "box_section",
@@ -404,3 +407,206 @@ def box_vanishing_angle_deg(
         else:
             high = middle
     return 0.5 * (low + high)
+
+
+# --------------------------------------------------------------------------------------
+# areas under the curve: the quantity the stability codes actually regulate
+# --------------------------------------------------------------------------------------
+
+#: Five-point Gauss-Legendre abscissae and weights on ``[-1, 1]``.  The rule integrates
+#: polynomials up to degree nine exactly; on a smooth piece that is a ``2**10`` error ratio
+#: against the same rule on doubled panels, which is what makes the doubling estimate below
+#: a bound rather than a wish.
+_GAUSS5_NODES = (
+    0.0,
+    -0.5384693101056831,
+    0.5384693101056831,
+    -0.9061798459386640,
+    0.9061798459386640,
+)
+_GAUSS5_WEIGHTS = (
+    0.5688888888888889,
+    0.4786286704993665,
+    0.4786286704993665,
+    0.2369268850561891,
+    0.2369268850561891,
+)
+_GAUSS5_GAIN = 2**10  # error ratio between the n-panel and the 2n-panel rule
+_MIN_PANELS = 4
+_MAX_PANELS = 512
+
+
+def _area_heel(name: str, value: float) -> float:
+    """A heel the area integral may touch -- the model's span, not the clip's."""
+    if not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise BoxGzError(f"{name} must be a finite number of degrees: {value!r}")
+    if abs(value) > MAX_HEEL_DEG:
+        raise BoxGzError(
+            f"{name} {value!r} is outside the model span "
+            f"-{MAX_HEEL_DEG} .. {MAX_HEEL_DEG} degrees"
+        )
+    return float(value)
+
+
+def _kn(
+    *, breadth: float, draft: float, depth: float, heel_deg: float
+) -> float:
+    """``KN(phi) = Y_B(phi)`` from the exact section, without the ``KG`` term."""
+    return box_section(breadth=breadth, draft=draft, depth=depth, heel_deg=heel_deg)[2]
+
+
+def _kn_area_piece(
+    *,
+    breadth: float,
+    draft: float,
+    depth: float,
+    start_rad: float,
+    stop_rad: float,
+    tolerance: float,
+) -> tuple[float, float, int, int]:
+    """``(integral, error estimate, panels, evaluations)`` over one smooth piece.
+
+    Composite five-point Gauss-Legendre with panel doubling.  The estimate is the classic
+    Richardson difference divided by the rule's known gain, so it is only as honest as the
+    smoothness of the piece it is given -- which is why the caller splits at the regime
+    boundaries before calling.
+    """
+    panels = _MIN_PANELS
+    evaluations = 0
+    previous: float | None = None
+    value = 0.0
+    error = math.inf
+    while True:
+        width = (stop_rad - start_rad) / panels
+        half = 0.5 * width
+        total = 0.0
+        for index in range(panels):
+            centre = start_rad + (index + 0.5) * width
+            for node, weight in zip(_GAUSS5_NODES, _GAUSS5_WEIGHTS, strict=True):
+                total += weight * _kn(
+                    breadth=breadth,
+                    draft=draft,
+                    depth=depth,
+                    heel_deg=math.degrees(centre + half * node),
+                )
+        value = total * half
+        evaluations += len(_GAUSS5_NODES) * panels
+        if previous is not None:
+            error = abs(value - previous) / (_GAUSS5_GAIN - 1)
+            if error <= max(tolerance * abs(value), 1e-16 * max(abs(value), 1.0)):
+                break
+            if panels >= _MAX_PANELS:
+                break
+        previous = value
+        panels *= 2
+    return value, error, panels, evaluations
+
+
+@dataclass(frozen=True)
+class BoxGzArea:
+    """``int GZ dphi`` between two heels, with the split that produced it.
+
+    ``area = kn_area - kg_term``, where ``kg_term = KG (cos(start) - cos(stop))`` is exact.
+    ``quadrature_error`` is the summed panel-doubling estimate over the smooth pieces, and
+    ``breakpoints_deg`` are the regime boundaries the interval was split at, because
+    ``KN'(phi)`` steps there: the waterplane width jumps when a deck edge enters the water.
+    """
+
+    start_deg: float
+    stop_deg: float
+    area: float
+    kn_area: float
+    kg_term: float
+    quadrature_error: float
+    breakpoints_deg: tuple[float, ...]
+    panels: int
+    heel_evaluations: int
+
+
+def box_gz_area(
+    *,
+    breadth: float,
+    draft: float,
+    depth: float,
+    kg: float,
+    start_deg: float = 0.0,
+    stop_deg: float = 30.0,
+    tolerance: float = 1e-12,
+) -> BoxGzArea:
+    """Area under the exact righting-arm curve, in m rad, over ``[start_deg, stop_deg]``.
+
+    This is the number the stability codes regulate -- the 0-30, 0-40 and 30-40 degree areas of
+    IS Code 2008 part A s. 2.2, and the gust area of the weather criterion -- and for a barge
+    it is the one that used to stop at the wall-sided limit, where the closed-form
+    antiderivative ``GM0 (1 - cos) + BM0/2 (sec + cos - 2)`` ceases to represent the ship.
+    Nothing here is bounded by that window.
+
+    The interval is cut at the regime boundaries of :func:`box_regime_bounds_deg` and each
+    smooth piece is integrated separately.  That is not cosmetic: ``d(KN)/dphi`` is the
+    waterplane second moment over the displaced volume, and the waterplane width *steps* when a
+    deck edge enters the water, so a single high-order rule spanning that heel falls like
+    ``h**2.5`` instead of ``h**10`` (measured on the doc barge, ``int KN dphi`` over 0-40 deg:
+    4.0e-8 with 8 panels and 6.6e-12 with 256, against 8 panels *per piece* and round-off with
+    the split).  ``tolerance`` is the relative target of the panel-doubling estimate, never a
+    claim about the geometry -- the section is exact, the quadrature is not.
+
+    >>> result = box_gz_area(breadth=2.0, draft=0.8, depth=1.2, kg=0.55, stop_deg=40.0)
+    >>> round(result.area, 8)
+    0.06703591
+    >>> result.quadrature_error < 1e-14
+    True
+    >>> [round(angle, 4) for angle in result.breakpoints_deg]
+    [21.8014]
+    """
+    breadth, draft, depth = _geometry(breadth, draft, depth)
+    if not isinstance(kg, (int, float)) or not math.isfinite(kg):
+        raise BoxGzError(f"KG must be finite: {kg!r}")
+    start = _area_heel("start heel", start_deg)
+    stop = _area_heel("stop heel", stop_deg)
+    if stop <= start:
+        raise BoxGzError(f"empty heel interval: {start!r} to {stop!r} degrees")
+    if not isinstance(tolerance, (int, float)) or not math.isfinite(tolerance) or tolerance <= 0:
+        raise BoxGzError(f"tolerance must be a finite positive number: {tolerance!r}")
+
+    bounds = box_regime_bounds_deg(breadth=breadth, draft=draft, depth=depth)
+    # the geometry is symmetric, so every boundary has a mirror on the other side of upright;
+    # missing the mirror is what makes an integral over a port interval creep instead of converge
+    candidates = {
+        side * angle
+        for angle in bounds.values()
+        if math.isfinite(angle)
+        for side in (1.0, -1.0)
+    }
+    breakpoints = tuple(sorted(angle for angle in candidates if start < angle < stop))
+    edges = (start, *breakpoints, stop)
+
+    kn_area = 0.0
+    error = 0.0
+    panels = 0
+    evaluations = 0
+    for low, high in pairwise(edges):
+        piece, piece_error, piece_panels, piece_evaluations = _kn_area_piece(
+            breadth=breadth,
+            draft=draft,
+            depth=depth,
+            start_rad=math.radians(low),
+            stop_rad=math.radians(high),
+            tolerance=tolerance,
+        )
+        kn_area += piece
+        error += piece_error
+        panels = max(panels, piece_panels)
+        evaluations += piece_evaluations
+
+    kg_term = float(kg) * (math.cos(math.radians(start)) - math.cos(math.radians(stop)))
+    return BoxGzArea(
+        start_deg=start,
+        stop_deg=stop,
+        area=kn_area - kg_term,
+        kn_area=kn_area,
+        kg_term=kg_term,
+        quadrature_error=error,
+        breakpoints_deg=breakpoints,
+        panels=panels,
+        heel_evaluations=evaluations,
+    )
