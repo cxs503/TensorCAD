@@ -4,6 +4,28 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## Unreleased
+
+### Added
+- **IS Code 2008 part A clause 2.3.3** — *the angle of heel* `θ_1` *shall not exceed the
+  flooding angle* `θ_f` — in `tensorcad.intact_stability.weather_criterion`. The call takes a
+  new keyword `flooding_angle_deg`; supplying it adds the clause to the report *and* puts the
+  same angle into 2.3.2's `θ_2 = min(θ_f, 50°, θ_c)`, because the code uses one `θ_f` in both
+  places (`WeatherCriterionReport.clauses` names the clauses a report actually evaluated).
+  Omitting it leaves 2.3.3 **not evaluated** — `flooding_angle_deg` is `None` and the verdict
+  says so — rather than silently passing, which is the failure mode of an unimplemented
+  clause. `θ_1` itself stays an input: clause 2.3.4's roll-period tables are still not in this
+  repository.
+- **An empty gust span is reported, not invented.** When `θ_1 ≥ θ_f` there is no interval
+  between `θ_1` and `θ_2` to integrate, so 2.3.3 fails and `area_b_m_rad`/`area_a_m_rad` are
+  `None` (serialised as `null`, rendered as "not measured"), instead of a fabricated zero that
+  a reader could mistake for a measured area. Every other report is unchanged: with no
+  `flooding_angle_deg` the numbers are bit-for-bit what 0.23.0 produced.
+- `tests/test_intact_stability.py` grows to 47 cases (2.3.3 passing, `θ_f` capping `θ_2` and
+  the gust areas against the antiderivative, the failing-and-unmeasured case, the
+  not-evaluated case, and `θ_f` outside `(0, 90)`), and `examples/intact_stability` to 17
+  claims, two of them on 2.3.3; `docs/intact_stability.md` §1 and §5 document the clause.
+
 ## 0.23.0 — 2026-11-06
 
 ### Added
