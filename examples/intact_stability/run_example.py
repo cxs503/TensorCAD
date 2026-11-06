@@ -21,8 +21,9 @@ So the run is built as a control experiment rather than as a demonstration:
    ``GM_0 = 0.30 m`` from the waterplane moments of :mod:`tensorcad.stability`): the case
    where no closed form exists, so the checks are the ``GM_0``-versus-slope identity, the
    angle-grid convergence, and the report itself -- whatever it says.
-5. **The weather criterion** (2.3.1 / 2.3.2): a moderate wind that passes, a storm that fails
-   both clauses, and a deck-edge case where the 80 % rule, not the 16 deg limit, binds.
+5. **The weather criterion** (2.3.1 / 2.3.2 / 2.3.3): a moderate wind that passes, a storm
+   that fails both clauses, a deck-edge case where the 80 % rule, not the 16 deg limit,
+   binds, and a flooding angle the windward roll amplitude is measured against.
 6. **Angle-grid convergence**: the criteria are read off a polyline, so the sampled step is
    their only discretisation error. The ladder measures it rather than asserting it.
 
@@ -357,6 +358,43 @@ def main(argv: list[str] | None = None) -> int:
         f"{binding.verdict()}",
         f"limit 0.8 x {deck_edge:g} = 9.6 deg < theta0 < 16 deg, so 2.3.1 fails",
     )
+    flooding = 20.0
+    capped = weather_criterion(
+        curve,
+        wind_area_m2=10.0,
+        wind_arm_m=2.0,
+        displacement_t=barge_displacement,
+        roll_amplitude_deg=8.0,
+        flooding_angle_deg=flooding,
+    )
+    run.claim(
+        "clause 2.3.3 passes and theta_f caps the gust areas",
+        capped.satisfied
+        and capped.theta2_deg == flooding
+        and capped.clauses == "2.3.1, 2.3.2 and 2.3.3",
+        f"theta_f = {flooding:g} deg, theta_1 = {capped.roll_amplitude_deg:g} deg, "
+        f"theta_2 = {capped.theta2_deg:g} deg, b = {capped.area_b_m_rad:.6f}, "
+        f"a = {capped.area_a_m_rad:.6f} m rad",
+        "theta_1 < theta_f, theta_2 = theta_f = 20 deg (not 50 deg), 2.3.3 satisfied",
+    )
+    swamped = weather_criterion(
+        curve,
+        wind_area_m2=10.0,
+        wind_arm_m=2.0,
+        displacement_t=barge_displacement,
+        roll_amplitude_deg=25.0,
+        flooding_angle_deg=flooding,
+    )
+    run.claim(
+        "a roll amplitude past theta_f fails 2.3.3 and leaves the gust areas unmeasured",
+        not swamped.satisfied
+        and [item.clause for item in swamped.failures] == ["2.3.3"]
+        and swamped.area_b_m_rad is None
+        and swamped.clauses == "2.3.1 and 2.3.3",
+        f"{swamped.verdict()}; theta_1 = 25 deg > theta_f = {flooding:g} deg, "
+        f"b = {swamped.area_b_m_rad}",
+        "fails 2.3.3 alone; theta_2 - theta_1 span is empty, so b and a are None",
+    )
 
     # ---- 6. angle-grid convergence ----------------------------------------
     convergence = []
@@ -481,6 +519,16 @@ def main(argv: list[str] | None = None) -> int:
                 "report": storm.to_dict(),
             },
             "deck_edge_rule": {"deck_edge_angle_deg": deck_edge, "report": binding.to_dict()},
+            "flooding_angle": {
+                "flooding_angle_deg": flooding,
+                "roll_amplitude_deg": 8.0,
+                "report": capped.to_dict(),
+            },
+            "roll_past_flooding": {
+                "flooding_angle_deg": flooding,
+                "roll_amplitude_deg": 25.0,
+                "report": swamped.to_dict(),
+            },
             "levers": wind_heeling_levers(10.0, 2.0, barge_displacement).to_dict(),
         },
         "convergence": convergence,
@@ -680,6 +728,8 @@ def _markdown(results: dict) -> str:
     moderate = results["weather"]["moderate"]["report"]
     storm = results["weather"]["storm"]["report"]
     binding = results["weather"]["deck_edge_rule"]["report"]
+    capped = results["weather"]["flooding_angle"]["report"]
+    swamped = results["weather"]["roll_past_flooding"]["report"]
 
     rows = "\n".join(
         f"| {item['clause']} | {item['quantity']} | {item['comparison']} {item['required']:g} "
@@ -715,14 +765,20 @@ def _markdown(results: dict) -> str:
         f"{'yes' if claim['holds'] else '**NO**'} |"
         for claim in results["claims"]
     )
+    def area(value: float | None) -> str:
+        """A gust area that has no span to be measured over is written as such."""
+        return "not measured" if value is None else f"{value:.6f}"
+
     weather_rows = "\n".join(
         f"| {label} | {report['theta0_deg']:.3f} | {report['steady_heel_limit_deg']:.1f} | "
-        f"{report['theta2_deg']:.1f} | {report['area_b_m_rad']:.6f} | "
-        f"{report['area_a_m_rad']:.6f} | {report['verdict']} |"
+        f"{report['theta2_deg']:.1f} | {area(report['area_b_m_rad'])} | "
+        f"{area(report['area_a_m_rad'])} | {report['clauses']} | {report['verdict']} |"
         for label, report in (
             ("moderate wind (A = 10 m²)", moderate),
             ("storm (A = 240 m²)", storm),
             ("deck edge at 12° (lw1 = 0.1 m)", binding),
+            ("θ_f = 20°, θ_1 = 8°", capped),
+            ("θ_f = 20°, θ_1 = 25°", swamped),
         )
     )
     return f"""# Intact-stability criteria (IS Code 2008 part A) on measured curves
@@ -823,8 +879,8 @@ displaces `{results['weather']['moderate']['displacement_t']:.2f} t` (80 m³ x 1
 `A = 10 m²`, `Z = 2 m`: `lw1 = {moderate['levers']['steady_lever_m']:.6f} m`,
 `lw2 = 1.5 lw1 = {moderate['levers']['gust_lever_m']:.6f} m`.
 
-| case | `θ_0` [deg] | limit [deg] | `θ_2` [deg] | b [m rad] | a [m rad] | verdict |
-|---|---|---|---|---|---|---|
+| case | `θ_0` [deg] | limit [deg] | `θ_2` [deg] | b [m rad] | a [m rad] | clauses | verdict |
+|---|---|---|---|---|---|---|---|
 {weather_rows}
 
 The third row is why the 80 % deck-edge rule is implemented rather than the 16° limit alone:
@@ -833,10 +889,17 @@ legal under the 16° rule and illegal under the code.
 
 ![weather](fig_weather.png)
 
-`θ_1`, the windward roll amplitude, is an **input** here (`0°` in the table): clause 2.3.4's
-empirical formula needs the roll-period tables, which are not in this repository and were not
-guessed. A non-zero `θ_1` moves both areas to start at that angle, which the tests check
-against the antiderivative.
+`θ_1`, the windward roll amplitude, is an **input** here: clause 2.3.4's empirical formula
+needs the roll-period tables, which are not in this repository and were not guessed. A
+non-zero `θ_1` moves both areas to start at that angle, which the tests check against the
+antiderivative.
+
+The last two rows are clause 2.3.3, which needs one more input: `θ_f`, the flooding angle.
+`θ_1 = 8° < θ_f = 20°` passes it, and because the code gives `θ_f` the same role in 2.3.2's
+minimum the gust areas then stop at 20° instead of 50° (`b = {capped['area_b_m_rad']:.6f}`
+instead of `{moderate['area_b_m_rad']:.6f}` m rad on the same curve). At `θ_1 = 25° > θ_f` the
+span `θ_2 - θ_1` is empty: 2.3.3 fails and 2.3.2 is reported as **not measured** rather than
+as a zero, which is why the two area cells are not numbers there.
 
 ## 6. Angle-grid convergence
 

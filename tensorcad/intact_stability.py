@@ -24,6 +24,7 @@ Clauses implemented -- IS Code 2008 (resolution MSC.267(85)), **part A**:
 2.2.5        angle of maximum ``GZ``                          >= 25 deg
 2.2.6        initial metacentric height ``GM_0``             >= 0.15 m
 2.3.1/2.3.2  weather criterion (steady wind heel angle, then gust area ``b >= a``)
+2.3.3        windward roll amplitude ``theta_1``             <= ``theta_f``
 ===========  ======================================================================
 
 **What is not computed, and why.** Clause 2.3.4 obtains the windward roll amplitude
@@ -35,7 +36,11 @@ whose factors are read off three tables keyed on ``Ak/B``, ``B/d``, ``Cb`` and t
 period. Those tables are transcribed nowhere in this repository, and a table copied from
 memory is worse than a missing one -- so :math:`\\theta_1` is an **input** here
 (:func:`weather_criterion`, ``roll_amplitude_deg``), defaulted to 0 (no windward roll,
-which is the case the code's own worked examples start from). Damage stability (part B),
+which is the case the code's own worked examples start from). That input is what clause
+2.3.3 needs: *the angle of heel* ``theta_1`` *shall not exceed the flooding angle*
+``theta_f``, so 2.3.3 is evaluated whenever the caller supplies ``flooding_angle_deg`` (and
+is then also the ``theta_f`` the 2.3.2 cap uses); when it is not supplied, 2.3.3 is
+reported as not evaluated rather than assumed satisfied. Damage stability (part B),
 grain and timber-deck codes, and the 2.2 criteria *as amended for* special ship types are
 outside the module and are not claimed.
 
@@ -505,17 +510,24 @@ def steady_wind_heel_angle(curve: Any, lever_m: float) -> float | None:
 
 @dataclass(frozen=True)
 class WeatherCriterionReport:
-    """IS Code 2008 part A 2.3: steady wind heel (2.3.1) and gust areas (2.3.2)."""
+    """IS Code 2008 part A 2.3: steady heel (2.3.1), gust areas (2.3.2), roll cap (2.3.3).
+
+    ``area_b_m_rad`` and ``area_a_m_rad`` are ``None`` in the one case where the gust areas
+    have no span to be measured over -- a supplied ``flooding_angle_deg`` at or below the
+    roll amplitude. There 2.3.3 fails outright and 2.3.2 is not evaluated, instead of a
+    number being invented for it.
+    """
 
     levers: WindHeelingLevers
     theta0_deg: float | None
     deck_edge_angle_deg: float | None
+    flooding_angle_deg: float | None
     steady_heel_limit_deg: float
     roll_amplitude_deg: float
     theta2_deg: float
     theta_c_deg: float | None
-    area_b_m_rad: float
-    area_a_m_rad: float
+    area_b_m_rad: float | None
+    area_a_m_rad: float | None
     criteria: tuple[Criterion, ...]
 
     @property
@@ -526,9 +538,18 @@ class WeatherCriterionReport:
     def failures(self) -> tuple[Criterion, ...]:
         return tuple(item for item in self.criteria if not item.satisfied)
 
+    @property
+    def clauses(self) -> str:
+        """The 2.3 clauses this report actually evaluated, as a readable list."""
+        if self.flooding_angle_deg is None:
+            return "2.3.1 and 2.3.2"
+        if self.area_b_m_rad is None:
+            return "2.3.1 and 2.3.3"
+        return "2.3.1, 2.3.2 and 2.3.3"
+
     def verdict(self) -> str:
         if self.satisfied:
-            return "passes IS Code 2008 part A 2.3.1 and 2.3.2 (weather criterion)"
+            return f"passes IS Code 2008 part A {self.clauses} (weather criterion)"
         failed = ", ".join(item.clause for item in self.failures)
         return f"fails IS Code 2008 part A {failed}"
 
@@ -541,6 +562,8 @@ class WeatherCriterionReport:
             "levers": self.levers.to_dict(),
             "theta0_deg": _round(self.theta0_deg),
             "deck_edge_angle_deg": _round(self.deck_edge_angle_deg),
+            "flooding_angle_deg": _round(self.flooding_angle_deg),
+            "clauses": self.clauses,
             "steady_heel_limit_deg": _round(self.steady_heel_limit_deg),
             "roll_amplitude_deg": _round(self.roll_amplitude_deg),
             "theta2_deg": _round(self.theta2_deg),
@@ -560,10 +583,11 @@ def weather_criterion(
     displacement_t: float,
     roll_amplitude_deg: float = 0.0,
     deck_edge_angle_deg: float | None = None,
+    flooding_angle_deg: float | None = None,
     downflooding_angle_deg: float = WEATHER_THETA2_CAP_DEG,
     gust_factor: float = WIND_GUST_FACTOR,
 ) -> WeatherCriterionReport:
-    """IS Code 2008 part A 2.3.1 (steady heel) and 2.3.2 (gust areas ``b >= a``).
+    """IS Code 2008 part A 2.3.1 (steady heel), 2.3.2 (gust areas ``b >= a``), 2.3.3.
 
     ``theta_0`` is solved from ``GZ(theta_0) = lw1`` and must not exceed 16 deg, nor 80 % of
     the deck-edge immersion angle when that is known. ``theta_1`` (the windward roll
@@ -571,9 +595,16 @@ def weather_criterion(
     empirical formula needs roll-period tables that are not transcribed here. ``theta_1 = 0``
     is the case the code's worked example starts from.
 
-    ``theta_2`` is the least of the down-flooding angle, 50 deg and the second intercept
-    ``theta_c`` of ``GZ`` with the gust lever ``lw2``. The gust area ``a = lw2 (theta_2 -
-    theta_1)`` since the lever is constant, and ``b`` is the ``GZ`` area over the same span.
+    ``theta_2`` is the least of the down-flooding angle, 50 deg, the supplied
+    ``flooding_angle_deg`` and the second intercept ``theta_c`` of ``GZ`` with the gust lever
+    ``lw2``. The gust area ``a = lw2 (theta_2 - theta_1)`` since the lever is constant, and
+    ``b`` is the ``GZ`` area over the same span.
+
+    ``flooding_angle_deg`` is clause 2.3.3's ``theta_f``: the windward roll amplitude
+    ``theta_1`` shall not exceed it. Supplying it adds that clause *and* puts it into the
+    ``theta_2`` minimum, so one number plays the role the code gives ``theta_f`` in both
+    places. When it is omitted, 2.3.3 is not evaluated -- the report says so in ``clauses``
+    and leaves ``flooding_angle_deg`` ``None`` rather than presuming a value.
     """
     angles, values = _polyline(curve)
     rotation = _finite(roll_amplitude_deg, "roll_amplitude_deg")
@@ -588,6 +619,12 @@ def weather_criterion(
         displacement_t,
         gust_factor=gust_factor,
     )
+
+    flooding = None if flooding_angle_deg is None else _finite(
+        flooding_angle_deg, "flooding_angle_deg"
+    )
+    if flooding is not None and not 0.0 < flooding < 90.0:
+        raise IntactStabilityError(f"flooding_angle_deg must be in (0, 90): {flooding!r}")
 
     deck_edge = None if deck_edge_angle_deg is None else _finite(
         deck_edge_angle_deg, "deck_edge_angle_deg"
@@ -619,16 +656,46 @@ def weather_criterion(
         criteria.append(_limit("2.3.1", theta0, limit, "deg", heel_quantity))
 
     theta_c = _second_crossing(angles, values, levers.gust_m)
-    candidates = [sink, WEATHER_THETA2_CAP_DEG, float(angles[-1])]
+    caps = [sink, WEATHER_THETA2_CAP_DEG]
+    if flooding is not None:
+        caps.append(flooding)
+    candidates = [*caps, float(angles[-1])]
     if theta_c is not None:
         candidates.append(theta_c)
     theta2 = min(candidates)
     if theta2 <= rotation:
+        if flooding is not None and rotation >= flooding:
+            # 2.3.3's own failure: the windward roll reaches the flooding angle, so there is
+            # no span between theta_1 and theta_2 for the gust areas to be measured over.
+            # Report the violated clause and leave the areas unmeasured (None) instead of
+            # fabricating a zero or a negative-lever integral.
+            criteria.append(
+                _limit(
+                    "2.3.3",
+                    rotation,
+                    flooding,
+                    "deg",
+                    "windward roll amplitude theta1 <= flooding angle theta_f",
+                )
+            )
+            return WeatherCriterionReport(
+                levers=levers,
+                theta0_deg=theta0,
+                deck_edge_angle_deg=deck_edge,
+                flooding_angle_deg=flooding,
+                steady_heel_limit_deg=limit,
+                roll_amplitude_deg=rotation,
+                theta2_deg=theta2,
+                theta_c_deg=theta_c,
+                area_b_m_rad=None,
+                area_a_m_rad=None,
+                criteria=tuple(criteria),
+            )
         raise IntactStabilityError(
             f"theta2 ({theta2!r} deg) does not exceed the roll amplitude ({rotation!r} deg): "
             "the gust areas would be measured over a non-positive span"
         )
-    if theta_c is None and theta2 >= float(angles[-1]) - 1e-12 and angles[-1] < min(sink, WEATHER_THETA2_CAP_DEG):
+    if theta_c is None and theta2 >= float(angles[-1]) - 1e-12 and angles[-1] < min(caps):
         raise IntactStabilityError(
             f"the curve stops at {angles[-1]!r} deg without reaching the gust lever again: "
             "sample further to locate theta2"
@@ -639,10 +706,21 @@ def weather_criterion(
     criteria.append(
         _criterion("2.3.2", area_b, area_a, "m rad", "area b under GZ >= area a under the gust lever lw2")
     )
+    if flooding is not None:
+        criteria.append(
+            _limit(
+                "2.3.3",
+                rotation,
+                flooding,
+                "deg",
+                "windward roll amplitude theta1 <= flooding angle theta_f",
+            )
+        )
     return WeatherCriterionReport(
         levers=levers,
         theta0_deg=theta0,
         deck_edge_angle_deg=deck_edge,
+        flooding_angle_deg=flooding,
         steady_heel_limit_deg=limit,
         roll_amplitude_deg=rotation,
         theta2_deg=theta2,
