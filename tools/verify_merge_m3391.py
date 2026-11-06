@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import ast
 import json
-import math
 import subprocess
 import sys
 from pathlib import Path
@@ -194,7 +193,7 @@ def branch_route() -> dict[str, object]:
     angles = [0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0]
     curve = righting_arm_curve(mesh, kg, angles, waterline_z=draft)
     reference = box_righting_arms_analytic(breadth, draft, kg, angles, depth=depth)
-    errors = [abs(a - b) for a, b in zip(curve.gz, reference)]
+    errors = [abs(a - b) for a, b in zip(curve.gz, reference, strict=True)]
     return {
         "angles_deg": angles,
         "gz_mesh": list(curve.gz),
