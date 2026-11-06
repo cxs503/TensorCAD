@@ -1,0 +1,595 @@
+{
+  "all_claims_hold": true,
+  "barge": {
+    "bm_m": 0.26666666666666666,
+    "breadth_m": 1.6,
+    "depth_m": 2.2,
+    "draft_m": 0.8,
+    "gm_closed_form_m": 0.16666666666666674,
+    "gm_from_waterplane_m": 0.16666666666666674,
+    "kb_m": 0.4,
+    "kg_m": 0.5,
+    "length_m": 10.0
+  },
+  "claims": [
+    {
+      "claim": "area rule is exact for A sin(2 phi) and second order in the step",
+      "detail": "error at 0.05 deg step 5.24e-08 m*rad; fitted log-log slope 2.0000 (2.0 = second order)",
+      "holds": true,
+      "numbers": {
+        "fitted_slope": 2.000005835714704,
+        "sine_table": [
+          {
+            "area": 0.20656697839393293,
+            "error": -2.0977189334470125e-05,
+            "exact": 0.2065879555832674,
+            "step_deg": 1.0
+          },
+          {
+            "area": 0.20658271136581025,
+            "error": -5.244217457150979e-06,
+            "exact": 0.2065879555832674,
+            "step_deg": 0.5
+          },
+          {
+            "area": 0.20658664453389533,
+            "error": -1.3110493720658312e-06,
+            "exact": 0.2065879555832674,
+            "step_deg": 0.25
+          },
+          {
+            "area": 0.20658774581559147,
+            "error": -2.0976767592384427e-07,
+            "exact": 0.2065879555832674,
+            "step_deg": 0.1
+          },
+          {
+            "area": 0.20658790314135628,
+            "error": -5.244191111919427e-08,
+            "exact": 0.2065879555832674,
+            "step_deg": 0.05
+          }
+        ]
+      }
+    },
+    {
+      "claim": "box barge areas reproduce the wall-sided closed form below the 45 deg limit",
+      "detail": "worst |area error| over three steps and both intervals: 1.76e-04 m*rad (clause thresholds are 0.055 and 0.090 m*rad)",
+      "holds": true,
+      "numbers": {
+        "barge_areas": [
+          {
+            "closed_form": 0.02509255832441893,
+            "error": 7.523683789871852e-05,
+            "measured": 0.02516779516231765,
+            "quantity": "area_0_30",
+            "step_deg": 5.0
+          },
+          {
+            "closed_form": 0.04851949047367124,
+            "error": 0.00017598122176430697,
+            "measured": 0.04869547169543555,
+            "quantity": "area_0_40",
+            "step_deg": 5.0
+          },
+          {
+            "closed_form": 0.02509255832441893,
+            "error": 1.8838527655822e-05,
+            "measured": 0.025111396852074752,
+            "quantity": "area_0_30",
+            "step_deg": 2.5
+          },
+          {
+            "closed_form": 0.04851949047367124,
+            "error": 4.408078403583121e-05,
+            "measured": 0.04856357125770707,
+            "quantity": "area_0_40",
+            "step_deg": 2.5
+          },
+          {
+            "closed_form": 0.02509255832441893,
+            "error": 4.7114741018039474e-06,
+            "measured": 0.025097269798520734,
+            "quantity": "area_0_30",
+            "step_deg": 1.25
+          },
+          {
+            "closed_form": 0.04851949047367124,
+            "error": 1.102557641993046e-05,
+            "measured": 0.04853051605009117,
+            "quantity": "area_0_40",
+            "step_deg": 1.25
+          }
+        ],
+        "gm_closed_form_m": 0.16666666666666674,
+        "gm_from_waterplane_m": 0.16666666666666674
+      }
+    },
+    {
+      "claim": "negative control: +0.1 m KG moves the 0-30 deg area by -dKG(1-cos 30 deg)",
+      "detail": "measured -0.013397375 m*rad vs closed form -0.013397460 m*rad",
+      "holds": true,
+      "numbers": {
+        "closed_form": -0.01339745962155613,
+        "measured": -0.013397374598540273
+      }
+    },
+    {
+      "claim": "box barge passes the initial-GM clause and fails the 0-30 deg area clause",
+      "detail": "GM 0.1667 m vs 0.15 m; area to 30 deg 0.0251 m*rad vs 0.055 m*rad",
+      "holds": true,
+      "numbers": {
+        "barge_assessment": {
+          "all_satisfied": false,
+          "code": "IMO IS Code 2008 Part A \u00a72.2 (general intact stability criteria)",
+          "criteria": [
+            {
+              "achieved": 0.025111396852,
+              "criterion": "IS-2008-PartA-2.2.1",
+              "margin": -0.029888603148,
+              "note": "",
+              "quantity": "area under GZ up to 30 deg",
+              "required": 0.055,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.048563571258,
+              "criterion": "IS-2008-PartA-2.2.2",
+              "margin": -0.041436428742,
+              "note": "",
+              "quantity": "area under GZ up to 40 deg",
+              "required": 0.09,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.023452174406,
+              "criterion": "IS-2008-PartA-2.2.3",
+              "margin": -0.006547825594,
+              "note": "",
+              "quantity": "area between 30 and 40 deg",
+              "required": 0.03,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.105555555556,
+              "criterion": "IS-2008-PartA-2.2.4",
+              "margin": -0.094444444444,
+              "note": "",
+              "quantity": "GZ at 30 deg",
+              "required": 0.2,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m"
+            },
+            {
+              "achieved": 40.0,
+              "criterion": "IS-2008-PartA-2.2.5",
+              "margin": 15.0,
+              "note": "the greatest sampled arm is the last sample, so the true peak lies at or beyond 40 deg; widen the curve before relying on this clause",
+              "quantity": "heel at the greatest GZ",
+              "required": 25.0,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "satisfied",
+              "units": "deg"
+            },
+            {
+              "achieved": 0.166666666667,
+              "criterion": "IS-2008-PartA-2.2.6",
+              "margin": 0.016666666667,
+              "note": "",
+              "quantity": "initial metacentric height GM_0",
+              "required": 0.15,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "satisfied",
+              "units": "m"
+            }
+          ],
+          "failed": [
+            "IS-2008-PartA-2.2.1",
+            "IS-2008-PartA-2.2.2",
+            "IS-2008-PartA-2.2.3",
+            "IS-2008-PartA-2.2.4"
+          ],
+          "flooding_angle_deg": null,
+          "gz_m": [
+            0.0,
+            0.007280985,
+            0.014614906,
+            0.022056009,
+            0.02966122,
+            0.037491627,
+            0.045614157,
+            0.054103522,
+            0.063044543,
+            0.072534985,
+            0.082689085,
+            0.093642006,
+            0.105555556,
+            0.118625618,
+            0.133091957,
+            0.149251314,
+            0.167475157
+          ],
+          "heel_angles_deg": [
+            0.0,
+            2.5,
+            5.0,
+            7.5,
+            10.0,
+            12.5,
+            15.0,
+            17.5,
+            20.0,
+            22.5,
+            25.0,
+            27.5,
+            30.0,
+            32.5,
+            35.0,
+            37.5,
+            40.0
+          ],
+          "initial_gm_m": 0.166666666667,
+          "initial_gm_source": "supplied",
+          "sampled_range_deg": 40.0,
+          "schema": "tensorcad.stability.intact_assessment/1",
+          "thresholds": {
+            "angle_of_max_gz_deg": 25.0,
+            "area_30_to_40_m_rad": 0.03,
+            "area_to_30_m_rad": 0.055,
+            "area_to_40_m_rad": 0.09,
+            "gz_at_30_deg_m": 0.2,
+            "initial_gm_m": 0.15
+          },
+          "undetermined": []
+        }
+      }
+    },
+    {
+      "claim": "Wigley hull: GM is put on the 0.15 m floor and every clause is evaluated",
+      "detail": "GM 0.1500 m; failed clauses: IS-2008-PartA-2.2.1, IS-2008-PartA-2.2.2, IS-2008-PartA-2.2.3, IS-2008-PartA-2.2.4; undetermined: none",
+      "holds": true,
+      "numbers": {
+        "wigley_assessment": {
+          "all_satisfied": false,
+          "code": "IMO IS Code 2008 Part A \u00a72.2 (general intact stability criteria)",
+          "criteria": [
+            {
+              "achieved": 0.001704824415,
+              "criterion": "IS-2008-PartA-2.2.1",
+              "margin": -0.053295175585,
+              "note": "",
+              "quantity": "area under GZ up to 30 deg",
+              "required": 0.055,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.002977080407,
+              "criterion": "IS-2008-PartA-2.2.2",
+              "margin": -0.087022919593,
+              "note": "",
+              "quantity": "area under GZ up to 40 deg",
+              "required": 0.09,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.001272255992,
+              "criterion": "IS-2008-PartA-2.2.3",
+              "margin": -0.028727744008,
+              "note": "",
+              "quantity": "area between 30 and 40 deg",
+              "required": 0.03,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.006366532174,
+              "criterion": "IS-2008-PartA-2.2.4",
+              "margin": -0.193633467826,
+              "note": "",
+              "quantity": "GZ at 30 deg",
+              "required": 0.2,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m"
+            },
+            {
+              "achieved": 90.0,
+              "criterion": "IS-2008-PartA-2.2.5",
+              "margin": 65.0,
+              "note": "the greatest sampled arm is the last sample, so the true peak lies at or beyond 90 deg; widen the curve before relying on this clause",
+              "quantity": "heel at the greatest GZ",
+              "required": 25.0,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "satisfied",
+              "units": "deg"
+            },
+            {
+              "achieved": 0.15,
+              "criterion": "IS-2008-PartA-2.2.6",
+              "margin": 0.0,
+              "note": "",
+              "quantity": "initial metacentric height GM_0",
+              "required": 0.15,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "satisfied",
+              "units": "m"
+            }
+          ],
+          "failed": [
+            "IS-2008-PartA-2.2.1",
+            "IS-2008-PartA-2.2.2",
+            "IS-2008-PartA-2.2.3",
+            "IS-2008-PartA-2.2.4"
+          ],
+          "flooding_angle_deg": null,
+          "gz_m": [
+            -0.0,
+            0.00110976,
+            0.002211073,
+            0.00329556,
+            0.004354964,
+            0.005381226,
+            0.006366532,
+            0.007303386,
+            0.008184656,
+            0.009003636,
+            0.009754093,
+            0.010430316,
+            0.011027157,
+            0.011540075,
+            0.011965167,
+            0.012299196,
+            0.01253962,
+            0.012684611,
+            0.012733064
+          ],
+          "heel_angles_deg": [
+            0.0,
+            5.0,
+            10.0,
+            15.0,
+            20.0,
+            25.0,
+            30.0,
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0
+          ],
+          "initial_gm_m": 0.15,
+          "initial_gm_source": "supplied",
+          "sampled_range_deg": 90.0,
+          "schema": "tensorcad.stability.intact_assessment/1",
+          "thresholds": {
+            "angle_of_max_gz_deg": 25.0,
+            "area_30_to_40_m_rad": 0.03,
+            "area_to_30_m_rad": 0.055,
+            "area_to_40_m_rad": 0.09,
+            "gz_at_30_deg_m": 0.2,
+            "initial_gm_m": 0.15
+          },
+          "undetermined": []
+        }
+      }
+    },
+    {
+      "claim": "a 25 deg flooding angle shortens the area clauses and empties 2.2.3",
+      "detail": "2.2.2 area measured to the 25 deg flooding angle = 0.001192 m*rad; 2.2.3 reported as undetermined",
+      "holds": true,
+      "numbers": {
+        "assessment": {
+          "all_satisfied": false,
+          "code": "IMO IS Code 2008 Part A \u00a72.2 (general intact stability criteria)",
+          "criteria": [
+            {
+              "achieved": 0.001192231786,
+              "criterion": "IS-2008-PartA-2.2.1",
+              "margin": -0.053807768214,
+              "note": "truncated at the flooding angle 25 deg, which is below 30 deg",
+              "quantity": "area under GZ up to 25 deg",
+              "required": 0.055,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.001192231786,
+              "criterion": "IS-2008-PartA-2.2.2",
+              "margin": -0.088807768214,
+              "note": "truncated at the flooding angle 25 deg",
+              "quantity": "area under GZ up to 25 deg",
+              "required": 0.09,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m*rad"
+            },
+            {
+              "achieved": null,
+              "criterion": "IS-2008-PartA-2.2.3",
+              "margin": null,
+              "note": "the upper limit (25 deg, flooding angle) does not reach 30 deg, so the interval the clause asks about is empty",
+              "quantity": "area between 30 deg and the upper limit",
+              "required": 0.03,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "undetermined",
+              "units": "m*rad"
+            },
+            {
+              "achieved": 0.006366532174,
+              "criterion": "IS-2008-PartA-2.2.4",
+              "margin": -0.193633467826,
+              "note": "",
+              "quantity": "GZ at 30 deg",
+              "required": 0.2,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "not_satisfied",
+              "units": "m"
+            },
+            {
+              "achieved": 90.0,
+              "criterion": "IS-2008-PartA-2.2.5",
+              "margin": 65.0,
+              "note": "the greatest sampled arm is the last sample, so the true peak lies at or beyond 90 deg; widen the curve before relying on this clause",
+              "quantity": "heel at the greatest GZ",
+              "required": 25.0,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "satisfied",
+              "units": "deg"
+            },
+            {
+              "achieved": 0.15,
+              "criterion": "IS-2008-PartA-2.2.6",
+              "margin": 0.0,
+              "note": "",
+              "quantity": "initial metacentric height GM_0",
+              "required": 0.15,
+              "schema": "tensorcad.stability.intact_criterion/1",
+              "status": "satisfied",
+              "units": "m"
+            }
+          ],
+          "failed": [
+            "IS-2008-PartA-2.2.1",
+            "IS-2008-PartA-2.2.2",
+            "IS-2008-PartA-2.2.4"
+          ],
+          "flooding_angle_deg": 25.0,
+          "gz_m": [
+            -0.0,
+            0.00110976,
+            0.002211073,
+            0.00329556,
+            0.004354964,
+            0.005381226,
+            0.006366532,
+            0.007303386,
+            0.008184656,
+            0.009003636,
+            0.009754093,
+            0.010430316,
+            0.011027157,
+            0.011540075,
+            0.011965167,
+            0.012299196,
+            0.01253962,
+            0.012684611,
+            0.012733064
+          ],
+          "heel_angles_deg": [
+            0.0,
+            5.0,
+            10.0,
+            15.0,
+            20.0,
+            25.0,
+            30.0,
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0
+          ],
+          "initial_gm_m": 0.15,
+          "initial_gm_source": "supplied",
+          "sampled_range_deg": 90.0,
+          "schema": "tensorcad.stability.intact_assessment/1",
+          "thresholds": {
+            "angle_of_max_gz_deg": 25.0,
+            "area_30_to_40_m_rad": 0.03,
+            "area_to_30_m_rad": 0.055,
+            "area_to_40_m_rad": 0.09,
+            "gz_at_30_deg_m": 0.2,
+            "initial_gm_m": 0.15
+          },
+          "undetermined": [
+            "IS-2008-PartA-2.2.3"
+          ]
+        },
+        "flooding_angle_deg": 25.0
+      }
+    }
+  ],
+  "schema": "tensorcad.examples.intact_stability/1",
+  "wigley": {
+    "beam_m": 1.0,
+    "bm_m": 0.1372669356521739,
+    "displacement_volume_m3": 2.7712221498842595,
+    "draft_m": 0.625,
+    "gm_m": 0.15000000000000002,
+    "gz_curve": {
+      "gz_m": [
+        -2.5535128858848018e-18,
+        0.0011097596807221402,
+        0.0022110734201319787,
+        0.003295559555752836,
+        0.004354964493238911,
+        0.005381225521330135,
+        0.006366532173930378,
+        0.007303385672468882,
+        0.008184655996134771,
+        0.009003636145639926,
+        0.009754093187533008,
+        0.01043031569059294,
+        0.011027157193242099,
+        0.01154007537127355,
+        0.011965166607642297,
+        0.012299195701361065,
+        0.01253962048934254,
+        0.012684611193765405,
+        0.012733064347826117
+      ],
+      "heel_angles_deg": [
+        0.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        45.0,
+        50.0,
+        55.0,
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+        80.0,
+        85.0,
+        90.0
+      ]
+    },
+    "kb_m": 0.3907608695652174,
+    "kg_m": 0.3780278052173912,
+    "length_m": 10.0,
+    "max_volume_error": 8.365066205587828e-14
+  }
+}

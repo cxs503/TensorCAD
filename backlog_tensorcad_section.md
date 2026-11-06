@@ -27,7 +27,7 @@
 - **无布尔/扫描操作**
 - **无网格平滑/简化**：2-3% 薄片报告为警告，不修复
 - ~~**无 SDF 体素网格导出**~~ → **0.10.0 已补**：`to_voxel_grid`/`VoxelGrid`（docs/voxel_export.md；SUBOFF 体素体积 0.698982 m³ vs 文献 0.699211 = −0.033 %）
-- **无公平性/稳性/阻力/规范合规** → 公平性 0.12 已补（docs/fairness.md）；**初稳性 KM/GM 0.14 已补**（tensorcad/stability.py + docs/stability.md：水线面惯性矩 I_T/I_L，箱体基准 2.2e-16、半球 KM=R −0.03%、船体 GM 默认网格 +1.99%/161×41 +0.35%）；大倾角 GZ、自由液面修正、阻力、规范合规仍缺
+- **无公平性/稳性/阻力/规范合规** → 公平性 0.12 已补（docs/fairness.md）；**初稳性 KM/GM 0.14 已补**（tensorcad/stability.py + docs/stability.md：水线面惯性矩 I_T/I_L，箱体基准 2.2e-16、半球 KM=R −0.03%、船体 GM 默认网格 +1.99%/161×41 +0.35%）；大倾角 GZ 已补（0.21.0 gz.py/righting_arm.py）；**IS Code 2008 Part A 2.2 完整稳性判据 0.22.x 已补**（tensorcad/intact_stability.py + docs/intact_stability.md：6 条判据逐条判定、undetermined 三态、面积规则二阶收敛 2.000、箱驳面积 vs 墙侧闭式 1.8e-4 m·rad、KG 负控 7e-8）；自由液面修正已有 free_surface_i_x 平降，§2.3 风倾复正、阻力、第二代失效模式仍缺
 - **神经场精度有限**：平均误差 ~1% 半径，最坏 ~2%
 
 ### 对 eco 价值排序（与 TensorShipDesign 接棒位）
