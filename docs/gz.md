@@ -130,9 +130,11 @@ stays watertight, outward-oriented and Euler-2 (`V − E + F = 2`).
   asymmetric waterplanes because `y_B` is measured, not assumed zero.
 - **No tanks, no damage.** `KG` is the only loading input. No compartment contents, no
   flooding, no grain heeling, no statutory maxima, no class rules.
-- **No weather criterion.** Nothing here computes a wind heeling arm, a `GZ` area criterion
-  or an IMO/IS-Code check; the areas `area_under_curve` returns are the input to such a check,
-  not the check.
+- **No weather criterion here.** This module computes no wind heeling arm and no IMO/IS-Code
+  check; the areas `area_under_curve` returns are the input to such a check. The check itself
+  lives in [`docs/intact_stability.md`](intact_stability.md) (`tensorcad.intact_stability`,
+  0.23.0: IS Code 2008 part A 2.2.1-2.2.6 and 2.3), which reads these curves and does not
+  touch the hydrostatics.
 - **Mesh resolution is the accuracy.** The integrator is exact for the polyhedron it is
   given; the hull's chord-wise waterplane (a 41-station mesh) is what limits `KN`, exactly as
   it limits `KB`/`BM`.
