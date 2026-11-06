@@ -28,9 +28,11 @@ from .bonjean import (
     section_properties,
 )
 from .box_gz import (
+    BoxGzArea,
     BoxGzError,
     BoxGzPoint,
     box_gz,
+    box_gz_area,
     box_gz_curve,
     box_regime_bounds_deg,
     box_section,
@@ -252,6 +254,7 @@ __all__ = [
     "BonjeanCurve",
     "BonjeanTable",
     "BoundingBox",
+    "BoxGzArea",
     "BoxGzError",
     "BoxGzPoint",
     "Check",
@@ -326,6 +329,7 @@ __all__ = [
     "bonjean_curve",
     "bonjean_table",
     "box_gz",
+    "box_gz_area",
     "box_gz_curve",
     "box_regime_bounds_deg",
     "box_righting_arms_analytic",
