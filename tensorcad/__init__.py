@@ -67,6 +67,15 @@ from .geometry_field import (
     surface_point,
     to_mesh,
 )
+from .box_gz import (
+    BoxGzError,
+    BoxGzPoint,
+    box_gz,
+    box_gz_curve,
+    box_regime_bounds_deg,
+    box_section,
+    box_vanishing_angle_deg,
+)
 from .gz import (
     DEFAULT_ANGLES_DEG,
     FreeSurfaceCorrection,
@@ -277,10 +286,17 @@ __all__ = [
     "analytic_wetted_surface_area",
     "assess_fairness",
     "barge_wall_sided_righting_arm",
+    "BoxGzError",
+    "BoxGzPoint",
     "bisection_righting_arm_curve",
     "bonjean_curve",
     "bonjean_table",
+    "box_gz",
+    "box_gz_curve",
+    "box_regime_bounds_deg",
     "box_righting_arms_analytic",
+    "box_section",
+    "box_vanishing_angle_deg",
     "box_wall_sided_limit_deg",
     "build_mesh",
     "build_transom_mesh",
