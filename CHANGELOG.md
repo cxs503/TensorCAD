@@ -4,6 +4,36 @@ All notable changes to TensorCAD are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## 0.23.0 — 2026-11-06
+
+### Added
+- **IS Code 2008 part A intact-stability criteria on a measured `GZ` curve**
+  (`tensorcad/intact_stability.py`, standard library only). `general_criteria` evaluates
+  2.2.1-2.2.6 (areas to 30° and 40°, the 30-40° band, `GZ(30°)`, the angle of maximum `GZ`,
+  `GM_0`) and `weather_criterion` evaluates 2.3.1/2.3.2 (`lw1 = P A Z/(1000 g Δ)` at
+  `P = 504 Pa`, the gust factor 1.5, the 80 % deck-edge heel limit, and the `b ≥ a` gust
+  areas up to `θ_2 = min(θ_downflood, 50°, θ_c)`). Both accept either curve in the package
+  (`gz.RightingArmCurve`, `righting_arm.RightingArmCurve`) or a plain `(angles, gz)` pair.
+  This closes the limitation `docs/gz.md` and `docs/stability.md` both named: *"nothing here
+  computes a wind heeling arm, a `GZ` area criterion or an IMO/IS-Code check."*
+- **The clauses carry their direction.** `Criterion.comparison` distinguishes "shall be at
+  least" (2.2.1-2.2.6, 2.3.2) from "shall not exceed" (2.3.1), and `margin` is the slack in
+  the passing direction, so a `>=` where the code says `<=` cannot report a ship compliant on
+  the weather heel. Areas are trapezoidal on the supplied polyline with both limits
+  interpolated, so the four areas the code quotes are additive to round-off.
+- **Verification against an antiderivative, not only a curve.** The wall-sided barge's
+  `∫GZ dφ = GM_0(1 − cos φ) + (BM_0/2)(sec φ + cos φ − 2)` gives the areas a closed form:
+  `A(0,30)` agrees to `1.1e-4` relative on a 1° grid, 1.5e-4 on `A(30,40)`, and the grid error
+  falls as `h²` from 2° down (ratios 4.00, 4.00). Reported attainments from the two waterline
+  solvers agree to `1.6e-13`. Negative controls: loading the same barge 0.35 m deeper flips
+  five clauses, and halving the passing arm fails 2.2.1, 2.2.2 and 2.2.4 on the same geometry.
+- `tests/test_intact_stability.py` (39 cases), `examples/intact_stability/run_example.py`
+  (15 claims, exits non-zero if one breaks, writes `docs/intact_stability/{results.json,
+  report.md}` and four figures) and `docs/intact_stability.md`.
+- Not implemented, and said so on the page: clause 2.3.4's roll amplitude `θ_1` is an
+  **input** (the roll-period tables it needs are not in this repository), damage stability
+  (part B), grain/timber-deck codes, and the 2.2 variants for special ship types.
+
 ## 0.22.0 — 2026-11-05
 
 ### Added

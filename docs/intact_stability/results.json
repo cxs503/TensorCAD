@@ -1,0 +1,1251 @@
+{
+  "schema": "tensorcad.intact-stability-example/1",
+  "tensorcad_version": "0.22.0",
+  "generated_utc": "2026-11-06T09:21:29Z",
+  "runtime_s": 4.943,
+  "barge": {
+    "length_m": 10.0,
+    "breadth_m": 4.0,
+    "draft_m": 2.0,
+    "depth_m": 4.0,
+    "kg_m": 1.2,
+    "km_m": 1.6666666666666665,
+    "gm0_m": 0.46666666666666656,
+    "bm0_m": 0.6666666666666666,
+    "kb0_m": 1.0,
+    "wall_sided_limit_deg": 45.0,
+    "arm_error_beyond_limit_m": 0.04391404304970725,
+    "analytic": {
+      "gz_30_m": 0.2888888888888888,
+      "gz_max_m": 0.7201524123309667,
+      "area_0_30_m_rad": 0.06943012562182535,
+      "area_0_40_m_rad": 0.13299650402822913,
+      "area_30_40_m_rad": 0.06356637840640378
+    },
+    "curve": {
+      "angles_deg": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0,
+        19.0,
+        20.0,
+        21.0,
+        22.0,
+        23.0,
+        24.0,
+        25.0,
+        26.0,
+        27.0,
+        28.0,
+        29.0,
+        30.0,
+        31.0,
+        32.0,
+        33.0,
+        34.0,
+        35.0,
+        36.0,
+        37.0,
+        38.0,
+        39.0,
+        40.0,
+        41.0,
+        42.0,
+        43.0,
+        44.0,
+        45.0,
+        46.0,
+        47.0,
+        48.0,
+        49.0,
+        50.0
+      ],
+      "gz_m": [
+        0.0,
+        0.0081462288,
+        0.016300617976,
+        0.024471361129,
+        0.03266671853,
+        0.040895051036,
+        0.049164854695,
+        0.057484796295,
+        0.06586375011,
+        0.074310836104,
+        0.082835459891,
+        0.091447354747,
+        0.100156626009,
+        0.108973798216,
+        0.117909865383,
+        0.126976344842,
+        0.136185335123,
+        0.145549578399,
+        0.155082528083,
+        0.164798422234,
+        0.174712363493,
+        0.184840406395,
+        0.195199652961,
+        0.205808357644,
+        0.2166860428,
+        0.227853626049,
+        0.239333561062,
+        0.251149993535,
+        0.263328934361,
+        0.275898452312,
+        0.288888888889,
+        0.302333098398,
+        0.316266716796,
+        0.330728463408,
+        0.345760480274,
+        0.361408714682,
+        0.377723351359,
+        0.394759301914,
+        0.412576760447,
+        0.431241835814,
+        0.450827272963,
+        0.47141327805,
+        0.493088464807,
+        0.515950943063,
+        0.540109574391,
+        0.565685424949,
+        0.591088962247,
+        0.614730706282,
+        0.636731880662,
+        0.657201609321,
+        0.676238369281
+      ],
+      "max_volume_error": 4.973799150320701e-15,
+      "arm_error_vs_closed_form_m": 2.7755575615628914e-16
+    },
+    "report": {
+      "schema": "tensorcad.intact-stability/1",
+      "code": "IMO IS Code 2008, part A, 2.2",
+      "satisfied": true,
+      "verdict": "passes IS Code 2008 part A 2.2.1-2.2.6",
+      "gm0_m": 0.466666667,
+      "flooding_angle_deg": null,
+      "upper_angle_deg": 40.0,
+      "area_0_30_m_rad": 0.069437494,
+      "area_0_40_m_rad": 0.133013849,
+      "area_30_40_m_rad": 0.063576355,
+      "gz_30_m": 0.288888889,
+      "max_gz_m": 0.676238369,
+      "angle_of_max_gz_deg": 50.0,
+      "angle_step_max_deg": 1.0,
+      "criteria": [
+        {
+          "clause": "2.2.1",
+          "quantity": "area under GZ up to 30 deg",
+          "required": 0.055,
+          "attained": 0.069437494,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.014437494
+        },
+        {
+          "clause": "2.2.2",
+          "quantity": "area under GZ up to 40 deg or the flooding angle",
+          "required": 0.09,
+          "attained": 0.133013849,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.043013849
+        },
+        {
+          "clause": "2.2.3",
+          "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+          "required": 0.03,
+          "attained": 0.063576355,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.033576355
+        },
+        {
+          "clause": "2.2.4",
+          "quantity": "GZ at 30 deg",
+          "required": 0.2,
+          "attained": 0.288888889,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.088888889
+        },
+        {
+          "clause": "2.2.5",
+          "quantity": "angle of maximum GZ",
+          "required": 25.0,
+          "attained": 50.0,
+          "unit": "deg",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 25.0
+        },
+        {
+          "clause": "2.2.6",
+          "quantity": "initial metacentric height GM_0",
+          "required": 0.15,
+          "attained": 0.466666667,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.316666667
+        }
+      ],
+      "failures": []
+    },
+    "criteria": [
+      {
+        "clause": "2.2.1",
+        "quantity": "area under GZ up to 30 deg",
+        "required": 0.055,
+        "attained": 0.069437494,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": 0.014437494,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.2",
+        "quantity": "area under GZ up to 40 deg or the flooding angle",
+        "required": 0.09,
+        "attained": 0.133013849,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": 0.043013849,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.3",
+        "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+        "required": 0.03,
+        "attained": 0.063576355,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": 0.033576355,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.4",
+        "quantity": "GZ at 30 deg",
+        "required": 0.2,
+        "attained": 0.288888889,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": 0.088888889,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.5",
+        "quantity": "angle of maximum GZ",
+        "required": 25.0,
+        "attained": 50.0,
+        "unit": "deg",
+        "comparison": "at least",
+        "margin": 25.0,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.6",
+        "quantity": "initial metacentric height GM_0",
+        "required": 0.15,
+        "attained": 0.466666667,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": 0.316666667,
+        "satisfied": true
+      }
+    ],
+    "other_route": {
+      "solver": "tensorcad.righting_arm (bisection on V(h))",
+      "report": {
+        "schema": "tensorcad.intact-stability/1",
+        "code": "IMO IS Code 2008, part A, 2.2",
+        "satisfied": true,
+        "verdict": "passes IS Code 2008 part A 2.2.1-2.2.6",
+        "gm0_m": 0.466666667,
+        "flooding_angle_deg": null,
+        "upper_angle_deg": 40.0,
+        "area_0_30_m_rad": 0.069437494,
+        "area_0_40_m_rad": 0.133013849,
+        "area_30_40_m_rad": 0.063576355,
+        "gz_30_m": 0.288888889,
+        "max_gz_m": 0.676238369,
+        "angle_of_max_gz_deg": 50.0,
+        "angle_step_max_deg": 1.0,
+        "criteria": [
+          {
+            "clause": "2.2.1",
+            "quantity": "area under GZ up to 30 deg",
+            "required": 0.055,
+            "attained": 0.069437494,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.014437494
+          },
+          {
+            "clause": "2.2.2",
+            "quantity": "area under GZ up to 40 deg or the flooding angle",
+            "required": 0.09,
+            "attained": 0.133013849,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.043013849
+          },
+          {
+            "clause": "2.2.3",
+            "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+            "required": 0.03,
+            "attained": 0.063576355,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.033576355
+          },
+          {
+            "clause": "2.2.4",
+            "quantity": "GZ at 30 deg",
+            "required": 0.2,
+            "attained": 0.288888889,
+            "unit": "m",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.088888889
+          },
+          {
+            "clause": "2.2.5",
+            "quantity": "angle of maximum GZ",
+            "required": 25.0,
+            "attained": 50.0,
+            "unit": "deg",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 25.0
+          },
+          {
+            "clause": "2.2.6",
+            "quantity": "initial metacentric height GM_0",
+            "required": 0.15,
+            "attained": 0.466666667,
+            "unit": "m",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.316666667
+          }
+        ],
+        "failures": []
+      },
+      "max_clause_gap": 1.5898393712632242e-13
+    }
+  },
+  "heavy_loading": {
+    "kg_m": 1.55,
+    "gm0_m": 0.11666666666666647,
+    "criteria": [
+      {
+        "clause": "2.2.1",
+        "quantity": "area under GZ up to 30 deg",
+        "required": 0.055,
+        "attained": 0.022547576,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.032452424,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.2",
+        "quantity": "area under GZ up to 40 deg or the flooding angle",
+        "required": 0.09,
+        "attained": 0.051131483,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.038868517,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.3",
+        "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+        "required": 0.03,
+        "attained": 0.028583907,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.001416093,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.4",
+        "quantity": "GZ at 30 deg",
+        "required": 0.2,
+        "attained": 0.113888889,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": -0.086111111,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.5",
+        "quantity": "angle of maximum GZ",
+        "required": 25.0,
+        "attained": 50.0,
+        "unit": "deg",
+        "comparison": "at least",
+        "margin": 25.0,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.6",
+        "quantity": "initial metacentric height GM_0",
+        "required": 0.15,
+        "attained": 0.116666667,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": -0.033333333,
+        "satisfied": false
+      }
+    ],
+    "report": {
+      "schema": "tensorcad.intact-stability/1",
+      "code": "IMO IS Code 2008, part A, 2.2",
+      "satisfied": false,
+      "verdict": "fails IS Code 2008 part A 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.6",
+      "gm0_m": 0.116666667,
+      "flooding_angle_deg": null,
+      "upper_angle_deg": 40.0,
+      "area_0_30_m_rad": 0.022547576,
+      "area_0_40_m_rad": 0.051131483,
+      "area_30_40_m_rad": 0.028583907,
+      "gz_30_m": 0.113888889,
+      "max_gz_m": 0.408122814,
+      "angle_of_max_gz_deg": 50.0,
+      "angle_step_max_deg": 1.0,
+      "criteria": [
+        {
+          "clause": "2.2.1",
+          "quantity": "area under GZ up to 30 deg",
+          "required": 0.055,
+          "attained": 0.022547576,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.032452424
+        },
+        {
+          "clause": "2.2.2",
+          "quantity": "area under GZ up to 40 deg or the flooding angle",
+          "required": 0.09,
+          "attained": 0.051131483,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.038868517
+        },
+        {
+          "clause": "2.2.3",
+          "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+          "required": 0.03,
+          "attained": 0.028583907,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.001416093
+        },
+        {
+          "clause": "2.2.4",
+          "quantity": "GZ at 30 deg",
+          "required": 0.2,
+          "attained": 0.113888889,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.086111111
+        },
+        {
+          "clause": "2.2.5",
+          "quantity": "angle of maximum GZ",
+          "required": 25.0,
+          "attained": 50.0,
+          "unit": "deg",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 25.0
+        },
+        {
+          "clause": "2.2.6",
+          "quantity": "initial metacentric height GM_0",
+          "required": 0.15,
+          "attained": 0.116666667,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.033333333
+        }
+      ],
+      "failures": [
+        "2.2.1",
+        "2.2.2",
+        "2.2.3",
+        "2.2.4",
+        "2.2.6"
+      ]
+    },
+    "curve": {
+      "angles_deg": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0,
+        19.0,
+        20.0,
+        21.0,
+        22.0,
+        23.0,
+        24.0,
+        25.0,
+        26.0,
+        27.0,
+        28.0,
+        29.0,
+        30.0,
+        31.0,
+        32.0,
+        33.0,
+        34.0,
+        35.0,
+        36.0,
+        37.0,
+        38.0,
+        39.0,
+        40.0,
+        41.0,
+        42.0,
+        43.0,
+        44.0,
+        45.0,
+        46.0,
+        47.0,
+        48.0,
+        49.0,
+        50.0
+      ],
+      "gz_m": [
+        0.0,
+        0.002037886547,
+        0.00408579413,
+        0.006153776444,
+        0.008251952719,
+        0.010390541074,
+        0.012579892551,
+        0.014830526104,
+        0.017153164774,
+        0.01955877334,
+        0.022058597707,
+        0.024664206365,
+        0.027387534223,
+        0.030240929196,
+        0.033237201923,
+        0.036389679056,
+        0.039712260587,
+        0.043219481746,
+        0.046926580052,
+        0.050849568174,
+        0.055005313329,
+        0.059411624054,
+        0.064087345265,
+        0.069052462673,
+        0.074328217724,
+        0.07993723444,
+        0.085903659686,
+        0.092253318626,
+        0.099013887386,
+        0.106215085226,
+        0.113888888889,
+        0.122069772179,
+        0.130794974314,
+        0.140104801153,
+        0.150042964059,
+        0.160656961959,
+        0.171998513056,
+        0.184124043811,
+        0.197095244083,
+        0.210979698946,
+        0.225851609573,
+        0.241792617903,
+        0.258892752581,
+        0.277251517041,
+        0.296979144731,
+        0.318198051534,
+        0.339320032128,
+        0.358756910715,
+        0.376631191745,
+        0.393053256243,
+        0.40812281419
+      ]
+    }
+  },
+  "negative_control": {
+    "what": "the passing barge curve scaled by 0.5, GM_0 halved with it",
+    "criteria": [
+      {
+        "clause": "2.2.1",
+        "quantity": "area under GZ up to 30 deg",
+        "required": 0.055,
+        "attained": 0.034718747,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.020281253,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.2",
+        "quantity": "area under GZ up to 40 deg or the flooding angle",
+        "required": 0.09,
+        "attained": 0.066506925,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.023493075,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.3",
+        "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+        "required": 0.03,
+        "attained": 0.031788177,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": 0.001788177,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.4",
+        "quantity": "GZ at 30 deg",
+        "required": 0.2,
+        "attained": 0.144444444,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": -0.055555556,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.5",
+        "quantity": "angle of maximum GZ",
+        "required": 25.0,
+        "attained": 50.0,
+        "unit": "deg",
+        "comparison": "at least",
+        "margin": 25.0,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.6",
+        "quantity": "initial metacentric height GM_0",
+        "required": 0.15,
+        "attained": 0.233333333,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": 0.083333333,
+        "satisfied": true
+      }
+    ],
+    "report": {
+      "schema": "tensorcad.intact-stability/1",
+      "code": "IMO IS Code 2008, part A, 2.2",
+      "satisfied": false,
+      "verdict": "fails IS Code 2008 part A 2.2.1, 2.2.2, 2.2.4",
+      "gm0_m": 0.233333333,
+      "flooding_angle_deg": null,
+      "upper_angle_deg": 40.0,
+      "area_0_30_m_rad": 0.034718747,
+      "area_0_40_m_rad": 0.066506925,
+      "area_30_40_m_rad": 0.031788177,
+      "gz_30_m": 0.144444444,
+      "max_gz_m": 0.338119185,
+      "angle_of_max_gz_deg": 50.0,
+      "angle_step_max_deg": 1.0,
+      "criteria": [
+        {
+          "clause": "2.2.1",
+          "quantity": "area under GZ up to 30 deg",
+          "required": 0.055,
+          "attained": 0.034718747,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.020281253
+        },
+        {
+          "clause": "2.2.2",
+          "quantity": "area under GZ up to 40 deg or the flooding angle",
+          "required": 0.09,
+          "attained": 0.066506925,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.023493075
+        },
+        {
+          "clause": "2.2.3",
+          "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+          "required": 0.03,
+          "attained": 0.031788177,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.001788177
+        },
+        {
+          "clause": "2.2.4",
+          "quantity": "GZ at 30 deg",
+          "required": 0.2,
+          "attained": 0.144444444,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.055555556
+        },
+        {
+          "clause": "2.2.5",
+          "quantity": "angle of maximum GZ",
+          "required": 25.0,
+          "attained": 50.0,
+          "unit": "deg",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 25.0
+        },
+        {
+          "clause": "2.2.6",
+          "quantity": "initial metacentric height GM_0",
+          "required": 0.15,
+          "attained": 0.233333333,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.083333333
+        }
+      ],
+      "failures": [
+        "2.2.1",
+        "2.2.2",
+        "2.2.4"
+      ]
+    }
+  },
+  "hull": {
+    "parameters": {
+      "length_m": 12.0,
+      "beam_m": 2.4,
+      "draft_m": 0.9,
+      "freeboard_m": 0.6,
+      "kg_m": 0.8000564700454096,
+      "gm_target_m": 0.3
+    },
+    "gm0_m": 0.30000000000000004,
+    "displacement_volume_m3": 12.133077798186422,
+    "displacement_t": 12.43640474314108,
+    "slope_at_zero_m": 0.2989101553791875,
+    "slope_probe_deg": 0.25,
+    "slope_relative_error": 0.003632815402708396,
+    "angle_step_deg": 5.0,
+    "curve": {
+      "angles_deg": [
+        0.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        45.0,
+        50.0
+      ],
+      "gz_m": [
+        -0.0,
+        0.024480456622,
+        0.046279017772,
+        0.066334878281,
+        0.085488903856,
+        0.104562613826,
+        0.124049648859,
+        0.139254276442,
+        0.148272443095,
+        0.152037924954,
+        0.151550321412
+      ],
+      "max_volume_error": 2.635310153041617e-15
+    },
+    "criteria": [
+      {
+        "clause": "2.2.1",
+        "quantity": "area under GZ up to 30 deg",
+        "required": 0.055,
+        "attained": 0.03396155,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.02103845,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.2",
+        "quantity": "area under GZ up to 40 deg or the flooding angle",
+        "required": 0.09,
+        "attained": 0.057996071,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.032003929,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.3",
+        "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+        "required": 0.03,
+        "attained": 0.024034521,
+        "unit": "m rad",
+        "comparison": "at least",
+        "margin": -0.005965479,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.4",
+        "quantity": "GZ at 30 deg",
+        "required": 0.2,
+        "attained": 0.124049649,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": -0.075950351,
+        "satisfied": false
+      },
+      {
+        "clause": "2.2.5",
+        "quantity": "angle of maximum GZ",
+        "required": 25.0,
+        "attained": 45.0,
+        "unit": "deg",
+        "comparison": "at least",
+        "margin": 20.0,
+        "satisfied": true
+      },
+      {
+        "clause": "2.2.6",
+        "quantity": "initial metacentric height GM_0",
+        "required": 0.15,
+        "attained": 0.3,
+        "unit": "m",
+        "comparison": "at least",
+        "margin": 0.15,
+        "satisfied": true
+      }
+    ],
+    "report": {
+      "schema": "tensorcad.intact-stability/1",
+      "code": "IMO IS Code 2008, part A, 2.2",
+      "satisfied": false,
+      "verdict": "fails IS Code 2008 part A 2.2.1, 2.2.2, 2.2.3, 2.2.4",
+      "gm0_m": 0.3,
+      "flooding_angle_deg": null,
+      "upper_angle_deg": 40.0,
+      "area_0_30_m_rad": 0.03396155,
+      "area_0_40_m_rad": 0.057996071,
+      "area_30_40_m_rad": 0.024034521,
+      "gz_30_m": 0.124049649,
+      "max_gz_m": 0.152037925,
+      "angle_of_max_gz_deg": 45.0,
+      "angle_step_max_deg": 5.0,
+      "criteria": [
+        {
+          "clause": "2.2.1",
+          "quantity": "area under GZ up to 30 deg",
+          "required": 0.055,
+          "attained": 0.03396155,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.02103845
+        },
+        {
+          "clause": "2.2.2",
+          "quantity": "area under GZ up to 40 deg or the flooding angle",
+          "required": 0.09,
+          "attained": 0.057996071,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.032003929
+        },
+        {
+          "clause": "2.2.3",
+          "quantity": "area under GZ between 30 deg and 40 deg or the flooding angle",
+          "required": 0.03,
+          "attained": 0.024034521,
+          "unit": "m rad",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.005965479
+        },
+        {
+          "clause": "2.2.4",
+          "quantity": "GZ at 30 deg",
+          "required": 0.2,
+          "attained": 0.124049649,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": false,
+          "margin": -0.075950351
+        },
+        {
+          "clause": "2.2.5",
+          "quantity": "angle of maximum GZ",
+          "required": 25.0,
+          "attained": 45.0,
+          "unit": "deg",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 20.0
+        },
+        {
+          "clause": "2.2.6",
+          "quantity": "initial metacentric height GM_0",
+          "required": 0.15,
+          "attained": 0.3,
+          "unit": "m",
+          "comparison": "at least",
+          "satisfied": true,
+          "margin": 0.15
+        }
+      ],
+      "failures": [
+        "2.2.1",
+        "2.2.2",
+        "2.2.3",
+        "2.2.4"
+      ]
+    }
+  },
+  "weather": {
+    "moderate": {
+      "wind_area_m2": 10.0,
+      "wind_arm_m": 2.0,
+      "displacement_t": 82.0,
+      "reference_theta0_deg": 1.5378788844603797,
+      "report": {
+        "schema": "tensorcad.intact-stability/1",
+        "code": "IMO IS Code 2008, part A, 2.3",
+        "satisfied": true,
+        "verdict": "passes IS Code 2008 part A 2.3.1 and 2.3.2 (weather criterion)",
+        "levers": {
+          "steady_lever_m": 0.012530768,
+          "gust_lever_m": 0.018796151,
+          "wind_area_m2": 10.0,
+          "wind_arm_m": 2.0,
+          "displacement_t": 82.0,
+          "pressure_pa": 504.0,
+          "gravity": 9.81
+        },
+        "theta0_deg": 1.537690637,
+        "deck_edge_angle_deg": null,
+        "steady_heel_limit_deg": 16.0,
+        "roll_amplitude_deg": 0.0,
+        "theta2_deg": 50.0,
+        "theta_c_deg": null,
+        "area_b_m_rad": 0.231616813,
+        "area_a_m_rad": 0.016402736,
+        "criteria": [
+          {
+            "clause": "2.3.1",
+            "quantity": "steady wind heel angle theta0 (limit min(16 deg, 0.8 deck edge))",
+            "required": 16.0,
+            "attained": 1.537690637,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": true,
+            "margin": 14.462309363
+          },
+          {
+            "clause": "2.3.2",
+            "quantity": "area b under GZ >= area a under the gust lever lw2",
+            "required": 0.016402736,
+            "attained": 0.231616813,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.215214076
+          }
+        ],
+        "failures": []
+      }
+    },
+    "storm": {
+      "wind_area_m2": 240.0,
+      "wind_arm_m": 2.0,
+      "displacement_t": 82.0,
+      "report": {
+        "schema": "tensorcad.intact-stability/1",
+        "code": "IMO IS Code 2008, part A, 2.3",
+        "satisfied": false,
+        "verdict": "fails IS Code 2008 part A 2.3.1, 2.3.2",
+        "levers": {
+          "steady_lever_m": 0.30073842,
+          "gust_lever_m": 0.45110763,
+          "wind_area_m2": 240.0,
+          "wind_arm_m": 2.0,
+          "displacement_t": 82.0,
+          "pressure_pa": 504.0,
+          "gravity": 9.81
+        },
+        "theta0_deg": 30.881385501,
+        "deck_edge_angle_deg": null,
+        "steady_heel_limit_deg": 16.0,
+        "roll_amplitude_deg": 0.0,
+        "theta2_deg": 50.0,
+        "theta_c_deg": null,
+        "area_b_m_rad": 0.231616813,
+        "area_a_m_rad": 0.393665672,
+        "criteria": [
+          {
+            "clause": "2.3.1",
+            "quantity": "steady wind heel angle theta0 (limit min(16 deg, 0.8 deck edge))",
+            "required": 16.0,
+            "attained": 30.881385501,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": false,
+            "margin": -14.881385501
+          },
+          {
+            "clause": "2.3.2",
+            "quantity": "area b under GZ >= area a under the gust lever lw2",
+            "required": 0.393665672,
+            "attained": 0.231616813,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": false,
+            "margin": -0.162048859
+          }
+        ],
+        "failures": [
+          "2.3.1",
+          "2.3.2"
+        ]
+      }
+    },
+    "deck_edge_rule": {
+      "deck_edge_angle_deg": 12.0,
+      "report": {
+        "schema": "tensorcad.intact-stability/1",
+        "code": "IMO IS Code 2008, part A, 2.3",
+        "satisfied": false,
+        "verdict": "fails IS Code 2008 part A 2.3.1",
+        "levers": {
+          "steady_lever_m": 0.1,
+          "gust_lever_m": 0.15,
+          "wind_area_m2": 79.803571429,
+          "wind_arm_m": 2.0,
+          "displacement_t": 82.0,
+          "pressure_pa": 504.0,
+          "gravity": 9.81
+        },
+        "theta0_deg": 11.982016175,
+        "deck_edge_angle_deg": 12.0,
+        "steady_heel_limit_deg": 9.6,
+        "roll_amplitude_deg": 0.0,
+        "theta2_deg": 50.0,
+        "theta_c_deg": null,
+        "area_b_m_rad": 0.231616813,
+        "area_a_m_rad": 0.130899694,
+        "criteria": [
+          {
+            "clause": "2.3.1",
+            "quantity": "steady wind heel angle theta0 (limit min(16 deg, 0.8 deck edge))",
+            "required": 9.6,
+            "attained": 11.982016175,
+            "unit": "deg",
+            "comparison": "not more than",
+            "satisfied": false,
+            "margin": -2.382016175
+          },
+          {
+            "clause": "2.3.2",
+            "quantity": "area b under GZ >= area a under the gust lever lw2",
+            "required": 0.130899694,
+            "attained": 0.231616813,
+            "unit": "m rad",
+            "comparison": "at least",
+            "satisfied": true,
+            "margin": 0.100717119
+          }
+        ],
+        "failures": [
+          "2.3.1"
+        ]
+      }
+    },
+    "levers": {
+      "steady_lever_m": 0.012530768,
+      "gust_lever_m": 0.018796151,
+      "wind_area_m2": 10.0,
+      "wind_arm_m": 2.0,
+      "displacement_t": 82.0,
+      "pressure_pa": 504.0,
+      "gravity": 9.81
+    }
+  },
+  "convergence": [
+    {
+      "angle_step_deg": 5.0,
+      "area_0_30_m_rad": 0.06961396603150474,
+      "relative_error": 0.0026478478619027875,
+      "verdict": "passes IS Code 2008 part A 2.2.1-2.2.6"
+    },
+    {
+      "angle_step_deg": 2.0,
+      "area_0_30_m_rad": 0.06945959272504026,
+      "relative_error": 0.00042441379661930357,
+      "verdict": "passes IS Code 2008 part A 2.2.1-2.2.6"
+    },
+    {
+      "angle_step_deg": 1.0,
+      "area_0_30_m_rad": 0.06943749428783481,
+      "relative_error": 0.00010613067373087353,
+      "verdict": "passes IS Code 2008 part A 2.2.1-2.2.6"
+    },
+    {
+      "angle_step_deg": 0.5,
+      "area_0_30_m_rad": 0.06943196790656708,
+      "relative_error": 2.6534371430734816e-05,
+      "verdict": "passes IS Code 2008 part A 2.2.1-2.2.6"
+    }
+  ],
+  "convergence_ratios": [
+    6.238835502036919,
+    3.99897392242636,
+    3.9997432766748022
+  ],
+  "claims": [
+    {
+      "claim": "barge GZ from the mesh equals the wall-sided closed form inside its validity window",
+      "holds": true,
+      "measured": "max |GZ - GZ_analytic| = 2.776e-16 m over 0-45.00 deg",
+      "expected": "< 1e-11 m"
+    },
+    {
+      "claim": "the closed form stops applying beyond the bilge-emergence angle, and the mesh says so",
+      "holds": true,
+      "measured": "max |GZ - GZ_analytic| = 4.391e-02 m above 45.00 deg (the formula is not the barge's arm there)",
+      "expected": "> 1e-3 m, so the agreement above is not vacuous"
+    },
+    {
+      "claim": "barge displacement is held at every heel",
+      "holds": true,
+      "measured": "max |V(phi)/V(0) - 1| = 4.974e-15",
+      "expected": "< 1e-12"
+    },
+    {
+      "claim": "the report's 30 deg area matches the antiderivative",
+      "holds": true,
+      "measured": "0.069437494 m rad vs 0.069430126 (relative 1.06e-04)",
+      "expected": "< 5e-4 relative on a 1 deg grid"
+    },
+    {
+      "claim": "the light barge passes all six general criteria",
+      "holds": true,
+      "measured": "passes IS Code 2008 part A 2.2.1-2.2.6",
+      "expected": "passes 2.2.1-2.2.6"
+    },
+    {
+      "claim": "the two waterline solvers produce the same report",
+      "holds": true,
+      "measured": "max |difference| over the six clauses = 1.590e-13",
+      "expected": "< 1e-8 (each clause keeps its own unit: m, m rad or deg)"
+    },
+    {
+      "claim": "loading 0.35 m deeper flips the verdict",
+      "holds": true,
+      "measured": "GM_0 = 0.1167 m; fails IS Code 2008 part A 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.6",
+      "expected": "fails, with GM_0 under the 0.15 m floor"
+    },
+    {
+      "claim": "the failing clauses are the five the areas and levers predict",
+      "holds": true,
+      "measured": "2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.6",
+      "expected": "2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.6 (2.2.5 is a shape clause and survives)"
+    },
+    {
+      "claim": "scaling the passing arm by 0.5 makes the same geometry fail",
+      "holds": true,
+      "measured": "fails IS Code 2008 part A 2.2.1, 2.2.2, 2.2.4",
+      "expected": "fails (the comparison can fail on the same geometry)"
+    },
+    {
+      "claim": "the hull curve's slope at zero equals GM_0 from the waterplane moments",
+      "holds": true,
+      "measured": "dGZ/dphi = 0.298910 m vs GM_0 = 0.300000 m (relative 3.63e-03, central difference over +/-0.25 deg)",
+      "expected": "< 1e-2 relative (the rest is the 81x25 hull's own resolution)"
+    },
+    {
+      "claim": "the steady wind heel angle matches an independent bisection",
+      "holds": true,
+      "measured": "theta0 = 1.537691 deg vs 1.537879 deg",
+      "expected": "< 1e-3 deg (linear interpolant on a 1 deg grid)"
+    },
+    {
+      "claim": "a moderate wind passes the weather criterion",
+      "holds": true,
+      "measured": "passes IS Code 2008 part A 2.3.1 and 2.3.2 (weather criterion); lw1 = 0.012531 m, lw2 = 0.018796 m, b = 0.231617, a = 0.016403 m rad",
+      "expected": "passes 2.3.1 and 2.3.2"
+    },
+    {
+      "claim": "a storm wind fails both weather clauses",
+      "holds": true,
+      "measured": "fails IS Code 2008 part A 2.3.1, 2.3.2; theta0 = 30.881 deg, b = 0.231617, a = 0.393666 m rad",
+      "expected": "fails 2.3.1 and 2.3.2"
+    },
+    {
+      "claim": "the 80 % deck-edge rule binds before the 16 deg limit",
+      "holds": true,
+      "measured": "limit = 9.6 deg, theta0 = 11.982 deg, fails IS Code 2008 part A 2.3.1",
+      "expected": "limit 0.8 x 12 = 9.6 deg < theta0 < 16 deg, so 2.3.1 fails"
+    },
+    {
+      "claim": "the criteria's grid error falls as the step squared",
+      "holds": true,
+      "measured": "errors 2.65e-03 at 5 deg, 4.24e-04 at 2 deg, 1.06e-04 at 1 deg, 2.65e-05 at 0.5 deg; successive ratios 6.24, 4.00, 4.00; verdict identical on all four grids",
+      "expected": "successive ratios 3.5-4.5 for 2 deg and below (the 5 deg rung is not asymptotic), same verdict"
+    }
+  ],
+  "failures": []
+}
