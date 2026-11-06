@@ -1,0 +1,302 @@
+{
+  "criteria": {
+    "2.2.1a": {
+      "requirement": "area under GZ from 0 to 30 deg",
+      "threshold": 0.055,
+      "unit": "m*rad"
+    },
+    "2.2.1b": {
+      "requirement": "area under GZ from 0 to 40 deg, or to the flooding angle if that is less",
+      "threshold": 0.09,
+      "unit": "m*rad"
+    },
+    "2.2.1c": {
+      "requirement": "area under GZ from 30 deg to 40 deg, or to the flooding angle if that is less",
+      "threshold": 0.03,
+      "unit": "m*rad"
+    },
+    "2.2.2": {
+      "requirement": "GZ at 30 deg of heel",
+      "threshold": 0.2,
+      "unit": "m"
+    },
+    "2.2.3": {
+      "requirement": "heel at which GZ reaches its maximum",
+      "threshold": 25.0,
+      "unit": "deg"
+    },
+    "2.2.4": {
+      "requirement": "initial metacentric height GM0",
+      "threshold": 0.15,
+      "unit": "m"
+    }
+  },
+  "area_quadrature": [
+    {
+      "curve": "GZ = 0.5 sin(phi)",
+      "interval_deg": "0-30",
+      "computed_m_rad": 0.06698729810778067,
+      "closed_form_m_rad": 0.06698729810778065,
+      "relative_error": 4.143408735633879e-16
+    },
+    {
+      "curve": "GZ = 0.5 sin(phi)",
+      "interval_deg": "0-40",
+      "computed_m_rad": 0.11697777844051098,
+      "closed_form_m_rad": 0.116977778440511,
+      "relative_error": 1.1863610330804837e-16
+    },
+    {
+      "curve": "GZ = 0.5 sin(phi)",
+      "interval_deg": "30-40",
+      "computed_m_rad": 0.04999048033273031,
+      "closed_form_m_rad": 0.04999048033273035,
+      "relative_error": 6.940215274711129e-16
+    },
+    {
+      "curve": "wall-sided barge (B=6 m, T=3 m, KG=2 m)",
+      "interval_deg": "0-30",
+      "computed_m_rad": 0.07735026918962577,
+      "closed_form_m_rad": 0.07735026918962579,
+      "relative_error": 1.7941486116606488e-16
+    },
+    {
+      "curve": "wall-sided barge (B=6 m, T=3 m, KG=2 m)",
+      "interval_deg": "0-40",
+      "computed_m_rad": 0.1527036446661393,
+      "closed_form_m_rad": 0.15270364466613934,
+      "relative_error": 1.8176105538483892e-16
+    },
+    {
+      "curve": "wall-sided barge (B=6 m, T=3 m, KG=2 m)",
+      "interval_deg": "30-40",
+      "computed_m_rad": 0.07535337547651354,
+      "closed_form_m_rad": 0.07535337547651355,
+      "relative_error": 1.8416942466153945e-16
+    }
+  ],
+  "gm0_from_slope": [
+    {
+      "curve": "GZ = 0.5 sin(phi)",
+      "computed_gm0_m": 0.5,
+      "reference_gm0_m": 0.5,
+      "relative_error": 0.0
+    },
+    {
+      "curve": "wall-sided barge",
+      "computed_gm0_m": 0.49999987617078295,
+      "reference_gm0_m": 0.5,
+      "relative_error": 2.476584340938004e-07
+    }
+  ],
+  "table_coarsening": [
+    {
+      "sample_step_deg": 20.0,
+      "samples": 4,
+      "area_to_30_m_rad": 0.0775893693937874,
+      "trapezoid_error_m_rad": 0.00023910020416161026,
+      "reported_uncertainty_m_rad": 0.0022442300886117584,
+      "covered": true
+    },
+    {
+      "sample_step_deg": 10.0,
+      "samples": 6,
+      "area_to_30_m_rad": 0.07735660053515855,
+      "trapezoid_error_m_rad": 6.331345532767374e-06,
+      "reported_uncertainty_m_rad": 0.001157862723141818,
+      "covered": true
+    },
+    {
+      "sample_step_deg": 5.0,
+      "samples": 11,
+      "area_to_30_m_rad": 0.07735063427190432,
+      "trapezoid_error_m_rad": 3.650822785333796e-07,
+      "reported_uncertainty_m_rad": 0.0002924022725102759,
+      "covered": true
+    },
+    {
+      "sample_step_deg": 2.5,
+      "samples": 21,
+      "area_to_30_m_rad": 0.07735029152972514,
+      "trapezoid_error_m_rad": 2.2340099353757026e-08,
+      "reported_uncertainty_m_rad": 7.327918879548271e-05,
+      "covered": true
+    },
+    {
+      "sample_step_deg": 1.0,
+      "samples": 51,
+      "area_to_30_m_rad": 0.0773502697581102,
+      "trapezoid_error_m_rad": 5.684844123221566e-10,
+      "reported_uncertainty_m_rad": 1.1732617247664616e-05,
+      "covered": true
+    }
+  ],
+  "verdicts": [
+    {
+      "case": "compliant analytic (GZ = 0.5 sin phi)",
+      "verdict": "pass",
+      "area_to_30_m_rad": 0.06698729810778067,
+      "area_to_40_m_rad": 0.11697777844051098,
+      "area_30_to_40_m_rad": 0.04999048033273031,
+      "gz_at_30_m": 0.24999999999999997,
+      "angle_of_max_gz_deg": 90.0,
+      "gm0_m": 0.5,
+      "statuses": {
+        "2.2.1a": "pass",
+        "2.2.1b": "pass",
+        "2.2.1c": "pass",
+        "2.2.2": "pass",
+        "2.2.3": "pass",
+        "2.2.4": "pass"
+      }
+    },
+    {
+      "case": "wall-sided barge, analytic curve",
+      "verdict": "pass",
+      "area_to_30_m_rad": 0.07735026918962577,
+      "area_to_40_m_rad": 0.1527036446661393,
+      "area_30_to_40_m_rad": 0.07535337547651354,
+      "gz_at_30_m": 0.33333333333333326,
+      "angle_of_max_gz_deg": 90.0,
+      "gm0_m": 0.49999987617078295,
+      "statuses": {
+        "2.2.1a": "pass",
+        "2.2.1b": "pass",
+        "2.2.1c": "pass",
+        "2.2.2": "pass",
+        "2.2.3": "pass",
+        "2.2.4": "pass"
+      }
+    },
+    {
+      "case": "wall-sided barge, mesh -> righting_arm_curve",
+      "verdict": "pass",
+      "area_to_30_m_rad": 0.07735660053515858,
+      "area_to_40_m_rad": 0.15358214813019114,
+      "area_30_to_40_m_rad": 0.07622554759503256,
+      "gz_at_30_m": 0.33333333333333337,
+      "angle_of_max_gz_deg": 40.0,
+      "gm0_m": 0.4986484141785438,
+      "statuses": {
+        "2.2.1a": "pass",
+        "2.2.1b": "pass",
+        "2.2.1c": "pass",
+        "2.2.2": "pass",
+        "2.2.3": "pass",
+        "2.2.4": "pass"
+      }
+    },
+    {
+      "case": "tender control (GZ = 0.1 sin phi)",
+      "verdict": "fail",
+      "area_to_30_m_rad": 0.013397459621556133,
+      "area_to_40_m_rad": 0.023395555688102195,
+      "area_30_to_40_m_rad": 0.009998096066546062,
+      "gz_at_30_m": 0.049999999999999996,
+      "angle_of_max_gz_deg": 90.0,
+      "gm0_m": 0.1,
+      "statuses": {
+        "2.2.1a": "fail",
+        "2.2.1b": "fail",
+        "2.2.1c": "fail",
+        "2.2.2": "fail",
+        "2.2.3": "pass",
+        "2.2.4": "fail"
+      }
+    }
+  ],
+  "mesh_route": [
+    {
+      "heel_deg": 0.0,
+      "mesh_gz_m": 0.0,
+      "closed_form_gz_m": 0.0,
+      "absolute_error_m": 0.0
+    },
+    {
+      "heel_deg": 10.0,
+      "mesh_gz_m": 0.08952355430241993,
+      "closed_form_gz_m": 0.08952355430241984,
+      "absolute_error_m": 8.326672684688674e-17
+    },
+    {
+      "heel_deg": 20.0,
+      "mesh_gz_m": 0.1936645165744716,
+      "closed_form_gz_m": 0.19366451657447156,
+      "absolute_error_m": 2.7755575615628914e-17
+    },
+    {
+      "heel_deg": 30.0,
+      "mesh_gz_m": 0.33333333333333337,
+      "closed_form_gz_m": 0.33333333333333326,
+      "absolute_error_m": 1.1102230246251565e-16
+    },
+    {
+      "heel_deg": 40.0,
+      "mesh_gz_m": 0.5476833875074247,
+      "closed_form_gz_m": 0.5476833875074238,
+      "absolute_error_m": 8.881784197001252e-16
+    }
+  ],
+  "crosscheck_intact_stability": [
+    {
+      "quantity": "area 0-30 deg [m rad]",
+      "statutory": 0.07735026919184458,
+      "intact_stability": 0.0773510025689587,
+      "closed_form": 0.07735026918962579,
+      "statutory_error": 2.868502741809162e-11,
+      "sibling_error": 9.48127706080981e-06,
+      "difference": 7.333771141204704e-07
+    },
+    {
+      "quantity": "area 0-40 deg [m rad]",
+      "statutory": 0.15270364467027414,
+      "intact_stability": 0.15270534515911124,
+      "closed_form": 0.15270364466613934,
+      "statutory_error": 2.7077307942790223e-11,
+      "sibling_error": 1.113590298138924e-05,
+      "difference": 1.7004888371030535e-06
+    },
+    {
+      "quantity": "verdict, compliant 0.5 sin(phi)",
+      "statutory": "pass",
+      "intact_stability": "passes IS Code 2008 part A 2.2.1-2.2.6",
+      "closed_form": null,
+      "statutory_error": null,
+      "sibling_error": null,
+      "difference": null,
+      "failed_rules": [],
+      "sibling_failed_rules": [],
+      "crosswalked": []
+    },
+    {
+      "quantity": "verdict, tender 0.1 sin(phi)",
+      "statutory": "fail",
+      "intact_stability": "fails IS Code 2008 part A 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.6",
+      "closed_form": null,
+      "statutory_error": null,
+      "sibling_error": null,
+      "difference": null,
+      "failed_rules": [
+        "2.2.1a",
+        "2.2.1b",
+        "2.2.1c",
+        "2.2.2",
+        "2.2.4"
+      ],
+      "sibling_failed_rules": [
+        "2.2.1",
+        "2.2.2",
+        "2.2.3",
+        "2.2.4",
+        "2.2.6"
+      ],
+      "crosswalked": [
+        "2.2.1",
+        "2.2.2",
+        "2.2.3",
+        "2.2.4",
+        "2.2.6"
+      ]
+    }
+  ]
+}
