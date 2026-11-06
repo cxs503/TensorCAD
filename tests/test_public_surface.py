@@ -46,6 +46,8 @@ EXPECTED_API = {
     "DEFAULT_HEELS_DEG", "HeeledDisplacement", "RightingArm", "RightingArmError",
     "heeled_displacement", "righting_arm", "wall_sided_validity_deg",
     "BoxGzError", "BoxGzPoint", "BisectionRightingArmCurve", "bisection_righting_arm_curve",
+    # areas under the exact multi-regime curve: IS Code areas past the wall-sided limit
+    "BoxGzArea", "box_gz_area",
     "barge_wall_sided_righting_arm",
     "waterplane_inertia_longitudinal", "waterplane_inertia_transverse", "condition_mesh", "decimate",
     "enforce_gate",
