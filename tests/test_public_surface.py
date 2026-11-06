@@ -62,6 +62,9 @@ EXPECTED_API = {
     "WeatherCriterionReport", "WindHeelingLevers",
     "general_criteria", "gz_area_between", "gz_at_angle",
     "steady_wind_heel_angle", "weather_criterion", "wind_heeling_levers",
+    # statutory rule check (0.23.0+): IS Code 2008 s. 2.2 with per-rule error bars
+    "INTACT_STABILITY_CRITERIA", "CriterionCheck", "IntactStabilityAssessment", "StatutoryError",
+    "area_under_gz_curve", "check_intact_stability", "gm0_from_gz_curve",
 }
 
 
