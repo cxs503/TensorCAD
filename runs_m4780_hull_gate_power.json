@@ -1,0 +1,350 @@
+{
+  "HUL-1-taper-exponent": {
+    "status": "ok",
+    "mutant": {
+      "id": "HUL-1-taper-exponent",
+      "kind": "model",
+      "file": "hull",
+      "old": "        _breadth_exponent(parameters, index),\n    )",
+      "new": "        0.8,  # mutant HUL-1\n    )",
+      "claim": "mesh volume 7.446554 m^3 at 41x13 vs analytic 7.512698 (-0.88 %): the sampled surface must be the surface the reference integrates",
+      "tests": [
+        "tests/test_hull.py",
+        "tests/test_analytic_hydrostatics.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "6 failed, 59 passed, 1 warning in 15.58s",
+      "failed": [
+        "FAILED tests/test_hull.py::test_even_station_count_reports_the_beam_shortfall_instead_of_hiding_it",
+        "FAILED tests/test_hull.py::test_hydrostatics_match_the_analytic_surface_within_grid_error",
+        "FAILED tests/test_hull.py::test_under_sampled_grid_warns_instead_of_reporting_clean_numbers",
+        "FAILED tests/test_analytic_hydrostatics.py::test_mesh_hydrostatics_converge_to_the_closed_forms",
+        "FAILED tests/test_analytic_hydrostatics.py::test_default_resolution_is_inside_three_percent_on_every_quantity",
+        "FAILED tests/test_analytic_hydrostatics.py::test_refinement_estimate_is_optimistic_about_the_true_error"
+      ],
+      "wall_seconds": 16.26
+    }
+  },
+  "HUL-2-vertical-taper": {
+    "status": "ok",
+    "mutant": {
+      "id": "HUL-2-vertical-taper",
+      "kind": "model",
+      "file": "hull",
+      "old": "    return math.sqrt(level / (parameters.nz - 1))",
+      "new": "    return level / (parameters.nz - 1)  # mutant HUL-2",
+      "claim": "the sqrt vertical profile (the 2/3 volume factor of B*L*T*I*2/3)",
+      "tests": [
+        "tests/test_hull.py",
+        "tests/test_analytic_hydrostatics.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "7 failed, 58 passed, 1 warning in 16.18s",
+      "failed": [
+        "FAILED tests/test_hull.py::test_even_station_count_reports_the_beam_shortfall_instead_of_hiding_it",
+        "FAILED tests/test_hull.py::test_hydrostatics_match_the_analytic_surface_within_grid_error",
+        "FAILED tests/test_hull.py::test_under_sampled_grid_warns_instead_of_reporting_clean_numbers",
+        "FAILED tests/test_analytic_hydrostatics.py::test_mesh_hydrostatics_converge_to_the_closed_forms",
+        "FAILED tests/test_analytic_hydrostatics.py::test_default_resolution_is_inside_three_percent_on_every_quantity",
+        "FAILED tests/test_analytic_hydrostatics.py::test_vertical_centre_error_is_bounded_at_the_default_grid",
+        "FAILED tests/test_analytic_hydrostatics.py::test_refinement_estimate_is_optimistic_about_the_true_error"
+      ],
+      "wall_seconds": 17.01
+    }
+  },
+  "HUL-3-end-zeroing": {
+    "status": "ok",
+    "mutant": {
+      "id": "HUL-3-end-zeroing",
+      "kind": "gate",
+      "file": "hull",
+      "old": "    if index == 0 or index == parameters.nx - 1:\n        return 0.0",
+      "new": "    if False:  # mutant HUL-3\n        return 0.0",
+      "claim": "the end stations close on the centreline (math.sin(pi) is not exactly zero in floating point)",
+      "tests": [
+        "tests/test_hull.py",
+        "tests/test_analytic_hydrostatics.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "29 failed, 36 passed, 1 warning in 13.78s",
+      "failed": [
+        "FAILED tests/test_hull.py::test_topology_counts_are_exact[3-3] - ValueError: ...",
+        "FAILED tests/test_hull.py::test_topology_counts_are_exact[5-3] - ValueError: ...",
+        "FAILED tests/test_hull.py::test_topology_counts_are_exact[11-5] - ValueError:...",
+        "FAILED tests/test_hull.py::test_topology_counts_are_exact[41-13] - ValueError...",
+        "FAILED tests/test_hull.py::test_topology_counts_are_exact[12-7] - ValueError:...",
+        "FAILED tests/test_hull.py::test_generated_surface_is_a_closed_oriented_solid[3-3]",
+        "FAILED tests/test_hull.py::test_generated_surface_is_a_closed_oriented_solid[5-4]",
+        "FAILED tests/test_hull.py::test_generated_surface_is_a_closed_oriented_solid[11-5]",
+        "FAILED tests/test_hull.py::test_generated_surface_is_a_closed_oriented_solid[41-13]",
+        "FAILED tests/test_hull.py::test_generated_surface_is_a_closed_oriented_solid[60-9]",
+        "FAILED tests/test_hull.py::test_default_hull_is_deterministic - ValueError: g...",
+        "FAILED tests/test_hull.py::test_waterline_lies_exactly_on_z_zero - ValueError...",
+        "FAILED tests/test_hull.py::test_dimensions_change_geometry - ValueError: gene...",
+        "FAILED tests/test_hull.py::test_offsets_describe_the_waterline_and_close_at_both_ends",
+        "FAILED tests/test_hull.py::test_even_station_count_reports_the_beam_shortfall_instead_of_hiding_it",
+        "FAILED tests/test_hull.py::test_hydrostatics_match_the_analytic_surface_within_grid_error",
+        "FAILED tests/test_hull.py::test_hydrostatics_are_consistent_with_each_other",
+        "FAILED tests/test_hull.py::test_resolution_refinement_reduces_the_error - Val...",
+        "FAILED tests/test_hull.py::test_discretisation_estimate_skips_instead_of_failing_a_legal_model[4001-3-8001x5]",
+        "FAILED tests/test_hull.py::test_discretisation_estimate_skips_instead_of_failing_a_legal_model[3-513-5x1025]",
+        "FAILED tests/test_hull.py::test_discretisation_estimate_skips_instead_of_failing_a_legal_model[2002-3-4003x5]",
+        "FAILED tests/test_hull.py::test_discretisation_estimate_skips_instead_of_failing_a_legal_model[3-258-5x515]",
+        "FAILED tests/test_hull.py::test_under_sampled_grid_warns_instead_of_reporting_clean_numbers",
+        "FAILED tests/test_hull.py::test_implausible_dimension_ratios_warn_without_failing",
+        "FAILED tests/test_hull.py::test_mesh_is_built_from_a_single_source_of_truth",
+        "FAILED tests/test_hull.py::test_metadata_is_complete_and_json_serialisable - ...",
+        "FAILED tests/test_hull.py::test_export_writes_reproducible_round_trippable_artifacts",
+        "FAILED tests/test_analytic_hydrostatics.py::test_vertical_centre_error_is_bounded_at_the_default_grid",
+        "FAILED tests/test_analytic_hydrostatics.py::test_longitudinal_centres_land_on_the_midpoint_at_every_resolution"
+      ],
+      "wall_seconds": 14.46
+    }
+  },
+  "HUL-4-midship-split": {
+    "status": "ok",
+    "mutant": {
+      "id": "HUL-4-midship-split",
+      "kind": "gate",
+      "file": "hull",
+      "old": "    if 2 * index >= parameters.nx - 1:",
+      "new": "    if 2 * index > parameters.nx - 1:  # mutant HUL-4",
+      "claim": "midship belongs to both halves; the tie must not bend the surface",
+      "tests": [
+        "tests/test_hull.py",
+        "tests/test_analytic_hydrostatics.py"
+      ]
+    },
+    "run": {
+      "returncode": 0,
+      "killed": false,
+      "summary": "65 passed, 1 warning in 15.34s",
+      "failed": [],
+      "wall_seconds": 16.01
+    }
+  },
+  "ANA-1-volume-factor": {
+    "status": "ok",
+    "mutant": {
+      "id": "ANA-1-volume-factor",
+      "kind": "value",
+      "file": "ana",
+      "old": "    volume = beam * length * draft * taper * (2.0 / 3.0)",
+      "new": "    volume = beam * length * draft * taper * (1.0 / 2.0)  # mutant ANA-1",
+      "claim": "displaced volume 7.512698 m^3 = B*L*T*I*2/3",
+      "tests": [
+        "tests/test_hydrostatics_analytic.py",
+        "tests/test_analytic_hydrostatics.py",
+        "tests/test_hull.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "8 failed, 104 passed, 1 warning in 52.02s",
+      "failed": [
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_reference_is_a_closed_form_of_the_surface",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_default_grid_is_within_three_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_mesh_under_integrates_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_fine_grid_is_within_half_a_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_volume_error_is_what_hull_py_already_claimed",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[displacement_volume]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_within_tolerance_is_the_criterion_in_one_call",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_example_runs_on_a_shortened_ladder"
+      ],
+      "wall_seconds": 52.92
+    }
+  },
+  "ANA-2-vcb": {
+    "status": "ok",
+    "mutant": {
+      "id": "ANA-2-vcb",
+      "kind": "value",
+      "file": "ana",
+      "old": "        vertical_centre_buoyancy=-0.4 * draft,",
+      "new": "        vertical_centre_buoyancy=-0.5 * draft,  # mutant ANA-2",
+      "claim": "VCB = -0.4*T (0.6*T above the keel)",
+      "claim_note": "the z-weighted mean of zeta**(1/2) on [-T, 0]",
+      "tests": [
+        "tests/test_hydrostatics_analytic.py",
+        "tests/test_analytic_hydrostatics.py",
+        "tests/test_hull.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "6 failed, 106 passed, 1 warning in 45.16s",
+      "failed": [
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_centres_follow_from_the_symmetry_of_the_form",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_default_grid_is_within_three_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_fine_grid_is_within_half_a_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[vertical_centre_buoyancy]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_within_tolerance_is_the_criterion_in_one_call",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_example_runs_on_a_shortened_ladder"
+      ],
+      "wall_seconds": 46.17
+    }
+  },
+  "ANA-3-waterplane-half-percent": {
+    "status": "ok",
+    "mutant": {
+      "id": "ANA-3-waterplane-half-percent",
+      "kind": "tolerance",
+      "file": "ana",
+      "old": "    waterplane = beam * length * taper",
+      "new": "    waterplane = beam * length * taper * 0.995  # mutant ANA-3",
+      "claim": "waterplane area 14.061669 m^2 at 41x13; the fine grid is within half a percent on every quantity",
+      "tests": [
+        "tests/test_hydrostatics_analytic.py",
+        "tests/test_analytic_hydrostatics.py",
+        "tests/test_hull.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "4 failed, 108 passed, 1 warning in 43.94s",
+      "failed": [
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_reference_is_a_closed_form_of_the_surface",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_mesh_under_integrates_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_fine_grid_is_within_half_a_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[waterplane_area]"
+      ],
+      "wall_seconds": 44.86
+    }
+  },
+  "ANA-4-taper-arg": {
+    "status": "ok",
+    "mutant": {
+      "id": "ANA-4-taper-arg",
+      "kind": "value",
+      "file": "ana",
+      "old": "math.gamma(0.5 * (exponent + 1.0))",
+      "new": "math.gamma(0.5 * (exponent + 1.5))  # mutant ANA-4",
+      "claim": "taper_integral is a Beta integral: e=0 -> 1, e=1 -> 2/pi, e=2 -> 1/2",
+      "tests": [
+        "tests/test_hydrostatics_analytic.py",
+        "tests/test_analytic_hydrostatics.py",
+        "tests/test_hull.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "14 failed, 98 passed, 1 warning in 47.95s",
+      "failed": [
+        "FAILED tests/test_hydrostatics_analytic.py::test_taper_integral_agrees_with_the_volume_derived_constant",
+        "FAILED tests/test_hydrostatics_analytic.py::test_taper_integral_agrees_with_quadrature",
+        "FAILED tests/test_hydrostatics_analytic.py::test_taper_integral_reproduces_textbook_values[0.0-1.0]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_taper_integral_reproduces_textbook_values[1.0-0.6366197723675814]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_taper_integral_reproduces_textbook_values[2.0-0.5]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_default_grid_is_within_three_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_mesh_under_integrates_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_fine_grid_is_within_half_a_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_volume_error_is_what_hull_py_already_claimed",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[displacement_volume]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[waterplane_area]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[block_coefficient]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_within_tolerance_is_the_criterion_in_one_call",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_example_runs_on_a_shortened_ladder"
+      ],
+      "wall_seconds": 48.85
+    }
+  },
+  "ANA-5-volume-half-percent": {
+    "status": "ok",
+    "mutant": {
+      "id": "ANA-5-volume-half-percent",
+      "kind": "tolerance",
+      "file": "ana",
+      "old": "    volume = beam * length * draft * taper * (2.0 / 3.0)",
+      "new": "    volume = beam * length * draft * taper * (2.0 / 3.0) * 1.005  # mutant ANA-5",
+      "claim": "the documented -0.880 % volume grid error, pinned to 5e-5",
+      "tests": [
+        "tests/test_hydrostatics_analytic.py",
+        "tests/test_analytic_hydrostatics.py",
+        "tests/test_hull.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "5 failed, 107 passed, 1 warning in 44.28s",
+      "failed": [
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_reference_is_a_closed_form_of_the_surface",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_fine_grid_is_within_half_a_percent_on_every_quantity",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_volume_error_is_what_hull_py_already_claimed",
+        "FAILED tests/test_hydrostatics_analytic.py::test_every_quantity_converges_monotonically_down_the_ladder[displacement_volume]",
+        "FAILED tests/test_hydrostatics_analytic.py::test_within_tolerance_is_the_criterion_in_one_call"
+      ],
+      "wall_seconds": 45.24
+    }
+  },
+  "HUL-5-taper-integral-const": {
+    "status": "ok",
+    "mutant": {
+      "id": "HUL-5-taper-integral-const",
+      "kind": "value",
+      "file": "hull",
+      "old": "TAPER_INTEGRAL = (2.0 / math.pi) * math.sqrt(math.pi) * math.gamma(0.85) / (2.0 * math.gamma(1.35))",
+      "new": "TAPER_INTEGRAL = (1.0 / math.pi) * math.sqrt(math.pi) * math.gamma(0.85) / (2.0 * math.gamma(1.35))  # mutant HUL-5",
+      "claim": "TAPER_INTEGRAL = int_0^1 sin(pi*x)^0.7 dx, cross-derived from the volume identity",
+      "tests": [
+        "tests/test_hydrostatics_analytic.py",
+        "tests/test_analytic_hydrostatics.py",
+        "tests/test_hull.py"
+      ]
+    },
+    "run": {
+      "returncode": 1,
+      "killed": true,
+      "summary": "13 failed, 99 passed, 1 warning in 41.79s",
+      "failed": [
+        "FAILED tests/test_hydrostatics_analytic.py::test_taper_integral_agrees_with_the_volume_derived_constant",
+        "FAILED tests/test_hydrostatics_analytic.py::test_the_volume_error_is_what_hull_py_already_claimed",
+        "FAILED tests/test_analytic_hydrostatics.py::test_taper_integral_matches_simpson",
+        "FAILED tests/test_analytic_hydrostatics.py::test_closed_form_volume_matches_independent_quadrature",
+        "FAILED tests/test_analytic_hydrostatics.py::test_closed_form_waterplane_and_section_areas_match_quadrature",
+        "FAILED tests/test_analytic_hydrostatics.py::test_mesh_hydrostatics_converge_to_the_closed_forms",
+        "FAILED tests/test_analytic_hydrostatics.py::test_default_resolution_is_inside_three_percent_on_every_quantity",
+        "FAILED tests/test_analytic_hydrostatics.py::test_sampled_surface_is_inscribed_so_it_under_reports",
+        "FAILED tests/test_analytic_hydrostatics.py::test_refinement_estimate_is_optimistic_about_the_true_error",
+        "FAILED tests/test_hull.py::test_even_station_count_reports_the_beam_shortfall_instead_of_hiding_it",
+        "FAILED tests/test_hull.py::test_hydrostatics_match_the_analytic_surface_within_grid_error",
+        "FAILED tests/test_hull.py::test_resolution_refinement_reduces_the_error - ass...",
+        "FAILED tests/test_hull.py::test_under_sampled_grid_warns_instead_of_reporting_clean_numbers"
+      ],
+      "wall_seconds": 42.72
+    }
+  },
+  "baseline-gen": {
+    "status": "baseline",
+    "run": {
+      "returncode": 0,
+      "killed": false,
+      "summary": "65 passed, 1 warning in 16.44s",
+      "failed": [],
+      "wall_seconds": 17.15
+    }
+  },
+  "baseline-ana": {
+    "status": "baseline",
+    "run": {
+      "returncode": 0,
+      "killed": false,
+      "summary": "112 passed, 1 warning in 48.67s",
+      "failed": [],
+      "wall_seconds": 49.73
+    }
+  }
+}
