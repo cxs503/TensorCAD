@@ -35,6 +35,11 @@ EXPECTED_API = {
     "analytic_relative_errors", "analytic_wetted_surface_area",
     "InitialStability", "StabilityError", "WaterplaneMoments",
     "compute_hydrostatics", "initial_stability", "waterplane_moments",
+    # intact-stability criteria (IS Code 2008 Part A 2.2)
+    "assess_intact_stability", "assess_righting_arm_curve", "CriterionResult",
+    "IntactStabilityAssessment", "IntactStabilityError", "IntactThresholds",
+    "gz_area_between", "initial_gm_from_curve", "interpolate_gz",
+    "INTACT_AREA_30_DEG", "INTACT_AREA_40_DEG", "wall_sided_area",
     "DEFAULT_ANGLES_DEG", "FreeSurfaceCorrection", "GzError", "HeeledHydrostatics",
     "RightingArmCurve", "box_righting_arms_analytic", "box_wall_sided_limit_deg",
     "deck_edge_immersion_deg", "free_surface_correction", "heeled_hydrostatics",

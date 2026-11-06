@@ -1,3 +1,35 @@
+## Unreleased -- intact-stability criteria (IS Code 2008 Part A 2.2)
+
+`docs/gz.md` ended with "the areas `area_under_curve` returns are the input to such a check";
+this is the check.
+
+- `tensorcad/intact_stability.py`: `assess_intact_stability` / `assess_curve` evaluate the six
+  general criteria of the IMO Intact Stability Code 2008 Part A §2.2 (`2.2.1` area to 30°,
+  `2.2.2` area to 40° or θf, `2.2.3` area 30–40°, `2.2.4` `GZ(30°)`, `2.2.5` heel of the
+  greatest arm, `2.2.6` initial `GM`). Thresholds live in `IntactThresholds` (replaceable, so
+  a clause number is never detached from its number); every clause comes back as a
+  `CriterionResult` with `achieved`, `required`, `margin`, `status` and a note.
+- **Three statuses, not two.** `undetermined` is returned when the sampled curve does not
+  reach the angle a clause is quoted at, or when no flooding angle is supplied; `achieved` is
+  `None` exactly then, and `all_satisfied` is `True` only when every clause is positively
+  satisfied. A short curve cannot pass by omission.
+- `area_between` integrates the table trapezoidally with `GZ` interpolated at the clause
+  boundaries, converts degrees to radians internally, and is **signed** (an interval with
+  `GZ < 0` subtracts). It raises instead of extrapolating past either end of the table.
+- `wall_sided_area` gives the exact closed form
+  `GM (1 - cos θ) + BM/2 (sec θ + cos θ - 2)` used to verify the machinery; its derivation is
+  in the module docstring, and `initial_gm_from_curve` reads `GM_0` off a chord with the
+  `BM/2 tan²φ` bias stated in the note rather than hidden.
+- `tests/test_intact_stability.py` (31 tests): the table rule against `A sin(2φ)` and the
+  wall-sided form, second-order convergence, a `KG`-shift negative control, a real box-barge
+  curve through `righting_arm_curve`, every refusal path, and the three criterion statuses
+  including a threshold placed 1e-9 above the achieved value.
+- `examples/intact_stability/run_example.py`: six claims, exits non-zero if one breaks,
+  writes `docs/intact_stability/{results.json,report.md,figure*.png}` with the closed forms,
+  the three steps, the convergence slope and the truncated-θf case. `docs/intact_stability.md`
+  is the record; the backlog's 规范合规 gap is closed for §2.2 and says plainly that §2.3
+  (weather criterion) and the second-generation modes are still out.
+
 # Changelog
 
 All notable changes to TensorCAD are documented here. The format follows
