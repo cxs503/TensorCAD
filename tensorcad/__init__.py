@@ -27,6 +27,16 @@ from .bonjean import (
     section_loops,
     section_properties,
 )
+from .damage import (
+    Compartment,
+    DamageError,
+    DamageWaterline,
+    FloodedState,
+    buoyancy_curve,
+    damage_gm,
+    flooded_equilibrium,
+    intact_equilibrium,
+)
 from .box_gz import (
     BoxGzArea,
     BoxGzError,
