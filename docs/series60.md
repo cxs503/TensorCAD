@@ -50,6 +50,13 @@ model = generate_series60(p)
 ref = analytic_series60_hydrostatics(p)
 ```
 
+## Fidelity to the published parents
+
+`Cwp` equals `Cp` identically in this family and `LCB` sits at `L/2`; both are identities of
+the single-exponent taper, and against the tabulated parents that is −10.7 % on `Cwp` at
+`Cb = 0.60`. Pass `Series60Parameters(cwp=..., lcb=...)` to set them independently, or read
+`docs/series60_fidelity.md` for the measurement and the verdict.
+
 ## Measured accuracy
 
 Mesh displacement against the closed form, `L=10 m, B=1.5 m, T=0.6 m`, with the
