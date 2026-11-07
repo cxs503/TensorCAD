@@ -118,8 +118,17 @@ def _segment_pierces(
     d1 = _dot(normal, end) - offset
     if abs(d0) <= limit and abs(d1) <= limit:
         return False  # coplanar with the triangle's plane
+    # Snap to the plane before the sign test. Without this, an endpoint that lies
+    # *on* the plane only up to rounding (7e-17 m for a 2 m triangle) keeps the
+    # sign of its noise, the pair is classified as 'both ends on the same side'
+    # and the contact is lost -- a false negative for a face resting exactly on
+    # another face's plane.
+    if abs(d0) <= limit:
+        d0 = 0.0
+    if abs(d1) <= limit:
+        d1 = 0.0
     if d0 * d1 > 0.0:
-        return False  # both ends on the same side
+        return False  # both ends strictly on the same side
     if d0 == d1:
         return False  # parallel to the plane, never crosses
     t = d0 / (d0 - d1)
@@ -158,17 +167,56 @@ def triangles_intersect(
     parallel = _norm(_cross(n1, n2)) <= tolerance
     size = max(_scale(first), _scale(second), 1.0)
     if parallel and abs(d1 - d2) <= tolerance * size:
-        # Coplanar: containment of any vertex in the other triangle is the test.
-        return (
-            any(_point_in_triangle(point, second, 1e-9) for point in first)
-            or any(_point_in_triangle(point, first, 1e-9) for point in second)
-        )
+        # Coplanar pairs need the full polygon test: vertex containment alone
+        # misses overlaps whose corners are all edge crossings.
+        return _coplanar_intersect(first, second, tolerance)
     for i in range(3):
         if _segment_pierces(first[i], first[(i + 1) % 3], second, tolerance):
             return True
         if _segment_pierces(second[i], second[(i + 1) % 3], first, tolerance):
             return True
     return False
+
+
+def _coplanar_intersect(
+    first: Sequence[Vec3], second: Sequence[Vec3], tolerance: float
+) -> bool:
+    """Intersection test for two triangles that share a plane.
+
+    The classical shortcut -- 'some vertex of one triangle lies in the other' --
+    is not sufficient: two coplanar triangles can overlap in a lens whose corners
+    are all edge-crossings, with every vertex of each triangle outside the other
+    (a "Star of David" configuration). It also misses the sharp-outline case where
+    the overlap is a rectangle between two crossing strips. Both were false
+    negatives, so the test here is the separating-axis criterion for convex
+    polygons: project both triangles onto the six edge normals; if any axis
+    separates them the triangles are disjoint, and if none does they share area
+    or at least touch. Touching counts as intersecting, matching the closed-set
+    contract of :func:`triangles_intersect`.
+    """
+    normal, _, _ = _plane(first)
+    axis = max(range(3), key=lambda index: abs(normal[index]))
+    u_axis, v_axis = [(1, 2), (2, 0), (0, 1)][axis]
+    flat_first = [(point[u_axis], point[v_axis]) for point in first]
+    flat_second = [(point[u_axis], point[v_axis]) for point in second]
+    pad = tolerance * max(_scale(first), _scale(second), 1.0)
+
+    axes: list[tuple[float, float]] = []
+    for polygon in (flat_first, flat_second):
+        for i in range(3):
+            x0, y0 = polygon[i]
+            x1, y1 = polygon[(i + 1) % 3]
+            axes.append((y0 - y1, x1 - x0))  # edge normal in the projection plane
+    for nx, ny in axes:
+        if nx == 0.0 and ny == 0.0:
+            continue
+        first_proj = [nx * x + ny * y for x, y in flat_first]
+        second_proj = [nx * x + ny * y for x, y in flat_second]
+        length = math.sqrt(nx * nx + ny * ny)
+        gap = pad * length
+        if max(first_proj) + gap < min(second_proj) or max(second_proj) + gap < min(first_proj):
+            return False
+    return True
 
 
 def _grid_cell(
