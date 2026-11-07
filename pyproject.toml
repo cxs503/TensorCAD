@@ -66,6 +66,10 @@ ignore = [
 # Example scripts prepend the checkout to sys.path before importing tensorcad,
 # so import-order rules do not apply to them.
 "examples/*" = ["E501", "E402", "I001"]
+# The report generators embed manuscript prose in f-strings: wrapping it at 110
+# columns would make the markdown they emit unreadable in the source.
+"tools/pc6_report.py" = ["E501"]
+"tools/pc6_contract.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
