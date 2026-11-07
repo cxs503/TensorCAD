@@ -400,6 +400,28 @@ tolerance; 161×65 (41 278 triangles) reaches −0.076 %; the STL round trip pre
 to 2.4e-8 relative (float32 quantisation). Details and measurements:
 [`docs/mesh_export_gate.md`](docs/mesh_export_gate.md).
 
+## Hull geometry audit pipeline (unreleased)
+
+A hull that renders is not a hull that can be integrated, so the checks that decide
+whether a model may be used at all are now one ordered pipeline:
+`tensorcad.geometry_audit.audit_hull_geometry` runs topology (free edges with the seam
+gap measured as the shortest distance between pieces, non-manifold edges, duplicate
+facets, winding conflicts, shell count, signed volume), fairness (discrete Gaussian
+curvature from the angle deficit, then the relative jump `|dK|/K` across every
+non-crease edge against a 50 % criterion, with designed creases excluded by dihedral
+angle instead of smoothed away), the declared `L/B/T/Cb` gate, and finally a two-route
+hydrostatic check — Simpson on a station × waterline offsets table versus the divergence
+theorem on the triangles — at 1 %. A topology or declaration failure stops the stages
+that depend on it and the report says where it stopped. Six injectors (seam offset, hole,
+normal flip, duplicate shell, `Cb` offset, Gaussian bump) keep the negatives honest, and
+`tensorcad.exchange` carries a faceted STEP round trip so a seam defect survives
+export/re-import; analytic B-reps and IGES are refused rather than guessed at.
+Measured on Wigley III and Series 60 Cb=0.70: 24/24 seam gaps found with the measured gap
+equal to the injected one, 9/9 bumps above the criterion marked with no false positive on
+the clean hull, table-versus-mesh within 0.55 %, `Cb` +5 % refused and named, and both
+hulls within 2 % of their closed forms. Details, figures and the gates file:
+[`docs/m5283_geometry_audit.md`](docs/m5283_geometry_audit.md).
+
 ## Neural geometry objects (0.3)
 
 A hull mesh is one way to store geometry. A `.ngo` object is another: the geometry
