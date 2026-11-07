@@ -7,6 +7,32 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.geomquality`: CAD geometry-quality pipeline from file to gated hydrostatics**
+  (`docs/geomquality-pipeline.md`). The chain is exchange -> topology -> declared geometry ->
+  continuity -> hydrostatics -> grid convergence -> machine gate, with `CRITERIA` and
+  `enforce()` so the verdict is computed and never written by hand. Exchange reads three
+  routes into one B-rep: native `.brep.json`, STEP as a *topological* model (shared
+  `edge_curve` identity is the shared edge), and IGES entity 128, which carries no topology
+  and no orientation at all -- so the reader sews boundaries geometrically and then
+  propagates a consistent orientation over the face graph (`orient_shell`) before the audit
+  can say anything. The topology audit works on the edge-face adjacency graph: free edges,
+  non-manifold edges, unsewn seams measured in metres and as a fraction of `L`, collapsed
+  boundaries recorded as degenerate and exempt, inside-out faces caught by comparing each
+  face's declared sense with the winding of its own loop. Continuity classifies every seam
+  G0/G1/G2 from the normal angle and the relative curvature jump *across* the seam, with
+  limits calibrated on 60 % of a labelled seam set and scored on the held-out 40 %
+  (F1 = 1.000, separation 0.43 vs 8e-5); designed creases are reported as `KNUCKLE`.
+  Hydrostatics integrate each face with Gauss-Legendre per knot span at an order that
+  follows the patch degree -- a degree-24 vertical span under-integrates by 0.5 % at the
+  default order, which is measured, not assumed. Two things worth knowing: refining
+  *parameter* space is not refining *physical* space on a graded patch (equal-arc sampling
+  recovers the second-order rate: observed order 2.13 instead of 1.55), and a 14-case defect
+  library with repair hints runs through the same detectors (14/14 detected, zero false
+  alarms on the clean hull). Measured: Wigley III displacement 2.2e-13, worst hydrostatic
+  quantity 1.1e-4 across three hulls, geometry deviation 1.8e-6 L, 8.5 s for the slowest
+  hull against a 10 s budget.
+
+### Added
 - **`tensorcad.geometry_audit`: hull geometry quality audit pipeline** (`docs/m5283_geometry_audit.md`).
   A machine gate between an exchanged hull model and the numbers computed from it, in the order
   a shipyard checks a lines plan: topology (free edges, seam gaps sized as the shortest distance
