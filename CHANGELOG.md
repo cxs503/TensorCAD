@@ -7,6 +7,27 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.damage`: deterministic damage stability by lost buoyancy**
+  (`docs/damage_stability.md`). A box-shaped compartment open to the sea is flooded and
+  the ship's new equilibrium -- sinkage, trim **and heel** -- is solved as three balances
+  on one waterline plane: `V_ext - mu V_c = Delta/rho`, and the centroid of that net
+  volume at the ship's `(x_G, y_G)`. Heel is an output, so an asymmetric compartment
+  finds its own list. `GM = KB + I_T/(Delta/rho) - KG` uses the *net* waterplane
+  (external minus `mu` times the flooded part), which is the lost-buoyancy method's
+  answer to the free-surface question -- no separate correction, which would double count.
+  Damped Newton with a backtracking line search; section cuts cached once per station;
+  compartment ends are panel edges and each panel is three-point Gauss-Legendre, so the
+  jump in `A(x)` at a compartment end is never sampled across. Measured against the
+  closed forms a wall-sided barge has: midship draft `L T/(L - l)` and `mu = 0.6` draft
+  `L T/(L - mu l)` to 1e-12 relative, the aft-compartment and port-half-compartment
+  two-equation solutions to round-off, mirror-symmetric heel, `I_T` of the damaged
+  waterplane exact, and a curved hull's intact solve against `tensorcad.hydrostatics`
+  (draft 0.5 %, KB/LCB 1 %, `I_T` within 5 %). `tests/test_damage.py` (24 cases),
+  `examples/damage/run_example.py` (17 claims, two figures, `docs/damage/results.json`).
+  Not implemented, and said so on the page: probabilistic subdivision (SOLAS part B-1),
+  progressive flooding, cross-flooding, intermediate stages, and damaged-ship `GZ`.
+
+### Added
 - **`tensorcad.geomquality`: CAD geometry-quality pipeline from file to gated hydrostatics**
   (`docs/geomquality-pipeline.md`). The chain is exchange -> topology -> declared geometry ->
   continuity -> hydrostatics -> grid convergence -> machine gate, with `CRITERIA` and
