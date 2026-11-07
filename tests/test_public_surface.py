@@ -83,7 +83,7 @@ def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
                    "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
                    "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
-                   "adapters.fem", "benchmark"):
+                   "adapters.fem", "benchmark", "nurbs"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
 
 
