@@ -11,6 +11,15 @@ azimuthal-equidistant plane centred on the first waypoint: along-track and
 across-track distances are then true great-circle distances, which a plain
 equirectangular projection would not give at 70-77 deg N.
 
+That claim holds for the *radial* direction only. An azimuthal-equidistant
+projection keeps every distance from the centre exact but inflates the tangential
+scale by ``c/sin c`` in the central angle ``c`` from the origin, so a plane length
+is a true length times ``sqrt(cos^2 beta + (sin beta / k)^2)``, ``k = c/sin c``,
+``beta`` the angle to the radial direction (:func:`plane_to_true_factor`). At
+campaign scale that is 0.46 % at 1061 km, which is why the corridor width is also
+reported in true metres (:func:`channel_true_widths`) instead of being read off
+the plane number.
+
 Only the Python standard library is required.
 """
 from __future__ import annotations
@@ -47,6 +56,16 @@ DEFAULT_WIDTH_M = 250.0
 DEFAULT_DEPTH_M = 11.0
 MAX_MITER_FACTOR = 2.0
 
+#: A leg shorter than this is a repeated waypoint: the miter normal is undefined
+#: (the two legs are parallel) and the zero-length strip folds the wall onto
+#: itself, so the solid is refused rather than built.
+MIN_SEGMENT_KM = 1.0e-3
+
+#: Half-angle at which the miter cap binds, ``acos(1/MAX_MITER_FACTOR)`` in degrees.
+#: Beyond it the wall vertex sits at ``MAX_MITER_FACTOR`` half-widths instead of on
+#: the bisector, so the excursion it demands of the legs stops growing.
+MITRE_CAP_HALF_ANGLE_DEG = math.degrees(math.acos(1.0 / MAX_MITER_FACTOR))
+
 
 def great_circle_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Haversine distance on a sphere of radius :data:`EARTH_RADIUS_KM`."""
@@ -78,6 +97,56 @@ def _unit(vector: tuple[float, float]) -> tuple[float, float]:
     if length == 0.0:
         return (1.0, 0.0)
     return (vector[0] / length, vector[1] / length)
+
+
+def _azimuth_deg(vector: tuple[float, float]) -> float:
+    """Compass azimuth of a plane vector: degrees clockwise from +y (north)."""
+    return math.degrees(math.atan2(vector[0], vector[1])) % 360.0
+
+
+def mitre_excursion_m(turn_deg: float, half_width: float) -> float:
+    """How far the mitred wall vertex reaches along a leg, in metres.
+
+    A turn of ``turn_deg`` puts the wall vertex ``half_width * tan(turn/2)`` past
+    the centreline station, measured along the leg. A leg shorter than that has
+    its inner wall laid back over the previous strip, so the corridor folds
+    through itself while staying watertight -- the reason :func:`ice_channel`
+    refuses such a route. The miter cap bounds the term at
+    :data:`MITRE_CAP_HALF_ANGLE_DEG`.
+    """
+    if not math.isfinite(turn_deg) or not math.isfinite(half_width):
+        raise ValueError("turn_deg and half_width must be finite")
+    if half_width <= 0.0:
+        raise ValueError(f"half_width must be positive, got {half_width!r}")
+    half_turn = min(abs(turn_deg) / 2.0, MITRE_CAP_HALF_ANGLE_DEG)
+    return half_width * math.tan(math.radians(half_turn))
+
+
+def plane_to_true_factor(x: float, y: float, plane_azimuth_deg: float) -> float:
+    """True length per unit plane length, for a plane vector at ``plane_azimuth_deg``.
+
+    ``x``, ``y`` are metres in the local plane of :data:`CHANNEL_FRAME`. The
+    projection is azimuthal-equidistant about the first waypoint, so its metric is
+    diagonal: radial scale exactly 1, tangential scale ``k = c/sin c`` in the
+    central angle ``c = |(x, y)| / R``. A plane vector of length ``L`` at angle
+    ``beta`` to the radial direction therefore has true length
+
+        ``L * sqrt(cos^2(beta) + (sin(beta) / k)^2)``,
+
+    which is the factor returned here. It is first order in ``L/R``: over the
+    250 m corridor width the neglected term is second order, ``1.5e-9``. At the
+    origin the factor is exactly 1, because every direction there is radial.
+    """
+    for label, value in (("x", x), ("y", y), ("plane_azimuth_deg", plane_azimuth_deg)):
+        if not math.isfinite(value):
+            raise ValueError(f"{label} must be finite, got {value!r}")
+    radial = math.hypot(x, y)
+    central = radial / (EARTH_RADIUS_KM * 1000.0)
+    if central <= 0.0:
+        return 1.0
+    tangent_scale = central / math.sin(central)  # >= 1: plane / true, tangential
+    beta = math.radians(plane_azimuth_deg - _azimuth_deg((x, y)))
+    return math.hypot(math.cos(beta), math.sin(beta) / tangent_scale)
 
 
 @dataclass(frozen=True)
@@ -150,6 +219,16 @@ def ice_channel(
     for name, lat, lon in route:
         if not (-90.0 <= lat <= 90.0) or not math.isfinite(lon):
             raise ValueError(f"waypoint {name!r} has an out-of-range position ({lat}, {lon})")
+    for index in range(len(route) - 1):
+        leg = great_circle_km(route[index][1], route[index][2],
+                              route[index + 1][1], route[index + 1][2])
+        if leg < MIN_SEGMENT_KM:
+            raise ValueError(
+                f"waypoints {route[index][0]!r} and {route[index + 1][0]!r} are "
+                f"{leg * 1000.0:.3f} m apart (minimum {MIN_SEGMENT_KM * 1000.0:.0f} m): a "
+                "repeated waypoint has no tangent, so the corridor folds through itself "
+                "instead of closing"
+            )
 
     origin = (route[0][1], route[0][2])
     centre = tuple(_project(lat, lon, origin) for _, lat, lon in route)
@@ -193,6 +272,25 @@ def ice_channel(
         right.append(
             (centre[index][0] - half * scale * normal[0], centre[index][1] - half * scale * normal[1])
         )
+    for index in range(1, len(centre) - 1):
+        incoming = _unit((centre[index][0] - centre[index - 1][0],
+                          centre[index][1] - centre[index - 1][1]))
+        outgoing = _unit((centre[index + 1][0] - centre[index][0],
+                          centre[index + 1][1] - centre[index][1]))
+        cosine = max(-1.0, min(1.0, incoming[0] * outgoing[0] + incoming[1] * outgoing[1]))
+        turn = math.degrees(math.acos(cosine))
+        excursion = mitre_excursion_m(turn, half)
+        for leg_index in (index - 1, index):
+            leg_m = segment[leg_index] * 1000.0
+            if leg_m <= excursion:
+                raise ValueError(
+                    f"the {turn:.1f} deg turn at waypoint {route[index][0]!r} mitres "
+                    f"{excursion:.1f} m along each leg, but leg {route[leg_index][0]!r} -> "
+                    f"{route[leg_index + 1][0]!r} is only {leg_m:.1f} m long: the inner wall "
+                    "would fold back over the previous strip (watertight, "
+                    "self-intersecting) instead of forming a corridor"
+                )
+
     return IceChannel(
         names=tuple(name for name, _, _ in route),
         latitude=tuple(lat for _, lat, _ in route),
@@ -292,6 +390,48 @@ def channel_measurements(mesh: Mesh, channel: IceChannel) -> dict[str, Any]:
     }
 
 
+def channel_true_widths(channel: IceChannel) -> dict[str, Any]:
+    """Corridor width re-expressed in true (great-circle) metres, per station.
+
+    The walls are offset ``width/2`` from the centreline *in the projection
+    plane*, so ``width`` is a plane length. Each station's width vector is
+    converted with :func:`plane_to_true_factor`; that vector is exactly what
+    :func:`channel_measurements` reports as ``measured_width_m``, so the two sets
+    of numbers are directly comparable. The maximum exceeds ``width`` by the mitre
+    factor at a turn -- a widened station chord, not projection error.
+    """
+    factors: list[float] = []
+    true_widths: list[float] = []
+    for centre, left in zip(channel.centre, channel.left, strict=True):
+        offset = (left[0] - centre[0], left[1] - centre[1])
+        factor = plane_to_true_factor(centre[0], centre[1], _azimuth_deg(offset))
+        factors.append(factor)
+        true_widths.append(2.0 * math.hypot(*offset) * factor)
+    plane_chords = [
+        math.hypot(left[0] - right[0], left[1] - right[1])
+        for left, right in zip(channel.left, channel.right, strict=True)
+    ]
+    return {
+        "plane_width_m": channel.width,
+        "plane_chord_m": {
+            "minimum": min(plane_chords),
+            "maximum": max(plane_chords),
+            "mean": sum(plane_chords) / len(plane_chords),
+        },
+        "true_width_m": {
+            "minimum": min(true_widths),
+            "maximum": max(true_widths),
+            "mean": sum(true_widths) / len(true_widths),
+        },
+        "true_to_plane_ratio": {
+            "minimum": min(factors),
+            "maximum": max(factors),
+            "mean": sum(factors) / len(factors),
+        },
+        "per_station_true_width_m": true_widths,
+    }
+
+
 __all__ = [
     "CHANNEL_FRAME",
     "DEFAULT_DEPTH_M",
@@ -299,9 +439,14 @@ __all__ = [
     "DE_LONG_PEVEK_ROUTE",
     "EARTH_RADIUS_KM",
     "IceChannel",
+    "MIN_SEGMENT_KM",
     "build_channel_mesh",
     "channel_measurements",
+    "channel_true_widths",
     "great_circle_km",
     "ice_channel",
+    "MITRE_CAP_HALF_ANGLE_DEG",
     "initial_bearing_deg",
+    "mitre_excursion_m",
+    "plane_to_true_factor",
 ]
