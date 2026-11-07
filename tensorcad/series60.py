@@ -4,10 +4,10 @@ The Series 60 (Todd 1951) is the most widely cited parametric hull family in nav
 architecture. Five parent forms cover Cb = 0.60, 0.65, 0.70, 0.75, 0.80 with
 closed-form hydrostatic coefficients for verification.
 
-Geometry: y(xi, zeta) = (B/2) * (1 - |2*xi-1|^n) * zeta^m
+Geometry: y(xi, zeta) = (B/2) * (1 - |2*xi-1|^n) * zeta**(1/m)
 where n, m are derived from target Cb via published Cp values.
 
-Closed forms: Cp=n/(n+1), Cm=m/(m+1), Cb=Cp*Cm, Cwp=Cp, VCB/T=(m+1)/(2(m+2))
+Closed forms: Cp=n/(n+1), Cm=m/(m+1), Cb=Cp*Cm, Cwp=Cp, VCB/T=(m+1)/(2m+1)
 """
 from __future__ import annotations
 
@@ -75,7 +75,14 @@ def analytic_maximum_section_area(B, T, m):
     return B * T * m / (m + 1.0)
 
 def analytic_vcb_above_keel(T, m):
-    return T * (m + 1.0) / (2.0 * (m + 2.0))
+    """Vertical centre of buoyancy above the keel for the ``zeta**(1/m)`` section.
+
+    ``int zeta*y dzeta / int y dzeta`` with ``y ~ zeta**(1/m)`` gives
+    ``(m+1)/(2m+1)``, not ``(m+1)/(2(m+2))``: the previous expression was off by
+    6.5 % at m=24 (0.481 T against 0.510 T).  Both are inside the "0 < VCB < T"
+    sanity band, which is why only an independent recomputation catches it.
+    """
+    return T * (m + 1.0) / (2.0 * m + 1.0)
 
 def analytic_vcb_z(T, m):
     return analytic_vcb_above_keel(T, m) - T
@@ -160,11 +167,22 @@ def _longitudinal_taper(p: Series60Parameters, i: int) -> float:
 
 
 def _vertical_taper(p: Series60Parameters, level: int) -> float:
+    """Section fullness at ``level`` (0 at the keel, ``nz-1`` at the waterline).
+
+    ``zeta ** (1/m)``, not ``zeta ** m``.  The closed forms in this module --
+    ``Cm = m/(m+1)`` and ``Cb = Cp*Cm``, which are what pins the exponents to the
+    published Series 60 parent forms -- follow from ``int_0^1 zeta**(1/m) dzeta =
+    m/(m+1)``.  With the exponent inverted the lofted sections collapse to a sliver
+    over the bottom 90 % of the draft and the mesh integrates 21 times less volume
+    than its own analytic reference; the error does not shrink under refinement
+    (measured -95.8 % at 241x101), which is how it was found during the geometry
+    audit (docs/series60.md records the measurement).
+    """
     if level >= p.nz - 1:
         return 1.0
     if level <= 0:
         return 0.0
-    return math.pow(level / (p.nz - 1), p.m)
+    return math.pow(level / (p.nz - 1), 1.0 / p.m)
 
 
 def _section_point(p: Series60Parameters, i: int, j: int) -> tuple[float, float, float]:

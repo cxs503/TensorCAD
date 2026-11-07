@@ -1,6 +1,10 @@
 """Tests for the Series 60 hull family."""
 import math
+
 import pytest
+
+from tensorcad import mesh as meshlib
+from tensorcad import series60
 from tensorcad.series60 import (
     Series60Parameters, generate_series60, analytic_series60_hydrostatics,
     analytic_volume, analytic_waterplane_area, analytic_maximum_section_area,
@@ -112,3 +116,50 @@ class TestDiscretisationError:
         assert "reference" in result
         assert "convergence" in result
         assert len(result["convergence"]) >= 1
+
+
+class TestVerticalTaper:
+    """The section profile is ``zeta**(1/m)``; ``zeta**m`` collapses the hull.
+
+    These two cases are the regression for the bug the geometry audit found
+    (mission 5283): the lofted mesh integrated 21 times less volume than the
+    module's own closed form for every Cb, and the error did not shrink under
+    refinement.  The first test pins the physics, the second reproduces the broken
+    exponent so the failure mode stays visible.
+    """
+
+    @pytest.mark.parametrize("cb", [0.60, 0.70])
+    def test_mesh_volume_matches_closed_form(self, cb):
+        p = Series60Parameters(length=10.0, beam=1.5, draft=0.6, nx=161, nz=41, cb=cb)
+        model = generate_series60(p)
+        reference = analytic_series60_hydrostatics(p)
+        assert model.hydrostatics.displacement_volume == pytest.approx(
+            reference["displacement_volume"], rel=0.02
+        )
+        assert model.hydrostatics.block_coefficient == pytest.approx(cb, rel=0.02)
+
+    def test_vertical_centre_of_buoyancy_matches_closed_form(self):
+        p = Series60Parameters(length=10.0, beam=1.5, draft=0.6, nx=161, nz=41, cb=0.70)
+        model = generate_series60(p)
+        reference = analytic_series60_hydrostatics(p)
+        above_keel = model.hydrostatics.vertical_centre_buoyancy + p.draft
+        assert above_keel == pytest.approx(reference["vertical_centre_buoyancy"], rel=0.02)
+
+    def test_inverted_exponent_loses_most_of_the_volume(self):
+        original = series60._vertical_taper
+        try:
+            def broken(parameters, level):  # zeta**m instead of zeta**(1/m)
+                if level >= parameters.nz - 1:
+                    return 1.0
+                if level <= 0:
+                    return 0.0
+                return math.pow(level / (parameters.nz - 1), parameters.m)
+
+            series60._vertical_taper = broken
+            p = Series60Parameters(length=10.0, beam=1.5, draft=0.6, nx=81, nz=21, cb=0.60)
+            mesh, _ = build_series60_mesh(p)
+            volume = abs(meshlib.total_signed_volume(mesh))
+            reference = analytic_volume(10.0, 1.5, 0.6, *p.exponents)
+            assert (volume - reference) / reference < -0.9
+        finally:
+            series60._vertical_taper = original
