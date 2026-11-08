@@ -1,6 +1,6 @@
 """Certify the IS Code areas of a barge past the wall-sided limit against the exact box solution.
 
-    python3 tools/verify_box_gz_areas.py            # writes artifacts/m4873/ and syncs the doc
+    python3 tools/verify_box_gz_areas.py            # writes docs/box_gz_areas/ and syncs the doc
 
 :mod:`tensorcad.statutory` already turns a ``GZ`` curve into the areas of IS Code 2008 part A
 s. 2.2 -- 0-30, 0-40, 30-40 degrees -- and the weather criterion's gust area, and it does it with
@@ -30,8 +30,8 @@ barge geometry:
    ``KG`` shift, both of which *must* fail the thresholds above.  A comparison that cannot fail
    certifies nothing.
 
-Everything comes from one run: ``artifacts/m4873/box_gz_areas.json``, the figure
-``artifacts/m4873/box_gz_areas.png``, and -- through :func:`sync_doc_tables` -- the tables of
+Everything comes from one run: ``docs/box_gz_areas/box_gz_areas.json``, the figure
+``docs/box_gz_areas/box_gz_areas.png``, and -- through :func:`sync_doc_tables` -- the tables of
 ``docs/box_gz_areas.md``, replaced in place so a stale number is a diff rather than a typo.
 """
 
@@ -61,7 +61,7 @@ from tensorcad.geometry import MeshBuilder
 from tensorcad.gz import righting_arm_curve
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACTS = ROOT / "artifacts" / "m4873"
+ARTIFACTS = ROOT / "docs" / "box_gz_areas"
 DOCS = ROOT / "docs" / "box_gz_areas.md"
 
 SPECS = [
