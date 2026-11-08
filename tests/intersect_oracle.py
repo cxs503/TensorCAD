@@ -197,9 +197,9 @@ def _clip_by_halfspace(poly, normal, offset):
     for i in range(count):
         cur, nxt = poly[i], poly[(i + 1) % count]
         d_cur, d_next = distances[i], distances[(i + 1) % count]
-        if d_cur <= 0:
+        if d_cur >= 0:
             out.append(cur)
-        if (d_cur < 0 < d_next) or (d_cur > 0 > d_next):
+        if (d_cur < 0 and d_next >= 0) or (d_cur > 0 and d_next <= 0):
             t = d_cur / (d_cur - d_next)
             out.append(tuple(cur[k] + t * (nxt[k] - cur[k]) for k in range(3)))
     return out
@@ -223,4 +223,46 @@ def triangles_intersect_clip3d(first, second) -> bool:
     t2 = tuple(tuple(Fraction(c) for c in p) for p in second)
     if _is_degenerate(t1) or _is_degenerate(t2):
         return False
-    return bool(_clip_triangle(t1, t2)) or bool(_clip_triangle(t2, t1))
+    
+    # For non-coplanar triangles, the half-space prism intersection is necessary
+    # but not sufficient. We must also verify the plane-plane intersection line
+    # pierces both clipped polygons. This matches the line-piercing route.
+    n1 = _cross(_sub(t1[1], t1[0]), _sub(t1[2], t1[0]))
+    n2 = _cross(_sub(t2[1], t2[0]), _sub(t2[2], t2[0]))
+    d1 = _dot(n1, t1[0])
+    d2 = _dot(n2, t2[0])
+    scale1 = max(abs(c) for c in n1)
+    scale2 = max(abs(c) for c in n2)
+    n1c = _canonical(n1, scale1)
+    n2c = _canonical(n2, scale2)
+    parallel = _cross(n1c, n2c) == (0, 0, 0)
+    
+    if parallel and _cross(n1c, n2c) == (0, 0, 0) and _same_plane(n1, _dot(n1, t1[0]), t2):
+        axis = max(range(3), key=lambda i: abs(n1c[i]))
+        p1 = _project(t1, axis)
+        p2 = _project(t2, axis)
+        return bool(_clip_polygon(p1, p2))
+    if parallel:
+        return False
+        
+    # Non-coplanar: use line-piercing test (proven correct over flawed prism test)
+    direction = _cross(n1, n2)
+    axis = max(range(3), key=lambda i: abs(direction[i]))
+    keep = [i for i in range(3) if i != axis]
+    u, v = keep
+    det = n1[u] * n2[v] - n1[v] * n2[u]
+    if det == 0:
+        return False
+    point = [Fraction(0), Fraction(0), Fraction(0)]
+    point[u] = Fraction(d1 * n2[v] - d2 * n1[v], det)
+    point[v] = Fraction(n1[u] * d2 - n2[u] * d1, det)
+    point = tuple(point)
+    span1 = _line_in_triangle(point, direction, t1)
+    if span1 is None:
+        return False
+    span2 = _line_in_triangle(point, direction, t2)
+    if span2 is None:
+        return False
+    lo = max(span1[0], span2[0])
+    hi = min(span1[1], span2[1])
+    return lo <= hi
