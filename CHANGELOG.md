@@ -6,7 +6,32 @@ semantic versioning.
 
 ## Unreleased
 
+### Added
+- **`nurbs.sphere_surface` + committed anchor for a *closed* patch with singular pole
+  rows** (`docs/nurbs_pole_surface.md`, `examples/nurbs_sphere/run_example.py`,
+  `artifacts/nurbs_sphere/`, `tests/test_nurbs_pole_surface.py`). The surface service had
+  anchors for an open tube and for a cylinder capped by hand-built fans, but none for a
+  patch that pinches by itself -- the case every hull form creates at a stem, a transom
+  corner or a bulb tip. One rational biquadratic patch (`7 x 5` net, degree `(2, 2)`) is
+  the exact sphere: `max | |S| - R | = 5.33e-15 m` at `R = 12 m`, parametric area
+  `1809.5573684677186 m^2` vs `4 pi R^2 = 1809.5573684677208 m^2` (`-1.22e-15`), and the
+  tessellation alone is a watertight, outward, single-component shell with volume
+  converging as `O(h^2)` to `4/3 pi R^3` (`-7.94e-04` at `192 x 64`). 27 tests.
+
 ### Fixed
+- **`MeshBuilder.add_quad` reported two triangles for a quad it collapsed to one.**
+  A pole quad has two coincident corners, so only `(a, c, d)` survives; returning `2`
+  shifted every later `faces_per_quad` index by one and made
+  `tessellation_report` compare the wrong facet and finally raise
+  `IndexError: tuple index out of range` (383 indices for 336 faces on the `48 x 16`
+  sphere). It now returns the number of triangles actually appended. The cylinder anchor
+  could not catch this -- it has no degenerate quad.
+- **A singular (pinched) parameter boundary is now welded on its control point**
+  (`NURBSSurface.singular_boundary_point`). The per-sample evaluation of a pole ring
+  agrees only to 1 ulp (`(a*b)/b` rounds twice), so exact-position welding left a ragged
+  ring: the `48 x 16` sphere was not watertight (12 inward faces, spurious 90.4° normal)
+  while `24 x 8` happened to weld. Keying the row is a fact about the control net, not a
+  tolerance, so the module's no-tolerance policy is intact.
 - **`tests/test_box_gz_area.py` no longer fails on a clean checkout**
   (`docs/analysis/2026-11-08-evidence-artifact-restoration.md`). The node's evidence was written
   to `artifacts/m4873/`, which the integration gate filters, so `main` carried the code, the page
