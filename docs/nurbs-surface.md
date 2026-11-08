@@ -278,6 +278,12 @@ tolerance chosen to make it pass.
 * **Watertightness is claimed for the closed solid, not for the lateral tube.** The
   tube is open at its two rims by construction, and the report says so explicitly
   instead of quietly testing only the closed case.
+* **A closed patch that pinches by itself is anchored separately**
+  (`docs/nurbs_pole_surface.md`): `nurbs.sphere_surface` is one patch whose two pole
+  rings are singular control rows, and its tessellation alone is a watertight, outward
+  shell. That anchor is also where the pole-welding rule and the `add_quad` face-count
+  contract were established; the cylinder above needs neither because its caps are added
+  by hand.
 
 ## 8. Reproduce
 
