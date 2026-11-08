@@ -180,6 +180,12 @@ is `7.4e-4`, three orders inside the 1 % gate the module enforces as a validatio
   the transom is triangulated as a fan rather than a loft, so its area is the planar
   polygon area of the last section.
 
+The wetted-area quadrature was re-audited against a high-precision reference and came
+out 0.85 % low at `q >= 2` and `inf` on four valid hulls at `q = 0.05`; the rule is now
+adaptive Gauss-Legendre with an overflow-free arc element and agrees with the reference
+to `2e-14` over 420 cases (`docs/planing_numerical_robustness.md`). The values tabulated
+above are unchanged because their `q = 0.6` hulls had already converged.
+
 ## 7. Where it plugs in
 
 `tensorcad.planing` returns the same `PlaningHullModel` shape as the other families
