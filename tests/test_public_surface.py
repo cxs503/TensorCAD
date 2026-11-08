@@ -40,6 +40,9 @@ EXPECTED_API = {
     "box_righting_arms_analytic", "box_section", "box_vanishing_angle_deg",
     "box_wall_sided_limit_deg",
     "deck_edge_immersion_deg", "free_surface_correction", "heeled_hydrostatics",
+    # tank-shift level/volume curve exported by the free-surface module but never added
+    # to this pinned list: the contract test had been red since that merge.
+    "free_surface_gz_shift", "free_surface_gz_shift_curve", "free_surface_loss_m",
     "rectangular_tank_inertia", "righting_arm_curve", "wall_sided_righting_arm",
     "with_freeboard",
     # second GZ route (0.22.0): clipped-section integral, bisection waterline solve
