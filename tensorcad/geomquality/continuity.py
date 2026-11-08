@@ -164,6 +164,9 @@ class SeamReport:
     max_curvature_jump: float
     mean_curvature_jump: float
     classification: str = "G2"
+    #: ``False`` when ``audit_seams(refine=True)`` hit ``max_samples`` without the
+    #: metrics settling: the verdict is then resolution-limited, not geometry-limited.
+    converged: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -174,6 +177,7 @@ class SeamReport:
             "max_curvature_jump": self.max_curvature_jump,
             "mean_curvature_jump": self.mean_curvature_jump,
             "classification": self.classification,
+            "converged": self.converged,
         }
 
 
@@ -250,6 +254,7 @@ def seam_metrics(
             "max_gap": math.inf,
             "max_normal_angle_deg": math.inf,
             "max_curvature_jump": math.inf,
+            "max_curvature_jump_absolute": math.inf,
             "mean_curvature_jump": math.inf,
             "samples": float(samples),
             "side_a": -1,
@@ -263,6 +268,7 @@ def seam_metrics(
     gaps: list[float] = []
     angles: list[float] = []
     jumps: list[float] = []
+    absolute_jumps: list[float] = []
     for point_a, parameter_a, point_b, parameter_b in zip(
         points_a, parameters_a, points_b, parameters_b
     ):
@@ -286,15 +292,89 @@ def seam_metrics(
         if math.isfinite(kappa_a) and math.isfinite(kappa_b):
             reference = max(abs(kappa_a), abs(kappa_b), 1.0 / max(scale, 1e-9))
             jumps.append(abs(kappa_a - kappa_b) / reference)
+            absolute_jumps.append(abs(kappa_a - kappa_b))
     return {
         "max_gap": max(gaps) if gaps else math.inf,
         "max_normal_angle_deg": max(angles) if angles else math.inf,
         "max_curvature_jump": max(jumps) if jumps else math.inf,
+        #: The same jump in 1/length, unnormalised. ``max_curvature_jump`` divides by
+        #: ``max(|k_a|, |k_b|, 1/scale)``, so below a curvature of ``1/scale`` it is an
+        #: *absolute* criterion and a large relative mismatch reads as a small number;
+        #: this key is what makes that floor visible instead of implicit.
+        "max_curvature_jump_absolute": max(absolute_jumps) if absolute_jumps else math.inf,
         "mean_curvature_jump": sum(jumps) / len(jumps) if jumps else math.inf,
         "samples": float(len(gaps)),
         "side_a": float(best["side_a"]),
         "side_b": float(best["side_b"]),
     }
+
+
+#: Keys whose value must settle before an adaptive measurement is believed.
+_STABILITY_KEYS = ("max_gap", "max_normal_angle_deg", "max_curvature_jump")
+
+
+def _settled(previous: dict[str, float], current: dict[str, float], stability: float) -> bool:
+    """Whether two resolutions agree on every criterion input to ``stability`` relative."""
+    for key in _STABILITY_KEYS:
+        first, second = previous[key], current[key]
+        if not (math.isfinite(first) and math.isfinite(second)):
+            if first != second:
+                return False
+            continue
+        denominator = max(abs(first), abs(second), 1e-12)
+        if abs(second - first) / denominator > stability:
+            return False
+    return True
+
+
+def seam_metrics_adaptive(
+    face_a: Face,
+    face_b: Face,
+    *,
+    samples: int = 17,
+    max_samples: int = 513,
+    scale: float = 1.0,
+    tolerance: float | None = None,
+    growth: int = 2,
+    stability: float = 0.05,
+) -> dict[str, float]:
+    """``seam_metrics`` at increasing resolution, stopped when the metrics settle.
+
+    ``seam_metrics`` takes the *maximum* over ``samples`` points of each seam isocurve.
+    A defect narrower than the sample interval is therefore invisible however large it
+    is -- a localized ripple along the seam reads as a clean G2 seam. Doubling the sample
+    count until ``max_gap``, ``max_normal_angle_deg`` and ``max_curvature_jump`` all move
+    by less than ``stability`` (relative) closes that blind spot at a bounded cost, and
+    the returned ``converged`` flag says whether the budget was enough.
+
+    The extra keys are ``samples_used`` (the resolution the answer came from) and
+    ``converged``. ``samples`` stays the starting resolution, so a caller that wants the
+    old behaviour keeps calling :func:`seam_metrics` directly.
+    """
+    if growth < 2:
+        raise ValueError("growth must be >= 2")
+    if not 0.0 < stability < 1.0:
+        raise ValueError("stability must be in (0, 1)")
+    previous = seam_metrics(
+        face_a, face_b, samples=samples, scale=scale, tolerance=tolerance
+    )
+    current = previous
+    used = samples
+    converged = False
+    while used < max_samples:
+        target = min(used * growth, max_samples)
+        current = seam_metrics(
+            face_a, face_b, samples=target, scale=scale, tolerance=tolerance
+        )
+        used = target
+        if _settled(previous, current, stability):
+            converged = True
+            break
+        previous = current
+    result = dict(current)
+    result["samples_used"] = float(used)
+    result["converged"] = converged
+    return result
 
 
 def classify(
@@ -322,8 +402,16 @@ def audit_seams(
     curvature_limit: float = DEFAULT_CURVATURE_LIMIT,
     samples: int = 17,
     tolerance: float = 1e-3,
+    refine: bool = False,
+    max_samples: int = 513,
 ) -> list[SeamReport]:
-    """Classify every pair of faces that share an edge in the adjacency graph."""
+    """Classify every pair of faces that share an edge in the adjacency graph.
+
+    ``refine=True`` measures each seam with :func:`seam_metrics_adaptive` instead of a
+    fixed grid, so a defect localized between the ``samples`` grid points is not averaged
+    away; it costs up to ``max_samples`` evaluations per seam and sets each report's
+    ``converged`` flag.  The default is the fixed grid, unchanged.
+    """
     by_index = {face.index: face for face in brep.faces}
     reports: list[SeamReport] = []
     seen: set[tuple[int, int]] = set()
@@ -336,12 +424,14 @@ def audit_seams(
             continue
         seen.add(key)
         scale = max(brep.length, 1e-9)
-        metrics = seam_metrics(
+        measured = seam_metrics_adaptive if refine else seam_metrics
+        metrics = measured(
             by_index[face_a],
             by_index[face_b],
             samples=samples,
             scale=scale,
             tolerance=tolerance * scale,
+            **({"max_samples": max_samples} if refine else {}),
         )
         if not math.isfinite(metrics["max_gap"]):
             continue
@@ -359,6 +449,7 @@ def audit_seams(
                     angle_limit_deg=angle_limit_deg,
                     curvature_limit=curvature_limit,
                 ),
+                converged=bool(metrics.get("converged", True)),
             )
         )
     return reports

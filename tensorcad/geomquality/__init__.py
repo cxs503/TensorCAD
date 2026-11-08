@@ -50,6 +50,7 @@ from .continuity import (
     label_seam_dataset,
     score,
     seam_metrics,
+    seam_metrics_adaptive,
 )
 from .defects import DEFECT_CASES, DefectCase, detect_all, run_library
 from .hydro import (
@@ -134,6 +135,7 @@ __all__ = [
     "save_cad",
     "score",
     "seam_metrics",
+    "seam_metrics_adaptive",
     "sew",
     "verify_cad",
     "worst_hydrostatic_error",
