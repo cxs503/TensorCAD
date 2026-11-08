@@ -18,6 +18,26 @@ The primitive is the standard edge/face formulation:
 Everything is pure standard library. The mesh-level search is pruned with a
 uniform hash grid over triangle bounding boxes, so the cost is close to linear
 in the face count instead of the quadratic all-pairs scan.
+
+Resolution contract
+-------------------
+The predicate is deliberately *conservative*: a pair that is closer than the
+resolution is reported as intersecting, because a missed contact is a missed
+mesh fold and a spurious contact only costs a false alarm. Two bands exist and
+they are not the same width:
+
+* plane distance and bounding boxes use :data:`RELATIVE_TOLERANCE` (``1e-10``)
+  times the triangle size;
+* the barycentric containment test uses :data:`BARYCENTRIC_TOLERANCE` (``1e-15``)
+  times the triangle size.
+
+Both are relative to the geometry, so the verdict does not change when a part is
+modelled in millimetres instead of metres. Nothing can be concluded about pairs
+that miss each other by less than ``1e-15`` of their own size: at that scale the
+answer is decided by the last bit of the *input* coordinates, not by the
+geometry, and a caller who needs it must use wider arithmetic. See
+``docs/intersect_resolution.md`` for the measured tie rate and the certificate
+used to tell such a tie apart from a classification error.
 """
 from __future__ import annotations
 
@@ -26,10 +46,17 @@ from collections.abc import Sequence
 
 from .geometry import Face, Mesh, Vec3
 
-#: Relative tolerance on plane distances and barycentric coordinates. Every
-#: quantity is scaled by the triangle's own edge length before comparison, so the
-#: same tolerance is meaningful for a 0.01 m part and a 200 m hull.
+#: Relative tolerance on plane distances and bounding boxes. Every quantity is
+#: scaled by the triangle's own edge length before comparison, so the same
+#: tolerance is meaningful for a 0.01 m part and a 200 m hull.
 RELATIVE_TOLERANCE = 1e-10
+
+#: Relative tolerance on the barycentric coordinates of a computed contact point.
+#: Tighter than :data:`RELATIVE_TOLERANCE` because it only has to absorb the
+#: rounding of one interpolation, not the independent rounding of two plane
+#: distances. Naming it makes the second, narrower resolution band of the
+#: predicate visible instead of leaving a literal in the middle of a predicate.
+BARYCENTRIC_TOLERANCE = 1e-15
 
 
 def _sub(a: Vec3, b: Vec3) -> Vec3:
@@ -147,7 +174,7 @@ def _segment_pierces(
     )
     # Use a relative tolerance scaled by triangle size to handle float noise
     # while remaining strict enough to reject near-misses.
-    return _point_in_triangle(point, triangle, 1e-15 * max(size, 1.0))
+    return _point_in_triangle(point, triangle, BARYCENTRIC_TOLERANCE * max(size, 1.0))
 
 
 def triangles_intersect(
@@ -314,4 +341,10 @@ def find_self_intersections(
     return tuple(sorted(found))
 
 
-__all__ = ["RELATIVE_TOLERANCE", "Face", "find_self_intersections", "triangles_intersect"]
+__all__ = [
+    "BARYCENTRIC_TOLERANCE",
+    "RELATIVE_TOLERANCE",
+    "Face",
+    "find_self_intersections",
+    "triangles_intersect",
+]
