@@ -53,6 +53,11 @@ Named limitations
 * The surface type is a tensor-product patch with a rectangular control net: no
   trimmed patches, no boolean operations, no non-tensor-product topology. A hull with
   a bulbous bow would need a trimmed multi-patch model, which is out of scope here.
+* A *closed* patch with singular pole rows is supported: :func:`sphere_surface` is one
+  patch whose two pole rings pinch to a vertex, and its tessellation alone is a
+  watertight, outward, positive-volume shell (anchored in
+  ``docs/nurbs_pole_surface.md``). What is still absent is topology beyond that patch:
+  no multi-patch stitching and no trimmed seam.
 * The PC6 compatibility block carries the *representation* and the L/B/Cb gate; the
   PC6 hull surface itself is still lofted by :mod:`tensorcad.pc6` from analytic
   stations, not re-fitted as one NURBS patch.
@@ -72,6 +77,9 @@ from .geometry import Mesh, MeshBuilder, Vec3
 NURBS_SCHEMA = "tensorcad.nurbs.surface/1.0"
 
 TWO_PI = 2.0 * math.pi
+
+#: ``cos(45 deg)``: the middle weight of an exact 90-degree rational quadratic arc.
+SQRT_HALF = math.sqrt(0.5)
 
 __all__ = [
     "ContinuityRecord",
@@ -924,6 +932,29 @@ class NURBSSurface:
         }
 
     # -- tessellation -------------------------------------------------------
+    def singular_boundary_point(self, axis: str, *, upper: bool = False) -> Vec3 | None:
+        """The point a coincident boundary control row collapses to, ``None`` if none.
+
+        A row of the control net whose control points are *all the same point*
+        forces the corresponding boundary curve of the patch to that point: the
+        north/south pole of a sphere, the apex of a cone. The parametrisation is
+        singular there -- every value of the other parameter maps to that one
+        point -- and evaluating it sample by sample gives values that agree only
+        to the last bit, so exact-position vertex welding would leave a ragged
+        pole ring. Returning the control point lets :meth:`tessellate` key the
+        whole row on a single vertex, which is a fact about the control net
+        rather than a tolerance.
+        """
+        if axis not in ("u", "v"):
+            raise NURBSError(f"axis must be 'u' or 'v', got {axis!r}")
+        if axis == "v":
+            index = len(self.control_net[0]) - 1 if upper else 0
+            row = [self.control_net[i][index] for i in range(len(self.control_net))]
+        else:
+            row = list(self.control_net[-1 if upper else 0])
+        first = row[0]
+        return first if all(point == first for point in row) else None
+
     def tessellate(self, u_samples: int = 64, v_samples: int = 8) -> Tessellation:
         """Sample the surface into a triangle mesh with consistent winding.
 
@@ -932,6 +963,13 @@ class NURBSSurface:
         position, so a seam that closes in the geometry (a full revolution, where
         ``S(u_min, v) == S(u_max, v)`` to the last bit) also closes in the topology --
         the watertightness check then has something real to say.
+
+        A *singular* boundary row (every control point of the boundary row is the
+        same point: a sphere's poles, a cone's apex) is keyed on that one vertex
+        instead of on the per-sample evaluation, because the evaluation only agrees
+        with itself to the last bit, not bit-for-bit (see
+        :meth:`singular_boundary_point`). Without that, the pole quads do not
+        collapse and the shell is not watertight at any density.
         """
         if u_samples < 1 or v_samples < 1:
             raise NURBSError(
@@ -943,9 +981,26 @@ class NURBSSurface:
         u_values[0], u_values[-1] = u_low, u_high
         v_values[0], v_values[-1] = v_low, v_high
         builder = MeshBuilder()
-        grid = [
-            [builder.add_vertex(self.evaluate(u, v)) for v in v_values] for u in u_values
-        ]
+        pole_v_low = self.singular_boundary_point("v")
+        pole_v_high = self.singular_boundary_point("v", upper=True)
+        pole_u_low = self.singular_boundary_point("u")
+        pole_u_high = self.singular_boundary_point("u", upper=True)
+        last_u = len(u_values) - 1
+        last_v = len(v_values) - 1
+        grid: list[list[int]] = []
+        for i, u in enumerate(u_values):
+            row: list[int] = []
+            pole_u = pole_u_low if i == 0 else (pole_u_high if i == last_u else None)
+            for j, v in enumerate(v_values):
+                if pole_u is not None:
+                    row.append(builder.add_vertex(pole_u))
+                elif j == 0 and pole_v_low is not None:
+                    row.append(builder.add_vertex(pole_v_low))
+                elif j == last_v and pole_v_high is not None:
+                    row.append(builder.add_vertex(pole_v_high))
+                else:
+                    row.append(builder.add_vertex(self.evaluate(u, v)))
+            grid.append(row)
         faces_per_quad: list[tuple[int, ...]] = []
         emitted = 0
         for i in range(u_samples):
@@ -1124,6 +1179,54 @@ def cylinder_surface(
     return NURBSSurface(
         degree=(2, 1),
         knots=(curve.knots, (0.0, 0.0, 1.0, 1.0)),
+        control_net=net,
+        weights=weights,
+    )
+
+
+def sphere_surface(radius: float, *, arcs: int = 3) -> NURBSSurface:
+    """An exact rational biquadratic sphere with two *singular* pole rings.
+
+    ``u`` is the exact circle (:func:`circle_curve`) and ``v`` is a semicircle in
+    the meridian half-plane built from two exact 90-degree rational quadratic
+    arcs (weights ``1, sqrt(1/2), 1``), so the patch is the true sphere rather
+    than a fit: every evaluation satisfies ``|S(u, v)| == radius`` to round-off,
+    which is the anchor the tests use. The whole sphere is one patch -- it needs
+    no caps, unlike :func:`cylinder_surface`.
+
+    The meridian runs from the **south** pole to the **north** pole, so
+    ``S_u x S_v`` points *outward* and a tessellation of the surface alone is a
+    closed shell with positive signed volume. The pole ordering decides that
+    sign: a north-to-south meridian produces the same closed shell with every
+    face consistently *inward* and a negative volume (both are documented in
+    ``docs/nurbs_pole_surface.md``).
+
+    Both ``v`` ends are singular rows of the control net -- every ``u`` maps to
+    the same point -- which :meth:`NURBSSurface.singular_boundary_point` reports
+    and :meth:`NURBSSurface.tessellate` welds to a single vertex. The area is
+    ``4 pi r^2`` and the volume ``4/3 pi r^3``; ``arcs`` only controls how the
+    full circle is stitched (three 120-degree arcs by default).
+    """
+    if radius <= 0.0:
+        raise NURBSError(f"radius must be positive, got {radius!r}")
+    meridian = ((0.0, -1.0), (1.0, -1.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
+    meridian_weights = (1.0, SQRT_HALF, 1.0, SQRT_HALF, 1.0)
+    meridian_knots = (0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 2.0)
+    circle = circle_curve(1.0, arcs=arcs)
+    # net[i][j]: i runs over u, j over v.  Scaling the unit circle's control
+    # polygon by the meridian control radius r_j makes the rational quotient
+    # separate, so S = radius * (r(v) X(u), r(v) Y(u), z(v)) exactly.
+    net = tuple(
+        tuple((radius * r * point[0], radius * r * point[1], radius * z) for r, z in meridian)
+        for point in circle.control_points
+    )
+    weights = tuple(
+        tuple(circle.weights[i] * meridian_weights[j] for j in range(len(meridian)))
+        for i in range(len(circle.control_points))
+    )
+    return NURBSSurface(
+        degree=(2, 2),
+        knots=(circle.knots, meridian_knots),
         control_net=net,
         weights=weights,
     )
