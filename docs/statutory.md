@@ -143,7 +143,8 @@ quadrature: the same curve handed over as a callable is at round-off.
 * **Damage stability** is outside for the same reason it is outside `tensorcad.gz`: no
   flooding, no permeability, no compartments.
 * **Free-surface correction** is not applied. Add `sum(i_x)/V` to the curve first
-  (`gz.free_surface_correction`) — a slack tank shifts every ordinate, and the rule applies
+  (`gz.free_surface_correction`) — a slack tank lowers `GM`, so the curve loses
+`Σi_x/∇·sin(φ)` at each ordinate ([free_surface.md](free_surface.md)), and the rule applies
   to the corrected curve, not to the bare one.
 
 Every assessment carries this list in its `scope` field, so a JSON consumer cannot mistake a
