@@ -137,7 +137,17 @@ def _segment_pierces(
         start[1] + t * (end[1] - start[1]),
         start[2] + t * (end[2] - start[2]),
     )
-    return _point_in_triangle(point, triangle, 1e-9)
+    # Project point back onto the triangle's plane to eliminate plane-distance
+    # rounding errors before computing barycentric coordinates.
+    d_pt = _dot(normal, point) - offset
+    point = (
+        point[0] - normal[0] * d_pt,
+        point[1] - normal[1] * d_pt,
+        point[2] - normal[2] * d_pt,
+    )
+    # Use a relative tolerance scaled by triangle size to handle float noise
+    # while remaining strict enough to reject near-misses.
+    return _point_in_triangle(point, triangle, 1e-15 * max(size, 1.0))
 
 
 def triangles_intersect(
