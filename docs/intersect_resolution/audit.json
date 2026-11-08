@@ -1,0 +1,102 @@
+{
+  "dyadic": {
+    "agree": 2000,
+    "decided_disagree": 0,
+    "decided_examples": [],
+    "disagree": 0,
+    "lattice": "dyadic",
+    "library_false_exact_true": 0,
+    "library_true_exact_false": 0,
+    "samples": 2000,
+    "stable_but_sub_resolution": 0,
+    "sub_resolution_disagree": 0,
+    "sub_resolution_ulps": {
+      "count": 0,
+      "max": null,
+      "median": null,
+      "min": null
+    }
+  },
+  "library": {
+    "BARYCENTRIC_TOLERANCE": 1e-15,
+    "RELATIVE_TOLERANCE": 1e-10
+  },
+  "mesh_controls": {
+    "clean_octahedron_pairs": 0,
+    "crossing_sheets_pairs": [
+      [
+        0,
+        1
+      ]
+    ]
+  },
+  "oracle_routes": {
+    "clip3d": "half-space clipping; non-coplanar branch shares the plane-line formulation",
+    "exact": "edge piercing / plane-line interval intersection",
+    "separation": "exact closest-distance meter (exact for disjoint pairs only)",
+    "stability": "ulp propagation through the exact route (sufficient tie certificate)"
+  },
+  "resolution_sweep": [
+    {
+      "boundary_gap_m": 1.0000000000000002e-10,
+      "boundary_relative": 3.5355339059327386e-08,
+      "measured_over_predicted": 1.0000000000000002,
+      "predicted_band_m": 1e-10,
+      "predicted_relative": 3.535533905932738e-08,
+      "scale": 0.001,
+      "triangle_size_m": 0.00282842712474619
+    },
+    {
+      "boundary_gap_m": 1.0000000000000002e-10,
+      "boundary_relative": 3.535533905932738e-09,
+      "measured_over_predicted": 1.0000000000000002,
+      "predicted_band_m": 1e-10,
+      "predicted_relative": 3.5355339059327376e-09,
+      "scale": 0.01,
+      "triangle_size_m": 0.0282842712474619
+    },
+    {
+      "boundary_gap_m": 2.828427124746191e-10,
+      "boundary_relative": 1.0000000000000003e-10,
+      "measured_over_predicted": 1.0000000000000002,
+      "predicted_band_m": 2.8284271247461906e-10,
+      "predicted_relative": 1.0000000000000002e-10,
+      "scale": 1.0,
+      "triangle_size_m": 2.8284271247461903
+    },
+    {
+      "boundary_gap_m": 5.6568542494923814e-08,
+      "boundary_relative": 1.0000000000000002e-10,
+      "measured_over_predicted": 1.0000000000000002,
+      "predicted_band_m": 5.656854249492381e-08,
+      "predicted_relative": 1e-10,
+      "scale": 200.0,
+      "triangle_size_m": 565.685424949238
+    }
+  ],
+  "thirds": {
+    "agree": 1973,
+    "decided_disagree": 0,
+    "decided_examples": [],
+    "disagree": 27,
+    "lattice": "thirds",
+    "library_false_exact_true": 0,
+    "library_true_exact_false": 27,
+    "samples": 2000,
+    "stable_but_sub_resolution": 1,
+    "sub_resolution_disagree": 27,
+    "sub_resolution_ulps": {
+      "count": 27,
+      "max": 0.05892556509887896,
+      "median": 0.038650387566186106,
+      "min": 0.011605958636065741
+    }
+  },
+  "verdict": {
+    "decided_disagreements": 0,
+    "missed_contacts": 0,
+    "predicate_has_a_logic_error_at_double_resolution": false,
+    "samples_total": 4000,
+    "sub_resolution_disagreements": 27
+  }
+}
