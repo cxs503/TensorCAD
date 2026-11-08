@@ -140,8 +140,10 @@ documented as discretisation, not as a modelling assumption.
 - **The wetted area is for the bare lofted surface** -- no appendages, no roughness, no
   transom immersion. The SUBOFF appendage fields are separate geometry and are verified
   in `docs/suboff_appendages.md`.
-- **No per-axis convergence rate.** Both grid axes refine together in the ladder, so a
-  separate `h_x`/`h_z` study remains open; the orders above are composite.
+- ~~**No per-axis convergence rate.**~~ **Closed** by `docs/per_axis_convergence.md`:
+  the axial order is 1.82 (endpoint exponent 0.7 + 1), the vertical order 1.65 (keel
+  `sqrt` exponent 0.5 + 1), they are additive to 0.3 %, and 75 % of the default grid's
+  volume error is vertical. The composite 1.212 reported above is the mixture of the two.
 
 ## Reproduction
 
