@@ -358,3 +358,20 @@ def test_a_curved_hull_reproduces_its_own_hydrostatics():
         reference.transverse_waterplane_inertia, rel=5e-2
     )
     assert state.converged
+
+
+def test_the_net_waterplane_subtracts_permeability_times_the_flooded_area(box):
+    """The lost-buoyancy method's answer to the free-surface question, at ``mu != 1``.
+
+    Found by the 2026-11-08 gate-power audit (`docs/analysis/2026-11-08-regulatory-gate-power.md`):
+    every waterplane/GM assertion in this file used the default ``mu = 1.0``, so dropping the
+    permeability factor from the flooded waterplane survived the suite with ``I_T`` 9.09 % high.
+    ``mu < 1`` is the case the "no separate free-surface correction" claim is about.
+    """
+    mu = 0.6
+    state = flooded_equilibrium(box, Compartment(4.0, 6.0, permeability=mu), DISPLACEMENT, kg=1.0)
+    assert state.waterplane_area == pytest.approx(B * (L - mu * 2.0), rel=1e-12)
+    assert state.flooded_waterplane_area == pytest.approx(mu * B * 2.0, rel=1e-12)
+    assert state.transverse_second_moment == pytest.approx(
+        B**3 * (L - mu * 2.0) / 12.0, rel=1e-12
+    )

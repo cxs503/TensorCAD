@@ -472,3 +472,22 @@ def test_the_verdict_agrees_with_the_sibling_on_pass_and_fail() -> None:
     assert {CLAUSE_CROSSWALK[item.code] for item in failing.failed} == {
         item.clause for item in sibling_weak.failures
     }
+
+
+def test_the_peak_is_searched_only_over_the_heel_the_ship_can_actually_take():
+    """``theta_f`` clamps the peak search, not just the area limit.
+
+    Found by the 2026-11-08 gate-power audit (`docs/analysis/2026-11-08-regulatory-gate-power.md`):
+    dropping the clamp on the peak-search ceiling survived the suite. The curve below peaks at
+    45 deg, past a 35 deg flooding angle, so an unclamped search reports a righting arm the
+    ship cannot be heeled to reach (45 deg, +28.6 % on the reported angle).
+    """
+
+    def curve(angle_deg: float) -> float:
+        return 0.8 * math.sin(math.radians(2.0 * angle_deg))
+
+    assessment = check_intact_stability(curve, flooding_angle_deg=35.0)
+    assert assessment.angle_of_max_gz_deg == pytest.approx(35.0, abs=1e-6)
+    assert assessment.max_gz_m == pytest.approx(curve(35.0), abs=1e-9)
+    # the unclamped curve's true peak lies past flooding and must not be reported
+    assert assessment.max_gz_m < curve(45.0)
