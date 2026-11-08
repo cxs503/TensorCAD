@@ -60,6 +60,7 @@ from .geometry import Mesh, MeshBuilder
 from .hull import COORDINATE_FRAME, UNITS
 from .hydrostatics import Hydrostatics, compute_hydrostatics
 from .validation import (
+    ERROR,
     WARNING,
     Check,
     DimensionTarget,
@@ -74,6 +75,24 @@ WETTED_AREA_WARNING = 0.02
 MAX_STATIONS = 2001
 MAX_LEVELS = 513
 CHINE_SNAP_TOLERANCE = 1e-12
+
+#: 10-point Gauss-Legendre nodes and weights on ``[-1, 1]`` (exact to degree 19).
+_GL10_X = (
+    -0.9739065285171717, -0.8650633666889845, -0.6794095682990244,
+    -0.4333953941292472, -0.1488743389816312, 0.1488743389816312,
+    0.4333953941292472, 0.6794095682990244, 0.8650633666889845,
+    0.9739065285171717,
+)
+_GL10_W = (
+    0.0666713443086881, 0.1494513491505806, 0.2190863625159820,
+    0.2692667193099963, 0.2955242247147529, 0.2955242247147529,
+    0.2692667193099963, 0.2190863625159820, 0.1494513491505806,
+    0.0666713443086881,
+)
+TOPSIDE_QUADRATURE_RTOL = 1e-12
+TOPSIDE_QUADRATURE_MAX_DEPTH = 24
+
+
 
 
 @dataclass(frozen=True)
@@ -252,7 +271,9 @@ def analytic_vertical_centre_buoyancy(p: PlaningHullParameters) -> float:
     return moment / analytic_volume(p)
 
 
-def analytic_wetted_area(p: PlaningHullParameters, samples: int = 4000) -> float:
+def analytic_wetted_area(p: PlaningHullParameters,
+                         rtol: float = TOPSIDE_QUADRATURE_RTOL,
+                         *, samples: int | None = None) -> float:
     """Wetted surface: V-bottom panels + wetted topside strip + transom.
 
     The V-bottom is closed form: its surface element is ``b sec(beta) dx`` independent
@@ -260,41 +281,90 @@ def analytic_wetted_area(p: PlaningHullParameters, samples: int = 4000) -> float
     wetted topside is **not** its vertical projection: the side follows the chine curve,
     so its element is ``(T - b tan(beta)) sqrt(1 + b'(x)**2) dx``. That integral has no
     elementary closed form once ``q < 1`` (``b'`` diverges at a knife bow), so it is
-    evaluated by composite Simpson in the substituted variable ``x = x0 t**(2/q)``,
-    which removes the endpoint singularity. The transom is closed form.
+    evaluated by adaptive Gauss-Legendre quadrature in the substituted variable
+    ``x = x0 t**e`` with ``e = 2/q`` (``q < 2``) or ``e = 1`` (``q >= 2``), which removes
+    the endpoint singularity without creating one at ``t = 0``; see
+    :func:`_wetted_topside_area`. The transom is closed form.
+
+    ``samples`` is the fixed Simpson interval count this integral used before the rule
+    became adaptive; it is accepted for call compatibility and ignored.
     """
     tau = p.tan_beta
     x0 = wetted_length(p)
     bottom = analytic_waterplane_area(p) * math.sqrt(1.0 + tau * tau)
-    return bottom + _wetted_topside_area(p, x0, samples) + section_area(p, p.length)
+    return bottom + _wetted_topside_area(p, x0, rtol) + section_area(p, p.length)
 
 
-def _wetted_topside_area(p: PlaningHullParameters, x0: float, samples: int = 4000) -> float:
-    """``2 int_0^x0 (T - b tan(beta)) sqrt(1 + b'^2) dx`` by Simpson in ``t``."""
+def _gauss10(f, lo: float, hi: float) -> float:
+    centre = 0.5 * (lo + hi)
+    half = 0.5 * (hi - lo)
+    total = 0.0
+    for node, weight in zip(_GL10_X, _GL10_W):
+        total += weight * f(centre + half * node)
+    return half * total
+
+
+def _adaptive_gauss10(f, lo: float, hi: float, rtol: float, depth: int = 0) -> float:
+    """Adaptive 10-point Gauss-Legendre on ``[lo, hi]``, relative tolerance ``rtol``.
+
+    Bisection is driven by the difference between one panel and its two halves, which
+    for a 10-point rule overestimates the error by orders of magnitude and so stops
+    early on the smooth parts of the integrand while still resolving a boundary layer
+    (``q = 0.05`` puts a ``t**39`` shape against ``t = 1``).
+    """
+    whole = _gauss10(f, lo, hi)
+    middle = 0.5 * (lo + hi)
+    split = _gauss10(f, lo, middle) + _gauss10(f, middle, hi)
+    if depth >= TOPSIDE_QUADRATURE_MAX_DEPTH:
+        return split
+    if abs(split - whole) <= rtol * abs(split):
+        return split
+    return _adaptive_gauss10(f, lo, middle, rtol, depth + 1) + _adaptive_gauss10(
+        f, middle, hi, rtol, depth + 1
+    )
+
+
+def _wetted_topside_area(p: PlaningHullParameters, x0: float,
+                         rtol: float = TOPSIDE_QUADRATURE_RTOL) -> float:
+    """``2 int_0^x0 (T - b tan(beta)) sqrt(1 + b'^2) dx``, adaptively quadratured.
+
+    Evaluated in the substituted variable ``x = x0 t**e`` so that neither the integrand
+    nor its factors may leave double range. Three numerical traps are avoided:
+
+    * ``b'(x) = c q x**(q-1)`` diverges at a knife bow (``q < 1``). ``e = 2/q`` turns
+      ``b`` into ``b(x0) t**2`` and the arc element into
+      ``sqrt((dx/dt)**2 + (db/dt)**2)`` with ``db/dt = 2 b(x0) t``, i.e. a smooth
+      integrand. For ``q >= 2`` that substitution would *introduce* a ``t**(2/q-1)``
+      singularity at ``t = 0``, so ``e = 1`` there instead (``b'`` already vanishes at
+      the stem for ``q > 1``).
+    * ``sqrt(1 + b'**2) * dx`` is formed as ``hypot(dx/dt, db/dt)`` rather than as
+      ``sqrt(1 + slope**2) * dx/dt``. At ``q = 0.05``, ``beta >= 30 deg`` and a light
+      draft the slope reaches ``~1e21``; squaring it overflowed to ``inf`` and the
+      whole wetted area came back ``inf``.
+    * the integral is adaptive instead of a fixed 4000-interval Simpson rule: with a
+      small ``q`` the arc element varies by ``e**(2/q)`` across ``[0, 1]``, so the
+      uniform grid was 0.06 % short at ``q = 0.05`` and 0.85 % short at ``q >= 2``
+      (see ``docs/planing_numerical_robustness.md``).
+    """
     if x0 <= 0.0:
         return 0.0
-    if samples % 2:
-        samples += 1
-    exponent = 2.0 / p.planform_exponent
-    c = p.half_beam_transom / p.length**p.planform_exponent
+    q = p.planform_exponent
+    tau = p.tan_beta
+    exponent = 2.0 / q if q < 2.0 else 1.0
+    b_x0 = chine_half_beam(p, x0)
+    power = exponent * q
 
     def integrand(t: float) -> float:
-        x = x0 * t**exponent
-        if x <= 0.0:
-            return 0.0
-        b = c * x**p.planform_exponent
-        slope = c * p.planform_exponent * x**(p.planform_exponent - 1.0)
-        height = p.draft - b * p.tan_beta
+        height = p.draft - tau * b_x0 * t**power
         if height <= 0.0:
             return 0.0
-        dx_dt = x0 * exponent * t ** (exponent - 1.0)
-        return 2.0 * height * math.sqrt(1.0 + slope * slope) * dx_dt
+        dx_dt = x0 * exponent * (1.0 if exponent == 1.0 else t ** (exponent - 1.0))
+        db_dt = b_x0 * power * (1.0 if power == 1.0 else t ** (power - 1.0))
+        return 2.0 * height * math.hypot(dx_dt, db_dt)
 
-    h = 1.0 / samples
-    total = integrand(0.0) + integrand(1.0)
-    for i in range(1, samples):
-        total += (4.0 if i % 2 else 2.0) * integrand(i * h)
-    return total * h / 3.0
+    if not rtol > 0.0:
+        raise ValueError(f"rtol must be positive, got {rtol!r}")
+    return _adaptive_gauss10(integrand, 0.0, 1.0, rtol)
 
 
 def analytic_planing_hydrostatics(p: PlaningHullParameters) -> dict[str, float]:
@@ -404,6 +474,17 @@ def _hydrostatic_checks(p: PlaningHullParameters, hydro: Hydrostatics) -> list[C
         ("planing_vcb", "vertical_centre_buoyancy", hydro.vertical_centre_buoyancy, 0.02),
     ):
         ref = reference[key]
+        if not math.isfinite(ref) or ref == 0.0:
+            checks.append(
+                Check(
+                    name,
+                    False,
+                    f"closed form is not a usable reference ({ref!r}); the mesh value "
+                    f"{measured:.6f} cannot be validated against it",
+                    severity=ERROR,
+                )
+            )
+            continue
         if name == "planing_lcb":
             relative = _relative(measured, ref) if ref else _relative(measured, 1.0)
         elif name == "planing_vcb":
@@ -487,6 +568,11 @@ def generate_planing_hull(parameters: PlaningHullParameters | None = None,
         raise ValueError("generated planing hull failed validation: " + "; ".join(report.errors))
     hydrostatics = compute_hydrostatics(mesh, 0.0, water_density=p.water_density, closed=True)
     report = merge(list(report.checks), _hydrostatic_checks(p, hydrostatics))
+    if report.errors:
+        # A non-finite or zero closed form is not sampling noise: it means the reference
+        # the mesh is validated against is broken, so the model must not be handed back
+        # with ``inf`` in its metadata (see docs/planing_numerical_robustness.md).
+        raise ValueError("generated planing hull failed validation: " + "; ".join(report.errors))
     return PlaningHullModel(parameters=p, mesh=mesh, validation=report,
                             hydrostatics=hydrostatics)
 
