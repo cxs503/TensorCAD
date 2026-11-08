@@ -159,9 +159,15 @@ class MeshBuilder:
         """Add ``(a, b, c)`` and ``(a, c, d)``, collapsing shared corners.
 
         A lofted quad whose adjacent corners are the same vertex (a section that
-        degenerates to a line at a stem or transom) reduces to a single
+        degenerates to a line at a stem or transom, or a row of a closed
+        parametric surface that pinches to a pole) reduces to a single
         triangle; one whose *diagonal* corners coincide has zero area and is
         dropped. Either way no zero-area face ever reaches the output.
+
+        The return value is the number of triangles **actually appended**, so a
+        pole quad (``a == b`` or ``c == d``) reports ``1``, not ``2``. Callers
+        that map quads onto the face list must use it: assuming two faces per
+        quad shifts every later index by one and ends up out of range.
         """
         if a == c or b == d:
             self._degenerate_skipped += 1
@@ -170,9 +176,9 @@ class MeshBuilder:
             return int(self.add_triangle(a, b, c))
         if b == c:
             return int(self.add_triangle(a, b, d))
-        self.add_triangle(a, b, c)
-        self.add_triangle(a, c, d)
-        return 2
+        added = int(self.add_triangle(a, b, c))
+        added += int(self.add_triangle(a, c, d))
+        return added
 
     def build(self) -> Mesh:
         return Mesh(
