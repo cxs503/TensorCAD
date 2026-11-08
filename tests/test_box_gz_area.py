@@ -297,7 +297,7 @@ def test_a_draft_deeper_than_the_depth_is_refused() -> None:
     with pytest.raises(BoxGzError):
         box_gz_area(breadth=2.0, draft=1.5, depth=1.2, kg=0.6)
 
-ARTIFACT = Path(__file__).resolve().parents[1] / "artifacts" / "m4873" / "box_gz_areas.json"
+ARTIFACT = Path(__file__).resolve().parents[1] / "docs" / "box_gz_areas" / "box_gz_areas.json"
 PAGE = Path(__file__).resolve().parents[1] / "docs" / "box_gz_areas.md"
 
 

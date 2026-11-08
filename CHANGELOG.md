@@ -6,6 +6,21 @@ semantic versioning.
 
 ## Unreleased
 
+### Fixed
+- **`tests/test_box_gz_area.py` no longer fails on a clean checkout**
+  (`docs/analysis/2026-11-08-evidence-artifact-restoration.md`). The node's evidence was written
+  to `artifacts/m4873/`, which the integration gate filters, so `main` carried the code, the page
+  and the tests but not the artifact two of those tests open (`FileNotFoundError`, known and
+  recorded in `docs/m5283_geometry_audit.md` as pre-existing debt). The evidence now lives beside
+  the page it certifies, `docs/box_gz_areas/` (the convention already used by `docs/bonjean/`,
+  `docs/fairness/`), and `tools/verify_box_gz_areas.py`, the test and the figure link follow.
+  Regenerated from `main`'s code, not copied: the JSON and the PNG come out **byte-identical** to
+  the ones produced when the node was authored (`sha256` of the json `9fa5acf0...ffa4e`, of the
+  png `351a91ff...2038c`; 1415 leaf keys, 1141 numeric fields, 0 differing), and the harness'
+  own rewrite of the page's tables differs only in the figure link -- so the committed numbers
+  reproduce from current code. No physics changed. 293 tests over the GZ/statutory evidence chain
+  pass (the two previously red ones included).
+
 ### Added
 - **`tensorcad.damage`: deterministic damage stability by lost buoyancy**
   (`docs/damage_stability.md`). A box-shaped compartment open to the sea is flooded and

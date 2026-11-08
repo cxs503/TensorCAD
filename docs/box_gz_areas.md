@@ -188,7 +188,7 @@ must move, and by the exact amount `1e-3 (1 - cos 40 deg)`).
 
 <!-- end: controls -->
 
-![areas under the exact curve, and the cost of ignoring the kinks](artifacts/m4873/box_gz_areas.png)
+![areas under the exact curve, and the cost of ignoring the kinks](box_gz_areas/box_gz_areas.png)
 
 The left panel is the doc barge: the exact `GZ` and its cumulative integral, with the two regime
 boundaries marked. The right panel is the convergence argument — the same Gauss-Legendre rule
