@@ -41,6 +41,7 @@
     "block_coefficient": 0.443396,
     "displacement_mass_kg": 2840.503,
     "displacement_volume_m3": 2.77122215,
+    "keel_z_m": -0.625,
     "longitudinal_centre_buoyancy_m": 5.0,
     "longitudinal_centre_flotation_m": 5.0,
     "maximum_section_area_m2": 0.415943287,
@@ -49,6 +50,8 @@
     "water_density_kg_per_m3": 1025.0,
     "waterline_z_m": 0.0,
     "waterplane_area_m2": 6.6625,
+    "waterplane_inertia_longitudinal_m4": 33.298619792,
+    "waterplane_inertia_transverse_m4": 0.380397173,
     "wetted_surface_area_m2": 14.876074557
   },
   "mesh": {
