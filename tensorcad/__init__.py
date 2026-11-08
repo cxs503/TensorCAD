@@ -104,6 +104,15 @@ from .gz import (
     wall_sided_righting_arm,
     with_freeboard,
 )
+from .free_surface import (
+    FreeSurfaceError,
+    SlackTank,
+    TankFreeSurface,
+    free_surface_gz_shift,
+    free_surface_gz_shift_curve,
+    free_surface_loss_m,
+    tank_free_surface,
+)
 from .hull import (
     ANALYTIC_COMPARABLE_QUANTITIES,
     HullModel,
@@ -359,6 +368,9 @@ __all__ = [
     "export_hull",
     "export_wigley",
     "free_surface_correction",
+    "free_surface_gz_shift",
+    "free_surface_gz_shift_curve",
+    "free_surface_loss_m",
     "gate_mesh",
     "general_criteria",
     "generate_hull",

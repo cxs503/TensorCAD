@@ -66,9 +66,12 @@ discretisation error at all, and both are used as references in the tests:
 
 **What this is not.** ``KG`` is the only loading input -- a height above the *keel*, as
 :func:`tensorcad.stability.initial_stability` takes it, because ``KN`` is levered about the
-keel line -- and there are no tank contents, so
-:func:`free_surface_correction` offers the flat reduction ``sum(i_x)/V`` that a designer
-applies by hand, and nothing more. :func:`with_freeboard` exists because a hull generated
+keel line -- and there is no tank model inside the integrator.
+:func:`free_surface_correction` supplies the classical ``sum(i_x)/V`` loss of ``GM``, applied
+the way that loss belongs on a curve -- ``-loss * sin(phi)``, i.e. a raise of ``KG``, so an
+upright symmetric ship still has ``GZ(0) = 0`` -- and
+:mod:`tensorcad.free_surface` supplies the *exact* heel-dependent shift of a prismatic slack
+tank for callers who want the finite-angle answer instead of the first-order one. :func:`with_freeboard` exists because a hull generated
 to its design waterline simply *cannot* be heeled -- on the dipping side the waterline
 leaves the modelled surface immediately -- so a closed freeboard band has to be added
 first. Damage stability, deck-edge immersion criteria, grain heeling, statutory maxima and
@@ -86,6 +89,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from . import mesh as meshlib
+from .free_surface import SlackTank, free_surface_gz_shift_curve, free_surface_loss_m
 from .geometry import Mesh
 
 SCHEMA_HEELED = "tensorcad.stability.heeled/1"
@@ -149,6 +153,7 @@ class RightingArmCurve:
     waterline_z: float
     keel_z: float
     displacement_volume: float
+    free_surface_model: str = "kg_raise"
 
     @property
     def max_volume_error(self) -> float:
@@ -212,6 +217,7 @@ class RightingArmCurve:
             "kg_m": _round(self.kg),
             "keel_z_m": _round(self.keel_z),
             "free_surface_correction_m": _round(self.free_surface_correction),
+            "free_surface_model": self.free_surface_model,
             "waterline_z_m": _round(self.waterline_z),
             "displacement_volume_m3": _round(self.displacement_volume),
             "max_gz_m": _round(self.max_gz),
@@ -228,7 +234,11 @@ class RightingArmCurve:
 
 @dataclass(frozen=True)
 class FreeSurfaceCorrection:
-    """The flat ``sum(i_x) / V`` reduction of a solid righting-arm curve."""
+    """The ``sum(i_x) / V`` loss of ``GM`` a set of slack tanks costs.
+
+    ``loss_m`` is the metres of metacentric height, i.e. the raise of ``KG``: a righting-arm
+    curve loses ``loss_m * sin(phi)`` at heel ``phi``, not ``loss_m`` at every ordinate.
+    """
 
     inertias: tuple[float, ...]
     total_inertia: float
@@ -491,18 +501,51 @@ def righting_arm_curve(
     keel_z: float | None = None,
     displacement_volume: float | None = None,
     free_surface_i_x: float = 0.0,
+    free_surface_model: str = "kg_raise",
+    slack_tanks: Sequence[SlackTank] = (),
     tolerance: float = 1e-13,
 ) -> RightingArmCurve:
     """Sample ``GZ`` over ``angles_deg`` for a centre of gravity ``kg`` above the keel.
 
     ``free_surface_i_x`` is the sum of the free-surface second moments ``i_x`` of any slack
-    tanks; it enters as the flat reduction ``sum(i_x)/V`` of the whole curve, which is what
-    that correction is.
+    tanks, i.e. their loss of ``GM`` is ``sum(i_x)/V``. How that loss enters the curve is the
+    caller's choice, and it is not cosmetic:
+
+    * ``free_surface_model="kg_raise"`` (default) -- ``GZ - sum(i_x)/V * sin(phi)``. This is
+      what raising ``KG`` by the loss does to the curve, it is the form the classical
+      correction is derived in, and it keeps ``GZ(0) = 0`` for an upright symmetric ship.
+    * ``free_surface_model="exact"`` -- the finite-angle shift of the actual tanks, from
+      :func:`tensorcad.free_surface.free_surface_gz_shift_curve`, which needs the tank
+      geometry in ``slack_tanks`` and no ``free_surface_i_x``. Exact for a prismatic
+      rectangular tank; the first-order model above is its small-angle limit.
+    * ``free_surface_model="flat"`` -- the historical ``GZ - sum(i_x)/V``, retained only so a
+      curve published by an earlier release can be reproduced. It is wrong at zero heel: an
+      upright symmetric ship gets ``GZ(0) = -sum(i_x)/V`` instead of zero, and every
+      intercepted area moves by ``sum(i_x)/V`` times the heel interval rather than by
+      ``sum(i_x)/V`` times ``(1 - cos)``.
     """
     if not math.isfinite(kg):
         raise GzError(f"kg must be finite: {kg!r}")
     if not math.isfinite(free_surface_i_x) or free_surface_i_x < 0.0:
         raise GzError(f"free_surface_i_x must be finite and non-negative: {free_surface_i_x!r}")
+    if free_surface_model not in ("kg_raise", "flat", "exact"):
+        raise GzError(
+            f"free_surface_model must be 'kg_raise', 'flat' or 'exact': {free_surface_model!r}"
+        )
+    tanks = tuple(slack_tanks)
+    if free_surface_model == "exact":
+        if not tanks:
+            raise GzError("free_surface_model='exact' needs at least one slack tank")
+        if free_surface_i_x:
+            raise GzError(
+                "pass the tanks, not free_surface_i_x, when free_surface_model='exact': the "
+                "exact shift already carries their inertias"
+            )
+    elif tanks:
+        raise GzError(
+            "slack tanks are only used by free_surface_model='exact'; for the first-order "
+            "model pass their summed free_surface_i_x"
+        )
     angles = tuple(float(angle) for angle in angles_deg)
     if not angles:
         raise GzError("a curve needs at least one heel angle")
@@ -528,10 +571,28 @@ def righting_arm_curve(
         )
         for angle in angles
     )
-    correction = free_surface_i_x / target
+    if free_surface_model == "exact":
+        shift = free_surface_gz_shift_curve(tanks, angles, target)
+        correction = free_surface_loss_m(tanks, target)
+        gz = tuple(
+            point.kn - kg * math.sin(math.radians(point.heel_angle_deg)) + offset
+            for point, offset in zip(points, shift, strict=True)
+        )
+    else:
+        correction = free_surface_i_x / target
+        if free_surface_model == "flat":
+            gz = tuple(
+                point.kn - kg * math.sin(math.radians(point.heel_angle_deg)) - correction
+                for point in points
+            )
+        else:
+            gz = tuple(
+                point.kn
+                - (kg + correction) * math.sin(math.radians(point.heel_angle_deg))
+                for point in points
+            )
     # ``kg`` is measured above the keel and the levers ``kn`` are taken about the keel
-    # line (the rotation axis), so the arm is simply ``kn - kg sin(phi)``.
-    gz = tuple(point.kn - kg * math.sin(math.radians(point.heel_angle_deg)) - correction for point in points)
+    # line (the rotation axis), so the arm is ``kn - kg sin(phi)`` before the tanks.
     return RightingArmCurve(
         angles_deg=angles,
         gz=gz,
@@ -542,6 +603,7 @@ def righting_arm_curve(
         waterline_z=waterline_z,
         keel_z=keel,
         displacement_volume=target,
+        free_surface_model=free_surface_model,
     )
 
 
@@ -600,7 +662,14 @@ def rectangular_tank_inertia(length: float, breadth: float) -> float:
 def free_surface_correction(
     tank_inertias: Sequence[float], displacement_volume: float
 ) -> FreeSurfaceCorrection:
-    """``sum(i_x) / V``: the flat amount a slack tank takes off every point of ``GZ``."""
+    """``sum(i_x) / V``: the loss of ``GM`` a slack tank costs, as a raise of ``KG``.
+
+    The number is a *metacentric* quantity. :func:`righting_arm_curve` applies it as
+    ``-loss * sin(phi)``, which is what a raise of ``KG`` by ``loss`` does to a curve; the
+    historical flat subtraction ``GZ - loss`` is still available as
+    ``free_surface_model="flat"`` and is wrong at zero heel (it gives an upright symmetric
+    ship a non-zero arm), which is why it is no longer the default.
+    """
     if displacement_volume <= 0.0:
         raise GzError(f"displacement_volume must be positive: {displacement_volume!r}")
     inertias = tuple(float(value) for value in tank_inertias)

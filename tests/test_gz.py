@@ -296,15 +296,36 @@ def test_free_surface_correction_is_sum_ix_over_volume() -> None:
         free_surface_correction([1.0], 0.0)
 
 
-def test_free_surface_correction_shifts_every_point_of_the_curve(barge: Mesh) -> None:
+def test_free_surface_correction_raises_kg_instead_of_flat_shifting(barge: Mesh) -> None:
+    """The correction is a loss of GM: the curve loses ``loss * sin(phi)``, not ``loss``."""
     volume = LENGTH * BREADTH * DRAFT
     inertia = rectangular_tank_inertia(2.0, 0.5)
     solid = righting_arm_curve(barge, KG, [0.0, 20.0, 40.0], waterline_z=DRAFT)
     flooded = righting_arm_curve(barge, KG, [0.0, 20.0, 40.0], waterline_z=DRAFT, free_surface_i_x=inertia)
     loss = inertia / volume
     assert flooded.free_surface_correction == pytest.approx(loss, rel=1e-12)
-    for gz_solid, gz_flooded in zip(solid.gz, flooded.gz, strict=True):
-        assert gz_flooded == pytest.approx(gz_solid - loss, rel=0, abs=1e-12)
+    assert flooded.free_surface_model == "kg_raise"
+    for angle, gz_solid, gz_flooded in zip(solid.angles_deg, solid.gz, flooded.gz, strict=True):
+        assert gz_flooded == pytest.approx(
+            gz_solid - loss * math.sin(math.radians(angle)), rel=0, abs=1e-12
+        )
+    # an upright symmetric ship has no arm, whatever slack tanks she carries
+    assert flooded.gz[0] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_flat_free_surface_model_reproduces_the_legacy_offset(barge: Mesh) -> None:
+    volume = LENGTH * BREADTH * DRAFT
+    inertia = rectangular_tank_inertia(2.0, 0.5)
+    solid = righting_arm_curve(barge, KG, [0.0, 20.0, 40.0], waterline_z=DRAFT)
+    flat = righting_arm_curve(
+        barge, KG, [0.0, 20.0, 40.0], waterline_z=DRAFT, free_surface_i_x=inertia,
+        free_surface_model="flat",
+    )
+    loss = inertia / volume
+    assert flat.free_surface_model == "flat"
+    for gz_solid, gz_flat in zip(solid.gz, flat.gz, strict=True):
+        assert gz_flat == pytest.approx(gz_solid - loss, rel=0, abs=1e-12)
+    assert flat.gz[0] == pytest.approx(-loss, abs=1e-12)
 
 
 def test_with_freeboard_keeps_the_upright_displacement(barge_at_waterline: Mesh) -> None:
