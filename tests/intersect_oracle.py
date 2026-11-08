@@ -13,6 +13,7 @@ Conventions that mirror the library contract:
 """
 from __future__ import annotations
 
+import math
 from fractions import Fraction
 
 Tri = tuple[tuple[Fraction, Fraction, Fraction], ...]
@@ -266,3 +267,216 @@ def triangles_intersect_clip3d(first, second) -> bool:
     lo = max(span1[0], span2[0])
     hi = min(span1[1], span2[1])
     return lo <= hi
+
+
+#: Paths through this module and how far each one can be trusted as an
+#: *independent* cross-check. Kept as data rather than prose so a reader (and the
+#: audit tool) can see that the two boolean routes converged: since the clip3d
+#: route was repaired it solves the non-coplanar branch by intersecting the same
+#: plane/plane line interval that :func:`triangles_intersect_exact` intersects, so
+#: their agreement no longer rules out a shared logic error there. The coplanar
+#: branches remain structurally different (2-D polygon clipping vs. separating
+#: axes). :func:`verdict_is_stable` is the independent discriminator that does not
+#: reuse either formulation.
+ROUTES = {
+    "exact": "edge piercing / plane-line interval intersection",
+    "clip3d": "half-space clipping; non-coplanar branch shares the plane-line formulation",
+    "stability": "ulp propagation through the exact route (sufficient tie certificate)",
+    "separation": "exact closest-distance meter (exact for disjoint pairs only)",
+}
+
+
+# ---------------------------------------------------------------------------
+# Exact separation meter
+# ---------------------------------------------------------------------------
+# Answers a different question than the two boolean routes: *how far apart* are
+# the triangles. For disjoint triangles the closest pair of points is realised
+# either at a vertex and its projection inside the facing triangle, or between two
+# edges, so the minimum over those candidates is the exact distance. For
+# intersecting triangles the true distance is zero but these candidates can all be
+# positive (an edge can pass through a face interior), so this meter must only be
+# used on pairs already known to be disjoint - it is a magnitude report, never a
+# verdict.
+
+
+def _point_triangle_sq(point, tri):
+    """Exact squared distance from a point to a closed triangle."""
+    a, b, c = tri
+    v0 = _sub(b, a)
+    v1 = _sub(c, a)
+    v2 = _sub(point, a)
+    d00 = _dot(v0, v0)
+    d01 = _dot(v0, v1)
+    d11 = _dot(v1, v1)
+    d20 = _dot(v2, v0)
+    d21 = _dot(v2, v1)
+    denominator = d00 * d11 - d01 * d01
+    if denominator != 0:
+        v = (d11 * d20 - d01 * d21) / denominator
+        w = (d00 * d21 - d01 * d20) / denominator
+        u = 1 - v - w
+        if u >= 0 and v >= 0 and w >= 0:
+            foot = tuple(a[i] + v * v0[i] + w * v1[i] for i in range(3))
+            offset = _sub(point, foot)
+            return _dot(offset, offset)
+    best = None
+    for i in range(3):
+        _, _, squared = _segment_segment_sq(point, point, tri[i], tri[(i + 1) % 3])
+        if best is None or squared < best:
+            best = squared
+    return best
+
+
+def _segment_segment_sq(p1, q1, p2, q2):
+    """Exact closest points of two closed segments (Ericson, rational arithmetic)."""
+    d1 = _sub(q1, p1)
+    d2 = _sub(q2, p2)
+    r = _sub(p1, p2)
+    a = _dot(d1, d1)
+    e = _dot(d2, d2)
+    if a == 0 and e == 0:
+        return p1, p2, _dot(_sub(p1, p2), _sub(p1, p2))
+    if a == 0:
+        s = Fraction(0)
+        t = min(Fraction(1), max(Fraction(0), _dot(d2, r) / e))
+    else:
+        c = _dot(d1, r)
+        if e == 0:
+            t = Fraction(0)
+            s = min(Fraction(1), max(Fraction(0), -c / a))
+        else:
+            b = _dot(d1, d2)
+            denominator = a * e - b * b
+            s = Fraction(0) if denominator == 0 else min(
+                Fraction(1), max(Fraction(0), (b * _dot(d2, r) - c * e) / denominator)
+            )
+            t = (b * s + _dot(d2, r)) / e
+            if t < 0:
+                t = Fraction(0)
+                s = min(Fraction(1), max(Fraction(0), -c / a))
+            elif t > 1:
+                t = Fraction(1)
+                s = min(Fraction(1), max(Fraction(0), (b - c) / a))
+    x = tuple(p1[i] + s * d1[i] for i in range(3))
+    y = tuple(p2[i] + t * d2[i] for i in range(3))
+    offset = _sub(x, y)
+    return x, y, _dot(offset, offset)
+
+
+def triangles_separation(first, second):
+    """Exact squared distance between two **disjoint** closed triangles.
+
+    Returns ``(separated, squared_gap)``. ``separated`` is False when a candidate
+    pair is exactly coincident or either triangle is degenerate (the module
+    contract treats a zero-area triangle as carrying no intersection). For
+    intersecting pairs the meter may return a positive gap; use the boolean routes
+    for the verdict and this only to phrase how large a disagreement is.
+    """
+    t1 = tuple(tuple(Fraction(c) for c in p) for p in first)
+    t2 = tuple(tuple(Fraction(c) for c in p) for p in second)
+    if _is_degenerate(t1) or _is_degenerate(t2):
+        return False, Fraction(0)
+    best = None
+    for point in t1:
+        candidate = _point_triangle_sq(point, t2)
+        if best is None or candidate < best:
+            best = candidate
+    for point in t2:
+        candidate = _point_triangle_sq(point, t1)
+        if best is None or candidate < best:
+            best = candidate
+    for i in range(3):
+        for j in range(3):
+            _, _, squared = _segment_segment_sq(t1[i], t1[(i + 1) % 3], t2[j], t2[(j + 1) % 3])
+            if squared < best:
+                best = squared
+    return best != 0, best
+
+
+# ---------------------------------------------------------------------------
+# Verdict-stability certificate
+# ---------------------------------------------------------------------------
+
+#: A pair is called *decided* when its exact verdict survives a perturbation of
+#: every single coordinate by +-``ULP_STEPS`` units in the last place. Double
+#: precision carries 53 bits, so a verdict that flips inside two ulps is a
+#: decision taken at the last bit of the input representation, not a property of
+#: the geometry that a floating-point routine could be requested to reproduce.
+ULP_STEPS = 2
+
+
+def _nudge(value, steps):
+    target = float("inf") if steps > 0 else float("-inf")
+    nudged = float(value)
+    for _ in range(abs(steps)):
+        nudged = math.nextafter(nudged, target)
+    return nudged
+
+
+def _perturbations(triangle, steps=ULP_STEPS):
+    for vertex in range(3):
+        for axis in range(3):
+            for delta in (steps, -steps):
+                moved = [list(point) for point in triangle]
+                moved[vertex][axis] = _nudge(moved[vertex][axis], delta)
+                yield tuple(tuple(point) for point in moved)
+
+
+def verdict_is_stable(first, second, *, steps: int = ULP_STEPS) -> bool:
+    """True when the exact verdict survives a ``steps``-ulp move of any one coordinate.
+
+    A sufficient way to certify a tie: if the exact answer flips inside a couple of
+    ulps, the pair is decided at the last bit of its input representation. It is not
+    *necessary*, and ``sub_resolution_gap`` is the criterion to trust when the two
+    disagree: a pair can miss by 3e-18 of its own size and still keep its verdict
+    under a 2**20-ulp move of every coordinate one at a time (measured on the
+    corners-kissing configuration in ``docs/intersect_resolution.md``), because the
+    sign of the separation is structural while its magnitude is tiny. Use this to
+    *explain* a tie; use ``sub_resolution_gap`` to *filter* one.
+    """
+    base = triangles_intersect_exact(first, second)
+    for moved in _perturbations(first, steps):
+        if triangles_intersect_exact(moved, second) != base:
+            return False
+    for moved in _perturbations(second, steps):
+        if triangles_intersect_exact(first, moved) != base:
+            return False
+    return True
+
+
+def longest_edge(triangle) -> float:
+    """Characteristic size used by the library's relative tolerances."""
+    return max(
+        math.dist(triangle[0], triangle[1]),
+        math.dist(triangle[1], triangle[2]),
+        math.dist(triangle[2], triangle[0]),
+    )
+
+
+def relative_gap(first, second) -> float:
+    """Exact separation as a fraction of the longer triangle's edge length."""
+    separated, squared = triangles_separation(first, second)
+    if not separated:
+        return 0.0
+    size = max(longest_edge(first), longest_edge(second), 1.0)
+    return math.sqrt(float(squared)) / size
+
+
+def sub_resolution_gap(first, second, tolerance) -> bool:
+    """True when the pair misses by less than the library's own resolution.
+
+    ``tolerance`` is the relative band the predicate declares
+    (:data:`tensorcad.intersect.RELATIVE_TOLERANCE`). Two triangles that pass each
+    other at a distance below ``tolerance * max(size, 1)`` are indistinguishable
+    from touching for any double-precision predicate with that band, so an exact
+    route and the library are *both* allowed a verdict there -- the library chooses
+    contact, which is the conservative choice for mesh fold detection. This is the
+    filter a differential test needs; agreement between two exact routes is not,
+    because those routes can share a formulation.
+    """
+    separated, squared = triangles_separation(first, second)
+    if not separated:
+        return False
+    size = max(longest_edge(first), longest_edge(second), 1.0)
+    limit = Fraction(tolerance) * Fraction(size)
+    return squared <= limit * limit

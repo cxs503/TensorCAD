@@ -15,7 +15,15 @@ Three independent lines of evidence are used here:
   different route (plane/plane line clipping and 2-D polygon clipping instead of
   edge piercing), so an agreement is not a shared rounding artefact;
 * **mesh-level controls** -- a clean closed solid must report nothing, and the
-  uniform-hash pruning must return exactly what an all-pairs scan returns.
+  uniform-hash pruning must return exactly what an all-pairs scan returns;
+* **resolution contract** -- the predicate is deliberately conservative and has a
+  finite resolution (``docs/intersect_resolution.md``), so a randomised
+  differential run must score only *decided* pairs: pairs whose exact verdict
+  survives a 1-ulp move of any single input coordinate. Without that filter the
+  comparison asks a float routine to reproduce a decision that is taken at the
+  last bit of its input, and a red test says nothing about the code.
+  ``intersect_oracle.ROUTES`` records why the two boolean routes are no longer
+  independent for non-coplanar pairs, which is what made the filter necessary.
 
 The suite found one real defect: coplanar pairs were decided by "is a vertex of
 one triangle inside the other", which misses overlaps whose corners are all edge
@@ -34,12 +42,17 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from intersect_oracle import (  # noqa: E402
+    ROUTES,
+    relative_gap,
+    sub_resolution_gap,
     triangles_intersect_clip3d,
     triangles_intersect_exact,
+    verdict_is_stable,
 )
 
 from tensorcad.geometry import Mesh  # noqa: E402
 from tensorcad.intersect import (  # noqa: E402
+    BARYCENTRIC_TOLERANCE,
     RELATIVE_TOLERANCE,
     find_self_intersections,
     triangles_intersect,
@@ -181,7 +194,13 @@ class TestExactDifferential:
         assert not mismatches, f"{len(mismatches)} disagreements, first: {mismatches[0]}"
 
     def test_three_exact_routes_agree_on_dyadic_pairs(self):
-        """The two exact routes must also agree with each other, or neither is a reference."""
+        """The two exact routes must also agree with each other, or neither is a reference.
+
+        See ``intersect_oracle.ROUTES``: they now share the non-coplanar
+        formulation, so this is a consistency check on that one formulation, not
+        an independence proof. ``test_no_decided_pair_disagrees_with_the_oracle``
+        is the part that rules out a shared logic error.
+        """
         rng = random.Random(4242)
         disagreements = []
         for _ in range(800):
@@ -193,28 +212,115 @@ class TestExactDifferential:
                 disagreements.append((first, second))
         assert not disagreements, f"{len(disagreements)} route disagreements: {disagreements[0]}"
 
-    def test_thirds_lattice_matches_halfspace_clipping(self):
-        """Non-dyadic inputs: the library is compared with 3-D half-space clipping.
+    def test_no_decided_pair_disagrees_with_the_oracle(self):
+        """Every pair the predicate is *required* to resolve matches the exact route.
 
-        Third-based coordinates are not representable in binary, so the float
-        implementation cannot be held to the rational answer bit for bit; the
-        honest statement is that it must agree with an exact route on every pair
-        whose geometry is unambiguous. The pairs scored here are the ones where
-        both exact routes agree with each other.
+        Third-based coordinates are not representable in binary, so some pairs miss
+        each other by 1e-17 of their size. Those are filtered with the contract's
+        own yardstick -- an exact separation below
+        ``RELATIVE_TOLERANCE * size`` -- rather than with agreement between two
+        exact routes, which stopped being evidence once those routes merged. The
+        filter is not a rubber stamp: it cannot hide a pair that misses by more
+        than the band, and ``test_the_binding_band_is_the_plane_band`` pins the band
+        itself from both sides. Sub-resolution pairs stay in the sample and their
+        direction is asserted, so a predicate that started *denying* contact at
+        that scale (a missed mesh fold) would fail here.
         """
         grid = (-1.0, -1.0 / 3.0, 0.0, 1.0 / 3.0, 1.0)
         rng = random.Random(7)
         mismatches = []
+        ties = []
         for _ in range(600):
             first = random_triangle(rng, grid)
             second = random_triangle(rng, grid)
-            line_route = triangles_intersect_exact(first, second)
-            clip_route = triangles_intersect_clip3d(first, second)
-            if line_route != clip_route:
-                continue  # near-degenerate: the exact routes disagree, no verdict
-            if triangles_intersect(first, second) != clip_route:
+            exact = triangles_intersect_exact(first, second)
+            library = triangles_intersect(first, second)
+            if library == exact:
+                continue
+            if sub_resolution_gap(first, second, RELATIVE_TOLERANCE):
+                ties.append((first, second, exact, library))
+            else:
                 mismatches.append((first, second))
-        assert not mismatches, f"{len(mismatches)} disagreements, first: {mismatches[0]}"
+        assert not mismatches, f"{len(mismatches)} decided disagreements, first: {mismatches[0]}"
+        assert len(ties) <= 40, f"{len(ties)} sub-resolution disagreements out of 600 pairs"
+        for first, second, exact, library in ties:
+            # Conservative direction only: inside the band the predicate may claim
+            # contact (a false alarm downstream) but must never deny it (a missed fold).
+            assert library is True and exact is False
+
+
+class TestResolutionContract:
+    """What the predicate promises at, and below, its resolution."""
+
+    #: The tie recorded when this contract was written: the exact route says the
+    #: pair misses, the predicate says it touches, the two differ by ~1e-17 of the
+    #: triangle size and a two-ulp move of one coordinate flips the exact answer.
+    TIE_A = ((-1.0 / 3.0, 1.0, 1.0), (0.0, 1.0, 1.0 / 3.0), (-1.0 / 3.0, -1.0 / 3.0, -1.0))
+    TIE_B = ((-1.0, 1.0, -1.0), (-1.0, 1.0 / 3.0, 1.0), (0.0, 1.0 / 3.0, 1.0))
+
+    def test_the_two_resolution_bands_are_ordered(self):
+        assert BARYCENTRIC_TOLERANCE < RELATIVE_TOLERANCE
+
+    def test_recorded_ulp_tie_is_reported_as_contact(self):
+        assert triangles_intersect_exact(self.TIE_A, self.TIE_B) is False
+        assert triangles_intersect(self.TIE_A, self.TIE_B) is True
+
+    def test_recorded_ulp_tie_is_certified_as_a_tie_not_an_error(self):
+        assert verdict_is_stable(self.TIE_A, self.TIE_B) is False
+        assert relative_gap(self.TIE_A, self.TIE_B) < 1e-15
+        assert sub_resolution_gap(self.TIE_A, self.TIE_B, RELATIVE_TOLERANCE)
+
+    def test_stability_is_sufficient_but_not_necessary(self):
+        """A 3e-18 miss can keep its verdict under huge perturbations.
+
+        Recorded because the first version of this suite used verdict stability as
+        the filter and this pair slipped through: the separation sign is structural
+        even though its magnitude is 0.014 ulp, so stability alone would have
+        reported a decided disagreement where the contract allows either verdict.
+        The gap band classifies it, the stability test does not.
+        """
+        corners_a = ((-1.0, 0.0, 0.0), (-1.0, -1.0, -1.0 / 3.0), (1.0, 1.0, 0.0))
+        corners_b = ((-1.0 / 3.0, 1.0 / 3.0, 0.0), (0.0, -1.0, 1.0 / 3.0), (1.0, -1.0 / 3.0, 1.0 / 3.0))
+        assert triangles_intersect_exact(corners_a, corners_b) is False
+        assert triangles_intersect(corners_a, corners_b) is True
+        assert verdict_is_stable(corners_a, corners_b) is True
+        assert relative_gap(corners_a, corners_b) < 1e-15
+        assert sub_resolution_gap(corners_a, corners_b, RELATIVE_TOLERANCE)
+
+    def test_gap_far_above_the_resolution_is_disjoint_and_decided(self):
+        # A blade stopping 1e-3 above the plate: 12 orders of magnitude above the
+        # barycentric band, so no tie argument can excuse a wrong answer here.
+        blade = ((0.5, 0.5, 1e-3), (0.5, 0.5, 2.0), (1.5, 1.5, 1.5))
+        assert triangles_intersect(FLAT, blade) is False
+        assert verdict_is_stable(FLAT, blade) is True
+
+    def test_the_binding_band_is_the_plane_band(self):
+        """Measured resolution: a gap is resolved once it clears `RELATIVE_TOLERANCE` * size.
+
+        Below it the tip is snapped onto the plane and the pair is reported as
+        contact, even though that is 10^5 times above the barycentric band -- the
+        wider band wins, which is why the module documents the *plane* band as the
+        resolution. Both sides are pinned here so a later change of either
+        tolerance cannot move the boundary unnoticed.
+        """
+        band = RELATIVE_TOLERANCE * max(2.8284271247461903, 1.0)
+        for gap in (1e-6, 1e-8, 1e-9, 2 * band):
+            blade = ((0.5, 0.5, gap), (0.5, 0.5, 2.0), (1.5, 1.5, 1.5))
+            assert triangles_intersect(FLAT, blade) is False, f"resolved gap {gap:g} judged contact"
+        for gap in (0.5 * band, 1e-10, 1e-12):
+            blade = ((0.5, 0.5, gap), (0.5, 0.5, 2.0), (1.5, 1.5, 1.5))
+            assert triangles_intersect(FLAT, blade) is True, f"sub-resolution gap {gap:g} judged disjoint"
+
+    def test_separation_meter_matches_known_gaps(self):
+        far = ((5.0, 5.0, 0.0), (6.0, 5.0, 0.0), (5.0, 6.0, 0.0))
+        assert abs(relative_gap(FLAT, far) - 2.0) < 1e-12
+        lifted = tuple((x, y, z + 0.5) for x, y, z in FLAT)
+        assert abs(relative_gap(FLAT, lifted) - 0.5 / 2.8284271247461903) < 1e-12
+
+    def test_route_metadata_records_the_independence_loss(self):
+        """Documentation as data: the clip3d route shares the plane-line branch."""
+        assert set(ROUTES) == {"exact", "clip3d", "stability", "separation"}
+        assert "shares" in ROUTES["clip3d"]
 
 
 class TestInvariance:
