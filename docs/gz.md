@@ -105,10 +105,19 @@ before comparing; with it the agreement is at the `1e-9` level.
 
 ## Free surface
 
-`free_surface_correction(tank_inertias, displacement_volume)` returns `Σi_x / V`, applied as
-a flat reduction of the whole curve (`GZ_fluid = GZ_solid − Σi_x/V`), which is what that
-correction is. `rectangular_tank_inertia(l, b) = l·b³/12` supplies `i_x` for a rectangular
-tank. A 2.0 × 0.5 m tank in the 7.45 m³ hull example costs 2.80 mm on every point.
+`free_surface_correction(tank_inertias, displacement_volume)` returns `Σi_x / V`, the loss of
+*metacentric height* a slack tank costs, and `rectangular_tank_inertia(l, b) = l·b³/12`
+supplies `i_x` for a rectangular tank. A loss of `GM` is a raise of `KG`, so the curve loses
+`Σi_x/V · sin(φ)` — not `Σi_x/V` at every ordinate: a flat subtraction puts
+`GZ(0) = −Σi_x/V` on an upright symmetric ship and overstates the low-angle areas. A
+2.0 × 0.5 m tank in the 7.45 m³ hull example costs 2.80 mm of `GM`; the corrected `A(0-30)`
+loses 3.7e-4 m rad where the flat model took 1.5e-3 m rad, 3.9× too much.
+
+`free_surface_model="flat"` reproduces the historical behaviour for an old curve.
+`free_surface_model="exact"` (with `slack_tanks=[SlackTank(...)]`) uses the finite-angle shift
+of [`tensorcad.free_surface`](free_surface.md) instead of the first-order one; that page
+measures the difference — 16.7 % more loss at 30° for a 2.0 × 0.5 × 1.0 m tank half full,
+because the free surface widens as `b/cos(φ)`.
 
 ## `with_freeboard`, and why a generated hull cannot be heeled
 
