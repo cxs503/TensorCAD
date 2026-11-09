@@ -22,7 +22,7 @@ EXPECTED_API = {
     "BonjeanCurve", "BonjeanTable", "SectionProperties", "analytic_section_area",
     "bonjean_curve", "bonjean_table", "section_loops", "section_properties",
     "DESIGN_SCHEMA", "DesignProblem", "DesignRecord", "DesignSolution", "DesignTargets",
-    "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
+    "BooleanField", "BoundingBox", "Check", "CylinderField", "EllipsoidField", "FieldError", "GeometryField",
     "AnalyticHydrostatics", "ConditionedMesh", "HullModel", "HullParameters", "Hydrostatics",
     "Mesh", "MeshBuilder",
     "MeshConditioningError", "MeshGateError", "MeshGateReport", "MeshMeasurements", "ParameterSpec",
@@ -59,6 +59,7 @@ EXPECTED_API = {
     "read_metadata", "read_obj", "read_stl", "resolve_resolution",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
+    "difference", "intersection", "union",
     "tanh_sinh_quadrature", "taper_integral", "taubin_smooth", "to_mesh", "to_voxel_grid", "validate_hull",
     "write_design_json", "write_metadata",
     "assess_fairness", "principal_curvatures",
@@ -84,7 +85,7 @@ def test_declared_api_is_importable() -> None:
 
 def test_layered_modules_are_all_importable() -> None:
     for module in ("curvature", "geometry", "geometry_field", "mesh", "mesh_conditioning", "gate",
-                   "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export",
+                   "parameters", "validation", "hydrostatics", "hydrostatics_analytic", "voxel", "export", "csg",
                    "wigley", "transom", "hull", "design", "suboff", "suboff_appendages", "cli",
                    "adapters.fem", "benchmark", "nurbs"):
         assert importlib.import_module(f"tensorcad.{module}") is not None
