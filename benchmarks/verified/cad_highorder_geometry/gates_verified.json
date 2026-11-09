@@ -1,0 +1,44 @@
+{
+  "schema": "tensorcad.gates/1.0",
+  "case": "cad_highorder_geometry",
+  "campaign_node": "p127w2-n01-cad-highorder-geometry",
+  "generated_utc": "2026-11-09T01:39:32Z",
+  "gates": {
+    "J1": {
+      "criterion": "exactness order = 2p-1 (exact there, wrong one degree beyond) and fitted quadrature order >= 2p-1 for p = 1..4",
+      "passed": true,
+      "evidence": "result.json#/gates/J1"
+    },
+    "J2": {
+      "criterion": "L_inf curvature error / kappa_max <= 1e-3 and unit-normal deviation <= 1e-3, against the closed-form ellipsoid/sphere and against a finite-difference route",
+      "passed": true,
+      "evidence": "result.json#/gates/J2"
+    },
+    "J3": {
+      "criterion": "order-4 curved elements on 2x2 subdivisions per knot span: volume relative error <= 1e-6 against 4/3 pi R^3 and 4/3 pi a b c",
+      "passed": true,
+      "evidence": "result.json#/gates/J3"
+    },
+    "J4": {
+      "criterion": "wetted surface S and block coefficient Cb from NURBS quadrature, STL tessellation and voxel grid all within 0.5% of the independent AGM/Carlson elliptic-integral value",
+      "passed": true,
+      "evidence": "result.json#/gates/J4"
+    },
+    "J5": {
+      "criterion": "write-read-recompute is bit identical (recomputed integrals agree to <= 1e-14) and the content hash survives NPZ, HDF5 and JSON",
+      "passed": true,
+      "evidence": "result.json#/gates/J5"
+    },
+    "J6": {
+      "criterion": "faceted patch: observed order <= 2 for area and volume, and volume relative error > 1e-3 at 8 and 16 facets per direction (i.e. J1/J3 cannot be met by facets)",
+      "passed": true,
+      "evidence": "result.json#/gates/J6"
+    },
+    "J7": {
+      "criterion": "pytest tests/test_highorder_geometry.py wall time <= 120 s and all green",
+      "passed": true,
+      "evidence": "result.json#/gates/J7"
+    }
+  },
+  "passed": true
+}
