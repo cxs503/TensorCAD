@@ -10,6 +10,11 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    # NURBS hull surface -> body mesh -> consistency loop (IN383-CAD01)
+    "HULL_NURBS_SCHEMA", "HullBodyMesh", "HullForm", "HullHydrostatics", "HullNurbsError",
+    "HullNurbsParameters", "HullNurbsSurface", "build_body_mesh", "build_nurbs_hull",
+    "calibrate_form", "holtrop_wetted_area", "kcs_lightweight_parameters", "mesh_integrals",
+    "nurbs_hydrostatics", "realised_dimensions", "schneekluth_lcb_ratio",
     "WIGLEY_REFERENCE_CASE", "WigleyAnalytic", "WigleyModel", "WigleyParameters",
     "export_wigley", "generate_wigley", "wigley_analytic_hydrostatics",
     "wigley_analytic_relative_errors", "wigley_convergence_study",
