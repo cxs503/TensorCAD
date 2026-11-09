@@ -71,6 +71,7 @@ from typing import Any
 
 from .geometry import Mesh
 from .hydrostatics import compute_hydrostatics
+from .righting_arm import heeled_displacement
 
 SCHEMA_WATERPLANE = "tensorcad.stability.waterplane/1"
 SCHEMA_STABILITY = "tensorcad.stability.initial/1"
@@ -195,11 +196,20 @@ def _plane_segments(
     plane (a hull's waterline cap, or the flat top of a box) are counted and skipped:
     their boundary is recovered from the neighbouring non-coplanar faces, which is what
     keeps an area from being counted twice.
+
+    A face pair that shares an *edge* lying in the plane each emit that whole edge as a
+    segment, so a plane that contains mesh edges -- the seam where a hull surface meets
+    the vertical band :func:`tensorcad.gz.with_freeboard` extrudes, for instance -- would
+    otherwise trace its boundary twice. The duplicate is dropped here: one geometric
+    curve is one segment, so the contour stays a simple ring and
+    :func:`waterplane_moments` measures the section once instead of reading the second
+    copy as a hole nested in the first.
     """
     vertices = mesh.vertices
     tolerance = PLANE_TOLERANCE * _bounding_scale(mesh)
     points: dict[Hashable, tuple[float, float]] = {}
     segments: list[tuple[Hashable, Hashable]] = []
+    seen: set[tuple[Hashable, Hashable]] = set()
     coplanar = 0
 
     for face in mesh.faces:
@@ -234,7 +244,11 @@ def _plane_segments(
             keys.append(key)
         unique = list(dict.fromkeys(keys))
         if len(unique) == 2:
-            segments.append((unique[0], unique[1]))
+            lower, upper = unique
+            identity = (lower, upper) if lower <= upper else (upper, lower)
+            if identity not in seen:  # an edge in the plane: the second face repeats it
+                seen.add(identity)
+                segments.append((unique[0], unique[1]))
         elif len(unique) > 2:  # pragma: no cover - a triangle meets a plane in <= 2 points
             raise StabilityError(
                 f"a triangle met the waterline in {len(unique)} points; the mesh is not "
@@ -400,30 +414,53 @@ def initial_stability(
     waterplane moments measured here, so the two halves of ``KM`` are computed by
     independent integrations and their agreement with the closed forms is checked
     separately in ``examples/stability``.
+
+    A hull modelled only up to its waterline is integrated as one closed body, which is
+    the immersed body. A mesh that *carries freeboard* -- what
+    :func:`tensorcad.gz.with_freeboard` produces, and what a GZ curve needs -- is not:
+    integrating it whole would return the body's total volume instead of the immersed
+    part and inflate ``BM`` by that ratio, so the immersed volume and ``KB`` are then
+    taken from :func:`tensorcad.righting_arm.heeled_displacement` at zero heel, the same
+    integral the righting-arm curve uses.
     """
     if not math.isfinite(kg):
         raise StabilityError(f"kg must be finite, got {kg!r}")
-    hydrostatics = compute_hydrostatics(mesh, waterline_z, water_density=water_density, closed=closed)
-    volume = hydrostatics.displacement_volume
-    if not math.isfinite(volume) or volume <= 0.0:
-        raise StabilityError(
-            f"displacement volume {volume!r} m^3 is not positive; a metacentric height needs a floating body"
-        )
     section = waterplane_moments(mesh, waterline_z)
     keel_z = min(vertex[2] for vertex in mesh.vertices)
-    kb = hydrostatics.vertical_centre_buoyancy - keel_z
+    above_waterline = max(vertex[2] for vertex in mesh.vertices) - waterline_z
+    basis = "solid GM (no free-surface correction)"
+    if above_waterline > PLANE_TOLERANCE * _bounding_scale(mesh):
+        # The mesh keeps its freeboard, so the closed-surface integral would count the
+        # volume above the waterline as displacement. Measure the immersed body.
+        immersed = heeled_displacement(mesh, heel_deg=0.0, waterline_z=waterline_z, closed=closed)
+        volume = immersed.volume
+        if not math.isfinite(volume) or volume <= 0.0:
+            raise StabilityError(
+                f"displacement volume {volume!r} m^3 is not positive; a metacentric height needs a floating body"
+            )
+        mass = volume * water_density
+        kb = immersed.centre_of_buoyancy[2] - keel_z
+        basis = "solid GM (no free-surface correction), immersed body below the waterline"
+    else:
+        hydrostatics = compute_hydrostatics(mesh, waterline_z, water_density=water_density, closed=closed)
+        volume = hydrostatics.displacement_volume
+        if not math.isfinite(volume) or volume <= 0.0:
+            raise StabilityError(
+                f"displacement volume {volume!r} m^3 is not positive; a metacentric height needs a floating body"
+            )
+        mass = hydrostatics.displacement_mass
+        kb = hydrostatics.vertical_centre_buoyancy - keel_z
+        if hydrostatics.basis != "closed surface integrals":
+            basis = f"solid GM, {hydrostatics.basis}"
     bm_transverse = section.transverse_second_moment / volume
     bm_longitudinal = section.longitudinal_second_moment / volume
     km_transverse = kb + bm_transverse
     km_longitudinal = kb + bm_longitudinal
-    basis = "solid GM (no free-surface correction)"
-    if hydrostatics.basis != "closed surface integrals":
-        basis = f"solid GM, {hydrostatics.basis}"
     return InitialStability(
         waterline_z=waterline_z,
         keel_z=keel_z,
         displacement_volume=volume,
-        displacement_mass=hydrostatics.displacement_mass,
+        displacement_mass=mass,
         kb=kb,
         kg=kg,
         bm_transverse=bm_transverse,
