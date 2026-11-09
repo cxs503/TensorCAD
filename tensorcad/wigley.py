@@ -255,6 +255,97 @@ def analytic_waterplane_area(
     return length * beam * n / (n + 1.0)
 
 
+def analytic_waterplane_inertia(
+    length: float, beam: float, longitudinal_exponent: float = 2.0
+) -> float:
+    """Exact transverse waterplane inertia ``I_T = int y^2 dA`` about the centreline.
+
+    The waterplane of the family is ``|y| <= b(x)`` with ``b = (B/2) taper(x)``, so
+    ``I_T = int_0^L (2/3) b^3 dx``. Substituting ``u = 2x/L - 1`` (``dx = L du / 2``)
+    and expanding the cube,
+
+        I_T = (B^3 L / 12) * K(n),
+        K(n) = 1 - 3/(n+1) + 3/(2n+1) - 1/(3n+1),
+
+    because ``int_0^1 (1 - u^n)^3 du = 1 - 3/(n+1) + 3/(2n+1) - 1/(3n+1)``. At
+    ``n = 2``: ``K = 16/35`` and ``I_T = 4 L B^3 / 105``.
+
+    Note which exponent enters: the *half breadth* tapers as ``(1-|u|^n)``, the
+    moment integrates its **cube**, so the Beta integral carries ``3n`` and not
+    ``n``. The mesh never sees that distinction -- it integrates whatever polygon it
+    is given -- which is why this reference is derived here and not read back from
+    the integrator.
+    """
+    n = float(longitudinal_exponent)
+    if not (math.isfinite(n) and n > 0.0):
+        raise ValueError(f"longitudinal_exponent must be finite and > 0, got {n!r}")
+    k = 1.0 - 3.0 / (n + 1.0) + 3.0 / (2.0 * n + 1.0) - 1.0 / (3.0 * n + 1.0)
+    return (beam**3 * length / 12.0) * k
+
+
+def analytic_waterplane_inertia_longitudinal(
+    length: float, beam: float, longitudinal_exponent: float = 2.0
+) -> float:
+    """Exact longitudinal waterplane inertia about the centre of flotation.
+
+    The waterplane is symmetric fore-aft, so the centre of flotation is at ``L/2``
+    and ``I_L = int (x - L/2)^2 2 b(x) dx``. With ``u = 2x/L - 1`` and
+    ``s = x - L/2 = (L/2) u``,
+
+        I_L = (B L^3 / 4) * int_0^1 u^2 (1 - u^n) du
+            = (B L^3 / 4) * (1/3 - 1/(n+3)),
+
+    because ``int_0^1 u^2 (1-u^n) du = 1/3 - 1/(n+3)``. At ``n = 2`` the bracket is
+    ``2/15`` and ``I_L = B L^3 / 30`` -- a third of the box value ``B L^3/12``,
+    which is what a hull that tapers to a point at both ends should give.
+
+    The parallel-axis term is **already removed**: the mesh routes report ``I_L``
+    about the centre of flotation (see :func:`tensorcad.stability.waterplane_moments`),
+    and comparing a centroidal reference with an about-origin one is the classic
+    way to manufacture a disagreement that is not a defect.
+    """
+    n = float(longitudinal_exponent)
+    if not (math.isfinite(n) and n > 0.0):
+        raise ValueError(f"longitudinal_exponent must be finite and > 0, got {n!r}")
+    k = 1.0 / 3.0 - 1.0 / (n + 3.0)
+    return (beam * length**3 / 4.0) * k
+
+
+def analytic_metacentric_radius_transverse(
+    length: float,
+    beam: float,
+    draft: float,
+    longitudinal_exponent: float = 2.0,
+    vertical_exponent: float = 2.0,
+) -> float:
+    """Exact ``BM_T = I_T / nabla``: ``B^2 (n+1)(m+1) K(n) / (12 T n m)``.
+
+    ``nabla = L B T n m / ((n+1)(m+1))`` is :func:`analytic_volume`, so the length
+    cancels and only the breadth-to-draft ratio survives. At ``n = m = 2`` this is
+    ``3 B^2 / (35 T)`` -- for the ITTC reference proportions ``B = 1 m``,
+    ``T = 0.625 m`` that is ``0.137142857 m``.
+    """
+    n, m = float(longitudinal_exponent), float(vertical_exponent)
+    volume = analytic_volume(length, beam, draft, n, m)
+    return analytic_waterplane_inertia(length, beam, n) / volume
+
+
+def analytic_metacentric_radius_longitudinal(
+    length: float,
+    beam: float,
+    draft: float,
+    longitudinal_exponent: float = 2.0,
+    vertical_exponent: float = 2.0,
+) -> float:
+    """Exact ``BM_L = I_L / nabla``: ``L^2 (n+1)(m+1) (1/3 - 1/(n+3)) / (4 T n m)``.
+
+    At ``n = m = 2`` this is ``3 L^2 / (40 T)``.
+    """
+    n, m = float(longitudinal_exponent), float(vertical_exponent)
+    volume = analytic_volume(length, beam, draft, n, m)
+    return analytic_waterplane_inertia_longitudinal(length, beam, n) / volume
+
+
 def analytic_maximum_section_area(
     beam: float, draft: float, vertical_exponent: float = 2.0
 ) -> float:
@@ -561,6 +652,181 @@ def wigley_analytic_hydrostatics(
         midship_coefficient=analytic_midship_coefficient(m),
         waterplane_coefficient=analytic_waterplane_coefficient(n),
         basis="closed forms of the Wigley algebraic surface; wetted area by composite Gauss-Legendre",
+    )
+
+
+#: Quantities :class:`WigleyStability` shares with
+#: :class:`tensorcad.stability.InitialStability`, so :meth:`WigleyStability.compare` is
+#: a one-to-one subtraction and not a name-matching exercise.
+STABILITY_COMPARABLE_QUANTITIES: tuple[str, ...] = (
+    "transverse_waterplane_inertia",
+    "longitudinal_waterplane_inertia",
+    "kb",
+    "bm_transverse",
+    "bm_longitudinal",
+    "km_transverse",
+    "km_longitudinal",
+    "gm_transverse",
+    "gm_longitudinal",
+)
+
+#: A measured stability result reports its waterplane moments one level down, which is
+#: why the two inertia names need a route to the nested record.
+_WATERPLANE_ROUTE: dict[str, str] = {
+    "transverse_waterplane_inertia": "transverse_second_moment",
+    "longitudinal_waterplane_inertia": "longitudinal_second_moment",
+}
+
+
+@dataclass(frozen=True)
+class WigleyStability:
+    """Exact initial stability of the Wigley surface: ``I_T``, ``I_L``, ``BM``, ``KM``, ``GM``.
+
+    Field names match :class:`tensorcad.stability.InitialStability` (and
+    :class:`tensorcad.hydrostatics.Hydrostatics` for the two inertias) so
+    :meth:`compare` is a subtraction, not a translation. ``KG`` is an input for the same
+    reason it is an input there: it is a loading condition, not a property of the shape.
+
+    Heights are above the keel, inertias about the centreline / centre of flotation, and
+    ``GM = KB + BM - KG`` -- no free-surface correction, no trim, no heel. This is the
+    intact, upright reference, which is exactly what a mesh route should be measured
+    against before it is trusted on anything else.
+    """
+
+    length: float
+    beam: float
+    draft: float
+    water_density: float
+    longitudinal_exponent: float
+    vertical_exponent: float
+    kg: float
+    displacement_volume: float
+    transverse_waterplane_inertia: float
+    longitudinal_waterplane_inertia: float
+    kb: float
+    bm_transverse: float
+    bm_longitudinal: float
+    km_transverse: float
+    km_longitudinal: float
+    gm_transverse: float
+    gm_longitudinal: float
+    basis: str
+
+    def as_dict(self) -> dict[str, Any]:
+        """JSON-ready payload; keys mirror the mesh stability record."""
+        return {
+            "schema": "tensorcad.wigley.stability/1",
+            "units": "m",
+            "form": "y = (B/2) (1 - |2x/L - 1|^n) (1 - (w/T)^m)",
+            "inputs": {
+                "length_m": self.length,
+                "beam_m": self.beam,
+                "draft_m": self.draft,
+                "water_density_kg_per_m3": self.water_density,
+                "longitudinal_exponent": self.longitudinal_exponent,
+                "vertical_exponent": self.vertical_exponent,
+                "kg_above_keel_m": self.kg,
+            },
+            "displacement_volume_m3": self.displacement_volume,
+            "transverse_waterplane_inertia_m4": self.transverse_waterplane_inertia,
+            "longitudinal_waterplane_inertia_m4": self.longitudinal_waterplane_inertia,
+            "kb_m": self.kb,
+            "bm_transverse_m": self.bm_transverse,
+            "bm_longitudinal_m": self.bm_longitudinal,
+            "km_transverse_m": self.km_transverse,
+            "km_longitudinal_m": self.km_longitudinal,
+            "gm_transverse_m": self.gm_transverse,
+            "gm_longitudinal_m": self.gm_longitudinal,
+            "basis": self.basis,
+        }
+
+    def compare(
+        self, measured: Any, *, quantities: tuple[str, ...] | None = None
+    ) -> dict[str, Any]:
+        """Signed relative error of a measured stability result against this reference.
+
+        ``measured`` is a :class:`tensorcad.stability.InitialStability` (or anything with
+        the same attribute names). Signed, because a sampled loft sits inside the analytic
+        surface: the waterplane *chords* cut the corner off a convex taper, so ``I_T`` is
+        expected to come out low at every resolution. A sign flip is a defect, not a
+        refinement level.
+        """
+        names = quantities if quantities is not None else STABILITY_COMPARABLE_QUANTITIES
+        errors: dict[str, float] = {}
+        values: dict[str, dict[str, float]] = {}
+        for name in names:
+            exact = float(getattr(self, name))
+            value = _measured_value(measured, name)
+            errors[name] = (value - exact) / abs(exact) if exact else float("nan")
+            values[name] = {"measured": value, "reference": exact}
+        finite = [abs(v) for v in errors.values() if math.isfinite(v)]
+        return {
+            "quantities": values,
+            "relative_error": errors,
+            "max_abs_relative_error": max(finite) if finite else float("nan"),
+            "reference_basis": self.basis,
+        }
+
+
+def _measured_value(measured: Any, name: str) -> float:
+    """Read ``name`` off a stability result, following one level into its waterplane."""
+    if hasattr(measured, name):
+        return float(getattr(measured, name))
+    nested = getattr(measured, "waterplane", None)
+    leaf = _WATERPLANE_ROUTE.get(name)
+    if nested is not None and leaf is not None and hasattr(nested, leaf):
+        return float(getattr(nested, leaf))
+    raise AttributeError(f"measured result has no {name!r} (nor a waterplane.{leaf})")
+
+
+def analytic_initial_stability(parameters: Any = None, **overrides: Any) -> WigleyStability:
+    """Closed-form ``KM``/``GM`` of the Wigley surface for one loading condition.
+
+    ``parameters`` is a :class:`WigleyParameters` (or anything carrying
+    ``length``/``beam``/``draft``/exponents) and ``kg`` is passed in ``overrides`` or
+    read off the parameters object; it is **required** for the same reason
+    :func:`tensorcad.stability.initial_stability` requires it -- a default of zero would
+    silently report ``GM = KM``.
+
+    Sampling counts are ignored: the reference describes the surface, not the sampling
+    of it. Pass ``kg`` above the keel.
+    """
+    kg = overrides.get("kg", getattr(parameters, "kg", None))
+    geometry_overrides = {k: v for k, v in overrides.items() if k != "kg"}
+    p = _resolve(parameters, geometry_overrides)
+    if kg is None:
+        raise ValueError("kg (height of the centre of gravity above the keel) is required")
+    kg = float(kg)
+    if not math.isfinite(kg):
+        raise ValueError(f"kg must be finite, got {kg!r}")
+    n, m = p.longitudinal_exponent, p.vertical_exponent
+    volume = analytic_volume(p.length, p.beam, p.draft, n, m)
+    inertia_t = analytic_waterplane_inertia(p.length, p.beam, n)
+    inertia_l = analytic_waterplane_inertia_longitudinal(p.length, p.beam, n)
+    kb = analytic_vertical_centre_buoyancy(p.draft, m)
+    bm_t = inertia_t / volume
+    bm_l = inertia_l / volume
+    km_t = kb + bm_t
+    km_l = kb + bm_l
+    return WigleyStability(
+        length=p.length,
+        beam=p.beam,
+        draft=p.draft,
+        water_density=p.water_density,
+        longitudinal_exponent=n,
+        vertical_exponent=m,
+        kg=kg,
+        displacement_volume=volume,
+        transverse_waterplane_inertia=inertia_t,
+        longitudinal_waterplane_inertia=inertia_l,
+        kb=kb,
+        bm_transverse=bm_t,
+        bm_longitudinal=bm_l,
+        km_transverse=km_t,
+        km_longitudinal=km_l,
+        gm_transverse=km_t - kg,
+        gm_longitudinal=km_l - kg,
+        basis="closed forms: I_T=(B^3 L/12)K(n), I_L=(B L^3/4)(1/3-1/(n+3)), KB=VCB, BM=I/nabla",
     )
 
 
