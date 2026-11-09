@@ -48,6 +48,12 @@ from .box_gz import (
     box_section,
     box_vanishing_angle_deg,
 )
+from .csg import (
+    BooleanField,
+    difference,
+    intersection,
+    union,
+)
 from .curvature import (
     CurvatureError,
     CurvatureSample,
@@ -272,6 +278,7 @@ __all__ = [
     "BisectionRightingArmCurve",
     "BonjeanCurve",
     "BonjeanTable",
+    "BooleanField",
     "BoundingBox",
     "BoxGzArea",
     "BoxGzError",
@@ -361,7 +368,7 @@ __all__ = [
     "compute_hydrostatics",
     "condition_mesh",
     "decimate",
-    "deck_edge_immersion_deg",
+    "deck_edge_immersion_deg", "difference",
     "enforce_gate",
     "estimate_discretisation_error",
     "estimate_transom_discretisation_error",
@@ -382,7 +389,7 @@ __all__ = [
     "heeled_displacement",
     "heeled_hydrostatics",
     "initial_stability",
-    "inspect_geometry",
+    "inspect_geometry", "intersection",
     "inspect_mesh_quality",
     "measure_mesh",
     "parent_length",
@@ -404,7 +411,7 @@ __all__ = [
     "suboff_reference_geometry",
     "suboff_sail_half_width",
     "surface_point",
-    "tanh_sinh_quadrature",
+    "tanh_sinh_quadrature", "union",
     "taper_integral",
     "taubin_smooth",
     "to_mesh",
