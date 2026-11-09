@@ -199,6 +199,40 @@ The tips are points of zero area, so the mesh stops short of them by about a cel
 than smoothed away. `python examples/suboff/run_example.py` re-measures every row and
 fails the build if one stops holding.
 
+## NURBS hull surface → body mesh → consistency loop (unreleased)
+
+`tensorcad.hull_nurbs` closes the geometry loop the ship-performance workflow needs: a
+parametric bicubic NURBS hull patch, its hydrostatics by Gauss quadrature, a body-fitted
+hexahedral volume mesh generated from that same patch, and the same hydrostatics
+re-integrated **from the mesh** so the two routes can be compared.
+
+```python
+from tensorcad import build_nurbs_hull, nurbs_hydrostatics, build_body_mesh, mesh_integrals
+
+hull = build_nurbs_hull()                    # L=3.0, B=0.4, T=0.15 m, Cb=0.555 (calibrated)
+hydro = nurbs_hydrostatics(hull)             # patch quadrature, not a formula
+hydro.displaced_volume / hull.parameters.design_displacement - 1      #  7.1e-4
+hydro.wetted_surface_area                    #  1.42355 m2  (Holtrop-Mennen +7.1 %)
+hydro.lcb_ratio_from_midship                 # +0.0114      (+1.14 % L of midship)
+
+mesh = build_body_mesh(hull)                 # 32 x 16 x 6 hexahedra, starboard half
+mesh.quality.pass_fraction                   #  0.9333  (96 stem-column cells collapse)
+mesh_integrals(mesh).displaced_volume / hydro.displaced_volume - 1   # -0.0047
+```
+
+| loop element | measured |
+|---|---|
+| patch is a real NURBS surface with exact `x = L·u`, `z = D·v` (Greville linear precision) | `< 1e-14` m |
+| NURBS quadrature vs `Cb·L·B·T` | 0.071 % |
+| hex mesh vs NURBS: volume / wetted area / KB / LCB | 0.468 / 0.114 / 0.175 / 0.025 % |
+| refinement ×2 (3072 → 24 576 cells) | volume 0.354 %, area 0.112 % |
+| mesh quality (scaled Jacobian ≥ 0.2, aspect ratio ≤ 100) | 93.33 % of cells |
+| six-tet subdivision vs hex volumes | `3.7e-15` relative |
+
+`python tools/hull_nurbs_report.py` regenerates the artifact and the figures;
+[docs/hull_nurbs.md](docs/hull_nurbs.md) states the form, the criteria, the six method
+pitfalls met on the way and the two empirical comparisons that did **not** land under 3 %.
+
 ## SUBOFF appendages (0.6)
 
 The sail and the four stern fins (AFF-8) on top of that hull — from the published
