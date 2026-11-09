@@ -69,6 +69,12 @@ ignore = [
 # The report generators embed manuscript prose in f-strings: wrapping it at 110
 # columns would make the markdown they emit unreadable in the source.
 "tools/pc6_report.py" = ["E501"]
+# Same reason as tools/pc6_report.py: the report generator embeds manuscript prose and
+# markdown tables in f-strings, which would be unreadable wrapped at 110 columns.
+"benchmarks/verified/*/render_report.py" = ["E501"]
+# The benchmark scripts put the checkout on sys.path before importing tensorcad, exactly
+# like examples/*, so the import-order rule cannot apply to them either.
+"benchmarks/verified/*/run_benchmark.py" = ["E402"]
 "tools/pc6_contract.py" = ["E501"]
 
 [tool.mypy]

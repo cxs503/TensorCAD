@@ -1,0 +1,1281 @@
+{
+  "schema": "tensorcad.highorder.benchmark/1.0",
+  "case": "cad_highorder_geometry",
+  "campaign_node": "p127w2-n01-cad-highorder-geometry",
+  "generated_utc": "2026-11-09T01:39:32Z",
+  "environment": {
+    "python": "3.11.6",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "machine": "loongarch64",
+    "numpy": "2.4.6",
+    "processor": "loongarch64"
+  },
+  "provenance": {
+    "commit": "8081ada51866cde89cbbb19ae6b3107b0c090bbb",
+    "branch": "agent/m7706",
+    "sources_dirty": "no",
+    "module_sha256": "3865fd3412b564568c81dd22d7d6c2e021beab6c5ad3c02a63d1dacee14e6bb0",
+    "script_sha256": "1c42e62f0214bcc3f8e0d5d244bb13ea7d9e54bd0f8d18cd715ee39e8302e0c8",
+    "test_file_sha256": "386e48090fb44c478e207c0c5ba0cf9120712290bbbf55015aec56d6dafa33b4"
+  },
+  "geometry": {
+    "sphere_radius": 1.0,
+    "ellipsoid_semi_axes": [
+      1.0,
+      0.6,
+      0.42
+    ],
+    "curvature_tolerance": 0.001,
+    "route_tolerance": 0.005
+  },
+  "gates": {
+    "J1": {
+      "criterion": "exactness order = 2p-1 (exact there, wrong one degree beyond) and fitted quadrature order >= 2p-1 for p = 1..4",
+      "rows": [
+        {
+          "degree": 1,
+          "target_order": 1,
+          "exactness_degree": 1,
+          "exactness_error_at_limit": 0.0,
+          "exactness_error_beyond_limit": 0.6666666666666666,
+          "observed_order_fitted": 19.038483303807727,
+          "pairwise_orders": [
+            16.653388180891977,
+            22.80376467390719,
+            null,
+            null
+          ],
+          "gauss_orders": [
+            2,
+            3,
+            4,
+            6,
+            8
+          ],
+          "relative_errors": [
+            1.6305855527155402e-06,
+            1.904704017190394e-09,
+            2.6962114550150938e-12,
+            6.273176954432512e-16,
+            9.409765431648768e-16
+          ],
+          "passed": true
+        },
+        {
+          "degree": 2,
+          "target_order": 3,
+          "exactness_degree": 3,
+          "exactness_error_at_limit": 0.0,
+          "exactness_error_beyond_limit": 0.17777777777777778,
+          "observed_order_fitted": 12.027810562509071,
+          "pairwise_orders": [
+            11.238110779375361,
+            6.514065368542158,
+            13.641799287981106,
+            18.111497042722856
+          ],
+          "gauss_orders": [
+            2,
+            3,
+            4,
+            6,
+            8
+          ],
+          "relative_errors": [
+            0.0048917902897354665,
+            5.134932677617814e-05,
+            7.88271194790229e-06,
+            3.122295796321194e-08,
+            1.7046942087048234e-10
+          ],
+          "passed": true
+        },
+        {
+          "degree": 3,
+          "target_order": 5,
+          "exactness_degree": 5,
+          "exactness_error_at_limit": 0.0,
+          "exactness_error_beyond_limit": 0.04571428571428576,
+          "observed_order_fitted": 11.19885303096326,
+          "pairwise_orders": [
+            8.126826561579858,
+            8.718119225848664,
+            14.982368030965487,
+            11.267600962493896
+          ],
+          "gauss_orders": [
+            2,
+            3,
+            4,
+            6,
+            8
+          ],
+          "relative_errors": [
+            0.011764676447810861,
+            0.00043603049744341096,
+            3.550471776333984e-05,
+            8.166237651146175e-08,
+            3.1934651831026455e-09
+          ],
+          "passed": true
+        },
+        {
+          "degree": 4,
+          "target_order": 7,
+          "exactness_degree": 7,
+          "exactness_error_at_limit": 0.0,
+          "exactness_error_beyond_limit": 0.01160997732426311,
+          "observed_order_fitted": 10.46689560731713,
+          "pairwise_orders": [
+            6.771890328488198,
+            8.390490958641553,
+            13.915560465862862,
+            11.595868260872972
+          ],
+          "gauss_orders": [
+            2,
+            3,
+            4,
+            6,
+            8
+          ],
+          "relative_errors": [
+            0.01432429523231248,
+            0.0009196076372215425,
+            8.228207390492883e-05,
+            2.9167329414918987e-07,
+            1.03782358543249e-08
+          ],
+          "passed": true
+        }
+      ],
+      "worst_observed_order": 19.038483303807727,
+      "tightest_margin": 3.466895607317131,
+      "passed": true
+    },
+    "J2": {
+      "criterion": "L_inf curvature error / kappa_max <= 1e-3 and unit-normal deviation <= 1e-3, against the closed-form ellipsoid/sphere and against a finite-difference route",
+      "ellipsoid": {
+        "semi_axes": [
+          1.0,
+          0.6,
+          0.42
+        ],
+        "samples": 49,
+        "kappa_max": 5.668934240362812,
+        "worst_curvature_error": 1.8840129456521026e-14,
+        "worst_normal_error": 1.3100232114635959e-15,
+        "worst_finite_difference_error": 8.786737629531061e-06
+      },
+      "sphere": {
+        "radius": 1.5,
+        "samples": 25,
+        "worst_curvature_error": 2.2351742123838392e-08,
+        "worst_normal_error": 3.055668993926847e-15
+      },
+      "scans": [
+        {
+          "u": 0.02,
+          "v": 0.04,
+          "kappa_max_closed": 1.1682568048552266,
+          "kappa_min_closed": 0.42168744180956796,
+          "curvature_error": 4.798161867825002e-16,
+          "normal_error": 1.2672131244918154e-15,
+          "finite_difference_error": 5.897704724588948e-12
+        },
+        {
+          "u": 0.02,
+          "v": 0.36,
+          "kappa_max_closed": 1.330533596160562,
+          "kappa_min_closed": 0.6168147564148527,
+          "curvature_error": 3.916866830877552e-17,
+          "normal_error": 1.4304896245381993e-16,
+          "finite_difference_error": 8.211382294120995e-11
+        },
+        {
+          "u": 0.02,
+          "v": 0.68,
+          "kappa_max_closed": 2.1200903674800893,
+          "kappa_min_closed": 1.7719213987951132,
+          "curvature_error": 3.9168668308775523e-16,
+          "normal_error": 2.2887833992611187e-16,
+          "finite_difference_error": 8.108376530202577e-11
+        },
+        {
+          "u": 0.02,
+          "v": 1.0,
+          "kappa_max_closed": 5.6122852393974245,
+          "kappa_min_closed": 2.695333122223907,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 1.2412670766236366e-16,
+          "finite_difference_error": 8.698949192029204e-06
+        },
+        {
+          "u": 0.02,
+          "v": 1.32,
+          "kappa_max_closed": 2.1200903674800884,
+          "kappa_min_closed": 1.7719213987951126,
+          "curvature_error": 3.9168668308775523e-16,
+          "normal_error": 2.423651445728339e-16,
+          "finite_difference_error": 7.995829278684142e-11
+        },
+        {
+          "u": 0.02,
+          "v": 1.64,
+          "kappa_max_closed": 1.3305335961605624,
+          "kappa_min_closed": 0.616814756414853,
+          "curvature_error": 0.0,
+          "normal_error": 1.0007415106216802e-16,
+          "finite_difference_error": 8.189083571252809e-11
+        },
+        {
+          "u": 0.02,
+          "v": 1.96,
+          "kappa_max_closed": 1.1682568048552258,
+          "kappa_min_closed": 0.4216874418095678,
+          "curvature_error": 7.833733661755105e-17,
+          "normal_error": 1.1385919347227337e-16,
+          "finite_difference_error": 8.1809639063124e-12
+        },
+        {
+          "u": 0.18,
+          "v": 0.04,
+          "kappa_max_closed": 1.1693568313522278,
+          "kappa_min_closed": 0.4205863591176416,
+          "curvature_error": 2.1934454252914295e-15,
+          "normal_error": 3.024643476906523e-16,
+          "finite_difference_error": 1.4304019688715642e-10
+        },
+        {
+          "u": 0.18,
+          "v": 0.36,
+          "kappa_max_closed": 1.449966920606556,
+          "kappa_min_closed": 0.4750403688002851,
+          "curvature_error": 3.916866830877552e-17,
+          "normal_error": 1.1188630228279524e-16,
+          "finite_difference_error": 1.7722985179435826e-10
+        },
+        {
+          "u": 0.18,
+          "v": 0.68,
+          "kappa_max_closed": 2.527237810402635,
+          "kappa_min_closed": 0.6182931726529451,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 2.498001805406602e-16,
+          "finite_difference_error": 2.518515016536327e-10
+        },
+        {
+          "u": 0.18,
+          "v": 1.0,
+          "kappa_max_closed": 3.6091790414766995,
+          "kappa_min_closed": 0.7168338775377636,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 1.5928608445259654e-16,
+          "finite_difference_error": 5.5941681573159485e-06
+        },
+        {
+          "u": 0.18,
+          "v": 1.32,
+          "kappa_max_closed": 2.5272378104026343,
+          "kappa_min_closed": 0.6182931726529451,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 8.326672684688674e-17,
+          "finite_difference_error": 2.5187302483686836e-10
+        },
+        {
+          "u": 0.18,
+          "v": 1.64,
+          "kappa_max_closed": 1.449966920606556,
+          "kappa_min_closed": 0.47504036880028466,
+          "curvature_error": 1.9584334154387762e-16,
+          "normal_error": 3.379462171739212e-16,
+          "finite_difference_error": 1.774803648046941e-10
+        },
+        {
+          "u": 0.18,
+          "v": 1.96,
+          "kappa_max_closed": 1.1693568313522278,
+          "kappa_min_closed": 0.4205863591176416,
+          "curvature_error": 1.2925660541895923e-15,
+          "normal_error": 1.395671015252306e-16,
+          "finite_difference_error": 1.4195650754889046e-10
+        },
+        {
+          "u": 0.34,
+          "v": 0.04,
+          "kappa_max_closed": 1.1692137947617192,
+          "kappa_min_closed": 0.42072958060105614,
+          "curvature_error": 4.7002401970530626e-15,
+          "normal_error": 9.351832959435182e-16,
+          "finite_difference_error": 3.773319536826136e-11
+        },
+        {
+          "u": 0.34,
+          "v": 0.36,
+          "kappa_max_closed": 1.438838169905938,
+          "kappa_min_closed": 0.4893613321712326,
+          "curvature_error": 4.8960835385969404e-17,
+          "normal_error": 4.050792900924367e-16,
+          "finite_difference_error": 3.1632812369508655e-11
+        },
+        {
+          "u": 0.34,
+          "v": 0.68,
+          "kappa_max_closed": 2.54383238844066,
+          "kappa_min_closed": 0.6753518416074163,
+          "curvature_error": 3.9168668308775523e-16,
+          "normal_error": 2.7194799110210365e-16,
+          "finite_difference_error": 5.569862970844497e-11
+        },
+        {
+          "u": 0.34,
+          "v": 1.0,
+          "kappa_max_closed": 3.7556424130424055,
+          "kappa_min_closed": 0.8076923072538857,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 2.504995567686355e-16,
+          "finite_difference_error": 5.8211782579725485e-06
+        },
+        {
+          "u": 0.34,
+          "v": 1.32,
+          "kappa_max_closed": 2.54383238844066,
+          "kappa_min_closed": 0.6753518416074163,
+          "curvature_error": 1.958433415438776e-17,
+          "normal_error": 1.6653345369377348e-16,
+          "finite_difference_error": 5.103223124081069e-11
+        },
+        {
+          "u": 0.34,
+          "v": 1.64,
+          "kappa_max_closed": 1.4388381699059385,
+          "kappa_min_closed": 0.48936133217123273,
+          "curvature_error": 8.812950369474493e-17,
+          "normal_error": 3.188872858294072e-16,
+          "finite_difference_error": 2.8657286144095908e-11
+        },
+        {
+          "u": 0.34,
+          "v": 1.96,
+          "kappa_max_closed": 1.1692137947617192,
+          "kappa_min_closed": 0.42072958060105614,
+          "curvature_error": 4.191047509038981e-15,
+          "normal_error": 9.19110456431864e-16,
+          "finite_difference_error": 3.3627564932636745e-11
+        },
+        {
+          "u": 0.5,
+          "v": 0.04,
+          "kappa_max_closed": 1.1682413265214373,
+          "kappa_min_closed": 0.4217029290340843,
+          "curvature_error": 3.4860114794810216e-15,
+          "normal_error": 8.450120119689949e-16,
+          "finite_difference_error": 4.868726573903359e-10
+        },
+        {
+          "u": 0.5,
+          "v": 0.36,
+          "kappa_max_closed": 1.3280728637742507,
+          "kappa_min_closed": 0.6195475306521316,
+          "curvature_error": 5.875300246316328e-17,
+          "normal_error": 1.8063160276528495e-16,
+          "finite_difference_error": 5.621226020657843e-10
+        },
+        {
+          "u": 0.5,
+          "v": 0.68,
+          "kappa_max_closed": 1.9577183745352686,
+          "kappa_min_closed": 1.9488590574075337,
+          "curvature_error": 7.677058988520003e-15,
+          "normal_error": 2.3155166045283957e-16,
+          "finite_difference_error": 8.251362537237128e-10
+        },
+        {
+          "u": 0.5,
+          "v": 1.0,
+          "kappa_max_closed": 5.668934240362812,
+          "kappa_min_closed": 2.7777777777777777,
+          "curvature_error": 0.0,
+          "normal_error": 4.950429691688826e-16,
+          "finite_difference_error": 8.786737629531061e-06
+        },
+        {
+          "u": 0.5,
+          "v": 1.32,
+          "kappa_max_closed": 1.957718374535267,
+          "kappa_min_closed": 1.948859057407533,
+          "curvature_error": 1.8840129456521026e-14,
+          "normal_error": 3.0109501136028114e-16,
+          "finite_difference_error": 8.251293600380905e-10
+        },
+        {
+          "u": 0.5,
+          "v": 1.64,
+          "kappa_max_closed": 1.3280728637742498,
+          "kappa_min_closed": 0.6195475306521319,
+          "curvature_error": 1.1750600492632657e-16,
+          "normal_error": 1.2037739496902993e-16,
+          "finite_difference_error": 5.620673350748007e-10
+        },
+        {
+          "u": 0.5,
+          "v": 1.96,
+          "kappa_max_closed": 1.1682413265214369,
+          "kappa_min_closed": 0.42170292903408413,
+          "curvature_error": 4.8960835385969404e-17,
+          "normal_error": 4.379160327459931e-16,
+          "finite_difference_error": 5.38914931080825e-10
+        },
+        {
+          "u": 0.66,
+          "v": 0.04,
+          "kappa_max_closed": 1.1692137947617187,
+          "kappa_min_closed": 0.4207295806010557,
+          "curvature_error": 2.056355086210715e-16,
+          "normal_error": 2.290426294945669e-16,
+          "finite_difference_error": 3.325235846673991e-11
+        },
+        {
+          "u": 0.66,
+          "v": 0.36,
+          "kappa_max_closed": 1.4388381699059374,
+          "kappa_min_closed": 0.48936133217123234,
+          "curvature_error": 8.812950369474493e-17,
+          "normal_error": 1.5700924586837752e-16,
+          "finite_difference_error": 3.228312976943926e-11
+        },
+        {
+          "u": 0.66,
+          "v": 0.68,
+          "kappa_max_closed": 2.5438323884406615,
+          "kappa_min_closed": 0.6753518416074168,
+          "curvature_error": 2.3501200985265314e-16,
+          "normal_error": 1.5700924586837752e-16,
+          "finite_difference_error": 5.694568177005977e-11
+        },
+        {
+          "u": 0.66,
+          "v": 1.0,
+          "kappa_max_closed": 3.7556424130424064,
+          "kappa_min_closed": 0.8076923072538864,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 1.7948389922982324e-16,
+          "finite_difference_error": 5.821180907967971e-06
+        },
+        {
+          "u": 0.66,
+          "v": 1.32,
+          "kappa_max_closed": 2.54383238844066,
+          "kappa_min_closed": 0.6753518416074163,
+          "curvature_error": 3.133493464702042e-16,
+          "normal_error": 5.551115123125783e-17,
+          "finite_difference_error": 5.201301469526243e-11
+        },
+        {
+          "u": 0.66,
+          "v": 1.64,
+          "kappa_max_closed": 1.4388381699059378,
+          "kappa_min_closed": 0.48936133217123257,
+          "curvature_error": 7.833733661755105e-17,
+          "normal_error": 1.7772239894833365e-16,
+          "finite_difference_error": 3.2114586989706595e-11
+        },
+        {
+          "u": 0.66,
+          "v": 1.96,
+          "kappa_max_closed": 1.1692137947617187,
+          "kappa_min_closed": 0.4207295806010557,
+          "curvature_error": 1.2142287175720412e-15,
+          "normal_error": 2.230249987766808e-16,
+          "finite_difference_error": 1.4725225838674307e-11
+        },
+        {
+          "u": 0.82,
+          "v": 0.04,
+          "kappa_max_closed": 1.1693568313522278,
+          "kappa_min_closed": 0.4205863591176418,
+          "curvature_error": 1.1358913809544903e-15,
+          "normal_error": 1.6369944904252282e-16,
+          "finite_difference_error": 1.4588062058340512e-10
+        },
+        {
+          "u": 0.82,
+          "v": 0.36,
+          "kappa_max_closed": 1.4499669206065555,
+          "kappa_min_closed": 0.4750403688002847,
+          "curvature_error": 1.9584334154387762e-16,
+          "normal_error": 2.1677797545656835e-16,
+          "finite_difference_error": 1.7757243075955387e-10
+        },
+        {
+          "u": 0.82,
+          "v": 0.68,
+          "kappa_max_closed": 2.5272378104026347,
+          "kappa_min_closed": 0.6182931726529451,
+          "curvature_error": 7.833733661755105e-17,
+          "normal_error": 4.449557262054371e-16,
+          "finite_difference_error": 2.5244104886468224e-10
+        },
+        {
+          "u": 0.82,
+          "v": 1.0,
+          "kappa_max_closed": 3.6091790414767,
+          "kappa_min_closed": 0.7168338775377632,
+          "curvature_error": 4.700240197053063e-16,
+          "normal_error": 1.6978997601615503e-16,
+          "finite_difference_error": 5.594168403060174e-06
+        },
+        {
+          "u": 0.82,
+          "v": 1.32,
+          "kappa_max_closed": 2.5272378104026343,
+          "kappa_min_closed": 0.6182931726529448,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 3.521787733787174e-16,
+          "finite_difference_error": 2.523931064146723e-10
+        },
+        {
+          "u": 0.82,
+          "v": 1.64,
+          "kappa_max_closed": 1.4499669206065564,
+          "kappa_min_closed": 0.4750403688002851,
+          "curvature_error": 7.833733661755105e-17,
+          "normal_error": 2.0955000055363631e-16,
+          "finite_difference_error": 1.7790365081093996e-10
+        },
+        {
+          "u": 0.82,
+          "v": 1.96,
+          "kappa_max_closed": 1.1693568313522278,
+          "kappa_min_closed": 0.4205863591176418,
+          "curvature_error": 1.9584334154387762e-15,
+          "normal_error": 1.6232414808539076e-16,
+          "finite_difference_error": 1.3838666532706156e-10
+        },
+        {
+          "u": 0.98,
+          "v": 0.04,
+          "kappa_max_closed": 1.1682568048552262,
+          "kappa_min_closed": 0.42168744180956796,
+          "curvature_error": 4.8960835385969405e-16,
+          "normal_error": 1.3100232114635959e-15,
+          "finite_difference_error": 1.2954238002294005e-10
+        },
+        {
+          "u": 0.98,
+          "v": 0.36,
+          "kappa_max_closed": 1.3305335961605618,
+          "kappa_min_closed": 0.6168147564148525,
+          "curvature_error": 7.833733661755105e-17,
+          "normal_error": 2.6766507790745728e-16,
+          "finite_difference_error": 8.143984766562085e-11
+        },
+        {
+          "u": 0.98,
+          "v": 0.68,
+          "kappa_max_closed": 2.1200903674800884,
+          "kappa_min_closed": 1.7719213987951123,
+          "curvature_error": 8.22542034484286e-16,
+          "normal_error": 8.3820000221454525e-16,
+          "finite_difference_error": 8.118184364747094e-11
+        },
+        {
+          "u": 0.98,
+          "v": 1.0,
+          "kappa_max_closed": 5.6122852393974245,
+          "kappa_min_closed": 2.695333122223907,
+          "curvature_error": 4.700240197053063e-16,
+          "normal_error": 1.268586545767324e-15,
+          "finite_difference_error": 8.698943304194985e-06
+        },
+        {
+          "u": 0.98,
+          "v": 1.32,
+          "kappa_max_closed": 2.1200903674800884,
+          "kappa_min_closed": 1.7719213987951123,
+          "curvature_error": 9.792167077193881e-16,
+          "normal_error": 8.688869536365456e-16,
+          "finite_difference_error": 7.995312252262465e-11
+        },
+        {
+          "u": 0.98,
+          "v": 1.64,
+          "kappa_max_closed": 1.3305335961605622,
+          "kappa_min_closed": 0.6168147564148528,
+          "curvature_error": 1.566746732351021e-16,
+          "normal_error": 2.9772625965880557e-16,
+          "finite_difference_error": 7.994810893308113e-11
+        },
+        {
+          "u": 0.98,
+          "v": 1.96,
+          "kappa_max_closed": 1.1682568048552266,
+          "kappa_min_closed": 0.42168744180956796,
+          "curvature_error": 5.679456904772451e-16,
+          "normal_error": 1.2368325958192618e-15,
+          "finite_difference_error": 7.055181958648404e-11
+        }
+      ],
+      "passed": true
+    },
+    "J3": {
+      "criterion": "order-4 curved elements on 2x2 subdivisions per knot span: volume relative error <= 1e-6 against 4/3 pi R^3 and 4/3 pi a b c",
+      "cases": [
+        {
+          "case": "sphere_r1",
+          "exact_volume": 4.1887902047863905,
+          "exact_area": 12.566370614359153,
+          "degree": [
+            2,
+            2
+          ],
+          "subdivisions": [
+            2,
+            2
+          ],
+          "rows": [
+            {
+              "order": 2,
+              "elements": 24,
+              "volume": 4.187126302102256,
+              "volume_relative_error": 0.00039722750550576956,
+              "area_relative_error": 0.0003972275055043566
+            },
+            {
+              "order": 3,
+              "elements": 24,
+              "volume": 4.188775466372079,
+              "volume_relative_error": 3.5185372364482463e-06,
+              "area_relative_error": 3.5185372348933136e-06
+            },
+            {
+              "order": 4,
+              "elements": 24,
+              "volume": 4.1887910675460525,
+              "volume_relative_error": 2.0596869734583135e-07,
+              "area_relative_error": 2.0596869883009051e-07
+            },
+            {
+              "order": 6,
+              "elements": 24,
+              "volume": 4.188790205131541,
+              "volume_relative_error": 8.239863013267533e-11,
+              "area_relative_error": 8.240025574951265e-11
+            }
+          ],
+          "order4_volume_relative_error": 2.0596869734583135e-07,
+          "passed": true
+        },
+        {
+          "case": "ellipsoid_1_0.6_0.42",
+          "exact_volume": 1.0555751316061703,
+          "exact_area": 5.508414766909572,
+          "degree": [
+            2,
+            2
+          ],
+          "subdivisions": [
+            2,
+            2
+          ],
+          "rows": [
+            {
+              "order": 2,
+              "elements": 24,
+              "volume": 1.0551558281297686,
+              "volume_relative_error": 0.00039722750550566526,
+              "area_relative_error": 0.000211112952979283
+            },
+            {
+              "order": 3,
+              "elements": 24,
+              "volume": 1.055571417525764,
+              "volume_relative_error": 3.518537236364105e-06,
+              "area_relative_error": 5.3761981521345685e-06
+            },
+            {
+              "order": 4,
+              "elements": 24,
+              "volume": 1.055575349021605,
+              "volume_relative_error": 2.059686973071262e-07,
+              "area_relative_error": 3.9027658991854787e-07
+            },
+            {
+              "order": 6,
+              "elements": 24,
+              "volume": 1.0555751316931483,
+              "volume_relative_error": 8.239866378933864e-11,
+              "area_relative_error": 4.881373199128001e-09
+            }
+          ],
+          "order4_volume_relative_error": 2.059686973071262e-07,
+          "passed": true
+        }
+      ],
+      "sphere_area_convergence": [
+        {
+          "order": 2,
+          "area": 12.32478325159474,
+          "relative_error": 0.019224911486247182
+        },
+        {
+          "order": 3,
+          "area": 12.581758277967822,
+          "relative_error": 0.0012245113629759125
+        },
+        {
+          "order": 4,
+          "area": 12.565428325039624,
+          "relative_error": 7.498500151438894e-05
+        },
+        {
+          "order": 6,
+          "area": 12.566366949179487,
+          "relative_error": 2.9166573210073037e-07
+        },
+        {
+          "order": 8,
+          "area": 12.566370598413117,
+          "relative_error": 1.2689467494114143e-09
+        }
+      ],
+      "passed": true
+    },
+    "J4": {
+      "criterion": "wetted surface S and block coefficient Cb from NURBS quadrature, STL tessellation and voxel grid all within 0.5% of the independent AGM/Carlson elliptic-integral value",
+      "geometry_gate": {
+        "L": {
+          "measured": 2.0,
+          "expected": 2.0,
+          "relative_error": 0.0
+        },
+        "B": {
+          "measured": 1.199112097547684,
+          "expected": 1.2,
+          "relative_error": 0.0007399187102632062
+        },
+        "T": {
+          "measured": 0.4200000000000001,
+          "expected": 0.42,
+          "relative_error": 2.6433881538694203e-16
+        },
+        "Cb": {
+          "measured": 0.5235987755982988,
+          "expected": 0.5235987755982988,
+          "relative_error": 0.0
+        }
+      },
+      "reference": {
+        "L": 2.0,
+        "B": 1.2,
+        "T": 0.42,
+        "volume": 0.5277875658030852,
+        "Cb": 0.5235987755982988,
+        "Cp": 0.3333333333333333,
+        "Cwp": 0.7853981633974483,
+        "waterplane_area": 1.8849555921538759,
+        "wetted_surface": 2.7542073834182266,
+        "total_surface": 5.508414766836453
+      },
+      "nurbs": {
+        "wetted_surface": 2.754207383454789,
+        "wetted_surface_relative_error": 1.3275074693463457e-11,
+        "volume": 0.5277875658030857,
+        "volume_relative_error": 1.0517707279971948e-15,
+        "Cb": 0.5235987755982994,
+        "Cb_relative_error": 1.0601848938211723e-15
+      },
+      "stl": [
+        {
+          "samples": 32,
+          "facets": 2016,
+          "wetted_surface": 2.7415587438678672,
+          "wetted_surface_relative_error": 0.004592478992871334
+        },
+        {
+          "samples": 64,
+          "facets": 8128,
+          "wetted_surface": 2.751038448338173,
+          "wetted_surface_relative_error": 0.0011505796909601286
+        },
+        {
+          "samples": 96,
+          "facets": 18336,
+          "wetted_surface": 2.752798405449747,
+          "wetted_surface_relative_error": 0.0005115729399907917
+        },
+        {
+          "samples": 128,
+          "facets": 32640,
+          "wetted_surface": 2.7534147207254773,
+          "wetted_surface_relative_error": 0.00028780065637812595
+        }
+      ],
+      "voxel": [
+        {
+          "resolution": 48,
+          "voxel_volume_full": 1.0561996297538863,
+          "half_hull_volume": 0.5280998148769431,
+          "Cb": 0.5239085465049039,
+          "Cb_relative_error": 0.0005916188521471359,
+          "Cb_hard_count": 0.523148148148148,
+          "Cb_hard_count_relative_error": 0.0008606350342127325
+        },
+        {
+          "resolution": 64,
+          "voxel_volume_full": 1.0559430009581066,
+          "half_hull_volume": 0.5279715004790533,
+          "Cb": 0.5237812504752513,
+          "Cb_relative_error": 0.00034850134388480033,
+          "Cb_hard_count": 0.5240478515625,
+          "Cb_hard_count_relative_error": 0.0008576719143165303
+        },
+        {
+          "resolution": 96,
+          "voxel_volume_full": 1.0557473444048293,
+          "half_hull_volume": 0.5278736722024147,
+          "Cb": 0.5236841986135066,
+          "Cb_relative_error": 0.00016314594148953622,
+          "Cb_hard_count": 0.5237720630787036,
+          "Cb_hard_count_relative_error": 0.00033095470898835403
+        },
+        {
+          "resolution": 128,
+          "voxel_volume_full": 1.0556775092608264,
+          "half_hull_volume": 0.5278387546304132,
+          "Cb": 0.5236495581650924,
+          "Cb_relative_error": 9.698755833711788e-05,
+          "Cb_hard_count": 0.52410888671875,
+          "Cb_hard_count_relative_error": 0.0009742404761514147
+        }
+      ],
+      "sensitivity": [
+        {
+          "perturbation": "isotropic +1%",
+          "curvature_relative_change": 0.009900990099010113,
+          "wetted_surface_relative_change": 0.020099999999999982,
+          "ratio_area_to_curvature": 2.0300999999999547
+        },
+        {
+          "perturbation": "isotropic -1%",
+          "curvature_relative_change": 0.010101010101009868,
+          "wetted_surface_relative_change": 0.019900000000000036,
+          "ratio_area_to_curvature": 1.970100000000049
+        },
+        {
+          "perturbation": "beam +1%",
+          "curvature_relative_change": 0.002367066038146602,
+          "wetted_surface_relative_change": 0.0068470616333766,
+          "ratio_area_to_curvature": 2.892636505713126
+        },
+        {
+          "perturbation": "beam -1%",
+          "curvature_relative_change": 0.0022933304064922935,
+          "wetted_surface_relative_change": 0.00683453616008558,
+          "ratio_area_to_curvature": 2.9801794546208344
+        },
+        {
+          "perturbation": "draft +1%",
+          "curvature_relative_change": 0.008263975489162042,
+          "wetted_surface_relative_change": 0.004516535780985118,
+          "ratio_area_to_curvature": 0.5465330562643149
+        },
+        {
+          "perturbation": "draft -1%",
+          "curvature_relative_change": 0.008278253085407195,
+          "wetted_surface_relative_change": 0.0045027034520161565,
+          "ratio_area_to_curvature": 0.5439195208894336
+        }
+      ],
+      "elliptic_routes": {
+        "triaxial_legendre": 5.508414766836453,
+        "ellipe_vs_agm_max_difference": 6.210587599753126e-13,
+        "ellipk_vs_agm_max_difference": 4.440892098500626e-16
+      },
+      "passed": true
+    },
+    "J5": {
+      "criterion": "write-read-recompute is bit identical (recomputed integrals agree to <= 1e-14) and the content hash survives NPZ, HDF5 and JSON",
+      "reports": [
+        {
+          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.npz",
+          "schema": "tensorcad.highorder.elements/1.0",
+          "rows": 384,
+          "fields": {
+            "points": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "weights": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "normals": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "jacobian_det": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "uv": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "element_id": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            }
+          },
+          "hash_match": true,
+          "content_hash": "fd006094f9b6de9fe02f5c1163184035d0b289206887f30b7b2b16207393577a",
+          "recomputed": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          },
+          "recomputed_reread": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          },
+          "recomputed_max_abs_difference": 0.0,
+          "all_bit_identical": true,
+          "format": ".npz",
+          "case": "sphere_r1",
+          "bytes": 38974
+        },
+        {
+          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.h5",
+          "schema": "tensorcad.highorder.elements/1.0",
+          "rows": 384,
+          "fields": {
+            "points": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "weights": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "normals": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "jacobian_det": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "uv": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "element_id": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            }
+          },
+          "hash_match": true,
+          "content_hash": "fd006094f9b6de9fe02f5c1163184035d0b289206887f30b7b2b16207393577a",
+          "recomputed": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          },
+          "recomputed_reread": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          },
+          "recomputed_max_abs_difference": 0.0,
+          "all_bit_identical": true,
+          "format": ".h5",
+          "case": "sphere_r1",
+          "bytes": 44048
+        },
+        {
+          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.json",
+          "schema": "tensorcad.highorder.elements/1.0",
+          "rows": 384,
+          "fields": {
+            "points": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "weights": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "normals": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "jacobian_det": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "uv": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "element_id": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            }
+          },
+          "hash_match": true,
+          "content_hash": "fd006094f9b6de9fe02f5c1163184035d0b289206887f30b7b2b16207393577a",
+          "recomputed": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          },
+          "recomputed_reread": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          },
+          "recomputed_max_abs_difference": 0.0,
+          "all_bit_identical": true,
+          "format": ".json",
+          "case": "sphere_r1",
+          "bytes": 82330
+        },
+        {
+          "format": "npz_as_written",
+          "case": "sphere_r1",
+          "rows": 384,
+          "elements": 24,
+          "content_hash": "fd006094f9b6de9fe02f5c1163184035d0b289206887f30b7b2b16207393577a",
+          "sha256_file": "34cf85768802d638614a04415fa9021518067d53cc9c15f791d4731f4edc0eab",
+          "recomputed": {
+            "area": 12.566373202638152,
+            "volume": 4.1887910675460525
+          }
+        },
+        {
+          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.npz",
+          "schema": "tensorcad.highorder.elements/1.0",
+          "rows": 384,
+          "fields": {
+            "points": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "weights": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "normals": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "jacobian_det": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "uv": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "element_id": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            }
+          },
+          "hash_match": true,
+          "content_hash": "464498bb4db15ea4b606375d2986f17bafce9f8ffcbaa6935d33c1de9876ceb8",
+          "recomputed": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          },
+          "recomputed_reread": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          },
+          "recomputed_max_abs_difference": 0.0,
+          "all_bit_identical": true,
+          "format": ".npz",
+          "case": "ellipsoid_1_0.6_0.42",
+          "bytes": 39018
+        },
+        {
+          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.h5",
+          "schema": "tensorcad.highorder.elements/1.0",
+          "rows": 384,
+          "fields": {
+            "points": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "weights": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "normals": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "jacobian_det": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "uv": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "element_id": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            }
+          },
+          "hash_match": true,
+          "content_hash": "464498bb4db15ea4b606375d2986f17bafce9f8ffcbaa6935d33c1de9876ceb8",
+          "recomputed": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          },
+          "recomputed_reread": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          },
+          "recomputed_max_abs_difference": 0.0,
+          "all_bit_identical": true,
+          "format": ".h5",
+          "case": "ellipsoid_1_0.6_0.42",
+          "bytes": 44048
+        },
+        {
+          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.json",
+          "schema": "tensorcad.highorder.elements/1.0",
+          "rows": 384,
+          "fields": {
+            "points": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "weights": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "normals": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "jacobian_det": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "uv": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            },
+            "element_id": {
+              "max_abs_difference": 0.0,
+              "bit_identical": true
+            }
+          },
+          "hash_match": true,
+          "content_hash": "464498bb4db15ea4b606375d2986f17bafce9f8ffcbaa6935d33c1de9876ceb8",
+          "recomputed": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          },
+          "recomputed_reread": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          },
+          "recomputed_max_abs_difference": 0.0,
+          "all_bit_identical": true,
+          "format": ".json",
+          "case": "ellipsoid_1_0.6_0.42",
+          "bytes": 82980
+        },
+        {
+          "format": "npz_as_written",
+          "case": "ellipsoid_1_0.6_0.42",
+          "rows": 384,
+          "elements": 24,
+          "content_hash": "464498bb4db15ea4b606375d2986f17bafce9f8ffcbaa6935d33c1de9876ceb8",
+          "sha256_file": "f6f7eb65cd0a0fc7035c61ab956b2d48c69c2e0560edd57569968692cb6e938a",
+          "recomputed": {
+            "area": 5.50841261710424,
+            "volume": 1.055575349021605
+          }
+        }
+      ],
+      "worst_field_difference": 0.0,
+      "passed": true
+    },
+    "J6": {
+      "criterion": "faceted patch: observed order <= 2 for area and volume, and volume relative error > 1e-3 at 8 and 16 facets per direction (i.e. J1/J3 cannot be met by facets)",
+      "rows": [
+        {
+          "samples": 8,
+          "facets": 112,
+          "area": 11.696145053794044,
+          "volume": 3.6212933769589615,
+          "area_relative_error": 0.06925034978442784,
+          "volume_relative_error": 0.1354798880065584
+        },
+        {
+          "samples": 16,
+          "facets": 480,
+          "area": 12.342262962947112,
+          "volume": 4.040209311466891,
+          "area_relative_error": 0.017833920253472392,
+          "volume_relative_error": 0.03547107543121181
+        },
+        {
+          "samples": 32,
+          "facets": 1984,
+          "area": 12.509903905233097,
+          "volume": 4.151197806394532,
+          "area_relative_error": 0.00449347793877358,
+          "volume_relative_error": 0.008974524040116085
+        },
+        {
+          "samples": 64,
+          "facets": 8064,
+          "area": 12.552225729270596,
+          "volume": 4.179363545039501,
+          "area_relative_error": 0.0011256141906569029,
+          "volume_relative_error": 0.002250449243344288
+        }
+      ],
+      "area_fitted_order": 1.9817830540652754,
+      "volume_fitted_order": 1.971790132574096,
+      "area_pairwise_orders": [
+        1.9571974871130366,
+        1.9887194469586118,
+        1.9971200971597307
+      ],
+      "volume_pairwise_orders": [
+        1.933363722896252,
+        1.982735737954733,
+        1.9956224017444237
+      ],
+      "passed": true
+    },
+    "J7": {
+      "criterion": "pytest tests/test_highorder_geometry.py wall time <= 120 s and all green",
+      "elapsed_seconds": 5.798238011077046,
+      "returncode": 0,
+      "summary": "44 passed, 1 warning in 4.65s",
+      "passed": true
+    }
+  },
+  "figures": [
+    {
+      "name": "convergence.png",
+      "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/figures/convergence.png",
+      "caption": "Left: Gauss-Legendre area error against points per direction for degree-1..4 Bezier patches (spectral decay; fitted order in the legend). Right: the same patch linearized -- second order only, and above the 1e-3 volume gate at every affordable facet count."
+    },
+    {
+      "name": "curvature_error.png",
+      "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/figures/curvature_error.png",
+      "caption": "Curvature and unit-normal error over the parameter square of the ellipsoid, both against the closed-form implicit-surface value; several orders of magnitude below the 1e-3 gate away from the poles."
+    },
+    {
+      "name": "cross_validation.png",
+      "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/figures/cross_validation.png",
+      "caption": "Left: STL wetted surface and voxel Cb against the AGM/Carlson elliptic-integral truth (the NURBS route sits at round-off). Right: wetted-area change against curvature change for isotropic and shape perturbations of the same hull -- the ratio is metric dependent, so a curvature guarantee does not replace an area gate."
+    }
+  ],
+  "elapsed_seconds": 19.7282754201442,
+  "passed": true
+}
