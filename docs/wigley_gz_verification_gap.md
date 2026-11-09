@@ -1,3 +1,14 @@
+# Wigley GZ verification gap
+
+> **STATUS: CLOSED** (2026-11-09, TensorCAD). Both open items in §5 are fixed and verified:
+> the waterplane cut now accepts the freeboard seam (`_plane_segments` traces a plane-lying
+> edge once) and `initial_stability` measures the immersed body instead of the whole closed
+> mesh. `GM` and the GZ curve now come from the same mesh and agree to 0.02 % at 2 deg.
+> Evidence: `docs/freeboard_seam.md`, `examples/freeboard_seam/outputs/`,
+> `tests/test_wigley_gz_verification.py::TestFreeboardSeamWaterplane`,
+> `tests/test_stability.py::test_a_waterline_containing_mesh_edges_measures_the_section_once`.
+> The text below is the gap as it stood when opened (m6594) and is kept unedited.
+
 # Wigley Hull GZ Curve Verification Gap
 
 **Date**: 2026-11-08  
