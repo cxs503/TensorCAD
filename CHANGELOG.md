@@ -6,6 +6,27 @@ semantic versioning.
 
 ## Unreleased
 
+### Fixed
+- **A waterline plane that contains mesh edges is traced once, not twice**
+  (`tensorcad/stability.py::_plane_segments`; `docs/freeboard_seam.md`). The seam where
+  `gz.with_freeboard`'s vertical band meets the hull is a ring of edges *in* the cutting
+  plane, met by both of that edge's faces; every segment was emitted twice, the doubled
+  contour was read as a hole nested in itself, and the Wigley hull reported a waterplane
+  area of `-13.33125 m^2` (exactly `-2 A`) instead of `6.665625 m^2`.
+- **`initial_stability` measures the immersed body, not the whole closed mesh**
+  (same file). A mesh carrying freeboard used to hand back its total volume as
+  displacement (Wigley 81x21: `4.108733 m^3` for a `2.775608 m^3` displacement, `KB`
+  +28 %, `GM` +28 %) with no warning; the banded branch now uses
+  `righting_arm.heeled_displacement` at zero heel. Hulls capped at their waterline keep the
+  original route bit for bit.
+
+### Added
+- **Wigley GZ verification closed** (`tests/test_wigley_gz_verification.py::
+  TestFreeboardSeamWaterplane`, `examples/freeboard_seam/`): `GM` and the GZ curve are now
+  measured on the same freeboarded mesh -- `GZ/sin(phi)` at 2 deg matches `GM` to 0.02 %,
+  and `GM` converges to the analytic `KB + I_T/nabla - KG` at 0.114 % / 0.047 % / 0.012 %
+  on 41x13 / 81x21 / 161x41.
+
 ### Added
 - **`nurbs.sphere_surface` + committed anchor for a *closed* patch with singular pole
   rows** (`docs/nurbs_pole_surface.md`, `examples/nurbs_sphere/run_example.py`,

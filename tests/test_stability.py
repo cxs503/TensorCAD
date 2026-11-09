@@ -374,3 +374,68 @@ def test_waterplane_second_moment_is_taken_about_the_section_centroid() -> None:
     # raw integral about y = 0 would be 6*2^3/12 + 12*3^2 = 4 + 108 = 112 m^4
     assert section.transverse_second_moment == pytest.approx(6.0 * 2.0 ** 3 / 12.0)
     assert section.longitudinal_second_moment == pytest.approx(2.0 * 6.0 ** 3 / 12.0)
+
+
+def stacked_box(length: float, beam: float, draft: float) -> Mesh:
+    """Two boxes welded at ``z = 0``: a surface with a whole ring of edges in the plane.
+
+    This is the cheapest geometry that reproduces the seam a hull gets when
+    :func:`tensorcad.gz.with_freeboard` extrudes a vertical band above its waterline: the
+    plane ``z = 0`` contains the shared edge ring, so both the face below and the face
+    above that ring meet the plane *along an edge* instead of crossing it. Every
+    reference quantity is still an exact rational: the section is the ``length x beam``
+    rectangle and only the lower box is immersed.
+    """
+    builder = MeshBuilder()
+    index: dict[tuple[float, float, float], int] = {}
+    for shift in (0.0, draft):
+        lower = box(length, beam, draft)
+        for face in lower.faces:
+            points = [lower.vertices[vertex] for vertex in face]
+            if all(point[2] + shift == 0.0 for point in points):
+                continue  # the two welded caps: drop them and the ring becomes a knuckle
+            triangle = []
+            for x, y, z in points:
+                point = (x, y, z + shift)
+                if point not in index:
+                    index[point] = builder.add_vertex(point)
+                triangle.append(index[point])
+            builder.add_triangle(*triangle)
+    return builder.build()
+
+
+def test_a_waterline_containing_mesh_edges_measures_the_section_once() -> None:
+    """The seam ring must count once, not twice (it used to come back as ``-2 A``).
+
+    A plane that contains an edge is met by *both* of that edge's faces, so each emits
+    the same segment; the contour was traced twice and the second copy was read as a
+    hole nested inside the first, which subtracted it and left a negative area. The
+    Wigley hull extended by ``gz.with_freeboard`` hit exactly this at its waterline.
+    """
+    length, beam, draft = 4.0, 1.0, 0.5
+    section = waterplane_moments(stacked_box(length, beam, draft), 0.0)
+    assert section.loops == 1
+    assert relative(section.area, length * beam) == pytest.approx(0.0, abs=1e-12)
+    assert relative(section.transverse_second_moment, length * beam**3 / 12.0) == (
+        pytest.approx(0.0, abs=1e-12)
+    )
+    assert relative(section.longitudinal_second_moment, beam * length**3 / 12.0) == (
+        pytest.approx(0.0, abs=1e-12)
+    )
+
+
+def test_a_body_taller_than_its_waterline_reports_only_the_immersed_part() -> None:
+    """``initial_stability`` must integrate the immersed body, not the whole closed mesh.
+
+    A mesh that carries freeboard (what a GZ curve needs) used to hand back its total
+    volume as displacement -- here twice the truth -- and an inflated ``BM``. On the
+    stacked box the immersed displacement, ``KB`` and ``GM`` are all exact rationals.
+    """
+    length, beam, draft, kg = 4.0, 1.0, 0.5, 0.15
+    result = initial_stability(stacked_box(length, beam, draft), kg=kg)
+    assert result.displacement_volume == pytest.approx(length * beam * draft, rel=1e-12)
+    assert result.kb == pytest.approx(0.5 * draft, rel=1e-12)
+    assert result.bm_transverse == pytest.approx(beam**2 / (12.0 * draft), rel=1e-12)
+    assert result.gm_transverse == pytest.approx(
+        0.5 * draft + beam**2 / (12.0 * draft) - kg, rel=1e-9
+    )

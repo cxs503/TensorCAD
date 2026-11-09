@@ -281,9 +281,10 @@ def main(argv: list[str] | None = None) -> int:
         HullParameters(length=HULL_LENGTH, beam=HULL_BEAM, draft=HULL_DRAFT, nx=81, nz=25)
     )
     # The waterplane at z = 0 is the same with and without the freeboard band, so KM (and
-    # therefore the KG for a target GM) is taken from the hull as generated -- the band
-    # duplicates the waterline ring, which the plane cut in tensorcad.stability will not
-    # accept -- and the band is used only for the heeled cuts.
+    # therefore the KG for a target GM) is taken from the hull as generated; the band is
+    # used for the heeled cuts. The plane cut accepts the banded mesh too now that the
+    # seam ring (edges lying in the cutting plane) is traced once instead of twice -- see
+    # examples/freeboard_seam -- so the two routes are interchangeable, not exclusive.
     upright = initial_stability(model.mesh, kg=0.0, waterline_z=0.0)
     hull_kg = upright.km_transverse - HULL_GM_TARGET
     hull_stability = initial_stability(model.mesh, kg=hull_kg, waterline_z=0.0)

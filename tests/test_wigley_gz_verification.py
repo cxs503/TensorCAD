@@ -6,9 +6,12 @@ curve whose small-angle slope matches the metacentric height GM from waterplane
 moments -- two independent integrations of the same hull.
 
 The Wigley hull has no freeboard by default (deck at waterline), so it must be
-extended with ``with_freeboard`` before computing GZ. The waterplane moments
-are computed on the original mesh (the freeboard band is vertical and does not
-contribute to the waterplane).
+extended with ``with_freeboard`` before computing GZ. The band is vertical, so it
+does not contribute to the waterplane: the section through the banded mesh must
+equal the section through the capped hull. That used to be untestable -- the plane
+cut met the seam ring *along its edges*, traced the boundary twice and returned
+``-2 A`` -- and ``TestFreeboardSeamWaterplane`` now pins it, which lets ``GM`` be
+measured on the same mesh the curve is computed on.
 """
 import math
 import pytest
@@ -16,7 +19,7 @@ import pytest
 from tensorcad.wigley import WigleyParameters, generate_wigley
 from tensorcad.gz import with_freeboard
 from tensorcad.righting_arm import righting_arm_curve, heeled_displacement
-from tensorcad.stability import waterplane_moments
+from tensorcad.stability import initial_stability, waterplane_moments
 
 
 FREEBOARD = 0.2
@@ -176,6 +179,51 @@ class TestWigleyAnalyticHydrostatics:
         assert rel_error < 0.005, (
             f"Waterplane area error {rel_error:.4f}: mesh {Awp_mesh:.6f} vs analytic {Awp_analytic:.6f}"
         )
+
+
+class TestFreeboardSeamWaterplane:
+    """The vertical freeboard band must not move the waterplane (m6594 gap, closed)."""
+
+    def test_the_section_through_the_band_equals_the_section_through_the_hull(self):
+        """Area and both second moments are unchanged, and the loop is counted once."""
+        model = wigley_model()
+        capped = waterplane_moments(model.mesh, WATERLINE)
+        banded = waterplane_moments(
+            with_freeboard(model.mesh, freeboard=FREEBOARD, waterline_z=WATERLINE), WATERLINE
+        )
+        assert banded.loops == 1
+        assert banded.area == pytest.approx(capped.area, rel=1e-14)
+        assert banded.transverse_second_moment == pytest.approx(
+            capped.transverse_second_moment, rel=1e-14
+        )
+        assert banded.longitudinal_second_moment == pytest.approx(
+            capped.longitudinal_second_moment, rel=1e-14
+        )
+
+    def test_gm_measured_on_the_banded_mesh_matches_the_capped_hull(self):
+        """``BM`` divides the section moment by the immersed volume, not the total."""
+        model = wigley_model()
+        capped = initial_stability(model.mesh, kg=KG, waterline_z=WATERLINE)
+        banded = initial_stability(
+            with_freeboard(model.mesh, freeboard=FREEBOARD, waterline_z=WATERLINE),
+            kg=KG,
+            waterline_z=WATERLINE,
+        )
+        assert banded.displacement_volume == pytest.approx(capped.displacement_volume, rel=1e-9)
+        assert banded.kb == pytest.approx(capped.kb, rel=1e-9)
+        assert banded.gm_transverse == pytest.approx(capped.gm_transverse, rel=1e-9)
+
+    def test_gz_slope_at_two_degrees_equals_gm_from_the_banded_mesh(self):
+        """The direct route: GM and the curve from one mesh, agreeing to 0.1 %."""
+        banded_mesh = with_freeboard(
+            wigley_model().mesh, freeboard=FREEBOARD, waterline_z=WATERLINE
+        )
+        gm = initial_stability(banded_mesh, kg=KG, waterline_z=WATERLINE).gm_transverse
+        curve = righting_arm_curve(
+            banded_mesh, kg=KG, waterline_z=WATERLINE, heels_deg=(0.0, 2.0)
+        )
+        slope = curve.points[1].righting_arm / math.sin(math.radians(2.0))
+        assert slope == pytest.approx(gm, rel=0.001), f"slope {slope:.6f} vs GM {gm:.6f}"
 
 
 if __name__ == "__main__":

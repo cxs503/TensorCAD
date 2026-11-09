@@ -1,0 +1,416 @@
+{
+  "schema": "tensorcad.freeboard_seam/1",
+  "inputs": {
+    "length_m": 10.0,
+    "beam_m": 1.0,
+    "draft_m": 0.625,
+    "freeboard_m": 0.2,
+    "kg_m": 0.3,
+    "waterline_z_m": 0.0,
+    "grids": [
+      [
+        41,
+        13
+      ],
+      [
+        81,
+        21
+      ],
+      [
+        161,
+        41
+      ]
+    ]
+  },
+  "analytic": {
+    "displacement_volume_m3": 2.7777777777777777,
+    "kb_m": 0.390625,
+    "waterplane_area_m2": 6.666666666666667,
+    "transverse_second_moment_m4": 0.38095238095238093,
+    "longitudinal_second_moment_m4": 33.333333333333314,
+    "bm_transverse_m": 0.13714285714285715,
+    "gm_transverse_m": 0.22776785714285713
+  },
+  "grids": [
+    {
+      "nx": 41,
+      "nz": 13,
+      "cells": 533,
+      "capped": {
+        "area": 6.6625000000000005,
+        "transverse": 0.3803971725260417,
+        "longitudinal": 33.298619791666795,
+        "loops": 1,
+        "volume": 2.7712221498842595,
+        "kb": 0.3907608695652174,
+        "bm": 0.1372669356521739,
+        "gm": 0.22802780521739124
+      },
+      "banded": {
+        "area": 6.6625000000000005,
+        "transverse": 0.3803971725260417,
+        "longitudinal": 33.298619791666795,
+        "loops": 1,
+        "volume": 2.771222149882972,
+        "kb": 0.3907608695651086,
+        "bm": 0.1372669356522377,
+        "gm": 0.22802780521734628,
+        "basis": "solid GM (no free-surface correction), immersed body below the waterline"
+      },
+      "slopes": {
+        "2.0": {
+          "gz": 0.007953554544314389,
+          "slope": 0.22789883224145238,
+          "volume_error": 7.675989870648336e-13
+        },
+        "5.0": {
+          "gz": 0.019873207935125536,
+          "slope": 0.22801948911920117,
+          "volume_error": 1.5063529182483164e-14
+        },
+        "10.0": {
+          "gz": 0.03973392503669021,
+          "slope": 0.22881855468073342,
+          "volume_error": 4.692129090033054e-13
+        }
+      }
+    },
+    {
+      "nx": 81,
+      "nz": 21,
+      "cells": 1701,
+      "capped": {
+        "area": 6.665625,
+        "transverse": 0.3808135137634273,
+        "longitudinal": 33.32465332031251,
+        "loops": 1,
+        "volume": 2.77560791015625,
+        "kb": 0.39067385866166354,
+        "bm": 0.13720003908692918,
+        "gm": 0.22787389774859274
+      },
+      "banded": {
+        "area": 6.665625,
+        "transverse": 0.3808135137634273,
+        "longitudinal": 33.32465332031251,
+        "loops": 1,
+        "volume": 2.7756079101549624,
+        "kb": 0.39067385866155474,
+        "bm": 0.13720003908699283,
+        "gm": 0.22787389774854755,
+        "basis": "solid GM (no free-surface correction), immersed body below the waterline"
+      },
+      "slopes": {
+        "2.0": {
+          "gz": 0.007951147098546111,
+          "slope": 0.22782984999254488,
+          "volume_error": 1.21437797119327e-12
+        },
+        "5.0": {
+          "gz": 0.01987545238558174,
+          "slope": 0.22804524130012974,
+          "volume_error": 4.639915831963746e-13
+        },
+        "10.0": {
+          "gz": 0.03973374693398345,
+          "slope": 0.22881752902812277,
+          "volume_error": 1.066220658765738e-12
+        }
+      }
+    },
+    {
+      "nx": 161,
+      "nz": 41,
+      "cells": 6601,
+      "capped": {
+        "area": 6.666406250000004,
+        "transverse": 0.38091766008647276,
+        "longitudinal": 33.33116322835278,
+        "loops": 1,
+        "volume": 2.777235260009765,
+        "kb": 0.39063720893889664,
+        "bm": 0.13715714529893064,
+        "gm": 0.2277943542378273
+      },
+      "banded": {
+        "area": 6.666406250000004,
+        "transverse": 0.38091766008647276,
+        "longitudinal": 33.33116322835278,
+        "loops": 1,
+        "volume": 2.777235260008492,
+        "kb": 0.3906372089387882,
+        "bm": 0.1371571452989935,
+        "gm": 0.22779435423778177,
+        "basis": "solid GM (no free-surface correction), immersed body below the waterline"
+      },
+      "slopes": {
+        "2.0": {
+          "gz": 0.00795057765584192,
+          "slope": 0.22781353334737817,
+          "volume_error": 2.2386468396926033e-13
+        },
+        "5.0": {
+          "gz": 0.01987378677649355,
+          "slope": 0.22802613057907248,
+          "volume_error": 1.261477494166782e-12
+        },
+        "10.0": {
+          "gz": 0.03973125589521322,
+          "slope": 0.2288031837075804,
+          "volume_error": 6.007568697660794e-13
+        }
+      }
+    }
+  ],
+  "claims": [
+    {
+      "claim": "seam: banded area == capped area [41x13]",
+      "value": 0.0,
+      "limit": 1e-14,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "a vertical band cannot change the waterplane"
+    },
+    {
+      "claim": "seam: banded I_T == capped I_T [41x13]",
+      "value": 0.0,
+      "limit": 1e-14,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "second moment measured once, not twice"
+    },
+    {
+      "claim": "immersed body: banded nabla == capped nabla [41x13]",
+      "value": 4.645656499999831e-13,
+      "limit": 1e-09,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "freeboard volume is not displacement"
+    },
+    {
+      "claim": "immersed body: banded GM == capped GM [41x13]",
+      "value": 1.9718662140545622e-13,
+      "limit": 1e-09,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "same loading, same metacentre"
+    },
+    {
+      "claim": "seam: banded area == capped area [81x21]",
+      "value": 0.0,
+      "limit": 1e-14,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "a vertical band cannot change the waterplane"
+    },
+    {
+      "claim": "seam: banded I_T == capped I_T [81x21]",
+      "value": 0.0,
+      "limit": 1e-14,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "second moment measured once, not twice"
+    },
+    {
+      "claim": "immersed body: banded nabla == capped nabla [81x21]",
+      "value": 4.638315860985055e-13,
+      "limit": 1e-09,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "freeboard volume is not displacement"
+    },
+    {
+      "claim": "immersed body: banded GM == capped GM [81x21]",
+      "value": 1.9829422127187416e-13,
+      "limit": 1e-09,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "same loading, same metacentre"
+    },
+    {
+      "claim": "seam: banded area == capped area [161x41]",
+      "value": 0.0,
+      "limit": 1e-14,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "a vertical band cannot change the waterplane"
+    },
+    {
+      "claim": "seam: banded I_T == capped I_T [161x41]",
+      "value": 0.0,
+      "limit": 1e-14,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "second moment measured once, not twice"
+    },
+    {
+      "claim": "immersed body: banded nabla == capped nabla [161x41]",
+      "value": 4.582829887540043e-13,
+      "limit": 1e-09,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "freeboard volume is not displacement"
+    },
+    {
+      "claim": "immersed body: banded GM == capped GM [161x41]",
+      "value": 1.9982560218374612e-13,
+      "limit": 1e-09,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "same loading, same metacentre"
+    },
+    {
+      "claim": "GZ slope vs GM at 2.0 deg [41x13]",
+      "value": 0.0005656019702113388,
+      "limit": 0.0012000000000000001,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 2.0 deg [41x13]",
+      "value": 7.675989870648336e-13,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 5.0 deg [41x13]",
+      "value": 3.646966709689117e-05,
+      "limit": 0.00645,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 5.0 deg [41x13]",
+      "value": 1.5063529182483164e-14,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 10.0 deg [41x13]",
+      "value": 0.0034677764960875414,
+      "limit": 0.0252,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 10.0 deg [41x13]",
+      "value": 4.692129090033054e-13,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 2.0 deg [81x21]",
+      "value": 0.00019329882201459553,
+      "limit": 0.0012000000000000001,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 2.0 deg [81x21]",
+      "value": 1.21437797119327e-12,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 5.0 deg [81x21]",
+      "value": 0.0007519226786178901,
+      "limit": 0.00645,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 5.0 deg [81x21]",
+      "value": 4.639915831963746e-13,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 10.0 deg [81x21]",
+      "value": 0.00414102400010946,
+      "limit": 0.0252,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 10.0 deg [81x21]",
+      "value": 1.066220658765738e-12,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 2.0 deg [161x41]",
+      "value": 8.419484170523196e-05,
+      "limit": 0.0012000000000000001,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 2.0 deg [161x41]",
+      "value": 2.2386468396926033e-13,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 5.0 deg [161x41]",
+      "value": 0.0010174806222316146,
+      "limit": 0.00645,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 5.0 deg [161x41]",
+      "value": 1.261477494166782e-12,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "GZ slope vs GM at 10.0 deg [161x41]",
+      "value": 0.004428685132141478,
+      "limit": 0.0252,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "wall-sided BM/2 tan^2 term widens the tolerance with heel"
+    },
+    {
+      "claim": "displacement conserved at 10.0 deg [161x41]",
+      "value": 6.007568697660794e-13,
+      "limit": 1e-10,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "every heeled point floats at the upright displacement"
+    },
+    {
+      "claim": "convergence: GM reaches the closed form on the finest grid",
+      "value": 0.00011633377622734015,
+      "limit": 0.001,
+      "unit": "relative error",
+      "holds": true,
+      "detail": "finest grid 161x41"
+    }
+  ],
+  "all_claims_hold": true
+}
