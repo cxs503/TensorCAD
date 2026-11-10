@@ -281,6 +281,24 @@ from .wigley import (
     reference_parameters as wigley_reference_parameters,
 )
 
+from .parametric_hull import (
+    CrossSection,
+    OffsetTable,
+    ParametricHull,
+    ParametricHullError,
+    SurfaceMesh,
+    HydrostaticResult,
+    Transform,
+    build_parametric_hull,
+    cross_section_from_offsets,
+    cross_section_from_function,
+    wigley_cross_sections,
+    suboff_cross_sections,
+    loft_nurbs_surface,
+    tessellate_surface,
+    apply_transform,
+    mesh_quality_report,
+)
 __all__ = [
     "ANALYTIC_COMPARABLE_QUANTITIES",
     "DEFAULT_ANGLES_DEG",
@@ -475,6 +493,16 @@ __all__ = [
     "write_solver_manifest",
     "write_stl",
 
+    "CrossSection",
+    "OffsetTable",
+    "ParametricHull",
+    "build_parametric_hull",
+    "wigley_cross_sections",
+    "suboff_cross_sections",
+    "loft_nurbs_surface",
+    "tessellate_surface",
+    "apply_transform",
+    "mesh_quality_report",
 ]
 
 __version__ = "0.23.0"
