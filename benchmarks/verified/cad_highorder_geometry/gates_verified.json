@@ -2,7 +2,7 @@
   "schema": "tensorcad.gates/1.0",
   "case": "cad_highorder_geometry",
   "campaign_node": "p127w2-n01-cad-highorder-geometry",
-  "generated_utc": "2026-11-09T01:39:32Z",
+  "generated_utc": "2026-11-10T08:41:07Z",
   "gates": {
     "J1": {
       "criterion": "exactness order = 2p-1 (exact there, wrong one degree beyond) and fitted quadrature order >= 2p-1 for p = 1..4",

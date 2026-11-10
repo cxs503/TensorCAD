@@ -2,7 +2,7 @@
   "schema": "tensorcad.highorder.benchmark/1.0",
   "case": "cad_highorder_geometry",
   "campaign_node": "p127w2-n01-cad-highorder-geometry",
-  "generated_utc": "2026-11-09T01:39:32Z",
+  "generated_utc": "2026-11-10T08:41:07Z",
   "environment": {
     "python": "3.11.6",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
@@ -11,8 +11,8 @@
     "processor": "loongarch64"
   },
   "provenance": {
-    "commit": "8081ada51866cde89cbbb19ae6b3107b0c090bbb",
-    "branch": "agent/m7706",
+    "commit": "5065af7192e04211e43f85ad0890193de0f2b44c",
+    "branch": "agent/m9199",
     "sources_dirty": "no",
     "module_sha256": "3865fd3412b564568c81dd22d7d6c2e021beab6c5ad3c02a63d1dacee14e6bb0",
     "script_sha256": "1c42e62f0214bcc3f8e0d5d244bb13ea7d9e54bd0f8d18cd715ee39e8302e0c8",
@@ -898,7 +898,7 @@
       "criterion": "write-read-recompute is bit identical (recomputed integrals agree to <= 1e-14) and the content hash survives NPZ, HDF5 and JSON",
       "reports": [
         {
-          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.npz",
+          "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.npz",
           "schema": "tensorcad.highorder.elements/1.0",
           "rows": 384,
           "fields": {
@@ -944,7 +944,7 @@
           "bytes": 38974
         },
         {
-          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.h5",
+          "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.h5",
           "schema": "tensorcad.highorder.elements/1.0",
           "rows": 384,
           "fields": {
@@ -990,7 +990,7 @@
           "bytes": 44048
         },
         {
-          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.json",
+          "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/artifacts/contract_sphere_r1.json",
           "schema": "tensorcad.highorder.elements/1.0",
           "rows": 384,
           "fields": {
@@ -1048,7 +1048,7 @@
           }
         },
         {
-          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.npz",
+          "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.npz",
           "schema": "tensorcad.highorder.elements/1.0",
           "rows": 384,
           "fields": {
@@ -1094,7 +1094,7 @@
           "bytes": 39018
         },
         {
-          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.h5",
+          "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.h5",
           "schema": "tensorcad.highorder.elements/1.0",
           "rows": 384,
           "fields": {
@@ -1140,7 +1140,7 @@
           "bytes": 44048
         },
         {
-          "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.json",
+          "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/artifacts/contract_ellipsoid_1_0.6_0.42.json",
           "schema": "tensorcad.highorder.elements/1.0",
           "rows": 384,
           "fields": {
@@ -1253,29 +1253,29 @@
     },
     "J7": {
       "criterion": "pytest tests/test_highorder_geometry.py wall time <= 120 s and all green",
-      "elapsed_seconds": 5.798238011077046,
+      "elapsed_seconds": 8.485265519469976,
       "returncode": 0,
-      "summary": "44 passed, 1 warning in 4.65s",
+      "summary": "44 passed, 1 warning in 6.70s",
       "passed": true
     }
   },
   "figures": [
     {
       "name": "convergence.png",
-      "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/figures/convergence.png",
+      "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/figures/convergence.png",
       "caption": "Left: Gauss-Legendre area error against points per direction for degree-1..4 Bezier patches (spectral decay; fitted order in the legend). Right: the same patch linearized -- second order only, and above the 1e-3 volume gate at every affordable facet count."
     },
     {
       "name": "curvature_error.png",
-      "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/figures/curvature_error.png",
+      "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/figures/curvature_error.png",
       "caption": "Curvature and unit-normal error over the parameter square of the ellipsoid, both against the closed-form implicit-surface value; several orders of magnitude below the 1e-3 gate away from the poles."
     },
     {
       "name": "cross_validation.png",
-      "path": "/root/tp-agent/work/m7706/benchmarks/verified/cad_highorder_geometry/figures/cross_validation.png",
+      "path": "/root/tp-agent/work/m9199/benchmarks/verified/cad_highorder_geometry/figures/cross_validation.png",
       "caption": "Left: STL wetted surface and voxel Cb against the AGM/Carlson elliptic-integral truth (the NURBS route sits at round-off). Right: wetted-area change against curvature change for isotropic and shape perturbations of the same hull -- the ratio is metric dependent, so a curvature guarantee does not replace an area gate."
     }
   ],
-  "elapsed_seconds": 19.7282754201442,
+  "elapsed_seconds": 28.430480590090156,
   "passed": true
 }
