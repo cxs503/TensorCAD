@@ -185,6 +185,23 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .resistance import (
+    FRICTION_LINES,
+    ModelShipPrediction,
+    ProhaskaFit,
+    Resistance,
+    ResistanceError,
+    bare_hull_resistance,
+    friction_coefficient,
+    froude_number,
+    ittc57_friction_coefficient,
+    mesh_bare_hull_resistance,
+    prandtl_schlichting_friction_coefficient,
+    prohaska_fit,
+    reynolds_number,
+    schoenherr_friction_coefficient,
+    ship_from_model_test,
+)
 from .righting_arm import (
     # Second, independent route to ``GZ(phi)``: the clipped-section integral with a
     # bracket-and-bisect waterline solve. Names that ``gz`` already publishes keep the
@@ -300,6 +317,21 @@ from .parametric_hull import (
     mesh_quality_report,
 )
 __all__ = [
+    "FRICTION_LINES",
+    "ModelShipPrediction",
+    "ProhaskaFit",
+    "Resistance",
+    "ResistanceError",
+    "bare_hull_resistance",
+    "friction_coefficient",
+    "froude_number",
+    "ittc57_friction_coefficient",
+    "mesh_bare_hull_resistance",
+    "prandtl_schlichting_friction_coefficient",
+    "prohaska_fit",
+    "reynolds_number",
+    "schoenherr_friction_coefficient",
+    "ship_from_model_test",
     "ANALYTIC_COMPARABLE_QUANTITIES",
     "DEFAULT_ANGLES_DEG",
     "DEFAULT_HEELS_DEG",
