@@ -484,6 +484,7 @@ def _span_before(knots: Sequence[float], degree: int, value: float) -> int:
         raise NURBSError(f"no span left of interior knot {value!r}")
     return span
 
+
 # ---------------------------------------------------------------------------
 # curve
 # ---------------------------------------------------------------------------
@@ -590,6 +591,117 @@ class NURBSCurve:
         low, high = self.domain
         step = (high - low) / (samples - 1)
         return tuple(self.evaluate(low + index * step) for index in range(samples))
+
+
+    def elevate_degree(self, times: int = 1) -> NURBSCurve:
+        """A curve of degree ``degree + times`` tracing exactly the same points.
+
+        Standard CAD operation (ISO 10303-42 degree elevation; Piegl & Tiller A5.9,
+        exposed by OCCT as ``Geom_BSplineCurve::IncreaseDegree``). A curve cannot be
+        stitched to a patch of higher degree without it, so this is the curve-level
+        half of the assembly operation the surface service lacks.
+
+        The representation grows minimally and keeps the original continuity: a knot
+        of multiplicity ``m`` becomes ``m + times``, so an interior ``C2`` join stays
+        ``C2`` in the larger degree. The control points are the unique coefficients of
+        the elevated curve in that space, obtained by collocation at the Greville
+        abscissae of the new knot vector (the collocation matrix is banded and totally
+        positive, so elimination needs no pivoting). Because the solve is done in
+        homogeneous coordinates the operation is exact for rational curves too:
+        ``elevated.evaluate(u) == self.evaluate(u)`` to round-off at the same ``u``.
+        """
+        if not isinstance(times, int) or isinstance(times, bool):
+            raise NURBSError(f"times must be a non-negative integer, got {times!r}")
+        if times < 0:
+            raise NURBSError(f"times must be a non-negative integer, got {times!r}")
+        if times == 0:
+            return self
+
+        degree = self.degree
+        target = degree + times
+        low, high = self.domain
+        unique = sorted({value for value in self.knots if low < value < high})
+        multiplicity = {value: sum(1 for knot in self.knots if knot == value) for value in unique}
+        disconnected = [value for value in unique if multiplicity[value] > degree]
+        if disconnected:
+            # A multiplicity of degree + 1 is not a C0 join but a break: the two sides
+            # share no control point, so the single-patch collocation matrix is
+            # singular by construction. Refuse with the fix instead of a generic
+            # singular-matrix message.
+            raise NURBSError(
+                "degree elevation needs a C0-or-better curve; knot "
+                f"{disconnected[0]!r} has multiplicity {multiplicity[disconnected[0]]} "
+                f"> degree {degree}, so the curve is discontinuous there -- split it "
+                "at that knot first"
+            )
+
+        knots: list[float] = [low] * (target + 1)
+        for value in unique:
+            knots.extend([value] * (multiplicity[value] + times))
+        knots.extend([high] * (target + 1))
+        count = len(knots) - target - 1
+        greville = [sum(knots[i + 1 : i + target + 1]) / target for i in range(count)]
+
+        homogeneous = [
+            (weight * point[0], weight * point[1], weight * point[2], weight)
+            for point, weight in zip(self.control_points, self.weights, strict=True)
+        ]
+        values = [spline_point(homogeneous, degree, self.knots, u) for u in greville]
+
+        matrix = [[0.0] * count for _ in range(count)]
+        for row, u in enumerate(greville):
+            span = find_span(knots, target, u)
+            basis = _basis_values(span, u, target, knots)
+            for offset, value in enumerate(basis):
+                matrix[row][span - target + offset] = value
+
+        # Solve the 4 homogeneous components with one elimination: same matrix, four
+        # right-hand sides. The collocation matrix at Greville points is totally
+        # positive, hence every leading principal minor is positive -- no pivoting.
+        solutions = [[values[row][axis] for row in range(count)] for axis in range(4)]
+        for pivot in range(count):
+            diagonal = matrix[pivot][pivot]
+            if diagonal == 0.0:
+                raise NURBSError(
+                    "degree elevation failed: the Greville collocation matrix is singular"
+                )
+            for row in range(pivot + 1, count):
+                factor = matrix[row][pivot]
+                if factor == 0.0:
+                    continue
+                factor /= diagonal
+                for column in range(pivot, count):
+                    matrix[row][column] -= factor * matrix[pivot][column]
+                for axis in range(4):
+                    solutions[axis][row] -= factor * solutions[axis][pivot]
+        coefficients = [[0.0] * count for _ in range(4)]
+        for pivot in range(count - 1, -1, -1):
+            for axis in range(4):
+                total = solutions[axis][pivot]
+                for column in range(pivot + 1, count):
+                    total -= matrix[pivot][column] * coefficients[axis][column]
+                coefficients[axis][pivot] = total / matrix[pivot][pivot]
+
+        points: list[Vec3] = []
+        weights: list[float] = []
+        for index in range(count):
+            weight = coefficients[3][index]
+            if weight == 0.0:
+                raise NURBSError("degree elevation produced a zero weight")
+            points.append(
+                (
+                    coefficients[0][index] / weight,
+                    coefficients[1][index] / weight,
+                    coefficients[2][index] / weight,
+                )
+            )
+            weights.append(weight)
+        return NURBSCurve(
+            degree=target,
+            knots=tuple(knots),
+            control_points=tuple(points),
+            weights=tuple(weights),
+        )
 
     # -- continuity ---------------------------------------------------------
     def continuity(self, order: int = 2) -> dict[str, Any]:
