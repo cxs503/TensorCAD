@@ -1,0 +1,151 @@
+{
+  "benchmark": "parametric_hull_geometry_and_hydrostatics",
+  "node": "p316w1-n03-cad-parametric-hull",
+  "repository": "TensorCAD",
+  "repro_cmd": "python benchmarks/verified/parametric_hull/run_benchmark.py",
+  "commit": "8c5131b2945f60da77092d6fbfa4f5db9a73b7fe",
+  "reference_hull": {
+    "L": 10.0,
+    "B": 1.0,
+    "T": 0.625,
+    "Cb": 0.4444444444444444,
+    "Cw": 0.6666666666666666
+  },
+  "mesh": {
+    "n_u": 97,
+    "n_v": 16,
+    "rule": "mesh_density_for(L, T, n_v=16) -> dx = 2.5 dz"
+  },
+  "cases": [
+    {
+      "id": "a_wigley_ordinates",
+      "quantity": "max relative error of hull ordinates y(x,z) at 10 stations x 5 waterlines",
+      "reference": "y = (B/2)(1-(2x-L)^2/L^2)(1-(z/T)^2), Wigley III closed form",
+      "measured": 3.427978503312086e-05,
+      "error": 3.427978503312086e-05,
+      "threshold": 0.001,
+      "passed": true
+    },
+    {
+      "id": "b_wigley_displacement",
+      "quantity": "displaced volume [m^3]",
+      "reference": "V = p q L B T/((p+1)(q+1)) = 2.777778",
+      "reference_value": 2.7777777777777777,
+      "measured": 2.7736685016949085,
+      "error": -0.0014793393898328944,
+      "error_measure": "relative",
+      "threshold": 0.005,
+      "passed": true
+    },
+    {
+      "id": "c_wigley_waterplane",
+      "quantity": "waterplane area [m^2]",
+      "reference": "Aw = p L B/(p+1) = 6.666667",
+      "reference_value": 6.666666666666667,
+      "measured": 6.66594712309051,
+      "error": -0.00010793153642350005,
+      "error_measure": "relative",
+      "threshold": 0.01,
+      "passed": true
+    },
+    {
+      "id": "d_suboff_offsets",
+      "quantity": "max relative radius error over 20 SUBOFF stations",
+      "reference": "DARPA SUBOFF four-segment radius table (Groves, Huang & Chang 1989)",
+      "measured": 0.0009310365753850286,
+      "error": 0.0009310365753850286,
+      "threshold": 0.005,
+      "passed": true
+    },
+    {
+      "id": "e_min_scaled_jacobian",
+      "quantity": "minimum scaled Jacobian over the hull triangles",
+      "reference": "criterion floor 0.30 (equilateral = 0.866)",
+      "measured": 0.3653263954178462,
+      "error": 0.06532639541784618,
+      "error_measure": "absolute margin above the floor",
+      "threshold": 0.3,
+      "passed": true
+    },
+    {
+      "id": "e_max_aspect_ratio",
+      "quantity": "maximum triangle aspect ratio",
+      "reference": "criterion ceiling 5.0",
+      "measured": 2.73727826005082,
+      "error": 2.26272173994918,
+      "error_measure": "absolute margin below the ceiling",
+      "threshold": 5.0,
+      "passed": true
+    },
+    {
+      "id": "f_parametric_cb_sweep",
+      "quantity": "max relative volume error over the Cb sweep (Cb 0.35 -> 0.55)",
+      "reference": "closed-form volume at each Cb",
+      "measured": 0.0024323682593836277,
+      "error": 0.0024323682593836277,
+      "threshold": 0.005,
+      "passed": true
+    },
+    {
+      "id": "cli_gmsh_volume",
+      "quantity": "displaced volume of the exported gmsh file [m^3]",
+      "reference": "V = 4/9 L B T = 2.777778 for L=10, B=1, T=0.625",
+      "reference_value": 2.7777777777777777,
+      "measured": 2.773668501694889,
+      "error": -0.0014793393898399289,
+      "error_measure": "relative",
+      "threshold": 0.005,
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "cli_handoff": {
+    "repro": "python -m tensorcad.parametric_hull_cli wigley ... --gmsh wigley_L10.msh",
+    "mesh_file": "benchmarks/verified/parametric_hull/wigley_L10.msh",
+    "mesh_sha256": "b31f72e19a59f331c0ca4c7df7779b98bd80278199e5f74d28d483b92b6871b2",
+    "gmsh_lines": 9227,
+    "nodes_in_file": 3070,
+    "triangles_in_file": 6136,
+    "watertight": true,
+    "edge_manifold": true,
+    "euler_characteristic": 2,
+    "volume_from_file_m3": 2.773668501694889,
+    "measured_volume_m3": 2.7736685016949085,
+    "analytic_volume_m3": 2.7777777777777777,
+    "gate_failures": []
+  },
+  "convergence": {
+    "observed_order": 2.074960879691785,
+    "richardson_extrapolated_rel_error": 0.0
+  },
+  "artifacts": {
+    "verification_record": "benchmarks/verified/parametric_hull/verification.json",
+    "verification_sha256": "4526eb0543bafdfb836ca20370045c0ff80aef6ab3813ffd84e92c9cefcd446b",
+    "figures": [
+      {
+        "name": "fig1_body_plan_waterlines",
+        "path": "docs/parametric_hull/figures/fig1_body_plan_waterlines.png"
+      },
+      {
+        "name": "fig2_ordinate_error",
+        "path": "docs/parametric_hull/figures/fig2_ordinate_error.png"
+      },
+      {
+        "name": "fig3_mesh_convergence",
+        "path": "docs/parametric_hull/figures/fig3_mesh_convergence.png"
+      },
+      {
+        "name": "fig4_mesh_quality",
+        "path": "docs/parametric_hull/figures/fig4_mesh_quality.png"
+      },
+      {
+        "name": "fig5_parametric_sweep",
+        "path": "docs/parametric_hull/figures/fig5_parametric_sweep.png"
+      },
+      {
+        "name": "fig6_suboff_offsets",
+        "path": "docs/parametric_hull/figures/fig6_suboff_offsets.png"
+      }
+    ]
+  }
+}

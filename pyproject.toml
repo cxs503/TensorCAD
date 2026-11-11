@@ -38,6 +38,7 @@ Issues = "https://github.com/cxs503/TensorCAD/issues"
 
 [project.scripts]
 tensorcad-hull = "tensorcad.cli:main"
+tensorcad-parametric-hull = "tensorcad.parametric_hull_cli:main"
 tensorcad-neural = "tensorcad.cli_neural:main"
 
 [tool.setuptools.packages.find]
