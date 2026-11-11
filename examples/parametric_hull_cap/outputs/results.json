@@ -1,0 +1,56 @@
+{
+  "su_boff_volume_reference_m3": 0.70754064,
+  "variants": [
+    {
+      "variant": "structured (baseline)",
+      "cap_adaptation": false,
+      "faces": 9480,
+      "min_scaled_jacobian": 0.1267187083591324,
+      "max_aspect_ratio": 7.875574578385435,
+      "mean_aspect_ratio": 2.200786952526577,
+      "watertight": true,
+      "edge_manifold": true,
+      "n_degenerate_faces": 0,
+      "volume_m3": 0.6938845714984208,
+      "volume_rel_error": -0.019300754938372577
+    },
+    {
+      "variant": "cap-adapted",
+      "cap_adaptation": true,
+      "faces": 8904,
+      "min_scaled_jacobian": 0.3251063625610317,
+      "max_aspect_ratio": 3.033856262820522,
+      "mean_aspect_ratio": 2.030253232064297,
+      "watertight": true,
+      "edge_manifold": true,
+      "n_degenerate_faces": 0,
+      "volume_m3": 0.6937696997940846,
+      "volume_rel_error": -0.019463108445495703
+    }
+  ],
+  "geometry_cost": {
+    "n_coarsened_rings": 7,
+    "worst_chord_sagitta_m": 0.002618678866864603,
+    "worst_chord_sagitta_rel_radius": 0.010309759318364578,
+    "worst_chord_sagitta_at_x": 3.8979260395154185,
+    "worst_segments_per_half_ring": 14
+  },
+  "wigley_regression": {
+    "baseline_min_scaled_jacobian": 0.3653263945812958,
+    "adapted_min_scaled_jacobian": 0.594750850259558,
+    "baseline_max_aspect_ratio": 2.737278266318835,
+    "adapted_max_aspect_ratio": 1.6813763268494448,
+    "volume_drift_rel": -0.003735922990319329
+  },
+  "closed_body_volume_note": "the structured baseline is -1.93% against the analytic bare-hull volume (a pre-existing discretisation of the two caps at n_u=160, not a cap-adaptation effect); the capability claim is the drift between the two variants, which is 0.017%.",
+  "gates": {
+    "min_scaled_jacobian_gt_0.30": true,
+    "max_aspect_ratio_lt_5": true,
+    "watertight": true,
+    "no_degenerate_faces": true,
+    "volume_drift_vs_baseline_lt_0.1pct": true,
+    "wigley_jacobian_not_degraded": true,
+    "wigley_volume_drift_lt_0.5pct": true
+  },
+  "all_gates_pass": true
+}
