@@ -1083,6 +1083,14 @@ def tessellate_surface(
         mesh = meshlib.weld(mesh, tolerance=tol)
         mesh = meshlib.remove_degenerate_faces(mesh, tolerance=0.0)
 
+    # The parametric grid winds the triangles inward: the divergence volume of the
+    # closed Wigley body at L = 10 m measures -2.7734 m^3 against +2.7734 outward.  An
+    # inward surface inverts every pressure and load sign in a solver, and the FEM
+    # handoff (``tensorcad.adapters.fem``) rejects it, so the orientation is fixed here,
+    # at the source, instead of leaving every consumer to guess.  ``orient_outward``
+    # preserves face order, so ``hull_face_count`` stays valid.
+    mesh = meshlib.orient_outward(mesh).mesh
+
     return SurfaceMesh(
         mesh=mesh,
         n_u=n_u,

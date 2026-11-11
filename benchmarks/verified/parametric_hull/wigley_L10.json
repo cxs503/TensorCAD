@@ -1,0 +1,107 @@
+{
+  "analytic_comparison": {
+    "volume_rel_error": -0.0014793393898328944,
+    "waterplane_area_rel_error": -0.00010793153642350005
+  },
+  "analytic_reference": {
+    "beam": 1.0,
+    "block_coefficient": 0.4444444444444444,
+    "depth_exponent": 2.0,
+    "displaced_volume": 2.7777777777777777,
+    "draft": 0.625,
+    "fore_exponent": 2.0,
+    "lcb": 5.0,
+    "lcf": 5.0,
+    "length": 10.0,
+    "longitudinal_waterplane_inertia": 33.33333333333333,
+    "midship_coefficient": 0.6666666666666666,
+    "transverse_metacentric_radius": 0.13714285714285715,
+    "transverse_waterplane_inertia": 0.38095238095238093,
+    "vcb": -0.234375,
+    "waterplane_area": 6.666666666666667,
+    "waterplane_coefficient": 0.6666666666666666
+  },
+  "definition": {
+    "beam": 1.0,
+    "depth_exponent": 2.0,
+    "draft": 0.625,
+    "family": "wigley",
+    "fore_exponent": 2.0,
+    "length": 10.0,
+    "points_per_section": 12,
+    "requested_block_coefficient": null,
+    "stations": 11
+  },
+  "gate_failures": [],
+  "gmsh": {
+    "area_m2": 21.53442387893506,
+    "digest": "66e3e94ae5c4196a9e5de3303a27a2f8aa18cb901cace71e13cb59ec7fc070f6",
+    "edge_manifold": true,
+    "euler_characteristic": 2,
+    "path": "/root/tp-agent/work/m14654/benchmarks/verified/parametric_hull/wigley_L10.msh",
+    "volume_m3": 2.773668501694889,
+    "watertight": true
+  },
+  "hydrostatics": {
+    "block_coefficient": 0.44378696027118536,
+    "centre_of_buoyancy": [
+      4.999999999999974,
+      1.4723032259434446e-19,
+      -0.23424065384509601
+    ],
+    "displaced_mass_kg": 2843.010214237281,
+    "displaced_volume_m3": 2.7736685016949085,
+    "lcb_m": 4.999999999999974,
+    "lcf_m": 5.000000000000034,
+    "longitudinal_waterplane_inertia_m4": 33.32744507277883,
+    "transverse_metacentric_radius_m": 0.13731108603361705,
+    "transverse_waterplane_inertia_m4": 0.3808554342649633,
+    "vcb_m": -0.23424065384509601,
+    "waterplane_area_m2": 6.66594712309051,
+    "wetted_surface_area_m2": 14.868476755844593
+  },
+  "mesh": {
+    "faces": 6136,
+    "hull_faces": 5756,
+    "n_u": 97,
+    "n_v": 16,
+    "vertices": 3070,
+    "waterplane_closed": true
+  },
+  "parameters": {
+    "beam": 1.0,
+    "close_waterplane": 1.0,
+    "degree_u": 3,
+    "degree_v": 3,
+    "draft": 0.625,
+    "interpolating_loft": 1.0,
+    "length": 10.0,
+    "mesh_n_u": 97,
+    "mesh_n_v": 16,
+    "n_sections": 11
+  },
+  "quality": {
+    "closure_faces": 380,
+    "edge_manifold": true,
+    "max_aspect_ratio": 2.73727826005082,
+    "mean_aspect_ratio": 2.3824635053827694,
+    "min_scaled_jacobian": 0.3653263954178462,
+    "min_triangle_area": 0.002170844958017159,
+    "n_degenerate_faces": 0,
+    "n_faces": 5756,
+    "n_faces_evaluated": 5756,
+    "n_vertices": 3070,
+    "watertight": false
+  },
+  "sections": 11,
+  "surface": {
+    "control_points": [
+      11,
+      12
+    ],
+    "degree": [
+      3,
+      3
+    ]
+  }
+}
