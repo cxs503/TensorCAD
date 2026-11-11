@@ -1,0 +1,313 @@
+{
+  "schema": "oss-inventory-cad/repos-v1",
+  "note": "Curated candidate pool for FEAT-OSS-INVENTORY-CAD round 1 (function-point full sweep). tier: 1=kernel-grade B-rep/NURBS/robust-solid kernel, 2=framework/library carrying a real kernel or exact-arithmetic geometry, 3=mesh/repair/exchange/IGA specialisation. Every entry is verified live by tools/oss_inventory_cad/survey.py (git commit SHA + tree + license file); entries that fail to clone are recorded as status=clone_failed, never silently dropped.",
+  "repos": [
+    {
+      "repo": "Open-Cascade-SAS/OCCT",
+      "tier": 1,
+      "focus": [
+        "brep-kernel",
+        "nurbs",
+        "boolean",
+        "surface-intersection",
+        "step",
+        "fillet",
+        "shell",
+        "offset",
+        "defeaturing"
+      ],
+      "why": "Reference open B-rep kernel; every downstream open CAD app is measured against it."
+    },
+    {
+      "repo": "FreeCAD/FreeCAD",
+      "tier": 1,
+      "focus": [
+        "parametric-cad",
+        "brep-kernel-app",
+        "sketch-solver",
+        "step",
+        "mesh-repair",
+        "lofting"
+      ],
+      "why": "Production parametric CAD application; owns the part-design/loft/defeaturing workflows TensorCAD would need."
+    },
+    {
+      "repo": "elalish/manifold",
+      "tier": 1,
+      "focus": [
+        "robust-boolean",
+        "manifold-guarantee",
+        "mesh-boolean",
+        "topology"
+      ],
+      "why": "Guaranteed-manifold boolean kernel; the licence-clean candidate for GAP-CAD-003."
+    },
+    {
+      "repo": "CGAL/cgal",
+      "tier": 1,
+      "focus": [
+        "exact-arithmetic",
+        "nefin-boolean",
+        "surface-mesh-generation",
+        "surface-intersection",
+        "smoothing"
+      ],
+      "why": "Exact-predicate reference implementations for arrangement/boolean/meshing primitives."
+    },
+    {
+      "repo": "solvespace/solvespace",
+      "tier": 1,
+      "focus": [
+        "sketch-solver",
+        "nurbs",
+        "parametric-cad"
+      ],
+      "why": "Constraint solver isolated in a small codebase; the only permissively-licensed Newton solver of this class."
+    },
+    {
+      "repo": "gismo/gismo",
+      "tier": 1,
+      "focus": [
+        "isogeometric",
+        "nurbs",
+        "spline-analysis"
+      ],
+      "why": "IGA reference: spline basis construction from CAD patches for analysis (GAP-CAD-014)."
+    },
+    {
+      "repo": "OpenVSP/OpenVSP",
+      "tier": 1,
+      "focus": [
+        "lofting",
+        "parametric-cad",
+        "ship-hull-section",
+        "surface-modeling"
+      ],
+      "why": "Section-based lofting engine closest in spirit to hull-form generation."
+    },
+    {
+      "repo": "CadQuery/cadquery",
+      "tier": 2,
+      "focus": [
+        "parametric-cad",
+        "boolean",
+        "fillet",
+        "shell",
+        "step",
+        "python-api"
+      ],
+      "why": "Python fluent API over OCCT; defines the agent-facing ergonomics TensorCAD should match."
+    },
+    {
+      "repo": "gumyr/build123d",
+      "tier": 2,
+      "focus": [
+        "parametric-cad",
+        "boolean",
+        "fillet",
+        "step",
+        "topology"
+      ],
+      "why": "Successor API with explicit topology (Vertex/Edge/Face/Solid) selection; useful for topology-naming semantics."
+    },
+    {
+      "repo": "tpaviot/pythonocc-core",
+      "tier": 2,
+      "focus": [
+        "brep-kernel-binding",
+        "step",
+        "nurbs",
+        "boolean"
+      ],
+      "why": "Thin Python binding to OCCT; the reference for what a Python-side B-rep surface looks like."
+    },
+    {
+      "repo": "zalo/CascadeStudio",
+      "tier": 2,
+      "focus": [
+        "web-cad",
+        "brep-kernel-binding",
+        "mesh-export"
+      ],
+      "why": "Minimal browser CAD; small enough to read end-to-end for kernel-call sequencing."
+    },
+    {
+      "repo": "jimy-byerley/pymadcad",
+      "tier": 2,
+      "focus": [
+        "parametric-cad",
+        "mesh-boolean",
+        "brep-mesh-hybrid",
+        "python-api"
+      ],
+      "why": "Pure-Python CAD kernel that keeps its own mesh-based B-rep (madcad); the closest permissive-licence peer for a Python-native kernel."
+    },
+    {
+      "repo": "orbingol/NURBS-Python",
+      "tier": 2,
+      "focus": [
+        "nurbs",
+        "spline-construction",
+        "degree-elevation"
+      ],
+      "why": "Pure-Python NURBS with knot refinement/degree elevation - directly comparable to tensorcad.nurbs."
+    },
+    {
+      "repo": "SINTEF-Geometry/SISL",
+      "tier": 2,
+      "focus": [
+        "nurbs",
+        "spline-construction",
+        "surface-intersection"
+      ],
+      "why": "Industrial spline library (SINTEF); intersection and approximation routines."
+    },
+    {
+      "repo": "libfive/libfive",
+      "tier": 2,
+      "focus": [
+        "implicit-geometry",
+        "csg-field",
+        "mesh-generation"
+      ],
+      "why": "Implicit/F-Rep CSG evaluated to meshes; the architectural peer of tensorcad.csg."
+    },
+    {
+      "repo": "NVIDIA/warp",
+      "tier": 2,
+      "focus": [
+        "differentiable-geometry",
+        "sdf",
+        "mesh-queries",
+        "gpu"
+      ],
+      "why": "Differentiable geometry queries on GPU; reference for later differentiable-geometry work."
+    },
+    {
+      "repo": "mikedh/trimesh",
+      "tier": 2,
+      "focus": [
+        "mesh-repair",
+        "mesh-queries",
+        "boolean",
+        "exchange"
+      ],
+      "why": "Python mesh workhorse; repair/watertight/boolean fallbacks that TensorCAD is currently missing."
+    },
+    {
+      "repo": "PyMesh/PyMesh",
+      "tier": 2,
+      "focus": [
+        "mesh-boolean",
+        "mesh-Repair",
+        "quality",
+        "tetra"
+      ],
+      "why": "Bundled exact-ish mesh boolean + repair + tetgen wrapper; a coverage map for F03/F08/F09."
+    },
+    {
+      "repo": "libigl/libigl",
+      "tier": 2,
+      "focus": [
+        "geometry-processing",
+        "mesh-boolean",
+        "parameterization",
+        "quality",
+        "remesh"
+      ],
+      "why": "Header-only geometry processing algorithms with citable papers per routine."
+    },
+    {
+      "repo": "NGSolve/netgen",
+      "tier": 3,
+      "focus": [
+        "volume-mesh",
+        "boundary-layer",
+        "mesh-generation",
+        "occ-import"
+      ],
+      "why": "B-rep driven volume mesher with prism boundary layers (F08)."
+    },
+    {
+      "repo": "wildmeshing/fTetWild",
+      "tier": 3,
+      "focus": [
+        "mesh-repair",
+        "watertight",
+        "remesh"
+      ],
+      "why": "Guaranteed-manifold repair of arbitrary triangle soups (F09 gap)."
+    },
+    {
+      "repo": "cnr-isti-vclab/meshlab",
+      "tier": 3,
+      "focus": [
+        "mesh-repair",
+        "quality",
+        "decimation",
+        "smoothing"
+      ],
+      "why": "Reference implementations of the standard repair/decimation filters."
+    },
+    {
+      "repo": "stepcode/stepcode",
+      "tier": 3,
+      "focus": [
+        "step",
+        "exchange",
+        "schema-parser"
+      ],
+      "why": "EXPRESS/STEP schema parser - licence-clean route to semantic STEP (F10)."
+    },
+    {
+      "repo": "nschloe/meshio",
+      "tier": 3,
+      "focus": [
+        "exchange",
+        "mesh-io"
+      ],
+      "why": "Format-normalising I/O layer; benchmark for what exchange coverage means."
+    },
+    {
+      "repo": "tensor-ecosystem-nonexistent/oss-cad-negative-control",
+      "tier": 3,
+      "focus": [
+        "PLACEHOLDER"
+      ],
+      "why": "Deliberately included negative control: a nonexistent repository must be recorded as clone_failed by the survey and must not inflate the census count."
+    },
+    {
+      "repo": "openscad/openscad",
+      "tier": 1,
+      "focus": [
+        "csg",
+        "boolean",
+        "implicit-geometry",
+        "script-cad"
+      ],
+      "why": "Script-driven CSG modeller with its own CGAL-backed CSG evaluator: the direct peer of an agent-authored geometry script."
+    },
+    {
+      "repo": "MeshInspector/MeshLib",
+      "tier": 3,
+      "focus": [
+        "halfedge",
+        "mesh-repair",
+        "mesh-processing",
+        "topology"
+      ],
+      "why": "Modern C++ mesh-processing toolkit built on a half-edge structure; replaces the unreachable OpenMesh entry for F01/F09."
+    },
+    {
+      "repo": "nschloe/pygalmesh",
+      "tier": 3,
+      "focus": [
+        "volume-mesh",
+        "tetra",
+        "surface-mesh-generation",
+        "cgmesher"
+      ],
+      "why": "Python bindings to CGAL meshers (tetra + surface + remesh); the licence-clean route to F08 without vendoring CGAL."
+    }
+  ]
+}
