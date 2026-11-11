@@ -248,3 +248,55 @@ python -m pytest tests/test_parametric_hull.py -q                  # 35 regressi
 
 Coverage of `tensorcad/parametric_hull.py` from the two test modules: **92%**
 (`coverage run --source=tensorcad.parametric_hull -m pytest ...`, statement + branch).
+
+## 7. Entry point and solver handoff (added in the m14654 rework)
+
+The pipeline is now reachable without writing Python, and it hands its surface to a
+solver through the adapter, not by a caller reaching into internals:
+
+```
+python -m tensorcad.parametric_hull_cli wigley --length 10 --beam 1 --draft 0.625 \
+    --gmsh hull.msh --json hull.json          # console script: tensorcad-parametric-hull
+python -m tensorcad.parametric_hull_cli suboff --station-fractions --stations 21
+python -m tensorcad.parametric_hull_cli offsets sections.json --length 10 --gmsh hull.msh
+```
+
+`--gmsh` goes through `tensorcad.adapters.fem.parametric_hull_surface(hull)`, i.e. the
+same `FemSurface` record and gmsh 2.2 writer every other geometry source uses, so the
+solver-side consumer sees one contract. The record printed by the CLI carries the
+definition, section count, surface degrees, mesh counts, hydrostatics, mesh quality, the
+analytic comparison (Wigley) and `gate_failures`.
+
+Two behaviours are worth stating because they were wrong before and are now pinned by
+tests:
+
+* **Orientation.** The parametric grid wound its triangles *inward* (the closed Wigley
+  body at L = 10 m measured -2.7734 m^3 against +2.7734 outward), so `parametric_hull_surface`
+  refused the surface -- correctly, since an inward surface inverts every load sign.
+  `tessellate_surface` now orients the mesh outward (`tensorcad.mesh.orient_outward`),
+  and every acceptance number in this document is unchanged by that fix: the hydrostatics
+  already carried a sign repair, so the geometry, displacement, waterplane and quality
+  figures are bit-identical to the pre-fix record.
+* **SUBOFF has no waterplane lid.** A body of revolution's section tops are not
+  coplanar, so `close_waterplane=True` cannot work for it; the CLI omits the lid and
+  records `definition.waterplane_lid = "omitted: ..."`. The exported artifact is
+  therefore a shell, and `--gmsh` on a SUBOFF run is refused with that reason rather
+  than exporting a body whose closure is unknown.
+
+## 8. Benchmark record and reproduction
+
+`benchmarks/verified/parametric_hull/` holds the committed run record
+(`result.json`, `verification.json`, `wigley_L10.msh`, `wigley_L10.json`) with the
+ref-vs-got table, and `docs/parametric_hull/EVIDENCE.md` maps each acceptance criterion
+to its measurement and to the file that holds the implementation.
+
+```
+python benchmarks/verified/parametric_hull/run_benchmark.py     # ~55 s, exit 0 = all PASS
+```
+
+**Scope limits, unchanged and restated:** geometry plus geometric hydrostatics only; no
+hydrodynamic, structural or seakeeping quantity is claimed. The SUBOFF mesh at the
+density used in the report (n_u = 160, n_v = 16) reaches min scaled Jacobian 0.127 and
+max aspect ratio 7.88 -- i.e. criterion (e) holds for the Wigley reference case and for
+the auto-density used by the entry point, not for every SUBOFF density; see the
+limitation section above.

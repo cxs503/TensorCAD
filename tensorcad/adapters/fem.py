@@ -339,6 +339,59 @@ def fem_surface(
     )
 
 
+def parametric_hull_surface(
+    hull: Any,
+    *,
+    components: Mapping[str, GeometryField] | Sequence[GeometryField] | None = None,
+    units: str | None = None,
+) -> FemSurface:
+    """Hand a generated parametric hull to a FEM/CFD solver.
+
+    ``hull`` is a :class:`tensorcad.parametric_hull.ParametricHull` -- the object the
+    parametric hull pipeline returns -- so a caller never has to reach into the module
+    and pick ``mesh_data.mesh`` out by hand (picking the wrong sub-mesh is exactly how
+    an open shell reaches a solver and silently produces a zero-volume body).
+
+    The hull has to be closed: a mesh built with ``close_waterplane=False`` is a shell
+    with an open top, so its signed volume is undefined and the orientation check below
+    would reject it for the wrong reason.  That case raises here with a message naming
+    the flag that fixes it.
+
+    The producer's mesh-quality report travels with the record under
+    ``quality["parametric_hull"]``: the solver-side consumer can then see the minimum
+    scaled Jacobian of the *hull* triangles (the lid excluded) without re-measuring it.
+    """
+    from ..parametric_hull import ParametricHull
+
+    if not isinstance(hull, ParametricHull):
+        raise TypeError(
+            "parametric_hull_surface expects a ParametricHull, got "
+            f"{type(hull).__name__}; build one with build_parametric_hull()"
+        )
+    mesh_data = hull.mesh_data
+    if mesh_data.waterplane_z is None:
+        raise ValueError(
+            "parametric hull has no waterplane lid (close_waterplane=False), so it is a "
+            "shell, not a body: rebuild with close_waterplane=True before the handoff"
+        )
+    surface = fem_surface(
+        mesh_data.mesh,
+        components=components,
+        units=units,
+        coordinate_frame=(
+            f"parametric hull: x aft->forward, y starboard, z up, waterline z={mesh_data.waterplane_z:g}"
+        ),
+    )
+    surface.quality["parametric_hull"] = {
+        "n_u": mesh_data.n_u,
+        "n_v": mesh_data.n_v,
+        "hull_faces": mesh_data.hull_face_count,
+        "mesh_quality": dict(hull.quality),
+        "parameters": dict(hull.parameters),
+    }
+    return surface
+
+
 def write_gmsh(surface: FemSurface, path: str | Path) -> Path:
     """Write ``surface`` as gmsh 2.2 ASCII with one physical tag per region.
 
