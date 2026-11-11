@@ -8,9 +8,14 @@ writes a machine-readable record plus the figures used in the report:
 
 Outputs (relative to the repository root):
 
-    artifacts/p316w1-n03/verification.json   every number below, plus PASS/FAIL
-    artifacts/p316w1-n03/figures/*.png       report figures
+    benchmarks/verified/parametric_hull/verification.json  every number, plus PASS/FAIL
+    docs/parametric_hull/figures/*.png       report figures
     docs/parametric_hull/VERIFICATION.md     generated table of the same numbers
+
+The record deliberately lands under ``benchmarks/verified/`` and the figures under
+``docs/``: the repository's push filter drops ``artifacts/``, ``runs/`` and binary
+extensions outside ``docs/``, so a record written to ``artifacts/`` never reaches the
+committed tree and the run leaves no evidence behind.
 
 The acceptance thresholds live in ``CRITERIA`` so the report cannot drift from the
 measurement, and the markdown is rendered from the measured dictionaries only.
@@ -27,8 +32,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tensorcad import mesh as meshlib  # noqa: E402
-from tensorcad.parametric_hull import (  # noqa: E402
+from tensorcad import mesh as meshlib
+from tensorcad.parametric_hull import (
     Transform,
     apply_transform,
     build_parametric_hull,
@@ -44,7 +49,7 @@ from tensorcad.parametric_hull import (  # noqa: E402
     wigley_cross_sections,
     wigley_family_sections,
 )
-from tensorcad.suboff import (  # noqa: E402
+from tensorcad.suboff import (
     SUBOFF_LENGTH_M,
     SUBOFF_RADIUS_M,
     suboff_radius_fraction,
@@ -954,7 +959,7 @@ def main():
     parser.add_argument(
         "--out",
         type=pathlib.Path,
-        default=ROOT / "artifacts" / "p316w1-n03",
+        default=ROOT / "benchmarks" / "verified" / "parametric_hull",
         help="output directory for verification.json and figures",
     )
     parser.add_argument("--no-figures", action="store_true")
@@ -990,8 +995,10 @@ def main():
         "convergence": convergence_study(),
         "quality_scan": quality_scan(),
     }
+    figure_dir = ROOT / "docs" / "parametric_hull" / "figures"
     if not args.no_figures:
-        results["figures"] = make_figures(hull, results, outdir / "figures")
+        figure_dir.mkdir(parents=True, exist_ok=True)
+        results["figures"] = make_figures(hull, results, figure_dir)
 
     verdicts = {
         "a": results["criterion_a"]["value"] < results["criterion_a"]["threshold"],
