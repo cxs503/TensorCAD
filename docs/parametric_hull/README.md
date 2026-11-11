@@ -199,6 +199,17 @@ Every key quantity is compared against an independent reference, and each is far
    therefore evaluated in the standard form `V = Cb L B T` (with `Cb` measured from the
    geometry, `0.147%` off), and the literal value is recorded in
    `criterion_b.seeding_formula_note` for the audit trail rather than silently satisfied.
+
+   > **Update (m13763, 2026-11-11): fixable without an unstructured remesher.**
+   > `tessellate_surface(..., cap_adaptation=True)` drops profile columns where the
+   > ring is already finer than the axial spacing; the zipper falls out of the quad
+   > loop and the existing `weld`/`remove_degenerate_faces` collapses it. SUBOFF
+   > `n_u=160, n_v=16`: min scaled Jacobian **0.127 -> 0.325**, max aspect
+   > **7.88 -> 3.03**, watertight, volume drift 0.017 %. Cost: worst chord sagitta
+   > 1.0 % of the radius, Wigley closed volume -0.37 %. See
+   > [`CAP_ADAPTATION.md`](CAP_ADAPTATION.md). The text below is the limitation as it
+   > stood when opened; criterion (e) is now met on both hulls.
+
 2. **SUBOFF mesh quality does not meet criterion (e).** Best achievable with a structured
    parametric grid is `min scaled Jacobian 0.13`, `max aspect ratio 7.9` (reported honestly
    in `criterion_d.mesh.quality`). Cause: both ends of the bare hull close with an infinite
