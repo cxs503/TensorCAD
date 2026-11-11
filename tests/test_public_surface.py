@@ -73,7 +73,10 @@ EXPECTED_API = {
     # intact-stability criteria (0.23.0): IS Code 2008 part A on a measured GZ curve
     "Criterion", "IS_CODE_2008_GENERAL", "IntactStabilityError", "IntactStabilityReport",
     "WeatherCriterionReport", "WindHeelingLevers",
-    "general_criteria", "gz_area_between", "gz_at_angle",
+    "general_criteria", "girder_section", "mirror_half_section", "box_girder_section",
+    "section_modulus_extremes", "closed_cell_torsion_constant",
+    "open_section_torsion_constant",
+    "gz_area_between", "gz_at_angle",
     "steady_wind_heel_angle", "weather_criterion", "wind_heeling_levers",
     # statutory rule check (0.23.0+): IS Code 2008 s. 2.2 with per-rule error bars
     "INTACT_STABILITY_CRITERIA", "CriterionCheck", "IntactStabilityAssessment", "StatutoryError",

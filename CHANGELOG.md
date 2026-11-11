@@ -7,6 +7,32 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.girder`: hull-girder elastic and plastic section properties** (`tensorcad/girder.py`,
+  `docs/girder_section.md`, `examples/girder_section/`, `tools/girder_section_doc.py`, 25 tests).
+  Geometry could produce a hull and the hydrostatics could say what it displaces, but nothing
+  could say what the section *carries*: there was no second moment, no section modulus and no
+  plastic capacity anywhere in the package, which is the whole input of a scantling check.
+  `girder_section` takes one closed polygon in the `(y, z)` section plane (or a half-breadth
+  table via `mirror_half_section`) and returns area, centroid, the two centroidal second
+  moments, the product of inertia with its principal axes, the four elastic section moduli
+  (deck/keel/port/starboard, each with its own extreme-fibre distance), the plastic neutral
+  axis and plastic modulus for both axes, and `first_moment(z)` -- the static moment that is
+  the numerator of `tau = V Q / I t`. `closed_cell_torsion_constant` (Bredt) and
+  `open_section_torsion_constant` cover the other degree of freedom. Area and second moments
+  are the exact shoelace/Euler sums, so there is no discretisation error: measured against
+  closed forms, a rectangle is exact to `0.0` relative, a double-walled box to **1.2e-16**, and
+  an I-beam polygon matches a sum of rectangles with Steiner terms to **1.4e-16**. The plastic
+  neutral axis is the only searched quantity; for three trapezoids it lands on the closed-form
+  equal-area level to **1.4e-15** relative and the plastic modulus matches a Simpson
+  quadrature of the width law to **5.7e-15**. Two traps are documented: an annulus entered as a
+  loop with a zero-width bridge must *not* be clipped-and-reconstructed (the reconstruction
+  paired the void's chain with itself and dropped it, returning 21.33 instead of 20 for the
+  box's plastic modulus -- the boundary-integral form is blind to holes and fixed it), and the
+  moment potential `-min(z, z_p)^2/2` is non-zero above the cut, so the above-level half of a
+  split edge must still be integrated. On the parametric hull's nine stations the section area
+  agrees with `bonjean.section_properties` to **4.8e-16** relative, the symmetric loft leaves a
+  product of inertia of **4.1e-12 m^4**, deck and keel moduli differ (0.1432 vs 0.0940 m^3 at
+  midship) and the plastic-to-elastic ratio is **1.98** against a rectangle's 1.5.
 - **`NURBSSurface.elevate_degree`: tensor-product degree elevation** (`tensorcad/nurbs.py`,
   `docs/nurbs_surface_degree_elevation.md`, `examples/nurbs_surface_degree_elevation/`,
   `tools/nurbs_surface_elevation_figure.py`, 17 tests). The curve operation landed without
