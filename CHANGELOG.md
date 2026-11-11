@@ -7,6 +7,7 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`NURBSCurve.elevate_degree`: standard degree elevation** (`tensorcad/nurbs.py`, `docs/nurbs_degree_elevation.md`, `examples/nurbs_degree_elevation/`, `tests/test_nurbs_degree_elevation.py`). A curve of degree `p` can now be represented as degree `p + times` with the same parametrisation and the same continuity: every knot multiplicity grows by `times`, the new control points are the unique coefficients in that space (Greville collocation, homogeneous for rational curves). Measured on the exact rational circle `R = 2 m`, three 120-degree arcs: degree 2 -> 5 / 7 -> 16 control points, max point deviation **1.11e-15 m**, radius deviation **1.55e-15 m**, arc-length relative error **2.83e-16** against `2 pi R`; a cubic C2 join stays C2 (measured derivative jump 0.0) with the minimal 7-point quartic, where a naive per-span Bezier route would return 9 points at C0. This is the curve-level half of the patch-degree alignment that multi-patch assembly needs; surface degree elevation, trimming and stitching remain out of scope.
 - **`tensorcad.resistance`: the 1966/1978 ITTC method** (`tensorcad/resistance.py`,
   `docs/resistance.md`, `examples/resistance/`, 60 tests). Geometry alone could not say
   what a hull costs to tow; this closes the gap the verification audit listed as medium
