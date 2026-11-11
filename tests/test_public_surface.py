@@ -78,6 +78,20 @@ EXPECTED_API = {
     # statutory rule check (0.23.0+): IS Code 2008 s. 2.2 with per-rule error bars
     "INTACT_STABILITY_CRITERIA", "CriterionCheck", "IntactStabilityAssessment", "StatutoryError",
     "area_under_gz_curve", "check_intact_stability", "gm0_from_gz_curve",
+    # resistance: ITTC-57 + Prohaska + ITTC-78 scaling (0.24.0)
+    "FRICTION_LINES", "ModelShipPrediction", "ProhaskaFit", "Resistance", "ResistanceError",
+    "bare_hull_resistance", "friction_coefficient", "froude_number",
+    "ittc57_friction_coefficient", "mesh_bare_hull_resistance",
+    "prandtl_schlichting_friction_coefficient", "prohaska_fit", "reynolds_number",
+    "schoenherr_friction_coefficient", "ship_from_model_test",
+    # exported since the offset/NURBS merges but never added to this pinned list: the
+    # contract test had been red at HEAD for exactly these two names.
+    "OffsetTable", "apply_transform",
+    # parametric-hull / cross-section names exported since those merges but absent from
+    # this pinned list: the contract test was red at HEAD for these eight as well.
+    "CrossSection", "ParametricHull", "build_parametric_hull", "loft_nurbs_surface",
+    "mesh_quality_report", "suboff_cross_sections", "tessellate_surface",
+    "wigley_cross_sections",
 }
 
 

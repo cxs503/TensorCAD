@@ -6,7 +6,31 @@ semantic versioning.
 
 ## Unreleased
 
+### Added
+- **`tensorcad.resistance`: the 1966/1978 ITTC method** (`tensorcad/resistance.py`,
+  `docs/resistance.md`, `examples/resistance/`, 60 tests). Geometry alone could not say
+  what a hull costs to tow; this closes the gap the verification audit listed as medium
+  priority ("no resistance modules -- ITTC-57 + form factor first"). Three flat-plate
+  lines (`ittc57`, `schoenherr` solved by bisection, `prandtl-schlichting`), the Prohaska
+  form-factor fit with residuals and standard errors, the resistance components
+  (`R_F`, `(1+k)R_F`, `R_R`, `R_T`, `P_E`) for one body at one speed, and model-to-ship
+  Froude scaling with the ITTC-78 two-dimensional split
+  `CT_s = (1+k) CF_s + CR + CA`. Residual resistance and correlation allowance are
+  caller inputs with no invented defaults. Measured: ITTC-57 within **2.24 %** of
+  Schoenherr and **2.55 %** of Prandtl-Schlichting for `Re >= 1e7` (the divergence below
+  `1e6` -- 16.1 % at `1e5` -- is asserted, not hidden), mesh wetted area within
+  **0.0016 %** of the analytic flank integral at 161x43, Prohaska recovering an injected
+  `1 + k = 1.15` to round-off, and a 10 m -> 100 m Wigley scaling where the ship is
+  **615.5x** the model, not the naive `lambda^3 = 1000x`. Documented trap: a closed
+  hull's deck patch is 30.9 % of its shell area, so shell area used as wetted surface
+  inflates friction by 44.8 %.
+
 ### Fixed
+- **The pinned public-surface contract test had been red at HEAD for ten names**
+  (`tests/test_public_surface.py`): `OffsetTable`, `apply_transform` and the eight
+  parametric-hull/cross-section exports were in `tensorcad.__all__` but missing from
+  `EXPECTED_API`. The list now matches the package, so the contract test can catch the
+  next drift instead of failing for a pre-existing one.
 - **A waterline plane that contains mesh edges is traced once, not twice**
   (`tensorcad/stability.py::_plane_segments`; `docs/freeboard_seam.md`). The seam where
   `gz.with_freeboard`'s vertical band meets the hull is a ring of edges *in* the cutting
