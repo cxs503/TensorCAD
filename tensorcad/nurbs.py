@@ -318,6 +318,136 @@ def spline_point(
     )
 
 
+def _dehomogenise(point: Sequence[float]) -> tuple[float, float, float]:
+    """3-D point of a homogeneous control point; a zero weight is an error, not a NaN."""
+    weight = point[3]
+    if weight == 0.0:
+        raise NURBSError("degree elevation produced a zero weight")
+    return (point[0] / weight, point[1] / weight, point[2] / weight)
+
+
+def _uniform_weight(points: Sequence[Sequence[float]]) -> float | None:
+    """The common weight if every homogeneous point carries the same one, else ``None``.
+
+    A net whose weights are all equal represents the same point set as the
+    non-rational net with unit weights (scaling every homogeneous coordinate by a
+    constant leaves the rational quotient unchanged). The elevation solve returns
+    that constant as ``w +/- 4e-16``, which would silently switch the result onto
+    the rational evaluation path -- so the caller restores the exact constant.
+    """
+    first = points[0][3]
+    return first if all(point[3] == first for point in points) else None
+
+
+def _rescale_to_uniform(points: Sequence[Sequence[float]], weight: float) -> list[list[float]]:
+    """Rescale homogeneous points so every one carries exactly ``weight``.
+
+    Homogeneous scaling (all four components by a common factor) does not move the
+    point, so this restores the exact constant that the solve returned as
+    ``weight +/- 4e-16`` without touching the geometry.
+    """
+    out: list[list[float]] = []
+    for point in points:
+        factor = weight / point[3]
+        out.append([value * factor for value in point])
+    return out
+
+
+def _elevate_homogeneous(
+    points: Sequence[Sequence[float]],
+    degree: int,
+    knots: Sequence[float],
+    times: int,
+    *,
+    label: str = "curve",
+) -> tuple[int, tuple[float, ...], tuple[tuple[float, ...], ...]]:
+    """Degree-elevate a **homogeneous** control polygon; shared by curves and surfaces.
+
+    ``points`` are 4-component homogeneous control points ``(w x, w y, w z, w)``.
+    The returned net spans the same geometry in the degree ``degree + times``
+    spline space, with every knot multiplicity grown by ``times`` (ISO 10303-42
+    / Piegl & Tiller A5.9), so the original continuity is preserved and the
+    representation grows by the minimum ``times * (#spans)`` points.
+
+    Working in homogeneous coordinates is what makes this exact for rational
+    geometry: elevating the 3-D net and carrying the old weights across is a
+    different, generally wrong curve. Collocating at the Greville abscissae of
+    the new knot vector gives a banded, totally positive system, so the
+    elimination needs no pivoting.
+    """
+    low = knots[degree]
+    high = knots[len(points)]
+    target = degree + times
+    unique = sorted({value for value in knots if low < value < high})
+    multiplicity = {value: sum(1 for knot in knots if knot == value) for value in unique}
+    disconnected = [value for value in unique if multiplicity[value] > degree]
+    if disconnected:
+        # A multiplicity of degree + 1 is not a C0 join but a break: the two sides
+        # share no control point, so the single-patch collocation matrix is
+        # singular by construction. Refuse with the fix instead of a generic
+        # singular-matrix message.
+        raise NURBSError(
+            f"degree elevation needs a C0-or-better {label}; knot "
+            f"{disconnected[0]!r} has multiplicity {multiplicity[disconnected[0]]} "
+            f"> degree {degree}, so the {label} is discontinuous there -- split it "
+            "at that knot first"
+        )
+
+    elevated_knots: list[float] = [low] * (target + 1)
+    for value in unique:
+        elevated_knots.extend([value] * (multiplicity[value] + times))
+    elevated_knots.extend([high] * (target + 1))
+    count = len(elevated_knots) - target - 1
+    greville = [sum(elevated_knots[i + 1 : i + target + 1]) / target for i in range(count)]
+
+    values = [spline_point(points, degree, knots, u) for u in greville]
+
+    matrix = [[0.0] * count for _ in range(count)]
+    for row, u in enumerate(greville):
+        span = find_span(elevated_knots, target, u)
+        basis = _basis_values(span, u, target, elevated_knots)
+        for offset, value in enumerate(basis):
+            matrix[row][span - target + offset] = value
+
+    # Solve the 4 homogeneous components with one elimination: same matrix, four
+    # right-hand sides. The collocation matrix at Greville points is totally
+    # positive, hence every leading principal minor is positive -- no pivoting.
+    solutions = [[values[row][axis] for row in range(count)] for axis in range(4)]
+    for pivot in range(count):
+        diagonal = matrix[pivot][pivot]
+        if diagonal == 0.0:
+            raise NURBSError(
+                "degree elevation failed: the Greville collocation matrix is singular"
+            )
+        for row in range(pivot + 1, count):
+            factor = matrix[row][pivot]
+            if factor == 0.0:
+                continue
+            factor /= diagonal
+            for column in range(pivot, count):
+                matrix[row][column] -= factor * matrix[pivot][column]
+            for axis in range(4):
+                solutions[axis][row] -= factor * solutions[axis][pivot]
+    coefficients = [[0.0] * count for _ in range(4)]
+    for pivot in range(count - 1, -1, -1):
+        for axis in range(4):
+            total = solutions[axis][pivot]
+            for column in range(pivot + 1, count):
+                total -= matrix[pivot][column] * coefficients[axis][column]
+            coefficients[axis][pivot] = total / matrix[pivot][pivot]
+
+    net = tuple(
+        (
+            coefficients[0][index],
+            coefficients[1][index],
+            coefficients[2][index],
+            coefficients[3][index],
+        )
+        for index in range(count)
+    )
+    return target, tuple(elevated_knots), net
+
+
 def spline_derivatives(
     points: Sequence[Sequence[float]],
     degree: int,
@@ -617,90 +747,22 @@ class NURBSCurve:
         if times == 0:
             return self
 
-        degree = self.degree
-        target = degree + times
-        low, high = self.domain
-        unique = sorted({value for value in self.knots if low < value < high})
-        multiplicity = {value: sum(1 for knot in self.knots if knot == value) for value in unique}
-        disconnected = [value for value in unique if multiplicity[value] > degree]
-        if disconnected:
-            # A multiplicity of degree + 1 is not a C0 join but a break: the two sides
-            # share no control point, so the single-patch collocation matrix is
-            # singular by construction. Refuse with the fix instead of a generic
-            # singular-matrix message.
-            raise NURBSError(
-                "degree elevation needs a C0-or-better curve; knot "
-                f"{disconnected[0]!r} has multiplicity {multiplicity[disconnected[0]]} "
-                f"> degree {degree}, so the curve is discontinuous there -- split it "
-                "at that knot first"
-            )
-
-        knots: list[float] = [low] * (target + 1)
-        for value in unique:
-            knots.extend([value] * (multiplicity[value] + times))
-        knots.extend([high] * (target + 1))
-        count = len(knots) - target - 1
-        greville = [sum(knots[i + 1 : i + target + 1]) / target for i in range(count)]
-
-        homogeneous = [
+        homogeneous = tuple(
             (weight * point[0], weight * point[1], weight * point[2], weight)
             for point, weight in zip(self.control_points, self.weights, strict=True)
-        ]
-        values = [spline_point(homogeneous, degree, self.knots, u) for u in greville]
-
-        matrix = [[0.0] * count for _ in range(count)]
-        for row, u in enumerate(greville):
-            span = find_span(knots, target, u)
-            basis = _basis_values(span, u, target, knots)
-            for offset, value in enumerate(basis):
-                matrix[row][span - target + offset] = value
-
-        # Solve the 4 homogeneous components with one elimination: same matrix, four
-        # right-hand sides. The collocation matrix at Greville points is totally
-        # positive, hence every leading principal minor is positive -- no pivoting.
-        solutions = [[values[row][axis] for row in range(count)] for axis in range(4)]
-        for pivot in range(count):
-            diagonal = matrix[pivot][pivot]
-            if diagonal == 0.0:
-                raise NURBSError(
-                    "degree elevation failed: the Greville collocation matrix is singular"
-                )
-            for row in range(pivot + 1, count):
-                factor = matrix[row][pivot]
-                if factor == 0.0:
-                    continue
-                factor /= diagonal
-                for column in range(pivot, count):
-                    matrix[row][column] -= factor * matrix[pivot][column]
-                for axis in range(4):
-                    solutions[axis][row] -= factor * solutions[axis][pivot]
-        coefficients = [[0.0] * count for _ in range(4)]
-        for pivot in range(count - 1, -1, -1):
-            for axis in range(4):
-                total = solutions[axis][pivot]
-                for column in range(pivot + 1, count):
-                    total -= matrix[pivot][column] * coefficients[axis][column]
-                coefficients[axis][pivot] = total / matrix[pivot][pivot]
-
-        points: list[Vec3] = []
-        weights: list[float] = []
-        for index in range(count):
-            weight = coefficients[3][index]
-            if weight == 0.0:
-                raise NURBSError("degree elevation produced a zero weight")
-            points.append(
-                (
-                    coefficients[0][index] / weight,
-                    coefficients[1][index] / weight,
-                    coefficients[2][index] / weight,
-                )
-            )
-            weights.append(weight)
+        )
+        target, knots, net = _elevate_homogeneous(homogeneous, self.degree, self.knots, times)
+        uniform = _uniform_weight(homogeneous)
+        weights = (
+            tuple(point[3] for point in net)
+            if uniform is None
+            else tuple(uniform for _ in net)
+        )
         return NURBSCurve(
             degree=target,
-            knots=tuple(knots),
-            control_points=tuple(points),
-            weights=tuple(weights),
+            knots=knots,
+            control_points=tuple(_dehomogenise(point) for point in net),
+            weights=weights,
         )
 
     # -- continuity ---------------------------------------------------------
@@ -983,6 +1045,90 @@ class NURBSSurface:
 
     def evaluate(self, u: float, v: float) -> Vec3:
         return self.derivatives(u, v, 0)[(0, 0)]
+
+    def elevate_degree(self, times_u: int = 0, times_v: int = 0) -> NURBSSurface:
+        """A surface of degree ``degree + (times_u, times_v)`` tracing the same patch.
+
+        The tensor-product counterpart of :meth:`NURBSCurve.elevate_degree`: each
+        fixed-``v`` column is a curve in ``u`` and each fixed-``u`` row is a curve
+        in ``v``, so the patch is elevated one direction at a time. Because the
+        operation is linear in homogeneous control points, elevating ``u`` then
+        ``v`` equals elevating ``v`` then ``u`` (asserted in
+        ``tests/test_nurbs_surface_degree_elevation.py``).
+
+        This is the surface-level half of patch-degree alignment: patches of an
+        assembly that disagree in degree cannot share one edge representation
+        without it. Trimming and stitching remain outside this module.
+
+        Everything the curve version promises carries over per direction: the
+        surfaces agree to round-off at the same ``(u, v)``, an interior knot of
+        multiplicity ``m`` becomes ``m + times`` (so a ``C1`` join stays ``C1``),
+        the control net grows by the minimum ``times * (#spans)`` points, and the
+        solve happens in homogeneous coordinates, so rational patches (the exact
+        cylinder and sphere anchors) stay exact.
+        """
+        for name, value in (("times_u", times_u), ("times_v", times_v)):
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise NURBSError(f"{name} must be a non-negative integer, got {value!r}")
+            if value < 0:
+                raise NURBSError(f"{name} must be a non-negative integer, got {value!r}")
+        if times_u == 0 and times_v == 0:
+            return self
+
+        width = len(self.control_net[0])
+        net = [
+            [
+                (
+                    self.weights[i][j] * self.control_net[i][j][0],
+                    self.weights[i][j] * self.control_net[i][j][1],
+                    self.weights[i][j] * self.control_net[i][j][2],
+                    self.weights[i][j],
+                )
+                for j in range(width)
+            ]
+            for i in range(len(self.control_net))
+        ]
+        degree = [self.degree[0], self.degree[1]]
+        knots = [self.knots[0], self.knots[1]]
+        uniform = _uniform_weight([point for row in net for point in row])
+
+        if times_u:
+            columns = [[net[i][j] for i in range(len(net))] for j in range(width)]
+            elevated = [
+                _elevate_homogeneous(column, degree[0], knots[0], times_u, label="u-column")
+                for column in columns
+            ]
+            degree[0] = elevated[0][0]
+            knots[0] = elevated[0][1]
+            net = [
+                [elevated[j][2][i] for j in range(width)] for i in range(len(elevated[0][2]))
+            ]
+            if uniform is not None:
+                net = [_rescale_to_uniform(row, uniform) for row in net]
+
+        if times_v:
+            rows = [
+                _elevate_homogeneous(row, degree[1], knots[1], times_v, label="v-row")
+                for row in net
+            ]
+            degree[1] = rows[0][0]
+            knots[1] = rows[0][1]
+            net = [list(row[2]) for row in rows]
+            if uniform is not None:
+                net = [_rescale_to_uniform(row, uniform) for row in net]
+
+        control_net = tuple(tuple(_dehomogenise(point) for point in row) for row in net)
+        weights = (
+            tuple(tuple(point[3] for point in row) for row in net)
+            if uniform is None
+            else tuple(tuple(uniform for _ in row) for row in net)
+        )
+        return NURBSSurface(
+            degree=(degree[0], degree[1]),
+            knots=(knots[0], knots[1]),
+            control_net=control_net,
+            weights=weights,
+        )
 
     def jacobian(self, u: float, v: float) -> tuple[Vec3, Vec3, Vec3]:
         """``(S_u, S_v, S_u x S_v)``; the third entry is the normal density vector."""
