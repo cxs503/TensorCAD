@@ -7,6 +7,21 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`NURBSSurface.elevate_degree`: tensor-product degree elevation** (`tensorcad/nurbs.py`,
+  `docs/nurbs_surface_degree_elevation.md`, `examples/nurbs_surface_degree_elevation/`,
+  `tools/nurbs_surface_elevation_figure.py`, 17 tests). The curve operation landed without
+  its surface half, so a degree-`(2,1)` rational cylinder could not be expressed in the
+  degree-`(3,3)` space of a bicubic neighbour even though both describe the same patch.
+  Each fixed-`v` column is now elevated in `u` and each fixed-`u` row in `v`, through the
+  same homogeneous collocation core that `NURBSCurve.elevate_degree` was refactored onto.
+  Measured: point deviation **3.56e-15 m** worst case, cylinder radius error **1.33e-15 m**,
+  area errors **4.66e-15** against `2 pi R H` and **1.33e-15** against `4 pi R^2`, the two
+  directions commuting to **2.22e-16 m**, a non-rational bicubic patch staying
+  non-rational, and growth exactly `n + times * spans`. Documented trap: elevating the
+  3-D net without the weights loses **0.3425 m** of radius (25.0 % of `R`) and **14.1 %**
+  of the lateral area; a second one found here is that the solve returns uniform weights
+  as `1 +/- 4e-16`, which silently flipped `NURBSSurface.rational` on, so the homogeneous
+  net is rescaled to the exact constant. Trimming and stitching remain out of scope.
 - **`NURBSCurve.elevate_degree`: standard degree elevation** (`tensorcad/nurbs.py`, `docs/nurbs_degree_elevation.md`, `examples/nurbs_degree_elevation/`, `tests/test_nurbs_degree_elevation.py`). A curve of degree `p` can now be represented as degree `p + times` with the same parametrisation and the same continuity: every knot multiplicity grows by `times`, the new control points are the unique coefficients in that space (Greville collocation, homogeneous for rational curves). Measured on the exact rational circle `R = 2 m`, three 120-degree arcs: degree 2 -> 5 / 7 -> 16 control points, max point deviation **1.11e-15 m**, radius deviation **1.55e-15 m**, arc-length relative error **2.83e-16** against `2 pi R`; a cubic C2 join stays C2 (measured derivative jump 0.0) with the minimal 7-point quartic, where a naive per-span Bezier route would return 9 points at C0. This is the curve-level half of the patch-degree alignment that multi-patch assembly needs; surface degree elevation, trimming and stitching remain out of scope.
 - **`tensorcad.resistance`: the 1966/1978 ITTC method** (`tensorcad/resistance.py`,
   `docs/resistance.md`, `examples/resistance/`, 60 tests). Geometry alone could not say
