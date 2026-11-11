@@ -150,13 +150,13 @@ def main():
         model = generate_series60(params)
         
         # Initial stability
-        stab = initial_stability(model.mesh, kg=KG, waterline_z=T)
+        stab = initial_stability(model.mesh, kg=KG, waterline_z=0.0)
         gm = stab.gm_transverse
         bm = stab.bm_transverse
         
         # GZ curve
         curve = righting_arm_curve(
-            model.mesh, kg=KG, waterline_z=T, heels_deg=HEELS_DEG
+            model.mesh, kg=KG, waterline_z=0.0, heels_deg=HEELS_DEG
         )
         
         # Verification
