@@ -170,6 +170,17 @@ Two things *are* measured rather than assumed:
 * **No trimming/patching of the solved profile.** Producing a wire or a face from the
   solved points is the next step, not this one.
 
+## Degenerate starts and the status contract (m16386 review)
+
+Two defects outside the acceptance surface above were found by probing the module,
+fixed, and pinned in `tests/test_sketch_robustness.py`: a sketch started with two
+coincident points (the natural programmatic start) raised a bare `ZeroDivisionError`
+from the length row's singular derivative, and `status` reported `fully_constrained`
+for coordinates that miss a dimension when the solve stalled above `tol`. The solver now
+escapes a singular start deterministically, and `status == "not_converged"` withholds the
+structural verdict until the residual is inside `tol`.
+Evidence, numbers and limitations: [`docs/sketch_robustness.md`](sketch_robustness.md).
+
 ## Files
 
 | path | what |
