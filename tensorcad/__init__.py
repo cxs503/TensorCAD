@@ -326,6 +326,18 @@ from .parametric_hull import (
     apply_transform,
     mesh_quality_report,
 )
+from .surface_intersection import (
+    CylinderPatch,
+    IntersectionCurve,
+    IntersectionResult,
+    PlanePatch,
+    SpherePatch,
+    SurfaceIntersectionError,
+    cylinder_implicit,
+    plane_implicit,
+    sphere_implicit,
+    surface_surface_intersection,
+)
 __all__ = [
     "FRICTION_LINES",
     "ModelShipPrediction",
@@ -553,6 +565,10 @@ __all__ = [
     "tessellate_surface",
     "apply_transform",
     "mesh_quality_report",
+    "CylinderPatch", "IntersectionCurve", "IntersectionResult", "PlanePatch",
+    "SpherePatch", "SurfaceIntersectionError", "cylinder_implicit", "plane_implicit",
+    "sphere_implicit", "surface_surface_intersection",
+    # surface--surface intersection (0.25.0): parameter-space marching for GAP-CAD-002
 ]
 
 __version__ = "0.23.0"
