@@ -6,6 +6,30 @@ semantic versioning.
 
 ## Unreleased
 
+### Added
+- **`tensorcad.section_gz`: an exact righting-arm oracle for prismatic sections**
+  (`docs/section_gz_exact.md`, `examples/section_gz_exact/`, 18 tests). Large-angle `GZ(phi)`
+  had two exact references and both were special: the wall-sided box (exact only while the
+  waterline stays on vertical sides) and the circular "log" at half submergence, which is
+  *degenerate* -- a circle is invariant under the heel rotation, so its arm is a pure sine at
+  every draft and the existing test could only sample heels that are symmetry axes of the
+  polygon. A prism needs no discretisation at all (volume is area x length, the buoyancy centre
+  is the section centroid), so the arm is exact for any convex polygon section (half-plane clip
+  plus Green's theorem) and, in closed form, for an elliptical section (affine map to the unit
+  disk). `prism_mesh` extrudes a section into a closed outward-oriented prism so the mesh
+  integrator can be run on the same body. Measured: the V-section prism's `GZ` agrees with
+  `righting_arm_curve` at **4.1e-15 m** over 19 heels from 0 to 90 deg (including 26.565 deg,
+  where the waterline sweeps across a section vertex), a hexagon rotated 17 deg -- no sampled
+  heel a symmetry axis -- agrees to **3.3e-16 m**, the box reproduces the wall-sided formula to
+  **1.1e-16 m** below its 26.57 deg limit and departs from it by **0.356 m** above (so the
+  check is not vacuous), and an inscribed polygon mesh converges to the exact 2:1 ellipse at
+  measured order **2.02 / 2.05 / 2.05 / 1.99** (32 chords: 0.45 % of the arm; 256 chords:
+  0.0097 %). `dGZ/dphi(0)` on the ellipse matches the waterplane-moment `GM` to 1e-16 m/rad.
+  The same run shows why the new reference earns its place: the wall-sided formula with this
+  section's own `GM` and `BM` is **65.7 % wrong at 30 deg** for the 2:1 ellipse. Concave
+  sections are refused (two waterline levels at one displacement), as are waterlines outside
+  the section and non-finite input.
+
 ### Fixed
 - **Examples start in a clean checkout** (`docs/examples_bootstrap_m16106.md`,
   `tests/test_examples_bootstrap.py`, 69 cases). 21 of the 48 `examples/*/run_*.py` entry
