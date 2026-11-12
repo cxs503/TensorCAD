@@ -66,6 +66,7 @@ __all__ = [
     "RepairResult",
     "measure_mesh",
     "fill_holes",
+    "boundary_loops",
     "manifoldize",
     "orient_consistently",
     "drop_duplicate_faces",
@@ -490,6 +491,16 @@ def _boundary_loops(mesh: Mesh) -> tuple[tuple[int, ...], ...]:
     return tuple(loops)
 
 
+def boundary_loops(mesh: Mesh) -> tuple[tuple[int, ...], ...]:
+    """Public view of the directed boundary walk :func:`fill_holes` is built on.
+
+    Each loop is returned in the direction the *shell* walks it, so a cap patch has to
+    traverse it backwards to agree with its neighbours. Raises :class:`MeshRepairError` when
+    a boundary vertex is walked by more than one loop or a walk dead-ends.
+    """
+    return _boundary_loops(mesh)
+
+
 def _newell_normal(points: Sequence[Vec3]) -> Vec3:
     nx = ny = nz = 0.0
     count = len(points)
@@ -803,6 +814,7 @@ def repair_mesh(
     weld_tolerance: float = DEFAULT_WELD_TOLERANCE,
     max_hole_edges: int = DEFAULT_MAX_HOLE_EDGES,
     self_intersection_limit: int = 16,
+    heal_self_intersections: bool = False,
 ) -> RepairResult:
     """Run the repair chain and accept it only if the result is measurably better.
 
@@ -810,8 +822,10 @@ def repair_mesh(
 
     * the result is closed (no boundary edge), edge-manifold, consistently wound, and has
       no coincident facets;
-    * the result has no self intersection (the defect this module cannot remove, so a mesh
-      that arrives with one is refused rather than quietly passed on);
+    * the result has no self intersection. This module does not remove one by itself, so a
+      mesh that arrives with one is refused rather than quietly passed on -- unless
+      ``heal_self_intersections=True`` is passed, in which case :mod:`tensorcad.detangle`
+      excavates the fold and caps the hole first and the refusal only stands if that fails;
     * the enclosed volume -- when a ``reference_volume`` is supplied, or when the input was
       already closed and its own volume can serve as the reference -- moved by no more than
       ``volume_tolerance``; likewise the area against ``reference_area``.
@@ -878,6 +892,31 @@ def repair_mesh(
             tolerated_area_change=area_tolerance,
             notes=tuple(notes),
         )
+
+    if heal_self_intersections and len(current.faces):
+        probe = measure_mesh(current, self_intersection_limit=self_intersection_limit)
+        if probe.self_intersections:
+            from .detangle import heal_self_intersections as _heal_self_intersections
+
+            healed = _heal_self_intersections(
+                current,
+                self_intersection_limit=max(self_intersection_limit, 64),
+                reference_volume=reference_volume,
+            )
+            notes.extend(f"heal: {note}" for note in healed.notes)
+            if healed.healed:
+                steps.append(
+                    RepairStep(
+                        "heal_self_intersections",
+                        healed.faces_removed,
+                        f"{probe.self_intersections} penetrating pair(s) removed by cutting "
+                        f"{healed.faces_removed} facet(s) in {healed.rings_used} ring(s) and "
+                        f"capping {healed.holes.filled if healed.holes else 0} loop(s)",
+                    )
+                )
+                current = healed.mesh
+            else:
+                notes.append(f"self-intersection heal refused: {healed.reason}")
 
     after = measure_mesh(current, self_intersection_limit=self_intersection_limit)
 
