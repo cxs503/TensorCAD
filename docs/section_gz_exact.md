@@ -126,6 +126,20 @@ was built from.
 | `examples/section_gz_exact/run_example.py` | the run that produced every number here |
 | `examples/section_gz_exact/outputs/` | `results.json`, `report.md`, `plot.png` |
 
+## 7. Independent re-check (m16430)
+
+A verifier seat re-derived every arm above with a route that shares no algorithm with this
+module -- rotated-conic slice quadrature for the ellipse, exact slice integration for polygons,
+no clipping and no Green's theorem (`tests/section_gz_oracle.py`,
+`examples/section_gz_independent/`). The closed form and the independent route agree to
+**2.7e-13 m** over 0-90 deg, the polygon oracle to **4.4e-16 m**, the wall-sided formula is
+reproduced to **2.2e-16 m** from its published transcription, and the chord convergence is
+reproduced at second order against the independent reference. The review also found and fixed
+one defect: `ellipse_section` did not return an *inscribed* polygon for side counts without a
+keel vertex (`sides = 18` left the ellipse by 3.0 %); the sampling now starts at `-pi/2`, which
+leaves the 16/32/64/128/256 vertex sets unchanged. Details and the claim-by-claim audit:
+`docs/section_gz_independent_review.md`.
+
 ## 7. Checks in the run
 
 | check | result | value |
