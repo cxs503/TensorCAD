@@ -1,0 +1,150 @@
+{
+  "boxes": [
+    {
+      "area": 5.880599999999999,
+      "area_analytic": 5.880599999999999,
+      "area_error": 0.0,
+      "face_reduction": 0.875,
+      "max_thickness_argument": 0.03,
+      "panels": 6,
+      "sheet_faces": 12,
+      "source_faces": 96,
+      "thickness": 0.01,
+      "volume": 0.9702990000000002,
+      "volume_analytic": 0.970299,
+      "volume_error": 2.220446049250313e-16,
+      "watertight": true
+    },
+    {
+      "area": 5.762400000000001,
+      "area_analytic": 5.7623999999999995,
+      "area_error": 2.220446049250313e-16,
+      "face_reduction": 0.875,
+      "max_thickness_argument": 0.06,
+      "panels": 6,
+      "sheet_faces": 12,
+      "source_faces": 96,
+      "thickness": 0.02,
+      "volume": 0.9411920000000004,
+      "volume_analytic": 0.9411919999999999,
+      "volume_error": 4.440892098500626e-16,
+      "watertight": true
+    },
+    {
+      "area": 5.415000000000003,
+      "area_analytic": 5.414999999999999,
+      "area_error": 6.661338147750939e-16,
+      "face_reduction": 0.875,
+      "max_thickness_argument": 0.15000000000000002,
+      "panels": 6,
+      "sheet_faces": 12,
+      "source_faces": 96,
+      "thickness": 0.05,
+      "volume": 0.8573750000000007,
+      "volume_analytic": 0.8573749999999999,
+      "volume_error": 8.881784197001252e-16,
+      "watertight": true
+    },
+    {
+      "area": 4.860000000000008,
+      "area_analytic": 4.86,
+      "area_error": 1.5543122344752192e-15,
+      "face_reduction": 0.875,
+      "max_thickness_argument": 0.30000000000000004,
+      "panels": 6,
+      "sheet_faces": 12,
+      "source_faces": 96,
+      "thickness": 0.1,
+      "volume": 0.7290000000000019,
+      "volume_analytic": 0.7290000000000001,
+      "volume_error": 2.4424906541753444e-15,
+      "watertight": true
+    }
+  ],
+  "defeaturing": {
+    "area_after": 1.0,
+    "area_before": 0.999998000001,
+    "faces_after": 2,
+    "faces_before": 8,
+    "gap": 1e-06,
+    "panels_after": 1,
+    "panels_before": 4,
+    "reduction": 0.75
+  },
+  "plates": [
+    {
+      "area": 1.0,
+      "area_analytic": 1.0,
+      "area_error": 0.0,
+      "coverage": 0.9803921568627453,
+      "face_reduction": 0.9973958333333334,
+      "panels": 1,
+      "sheet_faces": 2,
+      "source_faces": 768,
+      "thickness": 0.01,
+      "watertight": false
+    },
+    {
+      "area": 1.0,
+      "area_analytic": 1.0,
+      "area_error": 0.0,
+      "coverage": 0.9615384615384619,
+      "face_reduction": 0.9973958333333334,
+      "panels": 1,
+      "sheet_faces": 2,
+      "source_faces": 768,
+      "thickness": 0.02,
+      "watertight": false
+    },
+    {
+      "area": 1.0,
+      "area_analytic": 1.0,
+      "area_error": 0.0,
+      "coverage": 0.9090909090909083,
+      "face_reduction": 0.9973958333333334,
+      "panels": 1,
+      "sheet_faces": 2,
+      "source_faces": 768,
+      "thickness": 0.05,
+      "watertight": false
+    }
+  ],
+  "prisms": [
+    {
+      "area": 20.37099595797908,
+      "area_error": -2.220446049250313e-16,
+      "area_oracle": 20.370995957979083,
+      "panels": 8,
+      "sides": 6,
+      "thickness": 0.02,
+      "volume": 6.722428666133099,
+      "volume_error": 2.220446049250313e-16,
+      "volume_oracle": 6.722428666133098,
+      "watertight": true
+    },
+    {
+      "area": 19.758369587341978,
+      "area_error": 4.440892098500626e-16,
+      "area_oracle": 19.758369587341967,
+      "panels": 8,
+      "sides": 6,
+      "thickness": 0.05,
+      "volume": 6.421470115886144,
+      "volume_error": 4.440892098500626e-16,
+      "volume_oracle": 6.42147011588614,
+      "watertight": true
+    },
+    {
+      "area": 18.90842425212552,
+      "area_error": 0.0,
+      "area_oracle": 18.90842425212552,
+      "panels": 14,
+      "sides": 12,
+      "thickness": 0.02,
+      "volume": 6.239780003201421,
+      "volume_error": 0.0,
+      "volume_oracle": 6.239780003201421,
+      "watertight": true
+    }
+  ]
+}
