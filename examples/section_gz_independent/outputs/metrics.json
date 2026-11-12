@@ -1,0 +1,659 @@
+{
+  "mission": "m16430",
+  "scope": "independent verification of tensorcad.section_gz (merged m16358)",
+  "ellipse": {
+    "name": "2:1 ellipse a=2 m b=1 m, draft 1.2 m, KG 0.8 m, L=4 m",
+    "max_abs_error_m": 2.6911806116913795e-13,
+    "max_rel_error": 6.919241069842317e-13,
+    "max_abs_error_both_heels_m": 2.6911806116913795e-13,
+    "symmetry_residual_m": 7.771561172376096e-16,
+    "gm_published_m": 1.1558433455319073,
+    "gm_waterplane_independent_m": 1.1558433455315373,
+    "gm_integrated_independent_m": 1.1558433455315373,
+    "gm_slope_library_m": 1.155843345531907,
+    "gm_slope_independent_m": 1.1556831196156556,
+    "kb_library_m": 0.6813855514893641,
+    "kb_independent_m": 0.6813855514890959,
+    "gz_max_published_m": 0.4436855620569249,
+    "gz_max_published_heel_deg": 45.0,
+    "gz_max_independent_m": 0.44368556205717713,
+    "gz_max_independent_heel_deg": 45.0,
+    "gz_max_refined_m": 0.4444428811735668,
+    "gz_max_refined_heel_deg": 43.0,
+    "vanishing_angle_library_deg": 31.792423737863558,
+    "vanishing_angle_published_deg": 31.792423737863558,
+    "vanishing_angle_independent_deg": 31.79242373790072,
+    "table": [
+      {
+        "heel_deg": 0.0,
+        "gz_library": 0.0,
+        "gz_independent": -0.0,
+        "diff": 0.0
+      },
+      {
+        "heel_deg": 5.0,
+        "gz_library": 0.09949163076519703,
+        "gz_independent": 0.09949163076526578,
+        "diff": -6.875056079991282e-14
+      },
+      {
+        "heel_deg": 10.0,
+        "gz_library": 0.19126170514860086,
+        "gz_independent": 0.1912617051487332,
+        "diff": -1.3233858453531866e-13
+      },
+      {
+        "heel_deg": 15.0,
+        "gz_library": 0.26981683395254263,
+        "gz_independent": 0.2698168339527265,
+        "diff": -1.8385293287792592e-13
+      },
+      {
+        "heel_deg": 20.0,
+        "gz_library": 0.3327101751848823,
+        "gz_independent": 0.332710175185106,
+        "diff": -2.2370993946196904e-13
+      },
+      {
+        "heel_deg": 25.0,
+        "gz_library": 0.37994422283194057,
+        "gz_independent": 0.3799442228321895,
+        "diff": -2.489120021209601e-13
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_library": 0.4128731773871282,
+        "gz_independent": 0.4128731773873922,
+        "diff": -2.6401103525586223e-13
+      },
+      {
+        "heel_deg": 35.0,
+        "gz_library": 0.4333161226929667,
+        "gz_independent": 0.43331612269323583,
+        "diff": -2.6911806116913795e-13
+      },
+      {
+        "heel_deg": 40.0,
+        "gz_library": 0.44306426544364386,
+        "gz_independent": 0.4430642654439094,
+        "diff": -2.6556534749033744e-13
+      },
+      {
+        "heel_deg": 45.0,
+        "gz_library": 0.4436855620569249,
+        "gz_independent": 0.44368556205717713,
+        "diff": -2.5224267119483557e-13
+      },
+      {
+        "heel_deg": 50.0,
+        "gz_library": 0.43648926459811754,
+        "gz_independent": 0.43648926459835624,
+        "diff": -2.3869795029440866e-13
+      },
+      {
+        "heel_deg": 55.0,
+        "gz_library": 0.42255684025603935,
+        "gz_independent": 0.4225568402562567,
+        "diff": -2.1738166822160565e-13
+      },
+      {
+        "heel_deg": 60.0,
+        "gz_library": 0.4027912261272413,
+        "gz_independent": 0.40279122612743423,
+        "diff": -1.929567616798522e-13
+      },
+      {
+        "heel_deg": 65.0,
+        "gz_library": 0.3779642832183593,
+        "gz_independent": 0.3779642832185247,
+        "diff": -1.6542323066914832e-13
+      },
+      {
+        "heel_deg": 70.0,
+        "gz_library": 0.34875603038980374,
+        "gz_independent": 0.3487560303899383,
+        "diff": -1.3455903058456897e-13
+      },
+      {
+        "heel_deg": 75.0,
+        "gz_library": 0.31578500565644807,
+        "gz_independent": 0.31578500565655065,
+        "diff": -1.0258460747536446e-13
+      },
+      {
+        "heel_deg": 80.0,
+        "gz_library": 0.279631113026129,
+        "gz_independent": 0.27963111302619736,
+        "diff": -6.838973831690964e-14
+      },
+      {
+        "heel_deg": 85.0,
+        "gz_library": 0.24085276160350422,
+        "gz_independent": 0.24085276160353974,
+        "diff": -3.552713678800501e-14
+      },
+      {
+        "heel_deg": 90.0,
+        "gz_library": 0.19999999999999996,
+        "gz_independent": 0.19999999999999996,
+        "diff": 0.0
+      }
+    ],
+    "convergence": [
+      {
+        "sides": 16,
+        "max_abs_error_m": 0.005854042762636347,
+        "max_rel_error": 0.018837821534886036
+      },
+      {
+        "sides": 32,
+        "max_abs_error_m": 0.001442970965934487,
+        "max_rel_error": 0.004501515370149347,
+        "observed_order": 2.0203910127824622
+      },
+      {
+        "sides": 64,
+        "max_abs_error_m": 0.00034904491759302214,
+        "max_rel_error": 0.0010235597619328272,
+        "observed_order": 2.047557661810954
+      },
+      {
+        "sides": 128,
+        "max_abs_error_m": 8.433911777971925e-05,
+        "max_rel_error": 0.00022284865619847698,
+        "observed_order": 2.04913886903181
+      },
+      {
+        "sides": 256,
+        "max_abs_error_m": 2.1296659977187993e-05,
+        "max_rel_error": 5.4941907751297966e-05,
+        "observed_order": 1.9855747447920626
+      }
+    ],
+    "wall_sided_relative_error_at_30": 0.8497431162042568
+  },
+  "box": {
+    "name": "box barge B=4 m, T=1 m, D=2 m, KG=0.6 m, L=5 m",
+    "wall_sided_limit_deg": 26.56505117707799,
+    "max_abs_error_vs_independent_m": 4.440892098500626e-16,
+    "max_abs_error_wall_sided_inside_m": 2.220446049250313e-16,
+    "min_abs_error_wall_sided_outside_m": 0.022596292236855442,
+    "transom_heel_deg": 90.0,
+    "gz_at_90_independent_m": 0.4,
+    "table": [
+      {
+        "heel_deg": 0.0,
+        "gz_library": 0.0,
+        "gz_independent": 0.0,
+        "gz_wall_sided": 0.0,
+        "library_minus_wall_sided": 0.0,
+        "independent_minus_wall_sided": 0.0,
+        "wall_sided_region": "inside"
+      },
+      {
+        "heel_deg": 5.0,
+        "gz_library": 0.10793682489532475,
+        "gz_independent": 0.10793682489532466,
+        "gz_wall_sided": 0.1079368248953247,
+        "library_minus_wall_sided": 4.163336342344337e-17,
+        "independent_minus_wall_sided": -4.163336342344337e-17,
+        "wall_sided_region": "inside"
+      },
+      {
+        "heel_deg": 10.0,
+        "gz_library": 0.2177653730811537,
+        "gz_independent": 0.21776537308115365,
+        "gz_wall_sided": 0.21776537308115365,
+        "library_minus_wall_sided": 5.551115123125783e-17,
+        "independent_minus_wall_sided": 0.0,
+        "wall_sided_region": "inside"
+      },
+      {
+        "heel_deg": 15.0,
+        "gz_library": 0.3315984032141344,
+        "gz_independent": 0.33159840321413425,
+        "gz_wall_sided": 0.3315984032141344,
+        "library_minus_wall_sided": 0.0,
+        "independent_minus_wall_sided": -1.6653345369377348e-16,
+        "wall_sided_region": "inside"
+      },
+      {
+        "heel_deg": 20.0,
+        "gz_library": 0.45203076998384095,
+        "gz_independent": 0.4520307699838412,
+        "gz_wall_sided": 0.452030769983841,
+        "library_minus_wall_sided": -5.551115123125783e-17,
+        "independent_minus_wall_sided": 1.6653345369377348e-16,
+        "wall_sided_region": "inside"
+      },
+      {
+        "heel_deg": 25.0,
+        "gz_library": 0.5824927306206201,
+        "gz_independent": 0.5824927306206199,
+        "gz_wall_sided": 0.5824927306206199,
+        "library_minus_wall_sided": 2.220446049250313e-16,
+        "independent_minus_wall_sided": 0.0,
+        "wall_sided_region": "inside"
+      },
+      {
+        "heel_deg": 30.0,
+        "gz_library": 0.7051814855409223,
+        "gz_independent": 0.7051814855409225,
+        "gz_wall_sided": 0.7277777777777777,
+        "library_minus_wall_sided": -0.022596292236855442,
+        "independent_minus_wall_sided": -0.02259629223685522,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 35.0,
+        "gz_library": 0.772828276303061,
+        "gz_independent": 0.7728282763030614,
+        "gz_wall_sided": 0.894890360269346,
+        "library_minus_wall_sided": -0.12206208396628504,
+        "independent_minus_wall_sided": -0.1220620839662846,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 40.0,
+        "gz_library": 0.804819161754903,
+        "gz_independent": 0.8048191617549032,
+        "gz_wall_sided": 1.0944908288322706,
+        "library_minus_wall_sided": -0.2896716670773676,
+        "independent_minus_wall_sided": -0.28967166707736736,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 45.0,
+        "gz_library": 0.8131727983645293,
+        "gz_independent": 0.8131727983645295,
+        "gz_wall_sided": 1.34350288425444,
+        "library_minus_wall_sided": -0.5303300858899108,
+        "independent_minus_wall_sided": -0.5303300858899106,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 50.0,
+        "gz_library": 0.8043591882090151,
+        "gz_independent": 0.8043591882090149,
+        "gz_wall_sided": 1.670118157597627,
+        "library_minus_wall_sided": -0.8657589693886119,
+        "independent_minus_wall_sided": -0.8657589693886121,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 55.0,
+        "gz_library": 0.7822062535785863,
+        "gz_independent": 0.7822062535785868,
+        "gz_wall_sided": 2.1241195357818934,
+        "library_minus_wall_sided": -1.341913282203307,
+        "independent_minus_wall_sided": -1.3419132822033066,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 60.0,
+        "gz_library": 0.7491879392915536,
+        "gz_independent": 0.7491879392915536,
+        "gz_wall_sided": 2.8001488055696835,
+        "library_minus_wall_sided": -2.05096086627813,
+        "independent_minus_wall_sided": -2.05096086627813,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 65.0,
+        "gz_library": 0.7070470569560234,
+        "gz_independent": 0.7070470569560232,
+        "gz_wall_sided": 3.8964648595815725,
+        "library_minus_wall_sided": -3.189417802625549,
+        "independent_minus_wall_sided": -3.1894178026255493,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 70.0,
+        "gz_library": 0.6571180936004812,
+        "gz_independent": 0.657118093600481,
+        "gz_wall_sided": 5.887883530678778,
+        "library_minus_wall_sided": -5.230765437078297,
+        "independent_minus_wall_sided": -5.230765437078297,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 75.0,
+        "gz_library": 0.6005043371525995,
+        "gz_independent": 0.6005043371525995,
+        "gz_wall_sided": 10.160382661707148,
+        "library_minus_wall_sided": -9.559878324554548,
+        "independent_minus_wall_sided": -9.559878324554548,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 80.0,
+        "gz_library": 0.5381800050158327,
+        "gz_independent": 0.538180005015833,
+        "gz_wall_sided": 22.331131289642617,
+        "library_minus_wall_sided": -21.792951284626785,
+        "independent_minus_wall_sided": -21.792951284626785,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 85.0,
+        "gz_library": 0.4710520720880952,
+        "gz_independent": 0.4710520720880952,
+        "gz_wall_sided": 87.99460533218011,
+        "library_minus_wall_sided": -87.52355326009202,
+        "independent_minus_wall_sided": -87.52355326009202,
+        "wall_sided_region": "outside"
+      },
+      {
+        "heel_deg": 90.0,
+        "gz_library": 0.4,
+        "gz_independent": 0.4,
+        "gz_wall_sided": 1.7780625254090473e+32,
+        "library_minus_wall_sided": -1.7780625254090473e+32,
+        "independent_minus_wall_sided": -1.7780625254090473e+32,
+        "wall_sided_region": "outside"
+      }
+    ]
+  },
+  "polygons": {
+    "v_section": {
+      "name": "isosceles V section B=2 m, height 2 m, draft 1 m, KG 0.6 m",
+      "max_abs_error_m": 2.220446049250313e-16,
+      "max_rel_error": 7.321629812691877e-13,
+      "gz_library": [
+        0.0,
+        -0.008692377322913551,
+        -0.01717625492602358,
+        -0.02522786538700103,
+        -0.032588601046382365,
+        -0.03893473779821632,
+        -0.043824175592474035,
+        -0.04659269436727781,
+        -0.04612958825051694,
+        -0.04032462263499409,
+        -0.024425673951252613,
+        -0.0001516360500364855,
+        0.023409942079648638,
+        0.04717355524490707,
+        0.07212047445621717,
+        0.09943638587440617,
+        0.12211515007153628,
+        0.13074382614022295,
+        0.13175404862521167
+      ],
+      "gz_independent": [
+        0.0,
+        -0.00869237732291353,
+        -0.017176254926023565,
+        -0.02522786538700103,
+        -0.03258860104638242,
+        -0.03893473779821627,
+        -0.043824175592474035,
+        -0.04659269436727781,
+        -0.04612958825051705,
+        -0.040324622634994145,
+        -0.024425673951252724,
+        -0.00015163605003637448,
+        0.02340994207964875,
+        0.04717355524490685,
+        0.07212047445621728,
+        0.09943638587440606,
+        0.12211515007153628,
+        0.13074382614022306,
+        0.13175404862521167
+      ],
+      "heels_deg": [
+        0.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        45.0,
+        50.0,
+        55.0,
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+        80.0,
+        85.0,
+        90.0
+      ]
+    },
+    "rotated_hexagon": {
+      "name": "regular hexagon R=1 m rotated 17 deg, draft 0.8 m, KG 0.7 m",
+      "max_abs_error_m": 1.6653345369377348e-16,
+      "max_rel_error": 4.395927908582979e-15,
+      "gz_library": [
+        0.008287031487569525,
+        0.030371186284454184,
+        0.049997178886184074,
+        0.06801186345696139,
+        0.08516609273266476,
+        0.10218787162185211,
+        0.11985055803181438,
+        0.1390484812112508,
+        0.16044816436335024,
+        0.1801655912059238
+      ],
+      "gz_independent": [
+        0.008287031487569561,
+        0.03037118628445424,
+        0.0499971788861841,
+        0.06801186345696139,
+        0.0851660927326647,
+        0.10218787162185211,
+        0.11985055803181455,
+        0.1390484812112508,
+        0.16044816436335024,
+        0.18016559120592368
+      ],
+      "heels_deg": [
+        0.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        45.0
+      ]
+    }
+  },
+  "inscribed_polygon": {
+    "rows": [
+      {
+        "sides": 5,
+        "keel_offset_m": 0.0,
+        "outside_ellipse_quadric_max": 1.0,
+        "area_ratio_to_ellipse": 0.7568267286406569
+      },
+      {
+        "sides": 16,
+        "keel_offset_m": 0.0,
+        "outside_ellipse_quadric_max": 1.0,
+        "area_ratio_to_ellipse": 0.9744953584044327
+      },
+      {
+        "sides": 17,
+        "keel_offset_m": 0.0,
+        "outside_ellipse_quadric_max": 1.0000000000000002,
+        "area_ratio_to_ellipse": 0.9773877460154421
+      },
+      {
+        "sides": 18,
+        "keel_offset_m": 0.0,
+        "outside_ellipse_quadric_max": 1.0000000000000002,
+        "area_ratio_to_ellipse": 0.9798155360510166
+      },
+      {
+        "sides": 20,
+        "keel_offset_m": 0.0,
+        "outside_ellipse_quadric_max": 1.0000000000000002,
+        "area_ratio_to_ellipse": 0.9836316430834661
+      },
+      {
+        "sides": 32,
+        "keel_offset_m": 0.0,
+        "outside_ellipse_quadric_max": 1.0000000000000002,
+        "area_ratio_to_ellipse": 0.993586851144206
+      }
+    ],
+    "worst_outside": 1.0000000000000002,
+    "worst_overfill": 0.993586851144206
+  },
+  "rejections": {
+    "probes": {
+      "concave_section": {
+        "rejected": true,
+        "error": "the section is not convex: a concave section can float at two waterline levels with the same displacement, so the level solve is not unique (use the mesh path in tensorcad.gz instead)"
+      },
+      "zero_area_section": {
+        "rejected": true,
+        "error": "the section has zero area"
+      },
+      "non_finite_vertex": {
+        "rejected": true,
+        "error": "section vertex 1 is not finite: (1.0, nan)"
+      },
+      "heel_at_180": {
+        "rejected": true,
+        "error": "heel angle must be finite and within (-180, 180) degrees: 180.0"
+      },
+      "waterline_at_keel": {
+        "rejected": true,
+        "error": "the waterline (0.0) must sit above the keel (0.0)"
+      },
+      "displaced_area_too_large": {
+        "rejected": true,
+        "error": "the displaced area 5.0 m^2 is outside what the section holds between levels -0.17364817766693033 and 1.969615506024416 (0.0 .. 1.9999999999999998 m^2)"
+      },
+      "negative_length": {
+        "rejected": true,
+        "error": "the prism length must be positive: -1.0"
+      },
+      "ellipse_draft_at_top": {
+        "rejected": true,
+        "error": "the waterline (2.0) must sit strictly inside the section height (0 .. 2.0 m above the keel)"
+      },
+      "negative_semi_axis": {
+        "rejected": true,
+        "error": "the semi-axes must be positive: a=-2.0, b=1.0"
+      }
+    },
+    "clockwise_winding_difference_m": 0.0
+  },
+  "checks": [
+    {
+      "check": "ellipse: closed form vs independent slice quadrature, 0-90 deg",
+      "value": 2.6911806116913795e-13,
+      "unit": "m",
+      "criterion": "< 1e-9 m",
+      "passed": true
+    },
+    {
+      "check": "ellipse: both heel directions vs independent",
+      "value": 2.6911806116913795e-13,
+      "unit": "m",
+      "criterion": "< 1e-9 m",
+      "passed": true
+    },
+    {
+      "check": "box / V / rotated hexagon: polygon oracle vs independent",
+      "value": 4.440892098500626e-16,
+      "unit": "m",
+      "criterion": "< 1e-12 m",
+      "passed": true
+    },
+    {
+      "check": "box: wall-sided formula reproduced inside its limit (independent formula)",
+      "value": 2.220446049250313e-16,
+      "unit": "m",
+      "criterion": "< 1e-12 m",
+      "passed": true
+    },
+    {
+      "check": "box: wall-sided formula genuinely fails outside its limit",
+      "value": 0.022596292236855442,
+      "unit": "m",
+      "criterion": "> 0.01 m (non-vacuous)",
+      "passed": true
+    },
+    {
+      "check": "ellipse GM: published artifact vs independent waterplane moments",
+      "value": 3.6992631180510216e-13,
+      "unit": "m",
+      "criterion": "< 1e-6 m",
+      "passed": true
+    },
+    {
+      "check": "ellipse GM: library closed-form slope vs independent waterplane moments",
+      "value": 3.6970426720017713e-13,
+      "unit": "m",
+      "criterion": "< 1e-6 m",
+      "passed": true
+    },
+    {
+      "check": "ellipse GM: independent finite difference vs independent waterplane",
+      "value": 0.00016022591588171764,
+      "unit": "m",
+      "criterion": "< 1e-3 m (finite-difference truncation)",
+      "passed": true
+    },
+    {
+      "check": "ellipse KB: library centroid vs independent centroid",
+      "value": 2.682298827494378e-13,
+      "unit": "m",
+      "criterion": "< 1e-9 m",
+      "passed": true
+    },
+    {
+      "check": "ellipse GZ_max: published artifact vs independent 5 deg grid",
+      "value": 2.5224267119483557e-13,
+      "unit": "m",
+      "criterion": "< 1e-6 m",
+      "passed": true
+    },
+    {
+      "check": "ellipse vanishing angle at KG=1.6 m: library vs independent",
+      "value": 3.716138508025324e-11,
+      "unit": "deg",
+      "criterion": "< 0.05 deg (2 deg sampling + linear interpolation)",
+      "passed": true
+    },
+    {
+      "check": "mesh route converges to the independent oracle at second order",
+      "value": 1.9855747447920626,
+      "unit": "-",
+      "criterion": "1.9 < order < 2.1",
+      "passed": true
+    },
+    {
+      "check": "ellipse_section is inscribed in the exact ellipse for every side count",
+      "value": 1.0000000000000002,
+      "unit": "-",
+      "criterion": "<= 1 + 1e-12 (quadric)",
+      "passed": true
+    },
+    {
+      "check": "input contract: every documented rejection fires",
+      "value": 9,
+      "unit": "of",
+      "criterion": "9 probes",
+      "passed": true
+    },
+    {
+      "check": "clockwise winding accepted and identical",
+      "value": 0.0,
+      "unit": "m",
+      "criterion": "< 1e-15 m",
+      "passed": true
+    }
+  ],
+  "all_passed": true
+}

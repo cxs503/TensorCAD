@@ -6,6 +6,25 @@ semantic versioning.
 
 ## Unreleased
 
+### Fixed
+- **`section_gz.ellipse_section` returned a polygon that was not inscribed** for side counts
+  with no vertex on the keel (any `sides` not divisible by four): the `- min(z)` keel shift
+  translated the boundary *through* the exact ellipse, by 3.0 % at `sides = 18`, so the
+  "inscribed, known-sign chord error" the docstring promises did not hold and a convergence
+  study on such a mesh would have measured a systematic datum offset. The sampling now starts
+  at `-pi/2`, which guarantees a keel vertex; for side counts divisible by four the vertex set
+  is identical, so no published number changes.
+
+### Added
+- **Independent re-check of `tensorcad.section_gz`** (`tests/section_gz_oracle.py`,
+  `examples/section_gz_independent/`, 13 tests, `docs/section_gz_independent_review.md`). A
+  second route that shares no algorithm with the module -- rotated-conic slice quadrature for
+  the ellipse, exact slice integration for polygons, the wall-sided formula transcribed from
+  the literature -- reproduces the merged arms to `2.7e-13 m` (ellipse) and `4.4e-16 m`
+  (polygons), the waterplane `GM` to `3.7e-13 m`, and the second-order chord convergence
+  against itself. The review documents one mislabelled claim (a `max` published as a `min`),
+  the grid dependence of `GZ_max`, and the checks it did not run.
+
 ### Added
 - **`tensorcad.section_gz`: an exact righting-arm oracle for prismatic sections**
   (`docs/section_gz_exact.md`, `examples/section_gz_exact/`, 18 tests). Large-angle `GZ(phi)`
