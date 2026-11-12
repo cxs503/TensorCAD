@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "note": "变更主题与风险规则的唯一数据源；代码不含任何关键词字面量，改分类只改本文件。",
+  "areas": [
+    {
+      "area": "core",
+      "prefixes": [
+        "tensorcad/"
+      ]
+    },
+    {
+      "area": "tests",
+      "prefixes": [
+        "tests/"
+      ]
+    },
+    {
+      "area": "tools",
+      "prefixes": [
+        "tools/"
+      ]
+    },
+    {
+      "area": "docs",
+      "prefixes": [
+        "docs/"
+      ]
+    },
+    {
+      "area": "benchmarks",
+      "prefixes": [
+        "benchmarks/"
+      ]
+    },
+    {
+      "area": "examples",
+      "prefixes": [
+        "examples/"
+      ]
+    },
+    {
+      "area": "artifacts",
+      "prefixes": [
+        "artifacts/",
+        "runs/",
+        "reports/"
+      ]
+    },
+    {
+      "area": "schemas",
+      "prefixes": [
+        "schemas/"
+      ]
+    },
+    {
+      "area": "ci",
+      "prefixes": [
+        ".github/"
+      ]
+    },
+    {
+      "area": "repo-meta",
+      "prefixes": [
+        "README",
+        "CHANGELOG",
+        "AGENTS",
+        "LICENSE",
+        "pyproject.toml",
+        "MISSION_COMPLETE",
+        ".gitignore"
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "topic": "geometry-kernel",
+      "keywords": [
+        "nurbs",
+        "spline",
+        "bezier",
+        "knot",
+        "degree",
+        "brep",
+        "csg",
+        "boolean",
+        "intersect",
+        "curvature",
+        "surface",
+        "offset",
+        "fillet",
+        "shell",
+        "mid-surface",
+        "loop",
+        "fairness",
+        "continuity"
+      ]
+    },
+    {
+      "topic": "hull-and-hydrostatics",
+      "keywords": [
+        "hull",
+        "hydrostat",
+        "displacement",
+        "buoyancy",
+        "waterline",
+        "bonjean",
+        "gz",
+        "stability",
+        "free-surface",
+        "heel",
+        "trim",
+        "transom",
+        "ice",
+        "channel",
+        "girder",
+        "damage",
+        "freeboard"
+      ]
+    },
+    {
+      "topic": "evidence-and-reports",
+      "keywords": [
+        "report",
+        "evidence",
+        "provenance",
+        "artifact",
+        "sha256",
+        "claim",
+        "validation_report",
+        "publish"
+      ]
+    },
+    {
+      "topic": "gate-and-audit",
+      "keywords": [
+        "gate",
+        "audit",
+        "oracle",
+        "power",
+        "crosscheck",
+        "regulatory",
+        "statutory",
+        "continuity-ood",
+        "cap-adaptation"
+      ]
+    },
+    {
+      "topic": "geometry-field-mesh",
+      "keywords": [
+        "field",
+        "mesh",
+        "extract",
+        "adapters",
+        "fem",
+        "ocp",
+        "step",
+        "iges",
+        "export",
+        "stl",
+        "voxel",
+        "representation",
+        "neural"
+      ]
+    },
+    {
+      "topic": "test-infrastructure",
+      "keywords": [
+        "test",
+        "pytest",
+        "fixture",
+        "conftest",
+        "smoke"
+      ]
+    },
+    {
+      "topic": "ci-and-packaging",
+      "keywords": [
+        "ci",
+        "workflow",
+        "github",
+        "pyproject",
+        "release",
+        "changelog",
+        "benchmark"
+      ]
+    }
+  ],
+  "risk_rules": {
+    "large_churn_lines": 1000,
+    "bus_factor_min_commits": 10,
+    "gate_filtered_pattern": "被门禁滤除",
+    "gate_filtered_count_pattern": "（(\\d+) 个文件被门禁滤除）",
+    "merge_subject_pattern": "Merge #(\\d+) \\(m(\\d+)\\) via ([a-z-]+)",
+    "mission_pattern": "m(\\d+)",
+    "low_signal_tokens": [
+      "matured",
+      "mature",
+      "deliverables",
+      "deliverable",
+      "mission",
+      "update",
+      "updates",
+      "wip",
+      "misc",
+      "changes",
+      "change",
+      "fix",
+      "fixes",
+      "work"
+    ]
+  }
+}
