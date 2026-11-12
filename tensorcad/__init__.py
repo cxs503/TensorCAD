@@ -411,6 +411,16 @@ from .shell import (
     offset_inward,
     shell,
 )
+from .midsurface import (
+    MidSurface,
+    MidSurfaceError,
+    Panel,
+    ThicknessMap,
+    defeature,
+    extract_midsurface,
+    measure_thickness,
+    suggest_max_thickness,
+)
 from .surface_intersection import (
     CylinderPatch,
     IntersectionCurve,
@@ -424,6 +434,14 @@ from .surface_intersection import (
     surface_surface_intersection,
 )
 __all__ = [
+    "MidSurface",
+    "MidSurfaceError",
+    "Panel",
+    "ThicknessMap",
+    "defeature",
+    "extract_midsurface",
+    "measure_thickness",
+    "suggest_max_thickness",
     "RefinementError",
     "RefinementReport",
     "StageMetrics",

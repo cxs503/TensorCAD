@@ -247,13 +247,24 @@ def _vertex_planes(mesh: Mesh) -> list[list[tuple[Vec3, float, float]]]:
 
 
 def _solve_vertex(
-    constraints: list[tuple[Vec3, float, float]], thickness: float, ridge: float
+    constraints: list[tuple[Vec3, float, float]],
+    thickness: float,
+    ridge: float,
+    position: Vec3,
 ) -> tuple[Vec3, float]:
-    """Weighted least-squares offset point and the largest constraint residual at it."""
+    """Weighted least-squares offset point and the largest constraint residual at it.
+
+    The unknowns are the *displacement* from ``position``, not the point: a vertex on a flat
+    facet or on a straight edge carries only one or two independent planes, and the ridge term
+    then has to mean "do not move along the directions nothing constrains". Solving for the
+    absolute point instead makes the ridge mean "stay near the origin", which throws such a
+    vertex towards ``(0, 0, 0)`` -- a defect that no corner-vertex fixture can see, because a
+    corner has three independent planes and no null space at all.
+    """
     matrix = [[0.0] * 3 for _ in range(3)]
     rhs = [0.0, 0.0, 0.0]
     for normal, offset, weight in constraints:
-        target = offset - thickness
+        target = offset - thickness - _dot(normal, position)
         for row in range(3):
             rhs[row] += weight * normal[row] * target
             for column in range(3):
@@ -281,7 +292,11 @@ def _solve_vertex(
             )
             / determinant
         )
-    point: Vec3 = (solution[0], solution[1], solution[2])
+    point: Vec3 = (
+        position[0] + solution[0],
+        position[1] + solution[1],
+        position[2] + solution[2],
+    )
     residual = max(abs(_dot(normal, point) - (offset - thickness)) for normal, offset, _ in constraints)
     return point, residual
 
@@ -442,7 +457,9 @@ def _offset_vertices(mesh: Mesh, thickness: float) -> tuple[list[Vec3], float]:
     for vertex, constraints in enumerate(planes):
         if not constraints:
             raise ShellError(f"vertex {vertex} belongs to no face; the mesh is inconsistent")
-        point, residual = _solve_vertex(constraints, thickness, ridge=1e-14)
+        point, residual = _solve_vertex(
+            constraints, thickness, ridge=1e-14, position=mesh.vertices[vertex]
+        )
         points.append(point)
         max_residual = max(max_residual, residual)
     return points, max_residual
@@ -509,7 +526,10 @@ def shell(mesh: Mesh, thickness: float, *, wall_tolerance: float = 0.05) -> Shel
     inner = Mesh(vertices=tuple(points), faces=mesh.faces, units=mesh.units)
     outer_volume = meshlib.total_signed_volume(mesh)
     inner_volume = meshlib.total_signed_volume(inner)
-    if inner_volume <= 0.0:
+    # A cavity that is inverted *or* collapsed has no wall to measure: at exactly half the local
+    # wall the offset closes the solid to a zero-volume sheet, and a rounding sign is no basis
+    # for calling that a shell, so the test is relative to the outer volume.
+    if inner_volume <= 1e-12 * outer_volume:
         raise ShellError(
             f"the inward offset of {thickness!r} m inverts the solid: the inner signed volume is "
             f"{inner_volume!r} m^3 (outer {outer_volume!r} m^3), so the thickness exceeds half "
