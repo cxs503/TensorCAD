@@ -9,6 +9,29 @@ Everything on this page is measured by `python examples/savitsky/run_example.py`
 which writes `artifacts/savitsky/results.json` and exits non-zero if any claim
 stops holding. `tests/test_savitsky.py` pins the same numbers (28 cases).
 
+## 0. Audit status (m16954, verifier seat) -- read this before quoting any number
+
+An adversarial audit of this module (`docs/savitsky_audit_m16954.md`, evidence in
+`artifacts/savitsky_audit/`) changed three things about what the module may claim:
+
+1. **λ is solved only by `equilibrium_trim()` / `planing_prediction(..., lcg_m=...)`.**
+   The original lift solve is one equation in two unknowns, so `running_trim()` and the
+   default `planing_prediction()` path return an *assumed* λ (default 3.0) and say so via
+   `solution_method='assumed_wetted_length'`, `wetted_length_ratio_solved=False` and a
+   warning. Before the audit that assumption was reported as if it were an equilibrium.
+2. **The validity box is now reported, not implied.** Every result carries a `warnings`
+   tuple naming each violated bound (Fr, β, trim band, L/B) and any wetted-length clamp.
+   A clamped wetted length no longer breaks the lift balance silently.
+3. **The absolute accuracy is unknown, not ±10 %.** The module's lift correlation
+   (`CL = 0.00222 τ^0.9 λ^0.67 (β/1000)^-0.33`, no speed coefficient) disagrees with the
+   classical Cv-dependent Savitsky statement by 22-78 % over the validity box, and no
+   single Cv reconciles them (`tests/test_savitsky_audit.py::TestCorrelationIncompatibility`).
+   Both are labelled "Savitsky (1964) eq. (1)"; one label is wrong, and resolving it needs
+   the primary paper, which was not available. The resulting resistance difference between
+   the two paths on one reference craft is +21 % to +56 % (legacy high). Treat the module
+   as a correlation implementation of unverified absolute accuracy until that is settled.
+
+
 ## 1. What the method is, and what it deliberately is not
 
 `tensorcad.savitsky` implements the **Savitsky 1964** empirical method:
