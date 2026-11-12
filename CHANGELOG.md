@@ -7,6 +7,21 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.nurbs`: piecewise (break-aware) degree elevation** (`NURBSCurve.split_at_discontinuities`, `NURBSCurve.elevate_degree_piecewise`,
+  `docs/nurbs_piecewise_degree_elevation.md`, `examples/nurbs_piecewise_elevation/`,
+  17 tests). Degree elevation already refused a curve with an interior knot of
+  multiplicity `degree + 1` -- a break, not a `C0` join -- and told the caller to
+  split the curve first, but nothing in the package could split it: a composite
+  profile (polyline plus arc, a duplicated seam, two concatenated patches) could not
+  reach the elevated representation at all. `split_at_discontinuities` returns the
+  maximal `C0`-or-better pieces as a pure slice of the control polygon (nothing
+  inserted, nothing re-solved, so the split is bit-exact and keeps every interior
+  knot and rational weight; a smooth curve returns itself), and
+  `elevate_degree_piecewise(times)` composes it with the exact homogeneous elevation.
+  Evidence on the exact rational quarter circle plus straight segment: radius
+  `2 m + 8.9e-16 m`, total length `pi + 2 sqrt 2` to `8.9e-16 m`, point deviation
+  `<= 6.3e-16 m`, the 45 deg kink and the two jumps of a three-piece fixture
+  preserved, control-point growth minimal.
 - **`tensorcad.girder`: hull-girder elastic and plastic section properties** (`tensorcad/girder.py`,
   `docs/girder_section.md`, `examples/girder_section/`, `tools/girder_section_doc.py`, 25 tests).
   Geometry could produce a hull and the hydrostatics could say what it displaces, but nothing

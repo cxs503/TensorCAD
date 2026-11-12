@@ -68,6 +68,7 @@ import json
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
@@ -389,8 +390,10 @@ def _elevate_homogeneous(
         raise NURBSError(
             f"degree elevation needs a C0-or-better {label}; knot "
             f"{disconnected[0]!r} has multiplicity {multiplicity[disconnected[0]]} "
-            f"> degree {degree}, so the {label} is discontinuous there -- split it "
-            "at that knot first"
+            f"> degree {degree}, so the {label} is discontinuous there -- for a curve "
+            "use NURBSCurve.split_at_discontinuities(), or "
+            "NURBSCurve.elevate_degree_piecewise(times) which splits and elevates in "
+            "one step"
         )
 
     elevated_knots: list[float] = [low] * (target + 1)
@@ -764,6 +767,74 @@ class NURBSCurve:
             control_points=tuple(_dehomogenise(point) for point in net),
             weights=weights,
         )
+
+    # -- piecewise (break-aware) operations ---------------------------------
+    def split_at_discontinuities(self) -> tuple[NURBSCurve, ...]:
+        """The maximal ``C0``-or-better pieces, split where the curve is broken.
+
+        An interior knot of multiplicity ``degree + 1`` is not a ``C0`` join: the two
+        sides share no control point, so a single-curve collocation matrix is singular
+        there and :meth:`elevate_degree` (rightly) refuses. This method is the
+        splitting step that refusal asks for; :meth:`elevate_degree_piecewise`
+        composes the two.
+
+        The pieces are exact, not refitted: because a break already carries
+        multiplicity ``degree + 1``, the curve is the direct sum of its pieces -- the
+        i-th piece's control points are a contiguous window of the original polygon and
+        its knots the corresponding sub-range of the original knot vector. Nothing is
+        inserted, removed or re-solved, so every interior knot (and therefore every
+        ``C0``/``C1`` join *inside* a piece) is preserved verbatim, parameters are
+        unchanged (the i-th piece is parameterised on the knot interval it came from),
+        and rational weights travel untouched. A curve with no break returns
+        ``(self,)``: the identity, not a copy.
+
+        Only true breaks (multiplicity ``degree + 1``) split the curve. Note that the
+        *whole* broken curve is point-evaluable but not differentiable across a break
+        (the derivative net divides by a zero-length knot interval), which is exactly
+        why ``arc_length`` and ``curvature`` need the pieces this method returns.
+        """
+        degree = self.degree
+        low, high = self.domain
+        interior = sorted({value for value in self.knots if low < value < high})
+        breaks = [value for value in interior if _multiplicity(self.knots, value) > degree]
+        if not breaks:
+            return (self,)
+
+        knots = self.knots
+        bounds = [low, *breaks, high]
+        pieces: list[NURBSCurve] = []
+        for left, right in pairwise(bounds):
+            last_left = max(index for index, value in enumerate(knots) if value == left)
+            piece_knots = [left] * (degree + 1)
+            piece_knots.extend(value for value in knots if left < value < right)
+            piece_knots.extend([right] * (degree + 1))
+            count = len(piece_knots) - degree - 1
+            start = last_left - degree
+            pieces.append(
+                NURBSCurve(
+                    degree=degree,
+                    knots=tuple(piece_knots),
+                    control_points=self.control_points[start : start + count],
+                    weights=self.weights[start : start + count],
+                )
+            )
+        return tuple(pieces)
+
+    def elevate_degree_piecewise(self, times: int = 1) -> tuple[NURBSCurve, ...]:
+        """Elevate every continuous piece of a curve that is allowed to have breaks.
+
+        The piecewise counterpart of :meth:`elevate_degree`: split at every
+        multiplicity ``degree + 1`` knot (:meth:`split_at_discontinuities`) and elevate
+        each piece. The result is a tuple of segments, because a break stays a break at
+        every degree -- no single spline of degree ``degree + times`` represents a
+        broken curve. Every segment is exact, so the union traces the original curve
+        point-for-point while each segment is now usable by operations that need one
+        connected control polygon (patch-degree alignment against a neighbour,
+        curvature, collocation).
+        """
+        if not isinstance(times, int) or isinstance(times, bool) or times < 0:
+            raise NURBSError(f"times must be a non-negative integer, got {times!r}")
+        return tuple(piece.elevate_degree(times) for piece in self.split_at_discontinuities())
 
     # -- continuity ---------------------------------------------------------
     def continuity(self, order: int = 2) -> dict[str, Any]:
