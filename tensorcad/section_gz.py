@@ -503,15 +503,19 @@ def ellipse_section(semi_beam: float, semi_height: float, sides: int, *, rotatio
     """``sides`` points on the ellipse of :func:`ellipse_prism_righting_arms`, keel at ``z = 0``.
 
     An *inscribed* polygon, so the mesh built from it under-fills the exact section and the
-    chord error has a known sign.
+    chord error has a known sign.  The sampling starts half a turn down (``-pi/2``) so a
+    vertex always sits on the keel and the keel shift is zero for every ``sides``: without
+    that phase an odd ``sides`` (or one congruent to 2 mod 4) has no bottom vertex, and
+    subtracting the lowest vertex height then translates the polygon *through* the ellipse --
+    it stays smaller in area but its boundary leaves the exact section by up to 3 %.
     """
     if sides < 3:
         raise GzError(f"a polygon needs at least 3 sides, got {sides}")
     turn = math.radians(rotation_deg)
     points = [
         (
-            semi_beam * math.cos(2.0 * math.pi * index / sides + turn),
-            semi_height + semi_height * math.sin(2.0 * math.pi * index / sides + turn),
+            semi_beam * math.cos(2.0 * math.pi * index / sides - 0.5 * math.pi + turn),
+            semi_height + semi_height * math.sin(2.0 * math.pi * index / sides - 0.5 * math.pi + turn),
         )
         for index in range(sides)
     ]
