@@ -169,6 +169,101 @@ def read_patchset(path: str | Path) -> PatchGeometry:
 # --------------------------------------------------------------------------- #
 # faceted STEP (AP203 FACETED_BREP over POLY_LOOP)
 # --------------------------------------------------------------------------- #
+
+#: SI length prefixes a faceted STEP writer can declare *honestly*, as
+#: ``(file units per metre, token)``. ``SI_UNIT($,.METRE.)`` means the file is in
+#: metres; ``.MILLI.`` means it is in millimetres, i.e. 1000 file units per metre.
+#: A scale outside this table cannot be described by the file's own ``LENGTH_UNIT``,
+#: so :func:`write_step_facets` refuses it instead of writing a number that lies.
+_SI_LENGTH_PREFIXES: tuple[tuple[float, str], ...] = (
+    (1.0, "$"),
+    (1e1, ".DECI."),
+    (1e2, ".CENTI."),
+    (1e3, ".MILLI."),
+    (1e6, ".MICRO."),
+    (1e9, ".NANO."),
+)
+
+_SI_LENGTH = re.compile(r"SI_UNIT\(\s*(\$|\.[A-Z]+\.)\s*,\s*\.METRE\.\)")
+
+
+def _si_length_prefix(scale: float) -> str:
+    """The ``SI_UNIT`` prefix token for ``scale`` file units per metre."""
+    for factor, token in _SI_LENGTH_PREFIXES:
+        if abs(scale - factor) <= 1e-12 * factor:
+            return token
+    raise ExchangeError(
+        f"length_scale {scale!r} has no SI length prefix, so the file's LENGTH_UNIT "
+        "could not describe its own coordinates; use 1, 1e1, 1e2, 1e3, 1e6 or 1e9"
+    )
+
+
+def _scale_from_prefix(token: str) -> float | None:
+    for factor, prefix in _SI_LENGTH_PREFIXES:
+        if prefix == token:
+            return factor
+    return None
+
+
+def _declared_length_scale(statements: dict[str, tuple[str, str]]) -> tuple[float | None, str]:
+    """Read the file's own ``LENGTH_UNIT`` as ``(file units per metre, detail)``.
+
+    ``None`` means the file does not say anything this reader can honour; the caller
+    falls back to the millimetre convention and records that it *assumed* it.
+    """
+    conversion = False
+    for entity_type, arguments in statements.values():
+        if "LENGTH_UNIT" not in arguments:
+            continue
+        match = _SI_LENGTH.search(arguments)
+        if match is not None:
+            token = match.group(1)
+            scale = _scale_from_prefix(token)
+            if scale is None:
+                return None, f"unsupported SI prefix {token}"
+            return scale, f"SI_UNIT({token},.METRE.)"
+        if "CONVERSION_BASED_UNIT" in arguments:
+            conversion = True
+    if conversion:
+        return None, "CONVERSION_BASED_UNIT (inch/foot) is not supported"
+    return None, "no LENGTH_UNIT entity"
+
+
+def _is_convex(polygon: Sequence[int], vertices: Sequence[tuple[float, float, float]]) -> bool:
+    """Is this planar loop convex in the order given?
+
+    A fan triangulation from ``polygon[0]`` covers exactly the polygon only when the
+    polygon is convex (or star-shaped about that vertex). Every consecutive triple's
+    cross product is dotted with the Newell normal; a convex loop has no negative
+    contribution beyond round-off.
+    """
+    points = [vertices[index] for index in polygon]
+    count = len(points)
+    nx = ny = nz = 0.0
+    for i in range(count):
+        x1, y1, z1 = points[i]
+        x2, y2, z2 = points[(i + 1) % count]
+        nx += (y1 - y2) * (z1 + z2)
+        ny += (z1 - z2) * (x1 + x2)
+        nz += (x1 - x2) * (y1 + y2)
+    if nx == 0.0 and ny == 0.0 and nz == 0.0:
+        return False
+    contributions: list[float] = []
+    for i in range(count):
+        ax, ay, az = points[i]
+        bx, by, bz = points[(i + 1) % count]
+        cx, cy, cz = points[(i + 2) % count]
+        ux, uy, uz = bx - ax, by - ay, bz - az
+        vx, vy, vz = cx - bx, cy - by, cz - bz
+        cross = (uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx)
+        contributions.append(cross[0] * nx + cross[1] * ny + cross[2] * nz)
+    total = sum(abs(value) for value in contributions)
+    if total == 0.0:
+        return False
+    limit = 1e-9 * total
+    return all(value >= -limit for value in contributions) and sum(contributions) > 0.0
+
+
 def write_step_facets(
     path: str | Path,
     mesh: Mesh,
@@ -186,6 +281,8 @@ def write_step_facets(
         raise ExchangeError("cannot write a STEP file for a mesh with no faces")
     if length_scale <= 0:
         raise ExchangeError(f"length_scale must be positive, got {length_scale!r}")
+    if "'" in name:
+        raise ExchangeError(f"name must not contain a quote, got {name!r}")
 
     lines: list[str] = []
     counter = 0
@@ -205,7 +302,12 @@ def write_step_facets(
             text += "."
         return text
 
-    unit = emit("( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) )")
+    # The coordinates below are multiplied by ``length_scale``, so the file must
+    # declare the matching SI prefix; a millimetre label on metre numbers (or the
+    # reverse) makes every standards-conformant reader mis-scale the part.
+    unit = emit(
+        f"( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT({_si_length_prefix(length_scale)},.METRE.) )"
+    )
     angle = emit("( NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.) )")
     solid_angle = emit("( NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT() )")
     uncertainty = emit(f"UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-06),{unit},'distance_accuracy_value','')")
@@ -295,37 +397,75 @@ def _floats(arguments: str) -> tuple[float, float, float]:
         raise ExchangeError(f"non-numeric coordinate in {arguments!r}") from error
 
 
-def read_step_facets(path: str | Path, *, length_scale: float | None = None) -> PatchGeometry:
+def read_step_facets(
+    path: str | Path,
+    *,
+    length_scale: float | None = None,
+    weld_duplicates: bool = True,
+) -> PatchGeometry:
     """Read a faceted STEP file (``FACETED_BREP`` over ``POLY_LOOP``) into a mesh.
 
-    ``length_scale`` defaults to the millimetre convention
-    (:data:`DEFAULT_LENGTH_SCALE`), i.e. file coordinates are divided by 1000 to
-    give metres.  Pass ``1.0`` for a file already written in metres.
+    ``length_scale`` is *file units per metre*. Left as ``None`` -- the default --
+    it is taken from the file's own ``LENGTH_UNIT`` entity, so a metre-declared file
+    reads as metres and the millimetre convention of :func:`write_step_facets` reads
+    as millimetres; the source of the number is recorded in
+    ``metadata["length_scale_source"]``. Pass a number to override a wrong header.
+
+    ``weld_duplicates`` merges ``VERTEX_POINT`` entities whose coordinates are
+    *exactly* equal. Many faceted writers emit one vertex per face corner, which is
+    legal STEP but makes a closed solid read back as an open mesh -- the downstream
+    audit would then report the writer's indexing instead of the model's geometry.
+    Welding equal coordinates changes no position; pass ``False`` for entity-level
+    fidelity.
 
     Analytic B-rep files are refused with :class:`ExchangeError` listing the
-    entities that block the import rather than being tessellated by guesswork.
+    entities that block the import rather than being tessellated by guesswork. The
+    same refusal applies to a loop a fan triangulation cannot represent (a face with
+    more than one bound, i.e. a hole, or a non-convex ``POLY_LOOP``) and to a file
+    whose framing is truncated: those would otherwise become *silently* wrong
+    triangles, which is the worst possible input to a watertightness audit.
     """
     source = Path(path)
     text = source.read_text(encoding="utf-8", errors="replace")
     if "ISO-10303-21" not in text:
         raise ExchangeError(f"{source} is not an ISO-10303-21 (STEP) file")
+    if "END-ISO-10303-21" not in text:
+        raise ExchangeError(
+            f"{source} is truncated: the exchange structure has no END-ISO-10303-21 "
+            "terminator, so its data section cannot be trusted"
+        )
     statements = _statements(text)
     types = {entity_type for entity_type, _ in statements.values()}
 
     patches = [name for name in types if name in ("FACE", "ADVANCED_FACE")]
     unsupported = sorted(types.intersection(_BREP_ENTITIES) - {"FACE"})
-    if not patches:
-        raise ExchangeError(
-            f"{source} contains no face entities; found {len(statements)} entities of "
-            f"{len(types)} types"
-        )
     if unsupported:
         raise ExchangeError(
-            "STEP file is an analytic B-rep, not a faceted solid; refusing to guess a "
-            f"tessellation. Blocking entities: {', '.join(unsupported)}. "
-            "Install the optional OCP bridge (pip install 'tensorcad[ocp]') to tessellate it."
+            f"{source} is an analytic B-rep, not a faceted solid: {', '.join(unsupported)} "
+            "present. Tessellating it needs OpenCASCADE (pip install 'tensorcad[ocp]'); "
+            "guessing one here would audit the tessellator, not the model"
         )
-    scale = DEFAULT_LENGTH_SCALE if length_scale is None else float(length_scale)
+
+    # A truncated or hand-edited file must fail here, not read as a smaller body.
+    for entity_id, (_, arguments) in statements.items():
+        for ref in _refs(arguments):
+            if ref not in statements:
+                raise ExchangeError(
+                    f"{source} references #{ref} from #{entity_id}, which does not exist "
+                    "(truncated or hand-edited file)"
+                )
+
+    declared, unit_detail = _declared_length_scale(statements)
+    if length_scale is None:
+        if declared is None:
+            scale = DEFAULT_LENGTH_SCALE
+            scale_source = f"assumed millimetre convention ({unit_detail})"
+        else:
+            scale = declared
+            scale_source = f"declared {unit_detail}"
+    else:
+        scale = float(length_scale)
+        scale_source = "caller override"
     if scale == 0.0:
         raise ExchangeError("length_scale must be non-zero")
 
@@ -346,14 +486,31 @@ def read_step_facets(path: str | Path, *, length_scale: float | None = None) -> 
     if not vertices:
         raise ExchangeError(f"{source} has no VERTEX_POINT entities")
 
+    welded_rows = 0
+    if weld_duplicates:
+        first_index: dict[tuple[float, float, float], int] = {}
+        remap: dict[int, int] = {}
+        merged: list[tuple[float, float, float]] = []
+        for old, point in enumerate(vertices):
+            new = first_index.get(point)
+            if new is None:
+                new = len(merged)
+                first_index[point] = new
+                merged.append(point)
+            remap[old] = new
+        welded_rows = len(vertices) - len(merged)
+        vertices = merged
+    else:
+        remap = {index: index for index in range(len(vertices))}
+
     loop_faces: dict[str, tuple[int, ...]] = {}
     for entity_id, (entity_type, arguments) in statements.items():
         if entity_type != "POLY_LOOP":
             continue
         refs = _refs(arguments)
         try:
-            loop_faces[entity_id] = tuple(vertex_by_point[ref] for ref in refs)
-        except KeyError as error:  # pragma: no cover - malformed file
+            loop_faces[entity_id] = tuple(remap[vertex_by_point[ref]] for ref in refs)
+        except KeyError as error:
             raise ExchangeError(f"POLY_LOOP {entity_id} references unknown vertex {error}") from error
 
     faces: list[tuple[int, int, int]] = []
@@ -363,23 +520,42 @@ def read_step_facets(path: str | Path, *, length_scale: float | None = None) -> 
         if entity_type.endswith("BOUND"):
             bounds[entity_id] = _refs(arguments)
     skipped = 0
+    collapsed = 0
     for entity_id, (entity_type, arguments) in statements.items():
-        if entity_type not in ("FACE", "ADVANCED_FACE"):
+        if entity_type != "FACE":
             continue
         # FACE -> FACE_OUTER_BOUND -> POLY_LOOP; tolerate a FACE that points at a
         # loop directly (some writers do).
         face_bounds = [ref for ref in _refs(arguments) if ref in bounds]
+        if len(face_bounds) > 1:
+            raise ExchangeError(
+                f"{source}: FACE {entity_id} has {len(face_bounds)} bounds; a face with a "
+                "hole is not a single polygon and is refused rather than mis-triangulated"
+            )
         loops = [loop for bound in face_bounds for loop in bounds[bound] if loop in loop_faces]
         if not loops:
             loops = [ref for ref in _refs(arguments) if ref in loop_faces]
-        polygon: list[int] = []
-        for loop in loops:
-            polygon.extend(loop_faces.get(loop, ()))
+        if len(loops) > 1:
+            raise ExchangeError(
+                f"{source}: FACE {entity_id} carries {len(loops)} POLY_LOOPs; holes are not "
+                "tessellated here and a fan over the concatenation would invent area"
+            )
+        polygon = list(loop_faces.get(loops[0], ())) if loops else []
         if len(polygon) < 3:
             skipped += 1
             continue
+        if len(polygon) > 3 and not _is_convex(polygon, vertices):
+            raise ExchangeError(
+                f"{source}: FACE {entity_id} is a {len(polygon)}-vertex loop that is not "
+                "convex; a fan triangulation from its first vertex would invent area, so "
+                "triangulate it before export"
+            )
         for index in range(1, len(polygon) - 1):
-            faces.append((polygon[0], polygon[index], polygon[index + 1]))
+            triangle = (polygon[0], polygon[index], polygon[index + 1])
+            if len(set(triangle)) < 3:
+                collapsed += 1
+                continue
+            faces.append(triangle)
             patch_ids.append(entity_id)
     if not faces:
         raise ExchangeError(f"{source} yielded no triangles from {len(patches)} face entities")
@@ -392,23 +568,36 @@ def read_step_facets(path: str | Path, *, length_scale: float | None = None) -> 
         metadata={
             "schema": STEP_FACETS_SCHEMA,
             "length_scale": scale,
+            "length_scale_source": scale_source,
+            "declared_unit": unit_detail,
             "entities": len(statements),
             "entity_types": sorted(types),
             "vertex_points": len(vertices),
+            "welded_vertex_rows": welded_rows,
             "faces": len(faces),
             "skipped_faces": skipped,
+            "collapsed_triangles": collapsed,
             "validation": "internal round trip only; no third-party CAD kernel available",
         },
     )
 
 
-def round_trip_facets(mesh: Mesh, *, directory: str | Path | None = None) -> dict[str, float]:
-    """Write ``mesh`` to faceted STEP and read it back; report the geometry drift."""
+def round_trip_facets(
+    mesh: Mesh,
+    *,
+    directory: str | Path | None = None,
+    length_scale: float = DEFAULT_LENGTH_SCALE,
+) -> dict[str, float]:
+    """Write ``mesh`` to faceted STEP and read it back; report the geometry drift.
+
+    The reader is given no scale, so the round trip also tests that the declared
+    ``LENGTH_UNIT`` of the written file is the one the numbers are in.
+    """
     import tempfile
 
     with tempfile.TemporaryDirectory(dir=directory) as scratch:
         target = Path(scratch) / "round_trip.step"
-        write_step_facets(target, mesh)
+        write_step_facets(target, mesh, length_scale=length_scale)
         back = read_step_facets(target)
     if back.mesh.faces != mesh.faces:
         raise ExchangeError("faceted STEP round trip changed the face table")
@@ -421,6 +610,8 @@ def round_trip_facets(mesh: Mesh, *, directory: str | Path | None = None) -> dic
         "vertex_count": float(len(mesh.vertices)),
         "triangle_count": float(len(mesh.faces)),
         "length_scale": float(back.metadata["length_scale"]),
+        "round_trip_length_scale": float(length_scale),
+        "used_declared_unit": 1.0 if str(back.metadata["length_scale_source"]).startswith("declared") else 0.0,
     }
 
 
