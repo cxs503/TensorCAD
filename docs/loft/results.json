@@ -1,0 +1,92 @@
+{
+  "claims": {
+    "cylinder_radial_deviation_lt_1e-13": true,
+    "cylinder_area_lt_1e-12": true,
+    "cone_deviation_lt_1e-12": true,
+    "cone_area_lt_1e-9": true,
+    "parabola_deviation_lt_1e-13": true,
+    "cubic_skin_is_c2": true,
+    "cubic_jump_lt_1e-12": true,
+    "quadratic_skin_jumps": true,
+    "ruled_skin_jumps_in_first_derivative": true,
+    "mixed_degree_defect_lt_1e-13": true,
+    "mixed_degree_transverse_degree_2": true,
+    "rotating_sections_defect_lt_1e-13": true
+  },
+  "all_claims_hold": true,
+  "cylinder": {
+    "radius_m": 0.5,
+    "length_m": 2.0,
+    "degree": [
+      3,
+      2
+    ],
+    "control_points": [
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "max_radial_deviation_m": 3.3306690738754696e-16,
+    "area_m2": 6.2831853071795996,
+    "area_analytic_m2": 6.283185307179586,
+    "area_relative_error": 2.1203697876423446e-15,
+    "section_defect_relative": 2.205392004154286e-16,
+    "second_derivative_jump_relative": 0.0,
+    "measured_continuous_order": 2
+  },
+  "cone": {
+    "radii_m": [
+      0.6,
+      0.4,
+      0.2
+    ],
+    "stations_m": [
+      0.0,
+      1.0,
+      2.0
+    ],
+    "max_deviation_from_analytic_m": 4.440892098500626e-16,
+    "area_m2": 5.126093518212523,
+    "area_analytic_m2": 5.12609351821251,
+    "area_relative_error": 2.4257259122611002e-15
+  },
+  "parabola": {
+    "degree": [
+      3,
+      2
+    ],
+    "max_abs_z_minus_y_squared_m": 5.551115123125783e-16,
+    "section_defect_relative": 1.841096603147574e-16,
+    "second_derivative_jump_relative": 0.0
+  },
+  "continuity": {
+    "3": {
+      "measured_continuous_order": 2,
+      "relative_first_derivative_jump": 0.0,
+      "relative_second_derivative_jump": 0.0,
+      "interior_knots": 1
+    },
+    "2": {
+      "measured_continuous_order": 1,
+      "relative_first_derivative_jump": 0.0,
+      "relative_second_derivative_jump": 1.1293329368222582,
+      "interior_knots": 2
+    },
+    "1": {
+      "measured_continuous_order": 0,
+      "relative_first_derivative_jump": 0.15187465731504987,
+      "relative_second_derivative_jump": 0.0,
+      "interior_knots": 3
+    }
+  },
+  "mixed_and_rotating": {
+    "mixed_degree_defect_relative": 7.768357385599328e-17,
+    "rotating_defect_relative": 2.4539190047737827e-16
+  },
+  "acceptance": {
+    "surface_passes_through_sections_lt_1e-9_L": true,
+    "G2_in_the_loft_direction": true
+  }
+}
