@@ -377,6 +377,15 @@ from .parametric_hull import (
     apply_transform,
     mesh_quality_report,
 )
+from .shell import (
+    HollowBody,
+    ShellError,
+    ShellResult,
+    hollow_body,
+    min_wall_thickness,
+    offset_inward,
+    shell,
+)
 from .surface_intersection import (
     CylinderPatch,
     IntersectionCurve,
