@@ -132,7 +132,11 @@ with the degree.*
    documentation already states. A curve with an interior knot of multiplicity
    `degree + 1` is genuinely discontinuous (its two sides share no control point), so
    the single-curve collocation matrix is singular; the method refuses with a named
-   remedy ("split it at that knot first") rather than returning a wrong curve.
+   remedy rather than returning a wrong curve. That remedy now exists as real code:
+   `NURBSCurve.split_at_discontinuities` and `NURBSCurve.elevate_degree_piecewise`
+   (`docs/nurbs_piecewise_degree_elevation.md`) split a broken curve into its exact
+   pieces and elevate each -- the elevated result is a tuple, because a break stays a
+   break at every degree.
 6. **Cost.** The implementation solves a dense `count x count` system with one
    elimination per call. For the curves in this library (tens of control points) that
    is microseconds; a production kernel would exploit the band explicitly. The
