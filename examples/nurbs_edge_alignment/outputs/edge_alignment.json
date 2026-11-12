@@ -1,0 +1,175 @@
+{
+  "insertion": {
+    "radius": 2.0,
+    "degree": 2,
+    "control_points": [
+      7,
+      10
+    ],
+    "knots": [
+      10,
+      13
+    ],
+    "insertions": [
+      {
+        "value": 0.25,
+        "times": 2
+      },
+      {
+        "value": 0.7,
+        "times": 1
+      }
+    ],
+    "max_point_deviation": 6.684427777288335e-16,
+    "radius_error_before": 6.661338147750939e-16,
+    "radius_error_after": 8.881784197001252e-16,
+    "arc_length": [
+      12.56637061435917,
+      12.566370614359172
+    ],
+    "analytic_arc_length": 12.566370614359172,
+    "arc_length_relative_error": [
+      1.4135798584282297e-16,
+      0.0
+    ],
+    "rational_after": true
+  },
+  "seam": {
+    "before": {
+      "degree": [
+        2,
+        3
+      ],
+      "control_points": [
+        5,
+        9
+      ],
+      "rational": [
+        true,
+        true
+      ],
+      "domain": [
+        [
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          2.0
+        ]
+      ],
+      "same_degree": false,
+      "knots_equal": false,
+      "max_control_difference": null,
+      "max_weight_difference": null,
+      "max_gap": 3.510833468576701e-16,
+      "tolerance": 1e-12,
+      "watertight": false
+    },
+    "after": {
+      "degree": [
+        3,
+        3
+      ],
+      "control_points": [
+        9,
+        9
+      ],
+      "rational": [
+        true,
+        true
+      ],
+      "domain": [
+        [
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          2.0
+        ]
+      ],
+      "same_degree": true,
+      "knots_equal": true,
+      "max_control_difference": 4.449557262054371e-16,
+      "max_weight_difference": 4.440892098500626e-16,
+      "max_gap": 4.440892098500626e-16,
+      "tolerance": 1e-12,
+      "watertight": true
+    },
+    "deviation_first_edge": 4.002966042486721e-16,
+    "deviation_second_edge": 0.0,
+    "neighbour_elevation_deviation": 4.590695853185804e-16,
+    "reversed_seam_gap": 2.0
+  },
+  "controls": {
+    "different_radius": {
+      "degree": [
+        2,
+        2
+      ],
+      "control_points": [
+        7,
+        7
+      ],
+      "rational": [
+        true,
+        true
+      ],
+      "domain": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "same_degree": true,
+      "knots_equal": true,
+      "max_control_difference": 0.004000000000000016,
+      "max_weight_difference": 0.0,
+      "max_gap": 0.002000000000000248,
+      "tolerance": 1e-12,
+      "watertight": false
+    },
+    "same_point_set_other_parametrisation": {
+      "degree": [
+        2,
+        2
+      ],
+      "control_points": [
+        13,
+        13
+      ],
+      "rational": [
+        true,
+        true
+      ],
+      "domain": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "same_degree": true,
+      "knots_equal": true,
+      "max_control_difference": 4.577566798522237e-16,
+      "max_weight_difference": 0.25,
+      "max_gap": 0.03852100059292648,
+      "tolerance": 1e-12,
+      "watertight": false
+    }
+  },
+  "notes": {
+    "radius_m": 1.0,
+    "sphere": "sphere_surface(1.0), degree (2, 2), split at u = 0.5",
+    "neighbour": "insert_knot(v, 0.37, 1) then elevate_degree(0, 1)",
+    "tolerance_m": 1e-12
+  }
+}
