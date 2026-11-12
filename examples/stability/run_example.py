@@ -25,6 +25,13 @@ matplotlib is optional: the JSON is written either way and the PNGs are skipped.
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_REPO_ROOT = _Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in _sys.path:  # allow running from a checkout without installing
+    _sys.path.insert(0, str(_REPO_ROOT))
+
 import argparse
 import json
 import math

@@ -6,6 +6,19 @@ semantic versioning.
 
 ## Unreleased
 
+### Fixed
+- **Examples start in a clean checkout** (`docs/examples_bootstrap_m16106.md`,
+  `tests/test_examples_bootstrap.py`, 69 cases). 21 of the 48 `examples/*/run_*.py` entry
+  points raised `ModuleNotFoundError: No module named 'tensorcad'` when run from a clone
+  that had not been installed, because the repository root was never put on `sys.path`
+  (43.75 % of the executable evidence in the README was dead on arrival). Each script now
+  carries the same `REPO_ROOT`/`sys.path` preamble the other 27 already used, and a test
+  guards it from both sides: an `ast` check that the preamble precedes the first `tensorcad`
+  import, and a subprocess probe that executes each previously broken module body with
+  `PYTHONPATH` stripped and the working directory outside the checkout. Two examples then
+  revealed real API drift (`analytic_hydrostatics(fore_exponent=...)`,
+  `ValidationReport.watertight`), recorded as open items rather than papered over.
+
 ### Added
 - **`tensorcad.sketch`: 2-D sketch constraint solving with real DOF diagnostics**
   (`GAP-CAD-006`, `docs/sketch_constraints.md`, `examples/sketch_solver/`, 46 tests). The
