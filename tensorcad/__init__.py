@@ -238,6 +238,19 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .midsurface import (
+    CoplanarRegion,
+    DefeatureResult,
+    MidSurfaceError,
+    MidSurfaceResult,
+    ThicknessSample,
+    cylinder_skin,
+    defeature_planar_regions,
+    extract_midsurface,
+    mid_surface_between,
+    plate_solid,
+    sphere_skin,
+)
 from .refine import (
     RefinementError,
     RefinementReport,
@@ -425,6 +438,17 @@ from .surface_intersection import (
 )
 __all__ = [
     "RefinementError",
+    "CoplanarRegion",
+    "DefeatureResult",
+    "MidSurfaceError",
+    "MidSurfaceResult",
+    "ThicknessSample",
+    "cylinder_skin",
+    "defeature_planar_regions",
+    "extract_midsurface",
+    "mid_surface_between",
+    "plate_solid",
+    "sphere_skin",
     "RefinementReport",
     "StageMetrics",
     "edge_lengths",
