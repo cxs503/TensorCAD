@@ -10,6 +10,20 @@ import pytest
 import tensorcad
 
 EXPECTED_API = {
+    "SectionArm",
+    "SectionArmCurve",
+    "ellipse_prism_righting_arms",
+    "ellipse_section",
+    "polygon_prism_righting_arms",
+    "prism_mesh",
+    "regular_polygon_section",
+
+    # fillet/chamfer of sections with exact arc moments (GAP-CAD-012)
+    "FilletError", "FilletSolid", "SectionMoments", "SectionShape",
+    "chamfer_section", "chamfer_solid", "fillet_section", "fillet_solid",
+    "max_chamfer_setback", "max_fillet_radius", "polygon_moments", "rectangle_section",
+    "section_turns",
+
     # NURBS hull surface -> body mesh -> consistency loop (IN383-CAD01)
     "HULL_NURBS_SCHEMA", "HullBodyMesh", "HullForm", "HullHydrostatics", "HullNurbsError",
     "HullNurbsParameters", "HullNurbsSurface", "build_body_mesh", "build_nurbs_hull",
