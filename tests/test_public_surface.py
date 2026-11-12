@@ -64,6 +64,13 @@ EXPECTED_API = {
     "read_metadata", "read_obj", "read_stl", "resolve_resolution",
     "suboff_fin_chord", "suboff_radius_fraction", "suboff_reference_geometry",
     "suboff_sail_half_width", "surface_point",
+    # exported by the girder merge but never added to this pinned list: the contract test
+    # had been red at HEAD for exactly these two names.
+    "GirderError", "GirderSection",
+    # surface--surface intersection (0.25.0): parameter-space marching for GAP-CAD-002
+    "CylinderPatch", "IntersectionCurve", "IntersectionResult", "PlanePatch", "SpherePatch",
+    "SurfaceIntersectionError", "cylinder_implicit", "plane_implicit", "sphere_implicit",
+    "surface_surface_intersection",
     "difference", "intersection", "union",
     "tanh_sinh_quadrature", "taper_integral", "taubin_smooth", "to_mesh", "to_voxel_grid", "validate_hull",
     "write_design_json", "write_metadata",
