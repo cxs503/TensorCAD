@@ -7,6 +7,27 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.surface_intersection`: surface--surface intersection curves** (`GAP-CAD-002`,
+  `docs/surface_intersection.md`, `examples/surface_intersection/`, `plot.png`, 24 tests).
+  `intersect.py` answered the facet question and `csg.py` the implicit one, but nothing
+  produced the *curve* two surfaces meet along -- the input a B-rep edge, a trimmed patch or
+  a plate seam needs. The method is marching squares on `g(u, v) = f(S(u, v))` in the
+  parametric surface's own rectangular domain: no seeding, no step size, branch and loop
+  topology from the cell graph. `CylinderPatch`/`SpherePatch` flag their periodic `u`, which
+  is the case that tears a seam-crossing loop into an open chain and loses one segment;
+  clamped `NURBSSurface` patches close by position instead, since their seam is a duplicated
+  row. Measured against references computed in the example (elementary closed forms, `2 pi r`,
+  and the complete elliptic integral by AGM, itself cross-checked against a 2e5-point
+  midpoint quadrature): meridians **exact** (8.000000000 m), 30 deg ellipse **5.98e-06**
+  relative, sphere cap **1.12e-05**, cylinder x concentric sphere **1.12e-05**, NURBS
+  rational cylinder x plane **1.14e-05**, the perpendicular-cylinder Viviani pair
+  **5.46e-06** (two closed branches, residual **6.7e-16 m** on all 338 points, closure defect
+  **0.0**), truncated quarter-circle **6.29e-06**; the acceptance bound is 3%, so this is
+  ~2.5e3x inside it, and the arc length converges at measured order **2.00**. Three traps are
+  documented: the seam-closing chord that a period-apart parameter pair makes worthless (it
+  inflated the Viviani length 1.9x until unwrapping was fixed), tangential contact, which has
+  no sign change and is honestly *not* found, and coincident surfaces, which raise instead of
+  returning a cloud.
 - **`tensorcad.nurbs`: piecewise (break-aware) degree elevation** (`NURBSCurve.split_at_discontinuities`, `NURBSCurve.elevate_degree_piecewise`,
   `docs/nurbs_piecewise_degree_elevation.md`, `examples/nurbs_piecewise_elevation/`,
   17 tests). Degree elevation already refused a curve with an interior knot of
