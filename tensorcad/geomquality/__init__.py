@@ -53,6 +53,13 @@ from .continuity import (
     seam_metrics_adaptive,
 )
 from .defects import DEFECT_CASES, DefectCase, detect_all, run_library
+from .mesh_defects import (
+    MeshDefect,
+    MeshDefectReport,
+    RepairResult,
+    name_mesh_defects,
+    repair_facet_defects,
+)
 from .hydro import (
     DEFAULT_ORDER,
     PatchHydrostatics,
@@ -96,6 +103,9 @@ __all__ = [
     "REPAIR_HINTS",
     "TOPOLOGY_CODES",
     "BRep",
+    "MeshDefect",
+    "MeshDefectReport",
+    "RepairResult",
     "CriterionResult",
     "Defect",
     "DefectCase",
@@ -122,11 +132,13 @@ __all__ = [
     "label_seam_dataset",
     "load_cad",
     "merge_breps",
+    "name_mesh_defects",
     "mirror",
     "patch_hydrostatics",
     "read_brep_json",
     "read_iges",
     "read_step",
+    "repair_facet_defects",
     "report_criteria",
     "richardson_gci",
     "round_trip",
