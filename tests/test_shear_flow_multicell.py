@@ -19,14 +19,19 @@ from __future__ import annotations
 import math
 
 import pytest
+from shear_flow_reduction import (
+    canonical_span,
+    difference_on_points,
+    difference_on_spans,
+    flow_scale,
+    points_along,
+)
 
 from tensorcad.shear_flow import (
     AXIS_Y,
-    AXIS_Z,
     ShearFlowError,
     ThinWalledSection,
     Wall,
-    box_section,
     channel_section,
     i_section,
     shear_centre,
@@ -181,80 +186,77 @@ def reference_box() -> ThinWalledSection:
 
 
 class TestReductions:
-    @pytest.mark.xfail(
-        strict=True,
-        reason="honest open item: the pointwise reduction to the merged solver is not yet "
-        "wired up correctly in this test (the two evaluations disagree by O(1) while every "
-        "aggregate anchor -- resultant, twist, continuity, symmetry, the channel formula, "
-        "the energy stationarity -- holds at round-off). The graph solver's own residuals "
-        "are what the other tests assert; this comparison is left explicitly red.",
-    )
-    def test_two_cells_with_a_vanishing_web_reproduce_the_single_cell_box(self):
-        """The limit of a vanishing internal web is the merged single-cell box.
+    """The graph solver reduced to the merged one, compared as a *field*.
 
-        The compared quantities are the two side webs (identical geometry in both bodies)
-        and the total ``SUM INT |q| ds``; the flanges are split per cell in the two-cell
-        body, so a per-wall comparison there would compare a split wall with an unsplit one.
+    These three comparisons were ``xfail`` items with the note "the pointwise reduction is
+    not yet wired up correctly in this test": the two solvers agreed at round-off while the
+    *comparison* did not. ``tests/shear_flow_reduction.py`` records the diagnosis (a wall's
+    arc sense is not shared between the modules; a relative tolerance is meaningless at a
+    zero crossing; a spliced flange is not an unspliced one). Everything here is now
+    compared on physical points or on canonical wall spans, and the tolerance is a fraction
+    of the section's own flow scale -- so a wall carrying zero flow is not compared against
+    a tolerance proportional to zero.
+    """
+
+    TOLERANCE = 1e-9  # of the largest |q| anywhere in the section
+
+    def test_two_cells_with_a_vanishing_web_reproduce_the_single_cell_box(self):
+        """The limit of a vanishing internal web is the merged single-cell box, at O(t_web).
+
+        The limit is not round-off and cannot be: a wall whose thickness vanishes still
+        carries a finite *stress*, so it carries a vanishing *flow* (``q_web = tau t_web``),
+        and the perturbation it exerts on the rest of the section is first order in
+        ``t_web``. The assertion is the convergence *rate*: refine the web by 100x and the
+        difference falls by ~100x. Measured over seven decades; the ratio
+        ``difference / t_web`` holds two significant digits.
         """
         module = shear_flow(reference_box(), 8000.0)
-        side = {edge.label: abs(edge.q_at(0.5)) for edge in module.edges if edge.label.startswith("side")}
-        previous = None
-        for inner, ceiling in ((1e-3, 1e-5), (1e-6, 1e-8), (1e-9, 1e-11)):
+        scale = flow_scale(module)
+        side = {edge.label: edge for edge in module.edges if edge.label.startswith("side")}
+        spans = [canonical_span(side[label]) for label in ("side_s", "side_p")]
+        previous = 0.0
+        ratios: list[float] = []
+        for inner in (1e-3, 1e-5, 1e-7, 1e-9):
             section = multi_cell_box_section([2.0, 2.0], 3.0, 0.02, inner_thickness=inner)
             flow = multi_cell_shear_flow(section, 8000.0)
-            worst = 0.0
-            for label in ("box.side_s", "box.side_p"):
-                got = abs(flow.edge(label)[0].q_at(0.5))
-                expected = side["side_s" if label.endswith("s") else "side_p"]
-                worst = max(worst, close(got, expected))
-            assert worst < ceiling, (inner, worst)
-            if previous is not None:
-                assert worst < previous
+            worst = difference_on_spans(flow, module, spans)
+            if previous:
+                ratios.append(previous / worst)
             previous = worst
+        assert previous < 1e-6 * scale, previous / scale
+        # Two refinements of two decades each: a first-order limit gives 100, not 1 or 1e4.
+        assert min(ratios) > 50.0, ratios
+        assert max(ratios) < 200.0, ratios
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="honest open item: the pointwise reduction to the merged solver is not yet "
-        "wired up correctly in this test (the two evaluations disagree by O(1) while every "
-        "aggregate anchor -- resultant, twist, continuity, symmetry, the channel formula, "
-        "the energy stationarity -- holds at round-off). The graph solver's own residuals "
-        "are what the other tests assert; this comparison is left explicitly red.",
-    )
     def test_one_cell_matches_the_merged_box_pointwise(self):
         walls = multi_cell_box_section([4.0], 3.0, 0.02).walls
         section = MultiCellSection(walls)
         assert section.cell_count == 1
         flow = multi_cell_shear_flow(section, 8000.0)
         module = shear_flow(reference_box(), 8000.0)
-        for label, merged in (("box.side_s", "side_s"), ("box.side_p", "side_p"),
-                              ("box.top0", "top"), ("box.bottom0", "bottom")):
-            mine = flow.edge(label)[0]
-            reference = next(edge for edge in module.edges if edge.label == merged)
-            for fraction in (0.0, 0.25, 0.5, 0.75, 1.0):
-                assert close(abs(mine.q_at(fraction)), abs(reference.q_at(fraction))) < ROUND_OFF
+        scale = flow_scale(module)
+        # Wall by wall, on the spans both bodies have...
+        assert difference_on_spans(flow, module) < TestReductions.TOLERANCE * scale
+        # ...and at physical points, which is where the flange midpoints live: q is zero
+        # there (symmetry), and that zero is what a relative tolerance called a 100 % error.
+        points = points_along(reference_box().walls)
+        assert difference_on_points(flow, module, points) < TestReductions.TOLERANCE * scale
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="honest open item: the pointwise reduction to the merged solver is not yet "
-        "wired up correctly in this test (the two evaluations disagree by O(1) while every "
-        "aggregate anchor -- resultant, twist, continuity, symmetry, the channel formula, "
-        "the energy stationarity -- holds at round-off). The graph solver's own residuals "
-        "are what the other tests assert; this comparison is left explicitly red.",
-    )
     def test_an_open_tree_matches_the_merged_open_section(self):
         section = i_section(depth=3.0, flange_width=2.0, web_thickness=0.02,
                             flange_thickness=0.03)
         graph = MultiCellSection(section.walls)
+        assert graph.cell_count == 0
         flow = multi_cell_shear_flow(graph, 12000.0)
         module = shear_flow(section, 12000.0)
         assert flow.resultant[1] == pytest.approx(12000.0, rel=ROUND_OFF)
         assert flow.resultant[0] == pytest.approx(0.0, abs=1e-9)
         assert len(flow.edge_flows) == len(module.edges)
-        # The walls are the same objects in the same order, so they match by index; the arc
-        # sense is the caller's declaration and is compared as a magnitude.
-        for mine, edge in zip(flow.edge_flows, module.edges):
-            for fraction in (0.0, 0.25, 0.5, 0.75, 1.0):
-                assert close(abs(mine.q_at(fraction)), abs(edge.q_at(fraction))) < ROUND_OFF
+        scale = flow_scale(module)
+        # The merged module sweeps this tree from its free edges inwards, so half of its
+        # walls run the other way; on physical points that is not visible.
+        points = points_along(section.walls, count=11)
+        assert difference_on_points(flow, module, points) < TestReductions.TOLERANCE * scale
 
     def test_the_channel_shear_centre_still_lands_on_the_classical_formula(self):
         channel = channel_section(depth=3.0, flange_width=1.0, thickness=0.02)

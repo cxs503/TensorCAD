@@ -1,0 +1,120 @@
+{
+  "geometry": {
+    "width": 4.0,
+    "height": 3.0,
+    "thickness": 0.02
+  },
+  "shear_force": 8000.0,
+  "second_moment": 0.45,
+  "centroid_z": 1.4999999999999993,
+  "flow_scale": 1466.6666666666677,
+  "stations": [
+    {
+      "station": "web, top corner (u=0.2)",
+      "point": [
+        4.0,
+        2.8
+      ],
+      "closed_form": 1166.2222222222222,
+      "merged": 1166.2222222222224,
+      "graph": 1166.2222222222235,
+      "oracle": 1166.222222222222,
+      "merged_error": 1.9496599456832017e-16,
+      "graph_error": 1.169795967409921e-15,
+      "oracle_error": 1.9496599456832017e-16
+    },
+    {
+      "station": "web, mid height (u=1.5)",
+      "point": [
+        4.0,
+        1.5
+      ],
+      "closed_form": 1466.6666666666663,
+      "merged": 1466.6666666666667,
+      "graph": 1466.6666666666679,
+      "oracle": 1466.6666666666663,
+      "merged_error": 3.100550119680438e-16,
+      "graph_error": 1.0851925418881533e-15,
+      "oracle_error": 0.0
+    },
+    {
+      "station": "top flange, s=1 from centre",
+      "point": [
+        3.0,
+        3.0
+      ],
+      "closed_form": 533.3333333333334,
+      "merged": 533.333333333333,
+      "graph": 533.3333333333346,
+      "oracle": 533.3333333333322,
+      "merged_error": 6.394884621840901e-16,
+      "graph_error": 2.3447910280083303e-15,
+      "oracle_error": 2.1316282072803005e-15
+    },
+    {
+      "station": "bottom flange, s=1.5 from centre",
+      "point": [
+        3.5,
+        0.0
+      ],
+      "closed_form": 800.0,
+      "merged": 800.0000000000005,
+      "graph": 799.9999999999991,
+      "oracle": 799.9999999999997,
+      "merged_error": 5.684341886080802e-16,
+      "graph_error": 1.1368683772161603e-15,
+      "oracle_error": 4.263256414560601e-16
+    }
+  ],
+  "routes": {
+    "oracle_vs_merged_max_difference": 2.0463630789890885e-12,
+    "oracle_vs_graph_max_difference": 2.5011104298755527e-12,
+    "merged_vs_graph_max_difference": 1.8189894035458565e-12,
+    "oracle_resultant_z": 7999.999999999996,
+    "oracle_circulation": 1.26809546990054e-12
+  },
+  "vanishing_web": [
+    {
+      "inner_thickness": 0.001,
+      "max_difference": 49.08267063631979,
+      "difference_over_thickness": 49082.67063631979,
+      "ratio_to_previous": null
+    },
+    {
+      "inner_thickness": 0.0001,
+      "max_difference": 5.149427495587361,
+      "difference_over_thickness": 51494.2749558736,
+      "ratio_to_previous": 9.531675254847192
+    },
+    {
+      "inner_thickness": 1e-05,
+      "max_difference": 0.5174927950258734,
+      "difference_over_thickness": 51749.279502587335,
+      "ratio_to_previous": 9.950723073023465
+    },
+    {
+      "inner_thickness": 1e-06,
+      "max_difference": 0.05177492646248538,
+      "difference_over_thickness": 51774.92646248538,
+      "ratio_to_previous": 9.995046451699622
+    },
+    {
+      "inner_thickness": 1e-07,
+      "max_difference": 0.005177749264021259,
+      "difference_over_thickness": 51777.492640212586,
+      "ratio_to_previous": 9.999504383546528
+    },
+    {
+      "inner_thickness": 1e-08,
+      "max_difference": 0.0005177774930871237,
+      "difference_over_thickness": 51777.74930871237,
+      "ratio_to_previous": 9.999950428803258
+    },
+    {
+      "inner_thickness": 1e-09,
+      "max_difference": 5.177777552489715e-05,
+      "difference_over_thickness": 51777.77552489715,
+      "ratio_to_previous": 9.999994936788127
+    }
+  ]
+}
