@@ -10,6 +10,13 @@ holding, so the numbers on ``docs/bonjean.md`` cannot rot silently.
 """
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_REPO_ROOT = _Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in _sys.path:  # allow running from a checkout without installing
+    _sys.path.insert(0, str(_REPO_ROOT))
+
 import json
 import pathlib
 import sys
