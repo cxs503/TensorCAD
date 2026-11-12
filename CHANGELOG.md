@@ -6,6 +6,23 @@ semantic versioning.
 
 ## Unreleased
 
+### Added
+- **Exact barge hydrostatics at combined heel *and* trim** (`tensorcad.box_inclined`,
+  `docs/box_inclined_exact.md`, `examples/box_inclined/`, 29 tests). Every previous exact
+  reference held one attitude: `gz`/`box_gz` heel a section (no trim), `trim` assumes upright,
+  `compute_hydrostatics` cuts the mesh with a horizontal plane. The submerged body of a box is
+  `box ∩ half-space`, so clipping the six faces by the waterline plane and closing the cut with
+  the waterplane polygon gives the polyhedron *exactly* -- bilge emergence, deck-edge immersion
+  and a corner cut are one code path. Volume/centroid by the divergence theorem, in-plane
+  waterplane moments by Green's theorem, and one `GZ` expression for both attitudes. Measured
+  against closed forms: upright `VCB` 3.6e-15, `BM_T` (`B^2/12T`) 3.7e-15, trim `LCB`
+  (`L^2 tanτ/12T`) 2.3e-15, displacement preserved over 12 combined attitudes 5.7e-15. Inside the
+  wall-sided window the arm matches the closed form to 1e-12; at 40 deg it is 0.170156 m while
+  the extrapolated closed form is >0.02 m away, so the comparison is not vacuous. The trim
+  closed form's own window (deck immersion past `tau = 4.6 deg` on this barge) is flagged rather
+  than extrapolated, and the tests say plainly that the 2-D oracle they use is an independent
+  *implementation* of the same cut, not an independent method.
+
 ### Fixed
 - **`section_gz.ellipse_section` returned a polygon that was not inscribed** for side counts
   with no vertex on the keel (any `sides` not divisible by four): the `- min(z)` keel shift
