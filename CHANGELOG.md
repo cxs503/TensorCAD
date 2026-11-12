@@ -1,3 +1,26 @@
+## [0.25.0] - 2026-11-13
+
+### Added
+- **`tensorcad.shell`: hollow a closed solid by an inward offset, with the wall measured**
+  (`docs/shelling.md`, `examples/shelling/`, `tests/test_shell.py` + `tests/shell_oracle.py`,
+  48 tests). Closes `GAP-CAD-011` in `docs/oss_inventory_cad/GAP-ANCHORS.md`, whose acceptance
+  criterion is "box shelled at thickness `t` matches the analytic outer-minus-inner volume to
+  2 %, and `t/L` from 0.01 to 0.1 does not fail". Every triangle carries a plane, so the offset
+  vertex is the angle-weighted least-squares solution of the incident offset planes (a 3x3
+  system, ridge `1e-14` for rank-deficient flat/edge vertices), and the module then *proves*
+  the wall instead of assuming it: inner signed volume, per-face normal dot, and the measured
+  closest approach from every inner vertex to the whole outer surface through a triangle grid.
+  Measured: box inner volume matches `(1-2t)^3` to **3.0e-14** over the full sweep; a convex
+  pentagon prism (facets not mutually orthogonal, so the weights matter) matches an independent
+  2-D half-plane-clipping oracle to **2.5e-14**; a faceted sphere's shell volume converges to
+  `4/3 pi (R^3-(R-t)^3)` at observed order **1.98 / 1.99** (6.8 % -> 1.72 % -> 0.43 %), so the
+  residual is faceting, not model error; feeding the wall measurement a deliberately
+  under-offset surface makes it report that smaller distance, so the number it reports for a
+  correct shell is not a tautology. Failures are first-class: a plate thinner than twice the
+  thickness, a collapsing taper, an open surface, an inward-oriented surface and a non-positive
+  thickness all raise with a named reason. Not implemented: face removal and rim stitching
+  (needs B-rep topology, `GAP-CAD-001`) -- the export is a closed double-walled body.
+
 # Changelog
 
 All notable changes to TensorCAD are documented here. The format follows
