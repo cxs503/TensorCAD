@@ -1,3 +1,26 @@
+
+## Unreleased
+
+- **`tensorcad.savitsky` audited and fixed (m16954, verifier seat).** The trim solve never
+  solved the wetted length ratio: `λ` stayed at its 3.0 initial guess, so every
+  wetted-geometry-dependent number (wetted area, friction drag, total resistance, effective
+  power) was a function of a constant while being reported as an equilibrium. Added
+  `equilibrium_trim`, `classic_lift_coefficient`, `center_of_pressure_ratio`,
+  `speed_coefficient`, `trim_for_wetted_length` and `validity_warnings`: the two-equation
+  closure (lift = weight, centre of pressure under the LCG) now solves (τ, λ) with
+  residuals 4.7e-15 / 1.2e-10 m, and `planing_prediction(..., lcg_m=...)` exposes it.
+  `running_trim` takes λ as an explicit input and solves the trim in closed form (the
+  lift equation is invertible; the old loop ended either in a clamp or in a misleading
+  "failed to converge"). The hull-length cap is announced and re-solves the trim instead
+  of silently breaking lift equilibrium, the documented validity box is now evaluated and
+  reported per result, and `speed_sweep(failures=[...])` records skipped speeds.
+  `PlaningPrediction` gains `wetted_length_ratio_solved`, `solution_method`, `warnings`.
+  Audit document: `docs/savitsky_audit_m16954.md`; evidence generator:
+  `examples/savitsky_audit/run_example.py` -> `artifacts/savitsky_audit/`.
+  Open evidence gap (WITHHELD): the module's lift correlation disagrees with the classical
+  Cv-dependent Savitsky statement by 22-78 % and neither could be checked against the
+  primary paper in this environment.
+
 ## [0.27.0] - 2026-11-12
 - `tensorcad.patches`: multi-patch NURBS assembly -- `PatchNetwork`, `Seam`, `stitch`
   (index welding with a measured seam gap and dihedral), `derive_seams`,
