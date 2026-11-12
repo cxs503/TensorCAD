@@ -165,8 +165,26 @@ EXPECTED_API = {
 }
 
 
+#: exports added by merges after EXPECTED_API was pinned (refine/mesh_repair/geodesy);
+#: kept separate so the pinned surface stays auditable 
+POST_MERGE_API = {
+    "GeodesicError",
+    "GeodesicSolution",
+    "RefinementError",
+    "RefinementReport",
+    "StageMetrics",
+    "clairaut_distance",
+    "edge_lengths",
+    "great_circle",
+    "refine",
+    "sphere_error",
+    "vincenty_direct",
+    "vincenty_inverse",
+}
+
+
 def test_declared_api_is_importable() -> None:
-    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API
+    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API | POST_MERGE_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
     assert tensorcad.__version__ == "0.23.0"

@@ -722,6 +722,24 @@ __all__ = [
     "SpherePatch", "SurfaceIntersectionError", "cylinder_implicit", "plane_implicit",
     "sphere_implicit", "surface_surface_intersection",
     # surface--surface intersection (0.25.0): parameter-space marching for GAP-CAD-002
+    # ellipsoidal geodesics (WGS84): route/geodesic lengths in true metres
+    "GeodesicError",
+    "GeodesicSolution",
+    "clairaut_distance",
+    "great_circle",
+    "sphere_error",
+    "vincenty_direct",
+    "vincenty_inverse",
 ]
+
+from .geodesy import (  # ellipsoidal geodesics (WGS84): the Earth model behind a route
+    GeodesicError,
+    GeodesicSolution,
+    clairaut_distance,
+    great_circle,
+    sphere_error,
+    vincenty_direct,
+    vincenty_inverse,
+)
 
 __version__ = "0.23.0"
