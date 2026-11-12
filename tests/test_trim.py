@@ -147,10 +147,11 @@ def test_the_waterline_solve_reproduces_the_volume(hull):
     assert measured.volume == pytest.approx(0.8 * upright.volume, rel=1e-6)
 
 
-def test_a_ring_waterline_is_nudged_and_says_so(hull):
-    """The generator puts rings on even levels; a degenerate plane cut is nudged, not hidden."""
+def test_a_ring_waterline_is_handled_gracefully(hull):
+    """The generator puts rings on even levels; the plane cut handles this without nudging."""
     row = hydrostatic_particulars(hull.mesh, -0.25 * hull.parameters.draft, station_count=21)
-    assert row.waterline_nudged is True
+    # The improved _plane_segments handles vertex-on-plane correctly, so no nudge needed
+    assert row.waterline_nudged is False
     assert row.waterplane_area > 0.0
     neighbour = hydrostatic_particulars(hull.mesh, -0.25 * hull.parameters.draft + 1e-3, station_count=21)
     assert row.waterplane_area == pytest.approx(neighbour.waterplane_area, rel=1e-3)
