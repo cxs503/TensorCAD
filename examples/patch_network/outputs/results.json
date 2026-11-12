@@ -1,0 +1,1048 @@
+{
+  "box": {
+    "dimensions_m": [
+      2.0,
+      3.0,
+      4.0
+    ],
+    "analytic_volume_m3": 24.0,
+    "analytic_area_m2": 52.0,
+    "patches": 6,
+    "seams": 12,
+    "report": {
+      "vertices": 98,
+      "triangles": 192,
+      "watertight": true,
+      "edge_manifold": true,
+      "boundary_edges": 0,
+      "non_manifold_edges": 0,
+      "components": 1,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 24.0,
+      "surface_area_m2": 52.0,
+      "open_sides": 0,
+      "reference_volume_m3": 24.0,
+      "volume_relative_error": 0.0,
+      "reference_area_m2": 52.0,
+      "area_relative_error": 0.0
+    },
+    "seam_angle_deg": [
+      90.0
+    ],
+    "seam_gap_max_m": 0.0
+  },
+  "torus": {
+    "major_radius_m": 2.0,
+    "minor_radius_m": 0.5,
+    "analytic_volume_m3": 9.869604401089358,
+    "analytic_area_m2": 39.47841760435743,
+    "patches": 16,
+    "seams": 32,
+    "refinement": [
+      {
+        "samples_per_patch": 8,
+        "triangles": 2048,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 9.742651547699959,
+        "volume_error": -0.012863013372186113,
+        "area_m2": 39.25570656774522,
+        "area_error": -0.005641336459940298,
+        "seam_gap_max_m": 6.123233995736766e-16,
+        "seam_angle_max_deg": 1.2074182697257333e-06
+      },
+      {
+        "samples_per_patch": 16,
+        "triangles": 8192,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 9.837731860895811,
+        "volume_error": -0.0032293634980981355,
+        "area_m2": 39.42260655178927,
+        "area_error": -0.0014137104766326737,
+        "seam_gap_max_m": 6.123233995736766e-16,
+        "seam_angle_max_deg": 1.4787793334710982e-06
+      },
+      {
+        "samples_per_patch": 32,
+        "triangles": 32768,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 9.861627838707998,
+        "volume_error": -0.0008081947418763755,
+        "area_m2": 39.46445648635796,
+        "area_error": -0.0003536392501692033,
+        "seam_gap_max_m": 6.123233995736766e-16,
+        "seam_angle_max_deg": 1.4787793334710982e-06
+      },
+      {
+        "samples_per_patch": 64,
+        "triangles": 131072,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 9.867609733285503,
+        "volume_error": -0.00020210210285982172,
+        "area_m2": 39.47492680230274,
+        "area_error": -8.842304901062987e-05,
+        "seam_gap_max_m": 6.123233995736766e-16,
+        "seam_angle_max_deg": 1.4787793334710982e-06
+      }
+    ],
+    "observed_volume_order": [
+      1.9939069118934079,
+      1.9984749697917144,
+      1.9996186324145615
+    ],
+    "observed_area_order": [
+      1.9965502934758164,
+      1.9991363786581424,
+      1.9997840199261026
+    ],
+    "seam_angle_max_deg": 1.4787793334710982e-06,
+    "seam_gap_max_m": 6.123233995736766e-16,
+    "inset_normals": 0
+  },
+  "double_cone": {
+    "radius_m": 1.0,
+    "half_height_m": 1.0,
+    "analytic_volume_m3": 2.0943951023931953,
+    "analytic_area_m2": 8.885765876316732,
+    "patches": 8,
+    "seams": 12,
+    "pole_sides": 8,
+    "open_sides": 0,
+    "refinement": [
+      {
+        "samples_per_patch": 8,
+        "triangles": 960,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 2.080881388867074,
+        "volume_error": -0.006452322921630087,
+        "area_m2": 8.849948013056084,
+        "area_error": -0.004030925837930752,
+        "seam_gap_max_m": 2.4492935982947064e-16,
+        "seam_angle_max_deg": 90.00000000000001
+      },
+      {
+        "samples_per_patch": 16,
+        "triangles": 3968,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 2.0910105861782,
+        "volume_error": -0.0016159874567734972,
+        "area_m2": 8.876792310208446,
+        "area_error": -0.0010098809976756052,
+        "seam_gap_max_m": 2.4492935982947064e-16,
+        "seam_angle_max_deg": 90.00000000000001
+      },
+      {
+        "samples_per_patch": 32,
+        "triangles": 16128,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 2.0935485917677097,
+        "volume_error": -0.00040417905127752417,
+        "area_m2": 8.883521287811337,
+        "area_error": -0.0002526049568082009,
+        "seam_gap_max_m": 2.4492935982947064e-16,
+        "seam_angle_max_deg": 90.00000000000001
+      },
+      {
+        "samples_per_patch": 64,
+        "triangles": 65024,
+        "watertight": true,
+        "edge_manifold": true,
+        "components": 1,
+        "volume_m3": 2.094183450871673,
+        "volume_error": -0.00010105615758955991,
+        "area_m2": 8.885204654328948,
+        "area_error": -6.315966407350362e-05,
+        "seam_gap_max_m": 2.4492935982947064e-16,
+        "seam_angle_max_deg": 90.00000000000003
+      }
+    ],
+    "observed_volume_order": [
+      1.9974026433614793,
+      1.9993495465473845,
+      1.9998373171342982
+    ],
+    "observed_area_order": [
+      1.9969259415965313,
+      1.9992304445566698,
+      1.9998075459842535
+    ],
+    "inset_normals": 8,
+    "pole_side_samples": [
+      [
+        0,
+        "v1"
+      ],
+      [
+        1,
+        "v1"
+      ],
+      [
+        2,
+        "v1"
+      ],
+      [
+        3,
+        "v1"
+      ],
+      [
+        4,
+        "v0"
+      ],
+      [
+        5,
+        "v0"
+      ],
+      [
+        6,
+        "v0"
+      ],
+      [
+        7,
+        "v0"
+      ]
+    ]
+  },
+  "seams": {
+    "torus": [
+      {
+        "label": "derived0",
+        "first": [
+          0,
+          "u0"
+        ],
+        "second": [
+          12,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 6.123233995736766e-16,
+        "gap_mean_m": 5.664427990184506e-16,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 3.1351777068708166e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived1",
+        "first": [
+          0,
+          "u1"
+        ],
+        "second": [
+          4,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.4787793334710982e-06,
+        "angle_mean_deg": 3.710854360220019e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived2",
+        "first": [
+          0,
+          "v0"
+        ],
+        "second": [
+          3,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived3",
+        "first": [
+          0,
+          "v1"
+        ],
+        "second": [
+          1,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 7.102460410151373e-08,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived4",
+        "first": [
+          1,
+          "u0"
+        ],
+        "second": [
+          13,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 6.123233995736766e-16,
+        "gap_mean_m": 5.664427990184505e-16,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.632957914958114e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived5",
+        "first": [
+          1,
+          "u1"
+        ],
+        "second": [
+          5,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.4787793334710982e-06,
+        "angle_mean_deg": 3.710854360220019e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived6",
+        "first": [
+          1,
+          "v1"
+        ],
+        "second": [
+          2,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived7",
+        "first": [
+          2,
+          "u0"
+        ],
+        "second": [
+          14,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 4.898587196589413e-16,
+        "gap_mean_m": 4.1327464029943194e-16,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 1.714685624840542e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived8",
+        "first": [
+          2,
+          "u1"
+        ],
+        "second": [
+          6,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 1.2124658329278395e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived9",
+        "first": [
+          2,
+          "v1"
+        ],
+        "second": [
+          3,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.632957914958114e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived10",
+        "first": [
+          3,
+          "u0"
+        ],
+        "second": [
+          15,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 4.898587196589413e-16,
+        "gap_mean_m": 4.1327464029943194e-16,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 3.2213450005786485e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived11",
+        "first": [
+          3,
+          "u1"
+        ],
+        "second": [
+          7,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.7191252086659463e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived12",
+        "first": [
+          4,
+          "u1"
+        ],
+        "second": [
+          8,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.4787793334710982e-06,
+        "angle_mean_deg": 3.5028281111175834e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived13",
+        "first": [
+          4,
+          "v0"
+        ],
+        "second": [
+          7,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived14",
+        "first": [
+          4,
+          "v1"
+        ],
+        "second": [
+          5,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 1.9227118739429768e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived15",
+        "first": [
+          5,
+          "u1"
+        ],
+        "second": [
+          9,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.424931665855679e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived16",
+        "first": [
+          5,
+          "v1"
+        ],
+        "second": [
+          6,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived17",
+        "first": [
+          6,
+          "u1"
+        ],
+        "second": [
+          10,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 8.537736462515939e-07,
+        "angle_mean_deg": 1.0044395838254045e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived18",
+        "first": [
+          6,
+          "v1"
+        ],
+        "second": [
+          7,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.424931665855679e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived19",
+        "first": [
+          7,
+          "u1"
+        ],
+        "second": [
+          11,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 8.537736462515939e-07,
+        "angle_mean_deg": 2.5110989595635114e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived20",
+        "first": [
+          8,
+          "u1"
+        ],
+        "second": [
+          12,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 3.3432039559732514e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived21",
+        "first": [
+          8,
+          "v0"
+        ],
+        "second": [
+          11,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived22",
+        "first": [
+          8,
+          "v1"
+        ],
+        "second": [
+          9,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.632957914958114e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived23",
+        "first": [
+          9,
+          "u1"
+        ],
+        "second": [
+          13,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.632957914958114e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived24",
+        "first": [
+          9,
+          "v1"
+        ],
+        "second": [
+          10,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived25",
+        "first": [
+          10,
+          "u1"
+        ],
+        "second": [
+          14,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 1.2124658329278395e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived26",
+        "first": [
+          10,
+          "v1"
+        ],
+        "second": [
+          11,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 2.424931665855679e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived27",
+        "first": [
+          11,
+          "u1"
+        ],
+        "second": [
+          15,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 8.537736462515939e-07,
+        "angle_mean_deg": 1.0044395838254045e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived28",
+        "first": [
+          12,
+          "v0"
+        ],
+        "second": [
+          15,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived29",
+        "first": [
+          12,
+          "v1"
+        ],
+        "second": [
+          13,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 4.139617290696221e-07,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived30",
+        "first": [
+          13,
+          "v1"
+        ],
+        "second": [
+          14,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 0.0,
+        "angle_mean_deg": 0.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived31",
+        "first": [
+          14,
+          "v1"
+        ],
+        "second": [
+          15,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 17,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 1.2074182697257333e-06,
+        "angle_mean_deg": 1.714685624840542e-07,
+        "inset_normals": 0
+      }
+    ],
+    "box": [
+      {
+        "label": "derived0",
+        "first": [
+          0,
+          "u0"
+        ],
+        "second": [
+          2,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived1",
+        "first": [
+          0,
+          "u1"
+        ],
+        "second": [
+          3,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived2",
+        "first": [
+          0,
+          "v0"
+        ],
+        "second": [
+          4,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived3",
+        "first": [
+          0,
+          "v1"
+        ],
+        "second": [
+          5,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived4",
+        "first": [
+          1,
+          "u0"
+        ],
+        "second": [
+          4,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived5",
+        "first": [
+          1,
+          "u1"
+        ],
+        "second": [
+          5,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived6",
+        "first": [
+          1,
+          "v0"
+        ],
+        "second": [
+          2,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived7",
+        "first": [
+          1,
+          "v1"
+        ],
+        "second": [
+          3,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived8",
+        "first": [
+          2,
+          "u0"
+        ],
+        "second": [
+          4,
+          "v0"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived9",
+        "first": [
+          2,
+          "u1"
+        ],
+        "second": [
+          5,
+          "u0"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived10",
+        "first": [
+          3,
+          "v0"
+        ],
+        "second": [
+          4,
+          "v1"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      },
+      {
+        "label": "derived11",
+        "first": [
+          3,
+          "v1"
+        ],
+        "second": [
+          5,
+          "u1"
+        ],
+        "reversed": false,
+        "samples": 5,
+        "gap_max_m": 0.0,
+        "gap_mean_m": 0.0,
+        "angle_max_deg": 90.0,
+        "angle_mean_deg": 90.0,
+        "inset_normals": 0
+      }
+    ]
+  },
+  "negative_controls": {
+    "moved_patch": {
+      "offset_m": 0.001,
+      "sides_left_unclaimed_by_derive": 8,
+      "watertight_with_declared_seams": true,
+      "measured_gap_m": 0.0009999999999998899,
+      "volume_error": 0.00028124999999927053
+    },
+    "missing_patch": {
+      "open_sides": 4,
+      "watertight": false,
+      "boundary_edges": 16
+    },
+    "unclaimed_but_coincident_seam": {
+      "open_sides": 2,
+      "watertight": true
+    },
+    "reversed_flag": {
+      "gap_declared_correctly_m": 0.0,
+      "gap_flag_omitted_m": 1.0,
+      "edge_length_m": 1.0
+    },
+    "sample_mismatch": {
+      "refused": true,
+      "message": "seam 0 joins a side sampled with 8 nodes to one sampled with 4; a u1/v0 seam needs nu == nv (got 4 x 8)"
+    }
+  },
+  "environment": {
+    "python": "3.11.6",
+    "generated_by": "examples/patch_network/run_example.py",
+    "grid": "common (nu, nv) grid per patch, seams welded by index"
+  }
+}

@@ -1,3 +1,12 @@
+## [0.27.0] - 2026-11-12
+- `tensorcad.patches`: multi-patch NURBS assembly -- `PatchNetwork`, `Seam`, `stitch`
+  (index welding with a measured seam gap and dihedral), `derive_seams`,
+  `bilinear_patch`, `revolve_patch`. Closes the limitation `tensorcad.edge_alignment`
+  named ("multi-patch face assembly itself stays out of scope").
+  Evidence: `docs/patch_network.md`, `examples/patch_network/` (box exact V=24 m3 /
+  A=52 m2; 16-patch torus second-order to -1.29%/-0.020% volume; 8-patch double cone
+  with two collapsed apex poles, -0.010% at 64 samples), `tests/test_patches.py` (29).
+
 ## [0.25.0] - 2026-11-13
 
 ### Added
