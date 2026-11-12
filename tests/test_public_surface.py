@@ -9,6 +9,27 @@ import pytest
 
 import tensorcad
 
+#: Thin-walled shear flow module (0.24.0): section model, flow field, shear centre.
+SHEAR_FLOW_API = {
+    "AXIS_Y",
+    "AXIS_Z",
+    "EdgeFlow",
+    "MaxShearStress",
+    "ShearCentre",
+    "ShearFlow",
+    "ShearFlowError",
+    "ThinWalledSection",
+    "Wall",
+    "box_section",
+    "channel_section",
+    "i_section",
+    "max_shear_stress",
+    "shear_box_section",
+    "shear_centre",
+    "shear_flow",
+    "t_section",
+}
+
 EXPECTED_API = {
     "SectionArm",
     "SectionArmCurve",
@@ -145,7 +166,7 @@ EXPECTED_API = {
 
 
 def test_declared_api_is_importable() -> None:
-    assert set(tensorcad.__all__) == EXPECTED_API
+    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
     assert tensorcad.__version__ == "0.23.0"
