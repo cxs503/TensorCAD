@@ -120,6 +120,16 @@ from .gz import (
     wall_sided_righting_arm,
     with_freeboard,
 )
+from .section_gz import (
+    SectionArm,
+    SectionArmCurve,
+    ellipse_prism_righting_arms,
+    ellipse_section,
+    polygon_prism_righting_arms,
+    prism_mesh,
+    regular_polygon_section,
+    section_properties,
+)
 from .free_surface import (
     FreeSurfaceError,
     SlackTank,
@@ -541,6 +551,14 @@ __all__ = [
     "resolve_resolution",
     "righting_arm",
     "righting_arm_curve",
+    "SectionArm",
+    "SectionArmCurve",
+    "ellipse_prism_righting_arms",
+    "ellipse_section",
+    "polygon_prism_righting_arms",
+    "prism_mesh",
+    "regular_polygon_section",
+    "section_properties",
     "section_loops",
     "section_modulus_extremes",
     "section_properties",
