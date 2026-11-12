@@ -238,6 +238,13 @@ from .mesh_conditioning import (
     taubin_smooth,
 )
 from .parameters import ParameterSpec, RatioSpec
+from .refine import (
+    RefinementError,
+    RefinementReport,
+    StageMetrics,
+    edge_lengths,
+    refine,
+)
 from .sketch import (
     Angle,
     Coincident,
@@ -417,6 +424,11 @@ from .surface_intersection import (
     surface_surface_intersection,
 )
 __all__ = [
+    "RefinementError",
+    "RefinementReport",
+    "StageMetrics",
+    "edge_lengths",
+    "refine",
     "FRICTION_LINES",
     "ModelShipPrediction",
     "ProhaskaFit",
