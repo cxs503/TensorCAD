@@ -1,0 +1,741 @@
+{
+  "generated_by": "examples/sketch_solver/run_example.py",
+  "acceptance": {
+    "fixtures": 14,
+    "acceptance_bound": 1e-10,
+    "max_position_error": 2.447013149327845e-13,
+    "max_radius_error": 3.9968028886505635e-15,
+    "max_residual": 2.0250467969162855e-13,
+    "max_recheck_residual": 2.0250467969162855e-13,
+    "all_converged": true,
+    "inconsistent_fixtures": [
+      "inconsistent"
+    ],
+    "redundant_rows_reported": 3,
+    "restart_rate": 1.0,
+    "restart_attempts": 325,
+    "max_position_error_over_scales": 1.7732212690133027e-18,
+    "scale_dof": [
+      0,
+      0,
+      0
+    ]
+  },
+  "cases": [
+    {
+      "case": "fixed_point",
+      "description": "one point pinned at (2.5, -1.25)",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 2,
+      "parameters": 2,
+      "residual_rows": 2,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 2,
+      "max_residual": 0.0,
+      "recheck_residual": 0.0,
+      "max_position_error": 0.0,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          2.5,
+          -1.25
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          2.5,
+          -1.25
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": ""
+    },
+    {
+      "case": "distance_circle",
+      "description": "point held 5 m from a pinned point (one equation, two parameters)",
+      "status": "under_constrained",
+      "dof": 1,
+      "rank": 3,
+      "parameters": 4,
+      "residual_rows": 3,
+      "redundant_rows": 0,
+      "null_space_dimension": 1,
+      "iterations": 3,
+      "max_residual": 8.881784197001252e-16,
+      "recheck_residual": 8.881784197001252e-16,
+      "max_position_error": 0.0,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {},
+      "solved_positions": {},
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": "the answer is the 5 m residual plus one tangential motion, not a coordinate"
+    },
+    {
+      "case": "horizontal_arm",
+      "description": "horizontal 3 m arm off a pinned point",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 4,
+      "parameters": 4,
+      "residual_rows": 4,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 3,
+      "max_residual": 1.8360836653381868e-17,
+      "recheck_residual": 1.8360836653381868e-17,
+      "max_position_error": 1.836083665338232e-17,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          3.0,
+          0.0
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          1.8360836653381868e-17,
+          4.082147714100663e-24
+        ],
+        "B": [
+          3.0,
+          6.1823642481524505e-24
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": "the mirror branch B = (-3, 0) is excluded by the starting guess"
+    },
+    {
+      "case": "sss_triangle",
+      "description": "triangle from three side lengths (4, 3, 2 m), apex from the law of cosines",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 6,
+      "parameters": 6,
+      "residual_rows": 6,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 5,
+      "max_residual": 4.440892098500626e-16,
+      "recheck_residual": 4.440892098500626e-16,
+      "max_position_error": 4.440892098500626e-16,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          4.0,
+          0.0
+        ],
+        "C": [
+          2.625,
+          1.4523687548277813
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          6.069271610501201e-23,
+          3.3528478977052364e-23
+        ],
+        "B": [
+          4.0,
+          2.0925807662595762e-22
+        ],
+        "C": [
+          2.625,
+          1.4523687548277817
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": "upper apex branch; the lower mirror is a different start"
+    },
+    {
+      "case": "rectangle",
+      "description": "4 x 3 rectangle from horizontal/vertical pairs and two dimensions",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 8,
+      "parameters": 8,
+      "residual_rows": 8,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 3,
+      "max_residual": 3.774751897270818e-18,
+      "recheck_residual": 3.774751897270818e-18,
+      "max_position_error": 7.092880244077663e-18,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          4.0,
+          0.0
+        ],
+        "C": [
+          4.0,
+          3.0
+        ],
+        "D": [
+          0.0,
+          3.0
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          3.495094022887945e-18,
+          3.774751897270818e-18
+        ],
+        "B": [
+          4.0,
+          7.092880244077663e-18
+        ],
+        "C": [
+          4.0,
+          3.0
+        ],
+        "D": [
+          3.911177089639175e-18,
+          3.0
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": ""
+    },
+    {
+      "case": "angle_arm",
+      "description": "2 m arm at 30 degrees to a pinned x reference line",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 6,
+      "parameters": 6,
+      "residual_rows": 6,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 5,
+      "max_residual": 4.440892098500626e-16,
+      "recheck_residual": 4.440892098500626e-16,
+      "max_position_error": 2.482534153247273e-16,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "O": [
+          0.0,
+          0.0
+        ],
+        "R": [
+          1.0,
+          0.0
+        ],
+        "TIP": [
+          1.7320508075688774,
+          0.9999999999999999
+        ]
+      },
+      "solved_positions": {
+        "O": [
+          8.277124792202928e-20,
+          1.1553338792063987e-19
+        ],
+        "R": [
+          1.0,
+          -1.6028612418865103e-19
+        ],
+        "TIP": [
+          1.7320508075688776,
+          1.0
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": ""
+    },
+    {
+      "case": "perpendicular_chain",
+      "description": "vertical 3 m arm followed by a 4 m arm perpendicular to it",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 6,
+      "parameters": 6,
+      "residual_rows": 6,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 4,
+      "max_residual": 2.6705877282703084e-18,
+      "recheck_residual": 2.6705877282703084e-18,
+      "max_position_error": 3.947877744251435e-18,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          0.0,
+          3.0
+        ],
+        "C": [
+          4.0,
+          3.0
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          1.2772900159811267e-18,
+          -1.0447810806302227e-18
+        ],
+        "B": [
+          3.947877744251435e-18,
+          3.0
+        ],
+        "C": [
+          4.0,
+          3.0
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": ""
+    },
+    {
+      "case": "point_on_line",
+      "description": "point on the 3-4-5 line at 2.5 m from its start",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 6,
+      "parameters": 6,
+      "residual_rows": 6,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 3,
+      "max_residual": 1.7763568394002506e-16,
+      "recheck_residual": 1.7763568394002506e-16,
+      "max_position_error": 2.220446049250313e-16,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          4.0,
+          3.0
+        ],
+        "P": [
+          2.0,
+          1.5
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          1.014324203234315e-18,
+          7.327190681413096e-19
+        ],
+        "B": [
+          4.0,
+          3.0
+        ],
+        "P": [
+          1.9999999999999998,
+          1.5
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": ""
+    },
+    {
+      "case": "point_line_offset",
+      "description": "point 1 m to the left of the 3-4-5 line, x anchored",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 6,
+      "parameters": 6,
+      "residual_rows": 6,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 2,
+      "max_residual": 7.771561172376096e-16,
+      "recheck_residual": 7.771561172376096e-16,
+      "max_position_error": 2.5631488888267375e-15,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          4.0,
+          3.0
+        ],
+        "P": [
+          -0.6,
+          0.8
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          -4.2280015506901395e-16,
+          5.747543337452198e-16
+        ],
+        "B": [
+          4.0,
+          3.0
+        ],
+        "P": [
+          -0.5999999999999992,
+          0.8000000000000025
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": ""
+    },
+    {
+      "case": "circle_between_lines",
+      "description": "circle tangent to two parallel lines 2 m apart (r = h / 2)",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 11,
+      "parameters": 11,
+      "residual_rows": 11,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 2,
+      "max_residual": 1.1249999527957325e-16,
+      "recheck_residual": 1.1249999527957325e-16,
+      "max_position_error": 0.0,
+      "max_radius_error": 1.1102230246251565e-16,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "O": [
+          1.0,
+          1.0
+        ]
+      },
+      "solved_positions": {
+        "O": [
+          1.0,
+          1.0
+        ]
+      },
+      "analytic_radii": {
+        "C": 1.0
+      },
+      "solved_radii": {
+        "C": 0.9999999999999999
+      },
+      "note": ""
+    },
+    {
+      "case": "point_on_circle",
+      "description": "point on a radius-2 circle with its ordinate anchored",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 5,
+      "parameters": 5,
+      "residual_rows": 5,
+      "redundant_rows": 0,
+      "null_space_dimension": 0,
+      "iterations": 3,
+      "max_residual": 2.0250467969162855e-13,
+      "recheck_residual": 2.0250467969162855e-13,
+      "max_position_error": 2.447013149327845e-13,
+      "max_radius_error": 3.9968028886505635e-15,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "P": [
+          1.7320508075688772,
+          1.0
+        ]
+      },
+      "solved_positions": {
+        "P": [
+          1.7320508075691219,
+          0.999999999999998
+        ]
+      },
+      "analytic_radii": {
+        "C": 2.0
+      },
+      "solved_radii": {
+        "C": 2.000000000000004
+      },
+      "note": ""
+    },
+    {
+      "case": "under_constrained_line",
+      "description": "a bare horizontal line: 4 parameters, one equation",
+      "status": "under_constrained",
+      "dof": 3,
+      "rank": 1,
+      "parameters": 4,
+      "residual_rows": 1,
+      "redundant_rows": 0,
+      "null_space_dimension": 3,
+      "iterations": 2,
+      "max_residual": 2.7755575615628914e-17,
+      "recheck_residual": 2.7755575615628914e-17,
+      "max_position_error": 0.0,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {},
+      "solved_positions": {},
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": "the three motions are the two translations and the endpoint split"
+    },
+    {
+      "case": "inconsistent",
+      "description": "point pinned at (3, 0) and asked to be 5 m from the origin",
+      "status": "inconsistent",
+      "dof": 0,
+      "rank": 4,
+      "parameters": 4,
+      "residual_rows": 5,
+      "redundant_rows": 1,
+      "null_space_dimension": 0,
+      "iterations": 4,
+      "max_residual": 0.666666666666667,
+      "recheck_residual": 0.666666666666667,
+      "max_position_error": 0.0,
+      "max_radius_error": 0.0,
+      "blocking": [
+        "lock A",
+        "pin B",
+        "|AB| = 5"
+      ],
+      "raised": "InconsistentConstraintsError",
+      "analytic_positions": {},
+      "solved_positions": {},
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": "over-constrained and conflicting: the solver names both blocking rows"
+    },
+    {
+      "case": "redundant",
+      "description": "the same 5 m dimension stated twice over two pinned points",
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 4,
+      "parameters": 4,
+      "residual_rows": 6,
+      "redundant_rows": 2,
+      "null_space_dimension": 0,
+      "iterations": 3,
+      "max_residual": 8.014845942399251e-17,
+      "recheck_residual": 8.014845942399251e-17,
+      "max_position_error": 1.0134829647064257e-16,
+      "max_radius_error": 0.0,
+      "blocking": [],
+      "raised": "",
+      "analytic_positions": {
+        "A": [
+          0.0,
+          0.0
+        ],
+        "B": [
+          3.0,
+          4.0
+        ]
+      },
+      "solved_positions": {
+        "A": [
+          6.202984482861363e-17,
+          8.014845942399251e-17
+        ],
+        "B": [
+          3.0,
+          4.0
+        ]
+      },
+      "analytic_radii": {},
+      "solved_radii": {},
+      "note": "redundant but consistent: reported as redundancy, not as failure"
+    }
+  ],
+  "restarts": {
+    "restarts_per_case": 25,
+    "perturbation": 0.25,
+    "seed": 20261112,
+    "attempts": 325,
+    "converged": 325,
+    "rate": 1.0,
+    "median_iterations": 3,
+    "worst_position_error": 3.92627518215156e-12,
+    "cases": [
+      {
+        "case": "fixed_point",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 2
+      },
+      {
+        "case": "distance_circle",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "horizontal_arm",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "sss_triangle",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 4
+      },
+      {
+        "case": "rectangle",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "angle_arm",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 5
+      },
+      {
+        "case": "perpendicular_chain",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 4
+      },
+      {
+        "case": "point_on_line",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "point_line_offset",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "circle_between_lines",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "point_on_circle",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      },
+      {
+        "case": "under_constrained_line",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 2
+      },
+      {
+        "case": "redundant",
+        "restarts": 25,
+        "converged": 25,
+        "median_iterations": 3
+      }
+    ]
+  },
+  "scales": [
+    {
+      "scale": 0.001,
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 8,
+      "residual_rows": 8,
+      "max_residual": 3.774751837090197e-21,
+      "max_position_error": 7.092880185108733e-21,
+      "relative_error": 1.7732200462771832e-18
+    },
+    {
+      "scale": 1.0,
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 8,
+      "residual_rows": 8,
+      "max_residual": 3.774751897270818e-18,
+      "max_position_error": 7.092880244077663e-18,
+      "relative_error": 1.7732200610194158e-18
+    },
+    {
+      "scale": 1000.0,
+      "status": "fully_constrained",
+      "dof": 0,
+      "rank": 8,
+      "residual_rows": 8,
+      "max_residual": 3.774754286788812e-15,
+      "max_position_error": 7.0928850760532114e-15,
+      "relative_error": 1.7732212690133027e-18
+    }
+  ],
+  "residual_history": {
+    "sss_triangle": [
+      0.8284271247461903,
+      0.11228074336541427,
+      0.0033364054048035108,
+      2.0168998524638937e-06,
+      1.1519674103510624e-12,
+      4.440892098500626e-16
+    ],
+    "angle_arm": [
+      0.45919494764903024,
+      0.16455417948626483,
+      0.005366919665823144,
+      2.895394440693977e-05,
+      2.0171619929953977e-10,
+      4.440892098500626e-16
+    ],
+    "circle_between_lines": [
+      0.6000000000000001,
+      8.999999967507222e-09,
+      1.1249999527957325e-16
+    ],
+    "point_on_circle": [
+      0.19722436226800544,
+      0.004317273417528078,
+      1.5443598844200324e-06,
+      2.0250467969162855e-13
+    ]
+  }
+}
