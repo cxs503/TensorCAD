@@ -49,9 +49,14 @@ that is *not* open to the sea (an internally ruptured tank) is the added-weight
 problem with a free surface and is out of scope. Given ``KG``, :func:`damage_gm`
 evaluates it; a negative ``GM`` is reported as a negative number, not clamped.
 
-Not implemented, and said so: probabilistic subdivision (SOLAS part B-1, index A vs
-R), progressive flooding through internal openings, cross-flooding, the
-intermediate stages of flooding, and ``GZ`` curves of the damaged ship.
+The righting arm of the damaged ship is here too (:func:`flooded_righting_arm`,
+:func:`flooded_righting_arm_curve`): the heel is prescribed instead of solved, so the
+three balances become two, and ``GZ`` follows from the net buoyancy centroid. See
+``docs/damage_gz.md``.
+
+Still not implemented, and still said so: probabilistic subdivision (SOLAS part B-1,
+index A vs R), progressive flooding through internal openings, cross-flooding and the
+intermediate stages of flooding.
 """
 from __future__ import annotations
 
@@ -67,10 +72,14 @@ __all__ = [
     "DamageError",
     "Compartment",
     "DamageWaterline",
+    "FloodedArm",
+    "FloodedArmCurve",
     "FloodedState",
     "buoyancy_curve",
     "damage_gm",
     "flooded_equilibrium",
+    "flooded_righting_arm",
+    "flooded_righting_arm_curve",
     "intact_equilibrium",
 ]
 
@@ -1106,4 +1115,421 @@ def buoyancy_curve(
         net.append(area_ext - area_cmp)
     return BuoyancyCurve(
         stations=grid, external_areas=tuple(external), net_areas=tuple(net)
+    )
+# --------------------------------------------------------------------------- #
+# the righting arm of the flooded ship: the waterline is free, the heel is not
+# --------------------------------------------------------------------------- #
+SCHEMA_ARM = "tensorcad.damage.flooded_arm/1"
+
+#: Heel ladder limit for the damaged arm. Not a geometric limit of the integrator --
+#: that would take any angle -- but the point past which the lost-buoyancy model
+#: stops describing the case: a compartment open to the sea loses its water back
+#: through the opening once the waterline in the compartment rises above the damage,
+#: and on the hulls this package generates that has happened well before 60 degrees.
+MAX_ARM_HEEL_DEG = 60.0
+
+
+@dataclass(frozen=True)
+class FloodedArm:
+    """One point of the *damaged* ship's righting-arm curve.
+
+    ``righting_arm`` is ``(y_B - y_G) cos(phi) + (KB - KG) sin(phi)``, both points
+    taken in the world frame of the heeled body and every vertical coordinate measured
+    above the keel. That is the same transverse convention :func:`tensorcad.gz.righting_arm`
+    uses for the intact ship (``GZ = y_B - y_G`` there), written out in the two body-frame
+    coordinates this module integrates so the arm can be formed without rotating the mesh.
+
+    ``volume``, ``lcb``, ``tcb``, ``kb`` are the **net** (external minus flooded)
+    quantities: the ship floats on the difference, and the arm is the offset of that
+    difference's centroid from ``G``.
+    """
+
+    heel_deg: float
+    righting_arm: float
+    kg: float
+    lcg: float
+    tcb_gravity: float
+    keel_z: float
+    volume: float
+    lcb: float
+    tcb: float
+    kb: float
+    lost_buoyancy_volume: float
+    draft_at_reference: float
+    draft_min: float
+    draft_max: float
+    waterline: DamageWaterline
+    volume_residual: float
+    lcb_residual_m: float
+    iterations: int
+    converged: bool
+    schema: str = SCHEMA_ARM
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": self.schema,
+            "heel_deg": _round(self.heel_deg, 9),
+            "righting_arm_m": _round(self.righting_arm, 12),
+            "kg_m": _round(self.kg),
+            "lcg_m": _round(self.lcg),
+            "tcb_gravity_m": _round(self.tcb_gravity, 12),
+            "keel_z_m": _round(self.keel_z, 12),
+            "volume_m3": _round(self.volume),
+            "lcb_m": _round(self.lcb),
+            "tcb_m": _round(self.tcb),
+            "kb_m": _round(self.kb),
+            "lost_buoyancy_volume_m3": _round(self.lost_buoyancy_volume),
+            "draft_at_reference_m": _round(self.draft_at_reference),
+            "draft_min_m": _round(self.draft_min),
+            "draft_max_m": _round(self.draft_max),
+            "waterline": self.waterline.to_dict(),
+            "volume_residual_m3": _round(self.volume_residual, 15),
+            "lcb_residual_m": _round(self.lcb_residual_m, 12),
+            "iterations": self.iterations,
+            "converged": self.converged,
+        }
+
+
+@dataclass(frozen=True)
+class FloodedArmCurve:
+    """The damaged ship's ``GZ(phi)`` with the rule quantities read off the curve.
+
+    ``positive_range_deg``, ``vanishing_angle_deg``, ``max_arm``, ``heel_at_max_arm_deg``
+    and ``area_to_max_arm`` are measurements of the curve this module produced -- they
+    are *not* a comparison against a statutory criterion, which is a separate question
+    with its own thresholds and its own loading conditions.
+    """
+
+    points: tuple[FloodedArm, ...]
+    kg: float
+    lcg: float
+    displacement_volume: float
+    basis: str = "constant displacement, sinkage and trim solved at every heel"
+
+    @property
+    def peak(self) -> FloodedArm:
+        return max(self.points, key=lambda point: point.righting_arm)
+
+    @property
+    def max_arm(self) -> float:
+        return self.peak.righting_arm
+
+    @property
+    def heel_at_max_arm_deg(self) -> float:
+        return self.peak.heel_deg
+
+    @property
+    def vanishing_angle_deg(self) -> float | None:
+        """First heel past the arm's peak where ``GZ`` reaches zero, or ``None``.
+
+        ``None`` means the ladder ended while the arm was still positive: the range is
+        *at least* what the ladder covered, and saying so is the honest answer.
+        """
+        previous = None
+        for point in self.points:
+            if previous is not None and previous.heel_deg >= self.heel_at_max_arm_deg:
+                if point.righting_arm <= 0.0 < previous.righting_arm:
+                    span = previous.righting_arm - point.righting_arm
+                    fraction = previous.righting_arm / span if span else 0.0
+                    return previous.heel_deg + fraction * (point.heel_deg - previous.heel_deg)
+            previous = point
+        return None
+
+    @property
+    def positive_range_deg(self) -> float:
+        vanishing = self.vanishing_angle_deg
+        if vanishing is None:
+            return self.points[-1].heel_deg
+        return vanishing
+
+    @property
+    def area_to_max_arm(self) -> float:
+        """``INT GZ dphi`` from upright to the peak, in m rad (trapezoid on the ladder)."""
+        total = 0.0
+        for first, second in zip(self.points, self.points[1:], strict=False):
+            if first.heel_deg >= self.heel_at_max_arm_deg:
+                break
+            phi_a = math.radians(first.heel_deg)
+            phi_b = math.radians(second.heel_deg)
+            arm_a = first.righting_arm
+            arm_b = second.righting_arm
+            if second.heel_deg > self.heel_at_max_arm_deg:
+                fraction = (self.heel_at_max_arm_deg - first.heel_deg) / (
+                    second.heel_deg - first.heel_deg
+                )
+                phi_b = math.radians(first.heel_deg + fraction * (second.heel_deg - first.heel_deg))
+                arm_b = arm_a + fraction * (arm_b - arm_a)
+            total += 0.5 * (arm_a + arm_b) * (phi_b - phi_a)
+        return total
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": SCHEMA_ARM,
+            "kg_m": _round(self.kg),
+            "lcg_m": _round(self.lcg),
+            "displacement_volume_m3": _round(self.displacement_volume),
+            "righting_arms": [point.to_dict() for point in self.points],
+            "max_arm_m": _round(self.max_arm, 12),
+            "heel_at_max_arm_deg": _round(self.heel_at_max_arm_deg, 9),
+            "vanishing_angle_deg": (
+                None
+                if self.vanishing_angle_deg is None
+                else _round(self.vanishing_angle_deg, 9)
+            ),
+            "positive_range_deg": _round(self.positive_range_deg, 9),
+            "area_to_max_arm_m_rad": _round(self.area_to_max_arm, 12),
+            "basis": self.basis,
+        }
+
+
+def _solve2(matrix: list[list[float]], rhs: list[float]) -> list[float]:
+    """Gaussian elimination with partial pivoting on a 2x2 system."""
+    a, b = matrix[0]
+    c, d = matrix[1]
+    determinant = a * d - b * c
+    if abs(determinant) < 1e-300:
+        raise DamageError(
+            "the heel-fixed equilibrium Jacobian is singular: sinkage and trim cannot "
+            "both be recovered at this heel"
+        )
+    return [
+        (rhs[0] * d - b * rhs[1]) / determinant,
+        (a * rhs[1] - rhs[0] * c) / determinant,
+    ]
+
+
+def _newton_heel_fixed(
+    sections: _HullSections,
+    compartments: Sequence[Compartment],
+    target_volume: float,
+    lcg: float,
+    heel_tangent: float,
+    initial: DamageWaterline,
+) -> tuple[DamageWaterline, _Integrals, list[float], int, bool]:
+    """Damped Newton on ``(z0, tan(trim))`` with the heel held at ``heel_tangent``.
+
+    The transverse balance is dropped, not solved: at a prescribed heel the ship is
+    held there by an external moment and only volume and longitudinal position are
+    free, so the third unknown disappears instead of being pinned by an equation. That
+    is why this is not :func:`_newton` with a column deleted -- the residual *count*
+    changes and with it the system that has to be eliminated.
+    """
+    variables = [initial.base_z, initial.trim_tangent]
+    steps = [1e-6 * sections.scale, 1e-8]
+
+    def waterline_of(values: Sequence[float]) -> DamageWaterline:
+        return DamageWaterline(
+            base_z=values[0],
+            trim_tangent=values[1],
+            heel_tangent=heel_tangent,
+            reference_x=sections.reference_x,
+        )
+
+    residuals, integrals = _residuals(
+        sections, waterline_of(variables), compartments, target_volume, lcg, None
+    )
+    best = (_norm(residuals), list(variables), residuals, integrals)
+    iterations = 0
+    for iterations in range(1, MAX_ITERATIONS + 1):
+        if _converged(residuals, target_volume):
+            return (
+                waterline_of(variables), integrals, residuals, iterations - 1, True
+            )
+        jacobian: list[list[float]] = [[0.0, 0.0] for _ in range(2)]
+        for column in range(2):
+            trial = list(variables)
+            trial[column] += steps[column]
+            try:
+                probe_residuals, _ = _residuals(
+                    sections, waterline_of(trial), compartments, target_volume, lcg, None
+                )
+            except DamageError:
+                steps[column] *= 0.5
+                probe_residuals = residuals
+            for row in range(2):
+                jacobian[row][column] = (
+                    probe_residuals[row] - residuals[row]
+                ) / steps[column]
+        delta = _solve2(jacobian, [-value for value in residuals])
+        improved = False
+        scale = 1.0
+        for _ in range(20):
+            trial = [variables[index] + scale * delta[index] for index in range(2)]
+            try:
+                probe_residuals, probe_integrals = _residuals(
+                    sections, waterline_of(trial), compartments, target_volume, lcg, None
+                )
+            except DamageError:
+                scale *= 0.5
+                continue
+            if _norm(probe_residuals) < _norm(residuals):
+                variables = trial
+                residuals = probe_residuals
+                integrals = probe_integrals
+                improved = True
+                break
+            scale *= 0.5
+        if not improved:
+            break
+        if _norm(residuals) < best[0]:
+            best = (_norm(residuals), list(variables), residuals, integrals)
+    score, variables, residuals, integrals = best
+    return (
+        waterline_of(variables),
+        integrals,
+        residuals,
+        iterations,
+        _converged(residuals, target_volume),
+    )
+
+
+def flooded_righting_arm(
+    mesh: Mesh,
+    compartments: Sequence[Compartment] | Compartment,
+    displacement_volume: float,
+    *,
+    heel_deg: float,
+    kg: float,
+    lcg: float | None = None,
+    tcb: float | None = None,
+    panels: int = 12,
+    start: DamageWaterline | None = None,
+    raise_on_failure: bool = True,
+) -> FloodedArm:
+    """``GZ`` of the free-flooding damaged ship at a *prescribed* heel.
+
+    One point of :func:`flooded_righting_arm_curve`, and the function to call when a
+    single angle is what is wanted. ``kg`` is above the keel, as everywhere else in the
+    stability stack, and is required: an arm without a centre of gravity is not an arm.
+    ``lcg``/``tcb`` default to the intact ship's own centres at this displacement, i.e.
+    the weight stays where the intact ship carried it.
+
+    ``start`` warm-starts the sinkage/trim solve from a neighbouring heel; a curve
+    should pass the previous point's waterline, which keeps the Newton history short
+    and the answers continuous in ``heel_deg``.
+    """
+    target = _finite(displacement_volume, "displacement_volume")
+    if target <= 0.0:
+        raise DamageError(f"displacement_volume must be positive, got {target!r}")
+    heel = _finite(heel_deg, "heel_deg")
+    if abs(heel) > MAX_ARM_HEEL_DEG:
+        raise DamageError(
+            f"heel_deg {heel!r} is outside [-{MAX_ARM_HEEL_DEG:g}, {MAX_ARM_HEEL_DEG:g}] "
+            "degrees: past that the lost-buoyancy bookkeeping no longer describes a "
+            "compartment open to the sea"
+        )
+    weight = _finite(kg, "kg")
+    if isinstance(compartments, Compartment):
+        compartments = (compartments,)
+    resolved = _validated_compartments(mesh, compartments)
+    stations, weights = _panels(mesh, resolved, panels)
+    sections = _HullSections(mesh, stations, weights)
+    intact_base, intact_integrals = _level_waterline(sections, target)
+    x_g = intact_integrals.lcb if lcg is None else _finite(lcg, "lcg")
+    y_g = intact_integrals.tcb if tcb is None else _finite(tcb, "tcb")
+    initial = (
+        DamageWaterline(base_z=intact_base, reference_x=sections.reference_x)
+        if start is None
+        else start
+    )
+    tangent = math.tan(math.radians(heel))
+    waterline, integrals, residuals, iterations, converged = _newton_heel_fixed(
+        sections, resolved, target, x_g, tangent, initial
+    )
+    volume = integrals.volume
+    if volume <= 0.0:
+        raise DamageError(
+            "the net buoyant volume vanished at this heel: the flooded compartments "
+            "removed more buoyancy than the hull had"
+        )
+    kb = integrals.z_moment / volume - sections.keel_z
+    phi = math.radians(heel)
+    arm = (integrals.tcb - y_g) * math.cos(phi) + (kb - weight) * math.sin(phi)
+    box = mesh.bounding_box()
+    drafts = [
+        waterline.at(box.minimum[0], box.minimum[1]) - sections.keel_z,
+        waterline.at(box.minimum[0], box.maximum[1]) - sections.keel_z,
+        waterline.at(box.maximum[0], box.minimum[1]) - sections.keel_z,
+        waterline.at(box.maximum[0], box.maximum[1]) - sections.keel_z,
+    ]
+    point = FloodedArm(
+        heel_deg=heel,
+        righting_arm=arm,
+        kg=weight,
+        lcg=x_g,
+        tcb_gravity=y_g,
+        keel_z=sections.keel_z,
+        volume=volume,
+        lcb=integrals.lcb,
+        tcb=integrals.tcb,
+        kb=kb,
+        lost_buoyancy_volume=integrals.flooded_volume,
+        draft_at_reference=waterline.base_z - sections.keel_z,
+        draft_min=min(drafts),
+        draft_max=max(drafts),
+        waterline=waterline,
+        volume_residual=residuals[0] * target,
+        lcb_residual_m=residuals[1] * sections.length,
+        iterations=iterations,
+        converged=converged,
+    )
+    if raise_on_failure and not point.converged:
+        raise DamageError(
+            f"the flooded equilibrium did not converge at heel {heel!r} deg: volume "
+            f"residual {point.volume_residual!r} m^3, LCB residual "
+            f"{point.lcb_residual_m!r} m after {point.iterations} iterations"
+        )
+    return point
+
+
+def flooded_righting_arm_curve(
+    mesh: Mesh,
+    compartments: Sequence[Compartment] | Compartment,
+    displacement_volume: float,
+    *,
+    kg: float,
+    heels_deg: Sequence[float] | None = None,
+    lcg: float | None = None,
+    tcb: float | None = None,
+    panels: int = 12,
+    raise_on_failure: bool = True,
+) -> FloodedArmCurve:
+    """The damaged ship's ``GZ`` over a heel ladder, each point re-solved.
+
+    ``heels_deg`` defaults to 0..60 in 5-degree steps. Every point re-solves sinkage
+    and trim at constant displacement, so the curve is a locus of floating attitudes
+    rather than a rotation of the upright one -- which is the whole reason the damaged
+    curve differs from the intact ship's.
+    """
+    if heels_deg is None:
+        heels = tuple(float(value) for value in range(0, 61, 5))
+    else:
+        heels = tuple(sorted({float(value) for value in heels_deg}))
+    if not heels:
+        raise DamageError("heels_deg is empty: a curve needs at least one heel")
+    weight = _finite(kg, "kg")
+    points: list[FloodedArm] = []
+    start: DamageWaterline | None = None
+    for heel in heels:
+        point = flooded_righting_arm(
+            mesh,
+            compartments,
+            displacement_volume,
+            heel_deg=heel,
+            kg=weight,
+            lcg=lcg,
+            tcb=tcb,
+            panels=panels,
+            start=start,
+            raise_on_failure=raise_on_failure,
+        )
+        start = point.waterline
+        points.append(point)
+        if lcg is None:
+            lcg = point.lcg
+    return FloodedArmCurve(
+        points=tuple(points),
+        kg=weight,
+        lcg=float(lcg),
+        displacement_volume=float(displacement_volume),
     )
