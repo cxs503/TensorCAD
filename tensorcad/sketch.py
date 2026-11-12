@@ -443,7 +443,12 @@ class LineCircleTangency(Constraint):
 class SolveResult:
     """Outcome of :meth:`Sketch.solve`, including the degrees of freedom that remain."""
 
-    status: str  # "fully_constrained" | "under_constrained" | "inconsistent"
+    #: ``"fully_constrained"`` (residual inside ``tol`` and no freedom left),
+    #: ``"under_constrained"`` (residual inside ``tol``, freedom left -- ``null_space``
+    #: says which), ``"not_converged"`` (residual above ``tol`` but below
+    #: ``residual_tol``: the structural verdict is withheld because these coordinates do
+    #: not satisfy the sketch), or ``"inconsistent"`` (residual above ``residual_tol``).
+    status: str
     dof: int
     rank: int
     parameters: int
@@ -460,6 +465,9 @@ class SolveResult:
     positions: dict[str, tuple[float, float]]
     radii: dict[str, float]
     blocking: tuple[str, ...] = field(default_factory=tuple)
+    #: True when a row had no derivative at the caller's start and the solve was restarted
+    #: from :data:`SINGULAR_START_NUDGE` away from it (separate coincident points).
+    nudged_from_singular_start: bool = False
 
     @property
     def fully_constrained(self) -> bool:
@@ -472,6 +480,21 @@ class SolveResult:
     @property
     def inconsistent(self) -> bool:
         return self.status == "inconsistent"
+
+    @property
+    def not_converged(self) -> bool:
+        """The solve stopped above ``tol`` without being provably inconsistent.
+
+        The coordinates are the best the iteration reached, *not* a solution: ``dof`` is
+        the local rank there. A caller that needs a solution must treat this as a
+        failure -- ``fully_constrained`` can no longer be true here.
+        """
+        return self.status == "not_converged"
+
+    @property
+    def solved(self) -> bool:
+        """Residual inside ``tol``: the coordinates satisfy every constraint row."""
+        return self.converged
 
 
 def _evaluate(sketch: "Sketch", values: Sequence[float]) -> tuple[list[float], list[list[float]]]:
@@ -488,6 +511,54 @@ def _evaluate(sketch: "Sketch", values: Sequence[float]) -> tuple[list[float], l
                 dense[index] = value
             jacobian.append(dense)
     return residuals, jacobian
+
+
+#: Deterministic displacement used when a row has no derivative at the starting point.
+#: A ``Distance`` between two points that both start at the origin is a length row whose
+#: gradient is ``d / |d|`` with ``|d| = 0``: the geometry is well posed, only the *start*
+#: is not, so the solver steps off the singular point instead of refusing the sketch.
+#: ``1e-6`` is nine orders above the default convergence tolerance and four orders below
+#: anything a drawing dimension would notice, so the solution it reaches is the same one
+#: the caller would have got from a non-degenerate start.
+SINGULAR_START_NUDGE = 1e-6
+
+
+def _nudge_from_singular(values: Sequence[float]) -> list[float]:
+    """Step off a singular start, deterministically and symmetrically.
+
+    The displacements are ``+1, -2, +3, -4, ...`` times :data:`SINGULAR_START_NUDGE`: every
+    parameter gets a *distinct* magnitude, so any two parameters that hold numerically
+    equal values -- the coincidence that made the row singular -- are separated whatever
+    pair they are. (An alternating *sign* alone does not do this: the two coordinates of
+    one point and of the next point would get the same pattern and move together.) The
+    magnitudes grow linearly with the parameter index, which the module's own cost note
+    keeps small: this solver is for sketches with tens of parameters, so the largest
+    displacement is a few tens of micrometres.
+    """
+    return [
+        value + SINGULAR_START_NUDGE * (index + 1) * (1.0 if index % 2 == 0 else -1.0)
+        for index, value in enumerate(values)
+    ]
+
+
+def _singular_label(sketch: "Sketch", values: Sequence[float]) -> str:
+    """Label of the first constraint whose rows cannot be evaluated at ``values``."""
+    ev = _Eval(list(values))
+    for constraint in sketch.constraints:
+        try:
+            constraint.rows(ev)
+        except ZeroDivisionError:
+            return constraint.label()
+    return "unattributed"
+
+
+def _singular_message(sketch: "Sketch", values: Sequence[float], cause: Exception) -> str:
+    return (
+        f"constraint {_singular_label(sketch, values)!r} has no derivative at these "
+        f"coordinates: a zero-length line has no direction for a length or direction row, "
+        f"and a zero-radius circle has no tangent ({cause}). Give the entities distinct "
+        "coordinates, or state the constraint without a direction."
+    )
 
 
 def _normal_equations(jacobian: Sequence[Sequence[float]], residuals: Sequence[float],
@@ -678,12 +749,20 @@ class Sketch:
         itself: pointing this at the returned coordinates and finding zero is an
         independent verification, not a repetition of the solver's own bookkeeping.
         """
-        residuals, _ = _evaluate(self, self._values if values is None else list(values))
+        evaluated = self._values if values is None else list(values)
+        try:
+            residuals, _ = _evaluate(self, evaluated)
+        except ZeroDivisionError as exc:
+            raise SketchError(_singular_message(self, evaluated, exc)) from exc
         return tuple(residuals)
 
     def jacobian(self, values: Sequence[float] | None = None) -> tuple[tuple[float, ...], ...]:
         """Dense constraint Jacobian ``dr/dx`` at ``values`` (exact, by forward-mode AD)."""
-        _, jacobian = _evaluate(self, self._values if values is None else list(values))
+        evaluated = self._values if values is None else list(values)
+        try:
+            _, jacobian = _evaluate(self, evaluated)
+        except ZeroDivisionError as exc:
+            raise SketchError(_singular_message(self, evaluated, exc)) from exc
         return tuple(tuple(row) for row in jacobian)
 
     def positions(self) -> dict[str, tuple[float, float]]:
@@ -729,7 +808,20 @@ class Sketch:
 
         damping = 1e-8
         iterations = 0
-        residuals, jacobian = _evaluate(self, x)
+        nudged_from_singular_start = False
+        try:
+            residuals, jacobian = _evaluate(self, x)
+        except ZeroDivisionError as first:
+            # The start is on the singular set of a length row (coincident points, a
+            # zero-length line). The *geometry* may still be well posed -- a distance
+            # between two points that happen to start together is an ordinary request --
+            # so move deterministically off the singular point once and retry.
+            x = _nudge_from_singular(x)
+            nudged_from_singular_start = True
+            try:
+                residuals, jacobian = _evaluate(self, x)
+            except ZeroDivisionError as second:
+                raise SketchError(_singular_message(self, x, second)) from first
         max_residual = max((abs(v) for v in residuals), default=0.0)
         history: list[float] = [max_residual]
         while max_residual > tol and iterations < max_iterations:
@@ -744,7 +836,13 @@ class Sketch:
                     damping *= 10.0
                     continue
                 trial = [xi + di for xi, di in zip(x, candidate)]
-                trial_residuals, _ = _evaluate(self, trial)
+                try:
+                    trial_residuals, _ = _evaluate(self, trial)
+                except ZeroDivisionError:
+                    # The step collapsed a line (or a radius) onto the singular set. That
+                    # step cannot be scored, so treat it as a rejected trial and damp.
+                    damping *= 10.0
+                    continue
                 if sum(v * v for v in trial_residuals) < cost:
                     x = trial
                     step = candidate
@@ -768,11 +866,20 @@ class Sketch:
         labels: list[str] = []
         for constraint in self.constraints:
             labels.extend([constraint.label()] * len(constraint.rows(_Eval(x))))
+        # An inconsistent set names the rows that cannot be driven home; a merely
+        # unfinished solve names the rows that are still above the convergence tolerance.
+        blocking_threshold = residual_tol if max_residual > residual_tol else tol
         blocking = tuple(sorted({label for label, value in zip(labels, residuals)
-                                  if abs(value) > residual_tol}))
+                                  if abs(value) > blocking_threshold}))
 
         if max_residual > residual_tol:
             status = "inconsistent"
+        elif not converged:
+            # dof is the rank of the Jacobian *at these coordinates*, and those
+            # coordinates do not satisfy the sketch. Reporting "fully_constrained" here
+            # would hand a consumer geometry that misses its dimensions, so the
+            # structural verdict is withheld until the residual is inside ``tol``.
+            status = "not_converged"
         elif dof > 0:
             status = "under_constrained"
         else:
@@ -797,6 +904,7 @@ class Sketch:
             positions=self.positions(),
             radii=self.radii(),
             blocking=blocking,
+            nudged_from_singular_start=nudged_from_singular_start,
         )
         if status == "inconsistent" and strict:
             raise InconsistentConstraintsError(
