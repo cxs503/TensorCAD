@@ -1,0 +1,388 @@
+{
+  "results": {
+    "v_section": {
+      "name": "isosceles V section (B=2 m, height 2 m, draft 1 m, KG 0.6 m, L=4 m)",
+      "watertight": true,
+      "prism_volume": 8.0,
+      "section_area": 1.5,
+      "max_abs_error_m": 4.107825191113079e-15,
+      "max_rel_error": 3.660814906344598e-13,
+      "max_volume_error": 5.062616992290714e-14,
+      "waterline_vertex_crossing_deg": 26.56505117707799,
+      "table": [
+        {
+          "heel_deg": 0.0,
+          "gz_exact": 0.0,
+          "gz_mesh": 0.0
+        },
+        {
+          "heel_deg": 5.0,
+          "gz_exact": -0.008692377322913551,
+          "gz_mesh": -0.00869237732291351
+        },
+        {
+          "heel_deg": 10.0,
+          "gz_exact": -0.01717625492602358,
+          "gz_mesh": -0.01717625492602355
+        },
+        {
+          "heel_deg": 15.0,
+          "gz_exact": -0.02522786538700103,
+          "gz_mesh": -0.02522786538700114
+        },
+        {
+          "heel_deg": 20.0,
+          "gz_exact": -0.032588601046382365,
+          "gz_mesh": -0.03258860104638242
+        },
+        {
+          "heel_deg": 25.0,
+          "gz_exact": -0.03893473779821632,
+          "gz_mesh": -0.03893473779821627
+        },
+        {
+          "heel_deg": 30.0,
+          "gz_exact": -0.043824175592474035,
+          "gz_mesh": -0.04382417559247398
+        },
+        {
+          "heel_deg": 35.0,
+          "gz_exact": -0.04659269436727781,
+          "gz_mesh": -0.046592694367277754
+        },
+        {
+          "heel_deg": 40.0,
+          "gz_exact": -0.04612958825051694,
+          "gz_mesh": -0.04612958825051766
+        },
+        {
+          "heel_deg": 45.0,
+          "gz_exact": -0.04032462263499409,
+          "gz_mesh": -0.04032462263499409
+        },
+        {
+          "heel_deg": 50.0,
+          "gz_exact": -0.024425673951252613,
+          "gz_mesh": -0.024425673951252724
+        },
+        {
+          "heel_deg": 55.0,
+          "gz_exact": -0.0001516360500364855,
+          "gz_mesh": -0.00015163605003643
+        },
+        {
+          "heel_deg": 60.0,
+          "gz_exact": 0.023409942079648638,
+          "gz_mesh": 0.023409942079649304
+        },
+        {
+          "heel_deg": 65.0,
+          "gz_exact": 0.04717355524490707,
+          "gz_mesh": 0.04717355524491118
+        },
+        {
+          "heel_deg": 70.0,
+          "gz_exact": 0.07212047445621717,
+          "gz_mesh": 0.07212047445621816
+        },
+        {
+          "heel_deg": 75.0,
+          "gz_exact": 0.09943638587440617,
+          "gz_mesh": 0.09943638587440629
+        },
+        {
+          "heel_deg": 80.0,
+          "gz_exact": 0.12211515007153628,
+          "gz_mesh": 0.12211515007153628
+        },
+        {
+          "heel_deg": 85.0,
+          "gz_exact": 0.13074382614022295,
+          "gz_mesh": 0.1307438261402225
+        },
+        {
+          "heel_deg": 90.0,
+          "gz_exact": 0.13175404862521167,
+          "gz_mesh": 0.13175404862521178
+        }
+      ]
+    },
+    "rotated_hexagon": {
+      "name": "regular hexagon R=1 m rotated 17 deg, draft 0.8 m, KG 0.7 m, L=2.5 m",
+      "watertight": true,
+      "max_abs_error_m": 3.3306690738754696e-16,
+      "max_rel_error": 2.0234480708905353e-15,
+      "sampled_heels_deg": [
+        0.0,
+        7.0,
+        23.0,
+        41.0,
+        68.0,
+        90.0
+      ],
+      "polygon_symmetry_axes_deg": [
+        0.0,
+        60.0,
+        120.0
+      ],
+      "table": [
+        {
+          "heel_deg": 0.0,
+          "gz_exact": 0.008287031487569525,
+          "gz_mesh": 0.008287031487569537
+        },
+        {
+          "heel_deg": 7.0,
+          "gz_exact": 0.038466043533913905,
+          "gz_mesh": 0.03846604353391389
+        },
+        {
+          "heel_deg": 23.0,
+          "gz_exact": 0.0953473906526035,
+          "gz_mesh": 0.09534739065260345
+        },
+        {
+          "heel_deg": 41.0,
+          "gz_exact": 0.16460363484443774,
+          "gz_mesh": 0.1646036348444374
+        },
+        {
+          "heel_deg": 68.0,
+          "gz_exact": 0.24435545103117806,
+          "gz_mesh": 0.24435545103117817
+        },
+        {
+          "heel_deg": 90.0,
+          "gz_exact": 0.24800293601333223,
+          "gz_mesh": 0.24800293601333223
+        }
+      ]
+    },
+    "box": {
+      "name": "box barge B=4 m, T=1 m, D=2 m, KG=0.6 m, L=5 m",
+      "wall_sided_limit_deg": 26.56505117707799,
+      "max_error_inside_limit_m": 1.1102230246251565e-16,
+      "min_error_outside_limit_m": 0.3564854259248711,
+      "table": [
+        {
+          "heel_deg": 0.0,
+          "gz_exact": 0.0,
+          "gz_wall_sided": 0.0,
+          "gz_mesh": 0.0,
+          "inside_limit": true
+        },
+        {
+          "heel_deg": 5.0,
+          "gz_exact": 0.10793682489532475,
+          "gz_wall_sided": 0.1079368248953247,
+          "gz_mesh": 0.10793682489532463,
+          "inside_limit": true
+        },
+        {
+          "heel_deg": 10.0,
+          "gz_exact": 0.2177653730811537,
+          "gz_wall_sided": 0.21776537308115365,
+          "gz_mesh": 0.2177653730811537,
+          "inside_limit": true
+        },
+        {
+          "heel_deg": 20.0,
+          "gz_exact": 0.45203076998384095,
+          "gz_wall_sided": 0.452030769983841,
+          "gz_mesh": 0.45203076998384095,
+          "inside_limit": true
+        },
+        {
+          "heel_deg": 23.90854605937019,
+          "gz_exact": 0.5529424220463687,
+          "gz_wall_sided": 0.5529424220463686,
+          "gz_mesh": 0.5529424220463685,
+          "inside_limit": true
+        },
+        {
+          "heel_deg": 31.56505117707799,
+          "gz_exact": 0.731306865807843,
+          "gz_wall_sided": 0.7773273993182965,
+          "gz_mesh": 0.7313068658078428,
+          "inside_limit": false
+        },
+        {
+          "heel_deg": 41.56505117707799,
+          "gz_exact": 0.8095974950296281,
+          "gz_wall_sided": 1.1660829209544992,
+          "gz_mesh": 0.8095974950296281,
+          "inside_limit": false
+        }
+      ]
+    },
+    "ellipse": {
+      "name": "2:1 ellipse section a=2 m b=1 m, draft 1.2 m, KG 0.8 m, L=4 m",
+      "section_area": 3.936226854015763,
+      "gm_from_waterplane_m": 1.1558433455319073,
+      "dgz_dphi_at_zero": 1.155843345531907,
+      "gz_max_m": 0.4436855620569249,
+      "gz_max_heel_deg": 45.0,
+      "vanishing_angle_at_kg_1p6_deg": 31.792423737863558,
+      "wall_sided_at_30_deg": 0.6841264889361655,
+      "exact_at_30_deg": 0.4128731773871282,
+      "wall_sided_relative_error_at_30": 0.6569894253379849,
+      "convergence": [
+        {
+          "sides": 16,
+          "max_abs_error_m": 0.005854042762372225,
+          "max_rel_error": 0.01919949825589987,
+          "observed_order": null
+        },
+        {
+          "sides": 32,
+          "max_abs_error_m": 0.0014429709656654799,
+          "max_rel_error": 0.004521870639644233,
+          "observed_order": 2.0203910129863263
+        },
+        {
+          "sides": 64,
+          "max_abs_error_m": 0.0003490449173240151,
+          "max_rel_error": 0.001024608509283925,
+          "observed_order": 2.0475576626538756
+        },
+        {
+          "sides": 128,
+          "max_abs_error_m": 8.433911751071221e-05,
+          "max_rel_error": 0.00022289832810030983,
+          "observed_order": 2.0491388725215356
+        },
+        {
+          "sides": 256,
+          "max_abs_error_m": 2.129665970795891e-05,
+          "max_rel_error": 9.704051949947063e-05,
+          "observed_order": 1.9855747584287877
+        }
+      ],
+      "table": [
+        {
+          "heel_deg": 0.0,
+          "gz_exact": 0.0
+        },
+        {
+          "heel_deg": 5.0,
+          "gz_exact": 0.09949163076519703
+        },
+        {
+          "heel_deg": 10.0,
+          "gz_exact": 0.19126170514860086
+        },
+        {
+          "heel_deg": 15.0,
+          "gz_exact": 0.26981683395254263
+        },
+        {
+          "heel_deg": 20.0,
+          "gz_exact": 0.3327101751848823
+        },
+        {
+          "heel_deg": 25.0,
+          "gz_exact": 0.37994422283194057
+        },
+        {
+          "heel_deg": 30.0,
+          "gz_exact": 0.4128731773871282
+        },
+        {
+          "heel_deg": 35.0,
+          "gz_exact": 0.4333161226929667
+        },
+        {
+          "heel_deg": 40.0,
+          "gz_exact": 0.44306426544364386
+        },
+        {
+          "heel_deg": 45.0,
+          "gz_exact": 0.4436855620569249
+        },
+        {
+          "heel_deg": 50.0,
+          "gz_exact": 0.43648926459811754
+        },
+        {
+          "heel_deg": 55.0,
+          "gz_exact": 0.42255684025603935
+        },
+        {
+          "heel_deg": 60.0,
+          "gz_exact": 0.4027912261272413
+        },
+        {
+          "heel_deg": 65.0,
+          "gz_exact": 0.3779642832183593
+        },
+        {
+          "heel_deg": 70.0,
+          "gz_exact": 0.34875603038980374
+        },
+        {
+          "heel_deg": 75.0,
+          "gz_exact": 0.31578500565644807
+        },
+        {
+          "heel_deg": 80.0,
+          "gz_exact": 0.279631113026129
+        },
+        {
+          "heel_deg": 85.0,
+          "gz_exact": 0.24085276160350422
+        },
+        {
+          "heel_deg": 90.0,
+          "gz_exact": 0.19999999999999996
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "name": "V section: exact vs mesh at 19 heel angles",
+      "passed": true,
+      "value": "4.11e-15 m"
+    },
+    {
+      "name": "V section: displacement held constant",
+      "passed": true,
+      "value": "5.06e-14"
+    },
+    {
+      "name": "rotated hexagon: exact vs mesh off the symmetry axes",
+      "passed": true,
+      "value": "3.33e-16 m"
+    },
+    {
+      "name": "box: wall-sided formula reproduced below the limit",
+      "passed": true,
+      "value": "1.11e-16 m"
+    },
+    {
+      "name": "box: wall-sided formula departs above the limit (not vacuous)",
+      "passed": true,
+      "value": "3.56e-01 m"
+    },
+    {
+      "name": "ellipse: dGZ/dphi(0) equals the waterplane GM",
+      "passed": true,
+      "value": "1.155843346 vs 1.155843346"
+    },
+    {
+      "name": "ellipse: inscribed chords converge at second order",
+      "passed": true,
+      "value": "2.02, 2.05, 2.05, 1.99"
+    },
+    {
+      "name": "ellipse: 256 chords within 3 % of the exact curve",
+      "passed": true,
+      "value": "9.70e-05"
+    },
+    {
+      "name": "ellipse: wall-sided formula errs by > 3 % at 30 deg (not vacuous)",
+      "passed": true,
+      "value": "65.70%"
+    }
+  ]
+}
