@@ -1,0 +1,249 @@
+{
+  "box": {
+    "rows": [
+      {
+        "t_over_L": 0.01,
+        "inner_volume": 0.9411919999999719,
+        "inner_volume_analytic": 0.9411919999999999,
+        "relative_error": 2.972573100977691e-14,
+        "shell_volume": 0.05880800000002806,
+        "shell_volume_analytic": 0.05880800000000008,
+        "min_wall_thickness": 0.009999999999999898,
+        "max_plane_residual": 9.992007221626409e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.02,
+        "inner_volume": 0.8847359999999735,
+        "inner_volume_analytic": 0.8847359999999999,
+        "relative_error": 2.9740267925817663e-14,
+        "shell_volume": 0.11526400000002646,
+        "shell_volume_analytic": 0.11526400000000014,
+        "min_wall_thickness": 0.019999999999999796,
+        "max_plane_residual": 9.880984919163893e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.03,
+        "inner_volume": 0.830583999999975,
+        "inner_volume_analytic": 0.8305839999999999,
+        "relative_error": 2.99415781565784e-14,
+        "shell_volume": 0.169416000000025,
+        "shell_volume_analytic": 0.16941600000000012,
+        "min_wall_thickness": 0.029999999999999697,
+        "max_plane_residual": 9.658940314238862e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.04,
+        "inner_volume": 0.7786879999999766,
+        "inner_volume_analytic": 0.778688,
+        "relative_error": 3.008355826671376e-14,
+        "shell_volume": 0.22131200000002338,
+        "shell_volume_analytic": 0.22131199999999995,
+        "min_wall_thickness": 0.03999999999999959,
+        "max_plane_residual": 9.658940314238862e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.05,
+        "inner_volume": 0.7289999999999779,
+        "inner_volume_analytic": 0.7290000000000001,
+        "relative_error": 3.0458793542528296e-14,
+        "shell_volume": 0.2710000000000221,
+        "shell_volume_analytic": 0.2709999999999999,
+        "min_wall_thickness": 0.0499999999999995,
+        "max_plane_residual": 9.547918011776346e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.06,
+        "inner_volume": 0.6814719999999795,
+        "inner_volume_analytic": 0.681472,
+        "relative_error": 2.997643872837458e-14,
+        "shell_volume": 0.31852800000002046,
+        "shell_volume_analytic": 0.31852800000000003,
+        "min_wall_thickness": 0.059999999999999394,
+        "max_plane_residual": 9.547918011776346e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.07,
+        "inner_volume": 0.6360559999999807,
+        "inner_volume_analytic": 0.636056,
+        "relative_error": 3.0196803938670824e-14,
+        "shell_volume": 0.36394400000001925,
+        "shell_volume_analytic": 0.36394400000000005,
+        "min_wall_thickness": 0.0699999999999993,
+        "max_plane_residual": 9.325873406851315e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.08,
+        "inner_volume": 0.5927039999999824,
+        "inner_volume_analytic": 0.5927039999999999,
+        "relative_error": 2.9595757391678605e-14,
+        "shell_volume": 0.40729600000001764,
+        "shell_volume_analytic": 0.4072960000000001,
+        "min_wall_thickness": 0.07999999999999918,
+        "max_plane_residual": 9.2148511043888e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.09,
+        "inner_volume": 0.5513679999999836,
+        "inner_volume_analytic": 0.5513680000000001,
+        "relative_error": 2.980096916116335e-14,
+        "shell_volume": 0.44863200000001635,
+        "shell_volume_analytic": 0.4486319999999999,
+        "min_wall_thickness": 0.0899999999999991,
+        "max_plane_residual": 9.103828801926284e-15,
+        "min_normal_dot": 1.0
+      },
+      {
+        "t_over_L": 0.1,
+        "inner_volume": 0.5119999999999846,
+        "inner_volume_analytic": 0.5120000000000001,
+        "relative_error": 3.035766082959412e-14,
+        "shell_volume": 0.4880000000000154,
+        "shell_volume_analytic": 0.4879999999999999,
+        "min_wall_thickness": 0.099999999999999,
+        "max_plane_residual": 9.103828801926284e-15,
+        "min_normal_dot": 1.0
+      }
+    ],
+    "worst_relative_error": 3.0458793542528296e-14,
+    "limit": 0.02
+  },
+  "pentagon": {
+    "rows": [
+      {
+        "thickness": 0.02,
+        "inner_volume": 1.1003256234742886,
+        "clipped_reference": 1.1003256234743157,
+        "relative_error": 2.4619477382811446e-14,
+        "eroded_section_corners": 5,
+        "min_wall_thickness": 0.01999999999999439
+      },
+      {
+        "thickness": 0.05,
+        "inner_volume": 0.9233028660699207,
+        "clipped_reference": 0.9233028660699437,
+        "relative_error": 2.4890658801442293e-14,
+        "eroded_section_corners": 5,
+        "min_wall_thickness": 0.049999999999994126
+      },
+      {
+        "thickness": 0.1,
+        "inner_volume": 0.6719893502043733,
+        "clipped_reference": 0.67198935020439,
+        "relative_error": 2.4782156687917932e-14,
+        "eroded_section_corners": 5,
+        "min_wall_thickness": 0.09999999999999372
+      },
+      {
+        "thickness": 0.15,
+        "inner_volume": 0.47059869012331035,
+        "clipped_reference": 0.4705986901233219,
+        "relative_error": 2.4535383753566925e-14,
+        "eroded_section_corners": 5,
+        "min_wall_thickness": 0.1499999999999933
+      }
+    ],
+    "worst_relative_error": 2.4890658801442293e-14
+  },
+  "sphere": {
+    "rows": [
+      {
+        "meridians": 12,
+        "parallels": 6,
+        "faces": 120,
+        "shell_volume": 1.9051959178631706,
+        "shell_volume_analytic": 2.044129619935758,
+        "relative_error": 0.0679671683818925,
+        "outer_volume": 3.7320508075688754,
+        "outer_sphere_error": 0.1090384991579703,
+        "min_wall_thickness": 0.2000000000000011
+      },
+      {
+        "meridians": 24,
+        "parallels": 12,
+        "faces": 528,
+        "shell_volume": 2.008892286080449,
+        "shell_volume_analytic": 2.044129619935758,
+        "relative_error": 0.01723830696040526,
+        "outer_volume": 4.070552360820178,
+        "outer_sphere_error": 0.028227205991626352,
+        "min_wall_thickness": 0.19999999999998558
+      },
+      {
+        "meridians": 48,
+        "parallels": 24,
+        "faces": 2208,
+        "shell_volume": 2.035288247621593,
+        "shell_volume_analytic": 2.044129619935758,
+        "relative_error": 0.004325250330477093,
+        "outer_volume": 4.158971436341031,
+        "outer_sphere_error": 0.007118706592487386,
+        "min_wall_thickness": 0.19999999999983603
+      }
+    ],
+    "analytic": 2.044129619935758,
+    "observed_orders": [
+      1.9792199303184503,
+      1.9947625503655007
+    ],
+    "thickness": 0.2
+  },
+  "wall": {
+    "rows": [
+      {
+        "offset_factor": 0.2,
+        "requested_offset": 0.020000000000000004,
+        "measured_wall": 0.0199999999999998,
+        "relative_error": 1.023486850826316e-14
+      },
+      {
+        "offset_factor": 0.5,
+        "requested_offset": 0.05,
+        "measured_wall": 0.0499999999999995,
+        "relative_error": 9.992007221626409e-15
+      },
+      {
+        "offset_factor": 0.7,
+        "requested_offset": 0.06999999999999999,
+        "measured_wall": 0.06999999999999929,
+        "relative_error": 1.0110959688550534e-14
+      },
+      {
+        "offset_factor": 1.0,
+        "requested_offset": 0.1,
+        "measured_wall": 0.099999999999999,
+        "relative_error": 9.992007221626409e-15
+      }
+    ]
+  },
+  "refusals": {
+    "rows": [
+      {
+        "case": "plate_0.1_shelled_at_0.08",
+        "refused": true,
+        "reason": "the inward offset of 0.08 m inverts the solid: the inner signed volume is -0.042335999999998736 m^3 (outer 0.09999999999999999 m^3), so the thickness exceeds half the local wall somewhere. Reduce the thickness or split the body"
+      },
+      {
+        "case": "taper_shelled_at_0.10",
+        "refused": true,
+        "reason": "the inward offset folds the surface: min(dot(n_inner, n_outer)) = -1.0 over the faces, so some offset faces are wound backwards"
+      }
+    ]
+  },
+  "hollow_body": {
+    "vertices": 16,
+    "faces": 24,
+    "material_volume": 0.4880000000000154,
+    "cavity_volume": 0.5119999999999846,
+    "signed_volume": 0.48800000000001553,
+    "watertight": true,
+    "edge_manifold": true
+  }
+}
