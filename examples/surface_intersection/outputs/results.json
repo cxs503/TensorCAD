@@ -1,0 +1,157 @@
+{
+  "acceptance_relative_error": 0.03,
+  "acceptance_point_residual": 1e-09,
+  "studies": [
+    {
+      "study": "plane through the cylinder axis (two meridians)",
+      "measured_length": 8.0,
+      "reference_length": 8.0,
+      "relative_error": 0.0,
+      "branch_count": 2,
+      "closed_branch_count": 0,
+      "max_residual": 2.021286199229721e-15,
+      "samples": [
+        96,
+        12
+      ],
+      "refine_levels": 2,
+      "note": "length is 2 h exactly; the error is round-off, not discretisation",
+      "passes_acceptance": true
+    },
+    {
+      "study": "inclined plane cuts an ellipse at 30 deg",
+      "measured_length": 6.777877069543172,
+      "reference_length": 6.77791761270177,
+      "relative_error": 5.981654088195893e-06,
+      "branch_count": 1,
+      "closed_branch_count": 1,
+      "max_residual": 1.0106430996148604e-15,
+      "samples": [
+        128,
+        24
+      ],
+      "refine_levels": 2,
+      "note": "perimeter 4 a E(e^2) with a = R / cos(alpha), E by AGM",
+      "passes_acceptance": true
+    },
+    {
+      "study": "sphere patch cut by a plane",
+      "measured_length": 5.441337391807884,
+      "reference_length": 5.441398092702653,
+      "relative_error": 1.1155385754754468e-05,
+      "branch_count": 1,
+      "closed_branch_count": 1,
+      "max_residual": 2.220446049250313e-16,
+      "samples": [
+        96,
+        48
+      ],
+      "refine_levels": 2,
+      "note": "2 pi sqrt(R^2 - d^2)",
+      "passes_acceptance": true
+    },
+    {
+      "study": "cylinder cut by a concentric sphere",
+      "measured_length": 6.2831152158237185,
+      "reference_length": 6.283185307179586,
+      "relative_error": 1.1155385754369363e-05,
+      "branch_count": 2,
+      "closed_branch_count": 2,
+      "max_residual": 2.220446049250313e-16,
+      "samples": [
+        96,
+        24
+      ],
+      "refine_levels": 2,
+      "note": "two circles of radius R_cyl",
+      "passes_acceptance": true
+    },
+    {
+      "study": "NURBS rational cylinder cut by a plane",
+      "measured_length": 6.283113706372437,
+      "reference_length": 6.283185307179586,
+      "relative_error": 1.1395622387144772e-05,
+      "branch_count": 1,
+      "closed_branch_count": 1,
+      "max_residual": 9.731501718365924e-16,
+      "samples": [
+        96,
+        16
+      ],
+      "refine_levels": 2,
+      "note": "closes across the clamped patch's duplicated seam",
+      "passes_acceptance": true
+    },
+    {
+      "study": "perpendicular equal cylinders (Viviani)",
+      "measured_length": 15.28070767689795,
+      "reference_length": 15.280791156110848,
+      "relative_error": 5.4630164134918875e-06,
+      "branch_count": 2,
+      "closed_branch_count": 2,
+      "max_residual": 6.661338147750939e-16,
+      "samples": [
+        128,
+        32
+      ],
+      "refine_levels": 2,
+      "note": "4 sqrt(2) E(1/2) R per branch; AGM and 2e5-point midpoint quadrature agree to 4.65e-15",
+      "passes_acceptance": true
+    },
+    {
+      "study": "plane patch cut by a cylinder (truncated)",
+      "measured_length": 1.1780898296900908,
+      "reference_length": 1.1780972450961724,
+      "relative_error": 6.294392175595013e-06,
+      "branch_count": 1,
+      "closed_branch_count": 0,
+      "max_residual": 1.3322676295501878e-15,
+      "samples": [
+        64,
+        64
+      ],
+      "refine_levels": 2,
+      "note": "only the quarter inside the patch survives",
+      "passes_acceptance": true
+    }
+  ],
+  "convergence": [
+    {
+      "samples": 24,
+      "measured_length": 5.440426927139554,
+      "relative_error": 0.00017847721239169645,
+      "reference_length": 5.441398092702653,
+      "order_to_next": 1.9999420619609865
+    },
+    {
+      "samples": 48,
+      "measured_length": 5.44115529156128,
+      "relative_error": 4.462109502675207e-05,
+      "reference_length": 5.441398092702653,
+      "order_to_next": 1.9999855155285773
+    },
+    {
+      "samples": 96,
+      "measured_length": 5.441337391807884,
+      "relative_error": 1.1155385754754468e-05,
+      "reference_length": 5.441398092702653,
+      "order_to_next": 1.9999963800909581
+    },
+    {
+      "samples": 192,
+      "measured_length": 5.441382917440884,
+      "relative_error": 2.788853436274953e-06,
+      "reference_length": 5.441398092702653
+    }
+  ],
+  "residuals": {
+    "scale": 2.0,
+    "max_residual_reported": 6.661338147750939e-16,
+    "max_residual_recomputed": 6.661338147750939e-16,
+    "point_count": 338,
+    "max_closure_defect": 0.0,
+    "passes_acceptance": true
+  },
+  "figure": "plot.png",
+  "all_studies_pass": true
+}
