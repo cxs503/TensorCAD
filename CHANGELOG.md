@@ -7,6 +7,30 @@ semantic versioning.
 ## Unreleased
 
 ### Added
+- **`tensorcad.sketch`: 2-D sketch constraint solving with real DOF diagnostics**
+  (`GAP-CAD-006`, `docs/sketch_constraints.md`, `examples/sketch_solver/`, 46 tests). The
+  geometry core could validate numbers but not *solve* relations: no nonlinear constraint
+  solver, no freedom report, so every sketch coordinate had to be typed in by hand. A sketch
+  is a parameter vector (two per point, one per circle radius) plus residuals, solved by
+  Levenberg-Marquardt on `(J^T J + lambda diag(J^T J + 1)) dx = -J^T r` with an **exact**
+  Jacobian from a new forward-mode AD kernel (`tensorcad/autodiff.py`, sparse
+  `{parameter: derivative}` gradients) -- a finite-difference Jacobian's truncation error is a
+  floor above the 1e-10 acceptance bound. After the solve the Jacobian is row-normalised (so
+  rank does not depend on drawing units) and reduced to echelon form: `dof = n - rank` with
+  the null-space basis returned, consistent redundancy (`rows > rank`, residuals zero)
+  reported as redundancy rather than failure, and unavoidable residuals raised as
+  `InconsistentConstraintsError` naming the blocking rows. Constraints: coincident, fix /
+  fix-x / fix-y, distance, horizontal, vertical, point-on-line, point-line offset, parallel,
+  perpendicular, signed angle, equal length, radius, point-on-circle, line-circle tangency
+  (explicit side, because an unsigned distance is not differentiable at the solution).
+  Measured on 14 fixtures (1 under-constrained, 1 inconsistent, 1 redundantly
+  over-constrained): worst position error **2.45e-13 m** against the `1e-10 m` criterion
+  (closed-form references: law of cosines, `h/2`, `L cos 30`), residuals re-checked
+  independently at the returned parameter vector (**2.03e-13 m**), 25 deterministic
+  perturbed restarts per solvable fixture converge **325/325 (100 %)**, and the same
+  rectangle at `1e-3`/`1`/`1e3` scale keeps DOF 0 with relative error **1.8e-18**.
+  Limitations are stated: the solve is local (a mirror branch is chosen by the start), no
+  inequality constraints, `dof` is the local rank at the solution.
 - **`tensorcad.surface_intersection`: surface--surface intersection curves** (`GAP-CAD-002`,
   `docs/surface_intersection.md`, `examples/surface_intersection/`, `plot.png`, 24 tests).
   `intersect.py` answered the facet question and `csg.py` the implicit one, but nothing
