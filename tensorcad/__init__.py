@@ -424,6 +424,15 @@ from .shell import (
     offset_inward,
     shell,
 )
+from .loft import (
+    Loft,
+    LoftError,
+    LoftMeasurement,
+    knot_union,
+    loft_sections,
+    loft_surface,
+    section_deviation,
+)
 from .surface_intersection import (
     CylinderPatch,
     IntersectionCurve,
