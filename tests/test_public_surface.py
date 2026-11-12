@@ -30,7 +30,26 @@ SHEAR_FLOW_API = {
     "t_section",
 }
 
+MID_SURFACE_API = {
+    "CoplanarRegion",
+    "DefeatureResult",
+    "MidSurfaceError",
+    "MidSurfaceResult",
+    "ThicknessSample",
+    "cylinder_skin",
+    "defeature_planar_regions",
+    "extract_midsurface",
+    "mid_surface_between",
+    "plate_solid",
+    "sphere_skin",
+}
+
 EXPECTED_API = {
+    "RefinementError",
+    "RefinementReport",
+    "StageMetrics",
+    "edge_lengths",
+    "refine",
     "SectionArm",
     "SectionArmCurve",
     "ellipse_prism_righting_arms",
@@ -166,7 +185,7 @@ EXPECTED_API = {
 
 
 def test_declared_api_is_importable() -> None:
-    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API
+    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API | MID_SURFACE_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
     assert tensorcad.__version__ == "0.23.0"
