@@ -78,6 +78,9 @@ ignore = [
 # like examples/*, so the import-order rule cannot apply to them either.
 "benchmarks/verified/*/run_benchmark.py" = ["E402"]
 "tools/pc6_contract.py" = ["E501"]
+# Same reason again: the m18229 report generator embeds a manuscript in an f-string,
+# and wrapping markdown tables at 110 columns makes the emitted report unreadable.
+"work/midsurface_ledger_report.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"

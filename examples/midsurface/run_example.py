@@ -15,7 +15,9 @@ Four cases, each with an independent reference:
    against an independent route (vertex-normal offset, ``mid_surface_between``).
 
 Writes ``artifacts/midsurface/results.json`` (every number injected
-programmatically) and ``artifacts/midsurface/fig_*.png`` when matplotlib imports.
+programmatically), ``artifacts/midsurface/report.md`` (rendered *from* that payload, so the
+tables cannot drift from the measurement) and ``artifacts/midsurface/fig_*.png`` when
+matplotlib imports.
 
 Run: ``python examples/midsurface/run_example.py``
 """
@@ -48,9 +50,9 @@ from tensorcad.series60 import (
 from tensorcad.shell import offset_inward
 
 OUTPUT_DIR = _REPO_ROOT / "artifacts" / "midsurface"
-PLATE = dict(length=8.0, breadth=3.0, thickness=0.02)
-CYLINDER = dict(radius=1.0, thickness=0.02, length=4.0, segments=128)
-SPHERE = dict(radius=1.0, thickness=0.02, rings=32, segments=64)
+PLATE = {"length": 8.0, "breadth": 3.0, "thickness": 0.02}
+CYLINDER = {"radius": 1.0, "thickness": 0.02, "length": 4.0, "segments": 128}
+SPHERE = {"radius": 1.0, "thickness": 0.02, "rings": 32, "segments": 64}
 HULL = Series60Parameters(length=10.0, beam=1.5, draft=0.6, cb=0.60, nx=41, nz=13)
 HULL_FINE = Series60Parameters(length=10.0, beam=1.5, draft=0.6, cb=0.60, nx=81, nz=25)
 WALL = 0.02
@@ -376,6 +378,139 @@ def figures(cases: dict, sweep: list[dict], hull: dict) -> list[dict]:
     return written
 
 
+def _fmt(value, digits: int = 4) -> str:
+    """Format a payload number for the report; no number is typed by hand."""
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        return f"{value:.{digits}g}"
+    return str(value)
+
+
+def write_report(payload: dict, path: pathlib.Path) -> pathlib.Path:
+    """Render ``report.md`` from the run payload -- the document is a *view* of results.json.
+
+    Every number in the table below is interpolated from the payload the same run wrote to
+    ``results.json``, so the prose cannot drift from the measurement (nothing is copied).
+    """
+    checks = payload["checks"]
+    plate = payload["cases"]["plate"]
+    cylinder = payload["cases"]["cylinder"]
+    sphere = payload["cases"]["sphere"]
+    hull = payload["hull"]
+    solid = payload["solid_body_rejection"]
+    refinement = payload["hull_refinement"]["rows"]
+    n_pass = sum(1 for ok in checks.values() if ok)
+
+    def verdict(ok: bool) -> str:
+        return "PASS" if ok else "**FAIL**"
+
+    acceptance = [
+        ("mid-surface area error < 1 % and face count <= 1/10 of the pre-idealisation mesh",
+         f"area {_fmt(plate['area_relative_error'])}; faces "
+         f"{plate['defeature']['face_count_after']}/"
+         f"{plate['defeature']['face_count_before']}",
+         checks["plate_area_within_1pct"] and checks["plate_defeature_face_count_within_tenth"]),
+        ("mesh size drops >= 50 % after defeaturing",
+         f"{_fmt(plate['defeature']['face_reduction'])}",
+         checks["plate_defeature_reduction_over_50pct"]),
+        ("thickness is measured, not assumed (plate t = 20 mm)",
+         f"{_fmt(plate['mean_thickness'], 6)} m, rel {_fmt(plate['thickness_relative_error'], 3)}",
+         checks["plate_thickness_within_1pct"]),
+    ]
+    rows = "\n".join(f"| {criterion} | {measured} | {verdict(ok)} |"
+                      for criterion, measured, ok in acceptance)
+    case_rows = "\n".join([
+        f"| plate (8 x 3 x 0.02 m solid) | mid-plane area {_fmt(plate['analytic_mid_area'], 6)} m^2 "
+        f"| {_fmt(plate['mid_area'], 6)} m^2 | {_fmt(plate['area_relative_error'], 3)} |",
+        f"| tube skin (R 1 m, t 20 mm) | offset area {_fmt(cylinder['analytic_offset_area'], 6)} m^2 "
+        f"| {_fmt(cylinder['mid_area'], 6)} m^2 | {_fmt(cylinder['area_relative_error'], 3)} |",
+        f"| sphere skin (R 1 m, t 20 mm) | offset area {_fmt(sphere['analytic_offset_area'], 6)} m^2 "
+        f"| {_fmt(sphere['mid_area'], 6)} m^2 | {_fmt(sphere['area_relative_error'], 3)} |",
+        f"| Series 60 plating (t 20 mm, 41x13) | other route {_fmt(hull['reference_mid_area'], 6)} m^2 "
+        f"| {_fmt(hull['mid_area'], 6)} m^2 | {_fmt(hull['mid_area_relative_to_reference'], 3)} |",
+    ])
+    check_rows = "\n".join(f"| `{name}` | {verdict(ok)} |" for name, ok in checks.items())
+    refine_rows = "\n".join(
+        f"| {row['grid']} | {_fmt(row['cb_mesh'], 6)} | {_fmt(row['cb_relative_error'], 3)} |"
+        for row in refinement)
+    text = f"""# Mid-surface extraction and planar defeaturing -- verification report
+
+> **Generated** by `examples/midsurface/run_example.py`; every number below is interpolated
+> from `artifacts/midsurface/results.json` (schema `{payload["schema"]}`), nothing typed by
+> hand. Re-running the example regenerates both files.
+
+- module: `{payload["module"]}`
+- gap anchor: `{payload["gap_anchor"]}` (`docs/oss_inventory_cad/GAP-ANCHORS.md`)
+- checks: **{n_pass}/{len(checks)} PASS**, `all_checks_passed = {payload["all_checks_passed"]}`
+
+## 1. Acceptance criteria of the gap anchor
+
+| criterion | measured | verdict |
+|---|---|---|
+{rows}
+
+## 2. Cases against independent references
+
+| case | reference (closed form / other route) | measured mid-surface | relative error |
+|---|---|---|---|
+{case_rows}
+
+The tube and sphere references are the *exact* offset surfaces (`2 pi (R - t/2) L`,
+`4 pi (R - t/2)^2`). Each facet is translated, not offset, so the surplus over that
+reference is *predicted* to be `t/(2R)` (tube) and `t/R` (sphere) of the source area; the
+measured surplus minus the prediction is {_fmt(cylinder["surplus_prediction_error"], 3)} on
+the tube, i.e. the residual area is the documented translation artefact to round-off, not
+an error that merely happens to be small.
+
+## 3. Hull plating (the real geometry) and its geometry gate
+
+- gate before idealisation: watertight = {_fmt(hull["geometry_gate"]["watertight"])}; Cb {_fmt(hull["geometry_gate"]["cb_mesh"], 6)} vs {_fmt(hull["geometry_gate"]["cb_reference"], 4)} ({_fmt(hull["geometry_gate"]["cb_relative_error"] * 100, 3)} %); L/B/T = {_fmt(hull["geometry_gate"]["length"], 3)}/{_fmt(hull["geometry_gate"]["beam"], 3)}/{_fmt(hull["geometry_gate"]["draft"], 3)} m
+- paired faces {hull["paired_face_count"]}/{hull["source_face_count"]} ({_fmt(hull["paired_fraction"] * 100, 4)} %); mean wall {_fmt(hull["mean_thickness"], 6)} m ({_fmt(hull["thickness_relative_error"] * 100, 3)} % vs 0.02 m); measured band {_fmt(hull["min_measured_thickness"], 4)} .. {_fmt(hull["max_measured_thickness"], 4)} m
+- two independent routes: median difference {_fmt(hull["two_route_median_difference"], 3)} m ({_fmt(100 * hull["two_route_median_difference"] / (0.5 * WALL), 3)} % of t/2); max {_fmt(hull["two_route_max_difference"], 3)} m at the folded waterline rim
+- defeaturing a curved skin is refused rather than approximated: {hull["defeature"]["face_count_after"]}/{hull["defeature"]["face_count_before"]} faces, reduction {_fmt(hull["defeature"]["face_reduction"])}
+
+| grid | Cb (mesh) | error vs closed form |
+|---|---|---|
+{refine_rows}
+
+The Cb error shrinks with refinement, so the residual is the *mesh* discretisation of the
+station curves, not the plating construction -- which is why the geometry gate is stated
+before any mid-surface number is quoted.
+
+## 4. Rejecting the solid body
+
+A cube of edge {_fmt(solid["cube_edge"], 3)} m has antiparallel opposite faces, so a ray cast
+without a thickness band would "idealise" it into a mid-plane through its centre. With the
+band at {_fmt(solid["max_thickness_band"], 3)} m the paired face count is
+{solid["paired_face_count"]} and the mid-surface area is
+{_fmt(solid["mid_area"], 3)} m^2: the caller sees the solid it handed in instead of a
+silently half-hollowed model.
+
+## 5. Full check table
+
+| check | verdict |
+|---|---|
+{check_rows}
+
+## 6. What is not claimed
+
+* Caps are not turned into annuli: the extraction is a per-face operation, so a capped tube's
+  end disks pair with each other. Build a *skin* (`plate_solid`, `cylinder_skin`,
+  `sphere_skin`, `shell.offset_inward`), not a capped solid.
+* The sphere fixture's polar ring is degenerate; it is reported in `unpaired` (area
+  {_fmt(sphere["unpaired_area_fraction"], 3)} of the total) rather than repaired.
+* `defeature_planar_regions` refuses regions with an inner loop and never merges a curved
+  region, so the hull plating keeps all of its faces (row above).
+* The shadowing diagnostic in `tests/midsurface_oracle.py` reports zero on all fixtures:
+  the "wall hidden behind a nearer surface" failure mode is *not* exercised by this set.
+"""
+    path.write_text(text)
+    return path
+
+
 def strip_private(payload):
     if isinstance(payload, dict):
         return {key: strip_private(value) for key, value in payload.items() if not key.startswith("_")}
@@ -404,6 +539,9 @@ def main() -> int:
         "plate_area_within_1pct": abs(cases["plate"]["area_relative_error"]) < 0.01,
         "plate_thickness_within_1pct": abs(cases["plate"]["thickness_relative_error"]) < 0.01,
         "plate_defeature_reduction_over_50pct": cases["plate"]["defeature"]["face_reduction"] > 0.5,
+        # GAP-CAD-013 acceptance, verbatim: "面数 <= 原面数 1/10" after idealisation.
+        "plate_defeature_face_count_within_tenth": cases["plate"]["defeature"]["face_count_after"]
+        <= 0.1 * cases["plate"]["defeature"]["face_count_before"],
         "plate_defeature_area_preserved": cases["plate"]["defeature"]["area_relative_error"] < 1e-12,
         "cylinder_area_within_3pct": abs(cases["cylinder"]["area_relative_error"]) < 0.03,
         "cylinder_thickness_within_1pct": abs(cases["cylinder"]["thickness_relative_error"]) < 0.01,
@@ -445,6 +583,8 @@ def main() -> int:
         "all_checks_passed": all(checks.values()),
     }
     (OUTPUT_DIR / "results.json").write_text(json.dumps(payload, indent=2, sort_keys=True))
+    report_path = write_report(payload, OUTPUT_DIR / "report.md")
+    print(f"report                : {report_path}")
 
     failed = [name for name, ok in checks.items() if not ok]
     print(json.dumps({"checks": checks, "failed": failed}, indent=2))
