@@ -1,0 +1,49 @@
+{
+  "case": "CASE-TAYLOR-GREEN-3D",
+  "domain": {
+    "boundary": "periodic",
+    "box": [
+      0.0,
+      6.283185307179586,
+      0.0,
+      6.283185307179586,
+      0.0,
+      6.283185307179586
+    ]
+  },
+  "initial_condition": {
+    "amplitude": 0.25,
+    "u": "A sin(x) cos(y) cos(z)",
+    "v": "-A cos(x) sin(y) cos(z)",
+    "w": "0"
+  },
+  "metrics": [
+    "mode amplitude decay",
+    "kinetic energy decay",
+    "enstrophy"
+  ],
+  "parameters": {
+    "amplitude_A": 0.25,
+    "energy_E0": 0.0078125,
+    "enstrophy_Z0": 0.0234375,
+    "initial_dissipation_dE_dt": -0.00046875,
+    "kinematic_viscosity_nu": 0.01,
+    "reynolds_like_Re": 25.0
+  },
+  "reference": {
+    "coefficient_ratio": 0.19834351676933132,
+    "order": 12,
+    "trusted_t": [
+      0.0,
+      1.0
+    ],
+    "type": "time-Taylor series (this module, residual-checked)"
+  },
+  "relative_tolerance": 0.08,
+  "sample_times": [
+    1.0,
+    2.0,
+    3.0,
+    4.0
+  ]
+}
