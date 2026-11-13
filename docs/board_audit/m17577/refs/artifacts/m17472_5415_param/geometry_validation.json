@@ -1,0 +1,134 @@
+{
+  "anchor": "GAP-CAD-C1-5415-PARAM-REBUILD",
+  "purpose": "principal particulars (Cb / L / B / T) before any other claim",
+  "gate": {
+    "accept_pct": 3.0,
+    "reject_pct": 15.0,
+    "declared": "before computing, in tools/dtmb5415_param/verify_geometry.py"
+  },
+  "reference": {
+    "lambda": 24.825174825174827,
+    "Lpp_m": 142.0,
+    "beam_m": 18.86713286713287,
+    "draft_m": 6.156643356643357,
+    "displacement_volume_m3": 8412.037925248767,
+    "model_scale": {
+      "Lpp_m": 5.72,
+      "beam_m": 0.76,
+      "draft_m": 0.248,
+      "displacement_t": 0.549,
+      "rho_kg_m3": 998.5,
+      "displacement_volume_model_m3": 0.5498247371056585
+    },
+    "source": "DATASET.readme_model_scale_table (dataset README, quoted verbatim)",
+    "cb": 0.509991541742904
+  },
+  "got": {
+    "Lpp_m": 143.264946698,
+    "beam_m": 19.090661823757507,
+    "draft_m": 6.156643356643357,
+    "displacement_volume_m3": 8452.757810030433,
+    "cb": 0.5019881926994797,
+    "cwp": 0.7679371090155631,
+    "lcb_m": 70.38701397183036
+  },
+  "table": [
+    {
+      "quantity": "L (station span)",
+      "key": "Lpp_m",
+      "reference": 142.0,
+      "got": 143.264946698,
+      "diff_pct": 0.8908075338028089,
+      "pass_3pct": true,
+      "reject_15pct": false
+    },
+    {
+      "quantity": "B at design WL",
+      "key": "beam_m",
+      "reference": 18.86713286713287,
+      "got": 19.090661823757507,
+      "diff_pct": 1.184753180034215,
+      "pass_3pct": true,
+      "reject_15pct": false
+    },
+    {
+      "quantity": "T (moulded, from baseline)",
+      "key": "draft_m",
+      "reference": 6.156643356643357,
+      "got": 6.156643356643357,
+      "diff_pct": 0.0,
+      "pass_3pct": true,
+      "reject_15pct": false
+    },
+    {
+      "quantity": "displaced volume",
+      "key": "displacement_volume_m3",
+      "reference": 8412.037925248767,
+      "got": 8452.757810030433,
+      "diff_pct": 0.48406682356298475,
+      "pass_3pct": true,
+      "reject_15pct": false
+    },
+    {
+      "quantity": "Cb",
+      "key": "cb",
+      "reference": 0.509991541742904,
+      "got": 0.5019881926994797,
+      "diff_pct": -1.5693101528846318,
+      "pass_3pct": true,
+      "reject_15pct": false
+    }
+  ],
+  "all_pass_3pct": true,
+  "any_reject_15pct": false,
+  "cb_identity": {
+    "cb_L_B_T_m3": 8452.757810030433,
+    "integrated_m3": 8452.757810030433,
+    "rel_diff": 0.0,
+    "pass": true
+  },
+  "waterline": {
+    "used_m": 6.156643356643357,
+    "derivation": "0.248 m (README) * 142 / 5.720",
+    "sweep": [
+      {
+        "waterline_z_m": 6.0066,
+        "displacement_volume_m3": 8139.0164328723695,
+        "cb": 0.49668798606424636,
+        "beam_m": 19.042309328111536
+      },
+      {
+        "waterline_z_m": 6.0816,
+        "displacement_volume_m3": 8295.486420699495,
+        "cb": 0.4993536104622236,
+        "beam_m": 19.066714677663263
+      },
+      {
+        "waterline_z_m": 6.1566,
+        "displacement_volume_m3": 8452.666747085012,
+        "cb": 0.5019866836180841,
+        "beam_m": 19.09064798818406
+      },
+      {
+        "waterline_z_m": 6.2316,
+        "displacement_volume_m3": 8610.523533982978,
+        "cb": 0.5045744524222231,
+        "beam_m": 19.11458129870486
+      },
+      {
+        "waterline_z_m": 6.3066,
+        "displacement_volume_m3": 8769.024101489438,
+        "cb": 0.5071165762931583,
+        "beam_m": 19.138514609225656
+      }
+    ],
+    "z_matching_readme_volume_m": 6.137244973323958,
+    "note": "the matching waterline is reported only for transparency; the design draft is the README value, so the volume is a measurement and cannot be satisfied by construction"
+  },
+  "notes": [
+    "L is the station span of the rebuilt hull (transom to stem, station means), so it exceeds Lpp by the longitudinal extent of the end stations.",
+    "B is the waterline breadth of the clipped sections at the design draft.",
+    "Round 0 compared 8240 m^3 with the model-scale tonnage 8.412 and divided Cb by 1000; the corrected comparison is in 'table'."
+  ],
+  "wall_clock_s": 13.5
+}

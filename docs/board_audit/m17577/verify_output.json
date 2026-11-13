@@ -1,0 +1,80 @@
+{
+  "audit_mission": "m17577 (board-audit of m17472)",
+  "audited_mission": "m17472",
+  "anchor": "GAP-CAD-C1-5415-PARAM-REBUILD",
+  "audited_commit": "979fb83 (branch agent/m17472, NOT yet merged into origin/main)",
+  "at": "2026-11-13T07:05Z (approx, local wall clock)",
+  "C1_impl_files_exist": {
+    "tensorcad/dtmb5415.py": "746 lines, real implementation (design vector -> displacement field -> watertight mesh, analytic dV/dv)",
+    "tensorcad/dtmb5415_cli.py": "162 lines, CLI entry (console script tensorcad-dtmb5415, pyproject.toml:43)",
+    "tools/dtmb5415_param/run_acceptance.py": "311 lines",
+    "tools/dtmb5415_param/verify_geometry.py": "195 lines",
+    "tools/dtmb5415_param/verify_shipped_model.py": "222 lines",
+    "tools/dtmb5415_param/fit_design_space.py": "238 lines",
+    "tests/test_dtmb5415_param.py": "254 lines, 17 tests"
+  },
+  "C2_run_artifacts_exist": {
+    "dir": "artifacts/m17472_5415_param/ (in /root/tp-agent/work/m17472)",
+    "files": [
+      "acceptance.json", "geometry_validation.json", "shipped_model_check.json",
+      "shipped_model_check.csv", "sampled_configs.csv", "gate_samples.csv",
+      "fig_config0_distance.png", "fig_geometry_validation.png",
+      "fig_gradient_parity.png", "fig_sections_and_volume.png",
+      "fit/design_space.npz", "fit/design_space_metrics.json", "fit/design_space_holdout.csv"
+    ],
+    "all_present": true
+  },
+  "C3_tests_independent_rerun": {
+    "cmd": "PYTHONPATH=. python3 -m pytest tests/test_dtmb5415_param.py -q (in /root/tp-agent/work/m17472)",
+    "result": "17 passed, 1 warning in 6.41s",
+    "pass": true
+  },
+  "C4_repro_cmd_rerun": {
+    "cmd": "PYTHONPATH=. python3 tools/dtmb5415_param/run_acceptance.py && ... verify_geometry.py --out ... && ... verify_shipped_model.py --n-configs 400 --out ... && pytest tests/test_dtmb5415_param.py -q",
+    "executed": true,
+    "wall_clock_s": {"run_acceptance": 34.4, "verify_geometry": 13.5, "verify_shipped_model": 66.7, "pytest": 6.4},
+    "reproducibility": {
+      "sampled_configs.csv": "byte-identical to committed artifact (sha256 match)",
+      "gate_samples.csv": "byte-identical to committed artifact (sha256 match)",
+      "acceptance.json": "numerically identical to committed artifact (all fields equal except wall_s)",
+      "geometry_validation.json": "numerically identical (except wall_clock_s)",
+      "shipped_model_check.json": "numerically identical (except wall_clock_s)"
+    },
+    "verdict": "repro_cmd executable; committed numbers are reproducible, zero hand-copying confirmed"
+  },
+  "C5_benchmark_ledger": {
+    "query": "SELECT case_name,metric,tolerance FROM tensor_benchmark_cases WHERE anchor_slug='GAP-CAD-C1-5415-PARAM-REBUILD'",
+    "rows": 0,
+    "note": "no ledger row for this anchor; closest CAD anchors are CASE-CAD-BASELINE-FLEET-KCS-DISPLACEMENT and CASE-CAD-B2-ROUNDTRIP-18 (other missions). The mission's evidence.json 'benchmark' section is self-declared, not ledger-registered. Per audit rule the ledger is the sole arbiter -> L4 not confirmable from ledger.",
+    "self_declared_ref_vs_got": {
+      "config0_vs_exact": {"ref": "DTMB5415_Hull_exact.stl sha256 d40b17b1... (82794 unique verts)", "got": "99.902% within mesh resolution 0.4549 m (median 1.11 cm, p95 7.52 cm)", "threshold": ">95%", "pass": true},
+      "principal_particulars": {"Lpp": "+0.891%", "beam": "+1.185%", "draft": "0.0%", "displacement_volume": "+0.484%", "cb": "-1.569%", "all_within_3pct": true},
+      "volume_gradient": {"ref": "central difference h=1e-5", "got_max_rel_err": 5.2795e-08, "threshold": 0.01, "pass": true},
+      "holdout_point_error": {"ref": "independent rank-40 refit RMS 0.25188 m", "got": "0.25190 m", "agreement_pct": 0.0099}
+    }
+  },
+  "C6_acceptance_criteria": {
+    "criterion_1_config0_vs_exact": {"value": 0.9990216682368288, "threshold": 0.95, "pass": true},
+    "criterion_2_sampled_gate": {"value": "19/20", "threshold": "20/20", "pass": false, "failing_config": 4895, "failing_check": "half_breadth_non_negative (aft midline crossing, ~1e-6 m scale, PCA-40 model-family limit)"},
+    "criterion_3_gradient_chain": {"value": 5.2795e-08, "threshold": 0.01, "pass": true}
+  },
+  "C7_integration_callers": {
+    "platform_side_callers": 0,
+    "same_repo_callers": ["tensorcad/dtmb5415_cli.py (console script)", "tools/dtmb5415_param/run_acceptance.py"],
+    "note": "no main-solver/platform-side caller found (grep of TensorPlatform backend/api: DTMB5415 appears only in benchmark_reference*.json data files, not code)",
+    "L3_met": false
+  },
+  "C8_report": {
+    "report_id": 16450,
+    "title": "DTMB 5415 参数化可微重建（Zenodo 9001×27）返修轮：三个真缺陷与 19/20 几何门",
+    "six_sections": true,
+    "honesty": "19/20 gate failure disclosed in title, §3.3, §6; model domain limitation (uniform [-1,1]^27 sampling 8/20) disclosed in §5"
+  },
+  "level_assessment": {
+    "L2": "MET (independently verified: impl+entry+run_artifacts+tests)",
+    "L3": "NOT MET (no main-solver/platform-side caller)",
+    "L4": "NOT CONFIRMABLE (no tensor_benchmark_cases row for anchor; acceptance criterion 2 = 19/20)",
+    "verdict_level": 2
+  },
+  "rework_recommendation": "register tensor_benchmark_cases row(s) for anchor GAP-CAD-C1-5415-PARAM-REBUILD (ref=Zenodo README x lambda + DTMB5415_Hull_exact.stl sha256, tolerance per report §6); fix or formally scope-out config 4895 (raise PCA rank or manifold-projection constraint); then re-audit for L4."
+}
