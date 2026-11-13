@@ -22,21 +22,35 @@
           "basis": "mirroring about y leaves the z extent unchanged",
           "residual": 0,
           "tolerance": 1e-09
+        },
+        "identity_open_shell_has_one_boundary_component": {
+          "basis": "the open sheet carries a single boundary loop (deck edge + stem seam)",
+          "residual": 0,
+          "tolerance": 0.0
+        },
+        "identity_open_shell_is_not_a_solid": {
+          "basis": "the shipped 5415 mesh is an open hull sheet, so no closed-surface volume exists",
+          "residual": 0,
+          "tolerance": 0.0
         }
       },
       "known_limitations": [
         {
           "asserted": false,
-          "cloud_volume_m3": 8452.757810030433,
-          "detail": "compute_hydrostatics over space.mesh() does not reproduce the cloud integral reported by space.hydrostatics(); recorded as a diagnostic, not asserted against the dataset",
-          "id": "surface-integral-volume-disagrees-with-cloud-integral",
-          "relative_discrepancy": 2.6158475852763003,
-          "surface_integral_volume_m3": -13658.368296263065
+          "boundary_component_count": 1,
+          "boundary_edge_count": 722,
+          "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld and only the dataset/station-area displacement is reported. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
+          "displacement_volume_m3": 8452.757810030433,
+          "id": "displacement-withheld-open-shell",
+          "signed_tetra_sum_open_shell_m3": -13658.368296262934
         }
       ],
       "measurements": {
         "coarse": {
           "block_coefficient": 0.5019881926994797,
+          "boundary_component_count": 1,
+          "boundary_edge_count": 722,
+          "boundary_vertex_count": 722,
           "cloud_extent_x_m": 151.9004461,
           "cloud_extent_y_m": 10.2695,
           "cloud_extent_z_m": 19.195270999999998,
@@ -49,13 +63,17 @@
           "mesh_extent_y_m": 20.539,
           "mesh_extent_z_m": 19.195270999999998,
           "mesh_face_count": 50880,
+          "mesh_is_watertight": 0,
           "mesh_vertex_count": 25802,
-          "surface_integral_volume_m3": -13658.368296263065,
+          "signed_tetra_sum_open_shell_m3": -13658.368296262934,
           "waterline_beam_m": 19.090661823757507,
           "waterplane_area_m2": 2100.3253858657763
         },
         "fine": {
           "block_coefficient": 0.5019881926994797,
+          "boundary_component_count": 1,
+          "boundary_edge_count": 722,
+          "boundary_vertex_count": 722,
           "cloud_extent_x_m": 151.9004461,
           "cloud_extent_y_m": 10.2695,
           "cloud_extent_z_m": 19.195270999999998,
@@ -68,8 +86,9 @@
           "mesh_extent_y_m": 20.539,
           "mesh_extent_z_m": 19.195270999999998,
           "mesh_face_count": 50880,
+          "mesh_is_watertight": 0,
           "mesh_vertex_count": 25802,
-          "surface_integral_volume_m3": -13658.368296263065,
+          "signed_tetra_sum_open_shell_m3": -13658.368296262934,
           "waterline_beam_m": 19.090661823757507,
           "waterplane_area_m2": 2100.3253858657763
         }
@@ -326,8 +345,8 @@
   },
   "provenance": {
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "fccd701d79833bb06507a075e6fc5b2a844c1eecff7fe920049cbe125d83b0d6",
-    "git_commit": "9bc030ae76b1250f8e182d472d774e143f899697",
+    "geometry_fingerprint": "5eaf140b1b704bd4316866023f5f9eabdb37668b0190e138a698798b16a2d927",
+    "git_commit": "17c09fa6c785c0bb7ed6a2b39a7428b8af2fea2a",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },

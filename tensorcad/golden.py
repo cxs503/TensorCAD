@@ -404,8 +404,8 @@ class DTMB5415Golden(GoldenCase):
     The reference is the dataset itself (``docs/data/dtmb5415/holdout_fixture.npz``): the
     holdout residual the dataset records for one configuration. Absolute displacement has
     no published counterpart inside the repository, so it is drift-locked only, and the
-    surface-integral/cloud-integral disagreement is recorded instead of dressed up as an
-    acceptance.
+    mesh is asserted to be what it is — an open hull sheet — so that its tetrahedron sum
+    is never mistaken for a displacement.
     """
 
     name = "dtmb5415"
@@ -427,8 +427,7 @@ class DTMB5415Golden(GoldenCase):
     def measure(self, level: str) -> dict[str, float]:
         import numpy as np
 
-        from .dtmb5415 import WATERLINE_Z
-        from .hydrostatics import compute_hydrostatics
+        from . import mesh as meshlib
 
         space = self._space()
         fixture = self._fixture()
@@ -446,9 +445,16 @@ class DTMB5415Golden(GoldenCase):
             "length_stations_m": float(hydro["length_stations_m"]),
             "mesh_vertex_count": float(len(mesh.vertices)),
             "mesh_face_count": float(len(mesh.faces)),
-            "surface_integral_volume_m3": float(
-                compute_hydrostatics(mesh, waterline_z=WATERLINE_Z, closed=True).displacement_volume
+            # The shell is an open sheet (the hull *surface*, not a solid). Its
+            # tetrahedron sum is a signed integral over an open surface: never a volume.
+            # It is stored under a name that cannot be mistaken for one.
+            "signed_tetra_sum_open_shell_m3": float(meshlib.total_signed_volume(mesh)),
+            "mesh_is_watertight": float(meshlib.is_watertight(mesh)),
+            "boundary_edge_count": float(len(meshlib.boundary_edges(mesh))),
+            "boundary_vertex_count": float(
+                len({index for edge in meshlib.boundary_edges(mesh) for index in edge})
             ),
+            "boundary_component_count": float(_boundary_component_count(mesh)),
         }
         for axis, index in (("x", 0), ("y", 1), ("z", 2)):
             values[f"cloud_extent_{axis}_m"] = float(np.ptp(cloud[:, index]))
@@ -487,22 +493,41 @@ class DTMB5415Golden(GoldenCase):
                 1e-9,
                 f"mirroring about {axis} leaves the {other} extent unchanged",
             )
+        # Topology, not numerics: the shipped shell is the hull *surface*. If a future
+        # generator closes it, this fires and the displacement can be asserted instead.
+        invariants["identity_open_shell_is_not_a_solid"] = (
+            values["mesh_is_watertight"],
+            0.0,
+            "the shipped 5415 mesh is an open hull sheet, so no closed-surface volume exists",
+        )
+        invariants["identity_open_shell_has_one_boundary_component"] = (
+            values["boundary_component_count"] - 1.0,
+            0.0,
+            "the open sheet carries a single boundary loop (deck edge + stem seam)",
+        )
         return invariants
 
     def known_limitations(self, values: Mapping[str, float]) -> list[dict[str, Any]]:
-        cloud_volume = values["displacement_volume_m3"]
-        surface_volume = values["surface_integral_volume_m3"]
         return [
             {
-                "id": "surface-integral-volume-disagrees-with-cloud-integral",
+                "id": "displacement-withheld-open-shell",
                 "detail": (
-                    "compute_hydrostatics over space.mesh() does not reproduce the cloud "
-                    "integral reported by space.hydrostatics(); recorded as a diagnostic, "
-                    "not asserted against the dataset"
+                    "the shipped 5415 shell is an open sheet, not a solid: one boundary loop "
+                    f"of {int(values['boundary_edge_count'])} edges (deck edge plus the stem "
+                    "seam). Surface-integral displacement is therefore withheld and only the "
+                    "dataset/station-area displacement is reported. Passing closed=True to "
+                    "compute_hydrostatics on this shell returns the signed tetrahedron sum of "
+                    "an open surface (negative here), which is not a volume; the previous "
+                    "'relative_discrepancy' of 2.6 was measuring that artifact, not an "
+                    "integration error. Closing the sheet is not a one-liner: after welding, "
+                    "mesh_repair.boundary_loops refuses this boundary (a vertex is walked by "
+                    "two walks at the stem pinch), so a watertight repair needs the seam "
+                    "stitched first."
                 ),
-                "cloud_volume_m3": _number(cloud_volume),
-                "surface_integral_volume_m3": _number(surface_volume),
-                "relative_discrepancy": _number(_relative(surface_volume - cloud_volume, cloud_volume)),
+                "displacement_volume_m3": _number(values["displacement_volume_m3"]),
+                "signed_tetra_sum_open_shell_m3": _number(values["signed_tetra_sum_open_shell_m3"]),
+                "boundary_edge_count": _number(values["boundary_edge_count"]),
+                "boundary_component_count": _number(values["boundary_component_count"]),
                 "asserted": False,
             }
         ]
@@ -515,6 +540,31 @@ def golden_cases() -> list[GoldenCase]:
 # --------------------------------------------------------------------------------------
 # helpers
 # --------------------------------------------------------------------------------------
+def _boundary_component_count(mesh: Any) -> int:
+    """Connected components of the mesh boundary edges (a topological fact).
+
+    ``mesh_repair.boundary_loops`` walks loops and rejects a boundary that pinches at a
+    vertex, so this counts components instead: one component means one hole, however the
+    walk happens to be oriented.
+    """
+    from . import mesh as meshlib
+
+    parent: dict[int, int] = {}
+
+    def find(item: int) -> int:
+        parent.setdefault(item, item)
+        while parent[item] != item:
+            parent[item] = parent[parent[item]]
+            item = parent[item]
+        return item
+
+    for a, b in meshlib.boundary_edges(mesh):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    return len({find(node) for node in parent})
+
+
 def _hydrostatics_values(hydro: Any, metrics: Mapping[str, str]) -> dict[str, float]:
     """Map reported metric names to the :class:`Hydrostatics` attributes behind them."""
     return {name: float(getattr(hydro, attribute)) for name, attribute in metrics.items()}

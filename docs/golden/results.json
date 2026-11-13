@@ -1,5 +1,5 @@
 {
-  "baseline": "/root/tp-agent/work/m17688/docs/golden/tensorcad_geometry_golden.json",
+  "baseline": "/root/tp-agent/work/m18251/docs/golden/tensorcad_geometry_golden.json",
   "cases": [
     {
       "findings": [],
@@ -122,7 +122,7 @@
         "wetted_surface_area_m2": 14.879063104957783
       },
       "reference_source": "tensorcad.wigley.wigley_analytic_hydrostatics (closed forms)",
-      "seconds": 2.916,
+      "seconds": 2.906,
       "title": "Wigley hull (L=10, B=1, T=0.625, n=m=2): lofted and capped surface"
     },
     {
@@ -240,7 +240,7 @@
         "waterplane_area_m2": 9.374999999999998
       },
       "reference_source": "tensorcad.series60.analytic_* over the exponents fitted from Cb",
-      "seconds": 2.288,
+      "seconds": 2.197,
       "title": "Series 60 hull (L=10, B=1.5, T=0.6, Cb=0.60): fitted exponent family"
     },
     {
@@ -386,7 +386,7 @@
         "sphere_volume_m3": 4.1887902047863905
       },
       "reference_source": "(4/3)\u03c0r\u00b3, 4\u03c0r\u00b2 and (4/3)\u03c0abc over the exact primitive fields",
-      "seconds": 18.612,
+      "seconds": 11.688,
       "title": "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra"
     },
     {
@@ -395,16 +395,20 @@
       "known_limitations": [
         {
           "asserted": false,
-          "cloud_volume_m3": 8452.757810030433,
-          "detail": "compute_hydrostatics over space.mesh() does not reproduce the cloud integral reported by space.hydrostatics(); recorded as a diagnostic, not asserted against the dataset",
-          "id": "surface-integral-volume-disagrees-with-cloud-integral",
-          "relative_discrepancy": 2.6158475852763003,
-          "surface_integral_volume_m3": -13658.368296263065
+          "boundary_component_count": 1,
+          "boundary_edge_count": 722,
+          "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld and only the dataset/station-area displacement is reported. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
+          "displacement_volume_m3": 8452.757810030433,
+          "id": "displacement-withheld-open-shell",
+          "signed_tetra_sum_open_shell_m3": -13658.368296262934
         }
       ],
       "measurements": {
         "coarse": {
           "block_coefficient": 0.5019881926994797,
+          "boundary_component_count": 1,
+          "boundary_edge_count": 722,
+          "boundary_vertex_count": 722,
           "cloud_extent_x_m": 151.9004461,
           "cloud_extent_y_m": 10.2695,
           "cloud_extent_z_m": 19.195270999999998,
@@ -417,13 +421,17 @@
           "mesh_extent_y_m": 20.539,
           "mesh_extent_z_m": 19.195270999999998,
           "mesh_face_count": 50880,
+          "mesh_is_watertight": 0,
           "mesh_vertex_count": 25802,
-          "surface_integral_volume_m3": -13658.368296263065,
+          "signed_tetra_sum_open_shell_m3": -13658.368296262934,
           "waterline_beam_m": 19.090661823757507,
           "waterplane_area_m2": 2100.3253858657763
         },
         "fine": {
           "block_coefficient": 0.5019881926994797,
+          "boundary_component_count": 1,
+          "boundary_edge_count": 722,
+          "boundary_vertex_count": 722,
           "cloud_extent_x_m": 151.9004461,
           "cloud_extent_y_m": 10.2695,
           "cloud_extent_z_m": 19.195270999999998,
@@ -436,8 +444,9 @@
           "mesh_extent_y_m": 20.539,
           "mesh_extent_z_m": 19.195270999999998,
           "mesh_face_count": 50880,
+          "mesh_is_watertight": 0,
           "mesh_vertex_count": 25802,
-          "surface_integral_volume_m3": -13658.368296263065,
+          "signed_tetra_sum_open_shell_m3": -13658.368296262934,
           "waterline_beam_m": 19.090661823757507,
           "waterplane_area_m2": 2100.3253858657763
         }
@@ -492,6 +501,26 @@
           "relative_error": 0,
           "tolerance": 1e-09,
           "value": 0
+        },
+        {
+          "basis": "the shipped 5415 mesh is an open hull sheet, so no closed-surface volume exists",
+          "kind": "invariant",
+          "name": "identity_open_shell_is_not_a_solid",
+          "passed": true,
+          "reference": 0,
+          "relative_error": 0,
+          "tolerance": 0,
+          "value": 0
+        },
+        {
+          "basis": "the open sheet carries a single boundary loop (deck edge + stem seam)",
+          "kind": "invariant",
+          "name": "identity_open_shell_has_one_boundary_component",
+          "passed": true,
+          "reference": 0,
+          "relative_error": 0,
+          "tolerance": 0,
+          "value": 0
         }
       ],
       "name": "dtmb5415",
@@ -500,7 +529,7 @@
         "holdout_rms_m": 0.11738199454341851
       },
       "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]",
-      "seconds": 3.326,
+      "seconds": 2.423,
       "title": "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)"
     }
   ],
@@ -508,5 +537,5 @@
   "passed": true,
   "quick": false,
   "schema": "tensorcad.golden/1",
-  "seconds": 27.143
+  "seconds": 19.214
 }
