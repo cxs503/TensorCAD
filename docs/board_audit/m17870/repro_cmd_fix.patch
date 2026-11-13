@@ -1,0 +1,25 @@
+Subject: [PATCH] benchmarks/verified/golden_geometry/repro_cmd.sh: resolve the repo root one level up
+
+The script sits at <repo>/benchmarks/verified/golden_geometry/repro_cmd.sh, so the repo
+root is three levels up from $here, not two.  With ../.. the script resolved $repo to
+<repo>/benchmarks and died immediately:
+
+  $ sh benchmarks/verified/golden_geometry/repro_cmd.sh
+  python3: can't open file '<repo>/benchmarks/benchmarks/verified/golden_geometry/run_benchmark.py'
+  rc=2
+
+Audit m17870 found this by running the command the README/result.json advertise; the
+underlying benchmark itself was fine (30 rows / 9 gates PASS when invoked directly).
+Verified after the fix: rc=0, 30 rows identical to artifacts/golden_benchmark/result.json.
+
+--- a/benchmarks/verified/golden_geometry/repro_cmd.sh
++++ b/benchmarks/verified/golden_geometry/repro_cmd.sh
+@@ -8,7 +8,7 @@
+ set -eu
+ 
+ here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+-repo=$(CDPATH= cd -- "$here/../.." && pwd)
++repo=$(CDPATH= cd -- "$here/../../.." && pwd)
+ out=${1:-"$repo/artifacts/golden_benchmark"}
+ 
+ cd "$repo"
