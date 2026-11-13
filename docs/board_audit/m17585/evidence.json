@@ -1,0 +1,95 @@
+{
+  "impl_files": [
+    "tensorcad/geomquality/pipeline.py",
+    "tensorcad/geomquality/hydro.py",
+    "tensorcad/geomquality/baselines.py",
+    "tensorcad/geomquality/_eval.py"
+  ],
+  "impl_detail": "pipeline.py:148 verify_cad（CAD→defects→patch/facet hydrostatics→Richardson GCI） / pipeline.py:321 run_evidence / pipeline.py:473 main；hydro.py:146 patch_hydrostatics / hydro.py:296 facet_hydrostatics / hydro.py:486 convergence_study；baselines.py:287 reference_integrals / baselines.py:419 wigley_iii / :476 series60 / :559 kvlcc2_class",
+  "entry": [
+    "tensorcad/geomquality/pipeline.py",
+    "examples/geomquality/run_pipeline.py"
+  ],
+  "entry_cmd": "python3 -m tensorcad.geomquality.pipeline --out artifacts/geomquality ；python3 examples/geomquality/run_pipeline.py ；审计复算: python3 runs/m17585_audit/verify_m17453.py",
+  "run_artifacts": [
+    "runs/m17585_audit/audit_summary.json",
+    "runs/m17585_audit/refs/artifacts__xval_results.json",
+    "runs/m17585_audit/refs/artifacts__xval_pipeline_results.json",
+    "runs/m17585_audit/refs/docs__xval_m17404_canonical_quality_lib.md"
+  ],
+  "run_artifacts_sha256": {
+    "artifacts/xval_results.json": "40f3b78d8813b6d17373c626b4268a4727cb1634cd113a797114834a66a76dbd",
+    "artifacts/xval_pipeline_results.json": "6d27c44d4958a820f0b6df9c926dbe60fa32e2c9518dcbbb42f45376467437ff",
+    "docs/xval_m17404_canonical_quality_lib.md": "cfa081810940f8496c4f72502c4ec5e54588589ae02671b271a87b947ef0a815",
+    "docs/xval_convergence.png": "91cffd44c3f52e59752a2d8daced056f66b9a277e8342daa866d96ff8406cb3c",
+    "docs/xval_hydrostatics.png": "ac966edb18d624d5a9a3de79ed1c64073dc4972c8e0f2c3a731acbb1be2effe2"
+  },
+  "subject_status": {
+    "mission": 17453,
+    "db_status": "succeeded",
+    "head_commit": null,
+    "changed_files_in_result": [
+      "docs/xval_m17404_canonical_quality_lib.md"
+    ],
+    "git_status_all_untracked": true,
+    "subject_head": "6b3592d9ebef92f14112408c31378d50458b2419",
+    "present_in_main": {
+      "artifacts/xval_results.json": false,
+      "artifacts/xval_pipeline_results.json": false,
+      "docs/xval_convergence.png": false,
+      "docs/xval_hydrostatics.png": false,
+      "docs/xval_m17404_canonical_quality_lib.md": false
+    },
+    "xval_generator_py_in_subject_tree": []
+  },
+  "tests": [
+    "tests/test_geomquality_pipeline.py (18 tests)",
+    "tests/test_geomquality_io.py (9 tests)"
+  ],
+  "tests_reproduced": "python3 -m pytest tests/test_geomquality_pipeline.py tests/test_geomquality_io.py -q -> 27 passed in 15.22s (2026-11-13)",
+  "integration_callers": "none production-side: grep -rl geomquality over /root/tensor-ecosystem (TensorCAD excluded) -> 0 hits; no [project.scripts] entry; tensorcad/cli.py has no geomquality subcommand; only in-repo caller = examples/geomquality/run_pipeline.py:285 run_evidence(...)",
+  "benchmark": {
+    "registry_rows_for_anchor": 0,
+    "registry_note": "tensor_benchmark_cases has 0 rows for anchor XVAL-CAD-M17404-CANONICAL-QUALITY-LIB (table total 55) -> no board-registered ref/tolerance to judge against",
+    "independent_rerun_worst_rel": 5.519543953301915e-07,
+    "volume_vs_Cb_identity_worst_rel": 9.143480028089808e-06,
+    "gauss_vs_scipy_worst_abs": 1.457167719820518e-15,
+    "nurbs_vs_geomdl_worst_abs": 5.551115123125783e-17,
+    "per_hull": {
+      "wigley_iii": {
+        "gci_percent": 0.2628065711754439,
+        "error_finest_percent": 0.20738839366444314,
+        "volume_rel_err_vs_Cb_identity": 1.9184653865522706e-15
+      },
+      "series60_cb0.60": {
+        "gci_percent": 0.2747916472210988,
+        "error_finest_percent": 0.26429105736924524,
+        "volume_rel_err_vs_Cb_identity": 2.214329599089145e-07
+      },
+      "kvlcc2_class": {
+        "gci_percent": 0.6809957935633747,
+        "error_finest_percent": 0.4986361000786106,
+        "volume_rel_err_vs_Cb_identity": 9.143480028089808e-06
+      }
+    },
+    "vcb_awp_reference_gap": "kvlcc2_class: VCB/Awp reference = null in delivered JSON -> those two metrics were never benchmarked for that hull"
+  },
+  "repro_cmd": "python3 runs/m17585_audit/verify_m17453.py  (re-runs verify_cad on all three specimens + scipy/geomdl cross-checks; wrote runs/m17585_audit/audit_summary.json)",
+  "external_anchor": [
+    "geomdl 5.4.0 (NURBS eval/derivatives) — reproduced here: max |TC-geomdl| = 5.55e-17",
+    "scipy 1.16.0 scipy.special.roots_legendre (Gauss-Legendre) — reproduced: max diff 1.46e-15",
+    "analytic closed forms Cb*L*B*T identity + Wigley Awp=2/3·L·B"
+  ],
+  "refused_levels": {
+    "L3": "no main-solver/platform caller (see integration_callers); mission delivered documentation+artifacts only, no code change",
+    "L4": "no tensor_benchmark_cases row for the anchor (0/55) + deliverables never committed (head_commit=null, 5/5 files untracked, 0/5 on main) + no repro script in the subject tree",
+    "L5": "L4 unmet"
+  },
+  "verdict_note": "Substance verified, delivery not landed: the three hulls' hydrostatics, Richardson order and GCI reproduce to 5.52e-07 relative and the OSS cross-checks (geomdl/scipy) reproduce at machine precision, but every m17453 artifact is untracked and absent from main, so the evidence would vanish with the worktree. Declared L2 = real code path verified end-to-end without production integration or a registered benchmark.",
+  "figures": [
+    "docs/board_audit/m17585/figs/m17585_hydro_error.png",
+    "docs/board_audit/m17585/figs/m17585_claim_vs_rerun.png",
+    "docs/board_audit/m17585/figs/m17585_durability_funnel.png"
+  ],
+  "auditor": "m17585 board-audit (independent re-run, subject worktree read-only)"
+}
