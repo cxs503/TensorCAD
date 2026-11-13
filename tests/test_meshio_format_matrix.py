@@ -1,4 +1,4 @@
-"""meshio format matrix: round-trip fidelity for 6 formats × 3 geometries = 18 combos.
+"""meshio format matrix: round-trip fidelity for 6 formats × 4 geometries = 24 combos.
 
 Verifies that exporting a mesh through meshio and reading it back preserves:
 
@@ -17,9 +17,22 @@ Each geometry is exercised in the topology its formats speak:
 * volume formats (SU2, CGNS) get the tetrahedralisation of the same geometry
   (:func:`tensorcad.meshio_exchange.tetrahedralise_surface`).
 
-6 formats × 3 geometries = 18 combinations, all green.  Before this change
+6 formats × 4 geometries = 24 combinations, all green.  Before this change
 SU2 and CGNS were declared NOT_SUPPORTED and only 12 of the 18 combinations
 were actually exercised.
+
+The fourth geometry is a **real ship hull** -- ``tensorcad.wigley``'s own
+validated Wigley generator (L=10 m, B=1 m, T=0.625 m, 1001 vertices / 1998
+triangles, closed by a deck cap).  It is in the matrix because the previous
+version's volume path was only ever demonstrated on convex toy bodies (cube,
+sphere, capsule), while the module docstring claimed ship hulls work "in
+practice".  That claim was false against this very hull: where the section ring
+collapses to zero breadth at the stem and the post, the tip facets lie exactly
+in the centreplane ``y = 0``, so every off-plane apex *inverts* them and the
+strict-positivity rule refused the hull as "not star-shaped".  Certification by
+volume identity (no inverted cell + tets reproduce the surface volume to 1e-9)
+accepts it: the two edge-on facets span zero-volume cells, are dropped, and
+counted in ``TetrahedralMesh.edge_on_facets``.
 """
 from __future__ import annotations
 
@@ -127,11 +140,11 @@ def _make_capsule(n_theta: int = 32, n_axial: int = 12) -> Mesh:
       directed edges, 40 unpaired) and integrated to -0.034 m^3 -- less than
       half of the Wigley volume it was labelled with.
 
-    A body of revolution also rules out the trap found in the package's own
-    :func:`tensorcad.hull.build_mesh` output: that hull tapers to zero breadth
-    at both ends, so its end faces lie in the centreplane as zero-thickness
-    "fins" and no single interior point can see the whole shell (star
-    tessellation is refused there, by design).
+    A body of revolution keeps this fixture free of the trap found in the
+    package's own hull output: a tapering hull puts its stem/post tip facets
+    exactly in the centreplane, so an off-plane apex inverts them and an
+    on-plane apex sees them edge-on.  That case is exercised deliberately by
+    :func:`_make_wigley_hull` (see :func:`test_hull_tetrahedralisation_is_certified`).
     """
     radius, length = 0.5, 4.0
     builder = MeshBuilder(units="m")
@@ -180,11 +193,28 @@ def _make_capsule(n_theta: int = 32, n_axial: int = 12) -> Mesh:
     return meshlib.orient_outward(builder.build()).mesh
 
 
-#: Analytic volumes: cube = 1, sphere = 4/3*pi, capsule = pi*r^2*L + 4/3*pi*r^3.
+def _make_wigley_hull():
+    """Real benchmark hull: ``tensorcad.wigley``'s closed, deck-capped Wigley.
+
+    Not hand-rolled on purpose -- the failing fixtures in this file's history
+    were hand-rolled hulls.  The package generator is the one that carries its
+    own validation report and closed-form hydrostatics, so the volume reference
+    below is an independent analytic number, not a self-comparison:
+
+        V = L B T n m / ((n+1)(m+1)) = 4 L B T / 9 at n = m = 2 = 25/9 m^3
+    """
+    from tensorcad import wigley
+
+    return wigley.generate_wigley().mesh
+
+
+#: Analytic volumes: cube = 1, sphere = 4/3*pi, capsule = pi*r^2*L + 4/3*pi*r^3,
+#: wigley hull = 4*L*B*T/9 (closed form, see :func:`tensorcad.wigley.analytic_volume`).
 ANALYTIC_VOLUME = {
     "cube": 1.0,
     "sphere": 4.0 / 3.0 * math.pi,
     "capsule": math.pi * 0.5**2 * 4.0 + 4.0 / 3.0 * math.pi * 0.5**3,
+    "wigley_hull": 4.0 * 10.0 * 1.0 * 0.625 / 9.0,
 }
 
 
@@ -209,6 +239,7 @@ GEOMETRIES: tuple[GeometryCase, ...] = (
     GeometryCase("cube", _make_cube()),
     GeometryCase("sphere", _make_sphere()),
     GeometryCase("capsule", _make_capsule()),
+    GeometryCase("wigley_hull", _make_wigley_hull()),
 )
 
 
@@ -240,8 +271,13 @@ def _cell_count(mesh: Mesh | TetrahedralMesh) -> int:
 def test_tetrahedralise_conserves_volume_exactly(geom: GeometryCase) -> None:
     """Star tets must sum to the surface's signed volume (same closed boundary)."""
     tet = tetrahedralise_surface(geom.mesh)
-    assert len(tet.tets) == len(geom.mesh.faces)
+    # Every surface facet yields one tet, except facets the apex sees exactly
+    # edge-on; those are dropped (zero measure) and reported, never silent.
+    assert len(tet.tets) == len(geom.mesh.faces) - tet.edge_on_facets
     assert len(tet.vertices) == len(geom.mesh.vertices) + 1
+    convex = {"cube", "sphere", "capsule"}
+    if geom.name in convex:
+        assert tet.edge_on_facets == 0, f"{geom.name}: convex body, no edge-on facets"
     surf_vol = surface_signed_volume(geom.mesh)
     assert surf_vol > 0.0, f"{geom.name}: surface must be outward oriented"
     assert tet.signed_volume() == pytest.approx(surf_vol, rel=1e-12), (
@@ -475,13 +511,177 @@ def test_meshio_to_tetrahedral_rejects_surface_only() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Real hull: the case that falsified the "ship hulls work in practice" claim
+# ---------------------------------------------------------------------------
+
+def test_hull_tetrahedralisation_is_certified() -> None:
+    """The Wigley hull tetrahedralises, with the exact number of edge-on facets.
+
+    Regression guard for the failure that motivated this work: the hull's
+    stem/post tip facets lie in the centreplane, so the strict-positivity rule
+    raised ``TetrahedralisationError`` ("best candidate ... still gives a
+    worst-case tetrahedron volume 0.000e+00").  Two facets are seen edge-on from
+    a centreplane apex and exactly two are dropped; if the generator or the
+    tessellation changes, this count changes with it.
+    """
+    hull = _make_wigley_hull()
+    tet = tetrahedralise_surface(hull)
+    assert tet.edge_on_facets == 2, f"edge-on facets: {tet.edge_on_facets} (expected 2)"
+    assert len(tet.tets) == len(hull.faces) - 2
+    surf_vol = surface_signed_volume(hull)
+    assert tet.signed_volume() == pytest.approx(surf_vol, rel=1e-12)
+
+
+def test_hull_dropped_facets_lie_in_the_centreplane() -> None:
+    """The dropped cells are exactly the facets whose three vertices have y == 0.
+
+    This binds the "edge-on" claim to geometry instead of trusting the count:
+    the dropped facets must be the centreplane facets, and every centreplane
+    facet must be dropped (a zero-area cell cannot be tiled by a finite apex).
+    """
+    hull = _make_wigley_hull()
+    verts = np.array(hull.vertices)
+    centreplane = {
+        index
+        for index, face in enumerate(hull.faces)
+        if all(verts[v][1] == 0.0 for v in face)
+    }
+    assert len(centreplane) == 2, f"{len(centreplane)} centreplane facets (expected 2)"
+    tet = tetrahedralise_surface(hull)
+    kept = {tuple(sorted(face)) for *_apex, a, b, c in tet.tets for face in [(a, b, c)]}
+    dropped = [
+        face for index, face in enumerate(hull.faces) if tuple(sorted(face)) not in kept
+    ]
+    assert len(dropped) == 2
+    assert all(index in centreplane for index, face in enumerate(hull.faces)
+               if tuple(sorted(face)) not in kept)
+
+
+def test_hull_off_centreplane_apex_is_refused() -> None:
+    """Off the centreplane the hull really is not star-shaped -- refuse, do not fudge.
+
+    Documented counter-example to any "just nudge the apex" fix: lifting the
+    apex 5 % of the beam off the centreplane inverts three of the tip cells, so
+    the certificate must fail and say so.
+    """
+    hull = _make_wigley_hull()
+    bbox_centre = (np.array(hull.vertices).min(axis=0) + np.array(hull.vertices).max(axis=0)) / 2
+    with pytest.raises(TetrahedralisationError, match="not star-shaped"):
+        tetrahedralise_surface(hull, interior_point=(bbox_centre[0], 0.05, bbox_centre[2]))
+
+
+def test_hull_volume_mesh_boundary_slit_is_quantified() -> None:
+    """Known limitation, pinned: the hull volume mesh boundary is open along 2 slits.
+
+    Dropping the zero-volume cells keeps the *volume* identity exact, but the
+    two edge-on facets are skin patches of the hull, so the boundary of the
+    delivered volume mesh is the hull surface minus those two patches: 2 skin
+    facets missing and 6 rim edges unpaired (each slit is bounded by three
+    edges).  This is stated rather than hidden -- an SU2/CGNS solver receiving
+    the mesh sees an open wall there, which is why *volume-conservation* is REAL
+    for the hull while *solver-ready watertight volume mesh* is WITHHELD.
+    If a real volume mesher is wired in later, this test is the one to invert.
+    """
+    hull = _make_wigley_hull()
+    tet = tetrahedralise_surface(hull)
+    apex = len(tet.vertices) - 1
+    counts: dict[tuple[int, ...], int] = {}
+    for a, b, c, d in tet.tets:
+        for face in ((a, b, c), (b, a, d), (c, b, d), (a, c, d)):
+            key = tuple(sorted(face))
+            counts[key] = counts.get(key, 0) + 1
+    boundary = [face for face, n in counts.items() if n == 1]
+    outer = [face for face in boundary if apex not in face]
+    assert len(outer) == len(hull.faces) - 2, (
+        f"{len(outer)} outer boundary faces vs {len(hull.faces) - 2} expected"
+    )
+    rim: dict[tuple[int, int], int] = {}
+    for face in outer:
+        for edge in ((face[0], face[1]), (face[1], face[2]), (face[2], face[0])):
+            key = (min(edge), max(edge))
+            rim[key] = rim.get(key, 0) + 1
+    open_edges = [edge for edge, n in rim.items() if n != 2]
+    assert len(open_edges) == 6, f"{len(open_edges)} unpaired rim edges (expected 6)"
+    # the slit area is small but not zero -- quote it, do not round it away
+    verts = np.array(hull.vertices)
+    dropped = [
+        face for face in hull.faces if tuple(sorted(face)) not in {tuple(f) for f in outer}
+    ]
+    slit_area = sum(
+        0.5 * float(np.linalg.norm(np.cross(verts[b] - verts[a], verts[c] - verts[a])))
+        for a, b, c in dropped
+    )
+    assert 1e-3 < slit_area < 5e-2, f"slit area {slit_area:.5f} m^2 outside expected band"
+
+
+def _make_torus(major_radius: float = 2.0, minor_radius: float = 0.5,
+                n_major: int = 64, n_minor: int = 32) -> Mesh:
+    """Closed torus: *not* star-shaped from any point (the certification must refuse it)."""
+    builder = MeshBuilder(units="m")
+    rings: list[list[int]] = []
+    for i in range(n_major):
+        u = 2.0 * math.pi * i / n_major
+        ring = []
+        for j in range(n_minor):
+            v = 2.0 * math.pi * j / n_minor
+            ring.append(
+                builder.add_vertex(
+                    (
+                        (major_radius + minor_radius * math.cos(v)) * math.cos(u),
+                        (major_radius + minor_radius * math.cos(v)) * math.sin(u),
+                        minor_radius * math.sin(v),
+                    )
+                )
+            )
+        rings.append(ring)
+    for i in range(n_major):
+        a, b = rings[i], rings[(i + 1) % n_major]
+        for j in range(n_minor):
+            k = (j + 1) % n_minor
+            builder.add_quad(a[j], b[j], b[k], a[k])
+    mesh = builder.build()
+    return meshlib.orient_outward(mesh).mesh if surface_signed_volume(mesh) < 0 else mesh
+
+
+def test_certification_refuses_non_star_body_torus() -> None:
+    """The volume-identity certificate must not become a rubber stamp.
+
+    A torus is the canonical non-star body: from *every* interior point some
+    tetrahedra are inverted (the hole is behind the apex), so the certificate
+    fails and the error names the inverted cells.  This guards the relaxation
+    that made the hull work -- zero-volume cells are tolerated only together
+    with a volume identity that a torus cannot satisfy.
+    """
+    torus = _make_torus()
+    assert meshlib.is_watertight(torus)
+    analytic = 2.0 * math.pi**2 * 2.0 * 0.5**2
+    assert abs(surface_signed_volume(torus) - analytic) / analytic < 0.02
+    with pytest.raises(TetrahedralisationError, match="not star-shaped"):
+        tetrahedralise_surface(torus)
+
+
+def test_hull_hull_form_gate_volume_vs_analytic() -> None:
+    """Displaced volume from the hull's triangles vs the closed form (gate: < 1 %).
+
+    The 41 x 13 station/level grid under-resolves the ends, so the sampled solid
+    is slightly smaller than the analytic ``4LBT/9``; the gate is the geometry
+    validity check the matrix needs before any round-trip claim is meaningful.
+    """
+    hull = _make_wigley_hull()
+    measured = surface_signed_volume(hull)
+    analytic = ANALYTIC_VOLUME["wigley_hull"]
+    rel = abs(measured - analytic) / analytic
+    assert rel < 1e-2, f"hull volume {measured:.6f} vs analytic {analytic:.6f} ({rel:.2%})"
+
+
+# ---------------------------------------------------------------------------
 # Summary table generation (for artifacts)
 # ---------------------------------------------------------------------------
 
 def generate_format_matrix_table() -> str:
-    """Generate a markdown table of all 18 combinations, measured not asserted."""
+    """Generate a markdown table of all 24 combinations, measured not asserted."""
     lines = [
-        "# meshio Format Matrix — Round-Trip Fidelity (6 formats × 3 geometries)",
+        "# meshio Format Matrix — Round-Trip Fidelity (6 formats × 4 geometries)",
         "",
         "| Format | Geometry | Topology sent | Volume orig | Volume round-trip | rel. err | "
         "Topology | Orientation | Status |",
@@ -512,6 +712,12 @@ def generate_format_matrix_table() -> str:
         "",
         "## Notes",
         "- STL reorders vertices and faces (triangle soup) but preserves volume and orientation.",
+        "- `wigley_hull` is `tensorcad.wigley`'s deck-capped benchmark hull (L=10, B=1, "
+        "T=0.625); its volume reference is the closed form 4LBT/9 = 25/9 m^3.",
+        "- For the hull the SU2/CGNS rows carry 1996 tets: 2 surface facets lie exactly in "
+        "the centreplane and are seen edge-on by the apex, so their zero-volume tets are "
+        "dropped (`edge_on_facets=2`). Dropping zero-measure cells keeps the tiling exact; "
+        "`test_hull_tetrahedralisation_is_certified` pins the volume identity.",
         "- OBJ, VTK, Gmsh preserve exact vertex positions and triangle indices.",
         "- SU2 and CGNS carry **volume** cells (tetra); the matrix feeds them "
         "`tetrahedralise_surface(mesh)`, whose tets tile the body exactly, so the volume "
