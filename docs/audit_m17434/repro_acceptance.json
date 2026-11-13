@@ -1,0 +1,744 @@
+{
+  "anchor": "GAP-CAD-C1-5415-PARAM-REBUILD",
+  "dataset": {
+    "source_sha256": "16b14ba598787eeed74eb6a10e9ea6fb701bd25496b5ccbf8a317ad6e364bee2",
+    "n_configurations": 9001,
+    "n_design_variables": 27
+  },
+  "config0": {
+    "volume_shell_m3": 20692.6557805403,
+    "hydrostatics": {
+      "waterline_z_m": 6.055,
+      "length_stations_m": 143.264946698,
+      "beam_waterline_m": 19.058226330198554,
+      "draft_m": 6.055,
+      "displacement_volume_m3": 8239.908679407838,
+      "waterplane_area_m2": 2087.6884180503585,
+      "lcb_m": 70.54404309920527,
+      "cb": 0.49840894532773955,
+      "cwp": 0.7646157843313636,
+      "keel_z_m": -3.279432
+    },
+    "quality": {
+      "n_vertices": 25802,
+      "n_faces": 50880,
+      "edge_median_m": 0.4548561335958724,
+      "edge_min_m": 0.09192887751558554,
+      "edge_max_m": 2.3570321289253275,
+      "area_min_m2": 0.0074558208613144765,
+      "degenerate_faces": 0,
+      "min_angle_deg": 60.45061877141478,
+      "min_angle_p01_deg": 77.3891210668201,
+      "frac_angle_below_5deg": 0.0,
+      "aspect_p99": 2.8315095943161825,
+      "aspect_max": 14.321176721319194,
+      "non_manifold_edges": 0,
+      "boundary_edges": 722,
+      "non_finite_vertices": 0,
+      "half_breadth_min_m": -7.474470165383691e-10,
+      "stations_monotone": true,
+      "bbox": [
+        [
+          -0.1038461,
+          151.7966
+        ],
+        [
+          -10.2695,
+          10.2695
+        ],
+        [
+          -3.024471,
+          16.1708
+        ]
+      ]
+    }
+  },
+  "acceptance": {
+    "config0_vs_exact": {
+      "reference": "/root/ship-performance-platform-incoming/ship-performance-platform/backend/data/geometry/ships/DTMB5415_Hull_exact.stl",
+      "reference_sha256": "d40b17b1fc963e0d31ad8a30d2fe335758cb1e3c0324c968eafaf5fb9a3977fd",
+      "n_reference_points": 82794,
+      "mesh_resolution_m": 0.4548561335958724,
+      "median_m": 0.011125020931836661,
+      "p95_m": 0.07523908694938287,
+      "max_m": 1.0726498040839665,
+      "frac_within_resolution": 0.9990216682368288,
+      "frac_within_half_resolution": 0.9902891513877817,
+      "threshold": 0.95,
+      "pass": true
+    },
+    "sampled_configs_gate": {
+      "n": 20,
+      "seed": 20261113,
+      "holdout_modulus": 5,
+      "pass": false,
+      "n_pass": 6,
+      "rows": [
+        {
+          "config_index": 430,
+          "rms_point_m": 0.7860968676608585,
+          "max_point_m": 3.2040044981729907,
+          "rms_pct_beam": 7.654675180494265,
+          "edge_median_m": 0.51134902263706,
+          "min_angle_deg": 60.608617418513326,
+          "aspect_p99": 2.7894499795282153,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 23206.64744447588,
+          "displacement_m3": 8205.087884069193,
+          "cb": 0.4631440705691545,
+          "beam_wl_m": 20.42276340167764,
+          "gate_pass": true
+        },
+        {
+          "config_index": 1190,
+          "rms_point_m": 0.7865180750935162,
+          "max_point_m": 4.042468735340322,
+          "rms_pct_beam": 7.658776718374957,
+          "edge_median_m": 0.4955167533732102,
+          "min_angle_deg": 60.89458571452062,
+          "aspect_p99": 3.1066667711129416,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 22006.226683610545,
+          "displacement_m3": 8176.270979227158,
+          "cb": 0.4216735209884944,
+          "beam_wl_m": 22.35188562337569,
+          "gate_pass": false
+        },
+        {
+          "config_index": 1535,
+          "rms_point_m": 0.863212061557011,
+          "max_point_m": 3.7745052627566356,
+          "rms_pct_beam": 8.405589965986767,
+          "edge_median_m": 0.489347516929996,
+          "min_angle_deg": 60.01825628053096,
+          "aspect_p99": 3.181539298580587,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 17588.082290511244,
+          "displacement_m3": 8276.136814920817,
+          "cb": 0.48432202398649876,
+          "beam_wl_m": 19.699207915072275,
+          "gate_pass": true
+        },
+        {
+          "config_index": 1550,
+          "rms_point_m": 1.5650370167831844,
+          "max_point_m": 7.66909552838421,
+          "rms_pct_beam": 15.239661295907144,
+          "edge_median_m": 0.5207005205639398,
+          "min_angle_deg": 61.239756744959095,
+          "aspect_p99": 3.71307324275077,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 19282.557545647167,
+          "displacement_m3": 8240.45733276982,
+          "cb": 0.3943856629235091,
+          "beam_wl_m": 24.087035824199127,
+          "gate_pass": false
+        },
+        {
+          "config_index": 1640,
+          "rms_point_m": 0.5341771381466464,
+          "max_point_m": 2.212318054072677,
+          "rms_pct_beam": 5.201588569517955,
+          "edge_median_m": 0.49350459392671214,
+          "min_angle_deg": 60.22368054540756,
+          "aspect_p99": 3.8624904317410356,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 22171.302117348256,
+          "displacement_m3": 8213.710725071573,
+          "cb": 0.43178489520279084,
+          "beam_wl_m": 21.929311786901444,
+          "gate_pass": true
+        },
+        {
+          "config_index": 1880,
+          "rms_point_m": 0.9564919488033218,
+          "max_point_m": 3.37341048084171,
+          "rms_pct_beam": 9.31390962367517,
+          "edge_median_m": 0.5160906752901109,
+          "min_angle_deg": 60.534177324680314,
+          "aspect_p99": 3.2005014982562505,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 20103.183966494358,
+          "displacement_m3": 8249.856792635292,
+          "cb": 0.4544828559703324,
+          "beam_wl_m": 20.92746119476388,
+          "gate_pass": false
+        },
+        {
+          "config_index": 2240,
+          "rms_point_m": 0.7142969219548669,
+          "max_point_m": 3.116883686295338,
+          "rms_pct_beam": 6.95551800920071,
+          "edge_median_m": 0.49695811906111553,
+          "min_angle_deg": 61.13760958114518,
+          "aspect_p99": 3.197565167540918,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 20660.471879895347,
+          "displacement_m3": 8240.351082608666,
+          "cb": 0.36312332540589054,
+          "beam_wl_m": 26.16051684059456,
+          "gate_pass": false
+        },
+        {
+          "config_index": 2625,
+          "rms_point_m": 0.8752851491989186,
+          "max_point_m": 4.855583427669429,
+          "rms_pct_beam": 8.523152531271421,
+          "edge_median_m": 0.48749726904781676,
+          "min_angle_deg": 61.636890473406,
+          "aspect_p99": 2.771959130644259,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 18752.912061290594,
+          "displacement_m3": 8250.51100131502,
+          "cb": 0.44717530780674014,
+          "beam_wl_m": 21.268504937239438,
+          "gate_pass": false
+        },
+        {
+          "config_index": 4445,
+          "rms_point_m": 1.0997971144589227,
+          "max_point_m": 4.701988832655847,
+          "rms_pct_beam": 10.709354052864526,
+          "edge_median_m": 0.5316951701355405,
+          "min_angle_deg": 61.258795861838784,
+          "aspect_p99": 3.558363665788886,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 21108.786651023023,
+          "displacement_m3": 8227.654198356555,
+          "cb": 0.3762950411615324,
+          "beam_wl_m": 25.204667221378152,
+          "gate_pass": false
+        },
+        {
+          "config_index": 4895,
+          "rms_point_m": 0.6885359427526302,
+          "max_point_m": 3.0501844219086998,
+          "rms_pct_beam": 6.704668608526512,
+          "edge_median_m": 0.4966950348746568,
+          "min_angle_deg": 60.52723639078879,
+          "aspect_p99": 3.685799155613739,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 19820.275903936265,
+          "displacement_m3": 8200.539337261242,
+          "cb": 0.42744638796274514,
+          "beam_wl_m": 22.11585713483057,
+          "gate_pass": false
+        },
+        {
+          "config_index": 5570,
+          "rms_point_m": 0.7496991920580504,
+          "max_point_m": 3.661273202379294,
+          "rms_pct_beam": 7.300250178275967,
+          "edge_median_m": 0.5123059609943297,
+          "min_angle_deg": 61.81490535020251,
+          "aspect_p99": 3.315685912201187,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 21884.40124143437,
+          "displacement_m3": 8244.491539357186,
+          "cb": 0.4856802215736088,
+          "beam_wl_m": 19.570630941611327,
+          "gate_pass": false
+        },
+        {
+          "config_index": 5590,
+          "rms_point_m": 0.7426577262620746,
+          "max_point_m": 3.2774766410138123,
+          "rms_pct_beam": 7.231683395122203,
+          "edge_median_m": 0.507489237214733,
+          "min_angle_deg": 60.27750443863489,
+          "aspect_p99": 3.096077390632557,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 22362.793523391054,
+          "displacement_m3": 8192.57353247808,
+          "cb": 0.4407991613586695,
+          "beam_wl_m": 21.42549369211007,
+          "gate_pass": true
+        },
+        {
+          "config_index": 6365,
+          "rms_point_m": 0.8218303482503717,
+          "max_point_m": 2.807116063453607,
+          "rms_pct_beam": 8.002632535667479,
+          "edge_median_m": 0.5007917585164247,
+          "min_angle_deg": 60.56443254171092,
+          "aspect_p99": 3.898904961232141,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 18730.63781491625,
+          "displacement_m3": 8221.250813600129,
+          "cb": 0.4480116875091057,
+          "beam_wl_m": 21.153559749206938,
+          "gate_pass": false
+        },
+        {
+          "config_index": 6805,
+          "rms_point_m": 0.694252804186406,
+          "max_point_m": 4.6913300760562775,
+          "rms_pct_beam": 6.760336960771274,
+          "edge_median_m": 0.4756544865562328,
+          "min_angle_deg": 60.722286683325414,
+          "aspect_p99": 2.956133200221416,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 20293.3141255703,
+          "displacement_m3": 8227.887331441154,
+          "cb": 0.4472889708383978,
+          "beam_wl_m": 21.20574826947705,
+          "gate_pass": true
+        },
+        {
+          "config_index": 7110,
+          "rms_point_m": 0.6863484065836095,
+          "max_point_m": 2.0846167945379457,
+          "rms_pct_beam": 6.6833673166523155,
+          "edge_median_m": 0.5055957160485745,
+          "min_angle_deg": 60.18218746948915,
+          "aspect_p99": 3.609668082257392,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 19869.580982030187,
+          "displacement_m3": 8259.81185246723,
+          "cb": 0.5224400949244898,
+          "beam_wl_m": 18.2255853981508,
+          "gate_pass": false
+        },
+        {
+          "config_index": 7475,
+          "rms_point_m": 0.794582753540346,
+          "max_point_m": 4.020391342897472,
+          "rms_pct_beam": 7.73730710882074,
+          "edge_median_m": 0.5172307389058238,
+          "min_angle_deg": 60.14359231688332,
+          "aspect_p99": 3.689900834037391,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 21143.410440035314,
+          "displacement_m3": 8247.698766236725,
+          "cb": 0.5363604680854387,
+          "beam_wl_m": 17.726728702014174,
+          "gate_pass": false
+        },
+        {
+          "config_index": 7535,
+          "rms_point_m": 0.60515416804472,
+          "max_point_m": 3.0264840917557145,
+          "rms_pct_beam": 5.892732538533716,
+          "edge_median_m": 0.48212959394848615,
+          "min_angle_deg": 61.59447443823633,
+          "aspect_p99": 3.7789386931728597,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 20383.162254499846,
+          "displacement_m3": 8252.014938533726,
+          "cb": 0.45656033911394445,
+          "beam_wl_m": 20.835125584315044,
+          "gate_pass": false
+        },
+        {
+          "config_index": 8315,
+          "rms_point_m": 0.5175686324277426,
+          "max_point_m": 2.124829727992973,
+          "rms_pct_beam": 5.039862042239083,
+          "edge_median_m": 0.47354506491731563,
+          "min_angle_deg": 61.02480520581668,
+          "aspect_p99": 3.0088546321997236,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 19443.876948007222,
+          "displacement_m3": 8233.589633913793,
+          "cb": 0.4805222518772993,
+          "beam_wl_m": 19.75285906562135,
+          "gate_pass": false
+        },
+        {
+          "config_index": 8410,
+          "rms_point_m": 0.7014884710209655,
+          "max_point_m": 2.34770767983171,
+          "rms_pct_beam": 6.830794790602905,
+          "edge_median_m": 0.5059138815129622,
+          "min_angle_deg": 61.28619541244472,
+          "aspect_p99": 2.8895536097375847,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 22401.96618046018,
+          "displacement_m3": 8233.054160416656,
+          "cb": 0.4251645289927736,
+          "beam_wl_m": 22.324545082540553,
+          "gate_pass": false
+        },
+        {
+          "config_index": 8760,
+          "rms_point_m": 1.0953652066338548,
+          "max_point_m": 3.415084526980633,
+          "rms_pct_beam": 10.666198029445004,
+          "edge_median_m": 0.5032579255547149,
+          "min_angle_deg": 60.476714542039964,
+          "aspect_p99": 3.268182646181388,
+          "boundary_edges": 722,
+          "degenerate_faces": 0,
+          "non_manifold_edges": 0,
+          "stations_monotone": true,
+          "volume_m3": 17322.838066935285,
+          "displacement_m3": 8276.446094955663,
+          "cb": 0.5630489233276974,
+          "beam_wl_m": 16.945106553091204,
+          "gate_pass": true
+        }
+      ]
+    },
+    "uniform_samples_gate": {
+      "n": 20,
+      "seed": 20261113,
+      "n_pass": 0,
+      "rows": [
+        {
+          "sample": 0,
+          "gate_pass": false,
+          "volume_m3": 19612.315925658753,
+          "cb": 0.525729981566771,
+          "displacement_m3": 8231.812006119755,
+          "min_angle_deg": 60.52794947242655,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 1,
+          "gate_pass": false,
+          "volume_m3": 22190.04967048796,
+          "cb": 0.4720929367674604,
+          "displacement_m3": 8227.662565646215,
+          "min_angle_deg": 60.49874307937603,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 2,
+          "gate_pass": false,
+          "volume_m3": 17524.368752424954,
+          "cb": 0.4531365937304675,
+          "displacement_m3": 8134.2754727407955,
+          "min_angle_deg": 60.51840188238336,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 3,
+          "gate_pass": false,
+          "volume_m3": 23183.90784973679,
+          "cb": 0.41634362310181455,
+          "displacement_m3": 8222.355960394165,
+          "min_angle_deg": 61.512139083901396,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 4,
+          "gate_pass": false,
+          "volume_m3": 20977.265326052664,
+          "cb": 0.5152583036255723,
+          "displacement_m3": 8248.970307178623,
+          "min_angle_deg": 61.5280463320738,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 5,
+          "gate_pass": false,
+          "volume_m3": 20451.929185681467,
+          "cb": 0.5127460916783152,
+          "displacement_m3": 8240.26767978408,
+          "min_angle_deg": 60.972742270853885,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 6,
+          "gate_pass": false,
+          "volume_m3": 21745.523609078562,
+          "cb": 0.3920635567807559,
+          "displacement_m3": 8385.413180499276,
+          "min_angle_deg": 60.62596161277745,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 7,
+          "gate_pass": false,
+          "volume_m3": 18431.92905270268,
+          "cb": 0.4151785800475434,
+          "displacement_m3": 8073.6162735444195,
+          "min_angle_deg": 60.59705638688264,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 8,
+          "gate_pass": false,
+          "volume_m3": 18802.581421986994,
+          "cb": 0.3228527714272105,
+          "displacement_m3": 8028.678369662108,
+          "min_angle_deg": 60.71247671229392,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 9,
+          "gate_pass": false,
+          "volume_m3": 16577.171908767035,
+          "cb": 0.4225845485119415,
+          "displacement_m3": 7878.840272899693,
+          "min_angle_deg": 62.02665636993321,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 10,
+          "gate_pass": false,
+          "volume_m3": 19546.639049792033,
+          "cb": 0.4348716316811596,
+          "displacement_m3": 8175.389904828925,
+          "min_angle_deg": 60.96813768960635,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 11,
+          "gate_pass": false,
+          "volume_m3": 23498.75500932458,
+          "cb": 0.47572398244459724,
+          "displacement_m3": 8041.308287389079,
+          "min_angle_deg": 61.14472243529258,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 12,
+          "gate_pass": false,
+          "volume_m3": 20842.631254321033,
+          "cb": 0.4220939278768845,
+          "displacement_m3": 8195.62368706255,
+          "min_angle_deg": 60.22779801227712,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 13,
+          "gate_pass": false,
+          "volume_m3": 23297.410036272027,
+          "cb": 0.3704760123213424,
+          "displacement_m3": 8210.41221181238,
+          "min_angle_deg": 60.70171692950873,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 14,
+          "gate_pass": false,
+          "volume_m3": 21186.43465184007,
+          "cb": 0.4234150516909061,
+          "displacement_m3": 8356.84561752153,
+          "min_angle_deg": 60.210322154099515,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 15,
+          "gate_pass": false,
+          "volume_m3": 20885.117067134648,
+          "cb": 0.5187901865117565,
+          "displacement_m3": 9974.295911113568,
+          "min_angle_deg": 60.401268841811415,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 16,
+          "gate_pass": false,
+          "volume_m3": 17365.095368163726,
+          "cb": 0.4242287158329114,
+          "displacement_m3": 8170.2918542503185,
+          "min_angle_deg": 60.812041665294984,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 17,
+          "gate_pass": false,
+          "volume_m3": 19497.925450612194,
+          "cb": 0.4084471449439223,
+          "displacement_m3": 8239.428254185086,
+          "min_angle_deg": 60.488816722673384,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 18,
+          "gate_pass": false,
+          "volume_m3": 20952.651601478363,
+          "cb": 0.5230514165244606,
+          "displacement_m3": 8263.780059023798,
+          "min_angle_deg": 61.892894907068595,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        },
+        {
+          "sample": 19,
+          "gate_pass": false,
+          "volume_m3": 21655.023726784224,
+          "cb": 0.45408449405879975,
+          "displacement_m3": 8227.726228061594,
+          "min_angle_deg": 60.225276974342485,
+          "checks_failed": [
+            "half_breadth_non_negative"
+          ]
+        }
+      ]
+    },
+    "gradient_chain": {
+      "vertex_jacobian_shape": [
+        25802,
+        3,
+        27
+      ],
+      "vertex_jacobian_fd_max_abs_err_by_mode": [
+        1.3929620057623934e-08,
+        1.4426326002282136e-08,
+        1.4142067059834222e-08,
+        1.32695037926428e-08
+      ],
+      "vertex_jacobian_exact": true,
+      "volume_gradient_max_abs_diff": 1757.6748923306357,
+      "volume_gradient_max_rel_err": 1.022975123354889,
+      "volume_gradient_pass": false,
+      "volume_gradient_analytic": [
+        -330.12347684417534,
+        -2549.9098018385703,
+        -3515.2236661519623,
+        -362.9273403175244,
+        598.5182041499213,
+        -846.3046810904428,
+        808.2454501404005,
+        1184.183036716551,
+        1965.3233366557852,
+        -927.2215897394436,
+        -1989.2443675986558,
+        463.40642445115446,
+        534.172351552665,
+        -1053.5314334898544,
+        -1400.461696355407,
+        732.9368321717611,
+        -154.72361082358452,
+        -1006.2579531533682,
+        382.7510344942056,
+        767.6033438655336,
+        1057.369436369124,
+        43.28949938648532,
+        -151.8467289465373,
+        -999.746841817774,
+        269.0140562235706,
+        -1070.605308178001,
+        -74.36222255660748
+      ],
+      "volume_gradient_fd": [
+        -165.08797780261375,
+        -1274.9594685374177,
+        -1757.5487738213267,
+        -181.535955016443,
+        299.14847582404036,
+        -423.0815498885931,
+        404.01947553618805,
+        592.0732404774753,
+        982.8183057834393,
+        -463.66933020181017,
+        -994.416702815215,
+        231.72653145593355,
+        266.96912755141966,
+        -526.8198332487373,
+        -700.0852201599627,
+        366.59689758380404,
+        -77.13086233707145,
+        -503.34095612925006,
+        191.03940958302698,
+        383.8476284727221,
+        528.4495673549827,
+        21.72536533180391,
+        -76.26937549503054,
+        -499.97712139884237,
+        134.34381089609815,
+        -535.0125855329679,
+        -36.75884181575384
+      ],
+      "waterline_clip_differentiated": false
+    }
+  },
+  "wall_clock_s": 30.0
+}
