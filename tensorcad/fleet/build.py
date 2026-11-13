@@ -17,6 +17,7 @@ coarser hull, or a clipped parameter for the geometry it was asked for.
 
 from __future__ import annotations
 
+import hashlib
 import math
 import struct
 from dataclasses import dataclass
@@ -435,36 +436,6 @@ def stl_mesh(record: ShipRecord, path: str | Path, *, weld_tolerance: float = 1e
     )
 
 
-def build_ship_geometry(
-    record: ShipRecord,
-    *,
-    nx: int = 121,
-    nz: int = 25,
-    stl_path: str | Path | None = None,
-) -> BuiltGeometry:
-    """Dispatch on ``record.geometry_route``; raise :class:`RouteRefusal` if unsupported."""
-    route = record.geometry_route
-    if route == "series60_form":
-        return _series60_mesh(record, nx=nx, nz=nz)
-    if route == "offset_table":
-        if stl_path is not None:
-            raise RouteRefusal("offset_table route does not take an STL path")
-        table, levels = sample_offset_table(record, stations=nx, levels=nz)
-        return offset_table_mesh(record, table, levels, source="series60 law sampled to table form")
-    if route == "parametric_sections":
-        table, levels, details = parametric_table(record, stations=nx, levels=nz)
-        built = offset_table_mesh(record, table, levels,
-                                  source="parametric sections solved to published Cb/Cm/LCB")
-        built = BuiltGeometry(mesh=built.mesh, route="parametric_sections",
-                              details={**built.details, **details})
-        return built
-    if route == "imported_stl":
-        target = stl_path or record.geometry_path
-        if target is None:
-            raise RouteRefusal("imported_stl route needs a path (record.geometry_path or stl_path)")
-        return stl_mesh(record, target)
-    raise RouteRefusal(f"unknown geometry route {route!r}")
-
 # --------------------------------------------------------------------------- #
 # IGES field route (fourth route)
 # --------------------------------------------------------------------------- #
@@ -537,6 +508,36 @@ def iges_field_mesh(
             "frame": IGES_FRAME,
         },
     )
+
+
+def write_binary_stl(mesh: Mesh, path: str | Path, *, header: str = "tensorcad fleet artifact") -> str:
+    """Write ``mesh`` as a binary STL and return the sha256 of the bytes written.
+
+    The delivered artefact, not the in-memory mesh, is what downstream consumers
+    (and the manifest) have to be able to audit, so the writer pins the file's
+    digest at the moment of writing. Coordinates are stored as float32, which is
+    the format's own precision; :func:`read_stl` therefore returns a mesh whose
+    volume differs from the input by float32 rounding only, and the fleet run
+    re-reads every written file and re-measures it rather than trusting this copy.
+    """
+    payload = bytearray(header.encode("ascii", "replace")[:80].ljust(80, b"\0"))
+    payload += struct.pack("<I", len(mesh.faces))
+    for a, b, c in mesh.faces:
+        pa, pb, pc = mesh.vertices[a], mesh.vertices[b], mesh.vertices[c]
+        ux, uy, uz = pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]
+        vx, vy, vz = pc[0] - pa[0], pc[1] - pa[1], pc[2] - pa[2]
+        nx_, ny_, nz_ = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
+        norm = math.sqrt(nx_ * nx_ + ny_ * ny_ + nz_ * nz_)
+        if norm > 0.0:
+            nx_, ny_, nz_ = nx_ / norm, ny_ / norm, nz_ / norm
+        payload += struct.pack("<3f", nx_, ny_, nz_)
+        for point in (pa, pb, pc):
+            payload += struct.pack("<3f", point[0], point[1], point[2])
+        payload += b"\0\0"
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(bytes(payload))
+    return hashlib.sha256(bytes(payload)).hexdigest()
 
 
 def build_ship_geometry(
