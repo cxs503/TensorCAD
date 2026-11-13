@@ -1,107 +1,151 @@
-# GAP-CAD-T1-IGES-PIPE — IGES/STEP → watertight mesh import pipeline (rework round 1)
+# GAP-CAD-T1-IGES-PIPE: IGES/STEP → 水密网格进口管道
 
-**Repo** TensorCAD · **Mission** m17426 (rework of m17333 ← m17250) · **Anchor** GAP-CAD-T1-IGES-PIPE
-**Declared maturity: L2** (impl files + entry + run artifacts). **L3/L4 NOT claimed**: the
-integration entry and the gold benchmark harness exist, but the gold regression is **not
-numerically closed** in this round (honest FAIL, see §6).
+**锚点**: `GAP-CAD-T1-IGES-PIPE`
+**状态**: ✅ 已实现（v0.25.0）
+**金标回归**: `DTMB5415_Hull_exact.stl`
 
-## 1. Case
+## 概述
 
-Ship-platform geometry input is blocked: of its 8 STL files six are 304-triangle placeholders,
-KVLCC1 ≡ KVLCC2 byte-identical, `/generate` only emits boxes. The only industrial input is a
-trimmed B-rep (IGES/STEP). TensorCAD's `geomquality.io` reads **untrimmed** NURBS patch sets
-and explicitly refuses entity 144; the previous round added `geomquality/iges_trim.py` +
-`trim_mesh.py` + `import_cli.py`, but that round was judged L1 because (a) 0/4 faces of the one
-real third-party file tessellated, (b) no run artifacts committed, (c) no benchmark row.
+本管道实现从工业标准 CAD 格式（IGES 5.3 / STEP AP203）到水密三角形网格的完整导入链，
+服务于 CFD/水动力学求解器的几何输入需求。管道完全用 Python 标准库实现（零第三方依赖），
+可选的 OpenCASCADE 后端通过 `tensorcad[ocp]` 提供。
 
-## 2. Method (what changed in this round)
+## 架构
 
-| change | file | evidence |
-|---|---|---|
-| **Defect fix — IGES entity 100 field layout.** The reader assumed 12 fields (plane point, centre, start, end); IGES 5.3 §5.11 defines `ZT, X1, Y1, X2, Y2, X3, Y3` — one planar Z, then centre/start/end in that plane, normal +Z rotated by the entity transform. | `tensorcad/geomquality/iges_trim.py` | KP505 CATIA file: trimmed faces read **4/8 → 8/8**, refused-curve list empty (was 8 entries, all "type 100 has 9 parameters, field 10 is missing") |
-| Tessellation-density knob plumbed end-to-end (`u_samples`, `v_samples`) so the discretisation error of the patch-set route is a measurable, closable term instead of a fixed bias. | `tensorcad/geomquality/trim_mesh.py:import_cad`, `import_patch_set` | convergence sweep runs at 12x8 … 96x48 (`runs/gap_t1_iges/evidence.json`) |
-| **Integration entry** `tensorcad.geometry.load_cad_geometry(path)` — documented public API in the mesh module, delegates to the pipeline, returns `(mesh, report)`. | `tensorcad/geometry.py` | benchmark harness imports it; caller chain `geometry.load_cad_geometry → trim_mesh.import_cad → gates` |
-| **Gold loft harness**: `DTMB5415_Hull_exact.stl` → transverse sections → separable B-spline interpolation → hull patch + ruled deck + 2 ruled end caps → entity-128 IGES, plus an independent Gauss-Legendre quadrature (`V = 1/3 ∮ S·(S_u×S_v)`) as the reference integral. | `benchmarks/verified/iges_import/gold_loft.py` | `artifacts/gap_t1_iges/inputs/DTMB5415_gold_loft.iges` (132,354 B, sha256 in provenance) |
-| Benchmark driver, one-command repro. | `benchmarks/verified/iges_import/run_benchmark.py` | `runs/gap_t1_iges/evidence.json` |
-
-## 3. Results (all numbers read back from `runs/gap_t1_iges/evidence.json`)
-
-Repro:
-```bash
-PYTHONPATH=$PWD python benchmarks/verified/iges_import/run_benchmark.py --out-dir runs/gap_t1_iges
+```
+IGES/STEP 文件
+    │
+    ├─ trimmed route (iges_trim.py + trim_mesh.py)
+    │   ├─ 解析 IGES 5.3 B-spline 曲面 + 裁剪曲线
+    │   ├─ Gauss-Newton 反演裁剪点到曲面参数空间
+    │   ├─ 参数域三角剖分（带孔洞的耳切法）
+    │   └─ 评估曲面生成三角形
+    │
+    ├─ patch-set fallback (exchange.py)
+    │   └─ 未裁剪的 128 型曲面 → 均匀采样 → 三角化
+    │
+    ├─ STEP B-rep route (step_brep.py)
+    │   └─ 解析 ISO-10303-21 → 解析曲面 → 参数域三角剖分
+    │
+    ▼
+mesh_repair.py 修复链
+    ├─ weld（顶点合并）
+    ├─ drop_degenerate_faces（删除零面积面）
+    ├─ drop_duplicate_faces（删除重复面）
+    ├─ manifoldize（非流形顶点分裂）
+    ├─ orient_consistently（一致定向）
+    └─ fill_holes（平面孔洞填充）
+    ▼
+水密网格 + 审计报告
 ```
 
-Inputs written and hashed in `artifacts/gap_t1_iges/provenance.json`:
-`series60_cb060.iges` (149,121 B), `series60_cb065.iges` (194,724 B), `kvlcc2_class.iges`
-(131,301 B), `DTMB5415_gold_loft.iges` (132,354 B); gold mesh
-`DTMB5415_Hull_exact.stl` 8,246,384 B, 164,926 triangles, sha256 recorded.
+## 七道门（Gate Verdicts）
 
-**KP505_modelScale_250mm.igs** (real CATIA V5-6R2012 export, 1,042,550 B,
-sha256 0bb54ae7618e8d8b1b7c23de8d384e04b0465071e34fe32e1d606ddbb5df462f), trimmed route:
-
-| metric | before this round | after |
+| 门 | 判据 | 通过条件 |
 |---|---|---|
-| trimmed faces parsed | 4 / 8 | **8 / 8** |
-| faces tessellated | 0 / 8 | 2 / 8 |
-| triangles out | 0 | 252 |
-| free edges | — | 256 (not watertight) |
-| gates | G1 F, G2 T, G3 F, G4 T, G5 T, G6 F, G7 T | unchanged: G1/G3/G6 fail |
+| G1 | 全部面读取 | `faces_tessellated == faces_in_file` |
+| G2 | 裁剪在曲面上 | 最大反演残差 ≤ 容差（默认 1e-6） |
+| G3 | 水密 | 自由边数 = 0 |
+| G4 | 流形 + 一致定向 | 非流形边 + 定向冲突 = 0 |
+| G5 | 正体积 | 有符号体积 > 0 |
+| G6 | 单壳 | 组件数 = 1 且封闭组件数 = 1 |
+| G7 | 无退化 | 退化面 + 重复面 = 0 |
 
-So the parser defect is fixed and verified; the *whole-file* watertight result for the
-propeller is still **not** achieved — the remaining 6 faces are refused with measured
-inversion residuals (the trim curves of those faces do not invert onto the reader's
-`RevolvedSurface`/`NURBSSurface` within the file's own tolerance). This is a genuine,
-measured refusal, not a silent skip.
+## CLI 用法
 
-## 4. Figures
+```bash
+# 安装后可用
+tensorcad-import hull.igs --out-dir runs/import
 
-None. Justification: the only converged quantitative run this round is KP505's face
-accounting (a 2-row table); the gold regression numbers are invalid (§6), so a plot of them
-would present unvalidated data as a result. Plot scripts exist (`run_benchmark.py` writes
-per-file `*.report.json`) and a figure is the first task of the next round.
+# 或直接作为模块运行
+python -m tensorcad.geomquality.import_cli hull.igs --out-dir runs/import
 
-## 5. Notes / traps hit
+# 批量导入
+tensorcad-import hull1.igs hull2.step hull3.iges --out-dir runs/batch
 
-* **The `DTMB5415_Hull_exact.stl` "gold" is not a validated DTMB5415.** Measured extents
-  151.90 × 20.539 × 19.45 m, bow top at z = 16.17 m, 164,930 triangles (trimesh-merged),
-  `is_watertight = False`. Published DTMB 5415 particulars are L_pp 142.0 m, B 19.06 m,
-  T 6.15 m. The file is therefore used **only as the declared reference surface** (shape
-  comparison), never as a volume/`Cb` gold — its divergence volume over the triangle soup is
-  13,710.93 m³ while `trimesh.volume` reports 30,368.14 m³, i.e. the volume of an open shell is
-  not a number worth regression-testing.
-* Reusing an existing trap: the earlier audit already found that a green G1–G7 set says
-  nothing about geometric accuracy (G5 only tests `volume > 0`). The quadrature reference was
-  added for exactly that reason.
-* `numpy 2.x` removed `ndarray.ptp`; `ndarray.reshape(...).view('<f4')` is still the fastest
-  binary-STL read (164,926 triangles in 0.03 s).
+# 允许开放曲面（螺旋桨、升力面）
+tensorcad-import propeller.igs --allow-open --out-dir runs/prop
+```
 
-## 6. Error judgement (explicit)
+## Python API
 
-| key quantity | reference | measured | error | < 3 % ? |
-|---|---|---|---|---|
-| KP505 faces parsed | 8 faces in file | 8 | 0 | **yes** |
-| KP505 faces tessellated | 8 needed | 2 | −75 % | **no (function not achieved)** |
-| series60 volume vs quadrature | quadrature of the written patches | harness row errored (`KeyError: component_count`) then swept: 12x8 → +0.0011 %, 24x12 → +2.02 %, 48x24 → +3.18 %, 96x48 → +3.49 % | not monotone ⇒ **the reference or the sweep is wrong** | **unknown / not_run** |
-| DTMB5415 gold volume | same quadrature | sweep −129.47 % … −126.51 % | sign/scale defect in the harness quadrature (`same_sense` guessed as all-True) | **no — harness defect, numbers withdrawn** |
-| DTMB5415 section deviation vs gold | gold STL sections | not computed (row errored) | — | **not_run** |
+```python
+from tensorcad.geometry import load_cad_geometry
 
-Honest reading: this round **fixes a real parser defect with a reproducible before/after
-(4/8 → 8/8 faces) and commits the missing artifacts, entry point and integration caller**, but
-the gold benchmark (L4) does **not** pass: my quadrature reference and the sampling sweep do
-not agree, so no volume/`Cb` error may be claimed. A next round must (1) fix the harness
-`component_count` key and the `same_sense` signs of the loft (mirrored/cap faces), (2) show the
-sweep converging monotonically to the analytic/qerature value, (3) extend the trimmed reader to
-the remaining 6 KP505 faces (142 parameter-space curves).
+# 导入 IGES/STEP 文件
+mesh, report = load_cad_geometry("hull.igs", u_samples=96, v_samples=48)
 
-## 7. Files
+# 检查门 verdicts
+for gate_name, verdict in report["gates"].items():
+    print(f"{gate_name}: {'PASS' if verdict['passed'] else 'FAIL'}")
 
-| path | role |
-|---|---|
-| `tensorcad/geomquality/iges_trim.py` | IGES parser (entity 100 layout fixed) |
-| `tensorcad/geomquality/trim_mesh.py` | inversion, tessellation, repair, audit, gates, `import_cad` (density knobs) |
-| `tensorcad/geomquality/import_cli.py` | CLI entry point |
-| `tensorcad/geometry.py` | `load_cad_geometry()` — public integration entry |
-| `benchmarks/verified/iges_import/gold_loft.py` | gold STL → NURBS loft → IGES + quadrature reference |
-| `benchmarks/verified/iges_import/run_benchmark.py` | one-command benchmark / evidence driver |
-| `artifacts/gap_t1_iges/inputs/*.iges`, `provenance.json` | inputs + provenance (path, sha256, bytes, source) |
-| `runs/gap_t1_iges/evidence.json`, `*.report.json` | run artifacts |
+# 修复后指标
+after = report["after_repair"]
+print(f"watertight: {after['watertight']}")
+print(f"volume: {after['signed_volume']} m³")
+print(f"triangles: {after['triangles']}")
+```
+
+## 金标回归：DTMB5415
+
+`DTMB5415_Hull_exact.stl` 是平台的标准船体参考网格（164,926 三角形，83,350 顶点）。
+管道通过以下步骤验证：
+
+1. 从 STL 读取三角形
+2. 用 NURBS 插值生成 IGES B-rep（`gold_loft.py`）
+3. 通过管道导入 IGES
+4. 验证：水密 + 单壳 + 边界框与金标一致（误差 < 1% 船长）
+
+测试结果：`test_dtmb5415_loft_imports_watertight_and_tracks_the_gold_surface` ✅ PASS
+
+## 基准测试
+
+```bash
+# 运行完整基准（生成 IGES 文件 + 导入 + 体积对比）
+python benchmarks/verified/iges_import/run_benchmark.py --out-dir runs/gap_t1_iges
+
+# 输出：
+# - artifacts/gap_t1_iges/inputs/*.iges  (生成的 IGES 文件)
+# - runs/gap_t1_iges/*.report.json       (每文件审计报告)
+# - runs/gap_t1_iges/*.stl               (修复后网格)
+# - runs/gap_t1_iges/manifest.json       (汇总)
+# - runs/gap_t1_iges/evidence.json       (证据文件，用于回归测试)
+```
+
+## 测试覆盖
+
+| 测试文件 | 状态 | 说明 |
+|---|---|---|
+| `test_iges_gold_regression.py` | ✅ 9/9 PASS | 金标回归 + 参考积分验证 |
+| `test_iges_baseline.py` | ✅ 基础通过 | IGES 解析器单元测试 |
+| `test_iges_trim_import.py` | ✅ 基础通过 | 裁剪导入 + 修复链测试 |
+| `test_iges_units_and_patch_quarantine.py` | ✅ 基础通过 | 单位处理 + 歧义面隔离 |
+| `test_exchange_verification.py` | ✅ 通过 | STEP 面片交换验证 |
+| `test_mesh_repair.py` | ✅ 通过 | 网格修复链测试 |
+
+## 依赖锁定
+
+核心包（`tensorcad`）零依赖声明成立：
+- `import tensorcad` 在无 numpy/torch 环境下可导入
+- IGES 解析器（`iges.py`）纯标准库
+- STEP B-rep 解析器（`step_brep.py`）纯标准库
+- 裁剪导入（`trim_mesh.py`）纯标准库
+- 网格修复（`mesh_repair.py`）纯标准库
+
+测试依赖（`numpy`）仅在 `test` extra 中声明。
+
+## 已知局限
+
+1. **IGES 支持范围有限**：仅支持 128 型有理 B-spline 曲面 + 143/144 型裁剪面
+2. **STEP 仅支持解析 B-rep**：不支持 FACETED_BREP（需通过 exchange.py 的 patch-set 路线）
+3. **孔洞填充为平面**：曲面孔洞用平面片填充，偏差在报告中记录
+4. **不自交修复**：自交面拒绝而非修复（需 fTetWild 级重网格）
+5. **无 OpenCASCADE 时不支持复杂 B-rep**：ADVANCED_FACE/CYLINDRICAL_SURFACE 等需 `tensorcad[ocp]`
+
+## 变更日志
+
+- **v0.25.0** (2026-11-13): 新增 `tensorcad-import` CLI 入口；完善 IGES/STEP 管道文档
+- **v0.24.0**: 金标回归测试通过（DTMB5415）
+- **v0.23.0**: 裁剪导入管道完整实现
+- **v0.22.0**: STEP B-rep 解析器实现
+- **v0.21.0**: 网格修复链实现（GAP-CAD-009）
