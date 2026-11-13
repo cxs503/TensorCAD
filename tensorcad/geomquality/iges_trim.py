@@ -758,21 +758,28 @@ class _Builder:
                 end=_apply_point(matrix, (entry.real(3), entry.real(4), entry.real(5))),
             )
         if kind == 100:
-            plane_point = (entry.real(0), entry.real(1), entry.real(2))
-            centre = (entry.real(3), entry.real(4), entry.real(5))
-            start = (entry.real(6), entry.real(7), entry.real(8))
-            end = (entry.real(9), entry.real(10), entry.real(11))
-            normal = _sub(plane_point, centre)
-            if _norm(normal) < 1e-12:
+            # IGES 5.3 entity 100 (circular arc, form 0 / circle, form 1) is *planar*:
+            # fields are ZT, X1, Y1, X2, Y2, X3, Y3 -- one Z for the plane, then the
+            # centre, the start point and the end point in that plane (a form-1 circle
+            # repeats the start point).  Exporters append the field terminator pair
+            # (0,0), so accept 7 or more tokens; the arc normal is the plane normal +Z,
+            # rotated by the entity's transform matrix.
+            if len(entry.tokens) < 7:
                 raise IgesError(
-                    f"circular arc {entry.sequence} has its plane point at its centre: "
-                    "no plane normal"
+                    f"circular arc {entry.sequence} has {len(entry.tokens)} parameters; "
+                    "IGES 100 needs ZT, X1..Y3"
                 )
+            zt = entry.real(0)
+            centre_plane = (entry.real(1), entry.real(2), zt)
+            start_plane = (entry.real(3), entry.real(4), zt)
+            end_plane = (entry.real(5), entry.real(6), zt)
+            if entry.form == 1:
+                end_plane = start_plane
             return ArcCurve(
-                centre=_apply_point(matrix, centre),
-                start=_apply_point(matrix, start),
-                end=_apply_point(matrix, end),
-                normal=_apply_direction(matrix, normal),
+                centre=_apply_point(matrix, centre_plane),
+                start=_apply_point(matrix, start_plane),
+                end=_apply_point(matrix, end_plane),
+                normal=_apply_direction(matrix, (0.0, 0.0, 1.0)),
             )
         if kind == 106:
             form = entry.form

@@ -884,6 +884,8 @@ def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
     B-spline record), the untrimmed patch-set route is tried and the refusal is carried
     into the report, so a fallback is never silent.  STEP: patch sets only.
     """
+    u_samples = int(kwargs.pop("u_samples", 24))
+    v_samples = int(kwargs.pop("v_samples", 12))
     target = Path(path)
     suffix = target.suffix.lower()
     if suffix in (".igs", ".iges"):
@@ -894,7 +896,8 @@ def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
                 raise
             result = import_patch_set(target, **{k: v for k, v in kwargs.items()
                                                 if k in {"scale", "weld_tolerance", "repair",
-                                                         "fill_holes", "max_hole_edges"}})
+                                                         "fill_holes", "max_hole_edges"}},
+                                     u_samples=u_samples, v_samples=v_samples)
             result.report.setdefault("route_notes", []).append(
                 f"trimmed reader refused the file, fell back to the patch-set route: {exc}"
             )
@@ -903,7 +906,8 @@ def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
     if suffix in (".step", ".stp"):
         return import_patch_set(target, **{k: v for k, v in kwargs.items()
                                           if k in {"scale", "weld_tolerance", "repair",
-                                                   "fill_holes", "max_hole_edges"}})
+                                                   "fill_holes", "max_hole_edges"}},
+                                u_samples=u_samples, v_samples=v_samples)
     raise IgesError(f"unsupported CAD suffix {suffix!r}: expected .igs/.iges/.step/.stp")
 
 
