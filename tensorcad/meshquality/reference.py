@@ -1,0 +1,367 @@
+"""Reference implementations and external oracles for the mesh-quality metrics.
+
+The point of this module is that :mod:`tensorcad.meshquality.metrics` is never its own
+judge. Four independent references are provided:
+
+``reference_triangles`` / ``reference_tets`` / ``reference_hexahedra``
+    Second implementations of the same quantities by *different arithmetic*: Heron's
+    formula instead of a cross product, ``atan2`` instead of ``acos``, Cayley-Menger
+    instead of a triple product, and central finite differences of the isoparametric
+    map instead of its analytic derivative. They are not a proof, but they catch the
+    class of bug this library can have (a wrong normalisation, a transposed Jacobian,
+    a corner table that is off by one), because those do not survive two derivations.
+
+``icn_from_singular_values``
+    The same inverse condition number written through the singular values of the
+    Jacobian, ``d (prod sigma)^(2/d) / sum sigma^2``, instead of through its
+    determinant and Frobenius norm. Requires numpy; returns ``None`` without it.
+
+External tools, when present, are used directly:
+
+* **Gmsh** -- ``external_availability()["gmsh"]``; :func:`gmsh_element_qualities` calls
+  ``gmsh.model.mesh.getElementQualities(tags, "minSICN")``, which is the number the
+  ``gmsh_icn`` metric predicts.
+* **trimesh** -- a live third-party implementation of triangle angles, area and aspect
+  ratio; :func:`trimesh_triangle_metrics` wraps it.
+* **meshmagick** -- its ``print_quality()`` delegates to ``vtk.vtkMeshQuality``, so the
+  Verdict definitions mirrored in the metric module are its definitions. A runtime
+  adapter is not shipped because meshmagick is GPL-3.0 and its quality path needs VTK;
+  the benchmark records availability rather than silently skipping.
+
+Nothing here is imported by the package core at import time.
+"""
+from __future__ import annotations
+
+import importlib.util
+import math
+from typing import Any, Mapping, Sequence
+
+__all__ = [
+    "external_availability",
+    "gmsh_element_qualities",
+    "icn_from_singular_values",
+    "reference_hexahedra",
+    "reference_tets",
+    "reference_triangles",
+    "trimesh_triangle_metrics",
+]
+
+Vec3 = tuple[float, float, float]
+
+
+def _sub(a: Sequence[float], b: Sequence[float]) -> Vec3:
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def _cross(a: Vec3, b: Vec3) -> Vec3:
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def _norm(a: Vec3) -> float:
+    return math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2])
+
+
+def _linspace_six(p0: Vec3, p1: Vec3, p2: Vec3, p3: Vec3) -> tuple[float, ...]:
+    return (
+        _norm(_sub(p1, p0)),
+        _norm(_sub(p2, p1)),
+        _norm(_sub(p3, p2)),
+        _norm(_sub(p0, p3)),
+        _norm(_sub(p0, p2)),
+        _norm(_sub(p1, p3)),
+    )
+
+
+# --------------------------------------------------------------------------------------
+# independent second implementations
+# --------------------------------------------------------------------------------------
+def reference_triangles(
+    points: Sequence[Sequence[float]], triangles: Sequence[Sequence[int]]
+) -> dict[str, tuple[float, ...]]:
+    """Triangle metrics via Heron and ``atan2`` -- deliberately unlike the library path."""
+    out: dict[str, list[float]] = {
+        "area": [],
+        "min_angle": [],
+        "max_angle": [],
+        "aspect_ratio": [],
+        "gamma": [],
+    }
+    for face in triangles:
+        p = [tuple(float(c) for c in points[i]) for i in face]
+        sides = (_norm(_sub(p[1], p[0])), _norm(_sub(p[2], p[1])), _norm(_sub(p[0], p[2])))
+        semiperimeter = 0.5 * sum(sides)
+        # Heron with the numerically stable product form.
+        area = math.sqrt(
+            max(
+                0.0,
+                semiperimeter
+                * (semiperimeter - sides[0])
+                * (semiperimeter - sides[1])
+                * (semiperimeter - sides[2]),
+            )
+        )
+        angles = []
+        for k in range(3):
+            a = _sub(p[(k + 1) % 3], p[k])
+            b = _sub(p[(k + 2) % 3], p[k])
+            angles.append(math.degrees(math.atan2(_norm(_cross(tuple(a), tuple(b))),
+                                                  a[0] * b[0] + a[1] * b[1] + a[2] * b[2])))
+        # R = a / (2 sin A) with ``a`` the side opposite the angle -- a different path to
+        # the circumradius than the library's a*b*c/(4A).
+        circumradius = (
+            sides[1] / (2.0 * math.sin(math.radians(angles[0]))) if area > 0.0 else math.inf
+        )
+        inradius = area / semiperimeter if semiperimeter > 0.0 else 0.0
+        out["area"].append(area)
+        out["min_angle"].append(min(angles))
+        out["max_angle"].append(max(angles))
+        out["aspect_ratio"].append(circumradius / (2.0 * inradius) if inradius > 0.0 else math.inf)
+        out["gamma"].append(2.0 * inradius / circumradius if circumradius not in (0.0, math.inf) else 0.0)
+    return {name: tuple(values) for name, values in out.items()}
+
+
+def _cayley_menger(p0: Vec3, p1: Vec3, p2: Vec3, p3: Vec3) -> float:
+    """Tetrahedron volume from the 5x5 Cayley-Menger determinant (a different algebra)."""
+    d = [[0.0] * 5 for _ in range(5)]
+    pts = (p0, p1, p2, p3)
+    for i in range(4):
+        for j in range(4):
+            v = _sub(pts[i], pts[j])
+            d[i][j] = v[0] * v[0] + v[1] * v[1] + v[2] * v[2]
+    for i in range(4):
+        d[i][4] = d[4][i] = 1.0
+    # Bareiss-free Gaussian elimination is enough at this size and keeps the code short.
+    matrix = [row[:] for row in d]
+    sign = 1.0
+    for column in range(5):
+        pivot = max(range(column, 5), key=lambda r: abs(matrix[r][column]))
+        if matrix[pivot][column] == 0.0:
+            return 0.0
+        if pivot != column:
+            matrix[column], matrix[pivot] = matrix[pivot], matrix[column]
+            sign = -sign
+        for row in range(column + 1, 5):
+            factor = matrix[row][column] / matrix[column][column]
+            for k in range(column, 5):
+                matrix[row][k] -= factor * matrix[column][k]
+    det = sign
+    for i in range(5):
+        det *= matrix[i][i]
+    return math.sqrt(max(0.0, det / 288.0))
+
+
+def reference_tets(
+    points: Sequence[Sequence[float]], tets: Sequence[Sequence[int]]
+) -> dict[str, tuple[float, ...]]:
+    """Tetrahedron volume (Cayley-Menger), eta (edge sum) and dihedral angles (face normals)."""
+    out: dict[str, list[float]] = {"volume": [], "eta": [], "min_dihedral": [], "max_dihedral": []}
+    for tet in tets:
+        p = [tuple(float(c) for c in points[i]) for i in tet]
+        volume = _cayley_menger(p[0], p[1], p[2], p[3])
+        lengths = [
+            _norm(_sub(p[j], p[i]))
+            for i, j in ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3))
+        ]
+        total = sum(length * length for length in lengths)
+        out["volume"].append(volume)
+        out["eta"].append(12.0 * (3.0 * volume) ** (2.0 / 3.0) / total if total > 0.0 else 0.0)
+        # Dihedral angles from the inward normals of the two faces sharing an edge.
+        faces = ((1, 2, 3), (0, 3, 2), (0, 1, 3), (0, 2, 1))
+        normals = []
+        for face in faces:
+            a, b, c = (p[i] for i in face)
+            normals.append(_cross(_sub(b, a), _sub(c, a)))
+        interior = []
+        for edge in ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)):
+            adjacent = [k for k, face in enumerate(faces) if edge[0] in face and edge[1] in face]
+            if len(adjacent) != 2:
+                continue
+            n0, n1 = normals[adjacent[0]], normals[adjacent[1]]
+            scale = _norm(n0) * _norm(n1)
+            if scale == 0.0:  # a collapsed cell has no dihedral angle to measure
+                continue
+            cosine = (n0[0] * n1[0] + n0[1] * n1[1] + n0[2] * n1[2]) / scale
+            interior.append(180.0 - math.degrees(math.acos(max(-1.0, min(1.0, cosine)))))
+        interior = [a for a in interior if not math.isnan(a)]
+        out["min_dihedral"].append(min(interior) if interior else math.nan)
+        out["max_dihedral"].append(max(interior) if interior else math.nan)
+    return {name: tuple(values) for name, values in out.items()}
+
+
+#: Corner signs for the reference cube, repeated here so the reference code does not
+#: import the tables it is meant to check.
+_CORNER_SIGNS = (
+    (-1.0, -1.0, -1.0),
+    (1.0, -1.0, -1.0),
+    (1.0, 1.0, -1.0),
+    (-1.0, 1.0, -1.0),
+    (-1.0, -1.0, 1.0),
+    (1.0, -1.0, 1.0),
+    (1.0, 1.0, 1.0),
+    (-1.0, 1.0, 1.0),
+)
+
+
+def _trilinear(points: Sequence[Vec3], xi: float, eta: float, zeta: float) -> Vec3:
+    total = [0.0, 0.0, 0.0]
+    for sign, p in zip(_CORNER_SIGNS, points):
+        weight = 0.125
+        weight *= 1.0 + sign[0] * xi
+        weight *= 1.0 + sign[1] * eta
+        weight *= 1.0 + sign[2] * zeta
+        for k in range(3):
+            total[k] += weight * p[k]
+    return (total[0], total[1], total[2])
+
+
+def reference_hexahedra(
+    points: Sequence[Sequence[float]], hexes: Sequence[Sequence[int]], *, step: float = 1e-5
+) -> dict[str, tuple[float, ...]]:
+    """Corners Jacobian by central finite differences of the trilinear map.
+
+    Independent of the analytic shape-function derivatives in the library: it evaluates
+    the map and differentiates numerically, so an error in the derivative table shows up
+    as a finite difference. Accuracy is ~``step**2`` (1e-10 at the default step), which
+    is why the comparison tolerance is 1e-7 and not 1e-12.
+    """
+    out: dict[str, list[float]] = {"scaled_jacobian": [], "min_sicn": []}
+    for hex_nodes in hexes:
+        p = [tuple(float(c) for c in points[i]) for i in hex_nodes]
+        worst_sj = math.inf
+        worst_icn = math.inf
+        for xi, eta, zeta in _CORNER_SIGNS:
+            columns = []
+            for axis in range(3):
+                plus = [xi, eta, zeta]
+                minus = [xi, eta, zeta]
+                plus[axis] += step
+                minus[axis] -= step
+                a = _trilinear(p, plus[0], plus[1], plus[2])
+                b = _trilinear(p, minus[0], minus[1], minus[2])
+                columns.append(
+                    ((a[0] - b[0]) / (2 * step), (a[1] - b[1]) / (2 * step), (a[2] - b[2]) / (2 * step))
+                )
+            # J[row][column] with rows x, y, z.
+            jac = [[columns[column][row] for column in range(3)] for row in range(3)]
+            det = (
+                jac[0][0] * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1])
+                - jac[0][1] * (jac[1][0] * jac[2][2] - jac[1][2] * jac[2][0])
+                + jac[0][2] * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0])
+            )
+            norms = [math.sqrt(sum(jac[r][c] ** 2 for r in range(3))) for c in range(3)]
+            fro2 = sum(jac[r][c] ** 2 for r in range(3) for c in range(3))
+            sj = det / (norms[0] * norms[1] * norms[2]) if all(n > 0.0 for n in norms) else 0.0
+            icn = 3.0 * abs(det) ** (2.0 / 3.0) / fro2 if fro2 > 0.0 else 0.0
+            worst_sj = min(worst_sj, sj)
+            worst_icn = min(worst_icn, icn if det >= 0.0 else -icn)
+        out["scaled_jacobian"].append(worst_sj)
+        out["min_sicn"].append(worst_icn)
+    return {name: tuple(values) for name, values in out.items()}
+
+
+def icn_from_singular_values(jacobian: Sequence[Sequence[float]]) -> float | None:
+    """``d (prod sigma)^(2/d) / sum sigma^2`` -- the same ICN through the singular values."""
+    try:
+        import numpy as np
+    except ImportError:  # pragma: no cover - numpy is a test/dev dependency
+        return None
+    matrix = np.asarray(jacobian, dtype=float)
+    singular = np.linalg.svd(matrix, compute_uv=False)
+    if not np.any(singular):
+        return 0.0
+    dim = matrix.shape[0]
+    return float(dim * float(math.prod(singular)) ** (2.0 / dim) / float((singular**2).sum()))
+
+
+# --------------------------------------------------------------------------------------
+# external oracles
+# --------------------------------------------------------------------------------------
+def _version(module: str) -> str | None:
+    spec = importlib.util.find_spec(module)
+    if spec is None:
+        return None
+    try:
+        loaded = importlib.import_module(module)
+    except Exception:  # pragma: no cover - a broken install is reported, not hidden
+        return "import-failed"
+    return str(getattr(loaded, "__version__", "unknown"))
+
+
+def external_availability() -> dict[str, str | None]:
+    """Version of each external oracle, or ``None`` when it is not importable."""
+    return {
+        "gmsh": _version("gmsh"),
+        "meshmagick": _version("meshmagick"),
+        "trimesh": _version("trimesh"),
+    }
+
+
+def trimesh_triangle_metrics(
+    points: Sequence[Sequence[float]], triangles: Sequence[Sequence[int]]
+) -> dict[str, tuple[float, ...]] | None:
+    """Triangle area and angles from ``trimesh`` (third party).
+
+    trimesh 5.0 does not export a Verdict aspect ratio (``trimesh.triangles`` has
+    ``area`` and ``angles`` but no ``aspect_ratio``), so the comparison covers the two
+    primitives and the library's aspect ratio is checked against the analytic values and
+    :func:`reference_triangles` instead of against trimesh.
+    """
+    try:
+        import numpy as np
+        import trimesh.triangles as tri
+    except ImportError:  # pragma: no cover - exercised only where trimesh is missing
+        return None
+    vertices = np.asarray(points, dtype=float)
+    faces = np.asarray(triangles, dtype=int)
+    tris = vertices[faces]
+    angles = np.degrees(tri.angles(tris))
+    return {
+        "area": tuple(float(v) for v in tri.area(tris)),
+        "min_angle": tuple(float(v) for v in angles.min(axis=1)),
+        "max_angle": tuple(float(v) for v in angles.max(axis=1)),
+    }
+
+
+#: Gmsh element type numbers, for the adapter below.
+_GMSH_TYPES = {"tri": 2, "quad": 3, "tet": 4, "hex": 5}
+
+
+def gmsh_element_qualities(
+    points: Sequence[Sequence[float]],
+    elements: Mapping[str, Sequence[Sequence[int]]],
+    measure: str = "minSICN",
+) -> dict[str, tuple[float, ...]] | None:
+    """Run the real Gmsh on the mesh and return its own quality numbers.
+
+    Returns ``None`` when Gmsh is not importable (it ships no wheel for this
+    architecture), so callers can record ``not_run`` instead of silently passing.
+    The tags are 1-based and match the input order.
+    """
+    try:
+        import gmsh
+    except ImportError:  # pragma: no cover - depends on the host
+        return None
+    points_per_kind = {"tri": 3, "quad": 4, "tet": 4, "hex": 8}
+    result: dict[str, tuple[float, ...]] = {}
+    gmsh.initialize()
+    try:
+        gmsh.model.add("tensorcad_meshquality")
+        tags = [gmsh.model.addDiscreteEntity(0, i + 1, []) for i in range(len(points))]
+        for tag, xyz in zip(tags, points):
+            gmsh.model.mesh.setCoordinates([(0, tag)], [list(xyz)])
+        offset = 0
+        for kind, cells in elements.items():
+            if kind not in _GMSH_TYPES:
+                continue
+            flat: list[int] = []
+            entities: list[int] = []
+            for cell in cells:
+                entities.append(offset)
+                offset += 1
+                flat.extend(tags[i] for i in cell)
+            gmsh.model.mesh.addElements(0, _GMSH_TYPES[kind], entities, [flat])
+            qualities = gmsh.model.mesh.getElementQualities(entities, measure)
+            result[kind] = tuple(float(v) for v in qualities)
+    finally:
+        gmsh.finalize()
+    return result
