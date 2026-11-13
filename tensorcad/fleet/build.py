@@ -464,3 +464,132 @@ def build_ship_geometry(
             raise RouteRefusal("imported_stl route needs a path (record.geometry_path or stl_path)")
         return stl_mesh(record, target)
     raise RouteRefusal(f"unknown geometry route {route!r}")
+
+# --------------------------------------------------------------------------- #
+# IGES field route (fourth route)
+# --------------------------------------------------------------------------- #
+IGES_FRAME = "x aft->fwd, y positive to starboard, z up from keel (m)"
+
+
+def iges_field_mesh(
+    record: ShipRecord,
+    iges_path: str | Path,
+    *,
+    dx: float = 0.5,
+    dz: float = 0.1,
+    ring_points: int = 240,
+    samples_per_metre: float = 8.0,
+) -> BuiltGeometry:
+    """Build a watertight hull mesh from an IGES file via the half-breadth field route.
+
+    The IGES file is read as B-spline surfaces, sampled into a half-breadth field
+    ``b(x, z) = max |y|``, and then lofted into a closed mesh by structured waterline
+    slices. This guarantees watertightness by construction because topology is built
+    from the field grid, not from patch seams.
+
+    The cost is explicit: the ``max`` binning biases the surface outwards by
+    O(cell^2 / radius), which is bounded by the reported ``field_cover`` metric.
+    """
+    from tensorcad.fleet_baseline import (
+        build_solid,
+        field_from_points,
+        sample_patches,
+    )
+    from tensorcad.iges import read_iges
+
+    iges_path = Path(iges_path)
+    if not iges_path.exists():
+        raise RouteRefusal(f"IGES file not found: {iges_path}")
+
+    iges = read_iges(str(iges_path))
+    surfaces = [s for s in iges.surfaces if hasattr(s, 'sample')]
+    if not surfaces:
+        raise RouteRefusal(f"no B-spline surfaces found in {iges_path}")
+
+    spacing = 1.0 / samples_per_metre
+    points = sample_patches(surfaces, spacing=spacing)
+
+    field = field_from_points(
+        points,
+        draft=record.draft,
+        dx=dx,
+        dz=dz,
+        min_x=0.0,
+        max_x=record.length,
+    )
+
+    mesh, loft_info = build_solid(field, ring_points=ring_points, draft=record.draft)
+
+    return BuiltGeometry(
+        mesh=mesh,
+        route="iges_field",
+        details={
+            "source_path": str(iges_path),
+            "num_surfaces": len(surfaces),
+            "num_sample_points": len(points),
+            "field": field.to_dict(),
+            "loft": loft_info,
+            "dx": dx,
+            "dz": dz,
+            "ring_points": ring_points,
+            "samples_per_metre": samples_per_metre,
+            "units": "m",
+            "frame": IGES_FRAME,
+        },
+    )
+
+
+def build_ship_geometry(
+    record: ShipRecord,
+    *,
+    nx: int = 121,
+    nz: int = 25,
+    stl_path: str | Path | None = None,
+    iges_path: str | Path | None = None,
+    dx: float = 0.5,
+    dz: float = 0.1,
+    ring_points: int = 240,
+) -> BuiltGeometry:
+    """Dispatch on ``record.geometry_route``; raise :class:`RouteRefusal` if unsupported.
+
+    Parameters
+    ----------
+    record : ShipRecord
+        The ship to build geometry for.
+    nx, nz : int
+        Resolution for the form-family routes (stations x waterline levels).
+    stl_path : str or Path, optional
+        Path to an STL file for the ``imported_stl`` route.
+    iges_path : str or Path, optional
+        Path to an IGES file for the ``iges_field`` route.
+    dx, dz : float
+        Field cell sizes for the ``iges_field`` route (metres).
+    ring_points : int
+        Vertices per waterline ring for the ``iges_field`` route.
+    """
+    route = record.geometry_route
+    if route == "series60_form":
+        return _series60_mesh(record, nx=nx, nz=nz)
+    if route == "offset_table":
+        if stl_path is not None:
+            raise RouteRefusal("offset_table route does not take an STL path")
+        table, levels = sample_offset_table(record, stations=nx, levels=nz)
+        return offset_table_mesh(record, table, levels, source="series60 law sampled to table form")
+    if route == "parametric_sections":
+        table, levels, details = parametric_table(record, stations=nx, levels=nz)
+        built = offset_table_mesh(record, table, levels,
+                                  source="parametric sections solved to published Cb/Cm/LCB")
+        built = BuiltGeometry(mesh=built.mesh, route="parametric_sections",
+                              details={**built.details, **details})
+        return built
+    if route == "imported_stl":
+        target = stl_path or record.geometry_path
+        if target is None:
+            raise RouteRefusal("imported_stl route needs a path (record.geometry_path or stl_path)")
+        return stl_mesh(record, target)
+    if route == "iges_field":
+        target = iges_path or record.geometry_path
+        if target is None:
+            raise RouteRefusal("iges_field route needs a path (record.geometry_path or iges_path)")
+        return iges_field_mesh(record, target, dx=dx, dz=dz, ring_points=ring_points)
+    raise RouteRefusal(f"unknown geometry route {route!r}")
