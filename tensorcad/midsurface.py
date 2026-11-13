@@ -290,6 +290,87 @@ class MidSurfaceResult:
         }
 
 
+def _emit_mid_triangles(
+    mesh: Mesh, grid: _FaceGrid, samples: Sequence[ThicknessSample]
+) -> tuple[list[Vec3], list[Face]]:
+    """One mid triangle per measured wall, copied from a face chosen by the geometry.
+
+    A mid triangle is a *translated copy* of one of the two facings of a wall, and the two
+    facings of a curved wall do not have the same area, so the side the copy comes from
+    decides the mid-surface area by up to the wall's own ``t/R``. Taking "whichever face
+    the file lists first" makes that answer a property of the labelling: relabelling the
+    faces of the same geometry moved the mid area of a t/R = 2 % tube by 1.2 % and of a
+    sphere by 2.1 % (pinned in ``tests/test_midsurface_oracle.py``). The side is therefore
+    chosen per wall, from the faces alone:
+
+    * the facing whose outward normal points away from the model's bounding-box centre
+      owns the wall (its normal against the centroid-minus-centre vector) -- on a skin
+      that is the outer facing, which is also the side the ``t/(2R)`` surplus is stated
+      for;
+    * a tie -- a flat plate's two facings, which are congruent up to the translation -- is
+      broken by the normal itself, so one winding covers the whole sheet instead of a
+      checkerboard of them;
+    * each face emits at most one mid triangle, so a wall that both facings measured is
+      not turned into two overlapping triangles, and the walls are visited in an order
+      fixed by the chosen face's centroid so that the greedy match does not depend on
+      face numbering either.
+    """
+    box = mesh.bounding_box()
+    middle = _mul(_add(box.minimum, box.maximum), 0.5)
+    measured = {sample.face: sample for sample in samples}
+    outward: dict[int, float] = {}
+    normals: dict[int, Vec3] = {}
+    for face in measured:
+        raw = grid.normals[face]
+        if _norm(raw) == 0.0:
+            outward[face] = -math.inf
+            normals[face] = (0.0, 0.0, 0.0)
+            continue
+        normal = _unit(raw)
+        normals[face] = normal
+        outward[face] = _dot(normal, _sub(grid.centroids[face], middle))
+
+    # A wall is *reciprocal* when each facing measured the other. One-sided measurements
+    # (face A's ray finds B, but B's ray finds something else) are ambiguous about which
+    # facing owns the mid triangle, and on a hull plating they are exactly the faces at
+    # the folded waterline rim, where the two facings disagree about the wall's size. They
+    # stay in ``samples`` -- the thickness was really measured -- but they do not emit.
+    partner_of = {sample.face: sample.partner for sample in samples}
+    walls: dict[tuple[int, int], None] = {}
+    for sample in samples:
+        if partner_of.get(sample.partner) != sample.face:
+            continue
+        walls[(min(sample.face, sample.partner), max(sample.face, sample.partner))] = None
+
+    def _side_key(face: int) -> tuple[float, float, float, float]:
+        # prefer the outward facing, then one fixed normal direction, then the centroid
+        normal = normals[face]
+        return (-outward[face], -normal[0], -normal[1], -normal[2])
+
+    def _wall_order(item: tuple[int, int]) -> tuple[float, float, float, float]:
+        owner = min((face for face in item if face in measured), key=_side_key)
+        centroid = grid.centroids[owner]
+        return (round(-outward[owner], 9), centroid[0], centroid[1], centroid[2])
+
+    mid_vertices: list[Vec3] = []
+    mid_faces: list[Face] = []
+    used: set[int] = set()
+    for wall in sorted(walls, key=_wall_order):
+        # Only the owning facing emits. Falling back to the other facing when the owner
+        # is taken would make the answer depend on which of two walls that share a face
+        # happens to be visited first -- and two walls with the same owner would emit
+        # *the same* mid triangle anyway, so skipping the second loses nothing.
+        owner = min((face for face in wall if face in measured), key=_side_key)
+        if owner in used:
+            continue
+        used.add(owner)
+        offset = _mul(normals[owner], -0.5 * measured[owner].thickness)
+        base = len(mid_vertices)
+        mid_vertices.extend(_add(mesh.vertices[i], offset) for i in mesh.faces[owner])
+        mid_faces.append((base, base + 1, base + 2))
+    return mid_vertices, mid_faces
+
+
 def extract_midsurface(
     mesh: Mesh,
     *,
@@ -331,9 +412,6 @@ def extract_midsurface(
     grid = _FaceGrid(mesh, cell=max(max_thickness, 1e-6 * scale))
     samples: list[ThicknessSample] = []
     unpaired: list[int] = []
-    mid_vertices: list[Vec3] = []
-    mid_faces: list[Face] = []
-    paired_by: dict[int, int] = {}
 
     for index, face in enumerate(mesh.faces):
         normal = grid.normals[index]
@@ -343,7 +421,7 @@ def extract_midsurface(
         normal = _unit(normal)
         inward = _mul(normal, -1.0)
         centroid = grid.centroids[index]
-        best: tuple[float, int] | None = None
+        best: tuple[tuple[float, float, float, float], float, int] | None = None
         for candidate in grid.query(centroid, inward, max_thickness):
             if candidate == index:
                 continue
@@ -354,12 +432,18 @@ def extract_midsurface(
             )
             if hit is None or hit <= 1e-12 * scale:
                 continue
-            if best is None or hit < best[0]:
-                best = (hit, candidate)
+            # Equidistant candidates are the rule rather than the exception on a
+            # symmetric mesh (the facets either side of a sphere's pole ring are
+            # equidistant to round-off), so "the first one the grid listed" is not a
+            # decision: that list is sorted by face index. Rank by distance at the weld
+            # scale first, then by the candidate's own centroid, which is geometry.
+            rank = (round(hit / scale, 12), *grid.centroids[candidate])
+            if best is None or rank < best[0]:
+                best = (rank, hit, candidate)
         if best is None:
             unpaired.append(index)
             continue
-        thickness, partner = best
+        _, thickness, partner = best
         opponent = grid.normals[partner]
         if _norm(opponent) == 0.0:
             unpaired.append(index)
@@ -373,14 +457,8 @@ def extract_midsurface(
                 face=index, partner=partner, thickness=thickness, normal_dot=normal_dot
             )
         )
-        paired_by[index] = partner
-        # One mid triangle per pair: emit only from the lower-numbered face.
-        if index > partner and paired_by.get(partner, index) == index:
-            continue
-        offset = _mul(normal, -0.5 * thickness)
-        base = len(mid_vertices)
-        mid_vertices.extend(_add(mesh.vertices[i], offset) for i in face)
-        mid_faces.append((base, base + 1, base + 2))
+
+    mid_vertices, mid_faces = _emit_mid_triangles(mesh, grid, samples)
 
     tolerance = weld_tolerance if weld_tolerance is not None else 1e-9 * scale
     skin = Mesh(
