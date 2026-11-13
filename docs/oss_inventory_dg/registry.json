@@ -1,0 +1,5846 @@
+{
+ "schema_version": "1.0",
+ "generated_by": "tools/oss_inventory_wave/wave.py build",
+ "generated_at": "2026-11-13T01:51:06+00:00",
+ "domain": "DG",
+ "feature_slug": "FEAT-OSS-INVENTORY-DG",
+ "target_repo": "TensorDG",
+ "target_commit": "281ba5c6cf6777ced440b8df756ad4402287d696",
+ "target_evidence_source": "live_grep",
+ "target_scope": "tensordg/",
+ "tiers": {
+  "T1": "absorb now: method-defining DG/FR/spectral-element implementation whose technique maps onto a live TensorDG gap; reading the upstream source is enough to re-implement, licence is permissive or weak-copyleft",
+  "T2": "reference design: framework/library that carries the enabling machinery (AMR forests, matrix-free kernels, Krylov/IMEX stacks, MPI abstractions); read for design and cross-check numbers, not scheduled for porting",
+  "T3": "context only: adjacent paradigm (e.g. production FVM) or closed/hostile licence; kept for the maturity baseline and benchmark provenance, never for code reuse"
+ },
+ "evidence_policy": {
+  "measured": "metadata.* and feature_paths.* are fetched in this run from the GitHub REST API (repo metadata + one recursive tree at the default branch); source=github_api marks measured values",
+  "curated": "pool.json tier/focus/why and gaps.json refs/upstream_note are curation (curated_knowledge): they were NOT verified by reading the upstream sources in this run; adoption requires a source-reading pass in wave 2",
+  "unresolved": "entries with status=failed keep null metadata and must not be quoted as current project facts; the negative_control entry exists to prove failures are recorded, not dropped",
+  "target_evidence": "every GAP-DG current-state claim is a grep over the target repository at a pinned commit; patterns, hit counts and file:line samples are stored in registry.json (and re-run by `verify`)"
+ },
+ "counts": {
+  "pool_entries": 23,
+  "upstream_repos": 22,
+  "by_tier": {
+   "T1": 13,
+   "T2": 8,
+   "T3": 1
+  },
+  "surveyed_ok": 20,
+  "survey_failed": 2,
+  "not_surveyed": 0,
+  "negative_controls": 1,
+  "negative_controls_recorded_failed": 1,
+  "feature_points": 14,
+  "by_portability": {
+   "port_ok": 5,
+   "adapt_at_file_level": 2,
+   "read_only_reimplement": 3,
+   "read_only_until_resolved": 10,
+   "no_metadata": 2
+  },
+  "gaps": 7,
+  "gaps_evidence_satisfied": 7
+ },
+ "features": [
+  {
+   "id": "F01-basis",
+   "title": "\u6a21\u6001/\u8282\u70b9\u57fa\u4e0e\u6570\u503c\u6c42\u79ef",
+   "signature": "(basis|legendre|quadrature|vandermonde|polynomial|orthonormal)"
+  },
+  {
+   "id": "F02-flux",
+   "title": "\u6570\u503c\u901a\u91cf\uff08Riemann \u6c42\u89e3\u5668\uff09",
+   "signature": "(riemann|hllc|rusanov|flux|upwind|godunov)"
+  },
+  {
+   "id": "F03-limiting",
+   "title": "\u9650\u5236\u5668 / \u6fc0\u6ce2\u6355\u6349",
+   "signature": "(limit|weno|tvd|minmod|tvb|moment|artificial_viscosity)"
+  },
+  {
+   "id": "F04-bound-preserving",
+   "title": "\u4fdd\u754c/\u6b63\u6027\u4fdd\u6301\uff08\u5b50\u5355\u5143\u9650\u754c\uff09",
+   "signature": "(positiv|bound_preserv|bound-preserv|subcell|zhang|convex|mood)"
+  },
+  {
+   "id": "F05-entropy-stable",
+   "title": "\u71b5\u7a33\u5b9a/\u5206\u88c2\u578b\u79bb\u6563",
+   "signature": "(entropy|split_form|split-form|kuscu|esfr|two-point)"
+  },
+  {
+   "id": "F06-adaptivity",
+   "title": "h/p \u81ea\u9002\u5e94\u4e0e\u60ac\u6302\u8282\u70b9",
+   "signature": "(adapt|amr|p4est|hanging|refine|coarsen|octree)"
+  },
+  {
+   "id": "F07-simplex",
+   "title": "\u5355\u7eaf\u5f62\uff08\u4e09\u89d2/\u56db\u9762\u4f53\uff09\u5355\u5143\u4e0e\u7f51\u683c",
+   "signature": "(triangle|tetra|simplex|gmsh|unstructured)"
+  },
+  {
+   "id": "F08-curved",
+   "title": "\u66f2\u7ebf\u5355\u5143/\u7b49\u53c2\u51e0\u4f55",
+   "signature": "(curved|isoparametric|jacobian|nurbs|metric_term)"
+  },
+  {
+   "id": "F09-time-integration",
+   "title": "\u65f6\u95f4\u63a8\u8fdb\uff08SSP-RK / IMEX\uff09",
+   "signature": "(time_integ|ssprk|ssp_rk|rk3|imex|arkode|stepper|ode_solver)"
+  },
+  {
+   "id": "F10-implicit",
+   "title": "\u9690\u5f0f\u6c42\u89e3\uff08Newton-Krylov/\u591a\u91cd\u7f51\u683c/\u9884\u5904\u7406\uff09",
+   "signature": "(newton|gmres|krylov|multigrid|precondition|implicit)"
+  },
+  {
+   "id": "F11-parallel",
+   "title": "\u5e76\u884c\u4e0e\u52a0\u901f\u5668\u540e\u7aef\uff08MPI/GPU\uff09",
+   "signature": "(mpi|kokkos|cuda|hip|gpu|openmp|openacc|device)"
+  },
+  {
+   "id": "F12-error-estimation",
+   "title": "\u540e\u9a8c\u8bef\u5dee\u4f30\u8ba1/\u76ee\u6807\u5bfc\u5411\u81ea\u9002\u5e94",
+   "signature": "(adjoint|dual_weighted|dwr|a_posteriori|error_estimat)"
+  },
+  {
+   "id": "F13-multiphysics",
+   "title": "\u591a\u7269\u7406\uff08NS/Maxwell/\u5f39\u6027/\u6d45\u6c34/\u7b49\u79bb\u5b50\u4f53\uff09",
+   "signature": "(navier|maxwell|elastic|shallow|swe_|plasma|gyrokinetic|mhd|turbulen)"
+  },
+  {
+   "id": "F14-dispersion",
+   "title": "\u8272\u6563/\u8017\u6563\u5206\u6790\u4e0e\u8c31\u6027\u8d28",
+   "signature": "(dispersion|dissipation|eigen|spectrum|spectral_analysis)"
+  }
+ ],
+ "repos": [
+  {
+   "id": "trixi",
+   "repo": "trixi-framework/Trixi.jl",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dgsem",
+    "entropy-stable",
+    "amr-p4est",
+    "shock-capturing",
+    "curved-mesh"
+   ],
+   "why": "Numerically the most complete open DGSEM stack: entropy-conservative/stable split forms, subcell shock capturing, p4est-backed AMR and curved-mesh metrics in one tree.",
+   "gaps": [
+    "GAP-DG-002",
+    "GAP-DG-003",
+    "GAP-DG-004"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Trixi.jl: Adaptive high-order numerical simulations of conservation laws in Julia",
+    "forks": 170,
+    "full_name": "trixi-framework/Trixi.jl",
+    "html_url": "https://github.com/trixi-framework/Trixi.jl",
+    "language": "Julia",
+    "license_spdx": "MIT",
+    "pushed_at": "2026-11-12T23:16:50Z",
+    "stars": 737
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1159,
+    "n_source_paths": 331,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 3,
+     "samples": [
+      "src/solvers/dgsem/basis_gauss_legendre.jl",
+      "src/solvers/dgsem/basis_lobatto_legendre.jl",
+      "src/time_integration/paired_explicit_runge_kutta/polynomial_optimizer.jl"
+     ]
+    },
+    "F02-flux": {
+     "n": 4,
+     "samples": [
+      "src/equations/numerical_fluxes.jl",
+      "src/solvers/dgmulti/flux_differencing.jl",
+      "src/solvers/dgmulti/flux_differencing_compressible_euler.jl"
+     ]
+    },
+    "F03-limiting": {
+     "n": 18,
+     "samples": [
+      "src/callbacks_stage/entropy_bounded_limiter.jl",
+      "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+      "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 25,
+     "samples": [
+      "ext/TrixiConvexECOSExt.jl",
+      "src/callbacks_stage/positivity_liu_zhang.jl",
+      "src/callbacks_stage/positivity_zhang_shu.jl"
+     ]
+    },
+    "F05-entropy-stable": {
+     "n": 9,
+     "samples": [
+      "src/callbacks_stage/entropy_bounded_limiter.jl",
+      "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+      "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+     ]
+    },
+    "F06-adaptivity": {
+     "n": 39,
+     "samples": [
+      "src/auxiliary/p4est.jl",
+      "src/callbacks_step/amr.jl",
+      "src/callbacks_step/amr_dg.jl"
+     ]
+    },
+    "F07-simplex": {
+     "n": 12,
+     "samples": [
+      "src/callbacks_step/time_series_dg_unstructured.jl",
+      "src/meshes/unstructured_mesh.jl",
+      "src/solvers/dgsem_unstructured/containers_2d.jl"
+     ]
+    },
+    "F08-curved": {
+     "n": 1,
+     "samples": [
+      "src/solvers/dgsem_unstructured/mappings_geometry_curved_2d.jl"
+     ]
+    },
+    "F09-time-integration": {
+     "n": 13,
+     "samples": [
+      "src/time_integration/methods_2N.jl",
+      "src/time_integration/methods_3Sstar.jl",
+      "src/time_integration/methods_SSP.jl"
+     ]
+    },
+    "F10-implicit": {
+     "n": 0,
+     "samples": []
+    },
+    "F11-parallel": {
+     "n": 13,
+     "samples": [
+      "ext/TrixiAMDGPUExt.jl",
+      "ext/TrixiCUDACoreExt.jl",
+      "src/auxiliary/mpi.jl"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 14,
+     "samples": [
+      "src/equations/compressible_navier_stokes.jl",
+      "src/equations/compressible_navier_stokes_1d.jl",
+      "src/equations/compressible_navier_stokes_2d.jl"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 3,
+     "samples": [
+      "src/postprocessing/spectral_analysis.jl",
+      "src/postprocessing/spectral_analysis_2d.jl",
+      "src/postprocessing/spectral_analysis_3d.jl"
+     ]
+    }
+   },
+   "licence_class": "permissive",
+   "portability": "port_ok"
+  },
+  {
+   "id": "exadg",
+   "repo": "exadg/exadg",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "matrix-free",
+    "geometric-multigrid",
+    "incompressible-ns",
+    "dg-poisson"
+   ],
+   "why": "Reference matrix-free DG operator evaluation plus geometric multigrid for the elliptic solve - the exact machinery GAP-DG-006 asks for.",
+   "gaps": [
+    "GAP-DG-006"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "ExaDG - High-Order Discontinuous Galerkin for the Exa-Scale",
+    "forks": 55,
+    "full_name": "exadg/exadg",
+    "html_url": "https://github.com/exadg/exadg",
+    "language": "C++",
+    "license_spdx": "GPL-3.0",
+    "pushed_at": "2026-11-12T14:43:25Z",
+    "stars": 194
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1042,
+    "n_source_paths": 662,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 1,
+     "samples": [
+      "include/exadg/operators/quadrature.h"
+     ]
+    },
+    "F02-flux": {
+     "n": 2,
+     "samples": [
+      "include/exadg/postprocessor/normal_flux_calculation.cpp",
+      "include/exadg/postprocessor/normal_flux_calculation.h"
+     ]
+    },
+    "F03-limiting": {
+     "n": 4,
+     "samples": [
+      "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.cpp",
+      "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.h",
+      "include/exadg/incompressible_navier_stokes/spatial_discretization/operators/momentum_operator.cpp"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 4,
+     "samples": [
+      "include/exadg/fluid_structure_interaction/precice/precice_adapter.h",
+      "include/exadg/grid/perform_local_refinements.h",
+      "include/exadg/operators/adaptive_mesh_refinement.h"
+     ]
+    },
+    "F07-simplex": {
+     "n": 1,
+     "samples": [
+      "prototypes/simplex_grids.h"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 61,
+     "samples": [
+      "include/exadg/acoustic_conservation_equations/time_integration/time_int_abm.h",
+      "include/exadg/compressible_navier_stokes/time_integration/time_int_explicit_runge_kutta.cpp",
+      "include/exadg/compressible_navier_stokes/time_integration/time_int_explicit_runge_kutta.h"
+     ]
+    },
+    "F10-implicit": {
+     "n": 51,
+     "samples": [
+      "include/exadg/convection_diffusion/preconditioners/multigrid_preconditioner.cpp",
+      "include/exadg/convection_diffusion/preconditioners/multigrid_preconditioner.h",
+      "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.cpp"
+     ]
+    },
+    "F11-parallel": {
+     "n": 1,
+     "samples": [
+      "include/exadg/utilities/mpi.h"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 218,
+     "samples": [
+      "applications/compressible_navier_stokes/couette/application.h",
+      "applications/compressible_navier_stokes/couette/solver.cpp",
+      "applications/compressible_navier_stokes/euler_vortex/application.h"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 10,
+     "samples": [
+      "include/exadg/incompressible_navier_stokes/postprocessor/kinetic_energy_dissipation_detailed.cpp",
+      "include/exadg/incompressible_navier_stokes/postprocessor/kinetic_energy_dissipation_detailed.h",
+      "include/exadg/postprocessor/kinetic_energy_spectrum.cpp"
+     ]
+    }
+   },
+   "licence_class": "strong_copyleft",
+   "portability": "read_only_reimplement"
+  },
+  {
+   "id": "philip",
+   "repo": "McGillCompAero/PHiLiP",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "hp-adaptive",
+    "fr-cpr",
+    "dwr-error-estimation",
+    "euler-ns"
+   ],
+   "why": "Solver dedicated to hp-adaptation and dual-weighted-residual error estimation on DG/FR discretisations.",
+   "gaps": [
+    "GAP-DG-002",
+    "GAP-DG-007"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "Parallel High-Order Library for PDEs through hp-adaptive Discontinuous Galerkin methods",
+    "forks": 45,
+    "full_name": "McGillCompAero/PHiLiP",
+    "html_url": "https://github.com/McGillCompAero/PHiLiP",
+    "language": "C++",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-09-08T14:26:33Z",
+    "stars": 59
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1071,
+    "n_source_paths": 384,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 5,
+     "samples": [
+      "src/reduced_order/pod_basis_base.h",
+      "src/reduced_order/pod_basis_offline.cpp",
+      "src/reduced_order/pod_basis_offline.h"
+     ]
+    },
+    "F02-flux": {
+     "n": 6,
+     "samples": [
+      "src/numerical_flux/convective_numerical_flux.cpp",
+      "src/numerical_flux/convective_numerical_flux.hpp",
+      "src/numerical_flux/numerical_flux_factory.cpp"
+     ]
+    },
+    "F03-limiting": {
+     "n": 12,
+     "samples": [
+      "src/limiter/bound_preserving_limiter.cpp",
+      "src/limiter/bound_preserving_limiter.h",
+      "src/limiter/bound_preserving_limiter_factory.cpp"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 10,
+     "samples": [
+      "src/flow_solver/flow_solver_cases/positivity_preserving_tests.cpp",
+      "src/flow_solver/flow_solver_cases/positivity_preserving_tests.h",
+      "src/limiter/bound_preserving_limiter.cpp"
+     ]
+    },
+    "F05-entropy-stable": {
+     "n": 4,
+     "samples": [
+      "src/flow_solver/flow_solver_cases/periodic_entropy_tests.cpp",
+      "src/flow_solver/flow_solver_cases/periodic_entropy_tests.h",
+      "src/ode_solver/relaxation_runge_kutta/runge_kutta_store_entropy.cpp"
+     ]
+    },
+    "F06-adaptivity": {
+     "n": 46,
+     "samples": [
+      "src/grid_refinement/field.cpp",
+      "src/grid_refinement/field.h",
+      "src/grid_refinement/gmsh_out.cpp"
+     ]
+    },
+    "F07-simplex": {
+     "n": 4,
+     "samples": [
+      "src/grid_refinement/gmsh_out.cpp",
+      "src/grid_refinement/gmsh_out.h",
+      "src/mesh/gmsh_reader.cpp"
+     ]
+    },
+    "F08-curved": {
+     "n": 11,
+     "samples": [
+      "src/dummy/jacobian_via_dfad_example.cpp",
+      "src/mesh/grids/curved_periodic_grid.cpp",
+      "src/mesh/grids/curved_periodic_grid.hpp"
+     ]
+    },
+    "F09-time-integration": {
+     "n": 50,
+     "samples": [
+      "src/deprecated/ode_solver.cpp",
+      "src/deprecated/ode_solver.h",
+      "src/ode_solver/JFNK_solver/JFNK_solver.cpp"
+     ]
+    },
+    "F10-implicit": {
+     "n": 3,
+     "samples": [
+      "src/ode_solver/implicit_ode_solver.cpp",
+      "src/ode_solver/implicit_ode_solver.h",
+      "src/optimization/kkt_birosghattas_preconditioners.hpp"
+     ]
+    },
+    "F11-parallel": {
+     "n": 0,
+     "samples": []
+    },
+    "F12-error-estimation": {
+     "n": 4,
+     "samples": [
+      "src/functional/adjoint.cpp",
+      "src/functional/adjoint.h",
+      "src/mesh/mesh_adaptation/mesh_error_estimate.cpp"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 16,
+     "samples": [
+      "src/flow_solver/flow_solver_cases/periodic_turbulence.cpp",
+      "src/flow_solver/flow_solver_cases/periodic_turbulence.h",
+      "src/flow_solver/flow_solver_cases/turbulent_airfoil_3D.cpp"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 6,
+     "samples": [
+      "src/dg/artificial_dissipation.cpp",
+      "src/dg/artificial_dissipation.h",
+      "src/dg/artificial_dissipation_factory.cpp"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "flexi",
+   "repo": "flexi-framework/flexi",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dg-compressible",
+    "curved-mesh",
+    "fv-dg-hybrid",
+    "shock-capturing"
+   ],
+   "why": "Engineering-scale DG compressible code on curved hexahedral meshes; the closest analogue of a production CFD DG solver.",
+   "gaps": [
+    "GAP-DG-003",
+    "GAP-DG-004"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "FLEXI: A high order discontinuous Galerkin framework for hyperbolic\u2013parabolic conservation laws",
+    "forks": 77,
+    "full_name": "flexi-framework/flexi",
+    "html_url": "https://github.com/flexi-framework/flexi",
+    "language": "Fortran",
+    "license_spdx": "GPL-3.0",
+    "pushed_at": "2026-11-01T14:24:34Z",
+    "stars": 299
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 976,
+    "n_source_paths": 303,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 5,
+     "samples": [
+      "src/fv/fv_basis.f90",
+      "src/interpolation/basis.f90",
+      "src/interpolation/changeBasis.f90"
+     ]
+    },
+    "F02-flux": {
+     "n": 18,
+     "samples": [
+      "src/dg/fillflux.f90",
+      "src/equations/burgers/flux.f90",
+      "src/equations/burgers/getboundaryflux.f90"
+     ]
+    },
+    "F03-limiting": {
+     "n": 2,
+     "samples": [
+      "src/filter/pplimiter.f90",
+      "src/fv/fv_limiter.f90"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 0,
+     "samples": []
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 4,
+     "samples": [
+      "src/equations/linearscalaradvection/jacobian.f90",
+      "src/equations/navierstokes/jacobian.f90",
+      "src/equations/rans_sa/jacobian.f90"
+     ]
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 4,
+     "samples": [
+      "posti/common/newton/newton.f90",
+      "src/implicit/implicit.f90",
+      "src/implicit/implicit_vars.f90"
+     ]
+    },
+    "F11-parallel": {
+     "n": 2,
+     "samples": [
+      "src/mpi/mpi.f90",
+      "src/mpi/mpi_vars.f90"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 35,
+     "samples": [
+      "posti/dmd/navierstokes/equationDmd.f90",
+      "posti/dmd/navierstokes/equationDmd_vars.f90",
+      "posti/recordpoints/visualize/navierstokes/equationrp.f90"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 1,
+     "samples": [
+      "tools/plot_RitzSpectrum.py"
+     ]
+    }
+   },
+   "licence_class": "strong_copyleft",
+   "portability": "read_only_reimplement"
+  },
+  {
+   "id": "pyfr",
+   "repo": "PyFR/PyFR",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "flux-reconstruction",
+    "gpu-backend",
+    "mpi-decomposition",
+    "euler-ns"
+   ],
+   "why": "Flux-reconstruction DG/FR with pluggable CPU/CUDA/HIP/OpenCL backends - the design template for GAP-DG-005.",
+   "gaps": [
+    "GAP-DG-005"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "develop",
+    "description": "PyFR",
+    "forks": 241,
+    "full_name": "PyFR/PyFR",
+    "html_url": "https://github.com/PyFR/PyFR",
+    "language": "Python",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-12T03:23:04Z",
+    "stars": 585
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 701,
+    "n_source_paths": 253,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 1,
+     "samples": [
+      "pyfr/plugins/postproc/adapters.py"
+     ]
+    },
+    "F07-simplex": {
+     "n": 1,
+     "samples": [
+      "pyfr/readers/gmsh.py"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 2,
+     "samples": [
+      "pyfr/integrators/explicit/steppers.py",
+      "pyfr/integrators/implicit/steppers.py"
+     ]
+    },
+    "F10-implicit": {
+     "n": 16,
+     "samples": [
+      "pyfr/integrators/implicit/__init__.py",
+      "pyfr/integrators/implicit/base.py",
+      "pyfr/integrators/implicit/controllers.py"
+     ]
+    },
+    "F11-parallel": {
+     "n": 44,
+     "samples": [
+      "pyfr/backends/base/generator/gpu.py",
+      "pyfr/backends/cuda/__init__.py",
+      "pyfr/backends/cuda/base.py"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 1,
+     "samples": [
+      "pyfr/plugins/solver/turbulence.py"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "nektar",
+   "repo": "nektar/nektar",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "spectral-hp-element",
+    "tet-mesh",
+    "dg-sem",
+    "mpi"
+   ],
+   "why": "Spectral/hp element framework with genuine simplex (tetrahedral) support and DG/SEM variants in one library. Upstream lives on GitLab (no GitHub mirror), so this wave records it without live metadata.",
+   "gaps": [
+    "GAP-DG-001"
+   ],
+   "status": "failed",
+   "error": "not_on_github (upstream hosted at https://gitlab.com/nektar/nektar); HTTP 404",
+   "metadata": null,
+   "tree": null,
+   "feature_paths": {},
+   "licence_class": "unknown",
+   "portability": "no_metadata"
+  },
+  {
+   "id": "nek5000",
+   "repo": "Nek5000/Nek5000",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "spectral-element",
+    "mpi-scalability",
+    "incompressible-ns",
+    "turbulence"
+   ],
+   "why": "Long-lived massively parallel spectral-element solver; the scalability and turbulence-modelling reference for GAP-DG-005.",
+   "gaps": [
+    "GAP-DG-005"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "our classic",
+    "forks": 267,
+    "full_name": "Nek5000/Nek5000",
+    "html_url": "https://github.com/Nek5000/Nek5000",
+    "language": "Fortran",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-10-04T01:14:21Z",
+    "stars": 493
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 614,
+    "n_source_paths": 378,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 2,
+     "samples": [
+      "core/hrefine.f",
+      "tools/postnek/refine.f"
+     ]
+    },
+    "F07-simplex": {
+     "n": 5,
+     "samples": [
+      "tools/gmsh2nek/gmsh2nek.f90",
+      "tools/gmsh2nek/mod_SIZE.f90",
+      "tools/gmsh2nek/mxm.f"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 1,
+     "samples": [
+      "core/gmres.f"
+     ]
+    },
+    "F11-parallel": {
+     "n": 4,
+     "samples": [
+      "core/byte_mpi.f",
+      "core/comm_mpi.f",
+      "core/mpi_dummy.f"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 9,
+     "samples": [
+      "core/navier0.f",
+      "core/navier1.f",
+      "core/navier2.f"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "nekr",
+   "repo": "Nek5000/nekRS",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "gpu-spectral-element",
+    "matrix-free",
+    "incompressible-ns"
+   ],
+   "why": "GPU-ported successor of Nek5000: shows how a high-order element operator is mapped onto accelerators without rewriting physics.",
+   "gaps": [
+    "GAP-DG-005"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "next generation fast and scalable CFD code",
+    "forks": 129,
+    "full_name": "Nek5000/nekRS",
+    "html_url": "https://github.com/Nek5000/nekRS",
+    "language": "C++",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-05-24T10:31:19Z",
+    "stars": 431
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 14447,
+    "n_source_paths": 8284,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 2,
+     "samples": [
+      "src/core/mesh/meshBasis1D.cpp",
+      "src/core/mesh/meshBasisHex3D.cpp"
+     ]
+    },
+    "F02-flux": {
+     "n": 1,
+     "samples": [
+      "src/core/neknek/fixCoupledSurfaceFlux.cpp"
+     ]
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 17,
+     "samples": [
+      "3rd_party/hypre/src/FEI_mv/femli/mli_amgsa_coarsen1.cxx",
+      "3rd_party/hypre/src/parcsr_ls/par_cgc_coarsen.c",
+      "3rd_party/hypre/src/parcsr_ls/par_coarsen.c"
+     ]
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 87,
+     "samples": [
+      "3rd_party/cvode/include/sunnonlinsol/sunnonlinsol_newton.h",
+      "3rd_party/cvode/src/sunnonlinsol/newton/fmod/fsunnonlinsol_newton_mod.c",
+      "3rd_party/cvode/src/sunnonlinsol/newton/fmod/fsunnonlinsol_newton_mod.f90"
+     ]
+    },
+    "F11-parallel": {
+     "n": 217,
+     "samples": [
+      "3rd_party/adios/bindings/C/adios2/c/adios2_c_adios_mpi.cpp",
+      "3rd_party/adios/bindings/C/adios2/c/adios2_c_io_mpi.cpp",
+      "3rd_party/adios/bindings/CXX11/adios2/cxx11/ADIOSMPI.cpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 2,
+     "samples": [
+      "3rd_party/adios/source/h5vol/H5VolReadWrite.c",
+      "3rd_party/adios/source/h5vol/H5VolReadWrite.h"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 27,
+     "samples": [
+      "3rd_party/hypre/src/FEI_mv/fei-hypre/HYPRE_LSI_mlmaxwell.c",
+      "3rd_party/hypre/src/FEI_mv/fei-hypre/HYPRE_MLMaxwell.h",
+      "3rd_party/hypre/src/FEI_mv/fei-hypre/HYPRE_parcsr_maxwell.c"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 1,
+     "samples": [
+      "3rd_party/nek5000_parRSB/src/eigen.c"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "dune_fem",
+   "repo": "dune-community/dune-fem",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dg-fem",
+    "simplex",
+    "mpi",
+    "python-bindings"
+   ],
+   "why": "DUNE module with DG spaces, simplex grids and MPI; the second independent simplex-DG implementation for cross-checking orders of accuracy. Upstream lives on the DUNE GitLab, so this wave records it without live metadata.",
+   "gaps": [
+    "GAP-DG-001"
+   ],
+   "status": "failed",
+   "error": "not_on_github (upstream hosted at https://gitlab.dune-project.org/dune-fem/dune-fem); HTTP 404",
+   "metadata": null,
+   "tree": null,
+   "feature_paths": {},
+   "licence_class": "unknown",
+   "portability": "no_metadata"
+  },
+  {
+   "id": "ngsolve",
+   "repo": "NGSolve/ngsolve",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "hp-fem-dg",
+    "simplex",
+    "mpi",
+    "python-frontend"
+   ],
+   "why": "hp-adaptive finite element library with DG spaces on simplex meshes, MPI and a Python front end; replaces the unavailable hp3d entry as the hp/simplex reference.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-002"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "  Netgen/NGSolve is a high performance multiphysics finite element software. It is widely used to analyze models from solid mechanics, fluid dynamics and electromagnetics. Due to its flexible Python interface new physical equations and solution algorithms can be implemented easily.",
+    "forks": 103,
+    "full_name": "NGSolve/ngsolve",
+    "html_url": "https://github.com/NGSolve/ngsolve",
+    "language": "C++",
+    "license_spdx": "LGPL-2.1",
+    "pushed_at": "2026-11-12T17:50:49Z",
+    "stars": 594
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1017,
+    "n_source_paths": 537,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 1,
+     "samples": [
+      "fem/polynomials.hpp"
+     ]
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 1,
+     "samples": [
+      "py_tutorials/adaptive.py"
+     ]
+    },
+    "F07-simplex": {
+     "n": 1,
+     "samples": [
+      "py_tutorials/scattering_triangle.py"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 13,
+     "samples": [
+      "comp/preconditioner.cpp",
+      "comp/preconditioner.hpp",
+      "fem/newtonCF.cpp"
+     ]
+    },
+    "F11-parallel": {
+     "n": 54,
+     "samples": [
+      "bem/l2p_gpu_kernel.h",
+      "bem/m2l_fused_gpu_kernel.h",
+      "bem/mptools_device.cpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 5,
+     "samples": [
+      "fem/elasticity_equations.hpp",
+      "fem/maxwellintegrator.cpp",
+      "py_tutorials/elasticity.py"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 5,
+     "samples": [
+      "basiclinalg/eigensystem.cpp",
+      "basiclinalg/eigensystem.hpp",
+      "linalg/eigen.cpp"
+     ]
+    }
+   },
+   "licence_class": "weak_copyleft",
+   "portability": "adapt_at_file_level"
+  },
+  {
+   "id": "mfem",
+   "repo": "mfem/mfem",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "arbitrary-order-fem-dg",
+    "simplex",
+    "gpu",
+    "amr",
+    "subcell-limiter"
+   ],
+   "why": "Library-grade high-order FEM/DG with simplex meshes, partial-assembly GPU kernels, AMR and a published subcell limiter example.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-004",
+    "GAP-DG-005"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "Lightweight, general, scalable C++ library for finite element methods",
+    "forks": 670,
+    "full_name": "mfem/mfem",
+    "html_url": "https://github.com/mfem/mfem",
+    "language": "C++",
+    "license_spdx": "BSD-3-Clause",
+    "pushed_at": "2026-11-13T01:30:39Z",
+    "stars": 2291
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1602,
+    "n_source_paths": 819,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 6,
+     "samples": [
+      "fem/ceed/interface/basis.cpp",
+      "fem/ceed/interface/basis.hpp",
+      "fem/eltrans/eltrans_basis.hpp"
+     ]
+    },
+    "F02-flux": {
+     "n": 1,
+     "samples": [
+      "fem/integ/lininteg_boundary_flux.cpp"
+     ]
+    },
+    "F03-limiting": {
+     "n": 10,
+     "samples": [
+      "fem/tmop/assemble/diag2_limit.cpp",
+      "fem/tmop/assemble/diag3_limit.cpp",
+      "fem/tmop/assemble/grad2_limit.cpp"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 2,
+     "samples": [
+      "fem/tmop_amr.cpp",
+      "fem/tmop_amr.hpp"
+     ]
+    },
+    "F07-simplex": {
+     "n": 5,
+     "samples": [
+      "mesh/gmsh.cpp",
+      "mesh/tetrahedron.cpp",
+      "mesh/tetrahedron.hpp"
+     ]
+    },
+    "F08-curved": {
+     "n": 21,
+     "samples": [
+      "fem/fe/fe_nurbs.cpp",
+      "fem/fe/fe_nurbs.hpp",
+      "mesh/ncnurbs.cpp"
+     ]
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 6,
+     "samples": [
+      "fem/multigrid.cpp",
+      "fem/multigrid.hpp",
+      "miniapps/dpg/util/preconditioners.cpp"
+     ]
+    },
+    "F11-parallel": {
+     "n": 8,
+     "samples": [
+      "general/cuda.cpp",
+      "general/cuda.hpp",
+      "general/device.cpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 2,
+     "samples": [
+      "miniapps/adjoint/adjoint_advection_diffusion.cpp",
+      "miniapps/adjoint/cvsRoberts_ASAi_dns.cpp"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 31,
+     "samples": [
+      "fem/integ/bilininteg_elasticity_ea.cpp",
+      "fem/integ/bilininteg_elasticity_kernels.cpp",
+      "fem/integ/bilininteg_elasticity_kernels.hpp"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "permissive",
+   "portability": "port_ok"
+  },
+  {
+   "id": "dealii",
+   "repo": "dealii/dealii",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "hp-fem-dg",
+    "simplex",
+    "mpi",
+    "matrix-free",
+    "error-estimation"
+   ],
+   "why": "Benchmark of engineering quality for hp-adaptive finite elements including DG, simplex meshes, MPI and matrix-free operator loops.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-002",
+    "GAP-DG-006"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "The development repository for the deal.II finite element library",
+    "forks": 873,
+    "full_name": "dealii/dealii",
+    "html_url": "https://github.com/dealii/dealii",
+    "language": "C++",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-12T08:10:31Z",
+    "stars": 1758
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 34780,
+    "n_source_paths": 17539,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 141,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/math/interpolators/bezier_polynomial.hpp",
+      "bundled/boost-1.84.0/include/boost/math/interpolators/detail/bezier_polynomial_detail.hpp",
+      "bundled/boost-1.84.0/include/boost/math/quadrature/detail/exp_sinh_detail.hpp"
+     ]
+    },
+    "F02-flux": {
+     "n": 6,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/units/physical_dimensions/luminous_flux.hpp",
+      "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux.hpp",
+      "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux_density.hpp"
+     ]
+    },
+    "F03-limiting": {
+     "n": 182,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/accumulators/statistics/moment.hpp",
+      "bundled/boost-1.84.0/include/boost/accumulators/statistics/rolling_moment.hpp",
+      "bundled/boost-1.84.0/include/boost/accumulators/statistics/weighted_moment.hpp"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 18,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/geometry/algorithms/convex_hull.hpp",
+      "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/graham_andrew.hpp",
+      "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/interface.hpp"
+     ]
+    },
+    "F05-entropy-stable": {
+     "n": 2,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/uuid/detail/random_provider_getentropy.ipp",
+      "bundled/boost-1.84.0/include/boost/uuid/entropy_error.hpp"
+     ]
+    },
+    "F06-adaptivity": {
+     "n": 343,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor.hpp",
+      "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor_forward.hpp",
+      "bundled/boost-1.84.0/include/boost/asio/detail/buffer_sequence_adapter.hpp"
+     ]
+    },
+    "F07-simplex": {
+     "n": 11,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/geometry/strategies/cartesian/side_by_triangle.hpp",
+      "bundled/boost-1.84.0/include/boost/geometry/strategy/cartesian/side_by_triangle.hpp",
+      "bundled/boost-1.84.0/include/boost/random/triangle_distribution.hpp"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 65,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth.hpp",
+      "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth_moulton.hpp",
+      "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_moulton.hpp"
+     ]
+    },
+    "F10-implicit": {
+     "n": 70,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/contract/core/constructor_precondition.hpp",
+      "bundled/boost-1.84.0/include/boost/hof/implicit.hpp",
+      "bundled/boost-1.84.0/include/boost/implicit_cast.hpp"
+     ]
+    },
+    "F11-parallel": {
+     "n": 827,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/asio/execution/relationship.hpp",
+      "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_on_device.hpp",
+      "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_to_device.hpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 5,
+     "samples": [
+      "include/deal.II/numerics/error_estimator.h",
+      "include/deal.II/numerics/error_estimator.templates.h",
+      "source/numerics/error_estimator_1d.cc"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 7,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/statechart/shallow_history.hpp",
+      "include/deal.II/integrators/elasticity.h",
+      "include/deal.II/integrators/maxwell.h"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 4,
+     "samples": [
+      "bundled/boost-1.84.0/include/boost/compute/interop/eigen.hpp",
+      "bundled/boost-1.84.0/include/boost/compute/interop/eigen/core.hpp",
+      "bundled/boost-1.84.0/include/boost/multiprecision/eigen.hpp"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "gkeyll",
+   "repo": "gkeyllorg/gkeyll",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dg-kinetic",
+    "dg-fluid",
+    "positivity",
+    "structured-mesh"
+   ],
+   "why": "DG used as a production method outside CFD (plasma/kinetic): independent evidence of which DG extras are load-bearing in practice.",
+   "gaps": [
+    "GAP-DG-004"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "The Gkeyll Computational Plasma Physics Package",
+    "forks": 26,
+    "full_name": "gkeyllorg/gkeyll",
+    "html_url": "https://github.com/gkeyllorg/gkeyll",
+    "language": "C",
+    "license_spdx": "MIT",
+    "pushed_at": "2026-11-12T23:11:09Z",
+    "stars": 121
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 7967,
+    "n_source_paths": 6407,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 300,
+     "samples": [
+      "core/ker/basis/basis_eval_gkhyb.c",
+      "core/ker/basis/basis_eval_gkhyb_vel.c",
+      "core/ker/basis/basis_eval_hyb.c"
+     ]
+    },
+    "F02-flux": {
+     "n": 1146,
+     "samples": [
+      "core/ker/basis/gkyl_basis_gkhyb_1x1v_p1_upwind_quad_to_modal.h",
+      "core/ker/basis/gkyl_basis_gkhyb_1x2v_p1_upwind_quad_to_modal.h",
+      "core/ker/basis/gkyl_basis_gkhyb_2x2v_p1_upwind_quad_to_modal.h"
+     ]
+    },
+    "F03-limiting": {
+     "n": 543,
+     "samples": [
+      "gyrokinetic/apps/gk_neut_species_moment.c",
+      "gyrokinetic/apps/gk_species_moment.c",
+      "gyrokinetic/ker/lbo_gyrokinetic/gyrokinetic_cross_prim_moments_1x1v_ser_p1.c"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 14,
+     "samples": [
+      "gyrokinetic/apps/gk_species_positivity.c",
+      "gyrokinetic/ker/positivity_shift_gyrokinetic/gkyl_positivity_shift_gyrokinetic_kernels.h",
+      "gyrokinetic/ker/positivity_shift_gyrokinetic/positivity_shift_gyrokinetic_1x1v_ser_p1.c"
+     ]
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 53,
+     "samples": [
+      "gyrokinetic/creg/rt_gk_helical_adapt_src_sheath_surr_2x2v_p1.c",
+      "gyrokinetic/creg/rt_gk_helical_adapt_src_sheath_surr_3x2v_p1.c",
+      "gyrokinetic/creg/rt_gk_tcv_iwl_adapt_source_2x2v_p1.c"
+     ]
+    },
+    "F07-simplex": {
+     "n": 38,
+     "samples": [
+      "moments/creg/rt_gr_bhl_spinning_tetrad.c",
+      "moments/creg/rt_gr_bhl_static_tetrad.c",
+      "moments/creg/rt_gr_bz_monopole_fast_tetrad.c"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 5,
+     "samples": [
+      "gyrokinetic/apps/gyrokinetic_multib_update_ssp_rk3.c",
+      "gyrokinetic/apps/gyrokinetic_update_ssp_rk3.c",
+      "moments/apps/mom_update_ssp_rk.c"
+     ]
+    },
+    "F10-implicit": {
+     "n": 5,
+     "samples": [
+      "gyrokinetic/apps/gyrokinetic_update_implicit_coll.c",
+      "moments/zero/gkyl_sources_implicit_priv.h",
+      "moments/zero/sources_implicit.c"
+     ]
+    },
+    "F11-parallel": {
+     "n": 21,
+     "samples": [
+      "core/creg/rt_kann_gpu_cpu_verify.c",
+      "core/unit/mctest_mpi_comm.c",
+      "core/unit/mctest_mpi_comm_read.c"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 1367,
+     "samples": [
+      "core/ker/dg_interpolate/dg_interpolate_gyrokinetic_1x1v_ser_p1.c",
+      "core/ker/dg_interpolate/dg_interpolate_gyrokinetic_1x1v_ser_p2.c",
+      "core/ker/dg_interpolate/dg_interpolate_gyrokinetic_1x2v_ser_p1.c"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 7,
+     "samples": [
+      "vlasov/zero/bc_emission_spectrum.c",
+      "vlasov/zero/bc_emission_spectrum_cu.cu",
+      "vlasov/zero/emission_spectrum_model.c"
+     ]
+    }
+   },
+   "licence_class": "permissive",
+   "portability": "port_ok"
+  },
+  {
+   "id": "p4est",
+   "repo": "cburstedde/p4est",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "amr-forest",
+    "octree",
+    "hanging-node",
+    "mpi"
+   ],
+   "why": "The de-facto AMR forest-of-octrees library: 2:1 balance, hanging-node interfaces and partition-independent iteration numbers.",
+   "gaps": [
+    "GAP-DG-002"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "The \"p4est\" forest-of-octrees library ",
+    "forks": 130,
+    "full_name": "cburstedde/p4est",
+    "html_url": "https://github.com/cburstedde/p4est",
+    "language": "C",
+    "license_spdx": "GPL-2.0",
+    "pushed_at": "2026-11-11T09:14:18Z",
+    "stars": 321
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 484,
+    "n_source_paths": 109,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 49,
+     "samples": [
+      "src/p4est.c",
+      "src/p4est.h",
+      "src/p4est_algorithms.c"
+     ]
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 0,
+     "samples": []
+    },
+    "F11-parallel": {
+     "n": 0,
+     "samples": []
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "strong_copyleft",
+   "portability": "read_only_reimplement"
+  },
+  {
+   "id": "amrex",
+   "repo": "AMReX-Codes/amrex",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "block-structured-amr",
+    "gpu",
+    "mpi",
+    "flux-registers"
+   ],
+   "why": "Block-structured AMR + GPU abstraction with conservative refluxing; the machinery a DG AMR needs around the element kernel.",
+   "gaps": [
+    "GAP-DG-002",
+    "GAP-DG-005"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "development",
+    "description": "AMReX: Software Framework for Block Structured AMR",
+    "forks": 500,
+    "full_name": "AMReX-Codes/amrex",
+    "html_url": "https://github.com/AMReX-Codes/amrex",
+    "language": "C++",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-12T23:55:57Z",
+    "stars": 832
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 2478,
+    "n_source_paths": 823,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 1,
+     "samples": [
+      "Src/EB/AMReX_EB2_IF_Polynomial.H"
+     ]
+    },
+    "F02-flux": {
+     "n": 26,
+     "samples": [
+      "Src/AmrCore/AMReX_FluxReg_1D_C.H",
+      "Src/AmrCore/AMReX_FluxReg_2D_C.H",
+      "Src/AmrCore/AMReX_FluxReg_3D_C.H"
+     ]
+    },
+    "F03-limiting": {
+     "n": 1,
+     "samples": [
+      "Src/EB/AMReX_EB_StateRedistSlopeLimiter_K.H"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 766,
+     "samples": [
+      "Src/Amr/AMReX_Amr.H",
+      "Src/Amr/AMReX_Amr.cpp",
+      "Src/Amr/AMReX_AmrFwd.H"
+     ]
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 6,
+     "samples": [
+      "Src/F_Interfaces/LinearSolvers/AMReX_multigrid_fi.cpp",
+      "Src/F_Interfaces/LinearSolvers/AMReX_multigrid_mod.F90",
+      "Src/LinearSolvers/AMReX_GMRES.H"
+     ]
+    },
+    "F11-parallel": {
+     "n": 47,
+     "samples": [
+      "Src/Base/AMReX_CudaGraph.H",
+      "Src/Base/AMReX_Gpu.H",
+      "Src/Base/AMReX_GpuAllocators.H"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "parthenon",
+   "repo": "parthenon-hpc-lab/parthenon",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "amr-framework",
+    "dg-support",
+    "kokkos",
+    "tasking"
+   ],
+   "why": "Performance-portable AMR framework that already carries a DG (and FV) physics driver, i.e. a worked example of DG-on-AMR.",
+   "gaps": [
+    "GAP-DG-002"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "develop",
+    "description": "Parthenon AMR infrastructure ",
+    "forks": 49,
+    "full_name": "parthenon-hpc-lab/parthenon",
+    "html_url": "https://github.com/parthenon-hpc-lab/parthenon",
+    "language": "C++",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-13T01:35:36Z",
+    "stars": 175
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 676,
+    "n_source_paths": 370,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 1,
+     "samples": [
+      "src/loop_abstraction/flux_view.hpp"
+     ]
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 12,
+     "samples": [
+      "src/amr_criteria/amr_criteria.cpp",
+      "src/amr_criteria/amr_criteria.hpp",
+      "src/amr_criteria/refinement_package.cpp"
+     ]
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 4,
+     "samples": [
+      "src/time_integration/butcher_integrator.cpp",
+      "src/time_integration/low_storage_integrator.cpp",
+      "src/time_integration/staged_integrator.cpp"
+     ]
+    },
+    "F10-implicit": {
+     "n": 2,
+     "samples": [
+      "src/batched_linear_algebra/implicit_qr.hpp",
+      "tst/unit/test_implicit_qr.cpp"
+     ]
+    },
+    "F11-parallel": {
+     "n": 10,
+     "samples": [
+      "src/interface/swarm_device_context.hpp",
+      "src/kokkos_abstraction.hpp",
+      "src/kokkos_types.hpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 3,
+     "samples": [
+      "src/outputs/spectrum.cpp",
+      "src/utils/calc_spectrum.cpp",
+      "src/utils/calc_spectrum.hpp"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "libceed",
+   "repo": "CEED/libCEED",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "matrix-free-kernels",
+    "gpu",
+    "p-multigrid",
+    "high-order"
+   ],
+   "why": "Matrix-free operator kernels for high-order elements including p-multigrid; the cheapest route to GAP-DG-006 preconditioning.",
+   "gaps": [
+    "GAP-DG-005",
+    "GAP-DG-006"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "CEED Library: Code for Efficient Extensible Discretizations",
+    "forks": 85,
+    "full_name": "CEED/libCEED",
+    "html_url": "https://github.com/CEED/libCEED",
+    "language": "C",
+    "license_spdx": "BSD-2-Clause",
+    "pushed_at": "2026-11-12T19:33:21Z",
+    "stars": 273
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1251,
+    "n_source_paths": 375,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 56,
+     "samples": [
+      "backends/cuda-cublas/ceed-cuda-cublas-basis.c",
+      "backends/cuda-ref/ceed-cuda-ref-basis.c",
+      "backends/cuda-shared/ceed-cuda-shared-basis.c"
+     ]
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 0,
+     "samples": []
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 1,
+     "samples": [
+      "interface/ceed-preconditioning.c"
+     ]
+    },
+    "F11-parallel": {
+     "n": 122,
+     "samples": [
+      "backends/ceed-backend-list-cuda.h",
+      "backends/ceed-backend-list-hip.h",
+      "backends/cpu-gen/ceed-cpu-compile.cpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "permissive",
+   "portability": "port_ok"
+  },
+  {
+   "id": "petsc",
+   "repo": "petsc/petsc",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "newton-krylov",
+    "multigrid",
+    "dmpatch",
+    "mpi"
+   ],
+   "why": "Newton-Krylov + multigrid stack (SNES/PC) that an implicit DG solver would delegate to instead of growing its own.",
+   "gaps": [
+    "GAP-DG-006"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Mirror of https://gitlab.com/petsc/petsc",
+    "forks": 219,
+    "full_name": "petsc/petsc",
+    "html_url": "https://github.com/petsc/petsc",
+    "language": "C",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-12T21:15:10Z",
+    "stars": 550
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 11548,
+    "n_source_paths": 2711,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 3,
+     "samples": [
+      "lib/petsc/bin/maint/petscdt_create_quadrature_headers.py",
+      "src/ksp/ksp/utils/lmvm/lmbasis.c",
+      "src/ksp/ksp/utils/lmvm/lmbasis.h"
+     ]
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 47,
+     "samples": [
+      "config/BuildSystem/config/packages/AMReX.py",
+      "config/BuildSystem/config/packages/SAMRAI.py",
+      "config/BuildSystem/config/packages/p4est.py"
+     ]
+    },
+    "F07-simplex": {
+     "n": 6,
+     "samples": [
+      "config/BuildSystem/config/packages/Triangle.py",
+      "config/BuildSystem/config/packages/gmsh.py",
+      "src/dm/impls/plex/generators/triangle/trigenerate.c"
+     ]
+    },
+    "F08-curved": {
+     "n": 1,
+     "samples": [
+      "src/tao/leastsquares/tutorials/matlab/more_wild_probs/jacobian.m"
+     ]
+    },
+    "F09-time-integration": {
+     "n": 8,
+     "samples": [
+      "src/ts/impls/arkimex/arkimex.c",
+      "src/ts/impls/arkimex/arkimex.h",
+      "src/ts/impls/arkimex/fsarkimex.c"
+     ]
+    },
+    "F10-implicit": {
+     "n": 31,
+     "samples": [
+      "src/ksp/ksp/impls/gmres/dgmres/dgmres.c",
+      "src/ksp/ksp/impls/gmres/dgmres/dgmresimpl.h",
+      "src/ksp/ksp/impls/gmres/fgmres/fgmres.c"
+     ]
+    },
+    "F11-parallel": {
+     "n": 209,
+     "samples": [
+      "config/BuildSystem/config/compile/C.py",
+      "config/BuildSystem/config/compile/CUDA.py",
+      "config/BuildSystem/config/compile/Cxx.py"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 2,
+     "samples": [
+      "src/tao/unconstrained/tutorials/adjointreads.m",
+      "src/tao/unconstrained/tutorials/spectraladjointassimilation.c"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 2,
+     "samples": [
+      "src/sys/classes/draw/utils/cmap/plasma.h",
+      "src/tao/unconstrained/tutorials/elastic_net_regularization.c"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 1,
+     "samples": [
+      "config/BuildSystem/config/packages/Eigen.py"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "sundials",
+   "repo": "LLNL/sundials",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "imex-arkode",
+    "bdf",
+    "nonlinear-solvers"
+   ],
+   "why": "ARKODE IMEX/ARK integrators with embedded error control: the reference design for adding IMEX to an explicit-only DG stepper.",
+   "gaps": [
+    "GAP-DG-006"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Official development repository for SUNDIALS - a SUite of Nonlinear and DIfferential/ALgebraic equation Solvers. Pull requests are welcome for bug fixes and minor changes.",
+    "forks": 179,
+    "full_name": "llnl/sundials",
+    "html_url": "https://github.com/llnl/sundials",
+    "language": "C",
+    "license_spdx": "BSD-3-Clause",
+    "pushed_at": "2026-11-13T01:07:56Z",
+    "stars": 706
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 3731,
+    "n_source_paths": 692,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 31,
+     "samples": [
+      "bindings/sundials4py/sunadaptcontroller/sunadaptcontroller_imexgus.cpp",
+      "bindings/sundials4py/sunadaptcontroller/sunadaptcontroller_imexgus_generated.hpp",
+      "bindings/sundials4py/sunadaptcontroller/sunadaptcontroller_mrihtol.cpp"
+     ]
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 152,
+     "samples": [
+      "bindings/sundials4py/arkode/arkode.cpp",
+      "bindings/sundials4py/arkode/arkode_arkstep.cpp",
+      "bindings/sundials4py/arkode/arkode_arkstep_generated.hpp"
+     ]
+    },
+    "F10-implicit": {
+     "n": 8,
+     "samples": [
+      "bindings/sundials4py/sunnonlinsol/sunnonlinsol_newton.cpp",
+      "bindings/sundials4py/sunnonlinsol/sunnonlinsol_newton_generated.hpp",
+      "include/sunnonlinsol/sunnonlinsol_newton.h"
+     ]
+    },
+    "F11-parallel": {
+     "n": 47,
+     "samples": [
+      "bindings/sundials4py/nvector/nvector_cuda.cpp",
+      "bindings/sundials4py/nvector/nvector_cuda_generated.hpp",
+      "bindings/sundials4py/sunmemory/sunmemory_cuda.cpp"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 20,
+     "samples": [
+      "bindings/sundials4py/sunadjointcheckpointscheme/sunadjointcheckpointscheme_fixed.cpp",
+      "bindings/sundials4py/sunadjointcheckpointscheme/sunadjointcheckpointscheme_fixed_generated.hpp",
+      "bindings/sundials4py/sundials/sundials_adjointcheckpointscheme.cpp"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "permissive",
+   "portability": "port_ok"
+  },
+  {
+   "id": "dolfinx",
+   "repo": "FEniCS/dolfinx",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "dg-fem",
+    "simplex",
+    "mpi",
+    "python-frontend"
+   ],
+   "why": "Modern MPI-parallel Python FEM with first-class DG spaces on simplex meshes; the interface idiom for GAP-DG-001 in a Python codebase.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-005"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Next generation FEniCS problem solving environment for solving finite element problems",
+    "forks": 263,
+    "full_name": "FEniCS/dolfinx",
+    "html_url": "https://github.com/FEniCS/dolfinx",
+    "language": "C++",
+    "license_spdx": "LGPL-3.0",
+    "pushed_at": "2026-11-11T14:16:04Z",
+    "stars": 1249
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 527,
+    "n_source_paths": 207,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 0,
+     "samples": []
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 13,
+     "samples": [
+      "cpp/dolfinx/refinement/dolfinx_refinement.h",
+      "cpp/dolfinx/refinement/interval.h",
+      "cpp/dolfinx/refinement/mark.h"
+     ]
+    },
+    "F07-simplex": {
+     "n": 1,
+     "samples": [
+      "python/dolfinx/io/gmsh.py"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 0,
+     "samples": []
+    },
+    "F11-parallel": {
+     "n": 4,
+     "samples": [
+      "cpp/dolfinx/common/MPI.cpp",
+      "cpp/dolfinx/common/MPI.h",
+      "python/dolfinx/wrappers/dolfinx_wrappers/caster_mpi.h"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 0,
+     "samples": []
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 0,
+     "samples": []
+    }
+   },
+   "licence_class": "weak_copyleft",
+   "portability": "adapt_at_file_level"
+  },
+  {
+   "id": "firedrake",
+   "repo": "firedrakeproject/firedrake",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "dg-fem",
+    "adjoint",
+    "goal-oriented-error",
+    "mpi"
+   ],
+   "why": "FEM with integrated adjoint (pyadjoint) machinery, i.e. the plumbing behind dual-weighted-residual estimation.",
+   "gaps": [
+    "GAP-DG-007"
+   ],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Firedrake is an automated system for the portable solution of partial differential equations using the finite element method (FEM)",
+    "forks": 204,
+    "full_name": "firedrakeproject/firedrake",
+    "html_url": "https://github.com/firedrakeproject/firedrake",
+    "language": "Python",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-13T01:31:40Z",
+    "stars": 682
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 1143,
+    "n_source_paths": 241,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 0,
+     "samples": []
+    },
+    "F02-flux": {
+     "n": 0,
+     "samples": []
+    },
+    "F03-limiting": {
+     "n": 3,
+     "samples": [
+      "firedrake/slope_limiter/__init__.py",
+      "firedrake/slope_limiter/limiter.py",
+      "firedrake/slope_limiter/vertex_based_limiter.py"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 0,
+     "samples": []
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 1,
+     "samples": [
+      "firedrake/adapt.py"
+     ]
+    },
+    "F07-simplex": {
+     "n": 0,
+     "samples": []
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 19,
+     "samples": [
+      "firedrake/preconditioners/__init__.py",
+      "firedrake/preconditioners/asm.py",
+      "firedrake/preconditioners/assembled.py"
+     ]
+    },
+    "F11-parallel": {
+     "n": 14,
+     "samples": [
+      "firedrake/cython/mpi-compat.h",
+      "firedrake/preconditioners/hiptmair.py",
+      "firedrake/slate/slac/compiler.py"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 24,
+     "samples": [
+      "firedrake/adjoint/__init__.py",
+      "firedrake/adjoint/covariance_operator.py",
+      "firedrake/adjoint/ensemble_reduced_functional.py"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 0,
+     "samples": []
+    },
+    "F14-dispersion": {
+     "n": 1,
+     "samples": [
+      "firedrake/eigensolver.py"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "openfoam",
+   "repo": "OpenFOAM/OpenFOAM-dev",
+   "tier": "T3",
+   "role": "upstream",
+   "focus": [
+    "production-fvm",
+    "second-order-baseline",
+    "case-library"
+   ],
+   "why": "Production FVM baseline: not a DG source, but the maturity/verification bar any DG result has to beat in engineering practice.",
+   "gaps": [],
+   "status": "ok",
+   "error": null,
+   "metadata": {
+    "archived": false,
+    "default_branch": "master",
+    "description": "OpenFOAM Foundation development repository",
+    "forks": 743,
+    "full_name": "OpenFOAM/OpenFOAM-dev",
+    "html_url": "https://github.com/OpenFOAM/OpenFOAM-dev",
+    "language": "C++",
+    "license_spdx": "NOASSERTION",
+    "pushed_at": "2026-11-12T23:03:05Z",
+    "stars": 2306
+   },
+   "tree": {
+    "error": null,
+    "n_blobs": 17878,
+    "n_source_paths": 9311,
+    "status": "ok"
+   },
+   "feature_paths": {
+    "F01-basis": {
+     "n": 46,
+     "samples": [
+      "applications/modules/multiphaseEuler/phaseSystem/interfacialModels/liftModels/LegendreMagnaudet/LegendreMagnaudet.C",
+      "applications/modules/multiphaseEuler/phaseSystem/interfacialModels/liftModels/LegendreMagnaudet/LegendreMagnaudet.H",
+      "src/OpenFOAM/primitives/functions/FixedLaurentPolynomial/FixedLaurentPolynomial.C"
+     ]
+    },
+    "F02-flux": {
+     "n": 116,
+     "samples": [
+      "applications/modules/incompressibleDriftFlux/alphaSuSp.C",
+      "applications/modules/incompressibleDriftFlux/incompressibleDriftFlux.C",
+      "applications/modules/incompressibleDriftFlux/incompressibleDriftFlux.H"
+     ]
+    },
+    "F03-limiting": {
+     "n": 546,
+     "samples": [
+      "applications/modules/VoFSolver/momentumPredictor.C",
+      "applications/modules/XiFluid/ubMomentumTransportModel/ubMomentumTransportModel.C",
+      "applications/modules/XiFluid/ubMomentumTransportModel/ubMomentumTransportModel.H"
+     ]
+    },
+    "F04-bound-preserving": {
+     "n": 2,
+     "samples": [
+      "src/MomentumTransportModels/phaseCompressible/LES/SmagorinskyZhang/SmagorinskyZhang.C",
+      "src/MomentumTransportModels/phaseCompressible/LES/SmagorinskyZhang/SmagorinskyZhang.H"
+     ]
+    },
+    "F05-entropy-stable": {
+     "n": 0,
+     "samples": []
+    },
+    "F06-adaptivity": {
+     "n": 141,
+     "samples": [
+      "applications/solvers/foamRun/foamRun.C",
+      "applications/solvers/foamRun/setDeltaT.C",
+      "applications/solvers/foamRun/setDeltaT.H"
+     ]
+    },
+    "F07-simplex": {
+     "n": 21,
+     "samples": [
+      "applications/utilities/mesh/conversion/fluentMeshToFoam/extrudedTriangleCellShape.C",
+      "applications/utilities/mesh/conversion/gmshToFoam/gmshToFoam.C",
+      "applications/utilities/mesh/conversion/vtkUnstructuredToFoam/vtkUnstructuredToFoam.C"
+     ]
+    },
+    "F08-curved": {
+     "n": 0,
+     "samples": []
+    },
+    "F09-time-integration": {
+     "n": 0,
+     "samples": []
+    },
+    "F10-implicit": {
+     "n": 49,
+     "samples": [
+      "src/Lagrangian/Lagrangian/Lagrangian/LagrangianSpSchemes/implicit/implicit_LagrangianSpScheme.C",
+      "src/Lagrangian/Lagrangian/Lagrangian/LagrangianSpSchemes/implicit/implicit_LagrangianSpScheme.H",
+      "src/Lagrangian/Lagrangian/Lagrangian/LagrangianSpSchemes/implicit/implicit_LagrangianSpSchemes.C"
+     ]
+    },
+    "F11-parallel": {
+     "n": 46,
+     "samples": [
+      "applications/modules/compressibleVoF/fvModels/VoFTurbulenceDamping/VoFTurbulenceDamping.C",
+      "applications/modules/compressibleVoF/fvModels/VoFTurbulenceDamping/VoFTurbulenceDamping.H",
+      "applications/modules/incompressibleVoF/fvModels/VoFTurbulenceDamping/VoFTurbulenceDamping.C"
+     ]
+    },
+    "F12-error-estimation": {
+     "n": 11,
+     "samples": [
+      "applications/legacy/incompressible/adjointShapeOptimisationFoam/adjointContinuityErrs.H",
+      "applications/legacy/incompressible/adjointShapeOptimisationFoam/adjointOutletPressure/adjointOutletPressureFvPatchScalarField.C",
+      "applications/legacy/incompressible/adjointShapeOptimisationFoam/adjointOutletPressure/adjointOutletPressureFvPatchScalarField.H"
+     ]
+    },
+    "F13-multiphysics": {
+     "n": 101,
+     "samples": [
+      "applications/legacy/combustion/PDRFoam/PDRModels/turbulence/PDRkEpsilon/PDRkEpsilon.C",
+      "applications/legacy/combustion/PDRFoam/PDRModels/turbulence/PDRkEpsilon/PDRkEpsilon.H",
+      "applications/legacy/electromagnetics/mhdFoam/createControl.H"
+     ]
+    },
+    "F14-dispersion": {
+     "n": 45,
+     "samples": [
+      "applications/modules/incompressibleDriftFlux/packingDispersionModels/DeClercq/DeClercq.C",
+      "applications/modules/incompressibleDriftFlux/packingDispersionModels/DeClercq/DeClercq.H",
+      "applications/modules/incompressibleDriftFlux/packingDispersionModels/Green/Green.C"
+     ]
+    }
+   },
+   "licence_class": "unresolved",
+   "portability": "read_only_until_resolved"
+  },
+  {
+   "id": "negctl",
+   "repo": "tp-agent/dg-negative-control-does-not-exist",
+   "tier": "T3",
+   "role": "negative_control",
+   "focus": [
+    "negative-control"
+   ],
+   "why": "Deliberately unreachable: proves the census records fetch failures instead of silently dropping entries.",
+   "gaps": [],
+   "status": "failed",
+   "error": "HTTP 404",
+   "metadata": null,
+   "tree": null,
+   "feature_paths": {},
+   "licence_class": "unknown",
+   "portability": "no_metadata"
+  }
+ ],
+ "gaps": [
+  {
+   "id": "GAP-DG-001",
+   "title": "\u975e\u7ed3\u6784\u5355\u7eaf\u5f62\uff08\u4e09\u89d2/\u56db\u9762\u4f53\uff09\u5355\u5143\u4e0e\u7f51\u683c\u62d3\u6251",
+   "priority": "P0",
+   "effort": "L",
+   "feature_points": [
+    "F07-simplex",
+    "F01-basis"
+   ],
+   "status": "absent",
+   "current_state": "\u5168\u90e8 DG \u7b97\u5b50\u5efa\u5728\u5f20\u91cf\u79ef\uff08Cartesian/\u5468\u671f\uff09\u7f51\u683c\u4e0a\uff1aeuler_dg_2d \u7684\u6587\u6863\u4e32\u660e\u8bf4 periodic Cartesian mesh\uff0cadvection_1d/2d/3d\u3001euler_dg_1d/2d\u3001swe_1d/2d\u3001poisson_2d(SIPG) \u540c\u6784\uff1b\u4ed3\u5185\u65e0\u4e09\u89d2/\u56db\u9762\u4f53\u5355\u5143\u3001\u65e0\u9762\u90bb\u63a5\u62d3\u6251\u3001\u65e0\u5916\u90e8\u7f51\u683c\u8bfb\u5165\uff08gmsh\uff09\u3002",
+   "target_evidence": [
+    {
+     "pattern": "triangle|tetra|simplex|gmsh|unstructured",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "\u5355\u7eaf\u5f62\u5355\u5143\u4e0e\u7f51\u683c\u8bfb\u5165\u7684\u8def\u5f84/\u6807\u8bc6\u7b26\u4e00\u6b21\u90fd\u4e0d\u51fa\u73b0"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "nektar",
+     "repo": "nektar/nektar",
+     "tier": "T1",
+     "status": "failed",
+     "feature_paths": {}
+    },
+    {
+     "id": "ngsolve",
+     "repo": "NGSolve/ngsolve",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 1,
+       "samples": [
+        "fem/polynomials.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 1,
+       "samples": [
+        "py_tutorials/adaptive.py"
+       ]
+      },
+      "F07-simplex": {
+       "n": 1,
+       "samples": [
+        "py_tutorials/scattering_triangle.py"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 13,
+       "samples": [
+        "comp/preconditioner.cpp",
+        "comp/preconditioner.hpp",
+        "fem/newtonCF.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 54,
+       "samples": [
+        "bem/l2p_gpu_kernel.h",
+        "bem/m2l_fused_gpu_kernel.h",
+        "bem/mptools_device.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 5,
+       "samples": [
+        "fem/elasticity_equations.hpp",
+        "fem/maxwellintegrator.cpp",
+        "py_tutorials/elasticity.py"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 5,
+       "samples": [
+        "basiclinalg/eigensystem.cpp",
+        "basiclinalg/eigensystem.hpp",
+        "linalg/eigen.cpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "mfem",
+     "repo": "mfem/mfem",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 6,
+       "samples": [
+        "fem/ceed/interface/basis.cpp",
+        "fem/ceed/interface/basis.hpp",
+        "fem/eltrans/eltrans_basis.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 1,
+       "samples": [
+        "fem/integ/lininteg_boundary_flux.cpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 10,
+       "samples": [
+        "fem/tmop/assemble/diag2_limit.cpp",
+        "fem/tmop/assemble/diag3_limit.cpp",
+        "fem/tmop/assemble/grad2_limit.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 2,
+       "samples": [
+        "fem/tmop_amr.cpp",
+        "fem/tmop_amr.hpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 5,
+       "samples": [
+        "mesh/gmsh.cpp",
+        "mesh/tetrahedron.cpp",
+        "mesh/tetrahedron.hpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 21,
+       "samples": [
+        "fem/fe/fe_nurbs.cpp",
+        "fem/fe/fe_nurbs.hpp",
+        "mesh/ncnurbs.cpp"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 6,
+       "samples": [
+        "fem/multigrid.cpp",
+        "fem/multigrid.hpp",
+        "miniapps/dpg/util/preconditioners.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 8,
+       "samples": [
+        "general/cuda.cpp",
+        "general/cuda.hpp",
+        "general/device.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 2,
+       "samples": [
+        "miniapps/adjoint/adjoint_advection_diffusion.cpp",
+        "miniapps/adjoint/cvsRoberts_ASAi_dns.cpp"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 31,
+       "samples": [
+        "fem/integ/bilininteg_elasticity_ea.cpp",
+        "fem/integ/bilininteg_elasticity_kernels.cpp",
+        "fem/integ/bilininteg_elasticity_kernels.hpp"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "dealii",
+     "repo": "dealii/dealii",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 141,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/math/interpolators/bezier_polynomial.hpp",
+        "bundled/boost-1.84.0/include/boost/math/interpolators/detail/bezier_polynomial_detail.hpp",
+        "bundled/boost-1.84.0/include/boost/math/quadrature/detail/exp_sinh_detail.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 6,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/luminous_flux.hpp",
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux.hpp",
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux_density.hpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 182,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/moment.hpp",
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/rolling_moment.hpp",
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/weighted_moment.hpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 18,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/convex_hull.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/graham_andrew.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/interface.hpp"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 2,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/uuid/detail/random_provider_getentropy.ipp",
+        "bundled/boost-1.84.0/include/boost/uuid/entropy_error.hpp"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 343,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor.hpp",
+        "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor_forward.hpp",
+        "bundled/boost-1.84.0/include/boost/asio/detail/buffer_sequence_adapter.hpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 11,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/geometry/strategies/cartesian/side_by_triangle.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/strategy/cartesian/side_by_triangle.hpp",
+        "bundled/boost-1.84.0/include/boost/random/triangle_distribution.hpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 65,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth.hpp",
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth_moulton.hpp",
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_moulton.hpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 70,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/contract/core/constructor_precondition.hpp",
+        "bundled/boost-1.84.0/include/boost/hof/implicit.hpp",
+        "bundled/boost-1.84.0/include/boost/implicit_cast.hpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 827,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/asio/execution/relationship.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_on_device.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_to_device.hpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 5,
+       "samples": [
+        "include/deal.II/numerics/error_estimator.h",
+        "include/deal.II/numerics/error_estimator.templates.h",
+        "source/numerics/error_estimator_1d.cc"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 7,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/statechart/shallow_history.hpp",
+        "include/deal.II/integrators/elasticity.h",
+        "include/deal.II/integrators/maxwell.h"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 4,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/compute/interop/eigen.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/interop/eigen/core.hpp",
+        "bundled/boost-1.84.0/include/boost/multiprecision/eigen.hpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "dolfinx",
+     "repo": "FEniCS/dolfinx",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 13,
+       "samples": [
+        "cpp/dolfinx/refinement/dolfinx_refinement.h",
+        "cpp/dolfinx/refinement/interval.h",
+        "cpp/dolfinx/refinement/mark.h"
+       ]
+      },
+      "F07-simplex": {
+       "n": 1,
+       "samples": [
+        "python/dolfinx/io/gmsh.py"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 0,
+       "samples": []
+      },
+      "F11-parallel": {
+       "n": 4,
+       "samples": [
+        "cpp/dolfinx/common/MPI.cpp",
+        "cpp/dolfinx/common/MPI.h",
+        "python/dolfinx/wrappers/dolfinx_wrappers/caster_mpi.h"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "dune_fem",
+     "repo": "dune-community/dune-fem",
+     "tier": "T1",
+     "status": "failed",
+     "feature_paths": {}
+    }
+   ],
+   "acceptance": "\u5728 P1/P2 \u4e0b\u7528\u4e24\u5957\u975e\u7ed3\u6784\u4e09\u89d2\u5256\u5206\uff08\u6bcf\u5957 >=2000 \u5355\u5143\uff09\u89e3\u7ebf\u6027\u5bf9\u6d41\u4e0e Poisson(SIPG)\uff1aL2 \u8bef\u5dee\u5bf9\u89e3\u6790\u89e3\u7684\u6536\u655b\u9636\u4e0d\u4f4e\u4e8e p+0.8\uff08p=1 \u65f6 >=1.8\uff0cp=2 \u65f6 >=2.8\uff09\uff0c\u540c\u4e00\u7b97\u4f8b\u5728\u4e09\u89d2\u4e0e\u56db\u8fb9\u5f62\u7f51\u683c\u4e0a\u7684 p=2 \u8bef\u5dee\u6bd4\u503c <=1.3\uff0c\u5468\u671f\u8fb9\u754c\u4e0b\u7684\u603b\u8d28\u91cf\u5b88\u6052\u76f8\u5bf9\u8bef\u5dee <=1e-12\u3002",
+   "upstream_note": "curated\uff1anektar \u4e0e hp3d \u63d0\u4f9b\u56db\u9762\u4f53/\u4e09\u89d2\u5355\u5143\u7684\u57fa\u51fd\u6570-\u6c42\u79ef-\u9762\u62d3\u6251\u4e09\u4ef6\u5957\uff1bndg \u4e0e mfem \u63d0\u4f9b\u53ef\u76f4\u63a5\u5bf9\u7167\u7684 triangle \u7b97\u5b50\u6570\u503c\u7ed3\u679c\u3002\u672c\u6ce2\u672a\u8bfb\u6e90\u7801\u3002",
+   "external_anchor": "Hesthaven & Warburton, Nodal Discontinuous Galerkin Methods, Springer 2008, Ch.6\uff08\u4e09\u89d2\u5355\u5143\u7b97\u5b50\u4e0e\u6536\u655b\u9636\uff09\uff1bCockburn & Shu, SIAM J. Numer. Anal. 35(6) 1998\u3002",
+   "impact": "\u8239\u4f53\u66f2\u9762\u4e0e\u7ed3\u6784\u524d\u5904\u7406\u8f93\u51fa\u7684\u662f\u4e09\u89d2\u9762\u7247/\u56db\u9762\u4f53\u7f51\u683c\uff1b\u6ca1\u6709\u5355\u7eaf\u5f62\u5355\u5143\uff0cTensorDG \u65e0\u6cd5\u5403\u771f\u5b9e CAD \u7f51\u683c\uff0c\u53ea\u80fd\u505a\u89c4\u5219\u533a\u95f4\u7684\u6559\u79d1\u4e66\u7b97\u4f8b\u3002"
+  },
+  {
+   "id": "GAP-DG-002",
+   "title": "h/p \u81ea\u9002\u5e94\uff08\u60ac\u6302\u8282\u70b9\u754c\u9762 + p \u53d8\u66f4 + \u8bef\u5dee\u6307\u793a\uff09",
+   "priority": "P0",
+   "effort": "L",
+   "feature_points": [
+    "F06-adaptivity",
+    "F12-error-estimation"
+   ],
+   "status": "absent",
+   "current_state": "\u65e0\u4efb\u4f55 AMR/hp \u673a\u5236\uff1a\u6ca1\u6709\u56db/\u516b\u53c9\u68ee\u6797\u3001\u6ca1\u6709\u60ac\u6302\u8282\u70b9\uff08\u975e\u534f\u8c03\uff09\u754c\u9762\u901a\u91cf\u3001\u6ca1\u6709\u5355\u5143\u7ea7 p \u53d8\u66f4\u8bb0\u5f55\uff1b\u52a0\u5bc6\u53ea\u80fd\u6574\u7f51\u683c\u91cd\u8dd1\uff08convergence.py \u662f\u5bf9\u5747\u5300\u52a0\u5bc6\u5c42\u505a\u9636\u6b21\u62df\u5408\u7684\u5de5\u5177\uff0c\u4e0d\u662f\u81ea\u9002\u5e94\uff09\u3002",
+   "target_evidence": [
+    {
+     "pattern": "hanging_node|hanging_nodes|p4est|octree|quadtree|p_adapt|hp_adapt|nonconforming|\\bAMR\\b",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "\u60ac\u6302\u8282\u70b9/\u68ee\u6797/p \u81ea\u9002\u5e94\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d\uff08\u65e7\u7b7e\u540d hanging \u4f1a\u88ab sign-changing \u8bef\u547d\u4e2d\uff0c\u5df2\u6536\u7d27\uff09"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "p4est",
+     "repo": "cburstedde/p4est",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 49,
+       "samples": [
+        "src/p4est.c",
+        "src/p4est.h",
+        "src/p4est_algorithms.c"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 0,
+       "samples": []
+      },
+      "F11-parallel": {
+       "n": 0,
+       "samples": []
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "amrex",
+     "repo": "AMReX-Codes/amrex",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 1,
+       "samples": [
+        "Src/EB/AMReX_EB2_IF_Polynomial.H"
+       ]
+      },
+      "F02-flux": {
+       "n": 26,
+       "samples": [
+        "Src/AmrCore/AMReX_FluxReg_1D_C.H",
+        "Src/AmrCore/AMReX_FluxReg_2D_C.H",
+        "Src/AmrCore/AMReX_FluxReg_3D_C.H"
+       ]
+      },
+      "F03-limiting": {
+       "n": 1,
+       "samples": [
+        "Src/EB/AMReX_EB_StateRedistSlopeLimiter_K.H"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 766,
+       "samples": [
+        "Src/Amr/AMReX_Amr.H",
+        "Src/Amr/AMReX_Amr.cpp",
+        "Src/Amr/AMReX_AmrFwd.H"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 6,
+       "samples": [
+        "Src/F_Interfaces/LinearSolvers/AMReX_multigrid_fi.cpp",
+        "Src/F_Interfaces/LinearSolvers/AMReX_multigrid_mod.F90",
+        "Src/LinearSolvers/AMReX_GMRES.H"
+       ]
+      },
+      "F11-parallel": {
+       "n": 47,
+       "samples": [
+        "Src/Base/AMReX_CudaGraph.H",
+        "Src/Base/AMReX_Gpu.H",
+        "Src/Base/AMReX_GpuAllocators.H"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "philip",
+     "repo": "McGillCompAero/PHiLiP",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 5,
+       "samples": [
+        "src/reduced_order/pod_basis_base.h",
+        "src/reduced_order/pod_basis_offline.cpp",
+        "src/reduced_order/pod_basis_offline.h"
+       ]
+      },
+      "F02-flux": {
+       "n": 6,
+       "samples": [
+        "src/numerical_flux/convective_numerical_flux.cpp",
+        "src/numerical_flux/convective_numerical_flux.hpp",
+        "src/numerical_flux/numerical_flux_factory.cpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 12,
+       "samples": [
+        "src/limiter/bound_preserving_limiter.cpp",
+        "src/limiter/bound_preserving_limiter.h",
+        "src/limiter/bound_preserving_limiter_factory.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 10,
+       "samples": [
+        "src/flow_solver/flow_solver_cases/positivity_preserving_tests.cpp",
+        "src/flow_solver/flow_solver_cases/positivity_preserving_tests.h",
+        "src/limiter/bound_preserving_limiter.cpp"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 4,
+       "samples": [
+        "src/flow_solver/flow_solver_cases/periodic_entropy_tests.cpp",
+        "src/flow_solver/flow_solver_cases/periodic_entropy_tests.h",
+        "src/ode_solver/relaxation_runge_kutta/runge_kutta_store_entropy.cpp"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 46,
+       "samples": [
+        "src/grid_refinement/field.cpp",
+        "src/grid_refinement/field.h",
+        "src/grid_refinement/gmsh_out.cpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 4,
+       "samples": [
+        "src/grid_refinement/gmsh_out.cpp",
+        "src/grid_refinement/gmsh_out.h",
+        "src/mesh/gmsh_reader.cpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 11,
+       "samples": [
+        "src/dummy/jacobian_via_dfad_example.cpp",
+        "src/mesh/grids/curved_periodic_grid.cpp",
+        "src/mesh/grids/curved_periodic_grid.hpp"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 50,
+       "samples": [
+        "src/deprecated/ode_solver.cpp",
+        "src/deprecated/ode_solver.h",
+        "src/ode_solver/JFNK_solver/JFNK_solver.cpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 3,
+       "samples": [
+        "src/ode_solver/implicit_ode_solver.cpp",
+        "src/ode_solver/implicit_ode_solver.h",
+        "src/optimization/kkt_birosghattas_preconditioners.hpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 0,
+       "samples": []
+      },
+      "F12-error-estimation": {
+       "n": 4,
+       "samples": [
+        "src/functional/adjoint.cpp",
+        "src/functional/adjoint.h",
+        "src/mesh/mesh_adaptation/mesh_error_estimate.cpp"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 16,
+       "samples": [
+        "src/flow_solver/flow_solver_cases/periodic_turbulence.cpp",
+        "src/flow_solver/flow_solver_cases/periodic_turbulence.h",
+        "src/flow_solver/flow_solver_cases/turbulent_airfoil_3D.cpp"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 6,
+       "samples": [
+        "src/dg/artificial_dissipation.cpp",
+        "src/dg/artificial_dissipation.h",
+        "src/dg/artificial_dissipation_factory.cpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "trixi",
+     "repo": "trixi-framework/Trixi.jl",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 3,
+       "samples": [
+        "src/solvers/dgsem/basis_gauss_legendre.jl",
+        "src/solvers/dgsem/basis_lobatto_legendre.jl",
+        "src/time_integration/paired_explicit_runge_kutta/polynomial_optimizer.jl"
+       ]
+      },
+      "F02-flux": {
+       "n": 4,
+       "samples": [
+        "src/equations/numerical_fluxes.jl",
+        "src/solvers/dgmulti/flux_differencing.jl",
+        "src/solvers/dgmulti/flux_differencing_compressible_euler.jl"
+       ]
+      },
+      "F03-limiting": {
+       "n": 18,
+       "samples": [
+        "src/callbacks_stage/entropy_bounded_limiter.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 25,
+       "samples": [
+        "ext/TrixiConvexECOSExt.jl",
+        "src/callbacks_stage/positivity_liu_zhang.jl",
+        "src/callbacks_stage/positivity_zhang_shu.jl"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 9,
+       "samples": [
+        "src/callbacks_stage/entropy_bounded_limiter.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 39,
+       "samples": [
+        "src/auxiliary/p4est.jl",
+        "src/callbacks_step/amr.jl",
+        "src/callbacks_step/amr_dg.jl"
+       ]
+      },
+      "F07-simplex": {
+       "n": 12,
+       "samples": [
+        "src/callbacks_step/time_series_dg_unstructured.jl",
+        "src/meshes/unstructured_mesh.jl",
+        "src/solvers/dgsem_unstructured/containers_2d.jl"
+       ]
+      },
+      "F08-curved": {
+       "n": 1,
+       "samples": [
+        "src/solvers/dgsem_unstructured/mappings_geometry_curved_2d.jl"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 13,
+       "samples": [
+        "src/time_integration/methods_2N.jl",
+        "src/time_integration/methods_3Sstar.jl",
+        "src/time_integration/methods_SSP.jl"
+       ]
+      },
+      "F10-implicit": {
+       "n": 0,
+       "samples": []
+      },
+      "F11-parallel": {
+       "n": 13,
+       "samples": [
+        "ext/TrixiAMDGPUExt.jl",
+        "ext/TrixiCUDACoreExt.jl",
+        "src/auxiliary/mpi.jl"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 14,
+       "samples": [
+        "src/equations/compressible_navier_stokes.jl",
+        "src/equations/compressible_navier_stokes_1d.jl",
+        "src/equations/compressible_navier_stokes_2d.jl"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 3,
+       "samples": [
+        "src/postprocessing/spectral_analysis.jl",
+        "src/postprocessing/spectral_analysis_2d.jl",
+        "src/postprocessing/spectral_analysis_3d.jl"
+       ]
+      }
+     }
+    },
+    {
+     "id": "parthenon",
+     "repo": "parthenon-hpc-lab/parthenon",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 1,
+       "samples": [
+        "src/loop_abstraction/flux_view.hpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 12,
+       "samples": [
+        "src/amr_criteria/amr_criteria.cpp",
+        "src/amr_criteria/amr_criteria.hpp",
+        "src/amr_criteria/refinement_package.cpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 4,
+       "samples": [
+        "src/time_integration/butcher_integrator.cpp",
+        "src/time_integration/low_storage_integrator.cpp",
+        "src/time_integration/staged_integrator.cpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 2,
+       "samples": [
+        "src/batched_linear_algebra/implicit_qr.hpp",
+        "tst/unit/test_implicit_qr.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 10,
+       "samples": [
+        "src/interface/swarm_device_context.hpp",
+        "src/kokkos_abstraction.hpp",
+        "src/kokkos_types.hpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 3,
+       "samples": [
+        "src/outputs/spectrum.cpp",
+        "src/utils/calc_spectrum.cpp",
+        "src/utils/calc_spectrum.hpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "ngsolve",
+     "repo": "NGSolve/ngsolve",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 1,
+       "samples": [
+        "fem/polynomials.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 1,
+       "samples": [
+        "py_tutorials/adaptive.py"
+       ]
+      },
+      "F07-simplex": {
+       "n": 1,
+       "samples": [
+        "py_tutorials/scattering_triangle.py"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 13,
+       "samples": [
+        "comp/preconditioner.cpp",
+        "comp/preconditioner.hpp",
+        "fem/newtonCF.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 54,
+       "samples": [
+        "bem/l2p_gpu_kernel.h",
+        "bem/m2l_fused_gpu_kernel.h",
+        "bem/mptools_device.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 5,
+       "samples": [
+        "fem/elasticity_equations.hpp",
+        "fem/maxwellintegrator.cpp",
+        "py_tutorials/elasticity.py"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 5,
+       "samples": [
+        "basiclinalg/eigensystem.cpp",
+        "basiclinalg/eigensystem.hpp",
+        "linalg/eigen.cpp"
+       ]
+      }
+     }
+    }
+   ],
+   "acceptance": "2D Euler\uff08\u524d\u53f0\u9636\u6216\u53cc\u9a6c\u8d6b\u53cd\u5c04\uff09\u5728\u56fa\u5b9a\u81ea\u7531\u5ea6\u9884\u7b97\uff08<=\u5747\u5300\u57fa\u7ebf N_dof \u7684 25%\uff09\u4e0b\uff0c\u81ea\u9002\u5e94\u89e3\u7684\u5bc6\u5ea6 L1 \u8bef\u5dee <=\u5747\u5300\u52a0\u5bc6\u5230 4*N_dof \u89e3\u7684 60%\uff1b\u8de8\u60ac\u6302\u8282\u70b9\u754c\u9762\u603b\u8d28\u91cf\u6f02\u79fb <=1e-12\uff1bp \u53d8\u66f4\u540e\u5bc6\u5ea6\u6700\u5c0f\u503c >=\u540c\u7b97\u4f8b\u5747\u5300\u89e3\u7684 0.99\uff08\u65e0 Gibbs \u8d85\u8c03\uff09\u3002",
+   "upstream_note": "curated\uff1ap4est \u63d0\u4f9b 2:1 \u5e73\u8861\u7684\u68ee\u6797\u4e0e\u60ac\u6302\u8282\u70b9\u63a5\u53e3\u6784\u9020\uff1bphilip/trixi \u63d0\u4f9b hp \u5224\u636e\uff08\u622a\u65ad\u8bef\u5dee\u6307\u793a\uff09\u8bbe\u8ba1\uff1bamrex/parthenon \u63d0\u4f9b\u5757\u7ed3\u6784 AMR \u7684\u5b88\u6052\u56de\u6d41\uff08reflux\uff09\u8bbe\u8ba1\u3002\u672c\u6ce2\u672a\u8bfb\u6e90\u7801\u3002",
+   "external_anchor": "Burstedde, Wilcox & Ghattas, SIAM J. Sci. Comput. 33(2) 2011\uff08p4est\uff09\uff1bCeze & Fidkowski, J. Comput. Phys. 230 (2011)\uff08hp \u81ea\u9002\u5e94\u5224\u636e\uff09\uff1bBerger & Colella, J. Comput. Phys. 82 (1989)\uff08AMR \u5b88\u6052\u56de\u6d41\uff09\u3002",
+   "impact": "\u8239\u8236\u6c34\u52a8\u529b\u7b97\u4f8b\u91cc\u6fc0\u6ce2/\u81ea\u7531\u9762\u4e0e\u8fb9\u754c\u5c42\u5c3a\u5ea6\u5dee 2~3 \u4e2a\u91cf\u7ea7\uff0c\u5168\u57df p \u63d0\u5347\u7684\u4ee3\u4ef7\u4e0d\u53ef\u652f\u4ed8\uff1b\u81ea\u9002\u5e94\u662f\u4e09\u7ef4\u5b9e\u8239\u7b97\u4f8b\u80fd\u5426\u8dd1\u5f97\u52a8\u7684\u524d\u63d0\u3002"
+  },
+  {
+   "id": "GAP-DG-003",
+   "title": "\u71b5\u7a33\u5b9a/\u5206\u88c2\u578b\uff08split-form\u3001\u4e24\u70b9\u901a\u91cf\uff09\u79bb\u6563",
+   "priority": "P1",
+   "effort": "M",
+   "feature_points": [
+    "F05-entropy-stable"
+   ],
+   "status": "absent",
+   "current_state": "\u6ca1\u6709\u5206\u88c2\u578b\uff08skew-symmetric / split-form\uff09\u7b97\u5b50\uff0c\u4e5f\u6ca1\u6709\u4e24\u70b9\u71b5\u5b88\u6052\u901a\u91cf\u4e0e\u71b5\u7a33\u5b9a\u754c\u9762\u8017\u6563\uff1bentropy \u4e00\u8bcd\u53ea\u51fa\u73b0\u5728\u7b97\u4f8b\u540d\uff08Shu-Osher \u6fc0\u6ce2-\u71b5\u6ce2\u76f8\u4e92\u4f5c\u7528\uff09\u4e0e\u71b5\u9884\u7b97\u811a\u672c\u91cc\uff0c\u7b97\u5b50\u672c\u8eab\u662f\u8282\u70b9\u578b HLLC + TVB \u9650\u754c\u3002",
+   "target_evidence": [
+    {
+     "pattern": "split_form|split-form|entropy_stable|entropy-stable|kuscu|entropy_conserv|two-point_flux|two-point flux",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "\u5206\u88c2\u578b/\u71b5\u7a33\u5b9a\u7b97\u5b50\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d\uff08\u65e7\u7b7e\u540d two-point \u4f1a\u88ab\u6536\u655b\u7387\u4e24\u70b9\u4f30\u8ba1\u8bef\u547d\u4e2d\uff0c\u5df2\u6536\u7d27\uff09"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "trixi",
+     "repo": "trixi-framework/Trixi.jl",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 3,
+       "samples": [
+        "src/solvers/dgsem/basis_gauss_legendre.jl",
+        "src/solvers/dgsem/basis_lobatto_legendre.jl",
+        "src/time_integration/paired_explicit_runge_kutta/polynomial_optimizer.jl"
+       ]
+      },
+      "F02-flux": {
+       "n": 4,
+       "samples": [
+        "src/equations/numerical_fluxes.jl",
+        "src/solvers/dgmulti/flux_differencing.jl",
+        "src/solvers/dgmulti/flux_differencing_compressible_euler.jl"
+       ]
+      },
+      "F03-limiting": {
+       "n": 18,
+       "samples": [
+        "src/callbacks_stage/entropy_bounded_limiter.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 25,
+       "samples": [
+        "ext/TrixiConvexECOSExt.jl",
+        "src/callbacks_stage/positivity_liu_zhang.jl",
+        "src/callbacks_stage/positivity_zhang_shu.jl"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 9,
+       "samples": [
+        "src/callbacks_stage/entropy_bounded_limiter.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 39,
+       "samples": [
+        "src/auxiliary/p4est.jl",
+        "src/callbacks_step/amr.jl",
+        "src/callbacks_step/amr_dg.jl"
+       ]
+      },
+      "F07-simplex": {
+       "n": 12,
+       "samples": [
+        "src/callbacks_step/time_series_dg_unstructured.jl",
+        "src/meshes/unstructured_mesh.jl",
+        "src/solvers/dgsem_unstructured/containers_2d.jl"
+       ]
+      },
+      "F08-curved": {
+       "n": 1,
+       "samples": [
+        "src/solvers/dgsem_unstructured/mappings_geometry_curved_2d.jl"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 13,
+       "samples": [
+        "src/time_integration/methods_2N.jl",
+        "src/time_integration/methods_3Sstar.jl",
+        "src/time_integration/methods_SSP.jl"
+       ]
+      },
+      "F10-implicit": {
+       "n": 0,
+       "samples": []
+      },
+      "F11-parallel": {
+       "n": 13,
+       "samples": [
+        "ext/TrixiAMDGPUExt.jl",
+        "ext/TrixiCUDACoreExt.jl",
+        "src/auxiliary/mpi.jl"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 14,
+       "samples": [
+        "src/equations/compressible_navier_stokes.jl",
+        "src/equations/compressible_navier_stokes_1d.jl",
+        "src/equations/compressible_navier_stokes_2d.jl"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 3,
+       "samples": [
+        "src/postprocessing/spectral_analysis.jl",
+        "src/postprocessing/spectral_analysis_2d.jl",
+        "src/postprocessing/spectral_analysis_3d.jl"
+       ]
+      }
+     }
+    },
+    {
+     "id": "flexi",
+     "repo": "flexi-framework/flexi",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 5,
+       "samples": [
+        "src/fv/fv_basis.f90",
+        "src/interpolation/basis.f90",
+        "src/interpolation/changeBasis.f90"
+       ]
+      },
+      "F02-flux": {
+       "n": 18,
+       "samples": [
+        "src/dg/fillflux.f90",
+        "src/equations/burgers/flux.f90",
+        "src/equations/burgers/getboundaryflux.f90"
+       ]
+      },
+      "F03-limiting": {
+       "n": 2,
+       "samples": [
+        "src/filter/pplimiter.f90",
+        "src/fv/fv_limiter.f90"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 0,
+       "samples": []
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 4,
+       "samples": [
+        "src/equations/linearscalaradvection/jacobian.f90",
+        "src/equations/navierstokes/jacobian.f90",
+        "src/equations/rans_sa/jacobian.f90"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 4,
+       "samples": [
+        "posti/common/newton/newton.f90",
+        "src/implicit/implicit.f90",
+        "src/implicit/implicit_vars.f90"
+       ]
+      },
+      "F11-parallel": {
+       "n": 2,
+       "samples": [
+        "src/mpi/mpi.f90",
+        "src/mpi/mpi_vars.f90"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 35,
+       "samples": [
+        "posti/dmd/navierstokes/equationDmd.f90",
+        "posti/dmd/navierstokes/equationDmd_vars.f90",
+        "posti/recordpoints/visualize/navierstokes/equationrp.f90"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 1,
+       "samples": [
+        "tools/plot_RitzSpectrum.py"
+       ]
+      }
+     }
+    },
+    {
+     "id": "exadg",
+     "repo": "exadg/exadg",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 1,
+       "samples": [
+        "include/exadg/operators/quadrature.h"
+       ]
+      },
+      "F02-flux": {
+       "n": 2,
+       "samples": [
+        "include/exadg/postprocessor/normal_flux_calculation.cpp",
+        "include/exadg/postprocessor/normal_flux_calculation.h"
+       ]
+      },
+      "F03-limiting": {
+       "n": 4,
+       "samples": [
+        "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.cpp",
+        "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.h",
+        "include/exadg/incompressible_navier_stokes/spatial_discretization/operators/momentum_operator.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 4,
+       "samples": [
+        "include/exadg/fluid_structure_interaction/precice/precice_adapter.h",
+        "include/exadg/grid/perform_local_refinements.h",
+        "include/exadg/operators/adaptive_mesh_refinement.h"
+       ]
+      },
+      "F07-simplex": {
+       "n": 1,
+       "samples": [
+        "prototypes/simplex_grids.h"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 61,
+       "samples": [
+        "include/exadg/acoustic_conservation_equations/time_integration/time_int_abm.h",
+        "include/exadg/compressible_navier_stokes/time_integration/time_int_explicit_runge_kutta.cpp",
+        "include/exadg/compressible_navier_stokes/time_integration/time_int_explicit_runge_kutta.h"
+       ]
+      },
+      "F10-implicit": {
+       "n": 51,
+       "samples": [
+        "include/exadg/convection_diffusion/preconditioners/multigrid_preconditioner.cpp",
+        "include/exadg/convection_diffusion/preconditioners/multigrid_preconditioner.h",
+        "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 1,
+       "samples": [
+        "include/exadg/utilities/mpi.h"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 218,
+       "samples": [
+        "applications/compressible_navier_stokes/couette/application.h",
+        "applications/compressible_navier_stokes/couette/solver.cpp",
+        "applications/compressible_navier_stokes/euler_vortex/application.h"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 10,
+       "samples": [
+        "include/exadg/incompressible_navier_stokes/postprocessor/kinetic_energy_dissipation_detailed.cpp",
+        "include/exadg/incompressible_navier_stokes/postprocessor/kinetic_energy_dissipation_detailed.h",
+        "include/exadg/postprocessor/kinetic_energy_spectrum.cpp"
+       ]
+      }
+     }
+    }
+   ],
+   "acceptance": "1D/2D Euler\uff08Sod + Shu-Osher\uff09\uff1a\u5206\u88c2\u578b\u7b97\u5b50\u914d\u71b5\u5b88\u6052\u901a\u91cf\u540e\uff0c\u6bcf\u6b65\u79bb\u6563\u603b\u71b5\u53d8\u5316 <=1e-13\uff08\u7b26\u53f7\u4e00\u81f4\uff0c\u5373\u975e\u589e\uff09\uff1b\u52a8\u91cf\u4e0e\u80fd\u91cf\u5b88\u6052\u76f8\u5bf9\u8bef\u5dee <=1e-12\uff1bSod \u5bc6\u5ea6 L1 \u8bef\u5dee\u76f8\u5bf9\u672c\u4ed3\u73b0\u6709 HLLC \u8282\u70b9\u57fa\u7ebf <=1.05 \u500d\uff08\u7cbe\u5ea6\u4e0d\u5f97\u9000\u5316\uff09\u3002",
+   "upstream_note": "curated\uff1atrixi \u7684 volume/surface \u5206\u88c2\u578b\u5185\u6838\u4e0e\u71b5\u5b88\u6052\u901a\u91cf\u662f\u552f\u4e00\u5b8c\u6574\u7684\u5f00\u6e90\u53c2\u8003\u5b9e\u73b0\uff1bflexi \u7ed9\u51fa\u5de5\u7a0b\u5c3a\u5ea6\u4e0a\u7684\u7b97\u5b50\u7ec4\u7ec7\u65b9\u5f0f\u3002\u672c\u6ce2\u672a\u8bfb\u6e90\u7801\u3002",
+   "external_anchor": "Fisher & Carpenter, J. Comput. Phys. 252 (2013)\uff08entropy stable staggered grid / split form\uff09\uff1bGassner, Winters & Kopriva, J. Comput. Phys. 327 (2016)\uff08split-form DGSEM \u7684\u71b5\u7a33\u5b9a\u6027\uff09\uff1bChan, J. Comput. Phys. 378 (2019)\uff08discretely entropy stable DG\uff09\u3002",
+   "impact": "\u8010\u6ce2/\u64cd\u7eb5\u8fd9\u7c7b\u5fc5\u987b\u957f\u65f6\u79ef\u5206\u7684\u65f6\u57df\u7b97\u4f8b\uff0c\u975e\u71b5\u7a33\u5b9a\u79bb\u6563\u4f1a\u5e26\u6765\u7f13\u6162\u7684\u80fd\u91cf\u6f02\u79fb\uff0c\u8bef\u5dee\u5929\u82b1\u677f\u7531\u683c\u5f0f\u800c\u975e\u7269\u7406\u51b3\u5b9a\u3002"
+  },
+  {
+   "id": "GAP-DG-004",
+   "title": "\u4e8c\u7ef4\u4fdd\u754c\uff08Zhang-Shu \u7f29\u653e / \u5b50\u5355\u5143\u9650\u754c\uff09",
+   "priority": "P1",
+   "effort": "M",
+   "feature_points": [
+    "F04-bound-preserving",
+    "F03-limiting"
+   ],
+   "status": "partial",
+   "current_state": "\u4fdd\u754c\u53ea\u505a\u5230\u4e00\u534a\uff1a1-D Euler \u6709 Zhang-Shu \u53ef\u5bb9\u8bb8\u7f29\u653e\u9650\u5236\u5668 _positivity_scale\uff08tensordg/euler_dg_1d.py:98\uff0ctheta \u7f29\u653e\u4fdd\u4f4f\u5355\u5143\u5747\u503c\uff09\uff1b2-D \u8d77\u53ea\u6709\u4e8b\u540e\u8fc7\u6ee4 _positivity_filter\uff08tensordg/euler_dg_2d.py:659\uff1a\u4e0d\u53ef\u5bb9\u8bb8\u7684\u6574\u683c\u76f4\u63a5\u584c\u6210\u5355\u5143\u5747\u503c\u2014\u2014\u5747\u503c\u5b88\u6052\u4f46\u8be5\u5355\u5143\u9000\u5316\u4e3a\u4e00\u9636\uff0c\u4e0d\u662f theta \u7f29\u653e\uff0c\u4e5f\u6ca1\u6709\u5b50\u5355\u5143\u4fe1\u606f\uff09\u3002\u65e0\u5b50\u5355\u5143\uff08subcell\uff09FV \u6df7\u5408\u3001\u65e0 MOOD/a-posteriori \u9650\u754c\u3001\u65e0\u51f8\u9650\u754c\uff1bSWE/NS \u6a21\u5757\u6ca1\u6709\u4fdd\u754c\u8def\u5f84\u3002",
+   "target_evidence": [
+    {
+     "pattern": "_positivity_scale|zhang.?shu",
+     "expect": "present",
+     "hits": 6,
+     "samples": [
+      "tensordg/euler_dg_1d.py:48: \"\"\"Zhang-Shu admissible scaling factors ``theta`` for one modal cell block.",
+      "tensordg/euler_dg_1d.py:98: def _positivity_scale(coeff, check_points, eta=1e-10):",
+      "tensordg/euler_dg_1d.py:99: \"\"\"Zhang-Shu scaling limiter: admissible cell, maximum retained high order."
+     ],
+     "satisfied": true,
+     "note": "1-D Zhang-Shu \u7f29\u653e\u9650\u5236\u5668\u5b58\u5728\uff08partial \u7684\u6b63\u9762\u8bc1\u636e\uff09"
+    },
+    {
+     "pattern": "subcell|\\bmood\\b|convex_limit|convex limiting",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "\u5b50\u5355\u5143\u9650\u754c/\u51f8\u9650\u754c\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "trixi",
+     "repo": "trixi-framework/Trixi.jl",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 3,
+       "samples": [
+        "src/solvers/dgsem/basis_gauss_legendre.jl",
+        "src/solvers/dgsem/basis_lobatto_legendre.jl",
+        "src/time_integration/paired_explicit_runge_kutta/polynomial_optimizer.jl"
+       ]
+      },
+      "F02-flux": {
+       "n": 4,
+       "samples": [
+        "src/equations/numerical_fluxes.jl",
+        "src/solvers/dgmulti/flux_differencing.jl",
+        "src/solvers/dgmulti/flux_differencing_compressible_euler.jl"
+       ]
+      },
+      "F03-limiting": {
+       "n": 18,
+       "samples": [
+        "src/callbacks_stage/entropy_bounded_limiter.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 25,
+       "samples": [
+        "ext/TrixiConvexECOSExt.jl",
+        "src/callbacks_stage/positivity_liu_zhang.jl",
+        "src/callbacks_stage/positivity_zhang_shu.jl"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 9,
+       "samples": [
+        "src/callbacks_stage/entropy_bounded_limiter.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_1d.jl",
+        "src/callbacks_stage/entropy_bounded_limiter_2d.jl"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 39,
+       "samples": [
+        "src/auxiliary/p4est.jl",
+        "src/callbacks_step/amr.jl",
+        "src/callbacks_step/amr_dg.jl"
+       ]
+      },
+      "F07-simplex": {
+       "n": 12,
+       "samples": [
+        "src/callbacks_step/time_series_dg_unstructured.jl",
+        "src/meshes/unstructured_mesh.jl",
+        "src/solvers/dgsem_unstructured/containers_2d.jl"
+       ]
+      },
+      "F08-curved": {
+       "n": 1,
+       "samples": [
+        "src/solvers/dgsem_unstructured/mappings_geometry_curved_2d.jl"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 13,
+       "samples": [
+        "src/time_integration/methods_2N.jl",
+        "src/time_integration/methods_3Sstar.jl",
+        "src/time_integration/methods_SSP.jl"
+       ]
+      },
+      "F10-implicit": {
+       "n": 0,
+       "samples": []
+      },
+      "F11-parallel": {
+       "n": 13,
+       "samples": [
+        "ext/TrixiAMDGPUExt.jl",
+        "ext/TrixiCUDACoreExt.jl",
+        "src/auxiliary/mpi.jl"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 14,
+       "samples": [
+        "src/equations/compressible_navier_stokes.jl",
+        "src/equations/compressible_navier_stokes_1d.jl",
+        "src/equations/compressible_navier_stokes_2d.jl"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 3,
+       "samples": [
+        "src/postprocessing/spectral_analysis.jl",
+        "src/postprocessing/spectral_analysis_2d.jl",
+        "src/postprocessing/spectral_analysis_3d.jl"
+       ]
+      }
+     }
+    },
+    {
+     "id": "flexi",
+     "repo": "flexi-framework/flexi",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 5,
+       "samples": [
+        "src/fv/fv_basis.f90",
+        "src/interpolation/basis.f90",
+        "src/interpolation/changeBasis.f90"
+       ]
+      },
+      "F02-flux": {
+       "n": 18,
+       "samples": [
+        "src/dg/fillflux.f90",
+        "src/equations/burgers/flux.f90",
+        "src/equations/burgers/getboundaryflux.f90"
+       ]
+      },
+      "F03-limiting": {
+       "n": 2,
+       "samples": [
+        "src/filter/pplimiter.f90",
+        "src/fv/fv_limiter.f90"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 0,
+       "samples": []
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 4,
+       "samples": [
+        "src/equations/linearscalaradvection/jacobian.f90",
+        "src/equations/navierstokes/jacobian.f90",
+        "src/equations/rans_sa/jacobian.f90"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 4,
+       "samples": [
+        "posti/common/newton/newton.f90",
+        "src/implicit/implicit.f90",
+        "src/implicit/implicit_vars.f90"
+       ]
+      },
+      "F11-parallel": {
+       "n": 2,
+       "samples": [
+        "src/mpi/mpi.f90",
+        "src/mpi/mpi_vars.f90"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 35,
+       "samples": [
+        "posti/dmd/navierstokes/equationDmd.f90",
+        "posti/dmd/navierstokes/equationDmd_vars.f90",
+        "posti/recordpoints/visualize/navierstokes/equationrp.f90"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 1,
+       "samples": [
+        "tools/plot_RitzSpectrum.py"
+       ]
+      }
+     }
+    },
+    {
+     "id": "gkeyll",
+     "repo": "gkeyllorg/gkeyll",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 300,
+       "samples": [
+        "core/ker/basis/basis_eval_gkhyb.c",
+        "core/ker/basis/basis_eval_gkhyb_vel.c",
+        "core/ker/basis/basis_eval_hyb.c"
+       ]
+      },
+      "F02-flux": {
+       "n": 1146,
+       "samples": [
+        "core/ker/basis/gkyl_basis_gkhyb_1x1v_p1_upwind_quad_to_modal.h",
+        "core/ker/basis/gkyl_basis_gkhyb_1x2v_p1_upwind_quad_to_modal.h",
+        "core/ker/basis/gkyl_basis_gkhyb_2x2v_p1_upwind_quad_to_modal.h"
+       ]
+      },
+      "F03-limiting": {
+       "n": 543,
+       "samples": [
+        "gyrokinetic/apps/gk_neut_species_moment.c",
+        "gyrokinetic/apps/gk_species_moment.c",
+        "gyrokinetic/ker/lbo_gyrokinetic/gyrokinetic_cross_prim_moments_1x1v_ser_p1.c"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 14,
+       "samples": [
+        "gyrokinetic/apps/gk_species_positivity.c",
+        "gyrokinetic/ker/positivity_shift_gyrokinetic/gkyl_positivity_shift_gyrokinetic_kernels.h",
+        "gyrokinetic/ker/positivity_shift_gyrokinetic/positivity_shift_gyrokinetic_1x1v_ser_p1.c"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 53,
+       "samples": [
+        "gyrokinetic/creg/rt_gk_helical_adapt_src_sheath_surr_2x2v_p1.c",
+        "gyrokinetic/creg/rt_gk_helical_adapt_src_sheath_surr_3x2v_p1.c",
+        "gyrokinetic/creg/rt_gk_tcv_iwl_adapt_source_2x2v_p1.c"
+       ]
+      },
+      "F07-simplex": {
+       "n": 38,
+       "samples": [
+        "moments/creg/rt_gr_bhl_spinning_tetrad.c",
+        "moments/creg/rt_gr_bhl_static_tetrad.c",
+        "moments/creg/rt_gr_bz_monopole_fast_tetrad.c"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 5,
+       "samples": [
+        "gyrokinetic/apps/gyrokinetic_multib_update_ssp_rk3.c",
+        "gyrokinetic/apps/gyrokinetic_update_ssp_rk3.c",
+        "moments/apps/mom_update_ssp_rk.c"
+       ]
+      },
+      "F10-implicit": {
+       "n": 5,
+       "samples": [
+        "gyrokinetic/apps/gyrokinetic_update_implicit_coll.c",
+        "moments/zero/gkyl_sources_implicit_priv.h",
+        "moments/zero/sources_implicit.c"
+       ]
+      },
+      "F11-parallel": {
+       "n": 21,
+       "samples": [
+        "core/creg/rt_kann_gpu_cpu_verify.c",
+        "core/unit/mctest_mpi_comm.c",
+        "core/unit/mctest_mpi_comm_read.c"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 1367,
+       "samples": [
+        "core/ker/dg_interpolate/dg_interpolate_gyrokinetic_1x1v_ser_p1.c",
+        "core/ker/dg_interpolate/dg_interpolate_gyrokinetic_1x1v_ser_p2.c",
+        "core/ker/dg_interpolate/dg_interpolate_gyrokinetic_1x2v_ser_p1.c"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 7,
+       "samples": [
+        "vlasov/zero/bc_emission_spectrum.c",
+        "vlasov/zero/bc_emission_spectrum_cu.cu",
+        "vlasov/zero/emission_spectrum_model.c"
+       ]
+      }
+     }
+    },
+    {
+     "id": "mfem",
+     "repo": "mfem/mfem",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 6,
+       "samples": [
+        "fem/ceed/interface/basis.cpp",
+        "fem/ceed/interface/basis.hpp",
+        "fem/eltrans/eltrans_basis.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 1,
+       "samples": [
+        "fem/integ/lininteg_boundary_flux.cpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 10,
+       "samples": [
+        "fem/tmop/assemble/diag2_limit.cpp",
+        "fem/tmop/assemble/diag3_limit.cpp",
+        "fem/tmop/assemble/grad2_limit.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 2,
+       "samples": [
+        "fem/tmop_amr.cpp",
+        "fem/tmop_amr.hpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 5,
+       "samples": [
+        "mesh/gmsh.cpp",
+        "mesh/tetrahedron.cpp",
+        "mesh/tetrahedron.hpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 21,
+       "samples": [
+        "fem/fe/fe_nurbs.cpp",
+        "fem/fe/fe_nurbs.hpp",
+        "mesh/ncnurbs.cpp"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 6,
+       "samples": [
+        "fem/multigrid.cpp",
+        "fem/multigrid.hpp",
+        "miniapps/dpg/util/preconditioners.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 8,
+       "samples": [
+        "general/cuda.cpp",
+        "general/cuda.hpp",
+        "general/device.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 2,
+       "samples": [
+        "miniapps/adjoint/adjoint_advection_diffusion.cpp",
+        "miniapps/adjoint/cvsRoberts_ASAi_dns.cpp"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 31,
+       "samples": [
+        "fem/integ/bilininteg_elasticity_ea.cpp",
+        "fem/integ/bilininteg_elasticity_kernels.cpp",
+        "fem/integ/bilininteg_elasticity_kernels.hpp"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    }
+   ],
+   "acceptance": "2D Euler \u53cc\u7a00\u758f\u6ce2\uff08\u8fd1\u771f\u7a7a\uff0crho \u4e0e p \u8d77\u503c 1e-8\uff0cp=3\uff09\uff1a\u5168\u7a0b rho,p >=0 \u4e14\u65e0 NaN\uff1b\u603b\u8d28\u91cf\u4e0e\u603b\u80fd\u91cf\u76f8\u5bf9\u8bef\u5dee <=1e-12\uff1b\u628a 2D \u7684\u4e8b\u540e\u8fc7\u6ee4\u6362\u6210 Zhang-Shu theta \u7f29\u653e\u540e\uff0c\u89e6\u53d1\u5355\u5143-\u6b65\u6bd4\u4f8b\uff08\u6574\u683c\u584c\u9677\u8ba1\u6570/\u603b\u5355\u5143-\u6b65\uff09\u4ece\u73b0\u72b6 >10% \u964d\u5230 <=1%\uff1b\u7b49\u71b5\u6da1\uff08p=3\uff09\u7684 L2 \u8bef\u5dee\u9000\u5316 <=10%\u3002",
+   "upstream_note": "curated\uff1atrixi \u7684\u5b50\u5355\u5143\u6fc0\u6ce2\u6355\u6349\uff08\u6307\u793a\u5668 + subcell \u6df7\u5408\uff09\u4e0e mfem \u7684\u516c\u5f00 subcell limiter \u7b97\u4f8b\u662f\u4e24\u6761\u53ef\u642c\u8def\u7ebf\uff1bZhang-Shu \u7f29\u653e\u672c\u4ed3 1-D \u5df2\u6709\uff0c2-D \u5316\u662f\u76f4\u63a5\u589e\u91cf\u3002\u672c\u6ce2\u672a\u8bfb\u4e0a\u6e38\u6e90\u7801\u3002",
+   "external_anchor": "Zhang & Shu, Proc. R. Soc. A 466 (2010)\uff08DG \u4fdd\u754c\u9650\u5236\u5668\uff09\uff1bDumbser, Zanotti, Loub\u00e8re & Cassulli, J. Comput. Phys. 278 (2014)\uff08a posteriori subcell limiting\uff09\uff1bHennemann, Rueda-Ram\u00edrez, Hindenlang & Gassner, J. Comput. Phys. 424 (2021)\uff08\u5b50\u5355\u5143\u6fc0\u6ce2\u6355\u6349\uff09\u3002",
+   "impact": "\u4e8c\u7ef4\u8fd1\u771f\u7a7a/\u7a7a\u5316\u5de5\u51b5\u662f\u81ea\u7531\u9762\u4e0e\u87ba\u65cb\u6868\u7a7a\u6ce1\u7684\u5e38\u6001\uff1b\u6574\u683c\u584c\u9677\u4f1a\u5728\u5c40\u90e8\u628a\u7cbe\u5ea6\u964d\u6210\u4e00\u9636\uff0c\u5e76\u4ee5\u672a\u53d7\u63a7\u7684\u65b9\u5f0f\u6c61\u67d3\u963b\u529b/\u5347\u529b\u79ef\u5206\u91cf\u3002"
+  },
+  {
+   "id": "GAP-DG-005",
+   "title": "\u5206\u5e03\u5f0f\u5185\u5b58\u4e0e\u52a0\u901f\u5668\u540e\u7aef\uff08MPI / GPU\uff09",
+   "priority": "P1",
+   "effort": "L",
+   "feature_points": [
+    "F11-parallel"
+   ],
+   "status": "absent",
+   "current_state": "\u7eaf\u5355\u8fdb\u7a0b NumPy/Torch CPU \u5b9e\u73b0\uff1atensordg \u5185\u65e0 MPI \u901a\u4fe1\u3001\u65e0 CUDA/Kokkos/OpenMP \u5185\u6838\u3001\u65e0\u5206\u533a\u4e0e halo \u4ea4\u6362\uff1b\u5e76\u884c\u5316\u53ea\u80fd\u9760\u591a\u8fdb\u7a0b\u5404\u7b97\u5404\u7684\u7b97\u4f8b\u3002",
+   "target_evidence": [
+    {
+     "pattern": "mpi4py|cuda|kokkos|cupy|numba|gpu|openacc|openmp",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "\u5e76\u884c/\u52a0\u901f\u5668\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "nek5000",
+     "repo": "Nek5000/Nek5000",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 2,
+       "samples": [
+        "core/hrefine.f",
+        "tools/postnek/refine.f"
+       ]
+      },
+      "F07-simplex": {
+       "n": 5,
+       "samples": [
+        "tools/gmsh2nek/gmsh2nek.f90",
+        "tools/gmsh2nek/mod_SIZE.f90",
+        "tools/gmsh2nek/mxm.f"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 1,
+       "samples": [
+        "core/gmres.f"
+       ]
+      },
+      "F11-parallel": {
+       "n": 4,
+       "samples": [
+        "core/byte_mpi.f",
+        "core/comm_mpi.f",
+        "core/mpi_dummy.f"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 9,
+       "samples": [
+        "core/navier0.f",
+        "core/navier1.f",
+        "core/navier2.f"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "nekr",
+     "repo": "Nek5000/nekRS",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 2,
+       "samples": [
+        "src/core/mesh/meshBasis1D.cpp",
+        "src/core/mesh/meshBasisHex3D.cpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 1,
+       "samples": [
+        "src/core/neknek/fixCoupledSurfaceFlux.cpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 17,
+       "samples": [
+        "3rd_party/hypre/src/FEI_mv/femli/mli_amgsa_coarsen1.cxx",
+        "3rd_party/hypre/src/parcsr_ls/par_cgc_coarsen.c",
+        "3rd_party/hypre/src/parcsr_ls/par_coarsen.c"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 87,
+       "samples": [
+        "3rd_party/cvode/include/sunnonlinsol/sunnonlinsol_newton.h",
+        "3rd_party/cvode/src/sunnonlinsol/newton/fmod/fsunnonlinsol_newton_mod.c",
+        "3rd_party/cvode/src/sunnonlinsol/newton/fmod/fsunnonlinsol_newton_mod.f90"
+       ]
+      },
+      "F11-parallel": {
+       "n": 217,
+       "samples": [
+        "3rd_party/adios/bindings/C/adios2/c/adios2_c_adios_mpi.cpp",
+        "3rd_party/adios/bindings/C/adios2/c/adios2_c_io_mpi.cpp",
+        "3rd_party/adios/bindings/CXX11/adios2/cxx11/ADIOSMPI.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 2,
+       "samples": [
+        "3rd_party/adios/source/h5vol/H5VolReadWrite.c",
+        "3rd_party/adios/source/h5vol/H5VolReadWrite.h"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 27,
+       "samples": [
+        "3rd_party/hypre/src/FEI_mv/fei-hypre/HYPRE_LSI_mlmaxwell.c",
+        "3rd_party/hypre/src/FEI_mv/fei-hypre/HYPRE_MLMaxwell.h",
+        "3rd_party/hypre/src/FEI_mv/fei-hypre/HYPRE_parcsr_maxwell.c"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 1,
+       "samples": [
+        "3rd_party/nek5000_parRSB/src/eigen.c"
+       ]
+      }
+     }
+    },
+    {
+     "id": "pyfr",
+     "repo": "PyFR/PyFR",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 1,
+       "samples": [
+        "pyfr/plugins/postproc/adapters.py"
+       ]
+      },
+      "F07-simplex": {
+       "n": 1,
+       "samples": [
+        "pyfr/readers/gmsh.py"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 2,
+       "samples": [
+        "pyfr/integrators/explicit/steppers.py",
+        "pyfr/integrators/implicit/steppers.py"
+       ]
+      },
+      "F10-implicit": {
+       "n": 16,
+       "samples": [
+        "pyfr/integrators/implicit/__init__.py",
+        "pyfr/integrators/implicit/base.py",
+        "pyfr/integrators/implicit/controllers.py"
+       ]
+      },
+      "F11-parallel": {
+       "n": 44,
+       "samples": [
+        "pyfr/backends/base/generator/gpu.py",
+        "pyfr/backends/cuda/__init__.py",
+        "pyfr/backends/cuda/base.py"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 1,
+       "samples": [
+        "pyfr/plugins/solver/turbulence.py"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "libceed",
+     "repo": "CEED/libCEED",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 56,
+       "samples": [
+        "backends/cuda-cublas/ceed-cuda-cublas-basis.c",
+        "backends/cuda-ref/ceed-cuda-ref-basis.c",
+        "backends/cuda-shared/ceed-cuda-shared-basis.c"
+       ]
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 0,
+       "samples": []
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 1,
+       "samples": [
+        "interface/ceed-preconditioning.c"
+       ]
+      },
+      "F11-parallel": {
+       "n": 122,
+       "samples": [
+        "backends/ceed-backend-list-cuda.h",
+        "backends/ceed-backend-list-hip.h",
+        "backends/cpu-gen/ceed-cpu-compile.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "mfem",
+     "repo": "mfem/mfem",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 6,
+       "samples": [
+        "fem/ceed/interface/basis.cpp",
+        "fem/ceed/interface/basis.hpp",
+        "fem/eltrans/eltrans_basis.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 1,
+       "samples": [
+        "fem/integ/lininteg_boundary_flux.cpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 10,
+       "samples": [
+        "fem/tmop/assemble/diag2_limit.cpp",
+        "fem/tmop/assemble/diag3_limit.cpp",
+        "fem/tmop/assemble/grad2_limit.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 2,
+       "samples": [
+        "fem/tmop_amr.cpp",
+        "fem/tmop_amr.hpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 5,
+       "samples": [
+        "mesh/gmsh.cpp",
+        "mesh/tetrahedron.cpp",
+        "mesh/tetrahedron.hpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 21,
+       "samples": [
+        "fem/fe/fe_nurbs.cpp",
+        "fem/fe/fe_nurbs.hpp",
+        "mesh/ncnurbs.cpp"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 6,
+       "samples": [
+        "fem/multigrid.cpp",
+        "fem/multigrid.hpp",
+        "miniapps/dpg/util/preconditioners.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 8,
+       "samples": [
+        "general/cuda.cpp",
+        "general/cuda.hpp",
+        "general/device.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 2,
+       "samples": [
+        "miniapps/adjoint/adjoint_advection_diffusion.cpp",
+        "miniapps/adjoint/cvsRoberts_ASAi_dns.cpp"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 31,
+       "samples": [
+        "fem/integ/bilininteg_elasticity_ea.cpp",
+        "fem/integ/bilininteg_elasticity_kernels.cpp",
+        "fem/integ/bilininteg_elasticity_kernels.hpp"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "amrex",
+     "repo": "AMReX-Codes/amrex",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 1,
+       "samples": [
+        "Src/EB/AMReX_EB2_IF_Polynomial.H"
+       ]
+      },
+      "F02-flux": {
+       "n": 26,
+       "samples": [
+        "Src/AmrCore/AMReX_FluxReg_1D_C.H",
+        "Src/AmrCore/AMReX_FluxReg_2D_C.H",
+        "Src/AmrCore/AMReX_FluxReg_3D_C.H"
+       ]
+      },
+      "F03-limiting": {
+       "n": 1,
+       "samples": [
+        "Src/EB/AMReX_EB_StateRedistSlopeLimiter_K.H"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 766,
+       "samples": [
+        "Src/Amr/AMReX_Amr.H",
+        "Src/Amr/AMReX_Amr.cpp",
+        "Src/Amr/AMReX_AmrFwd.H"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 6,
+       "samples": [
+        "Src/F_Interfaces/LinearSolvers/AMReX_multigrid_fi.cpp",
+        "Src/F_Interfaces/LinearSolvers/AMReX_multigrid_mod.F90",
+        "Src/LinearSolvers/AMReX_GMRES.H"
+       ]
+      },
+      "F11-parallel": {
+       "n": 47,
+       "samples": [
+        "Src/Base/AMReX_CudaGraph.H",
+        "Src/Base/AMReX_Gpu.H",
+        "Src/Base/AMReX_GpuAllocators.H"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    }
+   ],
+   "acceptance": "2D Euler\uff08p=3\uff0c512x512 \u5355\u5143\uff09\u5728 4 \u4e2a MPI \u79e9\u4e0e 1 \u79e9\u4e0a\uff1a\u5bc6\u5ea6 L2 \u5dee <=1e-10\uff08\u540c\u4e00\u79bb\u6563\u89e3\uff09\uff1b4 \u79e9\u5e76\u884c\u6548\u7387 >=0.7\uff08\u76f8\u5bf9\u5355\u79e9\u5899\u949f\uff09\uff1b\u82e5\u5b9e\u73b0 GPU \u8def\u5f84\uff0c\u540c\u7b97\u4f8b\u76f8\u5bf9 CPU \u5355\u8282\u70b9\u52a0\u901f >=3 \u500d\u4e14 L2 \u5dee <=1e-10\u3002",
+   "upstream_note": "curated\uff1apyfr \u7684 backend \u62bd\u8c61\uff08\u540c\u4e00 FR \u7b97\u5b50\u591a\u540e\u7aef\uff09\u3001nekRS \u7684 matrix-free GPU \u5143\u7d20\u7b97\u5b50\u3001libceed \u7684\u53d7\u9650\u7b97\u5b50\uff08restriction/prolongation\uff09\u8bbe\u8ba1\u662f\u4e09\u6761\u53ef\u9009\u8def\u7ebf\u3002\u672c\u6ce2\u672a\u8bfb\u6e90\u7801\u3002",
+   "external_anchor": "Fischer, Lottes, Kerkemeier et al., Nek5000 user documentation (2008)\uff1bVincent, Witherden & Vermeire, Comput. Fluids 141 (2016)\uff08PyFR\uff09\uff1bFischer et al., Parallel Comput. 109 (2022)\uff08nekRS\uff09\u3002",
+   "impact": "\u4e09\u7ef4\u5b9e\u8239/\u5b9e\u6d77\u51b5 DG \u7b97\u4f8b\u7684\u5355\u8fdb\u7a0b\u4e0a\u9650\u5728\u4e24\u4e09\u4e07\u5355\u5143\u91cf\u7ea7\uff1b\u65e0\u5e76\u884c\u5219 DG \u53ea\u80fd\u505c\u7559\u5728\u4e8c\u7ef4\u9a8c\u8bc1\u5c42\uff0c\u65e0\u6cd5\u8fdb\u5165\u5de5\u7a0b\u7b97\u4f8b\u3002"
+  },
+  {
+   "id": "GAP-DG-006",
+   "title": "\u975e\u7ebf\u6027\u9690\u5f0f/IMEX \u65f6\u95f4\u63a8\u8fdb\u4e0e p-\u591a\u91cd\u7f51\u683c\u9884\u5904\u7406",
+   "priority": "P1",
+   "effort": "L",
+   "feature_points": [
+    "F10-implicit",
+    "F09-time-integration"
+   ],
+   "status": "partial",
+   "current_state": "\u65f6\u95f4\u63a8\u8fdb\u53ea\u6709\u663e\u5f0f SSP-RK3\uff1b\u9690\u5f0f\u4fa7\u4ec5\u5728 SIPG \u692d\u5706\u6c42\u89e3\u91cc\u6709\u5757 Jacobi \u9884\u6761\u4ef6\u7684 CG\uff08sipg_matrixfree.py / poisson_2d.py\uff09\uff0c\u6ca1\u6709\u975e\u7ebf\u6027 Newton-Krylov\u3001\u6ca1\u6709 p-\u591a\u91cd\u7f51\u683c\u3001\u6ca1\u6709 IMEX/ARK \u5206\u88c2\u3002",
+   "target_evidence": [
+    {
+     "pattern": "precondition",
+     "expect": "present",
+     "hits": 14,
+     "samples": [
+      "tensordg/heat_1d.py:6: * ``\"matrix-free\"``  -- no global assembly, solve with preconditioned CG",
+      "tensordg/poisson_2d.py:11: * ``\"matrix-free\"``  -- no global assembly, solve with preconditioned CG",
+      "tensordg/sipg_matrixfree.py:1: \"\"\"Matrix-free SIPG elliptic solvers using preconditioned CG."
+     ],
+     "satisfied": true,
+     "note": "SIPG \u7684\u5757 Jacobi \u9884\u6761\u4ef6 CG \u5b58\u5728\uff08partial \u7684\u6b63\u9762\u8bc1\u636e\uff09"
+    },
+    {
+     "pattern": "newton_krylov|newton-krylov|gmres|multigrid|imex|arkode",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "Newton-Krylov / p-\u591a\u91cd\u7f51\u683c / IMEX \u6807\u8bc6\u7b26\u96f6\u547d\u4e2d"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "exadg",
+     "repo": "exadg/exadg",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 1,
+       "samples": [
+        "include/exadg/operators/quadrature.h"
+       ]
+      },
+      "F02-flux": {
+       "n": 2,
+       "samples": [
+        "include/exadg/postprocessor/normal_flux_calculation.cpp",
+        "include/exadg/postprocessor/normal_flux_calculation.h"
+       ]
+      },
+      "F03-limiting": {
+       "n": 4,
+       "samples": [
+        "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.cpp",
+        "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.h",
+        "include/exadg/incompressible_navier_stokes/spatial_discretization/operators/momentum_operator.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 4,
+       "samples": [
+        "include/exadg/fluid_structure_interaction/precice/precice_adapter.h",
+        "include/exadg/grid/perform_local_refinements.h",
+        "include/exadg/operators/adaptive_mesh_refinement.h"
+       ]
+      },
+      "F07-simplex": {
+       "n": 1,
+       "samples": [
+        "prototypes/simplex_grids.h"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 61,
+       "samples": [
+        "include/exadg/acoustic_conservation_equations/time_integration/time_int_abm.h",
+        "include/exadg/compressible_navier_stokes/time_integration/time_int_explicit_runge_kutta.cpp",
+        "include/exadg/compressible_navier_stokes/time_integration/time_int_explicit_runge_kutta.h"
+       ]
+      },
+      "F10-implicit": {
+       "n": 51,
+       "samples": [
+        "include/exadg/convection_diffusion/preconditioners/multigrid_preconditioner.cpp",
+        "include/exadg/convection_diffusion/preconditioners/multigrid_preconditioner.h",
+        "include/exadg/incompressible_navier_stokes/preconditioners/multigrid_preconditioner_momentum.cpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 1,
+       "samples": [
+        "include/exadg/utilities/mpi.h"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 218,
+       "samples": [
+        "applications/compressible_navier_stokes/couette/application.h",
+        "applications/compressible_navier_stokes/couette/solver.cpp",
+        "applications/compressible_navier_stokes/euler_vortex/application.h"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 10,
+       "samples": [
+        "include/exadg/incompressible_navier_stokes/postprocessor/kinetic_energy_dissipation_detailed.cpp",
+        "include/exadg/incompressible_navier_stokes/postprocessor/kinetic_energy_dissipation_detailed.h",
+        "include/exadg/postprocessor/kinetic_energy_spectrum.cpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "petsc",
+     "repo": "petsc/petsc",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 3,
+       "samples": [
+        "lib/petsc/bin/maint/petscdt_create_quadrature_headers.py",
+        "src/ksp/ksp/utils/lmvm/lmbasis.c",
+        "src/ksp/ksp/utils/lmvm/lmbasis.h"
+       ]
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 47,
+       "samples": [
+        "config/BuildSystem/config/packages/AMReX.py",
+        "config/BuildSystem/config/packages/SAMRAI.py",
+        "config/BuildSystem/config/packages/p4est.py"
+       ]
+      },
+      "F07-simplex": {
+       "n": 6,
+       "samples": [
+        "config/BuildSystem/config/packages/Triangle.py",
+        "config/BuildSystem/config/packages/gmsh.py",
+        "src/dm/impls/plex/generators/triangle/trigenerate.c"
+       ]
+      },
+      "F08-curved": {
+       "n": 1,
+       "samples": [
+        "src/tao/leastsquares/tutorials/matlab/more_wild_probs/jacobian.m"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 8,
+       "samples": [
+        "src/ts/impls/arkimex/arkimex.c",
+        "src/ts/impls/arkimex/arkimex.h",
+        "src/ts/impls/arkimex/fsarkimex.c"
+       ]
+      },
+      "F10-implicit": {
+       "n": 31,
+       "samples": [
+        "src/ksp/ksp/impls/gmres/dgmres/dgmres.c",
+        "src/ksp/ksp/impls/gmres/dgmres/dgmresimpl.h",
+        "src/ksp/ksp/impls/gmres/fgmres/fgmres.c"
+       ]
+      },
+      "F11-parallel": {
+       "n": 209,
+       "samples": [
+        "config/BuildSystem/config/compile/C.py",
+        "config/BuildSystem/config/compile/CUDA.py",
+        "config/BuildSystem/config/compile/Cxx.py"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 2,
+       "samples": [
+        "src/tao/unconstrained/tutorials/adjointreads.m",
+        "src/tao/unconstrained/tutorials/spectraladjointassimilation.c"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 2,
+       "samples": [
+        "src/sys/classes/draw/utils/cmap/plasma.h",
+        "src/tao/unconstrained/tutorials/elastic_net_regularization.c"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 1,
+       "samples": [
+        "config/BuildSystem/config/packages/Eigen.py"
+       ]
+      }
+     }
+    },
+    {
+     "id": "sundials",
+     "repo": "LLNL/sundials",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 31,
+       "samples": [
+        "bindings/sundials4py/sunadaptcontroller/sunadaptcontroller_imexgus.cpp",
+        "bindings/sundials4py/sunadaptcontroller/sunadaptcontroller_imexgus_generated.hpp",
+        "bindings/sundials4py/sunadaptcontroller/sunadaptcontroller_mrihtol.cpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 152,
+       "samples": [
+        "bindings/sundials4py/arkode/arkode.cpp",
+        "bindings/sundials4py/arkode/arkode_arkstep.cpp",
+        "bindings/sundials4py/arkode/arkode_arkstep_generated.hpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 8,
+       "samples": [
+        "bindings/sundials4py/sunnonlinsol/sunnonlinsol_newton.cpp",
+        "bindings/sundials4py/sunnonlinsol/sunnonlinsol_newton_generated.hpp",
+        "include/sunnonlinsol/sunnonlinsol_newton.h"
+       ]
+      },
+      "F11-parallel": {
+       "n": 47,
+       "samples": [
+        "bindings/sundials4py/nvector/nvector_cuda.cpp",
+        "bindings/sundials4py/nvector/nvector_cuda_generated.hpp",
+        "bindings/sundials4py/sunmemory/sunmemory_cuda.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 20,
+       "samples": [
+        "bindings/sundials4py/sunadjointcheckpointscheme/sunadjointcheckpointscheme_fixed.cpp",
+        "bindings/sundials4py/sunadjointcheckpointscheme/sunadjointcheckpointscheme_fixed_generated.hpp",
+        "bindings/sundials4py/sundials/sundials_adjointcheckpointscheme.cpp"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    },
+    {
+     "id": "dealii",
+     "repo": "dealii/dealii",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 141,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/math/interpolators/bezier_polynomial.hpp",
+        "bundled/boost-1.84.0/include/boost/math/interpolators/detail/bezier_polynomial_detail.hpp",
+        "bundled/boost-1.84.0/include/boost/math/quadrature/detail/exp_sinh_detail.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 6,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/luminous_flux.hpp",
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux.hpp",
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux_density.hpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 182,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/moment.hpp",
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/rolling_moment.hpp",
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/weighted_moment.hpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 18,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/convex_hull.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/graham_andrew.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/interface.hpp"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 2,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/uuid/detail/random_provider_getentropy.ipp",
+        "bundled/boost-1.84.0/include/boost/uuid/entropy_error.hpp"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 343,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor.hpp",
+        "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor_forward.hpp",
+        "bundled/boost-1.84.0/include/boost/asio/detail/buffer_sequence_adapter.hpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 11,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/geometry/strategies/cartesian/side_by_triangle.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/strategy/cartesian/side_by_triangle.hpp",
+        "bundled/boost-1.84.0/include/boost/random/triangle_distribution.hpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 65,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth.hpp",
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth_moulton.hpp",
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_moulton.hpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 70,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/contract/core/constructor_precondition.hpp",
+        "bundled/boost-1.84.0/include/boost/hof/implicit.hpp",
+        "bundled/boost-1.84.0/include/boost/implicit_cast.hpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 827,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/asio/execution/relationship.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_on_device.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_to_device.hpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 5,
+       "samples": [
+        "include/deal.II/numerics/error_estimator.h",
+        "include/deal.II/numerics/error_estimator.templates.h",
+        "source/numerics/error_estimator_1d.cc"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 7,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/statechart/shallow_history.hpp",
+        "include/deal.II/integrators/elasticity.h",
+        "include/deal.II/integrators/maxwell.h"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 4,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/compute/interop/eigen.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/interop/eigen/core.hpp",
+        "bundled/boost-1.84.0/include/boost/multiprecision/eigen.hpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "libceed",
+     "repo": "CEED/libCEED",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 56,
+       "samples": [
+        "backends/cuda-cublas/ceed-cuda-cublas-basis.c",
+        "backends/cuda-ref/ceed-cuda-ref-basis.c",
+        "backends/cuda-shared/ceed-cuda-shared-basis.c"
+       ]
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 0,
+       "samples": []
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 0,
+       "samples": []
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 1,
+       "samples": [
+        "interface/ceed-preconditioning.c"
+       ]
+      },
+      "F11-parallel": {
+       "n": 122,
+       "samples": [
+        "backends/ceed-backend-list-cuda.h",
+        "backends/ceed-backend-list-hip.h",
+        "backends/cpu-gen/ceed-cpu-compile.cpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 0,
+       "samples": []
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 0,
+       "samples": []
+      }
+     }
+    }
+   ],
+   "acceptance": "2D \u5bf9\u6d41\u6269\u6563\uff08Pe=1e3\uff0cp=3\uff09\u63a8\u5230\u7a33\u6001\uff1aNewton-Krylov + p-\u591a\u91cd\u7f51\u683c\u9884\u6761\u4ef6\u7684\u7ebf\u6027\u8fed\u4ee3\u6b21\u6570\u4ece 64x64 \u5230 256x256 \u589e\u957f <=1.5 \u500d\uff0c\u8fbe\u5230\u540c\u4e00\u6536\u655b\u5224\u636e\u6240\u9700\u65f6\u95f4\u6b65\u6570 <=\u663e\u5f0f SSP-RK3 \u7684 1/10\uff1b\u7a33\u6001\u89e3\u4e0e\u663e\u5f0f\u957f\u65f6\u79ef\u5206\u89e3\u7684 L2 \u5dee <=1e-6\u3002",
+   "upstream_note": "curated\uff1aexadg \u5c55\u793a matrix-free DG + \u51e0\u4f55\u591a\u91cd\u7f51\u683c\u7684\u7ec4\u5408\uff1bsundials/ARKODE \u63d0\u4f9b IMEX \u4e0e\u5d4c\u5165\u5f0f\u8bef\u5dee\u63a7\u5236\u8bbe\u8ba1\uff1bpetsc \u63d0\u4f9b\u73b0\u6210\u7684 SNES/PC \u6808\u3002\u672c\u6ce2\u672a\u8bfb\u6e90\u7801\u3002",
+   "external_anchor": "Kronbichler & Kormann, ACM TOMS 45(3) 2019\uff08matrix-free DG \u7b97\u5b50\u6c42\u503c\uff09\uff1bPazner, SIAM J. Sci. Comput. 42(4) 2020\uff08p-multigrid for DG\uff09\uff1bHindmarsh et al., ACM TOMS 31 (2005)\uff08SUNDIALS\uff09\u3002",
+   "impact": "\u7c98\u6027\u4e3b\u5bfc/\u4f4e\u9a6c\u8d6b\u8239\u4f53\u7ed5\u6d41\u7684\u663e\u5f0f\u65f6\u95f4\u6b65\u53d7 CFL \u4e0e\u521a\u6027\u9879\u53cc\u91cd\u9650\u5236\uff1b\u6ca1\u6709\u9690\u5f0f-\u591a\u91cd\u7f51\u683c\u8def\u7ebf\uff0cDG \u7684\u5de5\u7a0b\u53ef\u7528\u6027\u505c\u5728\u53ef\u538b\u663e\u5f0f\u7b97\u4f8b\u3002"
+  },
+  {
+   "id": "GAP-DG-007",
+   "title": "\u76ee\u6807\u5bfc\u5411\u540e\u9a8c\u8bef\u5dee\u4f30\u8ba1\uff08DWR\uff09\u4e0e\u81ea\u9002\u5e94\u5224\u636e",
+   "priority": "P2",
+   "effort": "M",
+   "feature_points": [
+    "F12-error-estimation"
+   ],
+   "status": "partial",
+   "current_state": "\u6709\u53ef\u5fae\u540e\u7aef\u7684\u4f34\u968f\u7075\u654f\u5ea6\uff08differentiable.py: adjoint sensitivity of a sensor\uff09\u4e0e\u82e5\u5e72\u7b97\u4f8b\u5185\u7684\u7ecf\u9a8c\u8bef\u5dee\u4f30\u8ba1\uff0c\u4f46\u6ca1\u6709\u5bf9\u5076\u52a0\u6743\u6b8b\u5dee\uff08DWR\uff09\u4f30\u8ba1\u5b50\u3001\u6ca1\u6709\u4f30\u8ba1-\u771f\u8bef\u5dee\u5bf9\u7167\u3001\u6ca1\u6709\u628a\u4f30\u8ba1\u5b50\u63a5\u5230\u81ea\u9002\u5e94\u51b3\u7b56\u4e0a\u3002",
+   "target_evidence": [
+    {
+     "pattern": "adjoint",
+     "expect": "present",
+     "hits": 23,
+     "samples": [
+      "tensordg/differentiable.py:235: natural differentiable output functional (adjoint sensitivity of a sensor).",
+      "tensordg/kovasznay.py:350: wall_adjoint: bool = False,",
+      "tensordg/kovasznay.py:458: wall_penalty, wall_adjoint=wall_adjoint,"
+     ],
+     "satisfied": true,
+     "note": "\u4f34\u968f\u7075\u654f\u5ea6\u5b58\u5728\uff08partial \u7684\u6b63\u9762\u8bc1\u636e\uff09"
+    },
+    {
+     "pattern": "dual_weighted|dual-weighted|dwr|a_posteriori|a-posteriori|goal_oriented|goal-oriented",
+     "expect": "absent",
+     "hits": 0,
+     "samples": [],
+     "satisfied": true,
+     "note": "DWR/\u76ee\u6807\u5bfc\u5411\u4f30\u8ba1\u5b50\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d"
+    }
+   ],
+   "evidence_satisfied": true,
+   "refs": [
+    {
+     "id": "philip",
+     "repo": "McGillCompAero/PHiLiP",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 5,
+       "samples": [
+        "src/reduced_order/pod_basis_base.h",
+        "src/reduced_order/pod_basis_offline.cpp",
+        "src/reduced_order/pod_basis_offline.h"
+       ]
+      },
+      "F02-flux": {
+       "n": 6,
+       "samples": [
+        "src/numerical_flux/convective_numerical_flux.cpp",
+        "src/numerical_flux/convective_numerical_flux.hpp",
+        "src/numerical_flux/numerical_flux_factory.cpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 12,
+       "samples": [
+        "src/limiter/bound_preserving_limiter.cpp",
+        "src/limiter/bound_preserving_limiter.h",
+        "src/limiter/bound_preserving_limiter_factory.cpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 10,
+       "samples": [
+        "src/flow_solver/flow_solver_cases/positivity_preserving_tests.cpp",
+        "src/flow_solver/flow_solver_cases/positivity_preserving_tests.h",
+        "src/limiter/bound_preserving_limiter.cpp"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 4,
+       "samples": [
+        "src/flow_solver/flow_solver_cases/periodic_entropy_tests.cpp",
+        "src/flow_solver/flow_solver_cases/periodic_entropy_tests.h",
+        "src/ode_solver/relaxation_runge_kutta/runge_kutta_store_entropy.cpp"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 46,
+       "samples": [
+        "src/grid_refinement/field.cpp",
+        "src/grid_refinement/field.h",
+        "src/grid_refinement/gmsh_out.cpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 4,
+       "samples": [
+        "src/grid_refinement/gmsh_out.cpp",
+        "src/grid_refinement/gmsh_out.h",
+        "src/mesh/gmsh_reader.cpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 11,
+       "samples": [
+        "src/dummy/jacobian_via_dfad_example.cpp",
+        "src/mesh/grids/curved_periodic_grid.cpp",
+        "src/mesh/grids/curved_periodic_grid.hpp"
+       ]
+      },
+      "F09-time-integration": {
+       "n": 50,
+       "samples": [
+        "src/deprecated/ode_solver.cpp",
+        "src/deprecated/ode_solver.h",
+        "src/ode_solver/JFNK_solver/JFNK_solver.cpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 3,
+       "samples": [
+        "src/ode_solver/implicit_ode_solver.cpp",
+        "src/ode_solver/implicit_ode_solver.h",
+        "src/optimization/kkt_birosghattas_preconditioners.hpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 0,
+       "samples": []
+      },
+      "F12-error-estimation": {
+       "n": 4,
+       "samples": [
+        "src/functional/adjoint.cpp",
+        "src/functional/adjoint.h",
+        "src/mesh/mesh_adaptation/mesh_error_estimate.cpp"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 16,
+       "samples": [
+        "src/flow_solver/flow_solver_cases/periodic_turbulence.cpp",
+        "src/flow_solver/flow_solver_cases/periodic_turbulence.h",
+        "src/flow_solver/flow_solver_cases/turbulent_airfoil_3D.cpp"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 6,
+       "samples": [
+        "src/dg/artificial_dissipation.cpp",
+        "src/dg/artificial_dissipation.h",
+        "src/dg/artificial_dissipation_factory.cpp"
+       ]
+      }
+     }
+    },
+    {
+     "id": "firedrake",
+     "repo": "firedrakeproject/firedrake",
+     "tier": "T2",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 0,
+       "samples": []
+      },
+      "F02-flux": {
+       "n": 0,
+       "samples": []
+      },
+      "F03-limiting": {
+       "n": 3,
+       "samples": [
+        "firedrake/slope_limiter/__init__.py",
+        "firedrake/slope_limiter/limiter.py",
+        "firedrake/slope_limiter/vertex_based_limiter.py"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 0,
+       "samples": []
+      },
+      "F05-entropy-stable": {
+       "n": 0,
+       "samples": []
+      },
+      "F06-adaptivity": {
+       "n": 1,
+       "samples": [
+        "firedrake/adapt.py"
+       ]
+      },
+      "F07-simplex": {
+       "n": 0,
+       "samples": []
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 0,
+       "samples": []
+      },
+      "F10-implicit": {
+       "n": 19,
+       "samples": [
+        "firedrake/preconditioners/__init__.py",
+        "firedrake/preconditioners/asm.py",
+        "firedrake/preconditioners/assembled.py"
+       ]
+      },
+      "F11-parallel": {
+       "n": 14,
+       "samples": [
+        "firedrake/cython/mpi-compat.h",
+        "firedrake/preconditioners/hiptmair.py",
+        "firedrake/slate/slac/compiler.py"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 24,
+       "samples": [
+        "firedrake/adjoint/__init__.py",
+        "firedrake/adjoint/covariance_operator.py",
+        "firedrake/adjoint/ensemble_reduced_functional.py"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 0,
+       "samples": []
+      },
+      "F14-dispersion": {
+       "n": 1,
+       "samples": [
+        "firedrake/eigensolver.py"
+       ]
+      }
+     }
+    },
+    {
+     "id": "dealii",
+     "repo": "dealii/dealii",
+     "tier": "T1",
+     "status": "ok",
+     "feature_paths": {
+      "F01-basis": {
+       "n": 141,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/math/interpolators/bezier_polynomial.hpp",
+        "bundled/boost-1.84.0/include/boost/math/interpolators/detail/bezier_polynomial_detail.hpp",
+        "bundled/boost-1.84.0/include/boost/math/quadrature/detail/exp_sinh_detail.hpp"
+       ]
+      },
+      "F02-flux": {
+       "n": 6,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/luminous_flux.hpp",
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux.hpp",
+        "bundled/boost-1.84.0/include/boost/units/physical_dimensions/magnetic_flux_density.hpp"
+       ]
+      },
+      "F03-limiting": {
+       "n": 182,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/moment.hpp",
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/rolling_moment.hpp",
+        "bundled/boost-1.84.0/include/boost/accumulators/statistics/weighted_moment.hpp"
+       ]
+      },
+      "F04-bound-preserving": {
+       "n": 18,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/convex_hull.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/graham_andrew.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/algorithms/detail/convex_hull/interface.hpp"
+       ]
+      },
+      "F05-entropy-stable": {
+       "n": 2,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/uuid/detail/random_provider_getentropy.ipp",
+        "bundled/boost-1.84.0/include/boost/uuid/entropy_error.hpp"
+       ]
+      },
+      "F06-adaptivity": {
+       "n": 343,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor.hpp",
+        "bundled/boost-1.84.0/include/boost/align/aligned_allocator_adaptor_forward.hpp",
+        "bundled/boost-1.84.0/include/boost/asio/detail/buffer_sequence_adapter.hpp"
+       ]
+      },
+      "F07-simplex": {
+       "n": 11,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/geometry/strategies/cartesian/side_by_triangle.hpp",
+        "bundled/boost-1.84.0/include/boost/geometry/strategy/cartesian/side_by_triangle.hpp",
+        "bundled/boost-1.84.0/include/boost/random/triangle_distribution.hpp"
+       ]
+      },
+      "F08-curved": {
+       "n": 0,
+       "samples": []
+      },
+      "F09-time-integration": {
+       "n": 65,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth.hpp",
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_bashforth_moulton.hpp",
+        "bundled/boost-1.84.0/include/boost/numeric/odeint/stepper/adams_moulton.hpp"
+       ]
+      },
+      "F10-implicit": {
+       "n": 70,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/contract/core/constructor_precondition.hpp",
+        "bundled/boost-1.84.0/include/boost/hof/implicit.hpp",
+        "bundled/boost-1.84.0/include/boost/implicit_cast.hpp"
+       ]
+      },
+      "F11-parallel": {
+       "n": 827,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/asio/execution/relationship.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_on_device.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/algorithm/detail/copy_to_device.hpp"
+       ]
+      },
+      "F12-error-estimation": {
+       "n": 5,
+       "samples": [
+        "include/deal.II/numerics/error_estimator.h",
+        "include/deal.II/numerics/error_estimator.templates.h",
+        "source/numerics/error_estimator_1d.cc"
+       ]
+      },
+      "F13-multiphysics": {
+       "n": 7,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/statechart/shallow_history.hpp",
+        "include/deal.II/integrators/elasticity.h",
+        "include/deal.II/integrators/maxwell.h"
+       ]
+      },
+      "F14-dispersion": {
+       "n": 4,
+       "samples": [
+        "bundled/boost-1.84.0/include/boost/compute/interop/eigen.hpp",
+        "bundled/boost-1.84.0/include/boost/compute/interop/eigen/core.hpp",
+        "bundled/boost-1.84.0/include/boost/multiprecision/eigen.hpp"
+       ]
+      }
+     }
+    }
+   ],
+   "acceptance": "2D Poisson(SIPG) \u4e0e 2D Euler \u5404 2 \u4e2a\u7b97\u4f8b\u4e0a\uff0cDWR \u81ea\u9002\u5e94 5 \u8f6e\u540e\u76ee\u6807\u6cdb\u51fd\uff08\u963b\u529b/\u7ebf\u79ef\u5206\uff09\u8bef\u5dee <=\u540c\u81ea\u7531\u5ea6\u5747\u5300\u52a0\u5bc6\u89e3\u7684 50%\uff0c\u6548\u5e94\u6027\u6307\u6570\uff08\u4f30\u8ba1/\u771f\u8bef\u5dee\uff09\u843d\u5728 0.8~1.25 \u533a\u95f4\uff084 \u4e2a\u7b97\u4f8b\u5168\u90e8\u6ee1\u8db3\uff09\u3002",
+   "upstream_note": "curated\uff1aphilip \u7684 DWR \u4f30\u8ba1\u6d41\u7a0b\u3001firedrake/pyadjoint \u7684\u4f34\u968f\u88c5\u914d\u3001dealii \u7684\u76ee\u6807\u6cdb\u51fd\u88c5\u914d\u6a21\u5f0f\u662f\u4e09\u6761\u53c2\u8003\u8def\u7ebf\u3002\u672c\u6ce2\u672a\u8bfb\u6e90\u7801\u3002",
+   "external_anchor": "Becker & Rannacher, Acta Numerica 10 (2001)\uff08DWR \u53cc\u52a0\u6743\u6b8b\u5dee\uff09\uff1bFidkowski & Darmofal, AIAA J. 49(4) 2011\uff08output-based error estimation and mesh adaptation\uff09\u3002",
+   "impact": "\u628a\u6709\u9650\u81ea\u7531\u5ea6\u82b1\u5728\u5de5\u7a0b\u771f\u6b63\u5173\u5fc3\u7684\u91cf\uff08\u963b\u529b\u3001\u5347\u529b\u3001\u6868\u76d8\u63a8\u529b\uff09\u800c\u4e0d\u662f\u5168\u5c40 L2 \u4e0a\uff0c\u662f DG \u76f8\u8f83\u4e8c\u9636 FVM \u7684\u5356\u70b9\u80fd\u5426\u5151\u73b0\u7684\u5173\u952e\u3002"
+  }
+ ]
+}
