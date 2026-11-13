@@ -1,0 +1,111 @@
+{
+  "impl_files": [
+    "docs/board_audit/m17577/refs/impl/dtmb5415.py",
+    "docs/board_audit/m17577/refs/impl/dtmb5415_cli.py",
+    "docs/board_audit/m17577/refs/impl/tools/run_acceptance.py",
+    "docs/board_audit/m17577/refs/impl/tools/verify_geometry.py",
+    "docs/board_audit/m17577/refs/impl/tools/verify_shipped_model.py",
+    "docs/board_audit/m17577/refs/impl/tools/fit_design_space.py"
+  ],
+  "impl_files_detail": {
+    "docs/board_audit/m17577/refs/impl/dtmb5415.py": "746 行真实现：27 设计变量→位移场 d(v)=Φ·(C2·[v,vech(v⊗v)])→(girth,station) 样条细化→水密 mesh；解析 dV/dv；DATASET sha256 钉桩",
+    "docs/board_audit/m17577/refs/impl/dtmb5415_cli.py": "162 行 CLI（--config-index/--design-vector/--stl/--gradient/--gate）",
+    "docs/board_audit/m17577/refs/impl/tools/run_acceptance.py": "311 行验收入口（config0 逐点对照+20 配置几何门+梯度链）",
+    "docs/board_audit/m17577/refs/impl/tools/verify_geometry.py": "195 行 Cb/L/B/T/∇ 对标（3% 门预置）",
+    "docs/board_audit/m17577/refs/impl/tools/verify_shipped_model.py": "222 行 交付物 vs 独立重拟合一致性",
+    "docs/board_audit/m17577/refs/impl/tools/fit_design_space.py": "238 行 PCA-40+二次回归拟合器（87.7 s，npz 已入库）"
+  },
+  "entry": "docs/board_audit/m17577/refs/impl/dtmb5415_cli.py（console script tensorcad-dtmb5415，pyproject.toml:43）",
+  "run_artifacts": [
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/acceptance.json",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/geometry_validation.json",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/shipped_model_check.json",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/shipped_model_check.csv",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/sampled_configs.csv",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/gate_samples.csv",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/fig_config0_distance.png",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/fig_geometry_validation.png",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/fig_gradient_parity.png",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/fig_sections_and_volume.png",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/fit/design_space.npz",
+    "docs/board_audit/m17577/refs/artifacts/m17472_5415_param/fit/design_space_metrics.json"
+  ],
+  "tests": [
+    "tests/test_dtmb5415_param.py（m17577 独立复跑：17 passed, 6.41s）",
+    "test_point_grid_layout / test_cloud_map_matches_shipped_coefficients / test_shipped_model_holdout_accuracy / test_no_double_counted_linear_block / test_volume_gradient_matches_central_difference / test_principal_particulars_against_readme / test_cli_entry_point 等 17 项"
+  ],
+  "integration_callers": null,
+  "benchmark": null,
+  "repro_cmd": "PYTHONPATH=. python3 tools/dtmb5415_param/run_acceptance.py && PYTHONPATH=. python3 tools/dtmb5415_param/verify_geometry.py --out artifacts/m17472_5415_param && PYTHONPATH=. python3 tools/dtmb5415_param/verify_shipped_model.py --n-configs 400 --out artifacts/m17472_5415_param && PYTHONPATH=. python3 -m pytest tests/test_dtmb5415_param.py -q → m17577 独立复跑：3 个 JSON 数值逐位一致（仅 wall-clock 字段不同），2 个 CSV 逐字节一致（refs/*.sha + refs/repro_*.log）",
+  "external_anchor": {
+    "source": "Zenodo DTMB 5415 design-space dataset（Serani et al. 2025, Engineering with Computers）：9001 配置×27 变量，DTMB5415-database.mat 1086721690 B sha256=16b14ba5…364bee2（DATASET.source_sha256 钉桩）",
+    "reference_mesh": "DTMB5415_Hull_exact.stl sha256=d40b17b1…3977fd（82794 唯一顶点）"
+  },
+  "absent_reason": {
+    "integration_callers": "TensorPlatform backend/api 全量 grep：DTMB5415 仅出现在 benchmark_reference*.json 数据文件，无主求解器/平台侧代码调用方；同仓调用方仅 CLI console script 与验收工具 → L3 不满足",
+    "benchmark": "tensor_benchmark_cases 无 anchor_slug='GAP-CAD-C1-5415-PARAM-REBUILD' 行（m17577 实查 0 行；全表 55 行中 CAD 锚点仅 GAP-CAD-B2-MESH-FORMAT-MATRIX / GAP-CAD-T1-BASELINE-FLEET）→ 基准判据唯一裁判无行可裁，L4 不可确认；被审方 evidence.json 的 benchmark 节为自声明，未入台账"
+  },
+  "independent_reverification": {
+    "repro_rerun": "m17577 于被审工作树 /root/tp-agent/work/m17472 复跑完整 repro_cmd：acceptance/geometry/shipped 三 JSON 除 wall-clock 外数值逐位一致；sampled_configs.csv 与 gate_samples.csv 逐字节一致",
+    "tests_rerun": "17 passed, 6.41s（本机）",
+    "report": "tensor_reports id=16450，六段齐全，19/20 几何门在标题/§3.3/§6 三处如实披露",
+    "acceptance": {
+      "criterion_1_config0_vs_exact": {
+        "got": 0.9990216682368288,
+        "threshold": 0.95,
+        "pass": true
+      },
+      "criterion_2_sampled_gate": {
+        "got": "19/20",
+        "threshold": "20/20",
+        "pass": false,
+        "failing": "config 4895 half_breadth_non_negative（艉部中线 ~1e-6 m 越界，PCA-40 模型族限制）"
+      },
+      "criterion_3_gradient_chain": {
+        "got": 5.2795e-08,
+        "threshold": 0.01,
+        "pass": true
+      }
+    },
+    "key_numbers_vs_ref": {
+      "Lpp_m": {
+        "ref": 142.0,
+        "got": 143.264947,
+        "diff_pct": 0.891
+      },
+      "beam_m": {
+        "ref": 18.867133,
+        "got": 19.090662,
+        "diff_pct": 1.185
+      },
+      "draft_m": {
+        "ref": 6.156643,
+        "got": 6.156643,
+        "diff_pct": 0.0
+      },
+      "displacement_volume_m3": {
+        "ref": 8412.037925,
+        "got": 8452.75781,
+        "diff_pct": 0.484
+      },
+      "cb": {
+        "ref": 0.509992,
+        "got": 0.501988,
+        "diff_pct": -1.569
+      },
+      "holdout_rms_m": {
+        "ref_independent_refit": 0.25188,
+        "got": 0.2519,
+        "diff_pct": 0.0099
+      }
+    }
+  },
+  "material_defects": [
+    "tensor_benchmark_cases 无本锚点行：ref/tolerance 判据未入台账，L4 无法经基准台账确认（被审方未登记）",
+    "验收判据 2「抽样 20 配置过几何质量门」= 19/20 未达标（config 4895，被审方已如实披露，非隐瞒）",
+    "无主求解器/平台侧调用方，L3 不满足（仅同仓 CLI+验收工具）",
+    "被审分支 agent/m17472（commit 979fb83）尚未并入 origin/main（mission 状态 succeeded，合并待门禁）"
+  ],
+  "honest_disclosure": "被审方报告对 19/20 与模型有效域（数据集流形邻域）均如实披露，无粉饰；缺陷在台账登记与判据 2 未闭环",
+  "rework_recommendation": "① 向 tensor_benchmark_cases 登记本锚点行（ref=Zenodo README×λ 主尺度参数 + DTMB5415_Hull_exact.stl sha256，tolerance 按报告 §6 口径 3%）；② 修复或正式收窄判据 2（提高 PCA rank / 流形投影约束，或把判据限定在数据集流形邻域）；③ 完成后重审 L4"
+}

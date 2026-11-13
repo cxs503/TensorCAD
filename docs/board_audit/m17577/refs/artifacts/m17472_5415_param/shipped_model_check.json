@@ -1,0 +1,145 @@
+{
+  "anchor": "GAP-CAD-C1-5415-PARAM-REBUILD",
+  "purpose": "audit of the shipped reduced model against the design database",
+  "dataset": {
+    "source_sha256": "16b14ba598787eeed74eb6a10e9ea6fb701bd25496b5ccbf8a317ad6e364bee2",
+    "source_file": "/root/ship-data-official/dtmb5415/DTMB5415-database.mat",
+    "n_configurations": 9001,
+    "n_points_per_configuration": 2250
+  },
+  "shipped_artifact": {
+    "npz": "docs/data/dtmb5415/design_space.npz",
+    "metrics": {
+      "holdout_modulus": 5,
+      "n_fit": 7200,
+      "n_holdout": 1801
+    },
+    "beam_half_breadth_m": 10.2695,
+    "beam_full_m": 10.2695,
+    "note": "DTMB5415Space.beam_m is the HALF breadth of the base cloud; the full beam is 2x that (see 'beam_full_m')",
+    "mesh_resolution": {
+      "n_station_out": 133,
+      "n_girth_out": 49
+    }
+  },
+  "round_trip": {
+    "npz_keys": [
+      "base_cloud",
+      "beam_m",
+      "c1",
+      "c2",
+      "n_points",
+      "phi"
+    ],
+    "phi_shape": [
+      6750,
+      40
+    ],
+    "phi_dtype": "float32",
+    "c1_shape": [
+      27,
+      40
+    ],
+    "c2_shape": [
+      405,
+      40
+    ],
+    "base_cloud_shape": [
+      2250,
+      3
+    ],
+    "rank_matches_metrics": true,
+    "n_points_matches_grid": true,
+    "beam_m": 10.2695,
+    "base_cloud_equals_dataset_column_0": 0.0,
+    "phi_float32_rounding_m": 0.0
+  },
+  "holdout_shipped": {
+    "n_configs": 400,
+    "seed": 20261113,
+    "holdout_modulus": 5,
+    "rms_point_m": 0.2519005398484453,
+    "rms_point_pct_full_beam": 2.452899750216128,
+    "median_config_rms_m": 0.22414895464662335,
+    "p95_config_rms_m": 0.379710652193835,
+    "worst_config_rms_m": 0.6769943334100903,
+    "median_config_max_m": 1.204972612462317,
+    "p95_config_max_m": 2.709350217637271,
+    "worst_config_max_m": 4.572969830035907
+  },
+  "holdout_independent_refit": {
+    "rank": 40,
+    "rms_point_m": 0.2518754943921394,
+    "rms_point_pct_full_beam": 2.452655868271478,
+    "agrees_with_shipped_pct": 0.009942597312793278
+  },
+  "round0_defect_baseline": {
+    "description": "amplitudes with the linear block counted twice (c1 v + c2 [v, vech]) as shipped in round 0",
+    "rms_point_m": 0.83303272361081,
+    "rms_point_pct_full_beam": 8.11171647705156,
+    "ratio_vs_fixed": 3.3069906246012812
+  },
+  "worst_configs": [
+    {
+      "config_index": 5730,
+      "rms_m": 0.6769943334100903,
+      "max_m": 4.572969830035907,
+      "rms_pct_full_beam": 6.592281351673306
+    },
+    {
+      "config_index": 3650,
+      "rms_m": 0.6712241130511615,
+      "max_m": 4.483354486866586,
+      "rms_pct_full_beam": 6.536093413030444
+    },
+    {
+      "config_index": 5790,
+      "rms_m": 0.6208797846588501,
+      "max_m": 3.7589734190702475,
+      "rms_pct_full_beam": 6.045861869213205
+    },
+    {
+      "config_index": 4000,
+      "rms_m": 0.5677121816087789,
+      "max_m": 3.4600634635915384,
+      "rms_pct_full_beam": 5.528138483945459
+    },
+    {
+      "config_index": 6655,
+      "rms_m": 0.45723114316325136,
+      "max_m": 3.1191838408673336,
+      "rms_pct_full_beam": 4.452321370692355
+    },
+    {
+      "config_index": 520,
+      "rms_m": 0.45445145081967114,
+      "max_m": 2.2254220769789392,
+      "rms_pct_full_beam": 4.425253915182542
+    },
+    {
+      "config_index": 1655,
+      "rms_m": 0.45123889248975857,
+      "max_m": 3.140911870157462,
+      "rms_pct_full_beam": 4.39397139578128
+    },
+    {
+      "config_index": 7570,
+      "rms_m": 0.44951856237368937,
+      "max_m": 2.9982398015727023,
+      "rms_pct_full_beam": 4.377219556684253
+    },
+    {
+      "config_index": 2085,
+      "rms_m": 0.448870097287142,
+      "max_m": 2.5285825636191186,
+      "rms_pct_full_beam": 4.3709050809400845
+    },
+    {
+      "config_index": 2480,
+      "rms_m": 0.432317464006088,
+      "max_m": 2.8138819442602285,
+      "rms_pct_full_beam": 4.209722615571235
+    }
+  ],
+  "wall_clock_s": 66.7
+}
