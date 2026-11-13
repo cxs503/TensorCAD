@@ -150,12 +150,19 @@ GRID = {"n_girth": 25, "n_station": 45, "n_patches": 2, "patch_names": ("fore", 
 #: Refinement of the parametric surface used for the mesh (per patch).
 MESH_RESOLUTION = {"n_station_out": 133, "n_girth_out": 49}
 
-#: Design waterline used by :meth:`DTMB5415Space.hydrostatics`.  Derived, not quoted: the
-#: plane at which the integrated displaced volume of the baseline hull equals the full-scale
-#: volume implied by the README model-scale table,
-#: ``0.549 t / 998.5 kg/m^3 * (142 / 5.720)**3 = 8412 m^3``.  See
-#: ``tools/dtmb5415_param/verify_geometry.py``.
-WATERLINE_Z = 6.055
+#: Scale factor of the shipped database: the record's README table is at model scale
+#: (Lpp = 5.720 m), the geometry itself is full scale (Lpp = 142 m).
+SCALE_LAMBDA = 142.0 / 5.720
+
+#: Design draft used by :meth:`DTMB5415Space.hydrostatics`, measured from the baseline
+#: (z = 0; the bulb hangs below, z_keel = -3.28 m).  Taken straight from the README table
+#: scaled to full size: ``0.248 m * 142 / 5.720 = 6.1566 m``.  It is deliberately *not*
+#: back-solved from a target displacement -- that made round 0 circular (the waterline was
+#: tuned to a volume, then the volume was "validated" against it) and carried a t / (kg/m^3)
+#: unit slip that made the target 1000x too small (see git history of this constant).
+#: Geometry validation against the README table: ``tools/dtmb5415_param/verify_geometry.py``.
+DRAFT_M = 0.248 * SCALE_LAMBDA
+WATERLINE_Z = DRAFT_M
 
 _DATA_DIR = Path(__file__).resolve().parent.parent / "docs" / "data" / "dtmb5415"
 
@@ -321,7 +328,10 @@ class DTMB5415Space:
         self.c1 = np.asarray(npz["c1"], dtype=np.float64).T                  # (n_modes, 27)
         self.c2 = np.asarray(npz["c2"], dtype=np.float64).T                  # (n_modes, 405)
         self.base_cloud = np.asarray(npz["base_cloud"], dtype=np.float64)   # (2250, 3)
+        # ``beam_m`` in the artifact is the HALF breadth of the base cloud (max |y|);
+        # the moulded beam at the design waterline is 2x that (see ``beam_full_m``).
         self.beam_m = float(npz["beam_m"])
+        self.beam_full_m = 2.0 * self.beam_m
         self.n_modes, self.n_variables = self.c1.shape
         metrics_path = directory / "design_space_metrics.json"
         self.metrics: dict[str, Any] = (
@@ -362,14 +372,20 @@ class DTMB5415Space:
         return (v[:, None] * v[None, :])[self._tri_iu]
 
     def _amplitudes(self, v: Any) -> Any:
-        """Modal amplitudes ``C1 v + C2 (v (x) v)`` for a 27-vector ``v``."""
-        import numpy as np
+        """Modal amplitudes for a 27-vector ``v``, shape ``(n_modes,)``.
 
+        Model: ``a(v) = C2 @ [v, vech(v v^T)]``.  ``C2`` was least-squares fitted on the
+        full 405-column feature matrix, whose **first 27 columns are ``v`` itself** — so
+        the linear part is already inside ``C2``.  ``C1`` (``design_space.npz: c1``) is the
+        separate linear-only model M1 kept for diagnostics; adding ``C1 v`` here would
+        count the linear term twice (round-0 defect: holdout RMS 0.833 m instead of
+        0.252 m and 14/20 sampled configurations failing the geometry gate).
+        """
         import numpy as np
 
         v = self._check(v)
-        features = np.concatenate([v, self._quadratic(v)])       # 27 + 378, as fitted
-        return self.c1 @ v + self.c2 @ features
+        features = np.concatenate([v, self._quadratic(v)])       # 27 + 378 = 405, as fitted
+        return self.c2 @ features
 
     def _d_amplitudes(self, v: Any) -> Any:
         """Exact ``d a / d v``, shape ``(n_modes, 27)``."""
@@ -383,7 +399,8 @@ class DTMB5415Space:
             dq[:, k] = (np.outer(e, v) + np.outer(v, e)).ravel()
         iu, ju = self._tri_iu
         d_features = np.vstack([np.eye(self.n_variables), dq[iu * self.n_variables + ju]])
-        return self.c1 + self.c2 @ d_features
+        # C2 already contains the linear block (see _amplitudes); C1 must not be added.
+        return self.c2 @ d_features
 
     def _check(self, v: Any) -> Any:
         import numpy as np
@@ -560,12 +577,14 @@ class DTMB5415Space:
         dV_dX[:-1] -= 0.5 * (area[:-1] + area[1:])
         dV_dX[1:] += 0.5 * (area[:-1] + area[1:])
         G = np.zeros((area.size, n_girth_out, 3))
-        # x enters the integral through the girth-mean station position, so each vertex
-        # carries 1 / n_girth of it
-        G[:, :, 0] = dV_dX[:, None] / float(n_girth_out)
+        # V = 2 * sum_i 0.5 (A_i + A_i+1) dx_i, so the mirror factor 2 is already inside the
+        # trapezoid weights dV_dA = dx_(i-1) + dx_i; it still has to be applied to the x
+        # weights dV_dX = +-0.5 (A_i + A_i+1), which were written with the 0.5 kept explicit.
+        # (Round 0 applied `G *= 2.0` to everything: dV/dv came out exactly 2x the central
+        # difference -- see tools/dtmb5415_param/run_acceptance.py, acceptance 3.)
+        G[:, :, 0] = 2.0 * dV_dX[:, None] / float(n_girth_out)
         G[:, :, 1] = dV_dA[:, None] * dA_dy
         G[:, :, 2] = dV_dA[:, None] * dA_dz
-        G *= 2.0
         # scatter back to (patch, station) layout and then to the flattened vertex order
         G_patch = np.empty((2, n_station_out, n_girth_out, 3))
         G_patch[1][sa] = G[:n_station_out]

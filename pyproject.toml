@@ -40,6 +40,7 @@ Issues = "https://github.com/cxs503/TensorCAD/issues"
 tensorcad-hull = "tensorcad.cli:main"
 tensorcad-parametric-hull = "tensorcad.parametric_hull_cli:main"
 tensorcad-neural = "tensorcad.cli_neural:main"
+tensorcad-dtmb5415 = "tensorcad.dtmb5415_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["tensorcad*"]

@@ -20,7 +20,7 @@ import numpy as np
 
 from tensorcad.dtmb5415 import DATASET, REFERENCE, WATERLINE_Z, DTMB5415Space
 
-OUT = Path("runs/m17352_5415_param")
+OUT = Path("artifacts/m17472_5415_param")
 DATASET_MAT = "/root/ship-data-official/dtmb5415/DTMB5415-database.mat"
 HOLDOUT_MODULUS = 5          # same split as the fit
 N_SAMPLED = 20
@@ -143,7 +143,8 @@ def main() -> None:
             "config_index": int(k),
             "rms_point_m": float(np.sqrt((err ** 2).mean())),
             "max_point_m": float(err.max()),
-            "rms_pct_beam": float(100 * np.sqrt((err ** 2).mean()) / space.beam_m),
+            "rms_pct_beam": float(100 * np.sqrt((err ** 2).mean()) / space.beam_full_m),
+            "rms_pct_half_beam": float(100 * np.sqrt((err ** 2).mean()) / space.beam_m),
             "edge_median_m": q["edge_median_m"], "min_angle_deg": q["min_angle_deg"],
             "aspect_p99": q["aspect_p99"], "boundary_edges": q["boundary_edges"],
             "degenerate_faces": q["degenerate_faces"],
@@ -152,6 +153,7 @@ def main() -> None:
             "volume_m3": space.volume(v),
             "displacement_m3": h["displacement_volume_m3"], "cb": h["cb"],
             "beam_wl_m": h["beam_waterline_m"], "gate_pass": ok,
+            "checks_failed": [c["check"] for c in g if not c["ok"]],
         })
         gate_rows.append({"config_index": int(k), "checks": g, "pass": ok})
     # a second, harder sample: corners of the box [-1, 1]^27 sampled uniformly
@@ -209,6 +211,30 @@ def main() -> None:
                            "n_pass": int(sum(r["gate_pass"] for r in uni_rows)),
                            "rows": uni_rows},
                        "gradient_chain": grad},
+        "criteria": {
+            "acceptance_1_config0_vs_exact": {
+                "criterion": ">95% of DTMB5415_Hull_exact vertices within the config-0 mesh "
+                             "resolution",
+                "value": acc1["frac_within_resolution"], "threshold": 0.95,
+                "pass": acc1["pass"]},
+            "acceptance_2_sampled_gate": {
+                "criterion": "20 sampled dataset configurations pass the geometry quality gate",
+                "value": f'{sum(r["gate_pass"] for r in rows)}/{len(rows)}',
+                "threshold": "20/20",
+                "pass": bool(all(r["gate_pass"] for r in rows))},
+            "acceptance_3_gradient_chain": {
+                "criterion": "analytic dV/dv within 1% of central difference, all 27 variables",
+                "value": grad["volume_gradient_max_rel_err"], "threshold": 0.01,
+                "pass": grad["volume_gradient_pass"],
+                "vertex_jacobian_exact": grad["vertex_jacobian_exact"]},
+        },
+        "model": {
+            "shipped_holdout_rms_m": space.metrics.get(
+                "M3_pca_quadratic_shipped", {}).get("holdout", {}).get("rms_point_m"),
+            "beam_full_m": space.beam_full_m, "beam_half_m": space.beam_m,
+            "note": "geometry quality gate uses the full-beam percentage; the round-0 report "
+                    "divided by the half breadth and double counted the linear modal block",
+        },
         "wall_clock_s": None,
     }
     (OUT / "acceptance.json").write_text(json.dumps(result, indent=2))
@@ -216,7 +242,8 @@ def main() -> None:
         keys = list(rows[0])
         fh.write(",".join(keys) + "\n")
         for r in rows:
-            fh.write(",".join(f"{r[k]:.6g}" if isinstance(r[k], float) else str(r[k])
+            fh.write(",".join(f"{r[k]:.6g}" if isinstance(r[k], float)
+                              else "|".join(r[k]) if isinstance(r[k], list) else str(r[k])
                               for k in keys) + "\n")
     with open(OUT / "gate_samples.csv", "w") as fh:
         fh.write("sample,gate_pass,volume_m3,cb,displacement_m3,min_angle_deg,failed\n")
