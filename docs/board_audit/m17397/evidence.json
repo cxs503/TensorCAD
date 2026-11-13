@@ -1,0 +1,42 @@
+{
+  "impl_files": [
+    "tensorcad/series60.py (commit db0238e, 1206 lines: Series60Parameters with transom_ratio + bulb_length/area/centre_height_ratio, cosine keel clustering, VCB sign fix)",
+    "tensorcad/cli.py (commit db0238e: --family series60 entry)",
+    "tensorcad/__init__.py (commit db0238e: series60 export)",
+    "tools/series60_family/delivery_page.py (commit db0238e, 284 lines)"
+  ],
+  "entry": "tensorcad-hull --family series60 --cb .70 --cwp .753 --lcb .490 --transom-ratio .12 --bulb-* --gate --stl (tested in tests/test_series60_cli.py, commit db0238e)",
+  "run_artifacts": [
+    "docs/m17317/artifacts/series60_family/five_cb_gradient.json (commit db0238e)",
+    "docs/m17317/artifacts/series60_family/transom_sweep.json",
+    "docs/m17317/artifacts/series60_family/bulb_sweep.json",
+    "docs/m17317/artifacts/gate_power_series60.json (14/14 mutants status=ok)",
+    "docs/m17317/artifacts/test_run.log",
+    "docs/m17317/delivery_manifest.json",
+    "work/s60chk/hull.obj, metadata.json, offsets.csv",
+    "work/s60cli/hull.obj, hull.stl, metadata.json, offsets.csv"
+  ],
+  "tests": [
+    "tests/test_series60_cli.py (commit db0238e, 85 lines: CLI reaches family, gate refuses 3-level grid, invalid combos)",
+    "tests/test_series60_bulb_transom.py + test_series60.py + _fidelity + _gz_verification + _stations_published_comparison + test_hull.py -> 157 passed (43.4s, per m17317 result)",
+    "tools/hull_gate_power/mutate.py --only S60-1..S60-14 -> 14/14 killed (baseline 56 passed)"
+  ],
+  "integration_callers": "NONE in main. commit db0238e (m17317) is NOT an ancestor of HEAD; pr_gate=null (no PR merge). The CLI/__init__/delivery_page/run_artifacts exist only in the unmerged commit. No downstream solver/API/ship-platform caller in main.",
+  "benchmark": {
+    "registry_case": "tensor_benchmark_cases rows for anchor_slug='GAP-CAD-T2-PARAM-SERIES' = 0 -> no registered ref/tolerance; the 3% bar is code-internal (tools/series60_family/audit.py TOLERANCE=0.03), not platform-registered",
+    "ref_vs_got": "five_cb_gradient.json: model vs published parents, all 5 Cb x 5 coefficients within 3% (worst +0.34% midship @Cb=0.8); but the Cp/Cm are hardcoded in _PARENT_FORMS so this is closure-check of the published table's own Cb=Cp*Cm, not independent external verification",
+    "worst_relative_error": 0.003449
+  },
+  "repro_cmd": "python3 tools/series60_family/audit.py (writes docs/m17317/artifacts/series60_family/*; exists in commit db0238e, NOT in main)",
+  "external_anchor": {
+    "published_particulars": "Todd 1951 Series 60 parent forms (Cb/Cm/Cp/Cwp/LCB) in docs/data/series60_published_parents.json; provenance = inherited repo doc chain, no fresh fetch (sandbox no network)",
+    "NOT_AVAILABLE": "no issuing-body offset table / experimental hydrostatics ingested; no independent external geometry truth"
+  },
+  "critical_findings": [
+    "NOT MERGED: commit db0238e (m17317) is not an ancestor of HEAD; pr_gate=null. The 'succeeded' is TP_AUTO_APPROVE_DEV_ACCEPTANCE without merge verification. All m17317 deliverables exist only in the unmerged commit, not in main.",
+    "FORCED_FINISH: fail_stage=budget_exhausted+forced_finish; some checks not run (HUL/ANA old 10 mutants, cluster artifacts, vs-test-value comparison).",
+    "L3 NOT MET: no integration into main (no downstream consumer).",
+    "L4 NOT MET: tensor_benchmark_cases has 0 rows for the anchor; no registered tolerance.",
+    "ref-vs-got is closure-check, not independent external verification (Cp/Cm hardcoded in _PARENT_FORMS)."
+  ]
+}
