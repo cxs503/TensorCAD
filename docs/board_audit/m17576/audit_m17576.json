@@ -1,0 +1,169 @@
+{
+  "anchor": "GAP-CAD-B3-SOLVER-INTERFACE",
+  "audited_mission": 17476,
+  "audit_mission": 17576,
+  "subject": "/root/tp-agent/work/m17476",
+  "impl": {
+    "path": "tensorcad/solver_interface.py",
+    "lines": 1854,
+    "bytes": 75759,
+    "placeholder_hits": [],
+    "entry_main_line": 1824,
+    "run_functions": {
+      "bem_added_mass": 929,
+      "fem_plate": 1160,
+      "lbm_channel": 1393
+    },
+    "contract_line": 76,
+    "solver_api_calls": {
+      "tensorbem.compute_added_mass_matrix_3d": 989,
+      "tensorbem.TriangleMesh": 986,
+      "tensorfem.plate.q4_mindlin_stiffness": 1234,
+      "tensorfem.plate.kirchhoff_sine_center_deflection": 1185,
+      "tensorlbm.collide_bgk": 1478,
+      "tensorlbm.macroscopic": 1479
+    }
+  },
+  "entry": {
+    "module_entry": "tensorcad/solver_interface.py:1824 -> PYTHONPATH=. python -m tensorcad.solver_interface --out <dir>",
+    "package_export_line": 74,
+    "export_names": [
+      "CONTRACT_FRAME",
+      "FRAME_CONTRACT_ID",
+      "FrameContractError",
+      "GeometryBundle",
+      "SolverInterfaceError",
+      "SolverUnavailableError",
+      "bundle_from_mesh",
+      "frame_of",
+      "run_bem_added_mass",
+      "run_fem_plate",
+      "run_lbm_channel"
+    ]
+  },
+  "contract": {
+    "contract_id": "tensorcad.solver-frame/1",
+    "contract_frame": "x-aft / y-starboard / z-up",
+    "refuses_wrong_frame": true,
+    "refuses_wrong_units": true,
+    "accepts_contract_frame": true
+  },
+  "artifacts": {
+    "statuses": {
+      "tensorbem": "ran",
+      "tensorfem": "ran",
+      "tensorlbm": "ran"
+    },
+    "ran": [
+      "tensorbem",
+      "tensorfem",
+      "tensorlbm"
+    ],
+    "gates_failed": [],
+    "comparisons": 29,
+    "gated_rows": 24,
+    "failed_gated_rows": [],
+    "rel_error_recomputed_mismatches": [],
+    "artifact_files": [
+      "bem/manifest_16.json",
+      "bem/manifest_24.json",
+      "bem/panels_16.json",
+      "bem/panels_24.json",
+      "bem/run.json",
+      "convergence.png",
+      "fem/plate_16x16.json",
+      "fem/plate_8x8.json",
+      "fem/run.json",
+      "lbm/lattice_16.json",
+      "lbm/lattice_8.json",
+      "lbm/run.json",
+      "lbm/voxels_16.json",
+      "lbm/voxels_8.json",
+      "lbm_profile.png",
+      "results.json"
+    ],
+    "solver_files_recorded": {
+      "tensorbem": "/root/tp-agent/work/m17241/src/tensorbem/__init__.py",
+      "tensorfem": "/root/tp-agent/work/m17361/src/tensorfem/plate.py",
+      "tensorlbm": "/root/tp-agent/work/m17457/TensorLBM/src/tensorlbm/__init__.py"
+    },
+    "solver_versions_recorded": {
+      "tensorbem": "0.5.0",
+      "tensorfem": null,
+      "tensorlbm": null
+    },
+    "environment": {
+      "python": "3.11.6",
+      "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+      "contract": {
+        "identifier": "tensorcad.solver-frame/1",
+        "units": "m",
+        "coordinate_frame": "x-aft / y-starboard / z-up",
+        "handedness": "right-handed",
+        "forward": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "starboard": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "up": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "axes": {
+          "x": "+x aft -> fore (station, +x towards the bow)",
+          "y": "+y port -> starboard (+y to starboard)",
+          "z": "+z keel -> up (+z up; a submerged point has z < 0 in a waterline frame)"
+        },
+        "rotation": "no adapter applies a rotation; a solver whose native frame differs converts explicitly and records the matrix, and a 2-D solver records an axis map instead"
+      },
+      "modules": {
+        "numpy": {
+          "available": true,
+          "version": "2.4.6",
+          "file": "/usr/lib64/python3.11/site-packages/numpy/__init__.py"
+        },
+        "torch": {
+          "available": true,
+          "version": "2.7.1",
+          "file": "/usr/lib64/python3.11/site-packages/torch/__init__.py"
+        },
+        "tensorbem": {
+          "available": true,
+          "version": "0.5.0",
+          "file": "/root/tp-agent/work/m17241/src/tensorbem/__init__.py"
+        },
+        "tensorfem": {
+          "available": true,
+          "version": "0.45.0",
+          "file": "/root/tp-agent/work/m17361/src/tensorfem/__init__.py"
+        },
+        "tensorlbm": {
+          "available": true,
+          "version": "unknown",
+          "file": "/root/tp-agent/work/m17457/TensorLBM/src/tensorlbm/__init__.py"
+        }
+      }
+    }
+  },
+  "callers": {
+    "in_repo_benchmark_case": 2260,
+    "benchmark_calls": {
+      "bem_added_mass": 2283,
+      "fem_plate": 2284,
+      "lbm_channel": 2285
+    },
+    "package_export": 74,
+    "platform_side_callers": [
+      "/root/tensor-ecosystem/TensorPlatform/backend/uploads/tensor_report_ledger/payloads/3e706da0d99d41fd8b676554401851fb.json",
+      "/root/tensor-ecosystem/TensorPlatform/backend/uploads/tensor_report_ledger/payloads/c455aaa869d84cdf81603c858922a470.json",
+      "/root/tensor-ecosystem/TensorPlatform/backend/uploads/tensor_report_ledger/payloads/10a36d538ba14fe6820b0fdbda2b1120.json"
+    ]
+  },
+  "docs_present": true
+}
