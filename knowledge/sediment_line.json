@@ -8,18 +8,31 @@
       "claim": "Cb = n m/((n+1)(m+1)); 4/9 at n = m = 2 (the classic Wigley form).",
       "kind": "analytic_identity",
       "acceptance": "live closed form equals 4/9 to 1e-15 relative; docs/wigley.md still tabulates the same expression and the 4/9 value",
-      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "closed-form"
+      ],
       "probes": [
         {
           "call": "tensorcad.wigley:analytic_block_coefficient",
-          "args": [2.0, 2.0],
+          "args": [
+            2.0,
+            2.0
+          ],
           "expected": 0.4444444444444444,
           "rel_tol": 1e-15
         }
       ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "`n m/((n+1)(m+1))`"},
-        {"path": "docs/wigley.md", "contains": "`4/9`"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "`n m/((n+1)(m+1))`"
+        },
+        {
+          "path": "docs/wigley.md",
+          "contains": "`4/9`"
+        }
       ]
     },
     {
@@ -28,29 +41,43 @@
       "claim": "Cp = n/(n+1) = 2/3, Cm = m/(m+1) = 2/3, Cwp = n/(n+1) = 2/3, and 2/3*2/3 = 4/9 = Cb (the module's cheapest self-check).",
       "kind": "analytic_identity",
       "acceptance": "each coefficient equals 2/3 to 1e-15 relative; the product of the two live values equals the live Cb to 1e-15 relative",
-      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "closed-form"
+      ],
       "probes": [
         {
           "call": "tensorcad.wigley:analytic_prismatic_coefficient",
-          "args": [2.0, 2.0],
+          "args": [
+            2.0,
+            2.0
+          ],
           "expected": 0.6666666666666666,
           "rel_tol": 1e-15
         },
         {
           "call": "tensorcad.wigley:analytic_midship_coefficient",
-          "args": [2.0],
+          "args": [
+            2.0
+          ],
           "expected": 0.6666666666666666,
           "rel_tol": 1e-15
         },
         {
           "call": "tensorcad.wigley:analytic_waterplane_coefficient",
-          "args": [2.0],
+          "args": [
+            2.0
+          ],
           "expected": 0.6666666666666666,
           "rel_tol": 1e-15
         }
       ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "`n/(n+1)`"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "`n/(n+1)`"
+        }
       ]
     },
     {
@@ -59,17 +86,30 @@
       "claim": "V = 4 L B T / 9 = 2.7777... m^3 for L = 10 m, B = 1 m, T = 0.625 m.",
       "kind": "analytic_identity",
       "acceptance": "live closed form equals 25/9 to 1e-15 relative",
-      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "closed-form"
+      ],
       "probes": [
         {
           "call": "tensorcad.wigley:analytic_volume",
-          "args": [10.0, 1.0, 0.625, 2.0, 2.0],
+          "args": [
+            10.0,
+            1.0,
+            0.625,
+            2.0,
+            2.0
+          ],
           "expected": 2.7777777777777777,
           "rel_tol": 1e-15
         }
       ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "`4LBT/9`"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "`4LBT/9`"
+        }
       ]
     },
     {
@@ -78,17 +118,28 @@
       "claim": "Awp = L B n/(n+1) = 2 L B / 3 = 6.6667 m^2 for L = 10 m, B = 1 m (n = 2).",
       "kind": "analytic_identity",
       "acceptance": "live closed form equals 20/3 to 1e-15 relative",
-      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "closed-form"
+      ],
       "probes": [
         {
           "call": "tensorcad.wigley:analytic_waterplane_area",
-          "args": [10.0, 1.0, 2.0],
+          "args": [
+            10.0,
+            1.0,
+            2.0
+          ],
           "expected": 6.666666666666667,
           "rel_tol": 1e-15
         }
       ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "`2LB/3`"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "`2LB/3`"
+        }
       ]
     },
     {
@@ -97,17 +148,27 @@
       "claim": "VCB = T - T(m+1)/(2(m+2)) = 5T/8 = 0.390625 m for T = 0.625 m.",
       "kind": "analytic_identity",
       "acceptance": "live closed form equals 0.390625 to 1e-15 relative",
-      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "closed-form"
+      ],
       "probes": [
         {
           "call": "tensorcad.wigley:analytic_vertical_centre_buoyancy",
-          "args": [0.625, 2.0],
+          "args": [
+            0.625,
+            2.0
+          ],
           "expected": 0.390625,
           "rel_tol": 1e-15
         }
       ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "`5T/8`"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "`5T/8`"
+        }
       ]
     },
     {
@@ -116,17 +177,28 @@
       "claim": "S = 14.879063105 m^2 for L = 10 m, B = 1 m, T = 0.625 m; the value quoted in the module doc is the quadrature result actually returned.",
       "kind": "analytic_identity",
       "acceptance": "live composite Gauss-Legendre value equals the documented 14.879063105 m^2 to 1e-9 relative (the doc quotes 10 significant figures)",
-      "tags": ["hydrostatics", "wigley", "quadrature"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "quadrature"
+      ],
       "probes": [
         {
           "call": "tensorcad.wigley:analytic_wetted_surface_area",
-          "args": [10.0, 1.0, 0.625],
+          "args": [
+            10.0,
+            1.0,
+            0.625
+          ],
           "expected": 14.879063104957783,
-          "rel_tol": 1e-9
+          "rel_tol": 1e-09
         }
       ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "14.879063105 m^2"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "14.879063105 m^2"
+        }
       ]
     },
     {
@@ -135,9 +207,16 @@
       "claim": "The default grid integrates V = 2.7712221 m^3, i.e. -0.236 % against the closed form 25/9 -- the discretisation error that the convergence table reports.",
       "kind": "audit_measurement",
       "acceptance": "docs/wigley.md convergence table still reports the default-grid volume 2.7712221 m^3 (doc drift detector; the value is a mesh measurement, so it is pinned in prose, not recomputed by the guard)",
-      "tags": ["hydrostatics", "wigley", "convergence"],
+      "tags": [
+        "hydrostatics",
+        "wigley",
+        "convergence"
+      ],
       "docs": [
-        {"path": "docs/wigley.md", "contains": "**2.7712221**"}
+        {
+          "path": "docs/wigley.md",
+          "contains": "**2.7712221**"
+        }
       ]
     },
     {
@@ -146,7 +225,11 @@
       "claim": "V = B L T I 2/3 = 7.512698 m^3 with taper integral I = 0.7043154582422714, matching the mesh route (7.446554 m^3, -0.88 %) recorded in the m241 audit.",
       "kind": "analytic_identity",
       "acceptance": "live taper integral equals 0.7043154582422714 to 1e-15 relative; the audit artifact still records analytic 7.512698 and mesh 7.446554; README still quotes both",
-      "tags": ["hydrostatics", "parametric-hull", "audit"],
+      "tags": [
+        "hydrostatics",
+        "parametric-hull",
+        "audit"
+      ],
       "probes": [
         {
           "call": "tensorcad.hydrostatics_analytic:taper_integral",
@@ -177,7 +260,10 @@
         }
       ],
       "docs": [
-        {"path": "README.md", "contains": "7.446554 m^3  (analytic form: 7.512698)"}
+        {
+          "path": "README.md",
+          "contains": "7.446554 m^3  (analytic form: 7.512698)"
+        }
       ]
     },
     {
@@ -186,7 +272,11 @@
       "claim": "On 24 order-4 elements (2x2 subdivisions per knot span) the volume is 4.1887910675460525 m^3 against 4/3 pi = 4.1887902047863905 m^3, a relative error of 2.06e-7, i.e. the benchmark gate J3 criterion (<= 1e-6) holds with 5x margin.",
       "kind": "benchmark_gate",
       "acceptance": "pinned artifact values reproduced exactly at their JSON pointers and gate J3 recorded as passed",
-      "tags": ["high-order", "geometry", "benchmark"],
+      "tags": [
+        "high-order",
+        "geometry",
+        "benchmark"
+      ],
       "artifacts": [
         {
           "path": "benchmarks/verified/cad_highorder_geometry/result.json",
@@ -214,7 +304,11 @@
       "claim": "Volume 4.188790205131541 m^3, relative error 8.24e-11 -- three more digits than the order-4 row, which is the p-refinement evidence the gate J6 fitted order is built on.",
       "kind": "benchmark_gate",
       "acceptance": "pinned artifact values reproduced exactly at their JSON pointers",
-      "tags": ["high-order", "geometry", "benchmark"],
+      "tags": [
+        "high-order",
+        "geometry",
+        "benchmark"
+      ],
       "artifacts": [
         {
           "path": "benchmarks/verified/cad_highorder_geometry/result.json",
@@ -236,32 +330,60 @@
       "claim": "For the example barge B = 2.0 m, T = 0.8 m, D = 1.2 m, KG = 0.55 m the clipped-section solver returns GZ(45 deg) = 0.1755981839946591 m in the bilge-and-deck regime and GZ(80 deg) = 0.09125182565735745 m -- the range of stability the one-line wall-sided formula cannot describe.",
       "kind": "exact_section",
       "acceptance": "live exact section values equal the two documented arms to 1e-12 relative; the quoted doc sentences survive",
-      "tags": ["stability", "box", "exact"],
+      "tags": [
+        "stability",
+        "box",
+        "exact"
+      ],
       "probes": [
         {
           "call": "tensorcad.box_gz:box_gz",
-          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 45.0},
+          "kwargs": {
+            "breadth": 2.0,
+            "draft": 0.8,
+            "depth": 1.2,
+            "kg": 0.55,
+            "heel_deg": 45.0
+          },
           "attr": "righting_arm",
           "expected": 0.1755981839946591,
           "rel_tol": 1e-12
         },
         {
           "call": "tensorcad.box_gz:box_gz",
-          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 45.0},
+          "kwargs": {
+            "breadth": 2.0,
+            "draft": 0.8,
+            "depth": 1.2,
+            "kg": 0.55,
+            "heel_deg": 45.0
+          },
           "attr": "regime",
           "expected": "bilge_and_deck"
         },
         {
           "call": "tensorcad.box_gz:box_gz",
-          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 80.0},
+          "kwargs": {
+            "breadth": 2.0,
+            "draft": 0.8,
+            "depth": 1.2,
+            "kg": 0.55,
+            "heel_deg": 80.0
+          },
           "attr": "righting_arm",
           "expected": 0.09125182565735745,
           "rel_tol": 1e-12
         }
       ],
       "docs": [
-        {"path": "docs/box_inclined_exact.md", "contains": "`0.175598 m` at `45°`"},
-        {"path": "docs/box_inclined_exact.md", "contains": "`0.091252 m` at"}
+        {
+          "path": "docs/box_inclined_exact.md",
+          "contains": "`0.175598 m` at `45\u00b0`"
+        },
+        {
+          "path": "docs/box_inclined_exact.md",
+          "contains": "`0.091252 m` at"
+        }
       ]
     },
     {
@@ -270,25 +392,45 @@
       "claim": "At 10 deg the one-line wall-sided formula gives 0.04743095798991253 m and the clipped-section solver 0.04743095798991254 m: the closed form is exact there, which is why it may be used for the 1-15 deg band.",
       "kind": "exact_section",
       "acceptance": "both routes equal their recorded arms to 1e-12 relative and agree with each other to 1e-12 relative",
-      "tags": ["stability", "box", "cross-check"],
+      "tags": [
+        "stability",
+        "box",
+        "cross-check"
+      ],
       "probes": [
         {
           "call": "tensorcad.gz:box_righting_arms_analytic",
-          "args": [2.0, 0.8, 0.55, [10.0]],
+          "args": [
+            2.0,
+            0.8,
+            0.55,
+            [
+              10.0
+            ]
+          ],
           "index": 0,
           "expected": 0.04743095798991253,
           "rel_tol": 1e-12
         },
         {
           "call": "tensorcad.box_gz:box_gz",
-          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 10.0},
+          "kwargs": {
+            "breadth": 2.0,
+            "draft": 0.8,
+            "depth": 1.2,
+            "kg": 0.55,
+            "heel_deg": 10.0
+          },
           "attr": "righting_arm",
           "expected": 0.04743095798991254,
           "rel_tol": 1e-12
         }
       ],
       "docs": [
-        {"path": "docs/box_inclined_exact.md", "contains": "wall-sided closed form"}
+        {
+          "path": "docs/box_inclined_exact.md",
+          "contains": "wall-sided closed form"
+        }
       ]
     },
     {
@@ -297,11 +439,18 @@
       "claim": "box_wall_sided_limit_deg(2.0, 0.8) = 38.659808254090095 deg = atan(0.8): past it the deck edge or bilge enters and the one-line formula stops being the answer.",
       "kind": "exact_section",
       "acceptance": "live limit angle equals atan(0.8) to 1e-12 relative",
-      "tags": ["stability", "box", "validity-window"],
+      "tags": [
+        "stability",
+        "box",
+        "validity-window"
+      ],
       "probes": [
         {
           "call": "tensorcad.gz:box_wall_sided_limit_deg",
-          "args": [2.0, 0.8],
+          "args": [
+            2.0,
+            0.8
+          ],
           "expected": 38.659808254090095,
           "rel_tol": 1e-12
         }
@@ -313,10 +462,75 @@
       "claim": "Voxel integration of the SUBOFF bare hull gives 0.698982 m^3 against the published 0.699211 m^3 (-0.033 %), while hard cell counting is +1.18 % -- the partial-fill estimator is what makes the voxel route usable as a geometry source.",
       "kind": "audit_measurement",
       "acceptance": "docs/voxel_export.md still quotes both the measured 0.698982 m^3 and the published 0.699211 m^3 (doc drift detector; the grid is a 218x26x26 measurement, not recomputed by the guard)",
-      "tags": ["voxel", "suboff", "verification"],
+      "tags": [
+        "voxel",
+        "suboff",
+        "verification"
+      ],
       "docs": [
-        {"path": "docs/voxel_export.md", "contains": "0.698982"},
-        {"path": "docs/voxel_export.md", "contains": "0.699211"}
+        {
+          "path": "docs/voxel_export.md",
+          "contains": "0.698982"
+        },
+        {
+          "path": "docs/voxel_export.md",
+          "contains": "0.699211"
+        }
+      ]
+    },
+    {
+      "id": "nurbs_intersect.sphere_plane_circle",
+      "title": "NURBS x NURBS intersection: sphere x plane / sphere x sphere land on the analytic circle",
+      "claim": "Oriented-distance march + 4-parameter Gauss-Newton polish: the sphere x plane circle has radius error 5.551e-16 R (anchor bound 1e-8 R) and length 12.167258038 m against 2*pi*r = 12.167336028 m; the unequal sphere pair 5.551e-16 R; the 30 deg ellipse 6.777877122 m against 6.777917613 m (E by AGM), and |S1-S2| at every vertex is 1.63e-15 m on a patch scale of 8.50 m.",
+      "kind": "audit_measurement",
+      "acceptance": "the artifact still records radius error <= 1e-12 R and the quoted lengths to 1e-6 relative; docs/nurbs_intersect.md still reports the same numbers and the WITHHELD OpenCASCADE status; tests/test_nurbs_intersect.py still pins the tangential / coincident / truncated behaviours",
+      "tags": [
+        "cad",
+        "nurbs",
+        "surface-intersection",
+        "trim-domain",
+        "GAP-CAD-A1"
+      ],
+      "probes": [],
+      "artifacts": [
+        {
+          "path": "artifacts/m17346/nurbs_intersect/results.json",
+          "json_pointer": "/studies/sphere_plane/radius_error_over_R",
+          "expected": 5.551115123125783e-16,
+          "sha256": "b2dfa5ac16b7e37e9051d5ec991f7c30d5e965ef63e15552c04505152abe0127",
+          "note": "radius deviation from the analytic circle, relative to R=2"
+        },
+        {
+          "path": "artifacts/m17346/nurbs_intersect/results.json",
+          "json_pointer": "/studies/sphere_plane/length",
+          "expected": 12.167258037748171,
+          "sha256": "b2dfa5ac16b7e37e9051d5ec991f7c30d5e965ef63e15552c04505152abe0127",
+          "note": "arc length of the sphere x plane circle [m]"
+        },
+        {
+          "path": "artifacts/m17346/nurbs_intersect/results.json",
+          "json_pointer": "/studies/cylinder_ellipse/length",
+          "expected": 6.777877122053041,
+          "sha256": "b2dfa5ac16b7e37e9051d5ec991f7c30d5e965ef63e15552c04505152abe0127",
+          "note": "30 deg ellipse perimeter [m]"
+        },
+        {
+          "path": "artifacts/m17346/nurbs_intersect/results.json",
+          "json_pointer": "/studies/failures/tangential/flagged",
+          "expected": true,
+          "sha256": "b2dfa5ac16b7e37e9051d5ec991f7c30d5e965ef63e15552c04505152abe0127",
+          "note": "tangential contact is flagged, not silently empty"
+        }
+      ],
+      "docs": [
+        {
+          "path": "docs/nurbs_intersect.md",
+          "contains": "5.55e-16"
+        },
+        {
+          "path": "docs/nurbs_intersect.md",
+          "contains": "WITHHELD"
+        }
       ]
     }
   ]
