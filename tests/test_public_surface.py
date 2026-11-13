@@ -193,9 +193,54 @@ EXPECTED_API = {
     "wigley_cross_sections",
 }
 
+#: Exported by merges after this pinned list was last refreshed (offset-loft table ->
+#: NURBS, fairness energy, offset-table errors). Kept as its own set so the older
+#: pins stay auditable; the declared-API comparison was red at HEAD for exactly these.
+LATE_MERGED_API = {
+    "ENERGY_KINDS",
+    "FairnessEnergyReport",
+    "LoftComparison",
+    "MeshCurvatureField",
+    "OffsetLoft",
+    "OffsetProvenance",
+    "OffsetTableError",
+    "ShipOffsetTable",
+    "SmoothingEnergy",
+    "TableIntegrals",
+    "compare_offset_table",
+    "fairness_energy_report",
+    "loft_offset_table",
+    "offset_table",
+    "principal_curvature_field",
+    "read_offset_bundle",
+    "read_offset_csv",
+    "reference_for",
+    "sample_offset_table",
+    "simpson_integrate",
+    "smoothing_energy",
+    "station_sensitivity",
+    "table_integrals",
+    "write_offset_bundle",
+    "write_offset_csv",
+}
+
+#: Ellipsoidal geodesy (WGS84): route lengths in true metres, two independent routes.
+GEODESY_API = {
+    "GeodesicError",
+    "GeodesicSolution",
+    "clairaut_distance",
+    "great_circle",
+    "sphere_error",
+    "vincenty_direct",
+    "vincenty_inverse",
+}
+
 
 def test_declared_api_is_importable() -> None:
-    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API | MID_SURFACE_API | ELLIPTIC_SECTION_API
+    assert set(tensorcad.__all__) == (
+        EXPECTED_API | SHEAR_FLOW_API | MID_SURFACE_API | ELLIPTIC_SECTION_API
+        | GEODESY_API | LATE_MERGED_API
+    )
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
     assert tensorcad.__version__ == "0.23.0"
