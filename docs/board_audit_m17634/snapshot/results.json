@@ -1,0 +1,2660 @@
+{
+ "acceptance": {
+  "implementation_threshold": 0.001,
+  "orientation": "equal oriented face multiset, flipped faces 0",
+  "owner_threshold": 0.15,
+  "topology": "vertex bijection + equal face multiset (tol 1e-5*diag for STL, 0 else)"
+ },
+ "anchor": "XVAL-CAD-M17483-NATIVE-SIX-FORMAT-MATRIX",
+ "convergence": {
+  "rows": [
+   {
+    "case": "icosphere/sub1",
+    "discretisation_rel_err": 0.12654679999693674,
+    "faces": 80,
+    "vertices": 42,
+    "volume_exact": 4.1887902047863905,
+    "volume_mesh": 3.6587122085121595,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 5.674129789886164e-09,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "icosphere/sub2",
+    "discretisation_rel_err": 0.0338392514014127,
+    "faces": 320,
+    "vertices": 162,
+    "volume_exact": 4.1887902047863905,
+    "volume_mesh": 4.047044679978849,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 1.3111681010775757e-08,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "icosphere/sub3",
+    "discretisation_rel_err": 0.008606157370245074,
+    "faces": 1280,
+    "vertices": 642,
+    "volume_exact": 4.1887902047863905,
+    "volume_mesh": 4.152740817093058,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 1.6395392394285798e-08,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "icosphere/sub4",
+    "discretisation_rel_err": 0.0021608283894018676,
+    "faces": 5120,
+    "vertices": 2562,
+    "volume_exact": 4.1887902047863905,
+    "volume_mesh": 4.17973894799464,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 7.627024524560963e-09,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "torus/16x8",
+    "discretisation_rel_err": 0.12264592880912219,
+    "faces": 256,
+    "vertices": 128,
+    "volume_exact": 1.7765287921960844,
+    "volume_mesh": 1.5586447684210476,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 1.2025823308069962e-08,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "torus/32x16",
+    "discretisation_rel_err": 0.03175422538829534,
+    "faces": 1024,
+    "vertices": 512,
+    "volume_exact": 1.7765287921960844,
+    "volume_mesh": 1.7201164965198938,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 8.745841707427475e-09,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "torus/64x32",
+    "discretisation_rel_err": 0.00800845882370945,
+    "faces": 4096,
+    "vertices": 2048,
+    "volume_exact": 1.7765287921960844,
+    "volume_mesh": 1.7623015345146478,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 6.912403934595927e-10,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   },
+   {
+    "case": "torus/128x64",
+    "discretisation_rel_err": 0.0020065090882831166,
+    "faces": 16384,
+    "vertices": 8192,
+    "volume_exact": 1.7765287921960844,
+    "volume_mesh": 1.7729641710289463,
+    "xval": {
+     "cgns": 0.0,
+     "cgns_violations": [],
+     "gmsh": 0.0,
+     "obj": 0.0,
+     "stl": 6.733233444399313e-09,
+     "su2": 0.0,
+     "vtk": 0.0
+    }
+   }
+  ]
+ },
+ "environment": {
+  "h5py": "3.15.1",
+  "meshio": "5.3.5",
+  "numpy": "2.4.6",
+  "numpy_stl": "4.1.3",
+  "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+  "python": "3.11.6",
+  "trimesh": "5.0.0"
+ },
+ "figures": [
+  {
+   "caption": "Worst relative volume error after OSS re-read, per format (matrix A = XVAL writers, matrix B = m17483 artefacts).",
+   "name": "fig_volume_error.png"
+  },
+  {
+   "caption": "Refinement ladders (icosphere sub1-4, torus 16x8-128x64): discretisation error decreases, format round-trip error stays flat.",
+   "name": "fig_convergence.png"
+  },
+  {
+   "caption": "Coordinate-magnitude sensitivity: binary STL (float32) vertex deviation grows with |x|, ASCII OBJ/VTK stay exact.",
+   "name": "fig_offset_sensitivity.png"
+  }
+ ],
+ "matrix_a": {
+  "cells": [
+   {
+    "analytic_volume": null,
+    "bytes": 684,
+    "format": "stl",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "numpy-stl",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       36
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": true
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       36
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": true
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 194,
+    "format": "obj",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 319,
+    "format": "vtk",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "legacy reader, UNSTRUCTURED_GRID only",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "error": "SystemExit: 1",
+      "note": "historical writer variant",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": "POLYDATA"
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 248,
+    "format": "su2",
+    "geometry": "cube",
+    "readers": [
+     {
+      "error": "StopIteration: ",
+      "note": "fails on NELEM=0 (reader defect)",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "mesh_xval(strict grammar)",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 18448,
+    "format": "cgns",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "conformant": true,
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "no OSS triangle reader exists",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "h5py (SIDS mapping checker)",
+      "sids_violations": [],
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 303,
+    "format": "gmsh",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 16084,
+    "format": "stl",
+    "geometry": "icosphere2",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.04704462691529,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 1.3111681010775757e-08,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "numpy-stl",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       960
+      ],
+      "volume_got": 4.047044626915348,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 1.3111666745650994e-08,
+      "volume_sign_equal": true,
+      "welded": true
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       960
+      ],
+      "volume_got": 4.047044626915348,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 1.3111666745650994e-08,
+      "volume_sign_equal": true,
+      "welded": true
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 12880,
+    "format": "obj",
+    "geometry": "icosphere2",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 13308,
+    "format": "vtk",
+    "geometry": "icosphere2",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "legacy reader, UNSTRUCTURED_GRID only",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "error": "SystemExit: 1",
+      "note": "historical writer variant",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": "POLYDATA"
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 12618,
+    "format": "su2",
+    "geometry": "icosphere2",
+    "readers": [
+     {
+      "error": "StopIteration: ",
+      "note": "fails on NELEM=0 (reader defect)",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "mesh_xval(strict grammar)",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 26400,
+    "format": "cgns",
+    "geometry": "icosphere2",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "conformant": true,
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "no OSS triangle reader exists",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "h5py (SIDS mapping checker)",
+      "sids_violations": [],
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 14963,
+    "format": "gmsh",
+    "geometry": "icosphere2",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 204884,
+    "format": "stl",
+    "geometry": "torus64x32",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015357328218,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 6.912403934595927e-10,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "numpy-stl",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       12288
+      ],
+      "volume_got": 1.7623015357332594,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 6.914887334330512e-10,
+      "volume_sign_equal": true,
+      "welded": true
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       12288
+      ],
+      "volume_got": 1.7623015357332594,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 6.914887334330512e-10,
+      "volume_sign_equal": true,
+      "welded": true
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 190602,
+    "format": "obj",
+    "geometry": "torus64x32",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 194807,
+    "format": "vtk",
+    "geometry": "torus64x32",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "legacy reader, UNSTRUCTURED_GRID only",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "error": "SystemExit: 1",
+      "note": "historical writer variant",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": "POLYDATA"
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 186563,
+    "format": "su2",
+    "geometry": "torus64x32",
+    "readers": [
+     {
+      "error": "StopIteration: ",
+      "note": "fails on NELEM=0 (reader defect)",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "mesh_xval(strict grammar)",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 116784,
+    "format": "cgns",
+    "geometry": "torus64x32",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "conformant": true,
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "no OSS triangle reader exists",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "h5py (SIDS mapping checker)",
+      "sids_violations": [],
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   },
+   {
+    "analytic_volume": null,
+    "bytes": 223261,
+    "format": "gmsh",
+    "geometry": "torus64x32",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ]
+   }
+  ],
+  "summary": {
+   "cells_all_oss_green": 12,
+   "combinations": 18,
+   "failing": [
+    {
+     "error": "SystemExit: 1",
+     "format": "vtk",
+     "geometry": "cube",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": "POLYDATA"
+    },
+    {
+     "error": "StopIteration: ",
+     "format": "su2",
+     "geometry": "cube",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "SystemExit: 1",
+     "format": "vtk",
+     "geometry": "icosphere2",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": "POLYDATA"
+    },
+    {
+     "error": "StopIteration: ",
+     "format": "su2",
+     "geometry": "icosphere2",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "SystemExit: 1",
+     "format": "vtk",
+     "geometry": "torus64x32",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": "POLYDATA"
+    },
+    {
+     "error": "StopIteration: ",
+     "format": "su2",
+     "geometry": "torus64x32",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    }
+   ],
+   "reader_checks": 33,
+   "reader_checks_green": 27,
+   "worst_volume_rel_err": 1.3111681010775757e-08
+  }
+ },
+ "matrix_b": {
+  "cells": [
+   {
+    "bytes": 684,
+    "format": "stl",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "numpy-stl",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       36
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": true
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       36
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": true
+     }
+    ],
+    "sha256": "3535759df9608da4ceb4cf56f95fa8747f8e9c25fa0251505e630df5972ad304"
+   },
+   {
+    "bytes": 246,
+    "format": "obj",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "fea5c39e37f48a584a7a131e14833478601146eba9cd32263d6efeaa2a897ab0"
+   },
+   {
+    "bytes": 260,
+    "format": "vtk",
+    "geometry": "cube",
+    "readers": [
+     {
+      "error": "SystemExit: 1",
+      "note": "legacy reader, UNSTRUCTURED_GRID only",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     }
+    ],
+    "sha256": "971e84d77b222c8931e98482ed941d5cd8bd1fa6045b38df4f4ef5b797e359cd"
+   },
+   {
+    "bytes": 292,
+    "format": "su2",
+    "geometry": "cube",
+    "readers": [
+     {
+      "error": "StopIteration: ",
+      "note": "fails on NELEM=0 (reader defect)",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "mesh_xval(strict grammar)",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "535d84c01b2fc53e92270b9126844bce582520dc3beadcb9ca3e0f71a8920029"
+   },
+   {
+    "bytes": 17112,
+    "format": "cgns",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "conformant": false,
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "no OSS triangle reader exists",
+      "oriented_face_multiset_equal": true,
+      "pass": false,
+      "reader": "h5py (SIDS mapping checker)",
+      "sids_violations": [
+       "root: reserved attribute 'version' missing",
+       "Base: required attribute 'name' missing",
+       "Base: required attribute 'label' missing",
+       "Base: required attribute 'order' missing",
+       "Base: 'type' holds a label ('CGNSBase_t') where the spec requires a data-type code (MT/I4/R8/...)",
+       "Zone: required attribute 'name' missing",
+       "Zone: required attribute 'label' missing",
+       "Zone: required attribute 'order' missing",
+       "Zone: 'type' holds a label where the spec requires a data-type code",
+       "Elements: required attribute 'name' missing",
+       "Elements: required attribute 'label' missing",
+       "Elements: required attribute 'order' missing"
+      ],
+      "status": "nonconformant",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "a3bce3efca9324a9a8c74c9133c264aaf7b227b8937ad15994585ee18114a8a6"
+   },
+   {
+    "bytes": 303,
+    "format": "gmsh",
+    "geometry": "cube",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       12,
+       12
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       8,
+       8
+      ],
+      "vertices_read": [
+       8,
+       8
+      ],
+      "volume_got": 8.0,
+      "volume_ref": 8.0,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "ea6d4c966a4ed1bd1ba7422f511573779de7099e9ceb213e5d5e39cf842df774"
+   },
+   {
+    "bytes": 16084,
+    "format": "stl",
+    "geometry": "icosphere",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.04704462691529,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 1.3111681010775757e-08,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "numpy-stl",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       960
+      ],
+      "volume_got": 4.047044626915348,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 1.3111666745650994e-08,
+      "volume_sign_equal": true,
+      "welded": true
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       960
+      ],
+      "volume_got": 4.047044626915348,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 1.3111666745650994e-08,
+      "volume_sign_equal": true,
+      "welded": true
+     }
+    ],
+    "sha256": "98aa6052046527d6c42084960192a73429d55ebe4a2f05a4fe9a9f617b4d63cd"
+   },
+   {
+    "bytes": 13066,
+    "format": "obj",
+    "geometry": "icosphere",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "53c8557e8e48592b36dc37d03e3a691d619276c166d13282b6a3fc62d590198f"
+   },
+   {
+    "bytes": 12766,
+    "format": "vtk",
+    "geometry": "icosphere",
+    "readers": [
+     {
+      "error": "SystemExit: 1",
+      "note": "legacy reader, UNSTRUCTURED_GRID only",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     }
+    ],
+    "sha256": "abc03374844228b5299fef5bb9ceff999995ea239d7519f7efdb63ef7d4ba37b"
+   },
+   {
+    "bytes": 12796,
+    "format": "su2",
+    "geometry": "icosphere",
+    "readers": [
+     {
+      "error": "StopIteration: ",
+      "note": "fails on NELEM=0 (reader defect)",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "mesh_xval(strict grammar)",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "0eae79dc64142e15a186d13ce2b75ae3dfa3bfb6dcb4a78d13bc6d6bab672cfd"
+   },
+   {
+    "bytes": 25048,
+    "format": "cgns",
+    "geometry": "icosphere",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "conformant": false,
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "no OSS triangle reader exists",
+      "oriented_face_multiset_equal": true,
+      "pass": false,
+      "reader": "h5py (SIDS mapping checker)",
+      "sids_violations": [
+       "root: reserved attribute 'version' missing",
+       "Base: required attribute 'name' missing",
+       "Base: required attribute 'label' missing",
+       "Base: required attribute 'order' missing",
+       "Base: 'type' holds a label ('CGNSBase_t') where the spec requires a data-type code (MT/I4/R8/...)",
+       "Zone: required attribute 'name' missing",
+       "Zone: required attribute 'label' missing",
+       "Zone: required attribute 'order' missing",
+       "Zone: 'type' holds a label where the spec requires a data-type code",
+       "Elements: required attribute 'name' missing",
+       "Elements: required attribute 'label' missing",
+       "Elements: required attribute 'order' missing"
+      ],
+      "status": "nonconformant",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "3bc45f5fa4ee7d4067d04031a4cfa199cf8176b92132557dcc13605446f3f962"
+   },
+   {
+    "bytes": 15103,
+    "format": "gmsh",
+    "geometry": "icosphere",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       2,
+       2
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       320,
+       320
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       162,
+       162
+      ],
+      "vertices_read": [
+       162,
+       162
+      ],
+      "volume_got": 4.047044679978849,
+      "volume_ref": 4.047044679978849,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "50d2925cfdf6be1c44ae26d85ae7691c45546f28c7132ae691cadf243778e74f"
+   },
+   {
+    "bytes": 204884,
+    "format": "stl",
+    "geometry": "torus",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015357328218,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 6.912403934595927e-10,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "numpy-stl",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       12288
+      ],
+      "volume_got": 1.7623015357332594,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 6.914887334330512e-10,
+      "volume_sign_equal": true,
+      "welded": true
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       12288
+      ],
+      "volume_got": 1.7623015357332594,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 6.914887334330512e-10,
+      "volume_sign_equal": true,
+      "welded": true
+     }
+    ],
+    "sha256": "e8a4d0453d41cb4ee3032a3f46111d749de95fd32fa72525ef1b13ef724b3846"
+   },
+   {
+    "bytes": 190648,
+    "format": "obj",
+    "geometry": "torus",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "trimesh",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "65b37c212088ecf3055a5cf1c46e528aeed10c2a09947f22c2b4af0a137d6da3"
+   },
+   {
+    "bytes": 186572,
+    "format": "vtk",
+    "geometry": "torus",
+    "readers": [
+     {
+      "error": "SystemExit: 1",
+      "note": "legacy reader, UNSTRUCTURED_GRID only",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     }
+    ],
+    "sha256": "9ba9d8800b02075317012d2110dd0f187428f9b32ddd1755a4f91b7c3c1cae41"
+   },
+   {
+    "bytes": 186601,
+    "format": "su2",
+    "geometry": "torus",
+    "readers": [
+     {
+      "error": "StopIteration: ",
+      "note": "fails on NELEM=0 (reader defect)",
+      "pass": false,
+      "reader": "meshio",
+      "status": "unreadable"
+     },
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "mesh_xval(strict grammar)",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "3add24723c8df18aa37edc2ded6d805c263127a62dd794026edbb4a1990e368b"
+   },
+   {
+    "bytes": 115448,
+    "format": "cgns",
+    "geometry": "torus",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "conformant": false,
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "no OSS triangle reader exists",
+      "oriented_face_multiset_equal": true,
+      "pass": false,
+      "reader": "h5py (SIDS mapping checker)",
+      "sids_violations": [
+       "root: reserved attribute 'version' missing",
+       "Base: required attribute 'name' missing",
+       "Base: required attribute 'label' missing",
+       "Base: required attribute 'order' missing",
+       "Base: 'type' holds a label ('CGNSBase_t') where the spec requires a data-type code (MT/I4/R8/...)",
+       "Zone: required attribute 'name' missing",
+       "Zone: required attribute 'label' missing",
+       "Zone: required attribute 'order' missing",
+       "Zone: 'type' holds a label where the spec requires a data-type code",
+       "Elements: required attribute 'name' missing",
+       "Elements: required attribute 'label' missing",
+       "Elements: required attribute 'order' missing"
+      ],
+      "status": "nonconformant",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "6f46395359ec7099b90a8d9837181b43f78911c027bf5f798cd22bfa337fac37"
+   },
+   {
+    "bytes": 223261,
+    "format": "gmsh",
+    "geometry": "torus",
+    "readers": [
+     {
+      "bijection": true,
+      "boundary_edges": [
+       0,
+       0
+      ],
+      "euler": [
+       0,
+       0
+      ],
+      "face_multiset_equal": true,
+      "faces": [
+       4096,
+       4096
+      ],
+      "flipped_faces": 0,
+      "note": "",
+      "oriented_face_multiset_equal": true,
+      "pass": true,
+      "reader": "meshio",
+      "status": "ok",
+      "vertices": [
+       2048,
+       2048
+      ],
+      "vertices_read": [
+       2048,
+       2048
+      ],
+      "volume_got": 1.7623015345146478,
+      "volume_ref": 1.7623015345146478,
+      "volume_rel_err": 0.0,
+      "volume_sign_equal": true,
+      "welded": false
+     }
+    ],
+    "sha256": "b10825d1f0e4b60db85acc326872ec672d648a25a2ef3f80d94105c81d9fa10c"
+   }
+  ],
+  "sha256": {
+   "cube.cgns": "a3bce3efca9324a9a8c74c9133c264aaf7b227b8937ad15994585ee18114a8a6",
+   "cube.msh": "ea6d4c966a4ed1bd1ba7422f511573779de7099e9ceb213e5d5e39cf842df774",
+   "cube.obj": "fea5c39e37f48a584a7a131e14833478601146eba9cd32263d6efeaa2a897ab0",
+   "cube.stl": "3535759df9608da4ceb4cf56f95fa8747f8e9c25fa0251505e630df5972ad304",
+   "cube.su2": "535d84c01b2fc53e92270b9126844bce582520dc3beadcb9ca3e0f71a8920029",
+   "cube.vtk": "971e84d77b222c8931e98482ed941d5cd8bd1fa6045b38df4f4ef5b797e359cd",
+   "icosphere.cgns": "3bc45f5fa4ee7d4067d04031a4cfa199cf8176b92132557dcc13605446f3f962",
+   "icosphere.msh": "50d2925cfdf6be1c44ae26d85ae7691c45546f28c7132ae691cadf243778e74f",
+   "icosphere.obj": "53c8557e8e48592b36dc37d03e3a691d619276c166d13282b6a3fc62d590198f",
+   "icosphere.stl": "98aa6052046527d6c42084960192a73429d55ebe4a2f05a4fe9a9f617b4d63cd",
+   "icosphere.su2": "0eae79dc64142e15a186d13ce2b75ae3dfa3bfb6dcb4a78d13bc6d6bab672cfd",
+   "icosphere.vtk": "abc03374844228b5299fef5bb9ceff999995ea239d7519f7efdb63ef7d4ba37b",
+   "torus.cgns": "6f46395359ec7099b90a8d9837181b43f78911c027bf5f798cd22bfa337fac37",
+   "torus.msh": "b10825d1f0e4b60db85acc326872ec672d648a25a2ef3f80d94105c81d9fa10c",
+   "torus.obj": "65b37c212088ecf3055a5cf1c46e528aeed10c2a09947f22c2b4af0a137d6da3",
+   "torus.stl": "e8a4d0453d41cb4ee3032a3f46111d749de95fd32fa72525ef1b13ef724b3846",
+   "torus.su2": "3add24723c8df18aa37edc2ded6d805c263127a62dd794026edbb4a1990e368b",
+   "torus.vtk": "9ba9d8800b02075317012d2110dd0f187428f9b32ddd1755a4f91b7c3c1cae41"
+  },
+  "summary": {
+   "cells_all_oss_green": 9,
+   "combinations": 18,
+   "failing": [
+    {
+     "error": "SystemExit: 1",
+     "format": "vtk",
+     "geometry": "cube",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "StopIteration: ",
+     "format": "su2",
+     "geometry": "cube",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "",
+     "format": "cgns",
+     "geometry": "cube",
+     "reader": "h5py (SIDS mapping checker)",
+     "status": "nonconformant",
+     "variant": null
+    },
+    {
+     "error": "SystemExit: 1",
+     "format": "vtk",
+     "geometry": "icosphere",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "StopIteration: ",
+     "format": "su2",
+     "geometry": "icosphere",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "",
+     "format": "cgns",
+     "geometry": "icosphere",
+     "reader": "h5py (SIDS mapping checker)",
+     "status": "nonconformant",
+     "variant": null
+    },
+    {
+     "error": "SystemExit: 1",
+     "format": "vtk",
+     "geometry": "torus",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "StopIteration: ",
+     "format": "su2",
+     "geometry": "torus",
+     "reader": "meshio",
+     "status": "unreadable",
+     "variant": null
+    },
+    {
+     "error": "",
+     "format": "cgns",
+     "geometry": "torus",
+     "reader": "h5py (SIDS mapping checker)",
+     "status": "nonconformant",
+     "variant": null
+    }
+   ],
+   "reader_checks": 30,
+   "reader_checks_green": 21,
+   "worst_volume_rel_err": 1.3111681010775757e-08
+  }
+ },
+ "meshio_status": {
+  "path": "meshio/cgns/_cgns.py",
+  "raises_can_only_read_tetrahedra": true,
+  "todo_stub": true
+ },
+ "node": "m17595",
+ "offset": {
+  "rows": [
+   {
+    "cases": {
+     "obj": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     },
+     "stl": {
+      "max_vertex_dev_m": 3.2946889618384044e-08,
+      "volume_rel_err": 1.3111681010775757e-08
+     },
+     "vtk": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     }
+    },
+    "offset_m": 0.0
+   },
+   {
+    "cases": {
+     "obj": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     },
+     "stl": {
+      "max_vertex_dev_m": 8.263041731647532e-08,
+      "volume_rel_err": 4.377282370962323e-08
+     },
+     "vtk": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     }
+    },
+    "offset_m": 1.0
+   },
+   {
+    "cases": {
+     "obj": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     },
+     "stl": {
+      "max_vertex_dev_m": 6.648323413746687e-07,
+      "volume_rel_err": 1.416466931528927e-07
+     },
+     "vtk": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     }
+    },
+    "offset_m": 10.0
+   },
+   {
+    "cases": {
+     "obj": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     },
+     "stl": {
+      "max_vertex_dev_m": 5.130308209140657e-06,
+      "volume_rel_err": 2.5677426219604446e-06
+     },
+     "vtk": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     }
+    },
+    "offset_m": 100.0
+   },
+   {
+    "cases": {
+     "obj": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     },
+     "stl": {
+      "max_vertex_dev_m": 3.84691713938623e-05,
+      "volume_rel_err": 5.224368558411401e-06
+     },
+     "vtk": {
+      "max_vertex_dev_m": 0.0,
+      "volume_rel_err": 0.0
+     }
+    },
+    "offset_m": 1000.0
+   }
+  ]
+ },
+ "su2_variants": {
+  "boundary": {
+   "bytes": 248,
+   "error": "StopIteration: ",
+   "meshio": "unreadable",
+   "sha256": "6da4c1be3b598ac5484addaa12adf2af057bfd8d8dc58cb9000d4bf16ceb1228",
+   "strict_reader_volume_rel_err": 0.0
+  },
+  "meshio_own_tet": {
+   "cells": [
+    "tetra"
+   ],
+   "status": "ok"
+  },
+  "volume": {
+   "bytes": 239,
+   "meshio": "ok",
+   "sha256": "f68c6503c24542838b4f97c4c2f5fd62777914bf186304bda911cf6fe82afae8",
+   "strict_reader_volume_rel_err": 0.0,
+   "volume_rel_err": 0.0
+  }
+ }
+}
