@@ -84,6 +84,13 @@ def _summary(model: Any) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     argv_list = list(sys.argv[1:] if argv is None else argv)
+    if argv_list and argv_list[0] == "fairness":
+        # Integration caller for GAP-CAD-A3-CURVATURE-FAIRNESS: the package console
+        # script reaches the curvature-field / smoothing-energy entry, so the
+        # capability sits on a product entry point and not only on an import.
+        from tensorcad.fairness_cli import main as fairness_main
+
+        return fairness_main(argv_list[1:])
     if argv_list and argv_list[0] == "fleet":
         # Integration caller for GAP-CAD-T1-BASELINE-FLEET: the package CLI reaches the
         # baseline-fleet intake gate, so the gate is on a product entry point and not only
