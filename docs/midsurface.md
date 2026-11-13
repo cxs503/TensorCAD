@@ -228,14 +228,15 @@ two-route difference, 0 % hull defeaturing), the cause is named and the number k
 
 ```bash
 python examples/midsurface/run_example.py      # writes artifacts/midsurface/*, exits 1 on any red check
-python -m pytest tests/test_midsurface.py tests/test_midsurface_oracle.py -v   # 21 + 15 passed
+python -m pytest tests/test_midsurface.py tests/test_midsurface_oracle.py -v   # 36 tests
 ```
 
 | artefact | path |
 |---|---|
 | module | `tensorcad/midsurface.py` |
 | verification run | `examples/midsurface/run_example.py` |
-| numbers | `artifacts/midsurface/results.json` |
+| numbers | `artifacts/midsurface/results.json` (committed, so the evidence ships with the code) |
+| rendered report | `artifacts/midsurface/report.md` (written *from* `results.json` by the example) |
 | figures | `artifacts/midsurface/fig_plate_and_curvature.png`, `fig_hull_midsurface.png` |
 | tests | `tests/test_midsurface.py` |
 
@@ -292,7 +293,9 @@ outcome of the same function and therefore invisible to any area assertion.
 
 The example's own numbers do not move: cylinder surplus +1.000 % (prediction +1.000 %),
 sphere +1.826 %, hull wall 0.020000 m, hull area +0.257 % against the vertex-offset route,
-two-route median 0.99 % of `t/2`, and all 19 checks in `artifacts/midsurface/results.json`
+two-route median 0.99 % of `t/2`, and all 20 checks in `artifacts/midsurface/results.json`
+(the count is asserted against the document by `tests/test_midsurface.py`, so this sentence
+cannot silently go stale when a check is added)
 stay green.
 
 **What is *not* claimed.** The shadowing diagnostic (`oracle.shadowed_faces`) reports zero
@@ -314,3 +317,26 @@ attempt is reported here rather than dressed up as a passing case.
   (`BRepAlgoAPI_Simplify`), `libigl/libigl` (`igl/simplify_polyhedron.h`, strong-copyleft →
   reference only). None of their code was used: the loop/ear-clip and ray-cast route here is
   written from the geometry, in the standard library.
+
+## 9. The gap ledger is now closed, and what closed it
+
+`GAP-CAD-013` in `docs/oss_inventory_cad/GAP-ANCHORS.md` asked for three machine-checkable
+things; all three are measured by `examples/midsurface/run_example.py` and asserted per run,
+so the anchor is registered as `closed` in the ledger and `F13` is `real` (not `absent`) in
+`tools/oss_inventory_cad/feature_points.json`:
+
+| acceptance criterion (`GAP-CAD-013`) | measured | verdict |
+|---|---|---|
+| mid-surface area error < 1 % | plate **0** (analytic mid-plane), tube +1.000 %, sphere +1.826 % (both equal to the *predicted* `t/(2R)` / `t/R` translation surplus), hull +0.257 % against the independent vertex-offset route | PASS |
+| face count <= 1/10 of the pre-idealisation mesh | flat panel 2 / 400 faces after defeaturing | PASS |
+| mesh size drops >= 50 % after defeaturing | flat panel **99.5 %** fewer faces, area preserved to 5.3e-15 | PASS |
+
+The numbers in that table are the ones in `artifacts/midsurface/report.md` (rendered from
+`results.json`); `tests/test_midsurface.py::test_gap_ledger_registers_the_closed_gap` fails if
+the ledger says `absent` again while the module is present, and
+`test_committed_artifacts_are_the_green_run` fails if the committed evidence stops matching a
+green run. **Scope of the closure, stated so it is not over-read**: the third criterion is met
+on a *planar* panel; curved skins are deliberately not defeatured (the hull keeps 1824/1824
+faces) because merging a cylinder into one analytic face is not implemented and a
+linearised approximation would be a different, wrong claim. Caps are not turned into
+annuli (§5). Those two limits are properties of the method chosen, not regressions of it.

@@ -104,7 +104,7 @@
       "question": "结构分析前能否抽中面/去小特征？",
       "sig": ["defeatur", "idealiz", "simplif", "feature_recog", "mid_surface"],
       "probe": ["defeatur", "Defeatur", "idealiz", "Simplify"],
-      "tensorcad": {"status": "absent", "evidence": ["tensorcad/geometry_audit.py"], "note": "geometry_audit.py 只做几何缺陷审计（尺规检查），没有中面抽取或特征抑制。"}
+      "tensorcad": {"status": "real", "evidence": ["tensorcad/midsurface.py", "tensorcad/shell.py"], "note": "extract_midsurface 以法向反平行最邻近面对配对测厚并平移生成中面（板面积误差 0；管/球面积差等于预测的 t/(2R)、t/R 平移过剩；系列60 板厚 -0.009%，双路线中位差 0.99%·t/2）；defeature_planar_regions 把共面区重新三角化（平板 400→2 面，面积守恒 5e-15）。曲面板刻意不合并（船体保持 1824 面），端盖不生成环面——见 docs/midsurface.md §5/§9。"}
     },
     {
       "id": "F14",

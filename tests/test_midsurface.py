@@ -5,7 +5,9 @@ are the acceptance criteria, not the observed values.
 """
 from __future__ import annotations
 
+import json
 import math
+import pathlib
 
 import pytest
 
@@ -262,3 +264,82 @@ def test_defeature_keeps_a_hole_region_untouched():
     defeatured = defeature_planar_regions(result.mesh)
     assert defeatured.regions[0].simplified  # no hole yet: one rectangle
     assert defeatured.area_relative_error < 1e-12
+
+    # now punch a square hole: the same coplanar region now has TWO boundary loops
+    holey = _annulus()
+    skipped = defeature_planar_regions(holey)
+    assert len(skipped.regions) == 1
+    assert len(skipped.regions[0].boundary_loops) == 2
+    assert not skipped.regions[0].simplified
+    assert skipped.regions[0].reason == "region has 2 boundary loops; holes are not stitched"
+    assert skipped.skipped_regions == skipped.regions
+    # kept as it came in: same face count, same area -- no half-stitched polygon
+    assert skipped.face_count_after == skipped.face_count_before == len(holey.faces)
+    assert skipped.face_reduction == 0.0
+    assert skipped.area_relative_error < 1e-12
+    assert meshlib.surface_area(skipped.mesh) == pytest.approx(16.0 - 1.0, rel=1e-12)
+
+
+def _annulus() -> Mesh:
+    """A planar square annulus: outer 4 x 4 m, square 1 x 1 m hole, 8 triangles.
+
+    Four trapezoids around the hole, each split into two triangles, all wound
+    counter-clockwise in the z = 0 plane, so the whole sheet is one coplanar region
+    with an outer loop and an inner loop.
+    """
+    o = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0)]
+    i = [(1.5, 1.5), (2.5, 1.5), (2.5, 2.5), (1.5, 2.5)]
+    vertices = tuple((x, y, 0.0) for x, y in o + i)
+    quads = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]  # bottom, right, top, left
+    faces = []
+    for a, b, c, d in quads:
+        faces.append((a, b, c))
+        faces.append((a, c, d))
+    return Mesh(vertices=vertices, faces=tuple(faces))
+
+
+# --------------------------------------------------------------------------- #
+# the gap ledger and the committed evidence must agree with the code
+# --------------------------------------------------------------------------- #
+def test_gap_ledger_registers_the_closed_gap():
+    """GAP-CAD-013 may not fall back to ``absent`` while the module is here."""
+    root = pathlib.Path(__file__).resolve().parents[1]
+    census = json.loads((root / "tools/oss_inventory_cad/feature_points.json").read_text())
+    f13 = next(f for f in census["feature_points"] if f["id"] == "F13")
+    assert f13["tensorcad"]["status"] in ("real", "partial"), f13["tensorcad"]
+    evidence = f13["tensorcad"]["evidence"]
+    assert "tensorcad/midsurface.py" in evidence
+    for rel in evidence:  # evidence must be a path that exists, not a memory
+        assert (root / rel).is_file(), rel
+
+    ledger = (root / "docs/oss_inventory_cad/GAP-ANCHORS.md").read_text()
+    block = ledger.split("### GAP-CAD-013")[1].split("### GAP-CAD-014")[0]
+    assert "`closed`" in block
+    assert "tensorcad/midsurface.py" in block
+    assert "`absent`" not in block
+
+
+def test_committed_artifacts_are_the_green_run():
+    """The shipped numbers must be a green run of this module, and the report a view of it."""
+    root = pathlib.Path(__file__).resolve().parents[1]
+    payload = json.loads((root / "artifacts/midsurface/results.json").read_text())
+    assert payload["schema"] == "tensorcad.midsurface.verification/1.0"
+    assert payload["module"] == "tensorcad.midsurface"
+    assert payload["gap_anchor"] == "GAP-CAD-013"
+    assert payload["checks"], "no checks in the committed run"
+    assert payload["all_checks_passed"] is True
+    assert [name for name, ok in payload["checks"].items() if not ok] == []
+    # the acceptance criterion the ledger quotes is actually among the checks
+    assert "plate_defeature_face_count_within_tenth" in payload["checks"]
+
+    report = (root / "artifacts/midsurface/report.md").read_text()
+    for name in payload["checks"]:
+        assert f"`{name}`" in report, f"{name} missing from the rendered report"
+
+
+def test_docs_state_the_committed_check_count():
+    """A hand-typed count in the prose is a claim: pin it to the committed evidence."""
+    root = pathlib.Path(__file__).resolve().parents[1]
+    payload = json.loads((root / "artifacts/midsurface/results.json").read_text())
+    docs = (root / "docs/midsurface.md").read_text()
+    assert f"all {len(payload['checks'])} checks" in docs

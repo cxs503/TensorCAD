@@ -123,8 +123,8 @@
 
 ### GAP-CAD-013 — 中面抽取与特征简化（defeaturing）（F13，P1）
 
-- **现状**：`absent` · 证据：`tensorcad/geometry_audit.py`
-- **具体缺口**：geometry_audit.py 只做几何缺陷审计（尺规检查），没有中面抽取或特征抑制。
+- **现状**：`closed`（2026-11-13，`tensorcad/midsurface.py`；三条验收判据逐条机器化，见 `docs/midsurface.md` §9） · 证据：`tensorcad/midsurface.py`, `tensorcad/shell.py`, `docs/midsurface.md`, `examples/midsurface/`, `artifacts/midsurface/results.json`
+- **具体缺口（已补）**：原缺口为 geometry_audit.py 只做几何缺陷审计（尺规检查）、没有中面抽取或特征抑制；现由 `tensorcad/midsurface.py` 补上——法向反平行的最邻近面配对测厚后平移生成中面（板面积误差 0，曲面板面积差等于预测的 t/(2R)、t/R 平移过剩），`defeature_planar_regions` 把共面区重新三角化（平板 400→2 面）。未做部分已声明：曲面板不合并、端盖不生成环面。
 - **验收判据（机器可裁）**：中面抽取：对厚度 t 的板件抽取中面，面积误差 <1%，面数 ≤ 原面数 1/10；特征抑制后网格规模下降 ≥50%。
 - **开源来源（按可复用性排序，共 5 仓，其中可搬码 0 仓）**：
   - `FreeCAD/FreeCAD` (T1, copyleft-weak → adapt) `src/f13/F13.cpp:10-17`
