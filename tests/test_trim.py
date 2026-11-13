@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import math
+from itertools import pairwise
 
 import pytest
 
 import tensorcad.trim as trim_module
 from tensorcad import HullParameters, analytic_volume, generate_hull, generate_wigley
 from tensorcad.bonjean import section_properties
-from tensorcad.geometry import Mesh
+from tensorcad.geometry import Mesh, MeshBuilder
 from tensorcad.stability import StabilityError, waterplane_moments
 from tensorcad.trim import (
     SEAWATER_DENSITY,
@@ -172,6 +173,137 @@ def test_a_ring_waterline_is_handled_gracefully(hull):
         assert neighbour.waterline_nudged is False
         assert row.waterplane_area == pytest.approx(neighbour.waterplane_area, rel=1e-5)
         assert row.tpc == pytest.approx(neighbour.tpc, rel=1e-5)
+
+
+def _ring_levels(mesh: Mesh) -> list[float]:
+    """The distinct heights the generator put vertex rings on, keel first."""
+    return sorted({round(vertex[2], 12) for vertex in mesh.vertices})
+
+
+@pytest.mark.parametrize("factory", [generate_hull, generate_wigley], ids=["hull", "wigley"])
+def test_every_vertex_ring_between_keel_and_deck_is_an_ordinary_waterline(factory):
+    """Generalises the single -T/4 ring: *every* ring the generator lays down is an ordinary cut.
+
+    The vertex-on-plane classification in ``_plane_segments`` is what makes this work, and
+    it is a property of the whole mesh, not of one lucky level: a level where the cut
+    degenerated (and the plane had to be nudged) would make TPC and the waterplane area
+    jump as the waterline crosses it.  Walking every interior ring pins that down, and
+    the two shipped geometries have different ring spacings, so a spacing-dependent
+    regression cannot hide behind one of them.
+    """
+    mesh = factory().mesh
+    levels = _ring_levels(mesh)
+    keel, deck = levels[0], levels[-1]
+    interior = levels[1:-1]
+    assert len(interior) >= 10  # otherwise the loop would be about nothing
+
+    for z in interior:
+        row = hydrostatic_particulars(mesh, z, station_count=21)
+        assert row.waterline_nudged is False, z
+        for dz in (-1e-7, 1e-7):
+            neighbour = hydrostatic_particulars(mesh, z + dz, station_count=21)
+            # A ring is not a special case: crossing it must not move the answer.
+            assert neighbour.waterline_nudged is False, (z, dz)
+            assert neighbour.waterplane_area == pytest.approx(row.waterplane_area, rel=1e-5)
+            assert neighbour.tpc == pytest.approx(row.tpc, rel=1e-5)
+            assert neighbour.volume == pytest.approx(row.volume, rel=1e-5)
+            assert neighbour.lcb == pytest.approx(row.lcb, abs=1e-6)
+        assert 0.0 < row.draft < (deck - keel)
+
+
+def test_the_keel_ring_is_refused_rather_than_reported_as_a_zero_waterplane(hull):
+    """At the keel ring nothing is immersed, so the answer is a refusal, not an area of 0."""
+    keel = _ring_levels(hull.mesh)[0]
+    with pytest.raises(TrimError):
+        hydrostatic_particulars(hull.mesh, keel, station_count=21)
+
+
+def test_the_capped_deck_ring_needs_the_declared_nudge_on_one_side_only(hull):
+    """The generator caps the body at the design waterline, so the top ring is a hard edge.
+
+    Cutting exactly *on* that ring is still an ordinary cut.  A hair above it there is no
+    surface left to cut, so the fallback must move the plane, and it must say so; the move
+    stays inside the documented O(1e-6) relative budget, so the area it reports is still
+    the ring's area to 1e-5.  This is the one place in the shipped geometries where the
+    flag fires without provocation, and it is declared rather than hidden.
+    """
+    deck = _ring_levels(hull.mesh)[-1]
+    on_ring = hydrostatic_particulars(hull.mesh, deck, station_count=21)
+    assert on_ring.waterline_nudged is False
+
+    above = hydrostatic_particulars(hull.mesh, deck + 1e-7, station_count=21)
+    assert above.waterline_nudged is True
+    assert above.waterplane_area == pytest.approx(on_ring.waterplane_area, rel=1e-5)
+    assert above.volume == pytest.approx(on_ring.volume, rel=1e-5)
+
+
+def _tapered_prism(
+    levels: tuple[float, ...] = (-2.0, -1.5, -1.0, -0.5, 0.0),
+    length: float = 10.0,
+    root_half_breadth: float = 2.0,
+    taper: float = 0.5,
+) -> Mesh:
+    """A straight-tapered prism with a vertex ring at every level in ``levels``.
+
+    ``half_breadth(z) = root_half_breadth + taper * z`` does not depend on ``x``, so the
+    side faces are planar and the section is exactly the rectangle
+    ``length x 2 half_breadth(z)`` at *every* height, ring or not.  That gives the ring
+    cut somewhere to be graded against instead of only compared with its neighbours.
+    """
+
+    def half_breadth(z: float) -> float:
+        return root_half_breadth + taper * z
+
+    def ring_at(z: float) -> tuple[tuple[float, float, float], ...]:
+        width = half_breadth(z)
+        return (
+            (0.0, -width, z),
+            (length, -width, z),
+            (length, width, z),
+            (0.0, width, z),
+        )
+
+    builder = MeshBuilder()
+    for low, high in pairwise(levels):
+        lower, upper = ring_at(low), ring_at(high)
+        for index in range(4):
+            nxt = (index + 1) % 4
+            wall = (lower[index], lower[nxt], upper[nxt], upper[index])
+            builder.add_quad(*(builder.add_vertex(corner) for corner in wall))
+    for cap_level in (levels[0], levels[-1]):
+        builder.add_quad(*(builder.add_vertex(corner) for corner in ring_at(cap_level)))
+    return builder.build()
+
+
+def test_a_ring_cut_is_exact_and_not_merely_continuous():
+    """A geometry with a closed-form waterplane grades the ring cut itself.
+
+    Continuity across a ring (the test above) cannot separate an exact cut from one that
+    is displaced by the same amount on both sides; asking a shape that knows the answer
+    can.  Here the section is a rectangle of width ``2 half_breadth(z)``, so the area, the
+    LCF and the longitudinal second moment -- hence TPC and MCT -- are gradeable to
+    round-off, and the Simpson volume route is exact for the same reason.
+    """
+    levels = (-2.0, -1.5, -1.0, -0.5, 0.0)
+    length, root, taper = 10.0, 2.0, 0.5
+    mesh = _tapered_prism(levels, length=length, root_half_breadth=root, taper=taper)
+    keel = levels[0]
+
+    def half_breadth(z: float) -> float:
+        return root + taper * z
+
+    for z in levels[1:]:
+        width = 2.0 * half_breadth(z)
+        area = length * width
+        volume = length * (z - keel) * (half_breadth(keel) + half_breadth(z))
+        row = hydrostatic_particulars(mesh, z, station_count=21)
+        assert row.waterline_nudged is False
+        assert row.waterplane_area == pytest.approx(area, rel=1e-12)
+        assert row.lcf == pytest.approx(0.5 * length, rel=1e-12)
+        assert row.volume == pytest.approx(volume, rel=1e-12)
+        assert row.tpc == pytest.approx(SEAWATER_DENSITY / 1000.0 * area / 100.0, rel=1e-12)
+        expected_mct = SEAWATER_DENSITY / 1000.0 * (area * length * length / 12.0) / (100.0 * length)
+        assert row.mct == pytest.approx(expected_mct, rel=1e-12)
 
 
 def test_the_nudge_fallback_is_reported_when_the_plane_cut_refuses(hull, monkeypatch):
