@@ -1,0 +1,382 @@
+{
+ "schema": "oss-inventory-wave/pool-v1",
+ "domain": "DG",
+ "note": "Curated candidate pool for FEAT-OSS-INVENTORY-DG (propagation wave). tier semantics live in wave.json; every entry is verified live by wave.py survey (metadata + recursive tree at the default branch). 'gaps' lists the GAP-DG-* anchors this repository is a candidate reference implementation for. The negative_control entry is fetched on purpose: its failure must appear in the registry (proving failures are recorded, not dropped).",
+ "repos": [
+  {
+   "id": "trixi",
+   "repo": "trixi-framework/Trixi.jl",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dgsem",
+    "entropy-stable",
+    "amr-p4est",
+    "shock-capturing",
+    "curved-mesh"
+   ],
+   "why": "Numerically the most complete open DGSEM stack: entropy-conservative/stable split forms, subcell shock capturing, p4est-backed AMR and curved-mesh metrics in one tree.",
+   "gaps": [
+    "GAP-DG-002",
+    "GAP-DG-003",
+    "GAP-DG-004"
+   ]
+  },
+  {
+   "id": "exadg",
+   "repo": "exadg/exadg",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "matrix-free",
+    "geometric-multigrid",
+    "incompressible-ns",
+    "dg-poisson"
+   ],
+   "why": "Reference matrix-free DG operator evaluation plus geometric multigrid for the elliptic solve - the exact machinery GAP-DG-006 asks for.",
+   "gaps": [
+    "GAP-DG-006"
+   ]
+  },
+  {
+   "id": "philip",
+   "repo": "McGillCompAero/PHiLiP",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "hp-adaptive",
+    "fr-cpr",
+    "dwr-error-estimation",
+    "euler-ns"
+   ],
+   "why": "Solver dedicated to hp-adaptation and dual-weighted-residual error estimation on DG/FR discretisations.",
+   "gaps": [
+    "GAP-DG-002",
+    "GAP-DG-007"
+   ]
+  },
+  {
+   "id": "flexi",
+   "repo": "flexi-framework/flexi",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dg-compressible",
+    "curved-mesh",
+    "fv-dg-hybrid",
+    "shock-capturing"
+   ],
+   "why": "Engineering-scale DG compressible code on curved hexahedral meshes; the closest analogue of a production CFD DG solver.",
+   "gaps": [
+    "GAP-DG-003",
+    "GAP-DG-004"
+   ]
+  },
+  {
+   "id": "pyfr",
+   "repo": "PyFR/PyFR",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "flux-reconstruction",
+    "gpu-backend",
+    "mpi-decomposition",
+    "euler-ns"
+   ],
+   "why": "Flux-reconstruction DG/FR with pluggable CPU/CUDA/HIP/OpenCL backends - the design template for GAP-DG-005.",
+   "gaps": [
+    "GAP-DG-005"
+   ]
+  },
+  {
+   "id": "nektar",
+   "repo": "nektar/nektar",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "spectral-hp-element",
+    "tet-mesh",
+    "dg-sem",
+    "mpi"
+   ],
+   "why": "Spectral/hp element framework with genuine simplex (tetrahedral) support and DG/SEM variants in one library. Upstream lives on GitLab (no GitHub mirror), so this wave records it without live metadata.",
+   "gaps": [
+    "GAP-DG-001"
+   ],
+   "alt_host": "https://gitlab.com/nektar/nektar"
+  },
+  {
+   "id": "nek5000",
+   "repo": "Nek5000/Nek5000",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "spectral-element",
+    "mpi-scalability",
+    "incompressible-ns",
+    "turbulence"
+   ],
+   "why": "Long-lived massively parallel spectral-element solver; the scalability and turbulence-modelling reference for GAP-DG-005.",
+   "gaps": [
+    "GAP-DG-005"
+   ]
+  },
+  {
+   "id": "nekr",
+   "repo": "Nek5000/nekRS",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "gpu-spectral-element",
+    "matrix-free",
+    "incompressible-ns"
+   ],
+   "why": "GPU-ported successor of Nek5000: shows how a high-order element operator is mapped onto accelerators without rewriting physics.",
+   "gaps": [
+    "GAP-DG-005"
+   ]
+  },
+  {
+   "id": "dune_fem",
+   "repo": "dune-community/dune-fem",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dg-fem",
+    "simplex",
+    "mpi",
+    "python-bindings"
+   ],
+   "why": "DUNE module with DG spaces, simplex grids and MPI; the second independent simplex-DG implementation for cross-checking orders of accuracy. Upstream lives on the DUNE GitLab, so this wave records it without live metadata.",
+   "gaps": [
+    "GAP-DG-001"
+   ],
+   "alt_host": "https://gitlab.dune-project.org/dune-fem/dune-fem"
+  },
+  {
+   "id": "ngsolve",
+   "repo": "NGSolve/ngsolve",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "hp-fem-dg",
+    "simplex",
+    "mpi",
+    "python-frontend"
+   ],
+   "why": "hp-adaptive finite element library with DG spaces on simplex meshes, MPI and a Python front end; replaces the unavailable hp3d entry as the hp/simplex reference.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-002"
+   ]
+  },
+  {
+   "id": "mfem",
+   "repo": "mfem/mfem",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "arbitrary-order-fem-dg",
+    "simplex",
+    "gpu",
+    "amr",
+    "subcell-limiter"
+   ],
+   "why": "Library-grade high-order FEM/DG with simplex meshes, partial-assembly GPU kernels, AMR and a published subcell limiter example.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-004",
+    "GAP-DG-005"
+   ]
+  },
+  {
+   "id": "dealii",
+   "repo": "dealii/dealii",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "hp-fem-dg",
+    "simplex",
+    "mpi",
+    "matrix-free",
+    "error-estimation"
+   ],
+   "why": "Benchmark of engineering quality for hp-adaptive finite elements including DG, simplex meshes, MPI and matrix-free operator loops.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-002",
+    "GAP-DG-006"
+   ]
+  },
+  {
+   "id": "gkeyll",
+   "repo": "gkeyllorg/gkeyll",
+   "tier": "T1",
+   "role": "upstream",
+   "focus": [
+    "dg-kinetic",
+    "dg-fluid",
+    "positivity",
+    "structured-mesh"
+   ],
+   "why": "DG used as a production method outside CFD (plasma/kinetic): independent evidence of which DG extras are load-bearing in practice.",
+   "gaps": [
+    "GAP-DG-004"
+   ]
+  },
+  {
+   "id": "p4est",
+   "repo": "cburstedde/p4est",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "amr-forest",
+    "octree",
+    "hanging-node",
+    "mpi"
+   ],
+   "why": "The de-facto AMR forest-of-octrees library: 2:1 balance, hanging-node interfaces and partition-independent iteration numbers.",
+   "gaps": [
+    "GAP-DG-002"
+   ]
+  },
+  {
+   "id": "amrex",
+   "repo": "AMReX-Codes/amrex",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "block-structured-amr",
+    "gpu",
+    "mpi",
+    "flux-registers"
+   ],
+   "why": "Block-structured AMR + GPU abstraction with conservative refluxing; the machinery a DG AMR needs around the element kernel.",
+   "gaps": [
+    "GAP-DG-002",
+    "GAP-DG-005"
+   ]
+  },
+  {
+   "id": "parthenon",
+   "repo": "parthenon-hpc-lab/parthenon",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "amr-framework",
+    "dg-support",
+    "kokkos",
+    "tasking"
+   ],
+   "why": "Performance-portable AMR framework that already carries a DG (and FV) physics driver, i.e. a worked example of DG-on-AMR.",
+   "gaps": [
+    "GAP-DG-002"
+   ]
+  },
+  {
+   "id": "libceed",
+   "repo": "CEED/libCEED",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "matrix-free-kernels",
+    "gpu",
+    "p-multigrid",
+    "high-order"
+   ],
+   "why": "Matrix-free operator kernels for high-order elements including p-multigrid; the cheapest route to GAP-DG-006 preconditioning.",
+   "gaps": [
+    "GAP-DG-005",
+    "GAP-DG-006"
+   ]
+  },
+  {
+   "id": "petsc",
+   "repo": "petsc/petsc",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "newton-krylov",
+    "multigrid",
+    "dmpatch",
+    "mpi"
+   ],
+   "why": "Newton-Krylov + multigrid stack (SNES/PC) that an implicit DG solver would delegate to instead of growing its own.",
+   "gaps": [
+    "GAP-DG-006"
+   ]
+  },
+  {
+   "id": "sundials",
+   "repo": "LLNL/sundials",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "imex-arkode",
+    "bdf",
+    "nonlinear-solvers"
+   ],
+   "why": "ARKODE IMEX/ARK integrators with embedded error control: the reference design for adding IMEX to an explicit-only DG stepper.",
+   "gaps": [
+    "GAP-DG-006"
+   ]
+  },
+  {
+   "id": "dolfinx",
+   "repo": "FEniCS/dolfinx",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "dg-fem",
+    "simplex",
+    "mpi",
+    "python-frontend"
+   ],
+   "why": "Modern MPI-parallel Python FEM with first-class DG spaces on simplex meshes; the interface idiom for GAP-DG-001 in a Python codebase.",
+   "gaps": [
+    "GAP-DG-001",
+    "GAP-DG-005"
+   ]
+  },
+  {
+   "id": "firedrake",
+   "repo": "firedrakeproject/firedrake",
+   "tier": "T2",
+   "role": "upstream",
+   "focus": [
+    "dg-fem",
+    "adjoint",
+    "goal-oriented-error",
+    "mpi"
+   ],
+   "why": "FEM with integrated adjoint (pyadjoint) machinery, i.e. the plumbing behind dual-weighted-residual estimation.",
+   "gaps": [
+    "GAP-DG-007"
+   ]
+  },
+  {
+   "id": "openfoam",
+   "repo": "OpenFOAM/OpenFOAM-dev",
+   "tier": "T3",
+   "role": "upstream",
+   "focus": [
+    "production-fvm",
+    "second-order-baseline",
+    "case-library"
+   ],
+   "why": "Production FVM baseline: not a DG source, but the maturity/verification bar any DG result has to beat in engineering practice.",
+   "gaps": []
+  },
+  {
+   "id": "negctl",
+   "repo": "tp-agent/dg-negative-control-does-not-exist",
+   "tier": "T3",
+   "role": "negative_control",
+   "focus": [
+    "negative-control"
+   ],
+   "why": "Deliberately unreachable: proves the census records fetch failures instead of silently dropping entries.",
+   "gaps": []
+  }
+ ]
+}
