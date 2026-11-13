@@ -1,0 +1,105 @@
+{
+  "impl_files": [
+    "tensorcad/lines_fairing.py:1-1155 (signed_curvature:182, curvature_sign_flips:214, line_bending_energy:246, _cholesky_banded_solve:271, _energy_kernel:457, _pass_waterlines:797, _pass_stations:816, _pass_buttocks:834, fair_offset_table:957, hand_fairing_reference:1085)",
+    "examples/lines_fairing/run_example.py:1-196",
+    "tests/test_lines_fairing.py:1-282"
+  ],
+  "entry": "tensorcad/lines_fairing.py:957 fair_offset_table(table, FairingSettings) -> FairingResult; CLI: PYTHONPATH=. python3 examples/lines_fairing/run_example.py (measured exit 0, 7.0 s)",
+  "run_artifacts": [
+    "/root/tp-agent/work/m18646/docs/lines_fairing/results.json (461 lines, 3 hulls x 2 kernels)",
+    "/root/tp-agent/work/m18646/docs/lines_fairing/report.md (41 lines, 6-section measured table)",
+    "/root/tp-agent/work/m18646/docs/lines_fairing/plot.png (99441 B)",
+    "/root/tp-agent/work/m18646/docs/lines_fairing.md (67 lines)"
+  ],
+  "tests": "tests/test_lines_fairing.py: 34 passed in 6.60 s (independently re-run 2026-11-13 by board-audit/m18778)",
+  "integration_callers": "none: grep -r 'lines_fairing|fair_offset_table' over TensorCAD/TensorPlatform/ship-performance-platform returns only .git/worktrees/m18646/index -> no CLI, no registry, no platform API, no audit-pipeline stage (L3 not met)",
+  "benchmark": {
+    "registered_case": "SELECT case_name,metric,tolerance FROM tensor_benchmark_cases WHERE anchor_slug='GAP-CAD-C3-LINES-FAIRING' -> 0 rows (table has 110 rows; TensorCAD 6 rows, all GAP-CAD-D2-GOLDEN-*)",
+    "clause1_tolerance": {
+      "wigley_iii": "max_dev 0.00892 <= tol 0.01000",
+      "series60_cb060": "0.01000 <= 0.01000",
+      "kvlcc2_class": "0.05000 <= 0.05000",
+      "all_tolerance_respected": true
+    },
+    "clause2_monotone_flips": {
+      "wigley_iii": [
+        219,
+        81,
+        59
+      ],
+      "series60_cb060": [
+        450,
+        224,
+        182,
+        166,
+        146,
+        139
+      ],
+      "kvlcc2_class": [
+        272,
+        90,
+        47,
+        33,
+        29
+      ],
+      "hulls": 3,
+      "note": "monotone total by driver construction; kvlcc2 waterline family worsens 0->21 while station 272->7 (disclosed in docs/lines_fairing.md)"
+    },
+    "clause3_hand_reference": {
+      "status": "SURROGATE",
+      "wigley_max_m": 0.0051,
+      "wigley_rms_m": 0.0011,
+      "note": "no human hand-faired table in repo; independent MLS smoother + analytic surface; hand reference diverges on kvlcc2 (rms 0.36 m, max 2.61 m)"
+    },
+    "accuracy_vs_analytic": {
+      "wigley_21x17_rms_in_out": [
+        0.00216,
+        0.00137
+      ],
+      "wigley_21x17_rms_energy": 0.0005,
+      "kvlcc2_33x25_rms_in_out": [
+        0.01122,
+        0.0106
+      ],
+      "kvlcc2_max_in_out": [
+        0.02,
+        0.0559
+      ],
+      "relative_to_half_breadth_pct": 0.03
+    },
+    "overstated_docstring_numbers": [
+      "test_energy_kernel: claims energy 0.00216->0.00032, measured 0.00049/0.00050",
+      "test_energy_kernel: claims series60 energy 0.0048 vs local 0.0011, measured 0.00630 vs 0.00171 (21x17) / 0.00452 vs 0.00149 (25x21)",
+      "test_fairing_moves: claims kvlcc2 33x25 0.01122->0.00847, measured 0.00990 (mp=4/bl=4) or 0.01060 (mp=5/bl=5, run_example config)"
+    ]
+  },
+  "repro_cmd": "cd /root/tp-agent/work/m18646 && PYTHONPATH=. python3 examples/lines_fairing/run_example.py -> {\"acceptance\":\"PASS\"}; regenerated docs/lines_fairing/results.json is byte-identical to the committed file (json equality True)",
+  "external_anchor": "Wigley (1934) closed-form parabolic hull (Cb=4/9 exact) = external analytic anchor; series60 (Todd 1951 DTMB 1447 parametric family) = published family formula; kvlcc2_class = SELF-DECLARED reconstruction, 'NOT the official KRISO offset table' (tensorcad/offset_forms.py:226) -> 2 of 3 'analytic' references are the same surface used to synthesise the noisy table (circular for L4)",
+  "delivery_gap": "commit 4fa7b2a is NOT an ancestor of origin/main (merge-base --is-ancestor -> NO); branch agent/m18646 only (local) -> not ecosystem-available until push/merge",
+  "report_owed": "public.tensor_reports has 0 rows for mission_id=18646 (report_id NULL) -> platform report not published by the object mission",
+  "verdict": {
+    "level": 2,
+    "disposition": "request changes / reopened",
+    "why": "L2 = real implementation + math/unit validation + complete 3-hull case + error analysis + reproducible (byte-identical); L3 absent (zero callers); L4 not judgeable (0 benchmark rows, circular reference for 2/3 hulls, hand-fairing only surrogate); L5 unreachable"
+  },
+  "checks_run": [
+    "pytest tests/test_lines_fairing.py -q (34 passed)",
+    "repro_cmd full run + results.json diff",
+    "6 kernel x hull RMS/max recompute",
+    "kvlcc2 33x25 x3 (max_passes,buttock_levels) recompute",
+    "buttock-only probe on 3 hulls",
+    "hand_fairing_reference recompute (max 0.0051 / rms 0.0011 confirmed)",
+    "docstring number audit",
+    "tensor_benchmark_cases query",
+    "tensor_reports query",
+    "git ancestor check",
+    "ecosystem caller grep"
+  ],
+  "checks_not_run": [
+    "full TensorCAD test suite (only the 34 anchor tests)",
+    "loong64 cluster re-run",
+    "real basin offset tables (no data)",
+    "true human hand-fairing comparison (no artifact)",
+    "post-push CI re-verification (no push per discipline)"
+  ]
+}
