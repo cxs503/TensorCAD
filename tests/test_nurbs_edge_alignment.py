@@ -14,7 +14,9 @@ import pytest
 
 from tensorcad.edge_alignment import (
     SIDES,
+    SeamAlignment,
     align_edges,
+    align_patch_seam,
     boundary_curve,
     edge_report,
     insert_knot,
@@ -22,7 +24,13 @@ from tensorcad.edge_alignment import (
 )
 from tensorcad.highorder.nurbs_geom import insert_knot as insert_surface_knot
 from tensorcad.highorder.nurbs_geom import split_patch
-from tensorcad.nurbs import NURBSCurve, NURBSError, circle_curve, sphere_surface
+from tensorcad.nurbs import (
+    NURBSCurve,
+    NURBSError,
+    NURBSSurface,
+    circle_curve,
+    sphere_surface,
+)
 
 RADIUS = 1.0
 
@@ -246,3 +254,147 @@ def test_alignment_requires_a_common_parameter_domain() -> None:
     )
     with pytest.raises(NURBSError, match="common parameter domain"):
         align_edges(first, scaled)
+
+
+# -- patch-level seams ------------------------------------------------------
+def _planar_patch(net: tuple[tuple[tuple[float, float, float], ...], ...]) -> NURBSSurface:
+    """A bilinear ``(u, v)`` patch over ``[0, 1]^2`` from a 2x2 control net."""
+    return NURBSSurface(
+        degree=(1, 1),
+        knots=((0.0, 0.0, 1.0, 1.0), (0.0, 0.0, 1.0, 1.0)),
+        control_net=net,
+    )
+
+
+def _two_planar_patches(offset: float = 0.0, *, reverse: bool = False) -> tuple[NURBSSurface, NURBSSurface]:
+    """Two unit squares sharing the line ``x = 1`` (optionally shifted by ``offset``).
+
+    The right patch runs ``v`` downwards, so its ``u0`` edge traverses the shared line
+    the other way round -- a real assembly orientation, not a heuristic case.
+    """
+    left = _planar_patch(
+        (((0.0, 0.0, 0.0), (0.0, 1.0, 0.0)), ((1.0, 0.0, 0.0), (1.0, 1.0, 0.0)))
+    )
+    x = 1.0 + offset
+    right = _planar_patch(
+        (((x, 1.0, 0.0), (x, 0.0, 0.0)), ((x + 1.0, 1.0, 0.0), (x + 1.0, 0.0, 0.0)))
+        if reverse
+        else (((x, 0.0, 0.0), (x, 1.0, 0.0)), ((x + 1.0, 0.0, 0.0), (x + 1.0, 1.0, 0.0)))
+    )
+    return left, right
+
+
+def test_align_patch_seam_leaves_identical_boundary_rows() -> None:
+    """The seam ends up in the *patch data*, not only in a pair of loose curves."""
+    surface = sphere_surface(RADIUS)
+    left, right = split_patch(surface, 0, 0.5)
+    neighbour = insert_surface_knot(right, 1, 0.37, 1).elevate_degree(0, 1)
+    assert boundary_curve(left, "u1").knots != boundary_curve(neighbour, "u0").knots
+
+    alignment = align_patch_seam(left, "u1", neighbour, "u0")
+
+    assert isinstance(alignment, SeamAlignment)
+    assert alignment.watertight is True
+    report = alignment.report
+    assert report["same_degree"] is True
+    assert report["knots_equal"] is True
+    assert report["representation_matches_target"] == [True, True]
+    assert report["max_gap"] < 1e-12
+    assert report["max_control_difference"] < 1e-12
+    assert report["max_weight_difference"] < 1e-12
+    # the shared boundary row is carried by both patches, at round-off
+    shared = alignment.first.control_net[-1]
+    neighbour_row = alignment.second.control_net[0]
+    assert len(shared) == len(neighbour_row) == 9
+    assert max(math.dist(a, b) for a, b in zip(shared, neighbour_row, strict=True)) < 1e-12
+    assert (
+        max(
+            abs(a - b)
+            for a, b in zip(
+                alignment.first.weights[-1], alignment.second.weights[0], strict=True
+            )
+        )
+        < 1e-12
+    )
+    assert boundary_curve(alignment.first, "u1") == alignment.first_edge
+    assert boundary_curve(alignment.second, "u0") == alignment.second_edge
+
+
+def test_align_patch_seam_does_not_move_either_patch() -> None:
+    """Refinement is exact: the patches keep their geometry, domain and area."""
+    surface = sphere_surface(RADIUS)
+    left, right = split_patch(surface, 0, 0.5)
+    neighbour = insert_surface_knot(right, 1, 0.37, 1).elevate_degree(0, 1)
+
+    alignment = align_patch_seam(left, "u1", neighbour, "u0")
+
+    assert alignment.report["max_patch_deviation"][0] < 1e-12
+    assert alignment.report["max_patch_deviation"][1] < 1e-12
+    assert alignment.first.domain == left.domain
+    assert alignment.second.domain == neighbour.domain
+    assert alignment.first.area() == pytest.approx(left.area(), rel=1e-12)
+    assert alignment.second.area() == pytest.approx(neighbour.area(), rel=1e-12)
+
+
+def test_align_patch_seam_inserts_the_neighbours_knot_into_the_other_patch() -> None:
+    """A neighbour knot the other patch lacks is inserted along that patch's axis."""
+    left, right = _two_planar_patches()
+    neighbour = insert_surface_knot(right, 1, 0.5, 1)
+    assert neighbour.knots[1].count(0.5) == 1
+
+    alignment = align_patch_seam(left, "u1", neighbour, "u0")
+
+    assert alignment.watertight is True
+    assert alignment.first.knots[1].count(0.5) == 1
+    assert any(
+        entry["op"] == "insert_knot" and entry["patch"] == "first" and entry["value"] == 0.5
+        for entry in alignment.operations
+    )
+    assert alignment.report["axes"] == [1, 1]
+    assert alignment.report["max_patch_deviation"] == [0.0, 0.0]
+
+
+def test_align_patch_seam_requires_the_direction_to_be_declared() -> None:
+    """A backwards neighbour is a gap of one metre until the caller says so."""
+    left, right = _two_planar_patches(reverse=True)
+    neighbour = insert_surface_knot(right, 0, 0.5, 1).elevate_degree(0, 1)
+
+    naive = align_patch_seam(left, "u1", neighbour, "u0")
+    assert naive.watertight is False
+    assert naive.report["max_gap"] == pytest.approx(1.0, abs=1e-12)
+
+    declared = align_patch_seam(left, "u1", neighbour, "u0", reverse_second=True)
+    assert declared.watertight is True
+    assert declared.report["reversed_second"] is True
+    assert declared.report["max_gap"] < 1e-12
+    assert declared.operations  # the degree/patch data really did change
+
+
+def test_align_patch_seam_reports_a_gap_it_cannot_close() -> None:
+    """Edges 2 mm apart are aligned in representation and still reported as a gap."""
+    left, right = _two_planar_patches(offset=0.002)
+    alignment = align_patch_seam(left, "u1", right, "u0")
+
+    assert alignment.report["knots_equal"] is True
+    assert alignment.report["max_control_difference"] == pytest.approx(0.002, rel=1e-6)
+    assert alignment.report["max_gap"] == pytest.approx(0.002, rel=1e-6)
+    assert alignment.watertight is False
+
+
+def test_align_patch_seam_rejects_an_unknown_side() -> None:
+    left, right = _two_planar_patches()
+    with pytest.raises(ValueError, match="side must be one of"):
+        align_patch_seam(left, "v2", right, "u0")
+    with pytest.raises(ValueError, match="side must be one of"):
+        align_patch_seam(left, "u1", right, "top")
+
+
+def test_seam_alignment_serialises_its_evidence() -> None:
+    surface = sphere_surface(RADIUS)
+    left, right = split_patch(surface, 0, 0.5)
+    neighbour = insert_surface_knot(right, 1, 0.37, 1).elevate_degree(0, 1)
+    payload = align_patch_seam(left, "u1", neighbour, "u0").to_dict()
+    assert payload["report"]["watertight"] is True
+    assert payload["first_edge"] == {"degree": 3, "control_points": 9}
+    assert payload["second_edge"] == {"degree": 3, "control_points": 9}
+    assert len(payload["operations"]) == payload["report"]["operations"]
