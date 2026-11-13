@@ -1,0 +1,66 @@
+{
+  "repo": "TensorCAD",
+  "scope": "m17465 GAP-CAD-A3-CURVATURE-FAIRNESS",
+  "mission_id": 17622,
+  "level": 4,
+  "verdict_by": "board-audit",
+  "audited_mission": 17465,
+  "anchor": "GAP-CAD-A3-CURVATURE-FAIRNESS",
+  "evidence": {
+    "impl_files": [
+      "/root/tp-agent/work/m17465/tensorcad/fairness_cli.py",
+      "/root/tp-agent/work/m17465/tensorcad/fairness_energy.py",
+      "/root/tp-agent/work/m17465/tensorcad/geometry_audit.py",
+      "docs/board_audit/m17622/refs/fairness_cli.py"
+    ],
+    "entry": "/root/tp-agent/work/m17465/tensorcad/fairness_cli.py",
+    "entry_detail": "auditor ran `python -m tensorcad.fairness_cli sphere --radius 1 --level 12` and `python -m tensorcad.cli fairness wigley --nx 41 --nz 13` -> exit 0, claim records written; dispatch at tensorcad/cli.py:87-93 (branch agent/m17465), console script tensorcad-hull via pyproject.toml",
+    "run_artifacts": [
+      "/root/tp-agent/work/m17465/runs/m17465/benchmark/result.json",
+      "/root/tp-agent/work/m17465/runs/m17465/benchmark/gates_verified.json",
+      "/root/tp-agent/work/m17465/runs/m17465/repro_cmd.sh",
+      "/root/tp-agent/work/m17465/runs/m17465/pytest.log",
+      "/root/tp-agent/work/m17465/runs/m17465/manifest.json",
+      "/root/tp-agent/work/m17465/runs/m17465/crosscheck_three_cases.json",
+      "runs/m17622/result_auditor_rerun.json",
+      "runs/m17622/crosscheck_auditor_rerun.json"
+    ],
+    "tests": [
+      "tests/test_fairness_energy.py (18 tests, 46 asserts: closed forms 8pi/4pi, Gauss-Bonnet sum 4pi, scale/order/translation invariance, crease-vs-smooth divergence, bad-input rejection)",
+      "tests/test_fairness_entry.py (7 tests, 32 asserts: package exports, three CLI cases, sphere claim = acceptance clause, console script, audit pipeline calls smoothing_energy, switch-off, benchmark gates)",
+      "auditor rerun 2026-11-13: python -m pytest tests/test_fairness_energy.py tests/test_fairness_entry.py -q -> 29 passed, 1 warning in 112.07 s"
+    ],
+    "integration_callers": [
+      "tensorcad.geometry_audit:audit_hull_geometry(..., check_smoothing_energy=True) -> fairness_energy_report(mesh, crease_angle_degrees=...) at geometry_audit.py:1561-1567, stage name 'smoothing_energy', field carried in GeometryAuditReport.to_dict() at geometry_audit.py:1484",
+      "tensorcad.cli:main fairness dispatch -> tensorcad/cli.py:87-93"
+    ],
+    "benchmark": {
+      "registry_status": "tensor_benchmark_cases has 0 rows for anchor_slug='GAP-CAD-A3-CURVATURE-FAIRNESS' (55 rows total in the table, none CAD) -> the judge used here is gates_verified.json + the anchor acceptance clause, not a DB-registered case",
+      "G1_sphere_principal_curvature": "ref closed form 1/R, got 10.000000000000385 ... 0.09999999999998727 over R=0.1..10 (7 radii, 262+6 deterministic probes); |k-1/R| max 2.25e-7 1/m at R=0.1 < 1e-6 clause -> PASS (auditor recomputed the stronger max criterion, not just the gate's probe mean)",
+      "G2_sphere_energy_field_path": "ref 8pi=25.132741 / 4pi=12.566371, got 25.156293 / 12.578147 -> +0.09371 % (tol 0.1 %) PASS",
+      "G3_sphere_energy_mesh_path": "got 26.573625 / 12.763146 / 12.239480 -> +5.733 % / +1.566 % / -2.601 % (tol 6 %) PASS",
+      "G4_wigley_smooth_vs_analytic_flank_121x37": "ref E_bending 21.537877 analytic / got 20.084938 = -6.746 %; ref E_willmore 5.384469 / got 5.036300 = -6.466 % (tol 15 %) PASS",
+      "G5_richardson_and_reference_selfcheck": "E_bending extrapolated 21.550310 vs 21.537877 = +0.0577 % (tol 0.5 %); analytic area vs order-doubled quadrature 9.90e-16 (tol 1e-12) PASS",
+      "G6_invariance": "scaling 0.0, cell reordering 2.27e-13, 1.6 km translation 1.14e-11 (tol 1e-10) PASS",
+      "G7_diagnostic_only": "sphere H 1.58 % / K 0.05 %; ellipsoid H 12.83 % / K 22.43 % (> 15 % standard, FAIL row retained); wigley flank integral -12.87 % / area -13.61 %; meshmagick comparison WITHHELD",
+      "auditor_reproduction": "python benchmarks/verified/curvature_fairness/run_benchmark.py --out /tmp/audit17622/bench -> 46.7 s, exit 0, all_gates_pass True, 20/20 gate rows numerically identical to the shipped result.json (0 mismatches, incl. all error percentages)"
+    },
+    "repro_cmd": "bash /root/tp-agent/work/m17465/runs/m17465/repro_cmd.sh — auditor executed its components individually into /tmp (benchmark 46.7 s, CLI sphere/wigley/hull, crosscheck_curvature_thirdparty.py, pytest 29 passed/112 s) because the script writes into runs/m17465 and would have rewritten the audited sha256 manifest; shipped manifest re-verified 13/13 sha256 + byte sizes match",
+    "external_anchor_status": "analytic closed forms (8pi/4pi sphere energies, Wigley analytic flank Gauss-Legendre with order-doubled self-check) are the external reference; the clause's requested third-party tool meshmagick is WITHHELD (import/pip/git all failed on 2026-11-13, three attempts recorded in crosscheck_three_cases.json provenance) — L5 not claimed",
+    "landing_state": "remote main 5eae547 does NOT contain the deliverables (git merge-base --is-ancestor e030c60 origin/main -> NO); they sit on branch agent/m17465 = e030c60 / PR #422 (state open at 2026-11-13T07:28Z). 16 files were filtered by the push gate, so runs/m17465/* (repro_cmd.sh, sha256 manifest, figures, CLI records) exist only in the local worktree, not on the branch or main",
+    "findings": {
+      "F1_landing_gap": "code-complete but unlanded: PR #422 open, main 5eae547 lacks tensorcad/fairness_cli.py and benchmarks/verified/curvature_fairness/; effective ecosystem maturity is L0 until merge lands",
+      "F2_registry_gap": "tensor_benchmark_cases has no row for this anchor, so tolerances for G3/G4/G6 are author-declared (only the 1e-6 curvature clause comes from the acceptance text); recommend seeding the table with the G1/G5 rows",
+      "F3_clause3_unmet": "acceptance clause '3-case meshmagick cross-check' is honestly WITHHELD with a documented substitute (trimesh Cohen-Steiner/Morvan normal cycles + closed forms); ellipsoid K median 22.43 % breaches the 15 % standard and is kept as a failing row rather than dropped",
+      "F4_flag_hazard": "gates_verified.json reports all_gates_pass=true while diagnostics.G7.verdict=fail; a consumer keying on the flag alone would read 'every acceptance clause met'. Separating 'gates' from 'clauses' is recommended",
+      "F5_verified_strength": "report claims check out: every number in report section 3 matches result.json; the <=2.2e-7 1/m curvature claim is reproducible under the stricter max-deviation criterion"
+    },
+    "not_run": [
+      "full TensorCAD suite (262 tests) — only the two fairness test files were re-run",
+      "examples/ and CLI end-to-end for hull families other than the parametric hull",
+      "cross-architecture run (audit ran on x86_64 99 host; CI is x86, cluster is loong64)",
+      "meshmagick comparison (tool unobtainable — see external_anchor_status)"
+    ]
+  },
+  "disposition": "approve with notes (L4 substantively verified; landing + registry gaps recorded)"
+}
