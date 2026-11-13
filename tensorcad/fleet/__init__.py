@@ -14,6 +14,14 @@ either built from a stated source and admitted by machine-decidable gates, or re
 with the number that caused the refusal. Nothing in this package claims that a
 form-family hull *is* the benchmark ship: the record's provenance and the reference
 basis travel with every number into the artefacts.
+
+Geometry routes
+---------------
+* ``series60_form`` — Series-60 section law (Cb ∈ [0.55, 0.85])
+* ``parametric_sections`` — generalized Beta section-area law (any Cb < Cm ≤ 1)
+* ``offset_table`` — lofted station × waterline half-breadth table
+* ``imported_stl`` — binary/ASCII STL, welded and oriented on intake
+* ``iges_field`` — IGES B-spline patches → half-breadth field → watertight solid
 """
 
 from tensorcad.fleet.build import (
@@ -21,8 +29,10 @@ from tensorcad.fleet.build import (
     BuiltGeometry,
     RouteRefusal,
     build_ship_geometry,
+    iges_field_mesh,
     loft_station_table,
     offset_table_mesh,
+    parametric_table,
     read_stl,
     sample_offset_table,
     stl_mesh,
@@ -71,10 +81,12 @@ __all__ = [
     "evaluate_gates",
     "fleet_sha_index",
     "gate_volume",
+    "iges_field_mesh",
     "load_manifest",
     "loft_station_table",
     "measure",
     "offset_table_mesh",
+    "parametric_table",
     "placeholder_box",
     "placeholder_reasons",
     "read_stl",
