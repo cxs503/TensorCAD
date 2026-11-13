@@ -1,0 +1,227 @@
+{
+ "schema": "oss-inventory-wave/gaps-v1",
+ "domain": "DG",
+ "note": "GAP-DG-* anchors: one entry per capability the open-source census says is load-bearing and TensorDG does not have (or has only partially). Every current-state claim is a grep probe over the target repository (target_evidence, machine re-run by `wave.py verify`); every acceptance criterion is a numeric gate; every external_anchor is literature or an analytic solution - never the target repository itself.",
+ "gaps": [
+  {
+   "id": "GAP-DG-001",
+   "title": "非结构单纯形（三角/四面体）单元与网格拓扑",
+   "priority": "P0",
+   "effort": "L",
+   "feature_points": [
+    "F07-simplex",
+    "F01-basis"
+   ],
+   "status": "absent",
+   "current_state": "全部 DG 算子建在张量积（Cartesian/周期）网格上：euler_dg_2d 的文档串明说 periodic Cartesian mesh，advection_1d/2d/3d、euler_dg_1d/2d、swe_1d/2d、poisson_2d(SIPG) 同构；仓内无三角/四面体单元、无面邻接拓扑、无外部网格读入（gmsh）。",
+   "target_evidence": [
+    {
+     "pattern": "triangle|tetra|simplex|gmsh|unstructured",
+     "expect": "absent",
+     "note": "单纯形单元与网格读入的路径/标识符一次都不出现"
+    }
+   ],
+   "refs": [
+    "nektar",
+    "ngsolve",
+    "mfem",
+    "dealii",
+    "dolfinx",
+    "dune_fem"
+   ],
+   "acceptance": "在 P1/P2 下用两套非结构三角剖分（每套 >=2000 单元）解线性对流与 Poisson(SIPG)：L2 误差对解析解的收敛阶不低于 p+0.8（p=1 时 >=1.8，p=2 时 >=2.8），同一算例在三角与四边形网格上的 p=2 误差比值 <=1.3，周期边界下的总质量守恒相对误差 <=1e-12。",
+   "upstream_note": "curated：nektar 与 hp3d 提供四面体/三角单元的基函数-求积-面拓扑三件套；ndg 与 mfem 提供可直接对照的 triangle 算子数值结果。本波未读源码。",
+   "external_anchor": "Hesthaven & Warburton, Nodal Discontinuous Galerkin Methods, Springer 2008, Ch.6（三角单元算子与收敛阶）；Cockburn & Shu, SIAM J. Numer. Anal. 35(6) 1998。",
+   "impact": "船体曲面与结构前处理输出的是三角面片/四面体网格；没有单纯形单元，TensorDG 无法吃真实 CAD 网格，只能做规则区间的教科书算例。"
+  },
+  {
+   "id": "GAP-DG-002",
+   "title": "h/p 自适应（悬挂节点界面 + p 变更 + 误差指示）",
+   "priority": "P0",
+   "effort": "L",
+   "feature_points": [
+    "F06-adaptivity",
+    "F12-error-estimation"
+   ],
+   "status": "absent",
+   "current_state": "无任何 AMR/hp 机制：没有四/八叉森林、没有悬挂节点（非协调）界面通量、没有单元级 p 变更记录；加密只能整网格重跑（convergence.py 是对均匀加密层做阶次拟合的工具，不是自适应）。",
+   "target_evidence": [
+    {
+     "pattern": "hanging_node|hanging_nodes|p4est|octree|quadtree|p_adapt|hp_adapt|nonconforming|\\bAMR\\b",
+     "expect": "absent",
+     "note": "悬挂节点/森林/p 自适应标识符零命中（旧签名 hanging 会被 sign-changing 误命中，已收紧）"
+    }
+   ],
+   "refs": [
+    "p4est",
+    "amrex",
+    "philip",
+    "trixi",
+    "parthenon",
+    "ngsolve"
+   ],
+   "acceptance": "2D Euler（前台阶或双马赫反射）在固定自由度预算（<=均匀基线 N_dof 的 25%）下，自适应解的密度 L1 误差 <=均匀加密到 4*N_dof 解的 60%；跨悬挂节点界面总质量漂移 <=1e-12；p 变更后密度最小值 >=同算例均匀解的 0.99（无 Gibbs 超调）。",
+   "upstream_note": "curated：p4est 提供 2:1 平衡的森林与悬挂节点接口构造；philip/trixi 提供 hp 判据（截断误差指示）设计；amrex/parthenon 提供块结构 AMR 的守恒回流（reflux）设计。本波未读源码。",
+   "external_anchor": "Burstedde, Wilcox & Ghattas, SIAM J. Sci. Comput. 33(2) 2011（p4est）；Ceze & Fidkowski, J. Comput. Phys. 230 (2011)（hp 自适应判据）；Berger & Colella, J. Comput. Phys. 82 (1989)（AMR 守恒回流）。",
+   "impact": "船舶水动力算例里激波/自由面与边界层尺度差 2~3 个量级，全域 p 提升的代价不可支付；自适应是三维实船算例能否跑得动的前提。"
+  },
+  {
+   "id": "GAP-DG-003",
+   "title": "熵稳定/分裂型（split-form、两点通量）离散",
+   "priority": "P1",
+   "effort": "M",
+   "feature_points": [
+    "F05-entropy-stable"
+   ],
+   "status": "absent",
+   "current_state": "没有分裂型（skew-symmetric / split-form）算子，也没有两点熵守恒通量与熵稳定界面耗散；entropy 一词只出现在算例名（Shu-Osher 激波-熵波相互作用）与熵预算脚本里，算子本身是节点型 HLLC + TVB 限界。",
+   "target_evidence": [
+    {
+     "pattern": "split_form|split-form|entropy_stable|entropy-stable|kuscu|entropy_conserv|two-point_flux|two-point flux",
+     "expect": "absent",
+     "note": "分裂型/熵稳定算子标识符零命中（旧签名 two-point 会被收敛率两点估计误命中，已收紧）"
+    }
+   ],
+   "refs": [
+    "trixi",
+    "flexi",
+    "exadg"
+   ],
+   "acceptance": "1D/2D Euler（Sod + Shu-Osher）：分裂型算子配熵守恒通量后，每步离散总熵变化 <=1e-13（符号一致，即非增）；动量与能量守恒相对误差 <=1e-12；Sod 密度 L1 误差相对本仓现有 HLLC 节点基线 <=1.05 倍（精度不得退化）。",
+   "upstream_note": "curated：trixi 的 volume/surface 分裂型内核与熵守恒通量是唯一完整的开源参考实现；flexi 给出工程尺度上的算子组织方式。本波未读源码。",
+   "external_anchor": "Fisher & Carpenter, J. Comput. Phys. 252 (2013)（entropy stable staggered grid / split form）；Gassner, Winters & Kopriva, J. Comput. Phys. 327 (2016)（split-form DGSEM 的熵稳定性）；Chan, J. Comput. Phys. 378 (2019)（discretely entropy stable DG）。",
+   "impact": "耐波/操纵这类必须长时积分的时域算例，非熵稳定离散会带来缓慢的能量漂移，误差天花板由格式而非物理决定。"
+  },
+  {
+   "id": "GAP-DG-004",
+   "title": "二维保界（Zhang-Shu 缩放 / 子单元限界）",
+   "priority": "P1",
+   "effort": "M",
+   "feature_points": [
+    "F04-bound-preserving",
+    "F03-limiting"
+   ],
+   "status": "partial",
+   "current_state": "保界只做到一半：1-D Euler 有 Zhang-Shu 可容许缩放限制器 _positivity_scale（tensordg/euler_dg_1d.py:98，theta 缩放保住单元均值）；2-D 起只有事后过滤 _positivity_filter（tensordg/euler_dg_2d.py:659：不可容许的整格直接塌成单元均值——均值守恒但该单元退化为一阶，不是 theta 缩放，也没有子单元信息）。无子单元（subcell）FV 混合、无 MOOD/a-posteriori 限界、无凸限界；SWE/NS 模块没有保界路径。",
+   "target_evidence": [
+    {
+     "pattern": "_positivity_scale|zhang.?shu",
+     "expect": "present",
+     "note": "1-D Zhang-Shu 缩放限制器存在（partial 的正面证据）"
+    },
+    {
+     "pattern": "subcell|\\bmood\\b|convex_limit|convex limiting",
+     "expect": "absent",
+     "note": "子单元限界/凸限界标识符零命中"
+    }
+   ],
+   "refs": [
+    "trixi",
+    "flexi",
+    "gkeyll",
+    "mfem"
+   ],
+   "acceptance": "2D Euler 双稀疏波（近真空，rho 与 p 起值 1e-8，p=3）：全程 rho,p >=0 且无 NaN；总质量与总能量相对误差 <=1e-12；把 2D 的事后过滤换成 Zhang-Shu theta 缩放后，触发单元-步比例（整格塌陷计数/总单元-步）从现状 >10% 降到 <=1%；等熵涡（p=3）的 L2 误差退化 <=10%。",
+   "upstream_note": "curated：trixi 的子单元激波捕捉（指示器 + subcell 混合）与 mfem 的公开 subcell limiter 算例是两条可搬路线；Zhang-Shu 缩放本仓 1-D 已有，2-D 化是直接增量。本波未读上游源码。",
+   "external_anchor": "Zhang & Shu, Proc. R. Soc. A 466 (2010)（DG 保界限制器）；Dumbser, Zanotti, Loubère & Cassulli, J. Comput. Phys. 278 (2014)（a posteriori subcell limiting）；Hennemann, Rueda-Ramírez, Hindenlang & Gassner, J. Comput. Phys. 424 (2021)（子单元激波捕捉）。",
+   "impact": "二维近真空/空化工况是自由面与螺旋桨空泡的常态；整格塌陷会在局部把精度降成一阶，并以未受控的方式污染阻力/升力积分量。"
+  },
+  {
+   "id": "GAP-DG-005",
+   "title": "分布式内存与加速器后端（MPI / GPU）",
+   "priority": "P1",
+   "effort": "L",
+   "feature_points": [
+    "F11-parallel"
+   ],
+   "status": "absent",
+   "current_state": "纯单进程 NumPy/Torch CPU 实现：tensordg 内无 MPI 通信、无 CUDA/Kokkos/OpenMP 内核、无分区与 halo 交换；并行化只能靠多进程各算各的算例。",
+   "target_evidence": [
+    {
+     "pattern": "mpi4py|cuda|kokkos|cupy|numba|gpu|openacc|openmp",
+     "expect": "absent",
+     "note": "并行/加速器标识符零命中"
+    }
+   ],
+   "refs": [
+    "nek5000",
+    "nekr",
+    "pyfr",
+    "libceed",
+    "mfem",
+    "amrex"
+   ],
+   "acceptance": "2D Euler（p=3，512x512 单元）在 4 个 MPI 秩与 1 秩上：密度 L2 差 <=1e-10（同一离散解）；4 秩并行效率 >=0.7（相对单秩墙钟）；若实现 GPU 路径，同算例相对 CPU 单节点加速 >=3 倍且 L2 差 <=1e-10。",
+   "upstream_note": "curated：pyfr 的 backend 抽象（同一 FR 算子多后端）、nekRS 的 matrix-free GPU 元素算子、libceed 的受限算子（restriction/prolongation）设计是三条可选路线。本波未读源码。",
+   "external_anchor": "Fischer, Lottes, Kerkemeier et al., Nek5000 user documentation (2008)；Vincent, Witherden & Vermeire, Comput. Fluids 141 (2016)（PyFR）；Fischer et al., Parallel Comput. 109 (2022)（nekRS）。",
+   "impact": "三维实船/实海况 DG 算例的单进程上限在两三万单元量级；无并行则 DG 只能停留在二维验证层，无法进入工程算例。"
+  },
+  {
+   "id": "GAP-DG-006",
+   "title": "非线性隐式/IMEX 时间推进与 p-多重网格预处理",
+   "priority": "P1",
+   "effort": "L",
+   "feature_points": [
+    "F10-implicit",
+    "F09-time-integration"
+   ],
+   "status": "partial",
+   "current_state": "时间推进只有显式 SSP-RK3；隐式侧仅在 SIPG 椭圆求解里有块 Jacobi 预条件的 CG（sipg_matrixfree.py / poisson_2d.py），没有非线性 Newton-Krylov、没有 p-多重网格、没有 IMEX/ARK 分裂。",
+   "target_evidence": [
+    {
+     "pattern": "precondition",
+     "expect": "present",
+     "note": "SIPG 的块 Jacobi 预条件 CG 存在（partial 的正面证据）"
+    },
+    {
+     "pattern": "newton_krylov|newton-krylov|gmres|multigrid|imex|arkode",
+     "expect": "absent",
+     "note": "Newton-Krylov / p-多重网格 / IMEX 标识符零命中"
+    }
+   ],
+   "refs": [
+    "exadg",
+    "petsc",
+    "sundials",
+    "dealii",
+    "libceed"
+   ],
+   "acceptance": "2D 对流扩散（Pe=1e3，p=3）推到稳态：Newton-Krylov + p-多重网格预条件的线性迭代次数从 64x64 到 256x256 增长 <=1.5 倍，达到同一收敛判据所需时间步数 <=显式 SSP-RK3 的 1/10；稳态解与显式长时积分解的 L2 差 <=1e-6。",
+   "upstream_note": "curated：exadg 展示 matrix-free DG + 几何多重网格的组合；sundials/ARKODE 提供 IMEX 与嵌入式误差控制设计；petsc 提供现成的 SNES/PC 栈。本波未读源码。",
+   "external_anchor": "Kronbichler & Kormann, ACM TOMS 45(3) 2019（matrix-free DG 算子求值）；Pazner, SIAM J. Sci. Comput. 42(4) 2020（p-multigrid for DG）；Hindmarsh et al., ACM TOMS 31 (2005)（SUNDIALS）。",
+   "impact": "粘性主导/低马赫船体绕流的显式时间步受 CFL 与刚性项双重限制；没有隐式-多重网格路线，DG 的工程可用性停在可压显式算例。"
+  },
+  {
+   "id": "GAP-DG-007",
+   "title": "目标导向后验误差估计（DWR）与自适应判据",
+   "priority": "P2",
+   "effort": "M",
+   "feature_points": [
+    "F12-error-estimation"
+   ],
+   "status": "partial",
+   "current_state": "有可微后端的伴随灵敏度（differentiable.py: adjoint sensitivity of a sensor）与若干算例内的经验误差估计，但没有对偶加权残差（DWR）估计子、没有估计-真误差对照、没有把估计子接到自适应决策上。",
+   "target_evidence": [
+    {
+     "pattern": "adjoint",
+     "expect": "present",
+     "note": "伴随灵敏度存在（partial 的正面证据）"
+    },
+    {
+     "pattern": "dual_weighted|dual-weighted|dwr|a_posteriori|a-posteriori|goal_oriented|goal-oriented",
+     "expect": "absent",
+     "note": "DWR/目标导向估计子标识符零命中"
+    }
+   ],
+   "refs": [
+    "philip",
+    "firedrake",
+    "dealii"
+   ],
+   "acceptance": "2D Poisson(SIPG) 与 2D Euler 各 2 个算例上，DWR 自适应 5 轮后目标泛函（阻力/线积分）误差 <=同自由度均匀加密解的 50%，效应性指数（估计/真误差）落在 0.8~1.25 区间（4 个算例全部满足）。",
+   "upstream_note": "curated：philip 的 DWR 估计流程、firedrake/pyadjoint 的伴随装配、dealii 的目标泛函装配模式是三条参考路线。本波未读源码。",
+   "external_anchor": "Becker & Rannacher, Acta Numerica 10 (2001)（DWR 双加权残差）；Fidkowski & Darmofal, AIAA J. 49(4) 2011（output-based error estimation and mesh adaptation）。",
+   "impact": "把有限自由度花在工程真正关心的量（阻力、升力、桨盘推力）而不是全局 L2 上，是 DG 相较二阶 FVM 的卖点能否兑现的关键。"
+  }
+ ]
+}

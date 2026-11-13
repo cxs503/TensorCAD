@@ -1,0 +1,124 @@
+{
+ "domain": "DG",
+ "feature_slug": "FEAT-OSS-INVENTORY-DG",
+ "target_repo": "TensorDG",
+ "target_commit_pinned": "281ba5c6cf6777ced440b8df756ad4402287d696",
+ "target_scope": "tensordg/",
+ "target_path_env": "TENSORDG_PATH",
+ "target_path_default": "/root/tensor-ecosystem/TensorDG",
+ "docs_dir": "docs/oss_inventory_dg",
+ "artifacts_dir": "artifacts/oss_inventory_dg",
+ "tiers": {
+  "T1": "absorb now: method-defining DG/FR/spectral-element implementation whose technique maps onto a live TensorDG gap; reading the upstream source is enough to re-implement, licence is permissive or weak-copyleft",
+  "T2": "reference design: framework/library that carries the enabling machinery (AMR forests, matrix-free kernels, Krylov/IMEX stacks, MPI abstractions); read for design and cross-check numbers, not scheduled for porting",
+  "T3": "context only: adjacent paradigm (e.g. production FVM) or closed/hostile licence; kept for the maturity baseline and benchmark provenance, never for code reuse"
+ },
+ "evidence_policy": {
+  "measured": "metadata.* and feature_paths.* are fetched in this run from the GitHub REST API (repo metadata + one recursive tree at the default branch); source=github_api marks measured values",
+  "curated": "pool.json tier/focus/why and gaps.json refs/upstream_note are curation (curated_knowledge): they were NOT verified by reading the upstream sources in this run; adoption requires a source-reading pass in wave 2",
+  "unresolved": "entries with status=failed keep null metadata and must not be quoted as current project facts; the negative_control entry exists to prove failures are recorded, not dropped",
+  "target_evidence": "every GAP-DG current-state claim is a grep over the target repository at a pinned commit; patterns, hit counts and file:line samples are stored in registry.json (and re-run by `verify`)"
+ },
+ "features": [
+  {
+   "id": "F01-basis",
+   "title": "模态/节点基与数值求积",
+   "signature": "(basis|legendre|quadrature|vandermonde|polynomial|orthonormal)"
+  },
+  {
+   "id": "F02-flux",
+   "title": "数值通量（Riemann 求解器）",
+   "signature": "(riemann|hllc|rusanov|flux|upwind|godunov)"
+  },
+  {
+   "id": "F03-limiting",
+   "title": "限制器 / 激波捕捉",
+   "signature": "(limit|weno|tvd|minmod|tvb|moment|artificial_viscosity)"
+  },
+  {
+   "id": "F04-bound-preserving",
+   "title": "保界/正性保持（子单元限界）",
+   "signature": "(positiv|bound_preserv|bound-preserv|subcell|zhang|convex|mood)"
+  },
+  {
+   "id": "F05-entropy-stable",
+   "title": "熵稳定/分裂型离散",
+   "signature": "(entropy|split_form|split-form|kuscu|esfr|two-point)"
+  },
+  {
+   "id": "F06-adaptivity",
+   "title": "h/p 自适应与悬挂节点",
+   "signature": "(adapt|amr|p4est|hanging|refine|coarsen|octree)"
+  },
+  {
+   "id": "F07-simplex",
+   "title": "单纯形（三角/四面体）单元与网格",
+   "signature": "(triangle|tetra|simplex|gmsh|unstructured)"
+  },
+  {
+   "id": "F08-curved",
+   "title": "曲线单元/等参几何",
+   "signature": "(curved|isoparametric|jacobian|nurbs|metric_term)"
+  },
+  {
+   "id": "F09-time-integration",
+   "title": "时间推进（SSP-RK / IMEX）",
+   "signature": "(time_integ|ssprk|ssp_rk|rk3|imex|arkode|stepper|ode_solver)"
+  },
+  {
+   "id": "F10-implicit",
+   "title": "隐式求解（Newton-Krylov/多重网格/预处理）",
+   "signature": "(newton|gmres|krylov|multigrid|precondition|implicit)"
+  },
+  {
+   "id": "F11-parallel",
+   "title": "并行与加速器后端（MPI/GPU）",
+   "signature": "(mpi|kokkos|cuda|hip|gpu|openmp|openacc|device)"
+  },
+  {
+   "id": "F12-error-estimation",
+   "title": "后验误差估计/目标导向自适应",
+   "signature": "(adjoint|dual_weighted|dwr|a_posteriori|error_estimat)"
+  },
+  {
+   "id": "F13-multiphysics",
+   "title": "多物理（NS/Maxwell/弹性/浅水/等离子体）",
+   "signature": "(navier|maxwell|elastic|shallow|swe_|plasma|gyrokinetic|mhd|turbulen)"
+  },
+  {
+   "id": "F14-dispersion",
+   "title": "色散/耗散分析与谱性质",
+   "signature": "(dispersion|dissipation|eigen|spectrum|spectral_analysis)"
+  }
+ ],
+ "licence_policy": {
+  "note": "Measured from the API-reported SPDX id of each repository; decides whether an upstream technique may be ported as code or only re-implemented from its paper.",
+  "port_ok": [
+   "MIT",
+   "BSD-2-Clause",
+   "BSD-3-Clause",
+   "Apache-2.0",
+   "ISC",
+   "Zlib",
+   "0BSD"
+  ],
+  "adapt_allowed_file_level_copyleft": [
+   "LGPL-2.1",
+   "LGPL-3.0",
+   "MPL-2.0",
+   "EPL-2.0"
+  ],
+  "read_only_copyleft": [
+   "GPL-2.0",
+   "GPL-3.0",
+   "AGPL-3.0",
+   "SSPL-1.0"
+  ],
+  "read_only_unknown": [
+   "NOASSERTION",
+   "NOASSERTION-or-multiple",
+   "None",
+   "OTHER"
+  ]
+ }
+}

@@ -1,0 +1,144 @@
+{
+ "commit": "281ba5c6cf6777ced440b8df756ad4402287d696",
+ "domain": "DG",
+ "gaps": [
+  {
+   "id": "GAP-DG-001",
+   "probes": [
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "\u5355\u7eaf\u5f62\u5355\u5143\u4e0e\u7f51\u683c\u8bfb\u5165\u7684\u8def\u5f84/\u6807\u8bc6\u7b26\u4e00\u6b21\u90fd\u4e0d\u51fa\u73b0",
+     "pattern": "triangle|tetra|simplex|gmsh|unstructured",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  },
+  {
+   "id": "GAP-DG-002",
+   "probes": [
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "\u60ac\u6302\u8282\u70b9/\u68ee\u6797/p \u81ea\u9002\u5e94\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d\uff08\u65e7\u7b7e\u540d hanging \u4f1a\u88ab sign-changing \u8bef\u547d\u4e2d\uff0c\u5df2\u6536\u7d27\uff09",
+     "pattern": "hanging_node|hanging_nodes|p4est|octree|quadtree|p_adapt|hp_adapt|nonconforming|\\bAMR\\b",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  },
+  {
+   "id": "GAP-DG-003",
+   "probes": [
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "\u5206\u88c2\u578b/\u71b5\u7a33\u5b9a\u7b97\u5b50\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d\uff08\u65e7\u7b7e\u540d two-point \u4f1a\u88ab\u6536\u655b\u7387\u4e24\u70b9\u4f30\u8ba1\u8bef\u547d\u4e2d\uff0c\u5df2\u6536\u7d27\uff09",
+     "pattern": "split_form|split-form|entropy_stable|entropy-stable|kuscu|entropy_conserv|two-point_flux|two-point flux",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  },
+  {
+   "id": "GAP-DG-004",
+   "probes": [
+    {
+     "expect": "present",
+     "hits": 6,
+     "note": "1-D Zhang-Shu \u7f29\u653e\u9650\u5236\u5668\u5b58\u5728\uff08partial \u7684\u6b63\u9762\u8bc1\u636e\uff09",
+     "pattern": "_positivity_scale|zhang.?shu",
+     "samples": [
+      "tensordg/euler_dg_1d.py:48: \"\"\"Zhang-Shu admissible scaling factors ``theta`` for one modal cell block.",
+      "tensordg/euler_dg_1d.py:98: def _positivity_scale(coeff, check_points, eta=1e-10):",
+      "tensordg/euler_dg_1d.py:99: \"\"\"Zhang-Shu scaling limiter: admissible cell, maximum retained high order."
+     ],
+     "satisfied": true
+    },
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "\u5b50\u5355\u5143\u9650\u754c/\u51f8\u9650\u754c\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d",
+     "pattern": "subcell|\\bmood\\b|convex_limit|convex limiting",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  },
+  {
+   "id": "GAP-DG-005",
+   "probes": [
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "\u5e76\u884c/\u52a0\u901f\u5668\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d",
+     "pattern": "mpi4py|cuda|kokkos|cupy|numba|gpu|openacc|openmp",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  },
+  {
+   "id": "GAP-DG-006",
+   "probes": [
+    {
+     "expect": "present",
+     "hits": 14,
+     "note": "SIPG \u7684\u5757 Jacobi \u9884\u6761\u4ef6 CG \u5b58\u5728\uff08partial \u7684\u6b63\u9762\u8bc1\u636e\uff09",
+     "pattern": "precondition",
+     "samples": [
+      "tensordg/heat_1d.py:6: * ``\"matrix-free\"``  -- no global assembly, solve with preconditioned CG",
+      "tensordg/poisson_2d.py:11: * ``\"matrix-free\"``  -- no global assembly, solve with preconditioned CG",
+      "tensordg/sipg_matrixfree.py:1: \"\"\"Matrix-free SIPG elliptic solvers using preconditioned CG."
+     ],
+     "satisfied": true
+    },
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "Newton-Krylov / p-\u591a\u91cd\u7f51\u683c / IMEX \u6807\u8bc6\u7b26\u96f6\u547d\u4e2d",
+     "pattern": "newton_krylov|newton-krylov|gmres|multigrid|imex|arkode",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  },
+  {
+   "id": "GAP-DG-007",
+   "probes": [
+    {
+     "expect": "present",
+     "hits": 23,
+     "note": "\u4f34\u968f\u7075\u654f\u5ea6\u5b58\u5728\uff08partial \u7684\u6b63\u9762\u8bc1\u636e\uff09",
+     "pattern": "adjoint",
+     "samples": [
+      "tensordg/differentiable.py:235: natural differentiable output functional (adjoint sensitivity of a sensor).",
+      "tensordg/kovasznay.py:350: wall_adjoint: bool = False,",
+      "tensordg/kovasznay.py:458: wall_penalty, wall_adjoint=wall_adjoint,"
+     ],
+     "satisfied": true
+    },
+    {
+     "expect": "absent",
+     "hits": 0,
+     "note": "DWR/\u76ee\u6807\u5bfc\u5411\u4f30\u8ba1\u5b50\u6807\u8bc6\u7b26\u96f6\u547d\u4e2d",
+     "pattern": "dual_weighted|dual-weighted|dwr|a_posteriori|a-posteriori|goal_oriented|goal-oriented",
+     "samples": [],
+     "satisfied": true
+    }
+   ],
+   "satisfied": true
+  }
+ ],
+ "schema": "oss-inventory-wave/target-grep-v1",
+ "scope": "tensordg/",
+ "source": "live_grep",
+ "target_repo": "TensorDG"
+}
