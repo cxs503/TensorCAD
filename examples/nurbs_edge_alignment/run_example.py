@@ -15,6 +15,10 @@ hand):
    (radii 1.0 and 1.002) must keep its gap, and two representations of the same point
    set with different parametrisations (three 120-degree arcs against six 60-degree
    arcs) must come out with a weight mismatch instead of a watertight claim.
+4. **The seam inside the patches** (``align_patch_seam``): the same sphere seam, but
+   the refinement is now carried by the *patches* -- both boundary rows end up with
+   nine control points -- with the patch geometry unmoved, plus the two orientation
+   and gap controls at patch level.
 
 Run::
 
@@ -38,6 +42,7 @@ from pathlib import Path
 
 from tensorcad.edge_alignment import (
     align_edges,
+    align_patch_seam,
     boundary_curve,
     edge_report,
     insert_knot,
@@ -45,7 +50,7 @@ from tensorcad.edge_alignment import (
 )
 from tensorcad.highorder.nurbs_geom import insert_knot as insert_surface_knot
 from tensorcad.highorder.nurbs_geom import split_patch
-from tensorcad.nurbs import circle_curve, sphere_surface
+from tensorcad.nurbs import NURBSSurface, circle_curve, sphere_surface
 
 RADIUS = 1.0
 CIRCLE_RADIUS = 2.0
@@ -130,6 +135,95 @@ def controls_evidence() -> dict[str, object]:
     }
 
 
+def _planar_patch(net) -> NURBSSurface:
+    return NURBSSurface(
+        degree=(1, 1),
+        knots=((0.0, 0.0, 1.0, 1.0), (0.0, 0.0, 1.0, 1.0)),
+        control_net=net,
+    )
+
+
+def _planar_pair(offset: float = 0.0, *, reverse: bool = False):
+    """Two unit squares sharing ``x = 1`` (``+ offset``).
+
+    With ``reverse=True`` the right patch runs ``v`` downwards, so its ``u0`` edge
+    traverses the shared line the other way round.
+    """
+    x = 1.0 + offset
+    left = _planar_patch(
+        (((0.0, 0.0, 0.0), (0.0, 1.0, 0.0)), ((1.0, 0.0, 0.0), (1.0, 1.0, 0.0)))
+    )
+    right = _planar_patch(
+        (((x, 1.0, 0.0), (x, 0.0, 0.0)), ((x + 1.0, 1.0, 0.0), (x + 1.0, 0.0, 0.0)))
+        if reverse
+        else (((x, 0.0, 0.0), (x, 1.0, 0.0)), ((x + 1.0, 0.0, 0.0), (x + 1.0, 1.0, 0.0)))
+    )
+    return left, right
+
+
+def patch_seam_evidence() -> dict[str, object]:
+    """``align_patch_seam``: the seam carried by the two patches, not by loose curves."""
+    surface = sphere_surface(RADIUS)
+    left, right = split_patch(surface, 0, 0.5)
+    neighbour = insert_surface_knot(right, 1, 0.37, 1).elevate_degree(0, 1)
+    alignment = align_patch_seam(left, "u1", neighbour, "u0")
+
+    reversed_left, reversed_right = _planar_pair(reverse=True)
+    reversed_neighbour = insert_surface_knot(reversed_right, 0, 0.5, 1).elevate_degree(0, 1)
+    undeclared = align_patch_seam(reversed_left, "u1", reversed_neighbour, "u0")
+    declared = align_patch_seam(
+        reversed_left, "u1", reversed_neighbour, "u0", reverse_second=True
+    )
+
+    gap_left, gap_right = _planar_pair(offset=0.002)
+    gap = align_patch_seam(gap_left, "u1", gap_right, "u0")
+
+    return {
+        "sphere_seam": alignment.to_dict(),
+        "sphere_seam_patch_sizes": {
+            "left": {"before": [len(left.control_net), len(left.control_net[0])],
+                     "after": [len(alignment.first.control_net), len(alignment.first.control_net[0])]},
+            "neighbour": {"before": [len(neighbour.control_net), len(neighbour.control_net[0])],
+                          "after": [len(alignment.second.control_net), len(alignment.second.control_net[0])]},
+        },
+        "orientation_control": {
+            "undeclared": {
+                "watertight": undeclared.watertight,
+                "max_gap": undeclared.report["max_gap"],
+            },
+            "declared_reversed": {
+                "watertight": declared.watertight,
+                "max_gap": declared.report["max_gap"],
+                "operations": declared.to_dict()["operations"],
+            },
+        },
+        "gap_control": {
+            "offset_m": 0.002,
+            "knots_equal": gap.report["knots_equal"],
+            "max_control_difference": gap.report["max_control_difference"],
+            "max_gap": gap.report["max_gap"],
+            "watertight": gap.watertight,
+        },
+        "notes": {
+            "seam_axis": "u1 of the left patch, u0 of the neighbour (both edges run in v, axis 1)",
+            "refinement": "exact: degree elevation and/or knot insertion along the seam axis only",
+        },
+    }
+
+
+def alignment_knots() -> list[list[float]]:
+    """Interior knots along the seam direction: left patch, neighbour, both after."""
+    surface = sphere_surface(RADIUS)
+    left, right = split_patch(surface, 0, 0.5)
+    neighbour = insert_surface_knot(right, 1, 0.37, 1).elevate_degree(0, 1)
+    alignment = align_patch_seam(left, "u1", neighbour, "u0")
+    def interior(surface) -> list[float]:
+        degree = surface.degree[1]
+        return list(surface.knots[1][degree:-degree - 1])
+
+    return [interior(left), interior(neighbour), interior(alignment.first)]
+
+
 def figure(payload: dict[str, object], out: Path) -> None:
     import matplotlib
 
@@ -146,7 +240,7 @@ def figure(payload: dict[str, object], out: Path) -> None:
     coarse = circle_curve(1.002, arcs=3)
     fine = circle_curve(1.0, arcs=6)
 
-    fig, axes = plt.subplots(1, 3, figsize=(16.0, 4.8))
+    fig, axes = plt.subplots(1, 4, figsize=(21.0, 4.8))
 
     axis = axes[0]
     dense = _parameters(aligned_first, 400)
@@ -222,6 +316,40 @@ def figure(payload: dict[str, object], out: Path) -> None:
         axis.text(index + 0.18, right_value + 0.1, str(right_value), ha="center", fontsize=8)
     axis.legend(fontsize=8)
 
+    axis = axes[3]
+    patch_payload = payload["patch_seam"]["sphere_seam"]
+    rows = [
+        ("left patch, before", payload["patch_seam"]["sphere_seam_patch_sizes"]["left"]["before"][1], "tab:blue"),
+        (
+            "neighbour, before",
+            payload["patch_seam"]["sphere_seam_patch_sizes"]["neighbour"]["before"][1],
+            "tab:orange",
+        ),
+        (
+            "both, after alignment",
+            payload["patch_seam"]["sphere_seam_patch_sizes"]["left"]["after"][1],
+            "black",
+        ),
+    ]
+    seam_degree = patch_payload["report"]["degree"][0]
+    aligned_knots = alignment_knots()
+    for row, (label, _width, colour) in enumerate(rows):
+        axis.vlines(
+            aligned_knots[row],
+            row - 0.28,
+            row + 0.28,
+            color=colour,
+            linewidth=2.0,
+            label=label,
+        )
+    axis.set_yticks(range(len(rows)), [row[0] for row in rows])
+    axis.set_xlabel("interior knot in the seam direction (v)")
+    axis.set_title(
+        f"(d) knot vectors inside the patches\ndegree {seam_degree}, "
+        f"gap {patch_payload['report']['max_gap']:.1e} m"
+    )
+    axis.legend(fontsize=7, loc="center right")
+
     fig.tight_layout()
     fig.savefig(out / "edge_alignment.png", dpi=160)
     plt.close(fig)
@@ -238,6 +366,7 @@ def main() -> int:
         "insertion": insertion_evidence(),
         "seam": seam_evidence(),
         "controls": controls_evidence(),
+        "patch_seam": patch_seam_evidence(),
         "notes": {
             "radius_m": RADIUS,
             "sphere": "sphere_surface(1.0), degree (2, 2), split at u = 0.5",
@@ -266,6 +395,26 @@ def main() -> int:
         "watertight",
         payload["controls"]["different_radius"]["watertight"],
     )
+    patch = payload["patch_seam"]["sphere_seam"]["report"]
+    print(
+        "patch seam: watertight",
+        patch["watertight"],
+        "gap",
+        patch["max_gap"],
+        "patch deviation",
+        patch["max_patch_deviation"],
+        "operations",
+        patch["operations"],
+    )
+    orientation = payload["patch_seam"]["orientation_control"]
+    print(
+        "orientation control: undeclared gap",
+        orientation["undeclared"]["max_gap"],
+        "declared watertight",
+        orientation["declared_reversed"]["watertight"],
+    )
+    gap = payload["patch_seam"]["gap_control"]
+    print("gap control: control diff", gap["max_control_difference"], "watertight", gap["watertight"])
     print(
         "same point set, other parametrisation: weight diff",
         payload["controls"]["same_point_set_other_parametrisation"]["max_weight_difference"],
