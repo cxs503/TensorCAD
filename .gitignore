@@ -11,3 +11,5 @@ htmlcov/
 results/
 tensorcad-output/
 .venv*/
+artifacts/baseline_fleet/raw/
+artifacts/baseline_fleet/iges/
