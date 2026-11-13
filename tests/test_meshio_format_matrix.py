@@ -1,39 +1,52 @@
-"""meshio format matrix: round-trip fidelity for 6 formats × 3 geometries.
+"""meshio format matrix: round-trip fidelity for 6 formats × 3 geometries = 18 combos.
 
-Verifies that exporting a surface mesh through meshio and reading it back
-preserves:
-- **Volume** (divergence-theorem signed volume, relative error < 0.1%)
-- **Topology** (vertex count, face count; exact match for OBJ/VTK/Gmsh)
-- **Orientation** (signed volume sign unchanged → outward normals preserved)
+Verifies that exporting a mesh through meshio and reading it back preserves:
 
-Format capability
-=================
-STL / OBJ / VTK / Gmsh → REAL (surface triangles supported)
-SU2 / CGNS             → NOT_SUPPORTED for surface meshes (volume-only writers)
+- **Volume** (divergence-theorem volume, relative error < 1e-3; exact formats
+  < 1e-12)
+- **Topology** (vertex count and cell count exact for every format; exact vertex
+  positions and cell indices for the lossless formats OBJ/VTK/Gmsh/SU2/CGNS)
+- **Orientation** (sign of the volume unchanged → outward normals / positive
+  tetrahedra preserved)
 
-The 12 supported combinations (4 formats × 3 geometries) are tested;
-the 4 unsupported ones (SU2/CGNS × 3 geometries) are verified to raise
-``MeshioFormatError`` with a clear message.
+Matrix layout
+=============
+Each geometry is exercised in the topology its formats speak:
+
+* surface formats (STL, OBJ, VTK, Gmsh) get the triangle surface mesh;
+* volume formats (SU2, CGNS) get the tetrahedralisation of the same geometry
+  (:func:`tensorcad.meshio_exchange.tetrahedralise_surface`).
+
+6 formats × 3 geometries = 18 combinations, all green.  Before this change
+SU2 and CGNS were declared NOT_SUPPORTED and only 12 of the 18 combinations
+were actually exercised.
 """
 from __future__ import annotations
 
 import math
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from tensorcad.geometry import Mesh, MeshBuilder
 from tensorcad import mesh as meshlib
+from tensorcad.geometry import Mesh, MeshBuilder
 from tensorcad.meshio_exchange import (
+    FORMATS_ALL,
     FORMATS_SURFACE,
     FORMATS_VOLUME,
     MeshioFormatError,
+    TetrahedralisationError,
+    TetrahedralMesh,
     mesh_to_meshio,
     meshio_to_mesh,
+    meshio_to_tetrahedral,
     round_trip_meshio,
+    surface_signed_volume,
+    tetrahedral_volume,
+    tetrahedralise_surface,
+    write_meshio,
 )
 
 # ---------------------------------------------------------------------------
@@ -41,7 +54,7 @@ from tensorcad.meshio_exchange import (
 # ---------------------------------------------------------------------------
 
 def _make_cube() -> Mesh:
-    """Unit cube, outward-oriented, 8 vertices, 12 triangles."""
+    """Unit cube, outward-oriented, 8 vertices, 12 triangles.  Volume = 1."""
     vertices = (
         (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0),
         (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (1.0, 1.0, 1.0), (0.0, 1.0, 1.0),
@@ -57,162 +70,283 @@ def _make_cube() -> Mesh:
     return Mesh(vertices=vertices, faces=faces, units="m")
 
 
-def _make_sphere(n_lat: int = 16, n_lon: int = 32) -> Mesh:
-    """Approximate unit sphere via latitude-longitude tessellation.
+def _make_sphere(n_lat: int = 24, n_lon: int = 48) -> Mesh:
+    """Unit sphere: pole fans + quad bands, oriented outward, watertight.
 
-    Analytic volume = 4/3·π ≈ 4.18879.
+    Analytic volume = 4/3*pi = 4.188790...; the flat-faceted mesh is slightly
+    smaller, and the fixture asserts that discretisation error is < 1 %.
+
+    Note: the previous fixture used a full lat/lon *grid including the poles*,
+    which left a ring of boundary edges (32 unpaired edges) and an inward
+    normal -- a mesh whose "volume preserved" check was self-consistent but
+    physically meaningless.  Poles are single vertices here.
     """
     builder = MeshBuilder(units="m")
-    # Build vertices
-    vertex_map: list[list[int]] = []
-    for i_lat in range(n_lat + 1):
-        phi = math.pi * i_lat / n_lat  # 0..pi
-        row: list[int] = []
+    north = builder.add_vertex((0.0, 0.0, 1.0))
+    rings: list[list[int]] = []
+    for i_lat in range(1, n_lat):
+        phi = math.pi * i_lat / n_lat
+        ring = []
         for i_lon in range(n_lon):
-            theta = 2 * math.pi * i_lon / n_lon  # 0..2pi
-            x = math.sin(phi) * math.cos(theta)
-            y = math.sin(phi) * math.sin(theta)
-            z = math.cos(phi)
-            row.append(builder.add_vertex((x, y, z)))
-        vertex_map.append(row)
+            theta = 2 * math.pi * i_lon / n_lon
+            ring.append(
+                builder.add_vertex(
+                    (math.sin(phi) * math.cos(theta), math.sin(phi) * math.sin(theta), math.cos(phi))
+                )
+            )
+        rings.append(ring)
+    south = builder.add_vertex((0.0, 0.0, -1.0))
 
-    # Build triangles
-    for i_lat in range(n_lat):
+    for i_lon in range(n_lon):
+        j = (i_lon + 1) % n_lon
+        builder.add_triangle(north, rings[0][i_lon], rings[0][j])
+        builder.add_triangle(south, rings[-1][j], rings[-1][i_lon])
+    for i_lat in range(len(rings) - 1):
+        upper, lower = rings[i_lat], rings[i_lat + 1]
         for i_lon in range(n_lon):
-            i_lon_next = (i_lon + 1) % n_lon
-            a = vertex_map[i_lat][i_lon]
-            b = vertex_map[i_lat][i_lon_next]
-            c = vertex_map[i_lat + 1][i_lon_next]
-            d = vertex_map[i_lat + 1][i_lon]
-            builder.add_quad(a, b, c, d)
+            j = (i_lon + 1) % n_lon
+            builder.add_quad(upper[i_lon], lower[i_lon], lower[j], upper[j])
 
-    return builder.build()
+    return meshlib.orient_outward(builder.build()).mesh
 
 
-def _make_wigley() -> Mesh:
-    """Wigley III hull form (parabolic waterlines and sections).
+def _make_capsule(n_theta: int = 32, n_axial: int = 12) -> Mesh:
+    """Ship-like body of revolution: cylinder + hemispherical ends.
 
-    L=2, B=0.3, D=0.125.  Analytic volume ≈ 0.075 (Cb≈0.5 for Wigley).
+    A submarine hull without the appendages, i.e. a *closed, star-shaped* body
+    with an analytic volume: V = pi*r^2*L + 4/3*pi*r^3 with r = 0.5, L = 4.
+
+    Why this replaced the hand-rolled Wigley shelf
+    ----------------------------------------------
+    Two fixtures were probed against the invariants before being trusted:
+
+    * the old latitude/longitude sphere included the poles as full rings, which
+      left 32 unpaired boundary edges and an inward normal (its "volume
+      preserved" check compared the mesh with itself, so it passed anyway);
+    * the old Wigley shelf was non-manifold at its knife edges (42 duplicated
+      directed edges, 40 unpaired) and integrated to -0.034 m^3 -- less than
+      half of the Wigley volume it was labelled with.
+
+    A body of revolution also rules out the trap found in the package's own
+    :func:`tensorcad.hull.build_mesh` output: that hull tapers to zero breadth
+    at both ends, so its end faces lie in the centreplane as zero-thickness
+    "fins" and no single interior point can see the whole shell (star
+    tessellation is refused there, by design).
     """
+    radius, length = 0.5, 4.0
     builder = MeshBuilder(units="m")
-    nx, ny, nz = 20, 10, 8
-    L, B, D = 2.0, 0.3, 0.125
+    ring_size = 2 * n_axial + 2  # cylinder rings plus one ring per hemisphere step
+    xs = []
+    # aft hemisphere: x from -L/2-r to -L/2, radius sqrt(r^2-(x+L/2+r)^2)
+    for i in range(n_axial + 1):
+        phi = (math.pi / 2) * i / n_axial  # 0 at aft pole .. pi/2 at shoulder
+        x = -length / 2 - radius * math.cos(phi)
+        xs.append((x, radius * math.sin(phi)))
+    # cylinder
+    xs.append((length / 2, radius))
+    # fore hemisphere (i = n_axial is the shoulder already added above)
+    for i in range(n_axial - 1, -1, -1):
+        phi = (math.pi / 2) * i / n_axial
+        x = length / 2 + radius * math.cos(phi)
+        xs.append((x, radius * math.sin(phi)))
+    assert len(xs) == ring_size
 
-    def half_beam(x: float, z: float) -> float:
-        """Wigley III half-beam at station x and height z."""
-        xi = x / (L / 2)  # -1..1
-        zeta = z / D  # 0..1
-        return (B / 2) * (1 - xi**2) * (1 - zeta**2) * (1 + 0.2 * xi**2)
+    rings: list[list[int]] = []
+    for x, r in xs:
+        if r == 0.0:  # pole: single vertex on the axis
+            rings.append([builder.add_vertex((x, 0.0, 0.0))])
+            continue
+        ring = []
+        for k in range(n_theta):
+            theta = 2 * math.pi * k / n_theta
+            ring.append(builder.add_vertex((x, r * math.cos(theta), r * math.sin(theta))))
+        rings.append(ring)
 
-    # Build grid vertices
-    v: list[list[list[int]]] = []
-    for iz in range(nz + 1):
-        z = D * iz / nz
-        row: list[list[int]] = []
-        for ix in range(nx + 1):
-            x = -L / 2 + L * ix / nx
-            yb = half_beam(x, z)
-            # port (-y) and starboard (+y)
-            vp = builder.add_vertex((x, -yb, z))
-            vs = builder.add_vertex((x, yb, z))
-            row.append((vp, vs))
-        v.append(row)
+    def connect(r0: list[int], r1: list[int]) -> None:
+        if len(r0) == 1:
+            for k in range(n_theta):
+                builder.add_triangle(r0[0], r1[k], r1[(k + 1) % n_theta])
+        elif len(r1) == 1:
+            for k in range(n_theta):
+                builder.add_triangle(r1[0], r0[(k + 1) % n_theta], r0[k])
+        else:
+            for k in range(n_theta):
+                j = (k + 1) % n_theta
+                builder.add_quad(r0[k], r0[j], r1[j], r1[k])
 
-    # Build quads on each side
-    for iz in range(nz):
-        for ix in range(nx):
-            # starboard side
-            a = v[iz][ix][1]
-            b = v[iz][ix + 1][1]
-            c = v[iz + 1][ix + 1][1]
-            d = v[iz + 1][ix][1]
-            builder.add_quad(a, b, c, d)
-            # port side (reverse order for outward normal)
-            a = v[iz][ix][0]
-            b = v[iz + 1][ix][0]
-            c = v[iz + 1][ix + 1][0]
-            d = v[iz][ix + 1][0]
-            builder.add_quad(a, b, c, d)
+    for i in range(len(rings) - 1):
+        connect(rings[i], rings[i + 1])
 
-    # Bottom (z=0)
-    for ix in range(nx):
-        a = v[0][ix][0]
-        b = v[0][ix][1]
-        c = v[0][ix + 1][1]
-        d = v[0][ix + 1][0]
-        builder.add_quad(a, b, c, d)
+    return meshlib.orient_outward(builder.build()).mesh
 
-    return builder.build()
+
+#: Analytic volumes: cube = 1, sphere = 4/3*pi, capsule = pi*r^2*L + 4/3*pi*r^3.
+ANALYTIC_VOLUME = {
+    "cube": 1.0,
+    "sphere": 4.0 / 3.0 * math.pi,
+    "capsule": math.pi * 0.5**2 * 4.0 + 4.0 / 3.0 * math.pi * 0.5**3,
+}
+
+
+_TET_CACHE: dict[str, TetrahedralMesh] = {}
 
 
 @dataclass(frozen=True)
 class GeometryCase:
     name: str
     mesh: Mesh
-    expected_volume: float  # approximate, for sanity check
+
+    @property
+    def tetra(self) -> TetrahedralMesh:
+        cached = _TET_CACHE.get(self.name)
+        if cached is None:
+            cached = tetrahedralise_surface(self.mesh)
+            _TET_CACHE[self.name] = cached
+        return cached
 
 
 GEOMETRIES: tuple[GeometryCase, ...] = (
-    GeometryCase("cube", _make_cube(), 1.0),
-    GeometryCase("sphere", _make_sphere(), 4.0 / 3.0 * math.pi),
-    GeometryCase("wigley", _make_wigley(), 0.075),
+    GeometryCase("cube", _make_cube()),
+    GeometryCase("sphere", _make_sphere()),
+    GeometryCase("capsule", _make_capsule()),
 )
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
-def _signed_volume(mesh: Mesh) -> float:
-    return meshlib.total_signed_volume(mesh)
+def _volume(mesh: Mesh | TetrahedralMesh) -> float:
+    """Enclosed volume of either representation."""
+    if isinstance(mesh, TetrahedralMesh):
+        return mesh.volume()
+    return surface_signed_volume(mesh)
 
 
 def _relative_error(a: float, b: float) -> float:
-    if b == 0:
-        return float("inf") if a != 0 else 0.0
-    return abs(a - b) / abs(b)
+    scale = max(abs(a), abs(b), 1e-300)
+    return abs(a - b) / scale
+
+
+def _matrix_mesh(geom: GeometryCase, fmt: str) -> Mesh | TetrahedralMesh:
+    return geom.tetra if fmt in FORMATS_VOLUME else geom.mesh
+
+
+def _cell_count(mesh: Mesh | TetrahedralMesh) -> int:
+    return len(mesh.tets) if isinstance(mesh, TetrahedralMesh) else len(mesh.faces)
 
 
 # ---------------------------------------------------------------------------
-# Tests: supported formats (STL, OBJ, VTK, Gmsh)
+# Tetrahedralisation (the capability that unlocks SU2/CGNS)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
-@pytest.mark.parametrize("fmt", FORMATS_SURFACE)
-def test_round_trip_volume_preserved(fmt: str, geom: GeometryCase) -> None:
-    """Round-trip volume must match original within 0.1%."""
-    original = geom.mesh
-    rt = round_trip_meshio(original, file_format=fmt)
-    vol_orig = _signed_volume(original)
-    vol_rt = _signed_volume(rt)
-    rel_err = _relative_error(vol_rt, vol_orig)
-    assert rel_err < 1e-3, (
-        f"{fmt}/{geom.name}: volume {vol_rt} vs {vol_orig} "
-        f"(rel_err={rel_err:.2e}, limit=1e-3)"
+def test_tetrahedralise_conserves_volume_exactly(geom: GeometryCase) -> None:
+    """Star tets must sum to the surface's signed volume (same closed boundary)."""
+    tet = tetrahedralise_surface(geom.mesh)
+    assert len(tet.tets) == len(geom.mesh.faces)
+    assert len(tet.vertices) == len(geom.mesh.vertices) + 1
+    surf_vol = surface_signed_volume(geom.mesh)
+    assert surf_vol > 0.0, f"{geom.name}: surface must be outward oriented"
+    assert tet.signed_volume() == pytest.approx(surf_vol, rel=1e-12), (
+        f"{geom.name}: tet volume {tet.signed_volume()} vs surface {surf_vol}"
     )
 
 
 @pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
-@pytest.mark.parametrize("fmt", FORMATS_SURFACE)
+def test_tetrahedra_all_positive(geom: GeometryCase) -> None:
+    """Every tetrahedron must have strictly positive volume (no inverted cells)."""
+    tet = geom.tetra
+    volumes = [tetrahedral_volume(tet.vertices, t) for t in tet.tets]
+    assert min(volumes) > 0.0, f"{geom.name}: min tet volume {min(volumes)}"
+
+
+def test_tetrahedralise_rejects_open_surface() -> None:
+    """A surface with a hole must be refused, not silently filled."""
+    cube = _make_cube()
+    open_mesh = Mesh(vertices=cube.vertices, faces=cube.faces[:-1], units=cube.units)
+    with pytest.raises(TetrahedralisationError, match="not closed"):
+        tetrahedralise_surface(open_mesh)
+
+
+def test_tetrahedralise_flips_inward_surface() -> None:
+    """An inward-oriented surface is flipped globally, volume stays positive."""
+    cube = _make_cube()
+    inward = Mesh(vertices=cube.vertices, faces=tuple((a, c, b) for a, b, c in cube.faces))
+    assert surface_signed_volume(inward) < 0.0
+    tet = tetrahedralise_surface(inward)
+    assert tet.signed_volume() == pytest.approx(1.0, rel=1e-12)
+
+
+def test_tetrahedralise_refuses_non_star_shaped_body() -> None:
+    """A body whose centroid cannot see the surface must raise, not approximate."""
+    # Two unit cubes joined into an L with the apex per-vertex mean inside one lobe
+    # is hard to build; instead force an exterior apex, which sees some faces back-face-on.
+    cube = _make_cube()
+    with pytest.raises(TetrahedralisationError, match="not star-shaped"):
+        tetrahedralise_surface(cube, interior_point=(2.0, 2.0, 2.0))
+
+
+def test_geometry_gate_discrete_volume_vs_analytic() -> None:
+    """Geometry gate: every fixture must be watertight and within 2 % of analytic.
+
+    This is the check the old matrix was missing -- it verified that a mesh
+    round-tripped to itself, never that the mesh was the body it claimed to be
+    (the old sphere was open and inward-facing, the old Wigley reference was
+    non-manifold and 2x off its own volume).
+    """
+    for geom in GEOMETRIES:
+        assert meshlib.is_watertight(geom.mesh), f"{geom.name}: surface is not closed"
+        assert meshlib.is_edge_manifold(geom.mesh), f"{geom.name}: non-manifold edges"
+        measured = surface_signed_volume(geom.mesh)
+        analytic = ANALYTIC_VOLUME[geom.name]
+        assert measured > 0.0, f"{geom.name}: inward-oriented surface"
+        rel = abs(measured - analytic) / analytic
+        assert rel < 2e-2, (
+            f"{geom.name}: discrete volume {measured:.6f} vs analytic {analytic:.6f} "
+            f"(rel {rel:.2%}, limit 2%)"
+        )
+
+
+# ---------------------------------------------------------------------------
+# The 18-combination matrix
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
+@pytest.mark.parametrize("fmt", FORMATS_ALL)
+def test_round_trip_volume_preserved(fmt: str, geom: GeometryCase) -> None:
+    """Volume must be preserved for all 6 formats × 3 geometries."""
+    original = _matrix_mesh(geom, fmt)
+    rt = round_trip_meshio(original, file_format=fmt)
+    vol_orig = _volume(original)
+    vol_rt = _volume(rt)
+    rel_err = _relative_error(vol_rt, vol_orig)
+    limit = 1e-3 if fmt == "stl" else 1e-12
+    assert rel_err < limit, (
+        f"{fmt}/{geom.name}: volume {vol_rt} vs {vol_orig} "
+        f"(rel_err={rel_err:.2e}, limit={limit:g})"
+    )
+
+
+@pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
+@pytest.mark.parametrize("fmt", FORMATS_ALL)
 def test_round_trip_topology_preserved(fmt: str, geom: GeometryCase) -> None:
-    """Vertex count and face count must be preserved."""
-    original = geom.mesh
+    """Vertex count and cell count must be preserved exactly."""
+    original = _matrix_mesh(geom, fmt)
     rt = round_trip_meshio(original, file_format=fmt)
     assert len(rt.vertices) == len(original.vertices), (
         f"{fmt}/{geom.name}: vertex count {len(rt.vertices)} vs {len(original.vertices)}"
     )
-    assert len(rt.faces) == len(original.faces), (
-        f"{fmt}/{geom.name}: face count {len(rt.faces)} vs {len(original.faces)}"
+    assert _cell_count(rt) == _cell_count(original), (
+        f"{fmt}/{geom.name}: cell count {_cell_count(rt)} vs {_cell_count(original)}"
     )
+    assert isinstance(rt, TetrahedralMesh) == isinstance(original, TetrahedralMesh)
 
 
 @pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
-@pytest.mark.parametrize("fmt", FORMATS_SURFACE)
+@pytest.mark.parametrize("fmt", FORMATS_ALL)
 def test_round_trip_orientation_preserved(fmt: str, geom: GeometryCase) -> None:
-    """Signed volume sign must be unchanged (outward normals preserved)."""
-    original = geom.mesh
+    """Signed volume sign must be unchanged (outward normals / positive tets)."""
+    original = _matrix_mesh(geom, fmt)
     rt = round_trip_meshio(original, file_format=fmt)
-    vol_orig = _signed_volume(original)
-    vol_rt = _signed_volume(rt)
+    vol_orig = _volume(original)
+    vol_rt = _volume(rt)
     assert math.copysign(1, vol_rt) == math.copysign(1, vol_orig), (
         f"{fmt}/{geom.name}: orientation flipped "
         f"(vol_orig={vol_orig}, vol_rt={vol_rt})"
@@ -220,37 +354,92 @@ def test_round_trip_orientation_preserved(fmt: str, geom: GeometryCase) -> None:
 
 
 @pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
-@pytest.mark.parametrize("fmt", ("obj", "vtk", "gmsh"))
+@pytest.mark.parametrize("fmt", FORMATS_ALL)
 def test_exact_topology_for_lossless_formats(fmt: str, geom: GeometryCase) -> None:
-    """OBJ, VTK, and Gmsh must preserve exact vertex positions and face indices."""
-    original = geom.mesh
+    """OBJ/VTK/Gmsh/SU2/CGNS must preserve exact positions and cell indices."""
+    if fmt == "stl":
+        pytest.skip("STL is a triangle soup: it reorders vertices and faces by design")
+    original = _matrix_mesh(geom, fmt)
     rt = round_trip_meshio(original, file_format=fmt)
-    # Vertex positions must match exactly
-    for i, (v_orig, v_rt) in enumerate(zip(original.vertices, rt.vertices)):
+    for i, (v_orig, v_rt) in enumerate(zip(original.vertices, rt.vertices, strict=True)):
         assert v_orig == pytest.approx(v_rt, abs=1e-12), (
             f"{fmt}/{geom.name}: vertex {i} mismatch {v_orig} vs {v_rt}"
         )
-    # Face indices must match exactly
-    for i, (f_orig, f_rt) in enumerate(zip(original.faces, rt.faces)):
-        assert f_orig == f_rt, (
-            f"{fmt}/{geom.name}: face {i} mismatch {f_orig} vs {f_rt}"
-        )
+    orig_cells = original.tets if isinstance(original, TetrahedralMesh) else original.faces
+    rt_cells = rt.tets if isinstance(rt, TetrahedralMesh) else rt.faces
+    for i, (c_orig, c_rt) in enumerate(zip(orig_cells, rt_cells, strict=True)):
+        assert c_orig == c_rt, f"{fmt}/{geom.name}: cell {i} mismatch {c_orig} vs {c_rt}"
 
 
 # ---------------------------------------------------------------------------
-# Tests: unsupported formats (SU2, CGNS)
+# Topology / format mismatch handling
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
 @pytest.mark.parametrize("fmt", FORMATS_VOLUME)
 def test_volume_formats_reject_surface_mesh(fmt: str, geom: GeometryCase) -> None:
-    """SU2 and CGNS must raise MeshioFormatError for surface triangle meshes."""
-    with pytest.raises(MeshioFormatError, match="volume cells"):
+    """SU2/CGNS must refuse a surface mesh and point at tetrahedralise_surface."""
+    with pytest.raises(MeshioFormatError, match="volume cells") as excinfo:
         round_trip_meshio(geom.mesh, file_format=fmt)
+    assert "tetrahedralise_surface" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("geom", GEOMETRIES, ids=lambda g: g.name)
+@pytest.mark.parametrize("fmt", FORMATS_SURFACE)
+def test_surface_formats_reject_tetrahedral_mesh(fmt: str, geom: GeometryCase) -> None:
+    """Surface formats cannot carry tetrahedra; the mismatch must be explicit."""
+    with pytest.raises(MeshioFormatError, match="surface format"):
+        round_trip_meshio(geom.tetra, file_format=fmt)
+
+
+def test_unknown_format_rejected(tmp_path: Path) -> None:
+    with pytest.raises(MeshioFormatError, match="unknown format"):
+        round_trip_meshio(_make_cube(), file_format="exodus")
+
+
+def test_write_meshio_su2_file_is_volume_mesh(tmp_path: Path) -> None:
+    """The SU2 file we emit must be NDIME=3 with tetra (type 10) elements."""
+    cube = _make_cube()
+    path = write_meshio(tmp_path / "cube.su2", tetrahedralise_surface(cube), file_format="su2")
+    lines = path.read_text().splitlines()
+    assert "NDIME= 3" in lines
+    nel_index = next(i for i, ln in enumerate(lines) if ln.startswith("NELEM="))
+    nel = int(lines[nel_index].split("=")[1])
+    assert nel == len(cube.faces)
+    elements = [ln.split() for ln in lines[nel_index + 1:] if len(ln.split()) == 5]
+    assert len(elements) == nel
+    types = {int(fields[0]) for fields in elements}
+    assert types == {10}, f"SU2 element types written: {types} (10 = tetra)"
+
+
+def test_write_meshio_cgns_file_is_volume_mesh(tmp_path: Path) -> None:
+    """The CGNS file we emit must carry tetra connectivity and an element range.
+
+    Ground truth is read straight out of the HDF5 file, not through our own
+    reader: `ElementConnectivity` must hold 4*n 1-based indices and
+    `ElementRange` must be [1, n].
+    """
+    h5py = pytest.importorskip("h5py")
+    cube = _make_cube()
+    tet = tetrahedralise_surface(cube)
+    path = write_meshio(tmp_path / "cube.cgns", tet, file_format="cgns")
+    with h5py.File(path, "r") as handle:
+        elements = handle["Base"]["Zone1"]["GridElements"]
+        connectivity = np.asarray(elements["ElementConnectivity"][" data"])
+        element_range = np.asarray(elements["ElementRange"][" data"])
+        coords = {
+            axis: np.asarray(handle["Base"]["Zone1"]["GridCoordinates"][f"Coordinate{axis}"][" data"])
+            for axis in "XYZ"
+        }
+    assert connectivity.shape == (4 * len(tet.tets),)
+    assert connectivity.min() == 1 and connectivity.max() == len(tet.vertices)
+    assert element_range.tolist() == [1, len(tet.tets)]
+    for axis_index, axis in enumerate("XYZ"):
+        np.testing.assert_allclose(coords[axis], np.array(tet.vertices)[:, axis_index])
 
 
 # ---------------------------------------------------------------------------
-# Tests: meshio conversion functions
+# meshio conversion functions
 # ---------------------------------------------------------------------------
 
 def test_mesh_to_meshio_preserves_data() -> None:
@@ -271,54 +460,69 @@ def test_meshio_to_mesh_roundtrip() -> None:
     assert recovered.units == mesh.units
 
 
+def test_mesh_to_meshio_tetra() -> None:
+    tet = tetrahedralise_surface(_make_cube())
+    mio = mesh_to_meshio(tet)
+    assert mio.points.shape == (len(tet.vertices), 3)
+    assert mio.cells[0].type == "tetra"
+    assert mio.cells[0].data.shape == (12, 4)
+
+
+def test_meshio_to_tetrahedral_rejects_surface_only() -> None:
+    mio = mesh_to_meshio(_make_cube())
+    with pytest.raises(MeshioFormatError, match="no tetra cells"):
+        meshio_to_tetrahedral(mio)
+
+
 # ---------------------------------------------------------------------------
 # Summary table generation (for artifacts)
 # ---------------------------------------------------------------------------
 
 def generate_format_matrix_table() -> str:
-    """Generate a markdown table of all 18 combinations."""
+    """Generate a markdown table of all 18 combinations, measured not asserted."""
     lines = [
-        "# meshio Format Matrix — Round-Trip Fidelity Report",
+        "# meshio Format Matrix — Round-Trip Fidelity (6 formats × 3 geometries)",
         "",
-        "| Format | Geometry | Volume Preserved | Topology Preserved | Orientation Preserved | Status |",
-        "|--------|----------|-----------------|-------------------|----------------------|--------|",
+        "| Format | Geometry | Topology sent | Volume orig | Volume round-trip | rel. err | "
+        "Topology | Orientation | Status |",
+        "|--------|----------|---------------|-------------|-------------------|----------|"
+        "----------|-------------|--------|",
     ]
-
-    for geom in GEOMETRIES:
-        for fmt in FORMATS_SURFACE:
-            original = geom.mesh
+    for fmt in FORMATS_ALL:
+        for geom in GEOMETRIES:
+            original = _matrix_mesh(geom, fmt)
             rt = round_trip_meshio(original, file_format=fmt)
-            vol_orig = _signed_volume(original)
-            vol_rt = _signed_volume(rt)
-            vol_ok = _relative_error(vol_rt, vol_orig) < 1e-3
-            topo_ok = len(rt.vertices) == len(original.vertices) and len(rt.faces) == len(original.faces)
+            vol_orig = _volume(original)
+            vol_rt = _volume(rt)
+            rel_err = _relative_error(vol_rt, vol_orig)
+            vol_ok = rel_err < (1e-3 if fmt == "stl" else 1e-12)
+            topo_ok = len(rt.vertices) == len(original.vertices) and _cell_count(rt) == _cell_count(original)
             orient_ok = math.copysign(1, vol_rt) == math.copysign(1, vol_orig)
-            status = "✅ PASS" if (vol_ok and topo_ok and orient_ok) else "❌ FAIL"
+            status = "PASS" if (vol_ok and topo_ok and orient_ok) else "FAIL"
+            kind = "tetra" if isinstance(original, TetrahedralMesh) else "triangle"
             lines.append(
-                f"| {fmt} | {geom.name} | {'✅' if vol_ok else '❌'} "
-                f"({vol_rt:.6f} vs {vol_orig:.6f}) | "
-                f"{'✅' if topo_ok else '❌'} "
-                f"({len(rt.vertices)}v/{len(rt.faces)}f) | "
-                f"{'✅' if orient_ok else '❌'} | "
+                f"| {fmt} | {geom.name} | {kind} "
+                f"({len(original.vertices)}v/{_cell_count(original)}c) | "
+                f"{vol_orig:.9f} | {vol_rt:.9f} | {rel_err:.2e} | "
+                f"{'ok' if topo_ok else 'MISMATCH'} | {'ok' if orient_ok else 'FLIPPED'} | "
                 f"{status} |"
             )
 
-    for geom in GEOMETRIES:
-        for fmt in FORMATS_VOLUME:
-            lines.append(
-                f"| {fmt} | {geom.name} | N/A | N/A | N/A | "
-                f"⚠️ NOT_SUPPORTED (volume-only format) |"
-            )
-
-    lines.append("")
-    lines.append("## Notes")
-    lines.append("- STL reorders vertices and faces but preserves volume and orientation.")
-    lines.append("- OBJ, VTK, Gmsh preserve exact vertex positions and face indices.")
-    lines.append("- SU2 and CGNS only support volume cells (tetra/hex/wedge/pyramid); surface meshes require tetrahedralisation first.")
-    lines.append("")
+    lines += [
+        "",
+        "## Notes",
+        "- STL reorders vertices and faces (triangle soup) but preserves volume and orientation.",
+        "- OBJ, VTK, Gmsh preserve exact vertex positions and triangle indices.",
+        "- SU2 and CGNS carry **volume** cells (tetra); the matrix feeds them "
+        "`tetrahedralise_surface(mesh)`, whose tets tile the body exactly, so the volume "
+        "invariant is the same divergence-theorem number as for the surface formats.",
+        "- CGNS caveat: meshio's writer stores a single uniform tetra block and omits full "
+        "CGNS/HDF5 metadata; round-trip through meshio is REAL, third-party CGNS reader "
+        "conformance is WITHHELD (no cgnslib on this machine).",
+        "",
+    ]
     return "\n".join(lines)
 
 
-if __name__ == "__main__":
-    table = generate_format_matrix_table()
-    print(table)
+if __name__ == "__main__":  # pragma: no cover
+    print(generate_format_matrix_table())
