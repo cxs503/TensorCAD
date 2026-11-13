@@ -166,6 +166,133 @@
       "watertight": false
     }
   },
+  "patch_seam": {
+    "sphere_seam": {
+      "report": {
+        "degree": [
+          3,
+          3
+        ],
+        "control_points": [
+          9,
+          9
+        ],
+        "rational": [
+          true,
+          true
+        ],
+        "domain": [
+          [
+            0.0,
+            2.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ],
+        "same_degree": true,
+        "knots_equal": true,
+        "max_control_difference": 4.449557262054371e-16,
+        "max_weight_difference": 4.440892098500626e-16,
+        "max_gap": 4.440892098500626e-16,
+        "tolerance": 1e-12,
+        "watertight": true,
+        "sides": [
+          "u1",
+          "u0"
+        ],
+        "axes": [
+          1,
+          1
+        ],
+        "reversed_second": false,
+        "representation_matches_target": [
+          true,
+          true
+        ],
+        "max_patch_deviation": [
+          4.577566798522237e-16,
+          0.0
+        ],
+        "operations": 2
+      },
+      "operations": [
+        {
+          "patch": "first",
+          "axis": 1,
+          "op": "elevate_degree",
+          "times": 1
+        },
+        {
+          "patch": "first",
+          "axis": 1,
+          "op": "insert_knot",
+          "value": 0.37,
+          "times": 2
+        }
+      ],
+      "first_edge": {
+        "degree": 3,
+        "control_points": 9
+      },
+      "second_edge": {
+        "degree": 3,
+        "control_points": 9
+      }
+    },
+    "sphere_seam_patch_sizes": {
+      "left": {
+        "before": [
+          5,
+          5
+        ],
+        "after": [
+          5,
+          9
+        ]
+      },
+      "neighbour": {
+        "before": [
+          5,
+          9
+        ],
+        "after": [
+          5,
+          9
+        ]
+      }
+    },
+    "orientation_control": {
+      "undeclared": {
+        "watertight": false,
+        "max_gap": 1.0
+      },
+      "declared_reversed": {
+        "watertight": true,
+        "max_gap": 0.0,
+        "operations": [
+          {
+            "patch": "first",
+            "axis": 1,
+            "op": "elevate_degree",
+            "times": 1
+          }
+        ]
+      }
+    },
+    "gap_control": {
+      "offset_m": 0.002,
+      "knots_equal": true,
+      "max_control_difference": 0.0020000000000000018,
+      "max_gap": 0.0020000000000000018,
+      "watertight": false
+    },
+    "notes": {
+      "seam_axis": "u1 of the left patch, u0 of the neighbour (both edges run in v, axis 1)",
+      "refinement": "exact: degree elevation and/or knot insertion along the seam axis only"
+    }
+  },
   "notes": {
     "radius_m": 1.0,
     "sphere": "sphere_surface(1.0), degree (2, 2), split at u = 0.5",

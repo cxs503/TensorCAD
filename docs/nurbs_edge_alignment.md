@@ -168,9 +168,11 @@ inside the 3% threshold -- in fact inside `1e-15`:
 * **Alignment is not stitching.** It gives two edges one representation; it does not
   build the topology, does not trim and does not touch the patch interiors. A patch
   network still has to be assembled by the caller.
-* **Curves only.** What is aligned is the edge curves. Aligning a whole network means
-  taking each shared edge, aligning it, and using the aligned edge as the patch data --
-  which is what a stitcher needs -- but the module does not rewrite the patches.
+* **Seams, not assemblies.** `align_edges` aligns the edge *curves*; a stitcher cannot
+  use loose curves, so `align_patch_seam` (section 7) goes the last step and refines
+  the two patches that own the seam until their boundary rows are identical. What is
+  still out of scope is the assembly itself: no topology, no trimming, and no
+  orientation search over a network -- the caller declares `reverse_second`.
 * **Parametrisation, not just degree.** Two edges of the same circle cut into three
   and into six arcs are the same point set and a *different* curve as far as a solver
   is concerned; insertion equalises knot vectors, it cannot equalise the `u -> point`
@@ -192,8 +194,8 @@ inside the 3% threshold -- in fact inside `1e-15`:
 
 | file | role |
 |---|---|
-| `tensorcad/edge_alignment.py` | `insert_knot`, `boundary_curve`, `reverse_curve`, `align_edges`, `edge_report` |
-| `tests/test_nurbs_edge_alignment.py` | 16 tests: insertion exactness/guards, boundary curves on the surface, reversal, alignment on a real seam, three negative controls |
+| `tensorcad/edge_alignment.py` | `insert_knot`, `boundary_curve`, `reverse_curve`, `align_edges`, `edge_report`, `align_patch_seam` |
+| `tests/test_nurbs_edge_alignment.py` | 23 tests: insertion exactness/guards, boundary curves on the surface, reversal, alignment on a real seam, three edge-level negative controls, seven patch-level seam tests |
 | `examples/nurbs_edge_alignment/run_example.py` | produces the JSON and the figure above |
 | `examples/nurbs_edge_alignment/outputs/` | `edge_alignment.json`, `edge_alignment.png` |
 
@@ -201,3 +203,94 @@ Related: `docs/nurbs_degree_elevation.md` (curve elevation),
 `docs/nurbs_surface_degree_elevation.md` (surface elevation),
 `docs/highorder-geometry.md` / `docs/CAD_HIGH_ORDER_GEOMETRY.md` (Bezier extraction,
 which is knot insertion used internally), `docs/nurbs-surface.md`.
+
+## 7. Patch-level seams (`align_patch_seam`, m17661)
+
+### 7.1 Why the edge-level result is not enough
+
+Sections 1-6 aligned two *curves*. A stitcher cannot consume those curves: the patches
+still carry their old boundary rows, and nothing in the patch data knows that an aligned
+edge exists. The seam therefore stayed watertight "in principle" while the actual
+objects a solver receives were still incompatible. `align_patch_seam(first, side,
+second, side, reverse_second=...)` closes that loop and does it with exactly the two
+operations that change a knot vector without moving geometry: degree elevation and
+knot insertion, applied **only along the seam axis** (the axis taken from the side:
+`v0`/`v1` are edges in `u`, `u0`/`u1` are edges in `v`).
+
+### 7.2 Method
+
+1. Take the two boundary curves (`boundary_curve`, with `reverse_second` when the
+   neighbour traverses the shared edge the other way) and align them
+   (`align_edges`: common degree, then common knot vector).
+2. For each patch, elevate along its seam axis by the degree deficit, then insert each
+   interior knot of the aligned edge up to its target multiplicity, using the
+   tensor-product insertion of `tensorcad.highorder.nurbs_geom.insert_knot` (homogeneous,
+   so rational patches stay exact).
+3. Measure, do not assert: the returned `SeamAlignment` carries the refined patches,
+   the aligned edges, `edge_report` on the new boundary rows, the audit trail of every
+   operation, `representation_matches_target` (did the refinement actually reach the
+   aligned basis) and `max_patch_deviation` (how far each patch moved -- round-off, if
+   the refinement was exact).
+
+Everything below is produced by `examples/nurbs_edge_alignment/run_example.py` into
+`examples/nurbs_edge_alignment/outputs/edge_alignment.json` (key `patch_seam`); no
+number in this section is typed by hand.
+
+### 7.3 Results
+
+The test seam is the sphere of section 3 split at `u = 0.5`, with the neighbour
+re-represented (`insert_knot(v, 0.37, 1)` then `elevate_degree(0, 1)`). After
+`align_patch_seam(left, "u1", neighbour, "u0")`:
+
+| quantity | before | after |
+|---|---|---|
+| seam degree | 2 against 3 | 3 and 3 |
+| control points on the seam row | 5 against 9 | 9 and 9 |
+| knot vectors | different | equal |
+| control-point difference | n/a (no shared data) | 4.45e-16 m |
+| weight difference | n/a | 4.44e-16 |
+| gap at the same parameter | (curves coincide) | 4.44e-16 m |
+| left patch control net (u x v) | 5 x 5 | 5 x 9 |
+| neighbour control net (u x v) | 5 x 9 | 5 x 9 |
+| patch geometry moved by | -- | 4.58e-16 m (left), 0 m (neighbour) |
+| operations | -- | `elevate_degree(axis 1, x1)` then `insert_knot(v = 0.37, x2)` on the left patch |
+
+Two controls at patch level:
+
+* **orientation** -- two unit squares sharing `x = 1`, the right one running `v`
+  downwards: without `reverse_second` the seam is a **1.0 m** gap and is reported as
+  not watertight; with `reverse_second=True` it is watertight (`0.0` m) and the only
+  operation needed is one degree elevation of the left patch along `v`.
+* **geometry that is not there** -- the same pair shifted to `x = 1.002`: the two
+  representations are still made equal (`knots_equal: true`) but the control-point
+  difference and the gap stay at `2.00e-3 m` and `watertight` is `false`. Refinement
+  equalises representations; it cannot invent a coincidence.
+
+### 7.4 Error judgement
+
+| key quantity | measured | benchmark | relative error | < 3%? |
+|---|---|---|---|---|
+| seam gap after patch-level alignment | 4.44e-16 m | 0 (same curve) | 4.4e-16 of `R = 1 m` | yes |
+| seam control-point difference | 4.45e-16 m | 0 | 4.5e-16 of `R` | yes |
+| seam weight difference | 4.44e-16 | 0 | 4.4e-16 | yes |
+| patch geometry after refinement (left / neighbour) | 4.58e-16 m / 0 m | 0 (exact refinement) | 4.6e-16 of `R` | yes |
+| negative control: undeclared reversal | 1.0 m | 1.0 m (one metre apart at the same parameter) | 0.0 | yes (it *must* be non-zero) |
+| negative control: `x = 1.002` seam | 2.00e-3 m | 2.00e-3 m | 1.2e-13 | yes (it *must* stay non-zero) |
+
+### 7.5 Points to note
+
+* **Only the seam axis is refined.** The other direction of each patch is untouched, so
+  a patch that is a neighbour on two sides gets refined twice (exact, not minimal).
+  Panorama-of-cost is the caller's business, not this module's.
+* **Orientation is still explicit.** `align_patch_seam` refuses to guess which way the
+  neighbour runs; the 1.0 m control above is why a "closest of two orientations"
+  heuristic would be dangerous.
+* **No topology.** The result is two refined patches plus evidence. Whether the seam is
+  *used* as shared data (welded indices, a face list) belongs to the assembly layer,
+  which this module does not build.
+* **Uniform weights stay uniform.** Insertion and elevation go through the homogeneous
+  net with the uniform-weight rescale used by `insert_knot`, so a non-rational patch
+  stays non-rational instead of silently drifting onto the rational evaluation path.
+* **Refinement is a cost.** The left patch grew from 5 x 5 to 5 x 9 control points in
+  the reported case; a seam of high degree in a coarse patch is the expensive case, and
+  the returned `operations` list is the audit trail of what that cost was.
