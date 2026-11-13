@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from . import mesh as meshlib
 from .geometry import Mesh
 from .meshquality import tri_metrics
+from .meshquality.dialects import legacy_aspect_from_metrics
 
 ERROR = "error"
 WARNING = "warning"
@@ -336,7 +337,10 @@ def measure_quality(
             slivers += 1
             continue
         smallest_angle = min(smallest_angle, angle)
-        largest_aspect = max(largest_aspect, longest * longest / (2.0 * area))
+        # One definition, in tensorcad.meshquality.dialects: the 'legacy' dialect
+        # l_max**2/(2A). Delegating keeps this report bit-identical to the value
+        # produced before the dialects module existed.
+        largest_aspect = max(largest_aspect, legacy_aspect_from_metrics(area, longest))
         if angle < min_angle_degrees:
             slivers += 1
     return MeshQuality(smallest_angle, largest_aspect, slivers, len(mesh.faces))

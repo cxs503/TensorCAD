@@ -53,6 +53,7 @@ from .mesh import (
     total_signed_volume,
     triangle_areas,
 )
+from .meshquality.dialects import legacy_aspect_from_metrics
 from .validation import Check, measure_quality
 
 __all__ = [
@@ -750,7 +751,9 @@ def _aspect_ratio(
     )
     if area2 <= 0.0:  # pragma: no cover - callers check the area first
         return math.inf
-    return longest * longest / area2
+    # ``area2`` is twice the area, i.e. the same quantity the 'legacy' dialect is written
+    # in; the arithmetic lives in one place (tensorcad.meshquality.dialects).
+    return legacy_aspect_from_metrics(0.5 * area2, longest)
 
 
 def _rebuild(mesh: Mesh, points: Any) -> Mesh:

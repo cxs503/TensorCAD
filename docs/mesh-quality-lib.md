@@ -76,7 +76,7 @@ One definition actively corrected during this work: the edge-length form `l_max(
 
 | gate measure | sense | limit | why |
 |---|---|---|---|
-| `aspect_ratio` | max | 25 | the repository's existing decimation guard (25), canonically expressed |
+| `aspect_ratio` | max | 25 | the repository's existing decimation guard (25), **copied** into this dialect, not re-expressed: this dialect reads `p/(2√3 l_max)` times the shipped `l_max²/2A`, a factor of 0.577–0.866, so the gate is the more permissive one. Provably no-more-permissive limits are 14.4338 here (12.5 in the `R/(2r)` dialect) — see `docs/mesh_quality_dialects.md` |
 | `edge_ratio` | max | 100 | micro-edge detector; clean hulls sit two orders below it |
 | `gamma` | min | 0.05 | 1/20 of the ideal element — below this a facet is a cap |
 | `min_angle_deg` | min | 2 | the repository's existing sliver threshold (2°) |

@@ -22,6 +22,9 @@ This package is the single library behind that question:
 * :mod:`tensorcad.meshquality.topology` -- the non-per-element half: watertight,
   edge/vertex-manifold, duplicate faces, winding, outward orientation, Euler
   characteristic, shells, and the OpenFOAM internal-face non-orthogonality;
+* :mod:`tensorcad.meshquality.dialects` -- the three aspect-ratio dialects this tree
+  speaks (``legacy``, ``edge_form``, ``verdict``), the exact algebra relating them, and
+  the threshold transfer that keeps a gate at least as strict as the one it replaces;
 * :mod:`tensorcad.meshquality.reference` -- second implementations and external oracles
   (Gmsh, trimesh, and the VTK/Verdict definitions meshmagick uses) that the benchmark
   compares against, so the library is never its own judge.
@@ -32,6 +35,7 @@ run in this environment and why.
 """
 from __future__ import annotations
 
+from .dialects import ASPECT_DIALECTS, aspect_dialects, conservative_limit, dialect_audit
 from .metrics import ELEMENT_KINDS, METRIC_NAMES, ElementQuality, hex_metrics, quad_metrics, tet_metrics, tri_metrics
 from .topology import (
     FaceNonOrthogonality,
@@ -61,6 +65,10 @@ __all__ = [
     "FaceNonOrthogonality",
     "METRIC_NAMES",
     "Check",
+    "ASPECT_DIALECTS",
+    "aspect_dialects",
+    "conservative_limit",
+    "dialect_audit",
     "ElementQuality",
     "GateReport",
     "MeshQuality",
