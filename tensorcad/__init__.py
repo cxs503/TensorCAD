@@ -837,4 +837,9 @@ __all__ = [
 
 ]
 
+#: Mesh-exchange submodule, discoverable as ``tensorcad.mesh_formats`` without
+#: polluting the top-level namespace (its ``TriMesh`` must not shadow the hull
+#: contracts re-exported above).
+from . import mesh_formats  # noqa: E402,F401  (integration entry point)
+
 __version__ = "0.23.0"
