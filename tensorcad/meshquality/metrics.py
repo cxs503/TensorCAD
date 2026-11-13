@@ -65,6 +65,7 @@ METRIC_NAMES: dict[str, str] = {
     "max_edge": "longest edge (m)",
     "edge_ratio": "max_edge / min_edge (Verdict edge ratio, >= 1)",
     "min_angle": "smallest interior/face angle (deg)",
+    "skewness": "equiangle skewness (Fluent/TGrid): 0 = ideal element, 1 = degenerate; from the same angle set as min/max_angle with the ideal angle of the cell kind",
     "max_angle": "largest interior/face angle (deg)",
     "min_dihedral": "smallest interior dihedral angle (deg)",
     "max_dihedral": "largest interior dihedral angle (deg)",
@@ -128,6 +129,24 @@ def _angle_deg(u: Vec3, v: Vec3) -> float:
         return _NAN
     c = _dot(u, v) / (nu * nv)
     return math.degrees(math.acos(max(-1.0, min(1.0, c))))
+
+
+def _equiangle_skew(angles: Sequence[float], ideal: float) -> float:
+    """Equiangle skewness (Fluent/TGrid): 0 for the ideal element, 1 for a degenerate one.
+
+    ``max((a_max - a_ideal) / (180 - a_ideal), (a_ideal - a_min) / a_ideal)`` measured on
+    the interior angles of the element (corner angles for triangles/quads, face angles for
+    hexes and tets), with ``a_ideal`` = 60 for triangular faces and 60-dihedral cells, 90
+    for quadrilateral faces. Unlike the Verdict metrics this one is *bounded* on [0, 1],
+    which is why commercial solvers gate on it; the trade-off is that it is not
+    Jacobian-based, so an inverted but well-angled element still scores well and
+    ``min_sicn`` remains the guard for inversion.
+    """
+    valid = [a for a in angles if not (a != a)]
+    if not valid:
+        return _NAN
+    low, high = min(valid), max(valid)
+    return max((high - ideal) / (180.0 - ideal), (ideal - low) / ideal)
 
 
 # --------------------------------------------------------------------------------------
@@ -207,6 +226,7 @@ def tri_metrics(points: Sequence[Vec3], triangles: Sequence[Sequence[int]]) -> E
     eta: list[float] = []
     sj: list[float] = []
     sicn: list[float] = []
+    skew: list[float] = []
     for face in triangles:
         p0, p1, p2 = (points[i] for i in face)
         cr = _cross(_sub(p1, p0), _sub(p2, p0))
@@ -231,6 +251,7 @@ def tri_metrics(points: Sequence[Vec3], triangles: Sequence[Sequence[int]]) -> E
         sign = 1.0 if signed_area > 0.0 else -1.0
         sj.append(sign * (2.0 / math.sqrt(3.0)) * math.sin(math.radians(min(angles))))
         sicn.append(_triangle_sicn(p0, p1, p2, signed_area))
+        skew.append(_equiangle_skew(angles, 60.0))
     return ElementQuality(
         "tri",
         {
@@ -240,6 +261,7 @@ def tri_metrics(points: Sequence[Vec3], triangles: Sequence[Sequence[int]]) -> E
             "edge_ratio": tuple(edge_ratio),
             "min_angle": tuple(min_angle),
             "max_angle": tuple(max_angle),
+            "skewness": tuple(skew),
             "aspect_ratio": tuple(aspect),
             "gamma": tuple(gamma),
             "eta": tuple(eta),
@@ -316,6 +338,7 @@ def quad_metrics(points: Sequence[Vec3], quads: Sequence[Sequence[int]]) -> Elem
     eta: list[float] = []
     sj: list[float] = []
     sicn: list[float] = []
+    skew: list[float] = []
     for quad in quads:
         raw = [points[i] for i in quad]
         normal = (0.0, 0.0, 0.0)
@@ -339,6 +362,7 @@ def quad_metrics(points: Sequence[Vec3], quads: Sequence[Sequence[int]]) -> Elem
         min_angle.append(min(angles))
         max_angle.append(max(angles))
         eta.append(1.0 - max(abs(90.0 - a) for a in angles) / 90.0)
+        skew.append(_equiangle_skew(angles, 90.0))
         worst_sj = math.inf
         worst_sicn = math.inf
         for xi, eta_c in _QUAD_CORNERS:
@@ -362,6 +386,7 @@ def quad_metrics(points: Sequence[Vec3], quads: Sequence[Sequence[int]]) -> Elem
             "edge_ratio": tuple(edge_ratio),
             "min_angle": tuple(min_angle),
             "max_angle": tuple(max_angle),
+            "skewness": tuple(skew),
             "eta": tuple(eta),
             "scaled_jacobian": tuple(sj),
             "min_sicn": tuple(sicn),
@@ -438,6 +463,7 @@ def hex_metrics(points: Sequence[Vec3], hexes: Sequence[Sequence[int]]) -> Eleme
     max_angle: list[float] = []
     sj: list[float] = []
     sicn: list[float] = []
+    skew: list[float] = []
     for hex_nodes in hexes:
         p = [points[i] for i in hex_nodes]
         lengths = [_norm(_sub(p[b], p[a])) for a, b in _HEX_EDGES]
@@ -451,6 +477,7 @@ def hex_metrics(points: Sequence[Vec3], hexes: Sequence[Sequence[int]]) -> Eleme
         valid = [a for a in face_angles if not math.isnan(a)]
         min_angle.append(min(valid) if valid else _NAN)
         max_angle.append(max(valid) if valid else _NAN)
+        skew.append(_equiangle_skew(face_angles, 90.0))
         worst_sj = math.inf
         worst_sicn = math.inf
         for xi, eta, zeta in _HEX_CORNERS:
@@ -468,6 +495,7 @@ def hex_metrics(points: Sequence[Vec3], hexes: Sequence[Sequence[int]]) -> Eleme
             "edge_ratio": tuple(edge_ratio),
             "min_angle": tuple(min_angle),
             "max_angle": tuple(max_angle),
+            "skewness": tuple(skew),
             "scaled_jacobian": tuple(sj),
             "min_sicn": tuple(sicn),
         },
@@ -541,6 +569,14 @@ def _tet_corner_icn(
     return value if det >= 0.0 else -value
 
 
+def _tet_face_angles(p: Sequence[Vec3]) -> list[float]:
+    """The twelve interior angles of a tetrahedron's four triangular faces."""
+    angles: list[float] = []
+    for i, j, k in ((0, 2, 1), (0, 1, 3), (0, 3, 2), (1, 2, 3)):
+        angles.extend(_triangle_angles(p[i], p[j], p[k]))
+    return angles
+
+
 def _tet_dihedral_angles(p: Sequence[Vec3]) -> list[float]:
     """Interior dihedral angles (deg) at the six edges, via the vectors to the opposite vertices."""
     edges = ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3))
@@ -574,6 +610,7 @@ def tet_metrics(points: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> Elemen
     sj: list[float] = []
     sicn: list[float] = []
     gmsh_icn: list[float] = []
+    skew: list[float] = []
     for tet in tets:
         p = [points[i] for i in tet]
         signed = _tet_signed_volume(*p)  # type: ignore[misc]
@@ -586,6 +623,7 @@ def tet_metrics(points: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> Elemen
         min_edge.append(min(lengths))
         max_edge.append(max(lengths))
         edge_ratio.append(max(lengths) / min(lengths) if min(lengths) > 0.0 else math.inf)
+        skew.append(_equiangle_skew(_tet_face_angles(p), 60.0))
         dihedrals = _tet_dihedral_angles(p)
         valid = [a for a in dihedrals if not math.isnan(a)]
         min_dihedral.append(min(valid) if valid else _NAN)
@@ -641,6 +679,7 @@ def tet_metrics(points: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> Elemen
             "edge_ratio": tuple(edge_ratio),
             "min_dihedral": tuple(min_dihedral),
             "max_dihedral": tuple(max_dihedral),
+            "skewness": tuple(skew),
             "gamma": tuple(gamma),
             "eta": tuple(eta),
             "scaled_jacobian": tuple(sj),

@@ -19,6 +19,9 @@ This package is the single library behind that question:
 * :mod:`tensorcad.meshquality.io` -- a JSON exchange format so a solver can hand a mesh
   over without a mesh library;
 * :mod:`tensorcad.meshquality.cli` -- the CI entry point (exit 1 on a failed gate);
+* :mod:`tensorcad.meshquality.topology` -- the non-per-element half: watertight,
+  edge/vertex-manifold, duplicate faces, winding, outward orientation, Euler
+  characteristic, shells, and the OpenFOAM internal-face non-orthogonality;
 * :mod:`tensorcad.meshquality.reference` -- second implementations and external oracles
   (Gmsh, trimesh, and the VTK/Verdict definitions meshmagick uses) that the benchmark
   compares against, so the library is never its own judge.
@@ -30,6 +33,14 @@ run in this environment and why.
 from __future__ import annotations
 
 from .metrics import ELEMENT_KINDS, METRIC_NAMES, ElementQuality, hex_metrics, quad_metrics, tet_metrics, tri_metrics
+from .topology import (
+    FaceNonOrthogonality,
+    SurfaceTopology,
+    gate_non_orthogonality,
+    gate_surface,
+    non_orthogonality,
+    surface_topology,
+)
 from .report import (
     DEFAULT_GATE,
     DEFAULT_LIMITS,
@@ -47,6 +58,7 @@ __all__ = [
     "DEFAULT_GATE",
     "DEFAULT_LIMITS",
     "ELEMENT_KINDS",
+    "FaceNonOrthogonality",
     "METRIC_NAMES",
     "Check",
     "ElementQuality",
@@ -55,10 +67,15 @@ __all__ = [
     "MetricLimit",
     "QualityGate",
     "SummaryStats",
+    "SurfaceTopology",
+    "gate_non_orthogonality",
+    "gate_surface",
     "hex_metrics",
     "measure",
+    "non_orthogonality",
     "quad_metrics",
     "summary_stats",
+    "surface_topology",
     "tet_metrics",
     "tri_metrics",
 ]
