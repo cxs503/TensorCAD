@@ -1,0 +1,14 @@
+--- a/tensorcad/dtmb5415.py
++++ b/tensorcad/dtmb5415.py
+@@ volume_gradient(), lines 562-576 of the m17352 deliverable
+         G = np.zeros((area.size, n_girth_out, 3))
+         # x enters the integral through the girth-mean station position, so each vertex
+         # carries 1 / n_girth of it
+         G[:, :, 0] = dV_dX[:, None] / float(n_girth_out)
+         G[:, :, 1] = dV_dA[:, None] * dA_dy
+         G[:, :, 2] = dV_dA[:, None] * dA_dz
+-        G *= 2.0
++        # (auditor m17434) the mirror factor is already carried by the full-hull scatter
++        # below: with the 2.0 here the analytic gradient is *exactly* 2x the finite
++        # difference of volume() for every one of the 27 variables
+         # scatter back to (patch, station) layout and then to the flattened vertex order

@@ -1,0 +1,8 @@
+{
+  "compared_keys": 584,
+  "differing_keys": [
+    "/wall_clock_s"
+  ],
+  "note": "only wall-clock timing differs; every physical/numeric value is bit-identical",
+  "artifact_acceptance_sha256_m17352": "runs/m17352_5415_param/acceptance.json (source of the audited claim)"
+}
