@@ -1,0 +1,397 @@
+{
+  "claims": [
+    {
+      "claim": "sphere |k - 1/R| over four radii",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1e-06,
+      "note": "",
+      "value": 2.2478446659590645e-07
+    },
+    {
+      "claim": "sphere E_bending (field path, level 32)",
+      "direction": "<=",
+      "holds": true,
+      "limit": 0.001,
+      "note": "",
+      "value": 0.0005300029463126688
+    },
+    {
+      "claim": "sphere E_bending (conditioned mesh)",
+      "direction": "<=",
+      "holds": true,
+      "limit": 0.06,
+      "note": "",
+      "value": 0.057330930085483844
+    },
+    {
+      "claim": "Wigley analytic area vs independent quadrature",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1e-12,
+      "note": "",
+      "value": 4.440892098500626e-16
+    },
+    {
+      "claim": "Wigley analytic quadrature p-extension",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1e-12,
+      "note": "",
+      "value": 9.89711369932197e-16
+    },
+    {
+      "claim": "Wigley Richardson-extrapolated bending vs analytic",
+      "direction": "<=",
+      "holds": true,
+      "limit": 0.005,
+      "note": "first-order convergence: the crease filter drops an O(h) band",
+      "value": 0.0005772384124282937
+    },
+    {
+      "claim": "Wigley smooth energy is bounded (no 1/h blow-up)",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1.5,
+      "note": "measured well below 1: convergence is from below",
+      "value": 0.9325402951622698
+    },
+    {
+      "claim": "Wigley crease energy grows under refinement (designed creases)",
+      "direction": "<=",
+      "holds": true,
+      "limit": 465.1754265503342,
+      "note": "divergence of the crease bucket is the expected signature",
+      "value": 0.0
+    },
+    {
+      "claim": "scale invariance of E_bending (L, B, T doubled)",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1e-12,
+      "note": "",
+      "value": 0.0
+    },
+    {
+      "claim": "cell-order invariance (rebuilt mesh)",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1e-12,
+      "note": "",
+      "value": 2.220446049250313e-16
+    },
+    {
+      "claim": "translation invariance by 1.6 km",
+      "direction": "<=",
+      "holds": true,
+      "limit": 1e-12,
+      "note": "",
+      "value": 2.4424906541753444e-13
+    }
+  ],
+  "failures": [],
+  "figure": "/root/tp-agent/work/m17348/docs/fairness_energy/plot.png",
+  "schema": "tensorcad.fairness_energy.study/1",
+  "sphere_energies": {
+    "claims": [
+      {
+        "claim": "sphere E_bending (field path, level 32)",
+        "direction": "<=",
+        "holds": true,
+        "limit": 0.001,
+        "note": "",
+        "value": 0.0005300029463126688
+      },
+      {
+        "claim": "sphere E_bending (conditioned mesh)",
+        "direction": "<=",
+        "holds": true,
+        "limit": 0.06,
+        "note": "",
+        "value": 0.057330930085483844
+      }
+    ],
+    "field_path": [
+      {
+        "bending": 25.187067282192128,
+        "bending_relative_error": 0.0021615649872568365,
+        "faces": 6656,
+        "gaussian": 12.59353364109605,
+        "identity_residual": 4.440892098500626e-16,
+        "level": 16,
+        "willmore": 12.593533641096057
+      },
+      {
+        "bending": 25.156293257448965,
+        "bending_relative_error": 0.0009371054480802332,
+        "faces": 15584,
+        "gaussian": 12.578146628724468,
+        "identity_residual": 4.440892098500626e-16,
+        "level": 24,
+        "willmore": 12.578146628724475
+      },
+      {
+        "bending": 25.14606165561848,
+        "bending_relative_error": 0.0005300029463126688,
+        "faces": 28032,
+        "gaussian": 12.573030827809225,
+        "identity_residual": 4.440892098500626e-16,
+        "level": 32,
+        "willmore": 12.573030827809232
+      }
+    ],
+    "mesh_path_conditioned": {
+      "bending": 26.573624658958554,
+      "bending_relative_error": 0.057330930085483844,
+      "gaussian": 12.239479972390244,
+      "level": 32,
+      "willmore": 12.76314615093476
+    },
+    "reference": {
+      "bending": 25.132741228718345,
+      "gaussian": 12.566370614359172,
+      "willmore": 12.566370614359172
+    }
+  },
+  "sphere_everywhere": {
+    "claims": [
+      {
+        "claim": "sphere |k - 1/R| over four radii",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1e-06,
+        "note": "",
+        "value": 2.2478446659590645e-07
+      }
+    ],
+    "rows": [
+      {
+        "expected_per_m": 10.0,
+        "max_abs_error_per_m": 2.2478446659590645e-07,
+        "max_relative_error": 2.2478446659590645e-08,
+        "probes": 207,
+        "radius": 0.1,
+        "step_error_max_per_m": 5.643932539101115e-07
+      },
+      {
+        "expected_per_m": 4.0,
+        "max_abs_error_per_m": 5.960470916832605e-08,
+        "max_relative_error": 1.4901177292081513e-08,
+        "probes": 207,
+        "radius": 0.25,
+        "step_error_max_per_m": 2.2271561483933056e-07
+      },
+      {
+        "expected_per_m": 2.0,
+        "max_abs_error_per_m": 3.0619073054793944e-08,
+        "max_relative_error": 1.5309536527396972e-08,
+        "probes": 207,
+        "radius": 0.5,
+        "step_error_max_per_m": 1.1396012911113473e-07
+      },
+      {
+        "expected_per_m": 1.0,
+        "max_abs_error_per_m": 1.4049097885049378e-08,
+        "max_relative_error": 1.4049097885049378e-08,
+        "probes": 207,
+        "radius": 1.0,
+        "step_error_max_per_m": 5.5149311783964095e-08
+      },
+      {
+        "expected_per_m": 0.5,
+        "max_abs_error_per_m": 7.450732253388992e-09,
+        "max_relative_error": 1.4901464506777984e-08,
+        "probes": 207,
+        "radius": 2.0,
+        "step_error_max_per_m": 2.8499244519863964e-08
+      },
+      {
+        "expected_per_m": 0.2,
+        "max_abs_error_per_m": 3.5122601771409023e-09,
+        "max_relative_error": 1.756130088570451e-08,
+        "probes": 207,
+        "radius": 5.0,
+        "step_error_max_per_m": 1.1174000558167307e-08
+      },
+      {
+        "expected_per_m": 0.1,
+        "max_abs_error_per_m": 1.7561234827434546e-09,
+        "max_relative_error": 1.7561234827434546e-08,
+        "probes": 207,
+        "radius": 10.0,
+        "step_error_max_per_m": 5.783210257903626e-09
+      }
+    ],
+    "worst_abs_error_per_m": 2.2478446659590645e-07
+  },
+  "stability": {
+    "claims": [
+      {
+        "claim": "scale invariance of E_bending (L, B, T doubled)",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1e-12,
+        "note": "",
+        "value": 0.0
+      },
+      {
+        "claim": "cell-order invariance (rebuilt mesh)",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1e-12,
+        "note": "",
+        "value": 2.220446049250313e-16
+      },
+      {
+        "claim": "translation invariance by 1.6 km",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1e-12,
+        "note": "",
+        "value": 2.4424906541753444e-13
+      }
+    ],
+    "note": "translation is the hard one: the cotangent weights are differences of coordinates, so a large offset cancels badly unless the sum is exactly rounded",
+    "reordering": {
+      "base": 269.802768447721,
+      "relative_change": 2.220446049250313e-16,
+      "reordered": 269.80276844772106
+    },
+    "scale_doubling": {
+      "area_ratio": 4.0,
+      "bending_base": 21.537877325046104,
+      "bending_scaled": 21.537877325046104,
+      "relative_change": 0.0
+    },
+    "translation": {
+      "base": 269.802768447721,
+      "relative_change": 2.4424906541753444e-13,
+      "translated": 269.8027684477869
+    }
+  },
+  "wigley": {
+    "analytic_reference": {
+      "beam": 1.0,
+      "bending": 21.537877325046104,
+      "bending_per_unit_area": 1.4475291335964278,
+      "corner_charge": 12.566370614359172,
+      "draft": 0.625,
+      "gaussian": 6.691177358138967e-17,
+      "length": 10.0,
+      "longitudinal_exponent": 2.0,
+      "order": 64,
+      "panels": 4,
+      "quadrature_relative_change": 9.89711369932197e-16,
+      "schema": "tensorcad.wigley.flank_energy/1",
+      "units": {
+        "bending": "dimensionless",
+        "gaussian": "dimensionless",
+        "wetted_area": "m^2",
+        "willmore": "dimensionless"
+      },
+      "vertical_exponent": 2.0,
+      "wetted_area": 14.879063104957776,
+      "willmore": 5.384469331261526,
+      "willmore_inequality_slack": -7.1819012830976465
+    },
+    "claims": [
+      {
+        "claim": "Wigley analytic area vs independent quadrature",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1e-12,
+        "note": "",
+        "value": 4.440892098500626e-16
+      },
+      {
+        "claim": "Wigley analytic quadrature p-extension",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1e-12,
+        "note": "",
+        "value": 9.89711369932197e-16
+      },
+      {
+        "claim": "Wigley Richardson-extrapolated bending vs analytic",
+        "direction": "<=",
+        "holds": true,
+        "limit": 0.005,
+        "note": "first-order convergence: the crease filter drops an O(h) band",
+        "value": 0.0005772384124282937
+      },
+      {
+        "claim": "Wigley smooth energy is bounded (no 1/h blow-up)",
+        "direction": "<=",
+        "holds": true,
+        "limit": 1.5,
+        "note": "measured well below 1: convergence is from below",
+        "value": 0.9325402951622698
+      },
+      {
+        "claim": "Wigley crease energy grows under refinement (designed creases)",
+        "direction": "<=",
+        "holds": true,
+        "limit": 465.1754265503342,
+        "note": "divergence of the crease bucket is the expected signature",
+        "value": 0.0
+      }
+    ],
+    "richardson": {
+      "extrapolated_bending": 21.55030981516029,
+      "extrapolated_relative_error": 0.0005772384124282937,
+      "h_last": 0.008333333333333333,
+      "h_previous": 0.0125,
+      "slope": -175.77456855858426
+    },
+    "rows": [
+      {
+        "condition": 1.0735339409917415,
+        "crease_area_fraction": 0.5858427790675909,
+        "crease_energy": 157.48410297877302,
+        "faces": 518,
+        "nonpositive_fraction": 0.015444015444015444,
+        "nx": 21,
+        "nz": 7,
+        "smooth_energy": 12.926518650905306,
+        "smooth_relative_error": -0.3998239262012495,
+        "total_energy": 170.41062162967833
+      },
+      {
+        "condition": 1.0551926536982243,
+        "crease_area_fraction": 0.4538213334883861,
+        "crease_energy": 252.6462395805538,
+        "faces": 1998,
+        "nonpositive_fraction": 0.004004004004004004,
+        "nx": 41,
+        "nz": 13,
+        "smooth_energy": 17.1565288671672,
+        "smooth_relative_error": -0.20342526757657275,
+        "total_energy": 269.802768447721
+      },
+      {
+        "condition": 1.0354873194399479,
+        "crease_area_fraction": 0.38321566728414747,
+        "crease_energy": 439.3445256003701,
+        "faces": 7838,
+        "nonpositive_fraction": 0.0010206685378923194,
+        "nx": 81,
+        "nz": 25,
+        "smooth_energy": 19.352544442206483,
+        "smooth_relative_error": -0.10146463599262523,
+        "total_energy": 458.69707004257657
+      },
+      {
+        "condition": 1.0260920000508351,
+        "crease_area_fraction": 0.3589770251480544,
+        "crease_energy": 622.6595295291072,
+        "faces": 17518,
+        "nonpositive_fraction": 0.0004566731362027629,
+        "nx": 121,
+        "nz": 37,
+        "smooth_energy": 20.08493847786725,
+        "smooth_relative_error": -0.06745970483773023,
+        "total_energy": 642.7444680069744
+      }
+    ]
+  }
+}
