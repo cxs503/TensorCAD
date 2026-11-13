@@ -74,12 +74,20 @@ ellipsoid volumes are at −0.089 % with 0.55 % allowed. See `results.md` for ev
 * **DTMB 5415 absolute displacement has no published counterpart in the repository**, so
   it is drift-locked only. The suite asserts the dataset-recorded holdout residual
   (0.1174 m reproduced to 2.7e-8 relative) and the mirror/`Cb` identities instead.
-* **The 5415 surface-integral volume disagrees with the cloud integral**:
-  `compute_hydrostatics(space.mesh())` returns a signed volume that does not reproduce
-  `space.hydrostatics()` (see `known_limitations` in `docs/golden/results.json` for the
-  measured numbers). This is a real defect of the mesh→hydrostatics path for that hull,
-  logged as a diagnostic and deliberately **not** asserted, so the suite cannot mask it
-  as green. It deserves a feature-ledger entry of its own.
+* **The 5415 surface-integral displacement is withheld, because the shell is a sheet.**
+  `DTMB5415Space.mesh()` is the hull *surface*, open at the deck edge and along the stem
+  seam: 722 boundary edges forming one component, `is_watertight == False` (both asserted
+  as topology invariants). A tetrahedron sum over an open surface is a signed integral,
+  not a volume — it is −13 658 m³ here, which no displacement can be. An earlier version
+  of this suite passed `closed=True` to `compute_hydrostatics` on that shell and published
+  the result as a "surface-integral volume" disagreeing with the cloud integral by 2.6;
+  that number measured the artifact of the caller's assumption, not an integration error.
+  The suite now records `signed_tetra_sum_open_shell_m3` under a name that says what it
+  is, asserts the open topology, and withholds the displacement (only the dataset /
+  station-area displacement of 8 452.76 m³ is reported). Closing the sheet is not a
+  one-liner: after welding, `mesh_repair.boundary_loops` refuses the boundary (a vertex is
+  walked twice at the stem pinch), so a watertight repair must stitch the seam first —
+  that remains a feature-ledger item.
 * **The ellipsoid surface area** has no elementary closed form (elliptic integrals): it is
   drift-locked, not asserted against a reference.
 * **Proxy sampling allowance**: the analytic Wigley/Series-60 references are integrated
