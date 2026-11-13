@@ -47,6 +47,10 @@ from tensorcad.meshio_exchange import (  # noqa: E402
     write_meshio,
 )
 
+#: Output locations default to the run that first produced the 18-combination
+#: matrix; override with ``--out``/``--fig`` (m18268 added the real hull, i.e.
+#: 24 combinations, and writes to its own run directory so the two evidence
+#: sets stay separable).
 RUN_DIR = ROOT / "runs" / "m17802_meshio_matrix18"
 FIG_DIR = ROOT / "artifacts" / "m17802_meshio_matrix18"
 
@@ -102,6 +106,7 @@ def run_matrix() -> list[dict]:
                     "topology_ok": len(rt.vertices) == len(original.vertices)
                     and _cells(rt) == _cells(original),
                     "orientation_ok": math.copysign(1.0, vol_rt) == math.copysign(1.0, vol_orig),
+                    "edge_on_facets": getattr(original, "edge_on_facets", 0),
                     "exact_restore": bool(exact),
                     "file": str(path.relative_to(ROOT)),
                     "bytes": path.stat().st_size,
@@ -130,6 +135,7 @@ def geometry_gate() -> list[dict]:
                 "tetrahedra": len(tet.tets),
                 "tet_volume": tet.signed_volume(),
                 "tetV_minus_surfaceV": tet.signed_volume() - measured,
+                "edge_on_facets": tet.edge_on_facets,
             }
         )
     return gate
@@ -155,8 +161,9 @@ def make_figures(rows: list[dict], gate: list[dict]) -> list[Path]:
     ax.set_xticklabels(labels, fontsize=7)
     ax.set_ylabel("relative volume error after round trip")
     ax.set_title(
-        "meshio format matrix: volume preserved over 6 formats x 3 geometries "
-        "(STL = float32 detour, value noise, still < 1e-3)"
+        f"meshio format matrix: volume preserved over {len(rows)} combinations "
+        f"({len(formats_all := list(dict.fromkeys(r['format'] for r in rows)))} formats x "
+        f"{len(list(dict.fromkeys(r['geometry'] for r in rows)))} geometries)"
     )
     ax.axhline(1e-12, color="k", ls="--", lw=1, label="lossless limit 1e-12")
     ax.axhline(1e-3, color="#c0392b", ls=":", lw=1, label="STL limit 1e-3")
@@ -226,7 +233,21 @@ def make_figures(rows: list[dict], gate: list[dict]) -> list[Path]:
     return figures
 
 
+def _parse_outputs(argv: list[str]) -> None:
+    """``--out DIR`` / ``--fig DIR`` (both relative to the repo root or absolute)."""
+    global RUN_DIR, FIG_DIR
+    it = iter(argv)
+    for arg in it:
+        if arg == "--out":
+            RUN_DIR = Path(next(it)).resolve()
+        elif arg == "--fig":
+            FIG_DIR = Path(next(it)).resolve()
+        else:  # pragma: no cover - CLI misuse
+            raise SystemExit(f"unknown argument {arg!r}; use --out DIR / --fig DIR")
+
+
 def main() -> int:
+    _parse_outputs(sys.argv[1:])
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     rows = run_matrix()
     gate = geometry_gate()
@@ -234,7 +255,7 @@ def main() -> int:
 
     all_ok = all(r["volume_ok"] and r["topology_ok"] and r["orientation_ok"] for r in rows)
     payload = {
-        "run": "m17802_meshio_matrix18",
+        "run": RUN_DIR.name,
         "anchor": "GAP-CAD-B2-MESH-FORMAT-MATRIX",
         "python": platform.python_version(),
         "platform": platform.platform(),
@@ -246,7 +267,8 @@ def main() -> int:
         "matrix": rows,
         "figures": [str(p.relative_to(ROOT)) for p in figures],
         "reproduce": (
-            "python scripts/meshio_matrix18.py && "
+            f"python scripts/meshio_matrix18.py --out {RUN_DIR.relative_to(ROOT)} "
+            f"--fig {FIG_DIR.relative_to(ROOT)} && "
             "python -m pytest tests/test_meshio_format_matrix.py -q"
         ),
     }
