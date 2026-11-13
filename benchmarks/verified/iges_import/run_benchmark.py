@@ -38,7 +38,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from gold_loft import (  # noqa: E402
-    brep_quadrature, brep_quadrature as _quad, loft_gold_hull, read_stl, section_polyline,
+    brep_quadrature, loft_gold_hull, read_stl, section_polyline,
 )
 
 from tensorcad.geomquality.baselines import kvlcc2_class, series60  # noqa: E402
@@ -126,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-dir", default="runs/gap_t1_iges")
     parser.add_argument("--samples", default="12x8,24x12,48x24,96x48",
                         help="convergence sweep, <u>x<v> pairs")
+    parser.add_argument("--panels", default="1,2,4",
+                        help="reference-quadrature ladder (graded composite Gauss panels)")
     args = parser.parse_args(argv)
 
     out = ROOT / args.out_dir
@@ -135,17 +137,20 @@ def main(argv: list[str] | None = None) -> int:
 
     started = time.time()
     provenance: dict[str, dict] = {}
-    brep_refs: dict[str, dict] = {}
+    references: dict[str, dict] = {}
     gold_triangles = None
+    ladder = [int(value) for value in args.panels.split(",")]
 
-    # ---- input files -------------------------------------------------------
+    # ---- input files + reference integrals ---------------------------------
     builders = {
         "series60_cb060": lambda: series60(0.60),
         "series60_cb065": lambda: series60(0.65),
         "kvlcc2_class": kvlcc2_class,
     }
+    specimens = {}
     for name, builder in builders.items():
         specimen = builder()
+        specimens[name] = specimen
         target = inputs / f"{name}.iges"
         write_iges(target, specimen.brep)
         provenance[name] = {
@@ -153,13 +158,13 @@ def main(argv: list[str] | None = None) -> int:
             "bytes": target.stat().st_size, "kind": "analytic hull baseline",
             "source": "tensorcad.geomquality.baselines", "license": "in-repository",
         }
-        brep_refs[name] = brep_quadrature(specimen.brep)
 
     if GOLD.exists():
         gold_triangles = read_stl(GOLD)
         brep, info = loft_gold_hull(gold_triangles)
         target = inputs / "DTMB5415_gold_loft.iges"
         write_iges(target, brep)
+        specimens["DTMB5415_gold_loft"] = None
         provenance["DTMB5415_gold_loft"] = {
             "path": str(target.relative_to(ROOT)), "sha256": sha256(target),
             "bytes": target.stat().st_size, "kind": "NURBS loft of the platform gold mesh",
@@ -167,15 +172,58 @@ def main(argv: list[str] | None = None) -> int:
             "source_faces": int(len(gold_triangles)),
             "license": "platform internal reference geometry", "loft": info,
         }
-        brep_refs["DTMB5415_gold_loft"] = brep_quadrature(brep)
+        specimen_breps = {"DTMB5415_gold_loft": brep}
     else:
         print(f"WARNING gold mesh missing: {GOLD}")
+        specimen_breps = {}
+    for name, specimen in specimens.items():
+        if specimen is not None:
+            specimen_breps[name] = specimen.brep
+
+    # Reference = graded composite Gauss over the very patches that were written, with a
+    # panel ladder so the reference's own convergence is measured.  The analytic closed
+    # form of each baseline is carried alongside as an *independent* anchor: a reference
+    # integral that cannot reproduce it may not judge the pipeline.
+    for name, brep in specimen_breps.items():
+        rungs = [brep_quadrature(brep, panels=p) for p in ladder]
+        finest, previous = rungs[-1], rungs[-2] if len(rungs) > 1 else rungs[-1]
+        closed = None
+        if specimens.get(name) is not None:
+            closed = specimens[name].reference.get("closed_form", {}).get("volume")
+        entry = {
+            "volume": finest["volume"], "area": finest["area"],
+            "ladder": [{"panels": rung["panels"], "volume": rung["volume"],
+                        "area": rung["area"]} for rung in rungs],
+            "self_change_pct": (100.0 * (finest["volume"] - previous["volume"])
+                                / previous["volume"] if previous["volume"] else None),
+            "method": finest["method"],
+            "per_face": finest["per_face"],
+            "analytic_closed_form_volume": closed,
+            "vs_analytic_pct": (100.0 * (finest["volume"] - closed) / closed
+                                if closed else None),
+        }
+        # A reference is usable only if (a) the ladder has settled and (b) it matches the
+        # analytic closed form where one exists.  Otherwise the row is reported, not used.
+        settled = abs(entry["self_change_pct"] or 0.0) < 1e-3
+        anchored = (entry["vs_analytic_pct"] is None
+                    or abs(entry["vs_analytic_pct"]) < 1.0)
+        entry["reference_converged"] = bool(settled and anchored)
+        entry["reference_reason"] = (
+            "ladder settled and matches the analytic closed form" if entry["reference_converged"]
+            else "ladder not settled" if not settled
+            else "reference disagrees with the analytic closed form")
+        references[name] = entry
+        print("reference", name, {k: (round(v, 6) if isinstance(v, float) else v)
+                                  for k, v in entry.items() if k in
+                                  ("volume", "self_change_pct", "vs_analytic_pct",
+                                   "reference_converged", "reference_reason")})
 
     # ---- import + measure --------------------------------------------------
     rows: dict[str, dict] = {}
-    for name, reference in brep_refs.items():
+    for name, reference in references.items():
         path = inputs / f"{name}.iges"
-        record: dict = {"input": str(path.relative_to(ROOT)), "sha256": provenance[name]["sha256"]}
+        record: dict = {"input": str(path.relative_to(ROOT)),
+                        "sha256": provenance[name]["sha256"]}
         try:
             clock = time.time()
             mesh, report = load_cad_geometry(path)
@@ -187,20 +235,29 @@ def main(argv: list[str] | None = None) -> int:
                 "triangles": int(after["triangles"]),
                 "watertight": bool(after["watertight"]),
                 "free_edges": int(after["free_edges"]),
-                "components": int(after["component_count"]),
+                # ``after_repair`` publishes the audit as ``components`` /
+                # ``closed_components``; the first version of this driver read
+                # ``component_count`` and raised KeyError on every file, voiding the run.
+                "components": int(after["components"]),
+                "closed_components": int(after["closed_components"]),
                 "gates": {key: bool(value["passed"]) for key, value in report["gates"].items()},
                 "gates_passed": all(value["passed"] for value in report["gates"].values()),
                 "ref_volume_quadrature": reference["volume"],
                 "got_volume_mesh": volume,
-                "volume_error_pct": 100.0 * (volume - reference["volume"]) / reference["volume"],
+                "volume_error_pct": (100.0 * (volume - reference["volume"])
+                                     / reference["volume"]),
                 "ref_area_quadrature": reference["area"],
                 "got_area_mesh": float(after.get("area", float("nan"))),
                 "area_error_pct": (100.0 * (float(after.get("area", 0.0)) - reference["area"])
                                    / reference["area"]),
-                "within_3pct": abs(100.0 * (volume - reference["volume"]) / reference["volume"]) < TOLERANCE,
+                "reference_converged": reference["reference_converged"],
+                "within_3pct": bool(reference["reference_converged"]
+                                    and abs(100.0 * (volume - reference["volume"])
+                                            / reference["volume"]) < TOLERANCE),
             })
             if gold_triangles is not None and name == "DTMB5415_gold_loft":
-                record["deviation_vs_gold"] = _section_deviation(gold_triangles, mesh.vertices, mesh.faces)
+                record["deviation_vs_gold"] = _section_deviation(
+                    gold_triangles, mesh.vertices, mesh.faces)
             (out / f"{name}.report.json").write_text(json.dumps(report, indent=2, default=str))
         except Exception as exc:  # honest failure, never a fabricated row
             record.update({"error": f"{type(exc).__name__}: {exc}", "gates_passed": False,
@@ -240,7 +297,7 @@ def main(argv: list[str] | None = None) -> int:
         u, _, v = token.partition("x")
         pairs.append((int(u), int(v)))
     for name in ("series60_cb060", "DTMB5415_gold_loft"):
-        if name not in brep_refs:
+        if name not in references:
             continue
         path = inputs / f"{name}.iges"
         series = []
@@ -248,7 +305,7 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 mesh, report = load_cad_geometry(path, u_samples=u, v_samples=v)
                 volume = _mesh_volume(mesh.vertices, mesh.faces)
-                ref = brep_refs[name]["volume"]
+                ref = references[name]["volume"]
                 series.append({
                     "u_samples": u, "v_samples": v,
                     "triangles": int(report["after_repair"]["triangles"]),
@@ -266,10 +323,13 @@ def main(argv: list[str] | None = None) -> int:
         "anchor": "GAP-CAD-T1-IGES-PIPE",
         "tool": "tensorcad.geometry.load_cad_geometry -> geomquality.trim_mesh.import_cad",
         "tolerance_pct": TOLERANCE,
-        "reference": "5x5 Gauss-Legendre quadrature over the written NURBS patches",
+        "reference": ("graded composite Gauss over the written NURBS patches "
+                      "(V = 1/3 sum_faces s_f int S.(S_u x S_v)); ladder over panels "
+                      f"{ladder}; anchors = analytic closed forms where they exist"),
         "gold_mesh": ({"path": str(GOLD), "sha256": sha256(GOLD), "faces": int(len(gold_triangles))}
                       if gold_triangles is not None else None),
         "provenance": provenance,
+        "references": references,
         "files": rows,
         "kp505_real_catia": kp505,
         "convergence": sweep,
@@ -278,11 +338,15 @@ def main(argv: list[str] | None = None) -> int:
     }
     (out / "evidence.json").write_text(json.dumps(evidence, indent=2, default=str))
     (ROOT / "artifacts" / "gap_t1_iges" / "provenance.json").write_text(
-        json.dumps({"inputs": provenance, "gold_mesh": evidence["gold_mesh"]}, indent=2, default=str)
+        json.dumps({"inputs": provenance, "gold_mesh": evidence["gold_mesh"],
+                    "references": references, "kp505": kp505}, indent=2, default=str)
     )
     print(json.dumps({"evidence": str(out / "evidence.json"),
+                      "all_references_converged": all(r["reference_converged"]
+                                                      for r in references.values()),
                       "all_gates_passed": all(r.get("gates_passed") for r in rows.values()),
-                      "all_within_3pct": all(r.get("within_3pct") for r in rows.values())}, indent=1))
+                      "all_within_3pct": all(r.get("within_3pct") for r in rows.values())},
+                     indent=1))
     return 0
 
 

@@ -21,18 +21,19 @@ recorded by the caller in ``artifacts/gap_t1_iges/provenance.json``.
 from __future__ import annotations
 
 import struct
-from dataclasses import dataclass
 from pathlib import Path
+from typing import Sequence
 
 import numpy as np
 
 from tensorcad.geomquality.baselines import greville_abscissae
 from tensorcad.geomquality.brep import BRep, Face, sew
-from tensorcad.nurbs import NURBSSurface
+from tensorcad.nurbs import NURBSSurface, _differentiate_axis, tensor_point
 
 __all__ = [
     "read_stl", "section_polyline", "girth_grid", "interpolate_surface",
-    "loft_gold_hull", "brep_quadrature",
+    "loft_gold_hull", "brep_quadrature", "graded_panels", "enclosed_volume_flags",
+    "PatchDerivatives",
 ]
 
 
@@ -235,8 +236,18 @@ def _ruled(edge_a: list[tuple[float, float, float]], edge_b: list[tuple[float, f
 
 
 def loft_gold_hull(triangles: np.ndarray, *, stations: int = 41, girth_samples: int = 41,
-                   degree: int = 3) -> tuple[BRep, dict]:
-    """Full hull B-rep: girth patch + ruled deck + ruled bow/stern caps."""
+                   degree: int = 3, orient: bool = True) -> tuple[BRep, dict]:
+    """Full hull B-rep: girth patch + ruled deck + ruled bow/stern caps.
+
+    ``orient`` derives the ``same_sense`` flags from the enclosed volume
+    (:func:`enclosed_volume_flags`)
+    instead of guessing them.  The first version of this module hard-coded ``True`` for
+    every face, and the resulting patch set was *not* consistently oriented: its signed
+    volume came out at +2398.9 m3 where the closed body holds ~13922 m3, which is what
+    made the earlier gold-regression numbers meaningless (documented in
+    ``docs/gap_cad_t1_iges_pipe.md``).  The flags are recorded in the returned info dict
+    so the evidence file carries the orientation that was actually used.
+    """
     xs, grid, spans = girth_grid(triangles, stations, girth_samples)
     hull = interpolate_surface(grid, degree=(degree, degree))
     knots_u, knots_v = hull.knots
@@ -258,10 +269,18 @@ def loft_gold_hull(triangles: np.ndarray, *, stations: int = 41, girth_samples: 
         line = [tuple(first + (last - first) * (j / (len(row) - 1))) for j in range(len(row))]
         return _ruled(list(row), line, knots_v, degree)
 
+    names = ["hull", "deck", "cap_aft", "cap_fore"]
+    surfaces = [hull, deck, cap(net[0]), cap(net[-1])]
+    orientation: dict = {}
+    if orient:
+        provisional = sew(surfaces, names=names, source="DTMB5415_Hull_exact.stl loft")
+        flags, orientation = enclosed_volume_flags(provisional)
+    else:
+        flags = [True] * len(surfaces)
     brep = sew(
-        [hull, deck, cap(net[0]), cap(net[-1])],
-        names=["hull", "deck", "cap_aft", "cap_fore"],
-        same_sense=[True, True, True, True],
+        surfaces,
+        names=names,
+        same_sense=flags,
         source="DTMB5415_Hull_exact.stl loft",
     )
     info = {
@@ -272,12 +291,112 @@ def loft_gold_hull(triangles: np.ndarray, *, stations: int = 41, girth_samples: 
         "girth_span_min": float(min(spans)),
         "faces": len(brep.faces),
         "hull_control_points": [len(net), len(net[0])],
+        "same_sense": flags,
+        "orientation": orientation,
     }
     return brep, info
 
 
 # --------------------------------------------------------------------------- #
-# independent reference integrals (Gauss quadrature on the patches)
+# exact patch derivatives, with the derivative control nets cached
+# --------------------------------------------------------------------------- #
+class PatchDerivatives:
+    """``S``, ``S_u`` and ``S_v`` of a ``NURBSSurface`` with its nets built once.
+
+    ``NURBSSurface.derivatives`` rebuilds the homogeneous (derivative) control nets on
+    every call, which costs ~6 ms per point -- enough to make a converged reference
+    integral unaffordable.  This class performs the *same* exact computation (A3.6
+    rational quotient recursion on the same derivative nets, built with
+    ``tensorcad.nurbs._differentiate_axis``) but builds the nets in ``__init__``.
+    ``tests/test_iges_gold_regression.py`` asserts equality with the library to 1e-12,
+    so this is a cache, not a second implementation.
+    """
+
+    def __init__(self, surface: NURBSSurface) -> None:
+        self.surface = surface
+        degree_u, degree_v = surface.degree
+        homogeneous = tuple(
+            tuple(
+                (
+                    surface.weights[i][j] * surface.control_net[i][j][0],
+                    surface.weights[i][j] * surface.control_net[i][j][1],
+                    surface.weights[i][j] * surface.control_net[i][j][2],
+                    surface.weights[i][j],
+                )
+                for j in range(len(surface.control_net[i]))
+            )
+            for i in range(len(surface.control_net))
+        )
+        knots_u = tuple(surface.knots[0])
+        knots_v = tuple(surface.knots[1])
+        self._u0 = (homogeneous, degree_u, knots_u)
+        reduced, degree, knots = _differentiate_axis(homogeneous, 0, degree_u, knots_u)
+        self._u1 = (reduced, degree, knots)
+        reduced, degree, knots = _differentiate_axis(homogeneous, 1, degree_v, knots_v)
+        self._v1 = (reduced, degree, knots)
+        self._v0 = (homogeneous, degree_v, knots_v)
+
+    def __call__(self, u: float, v: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        (net, degree_u, knots_u), (net_u, degree_u1, knots_u1) = self._u0, self._u1
+        (_, degree_v, knots_v), (net_v, degree_v1, knots_v1) = self._v0, self._v1
+        h00 = tensor_point(net, (degree_u, degree_v), (knots_u, knots_v), u, v)
+        h10 = tensor_point(net_u, (degree_u1, degree_v), (knots_u1, knots_v), u, v)
+        h01 = tensor_point(net_v, (degree_u, degree_v1), (knots_u, knots_v1), u, v)
+        w0 = h00[3]
+        if w0 == 0.0:
+            raise ValueError(f"degenerate evaluation at (u, v)=({u!r}, {v!r})")
+        point = np.asarray(h00[:3], dtype=float) / w0
+        du = (np.asarray(h10[:3], dtype=float) - h10[3] * point) / w0
+        dv = (np.asarray(h01[:3], dtype=float) - h01[3] * point) / w0
+        return point, du, dv
+
+
+# --------------------------------------------------------------------------- #
+# orientation: outward face normals without trusting a caller-supplied flag
+# --------------------------------------------------------------------------- #
+def _grid_points(surface: NURBSSurface, nu: int, nv: int) -> np.ndarray:
+    (u0, u1), (v0, v1) = surface.domain
+    return np.array([
+        [np.asarray(surface.evaluate(u, v)) for v in np.linspace(v0, v1, nv)]
+        for u in np.linspace(u0, u1, nu)
+    ])
+
+
+def enclosed_volume_flags(brep: BRep, *, order: int = 5, panels: int = 4) -> tuple[list[bool], dict]:
+    """``same_sense`` per face from the enclosed volume: keep the sign set that maximises it.
+
+    A consistently oriented closed patch set has one outward orientation and one inward
+    one; any single reversed face subtracts its own (double) contribution, so the outward
+    set is the one whose ``|V| = 1/3 |sum_faces s_f int S.(S_u x S_v)|`` is largest.  The
+    argument is not a theorem for a general surface, so the rule is *validated* instead:
+    ``tests/test_iges_gold_regression.py`` checks that it reproduces the hand-set flags of
+    the analytic baselines (Series 60 Cb=0.60/0.65, KVLCC2), whose orientation is known
+    from their construction, before it is used for the DTMB5415 loft.
+
+    This replaces the earlier hard-coded ``same_sense=[True, True, True, True]``, which was
+    not consistently oriented: the loft's signed volume came out as +2398.9 m3 against the
+    ~13922 m3 the closed body actually encloses.
+    """
+    count = len(brep.faces)
+    best: tuple[float, list[bool]] | None = None
+    table: list[dict] = []
+    for mask in range(2 ** count):
+        flags = [bool(mask >> index & 1) for index in range(count)]
+        volume = brep_quadrature(brep, order=order, panels=panels, flags=flags)["volume"]
+        table.append({"flags": flags, "volume": volume})
+        if best is None or abs(volume) > abs(best[0]) + 1e-12:
+            best = (volume, flags)
+    assert best is not None
+    return best[1], {
+        "rule": "maximise |V| = |1/3 sum_faces s_f int S.(S_u x S_v)| over the 2**n sign sets",
+        "volume": best[0],
+        "combinations": len(table),
+        "runner_up": sorted((abs(row["volume"]) for row in table), reverse=True)[1],
+    }
+
+
+# --------------------------------------------------------------------------- #
+# independent reference integrals (graded composite Gauss on the patches)
 # --------------------------------------------------------------------------- #
 _GAUSS = {
     1: ([0.0], [2.0]),
@@ -286,35 +405,103 @@ _GAUSS = {
     5: ([-0.9061798459386640, -0.5384693101056831, 0.0, 0.5384693101056831, 0.9061798459386640],
         [0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665,
          0.2369268850561891]),
+    8: ([-0.9602898564975363, -0.7966664774136267, -0.5255324099163290, -0.1834346424956498,
+         0.1834346424956498, 0.5255324099163290, 0.7966664774136267, 0.9602898564975363],
+        [0.1012285362903763, 0.2223810344533745, 0.3137066458778873, 0.3626837833783620,
+         0.3626837833783620, 0.3137066458778873, 0.2223810344533745, 0.1012285362903763]),
 }
 
 
-def brep_quadrature(brep: BRep, *, order: int = 5) -> dict[str, float]:
-    """Area and signed volume of a full-domain patch set by Gauss-Legendre quadrature.
+def graded_panels(low: float, high: float, count: int, ratio: float = 0.5) -> list[tuple[float, float]]:
+    """Break ``[low, high]`` into ``count`` panels clustered geometrically at both ends.
 
-    Deliberately independent of the tessellation path: ``V = 1/3 ∮ S·(S_u × S_v) du dv``
-    and ``A = ∫∫ |S_u × S_v| du dv`` with a 5x5 rule per patch.
+    The analytic hull baselines carry an algebraic singularity at the keel
+    (``y ~ zeta**(1/m)`` with ``m`` up to 24), so a uniform panel grid -- or a single
+    panel -- under-integrates by whole per-cent: that was the defect in the first
+    version of this reference.  Geometric clustering towards *both* parameter ends makes
+    the composite rule converge to the exact value regardless of which end is singular.
+    """
+    if count <= 1:
+        return [(low, high)]
+    half = count // 2
+    # ``ratio < 1`` must make the panels *small* at the ends and coarse in the middle:
+    # the singular end of a hull patch is an endpoint, so that is where the resolution has
+    # to go (``weights`` is therefore reversed relative to the panel order).
+    weights = [ratio ** (half - 1 - i) for i in range(half)]
+    total = sum(weights)
+    fractions = [0.0]
+    accumulated = 0.0
+    for weight in weights:
+        accumulated += 0.5 * weight / total
+        fractions.append(accumulated)
+    mirrored = [1.0 - fraction for fraction in reversed(fractions)]
+    if count % 2:
+        # odd count: use the even subdivision of ``count - 1`` and split the widest
+        # (central) panel, so the panel count is exact for every count.
+        even = graded_panels(low, high, count - 1, ratio)
+        widest = max(range(len(even)), key=lambda i: even[i][1] - even[i][0])
+        a, b = even[widest]
+        middle = 0.5 * (a + b)
+        return even[:widest] + [(a, middle), (middle, b)] + even[widest + 1:]
+    breakpoints = fractions + mirrored[1:]
+    breakpoints = sorted({round(fraction, 15) for fraction in breakpoints})
+    breakpoints[0], breakpoints[-1] = 0.0, 1.0
+    return [(low + (high - low) * a, low + (high - low) * b)
+            for a, b in zip(breakpoints[:-1], breakpoints[1:])]
+
+
+def brep_quadrature(brep: BRep, *, order: int = 5, panels: int = 4,
+                    ratio: float = 0.5, flags: Sequence[bool] | None = None) -> dict:
+    """Area and signed volume of a full-domain patch set by graded composite Gauss.
+
+    ``V = 1/3 * sum_faces s_f * int int S . (S_u x S_v) du dv`` and
+    ``A = sum_faces int int |S_u x S_v| du dv``, with ``s_f = +1/-1`` from
+    ``face.same_sense`` (or from ``flags``).  Deliberately independent of the
+    tessellation/trim-inversion path under test: it integrates the *same* NURBS patches
+    that were written to the file.
+
+    Reference quality is measured, not assumed: ``panels`` and ``order`` are the
+    convergence ladder rungs reported by the benchmark driver, and the harness checks the
+    result against the analytic closed forms of the baselines (Series 60, KVLCC2) where
+    those exist.  A reference that does not reproduce an analytic volume to well under
+    1 % is not allowed to judge the pipeline.
     """
     nodes, weights = _GAUSS[order]
     area = 0.0
     volume = 0.0
-    for face in brep.faces:
+    per_face: dict[str, dict] = {}
+    for index, face in enumerate(brep.faces):
         surface = face.surface
+        derivative = PatchDerivatives(surface)
         (u0, u1), (v0, v1) = surface.domain
-        ju = 0.5 * (u1 - u0)
-        jv = 0.5 * (v1 - v0)
-        for i, nu in enumerate(nodes):
-            u = 0.5 * (u0 + u1) + ju * nu
-            for j, nv in enumerate(nodes):
-                v = 0.5 * (v0 + v1) + jv * nv
-                derivatives = surface.derivatives(u, v, order=1)
-                point = np.asarray(surface.evaluate(u, v))
-                du = np.asarray(derivatives[(1, 0)])
-                dv = np.asarray(derivatives[(0, 1)])
-                cross = np.cross(du, dv)
-                weight = ju * jv * weights[i] * weights[j]
-                area += float(np.linalg.norm(cross)) * weight
-                signed = float(np.dot(point, cross)) / 3.0
-                sign = 1.0 if face.same_sense else -1.0
-                volume += sign * signed * weight
-    return {"area": area, "volume": volume}
+        sign = 1.0 if (flags[index] if flags is not None else face.same_sense) else -1.0
+        face_area = 0.0
+        face_volume = 0.0
+        for ua, ub in graded_panels(u0, u1, panels, ratio):
+            half_u, mid_u = 0.5 * (ub - ua), 0.5 * (ua + ub)
+            for va, vb in graded_panels(v0, v1, panels, ratio):
+                half_v, mid_v = 0.5 * (vb - va), 0.5 * (va + vb)
+                for i, node_u in enumerate(nodes):
+                    u = mid_u + half_u * node_u
+                    for j, node_v in enumerate(nodes):
+                        v = mid_v + half_v * node_v
+                        point, du, dv = derivative(u, v)
+                        cross = np.cross(du, dv)
+                        weight = half_u * half_v * weights[i] * weights[j]
+                        face_area += float(np.linalg.norm(cross)) * weight
+                        face_volume += sign * float(np.dot(point, cross)) / 3.0 * weight
+        area += face_area
+        volume += face_volume
+        per_face[face.name] = {"area": face_area, "volume": face_volume,
+                               "same_sense": bool(flags[index] if flags is not None
+                                                  else face.same_sense)}
+    return {
+        "volume": volume,
+        "area": area,
+        "order": order,
+        "panels": panels,
+        "grading_ratio": ratio,
+        "per_face": per_face,
+        "method": f"{order}x{order} Gauss per panel, {panels}x{panels} panels graded "
+                  f"(ratio {ratio}) toward both parameter ends",
+    }
