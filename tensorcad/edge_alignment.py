@@ -24,10 +24,12 @@ tolerance. This module lands the missing half:
 
 Named limitations
 -----------------
-* Curves only (edges), not whole patches: aligning a patch network means aligning the
-  edge curves it shares and using them as the patch data, which is exactly what a
-  stitching operation needs; multi-patch face assembly itself stays out of scope, as
-  it does in :mod:`tensorcad.nurbs`.
+* Seams, not assemblies: :func:`align_patch_seam` refines the two patches that own a
+  shared edge until their boundary rows are identical, so the seam is watertight by
+  construction -- in the patch data, not only in a pair of loose curves. What stays
+  out of scope is the *assembly*: no topology, no trimming, no orientation search over
+  a whole network, and a patch that is a neighbour of two refined patches is refined
+  twice (which is exact, just not minimal).
 * The two edges must share a parameter domain. Insertion can equalise the *knot
   vector*, it cannot equalise the *parametrisation*: two edges of the same circle
   split into three and into six arcs have the same point set but visit it at different
@@ -47,7 +49,9 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from dataclasses import dataclass
 
+from .highorder.nurbs_geom import insert_knot as _insert_surface_knot
 from .nurbs import (
     NURBSCurve,
     NURBSError,
@@ -60,7 +64,9 @@ from .nurbs import (
 
 __all__ = [
     "SIDES",
+    "SeamAlignment",
     "align_edges",
+    "align_patch_seam",
     "boundary_curve",
     "edge_report",
     "insert_knot",
@@ -354,3 +360,190 @@ def edge_report(
             and weight_difference <= tolerance
         ),
     }
+
+
+# -- patch-level seams ------------------------------------------------------
+_EDGE_AXIS = {"v0": 0, "v1": 0, "u0": 1, "u1": 1}
+
+
+@dataclass(frozen=True)
+class SeamAlignment:
+    """Two refined patches plus the evidence that the seam is (or is not) closed.
+
+    ``first``/``second`` are the patches to use from now on -- carrying the same
+    geometry as the inputs, with their shared boundary rows made identical.
+    ``report`` is :func:`edge_report` on the two boundary curves after the refinement,
+    extended with the refinement's own bookkeeping, and ``operations`` is the audit
+    trail of what was done to which patch (degree elevation and knot insertions).
+    """
+
+    first: NURBSSurface
+    second: NURBSSurface
+    first_edge: NURBSCurve
+    second_edge: NURBSCurve
+    report: dict[str, object]
+    operations: tuple[dict[str, object], ...]
+
+    @property
+    def watertight(self) -> bool:
+        """Whether the two patches now share one edge representation."""
+        return bool(self.report["watertight"])
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "report": dict(self.report),
+            "operations": [dict(entry) for entry in self.operations],
+            "first_edge": {
+                "degree": self.first_edge.degree,
+                "control_points": len(self.first_edge.control_points),
+            },
+            "second_edge": {
+                "degree": self.second_edge.degree,
+                "control_points": len(self.second_edge.control_points),
+            },
+        }
+
+
+def _axis_multiplicities(knots: Sequence[float], degree: int, count: int) -> dict[float, int]:
+    """Interior multiplicities of a clamped knot vector with ``count`` basis functions."""
+    low, high = knots[degree], knots[count]
+    values: dict[float, int] = {}
+    for knot in knots:
+        if low < knot < high:
+            values[knot] = values.get(knot, 0) + 1
+    return values
+
+
+def _refine_axis(
+    surface: NURBSSurface,
+    axis: int,
+    target: NURBSCurve,
+    name: str,
+    operations: list[dict[str, object]],
+) -> NURBSSurface:
+    """Refine ``surface`` along ``axis`` until that direction *is* ``target``'s basis.
+
+    Degree first (a patch cannot carry a seam of higher degree than its own), then
+    knots: every interior breakpoint ``target`` has is inserted up to ``target``'s
+    multiplicity. Both operations are exact -- the patch does not move -- and they are
+    the only two that change a knot vector without changing the geometry.
+    """
+    current = surface
+    elevation = target.degree - current.degree[axis]
+    if elevation > 0:
+        current = (
+            current.elevate_degree(elevation, 0)
+            if axis == 0
+            else current.elevate_degree(0, elevation)
+        )
+        operations.append(
+            {"patch": name, "axis": axis, "op": "elevate_degree", "times": elevation}
+        )
+    degree = target.degree
+    count = len(current.knots[axis]) - degree - 1
+    have = _axis_multiplicities(current.knots[axis], degree, count)
+    want = _axis_multiplicities(target.knots, degree, len(target.control_points))
+    for value in sorted(want):
+        deficit = want[value] - have.get(value, 0)
+        if deficit > 0:
+            current = _insert_surface_knot(current, axis, value, deficit)
+            operations.append(
+                {
+                    "patch": name,
+                    "axis": axis,
+                    "op": "insert_knot",
+                    "value": value,
+                    "times": deficit,
+                }
+            )
+    return current
+
+
+def _max_patch_deviation(first: NURBSSurface, second: NURBSSurface, samples: int = 17) -> float:
+    """Largest distance between two patches at the same ``(u, v)`` on a sample grid."""
+    (u_low, u_high), (v_low, v_high) = first.domain
+    worst = 0.0
+    for row in range(samples):
+        u = u_low + (u_high - u_low) * row / (samples - 1)
+        for column in range(samples):
+            v = v_low + (v_high - v_low) * column / (samples - 1)
+            worst = max(worst, _max_distance(first.evaluate(u, v), second.evaluate(u, v)))
+    return worst
+
+
+def align_patch_seam(
+    first: NURBSSurface,
+    first_side: str,
+    second: NURBSSurface,
+    second_side: str,
+    *,
+    reverse_second: bool = False,
+    samples: int = 129,
+    tolerance: float = 1e-12,
+) -> SeamAlignment:
+    """Make the edge ``first_side`` of ``first`` and ``second_side`` of ``second`` one
+    and the same *patch data*.
+
+    :func:`align_edges` aligns two loose curves; a stitcher cannot use those curves,
+    because the patches still carry their old boundary rows and nothing in the patch
+    knows about the aligned edge. This function closes that loop: it aligns the two
+    boundary curves (degree, then knot vector) and then refines each patch along its
+    own edge direction until the patch's knot vector equals the aligned edge's --
+    by degree elevation when the seam is of higher degree, by knot insertion
+    otherwise. Both are exact, so the patch geometry is untouched and only the
+    representation along that direction grows.
+
+    The axes come from the sides, not from a guess: ``"v0"``/``"v1"`` are edges in
+    ``u`` (axis 0), ``"u0"``/``"u1"`` are edges in ``v`` (axis 1). ``reverse_second``
+    says that the neighbour traverses the shared edge the other way, exactly as in
+    :func:`boundary_curve`.
+
+    The returned :class:`SeamAlignment` carries the two refined patches, the aligned
+    edges and a report that measures the result instead of asserting it:
+    ``watertight`` (equal degree, equal knots, equal control points and weights within
+    ``tolerance``), ``max_gap`` at the same parameters, ``max_patch_deviation`` (how
+    far each refined patch moved from its input -- round-off, if the refinement is
+    exact) and ``representation_matches_target`` (whether the refinement reached the
+    aligned edge's basis on both sides). Two edges that are *different* curves are
+    still aligned in representation and still reported with their gap: refinement
+    cannot invent geometry that is not there.
+    """
+    for side in (first_side, second_side):
+        if side not in SIDES:
+            raise ValueError(f"side must be one of {SIDES}, got {side!r}")
+    first_axis = _EDGE_AXIS[first_side]
+    second_axis = _EDGE_AXIS[second_side]
+
+    first_edge = boundary_curve(first, first_side)
+    second_edge = boundary_curve(second, second_side, reverse=reverse_second)
+    target_first, target_second = align_edges(first_edge, second_edge)
+
+    operations: list[dict[str, object]] = []
+    refined_first = _refine_axis(first, first_axis, target_first, "first", operations)
+    refined_second = _refine_axis(second, second_axis, target_second, "second", operations)
+
+    new_first_edge = boundary_curve(refined_first, first_side)
+    new_second_edge = boundary_curve(refined_second, second_side, reverse=reverse_second)
+
+    report = edge_report(new_first_edge, new_second_edge, samples=samples, tolerance=tolerance)
+    report["sides"] = [first_side, second_side]
+    report["axes"] = [first_axis, second_axis]
+    report["reversed_second"] = reverse_second
+    report["representation_matches_target"] = [
+        new_first_edge.degree == target_first.degree and new_first_edge.knots == target_first.knots,
+        new_second_edge.degree == target_second.degree
+        and new_second_edge.knots == target_second.knots,
+    ]
+    report["max_patch_deviation"] = [
+        _max_patch_deviation(first, refined_first),
+        _max_patch_deviation(second, refined_second),
+    ]
+    report["operations"] = len(operations)
+    return SeamAlignment(
+        first=refined_first,
+        second=refined_second,
+        first_edge=new_first_edge,
+        second_edge=new_second_edge,
+        report=report,
+        operations=tuple(operations),
+    )
