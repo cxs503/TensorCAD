@@ -433,6 +433,13 @@ from .loft import (
     loft_surface,
     section_deviation,
 )
+from .mesh_boolean import (
+    MeshBooleanError,
+    boolean,
+    mesh_difference,
+    mesh_intersection,
+    mesh_union,
+)
 from .surface_intersection import (
     CylinderPatch,
     IntersectionCurve,
@@ -755,6 +762,8 @@ __all__ = [
     "SpherePatch", "SurfaceIntersectionError", "cylinder_implicit", "plane_implicit",
     "sphere_implicit", "surface_surface_intersection",
     # surface--surface intersection (0.25.0): parameter-space marching for GAP-CAD-002
+    "MeshBooleanError", "boolean", "mesh_difference", "mesh_intersection", "mesh_union",
+    # mesh-level regularised boolean (GAP-CAD-003): surface classification, not voxels
 ]
 
 __version__ = "0.23.0"
