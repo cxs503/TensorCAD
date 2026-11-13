@@ -1,0 +1,461 @@
+{
+  "hulls": {
+    "kvlcc2_class": {
+      "grid": [
+        33,
+        25
+      ],
+      "kernels": {
+        "energy": {
+          "families": {
+            "buttock": [
+              0,
+              0
+            ],
+            "station": [
+              272,
+              255
+            ],
+            "waterline": [
+              0,
+              6
+            ]
+          },
+          "flips": [
+            272,
+            270
+          ],
+          "hand_reference_max": 2.614045959087445,
+          "hand_reference_rms": 0.3634935184511587,
+          "max_deviation": 0.05000000000000071,
+          "max_to_analytic_in": 0.019992852487224155,
+          "max_to_analytic_out": 0.0695815344043158,
+          "monotone": true,
+          "passes": [
+            {
+              "accepted": true,
+              "flips": 270,
+              "index": 1,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 298,
+              "index": 2,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 293,
+              "index": 2,
+              "relaxation": 0.5
+            },
+            {
+              "accepted": false,
+              "flips": 293,
+              "index": 2,
+              "relaxation": 0.25
+            }
+          ],
+          "rms_error_reduction": -2.8104564705970225,
+          "rms_to_analytic_in": 0.011221985407623258,
+          "rms_to_analytic_out": 0.04276088690942341,
+          "tolerance_respected": true,
+          "volume_relative_change": 7.226719093459816e-05
+        },
+        "local": {
+          "families": {
+            "buttock": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "station": [
+              272,
+              74,
+              25,
+              11,
+              7
+            ],
+            "waterline": [
+              0,
+              0,
+              15,
+              19,
+              21
+            ]
+          },
+          "flips": [
+            272,
+            90,
+            47,
+            33,
+            29
+          ],
+          "hand_reference_max": 2.614045959087445,
+          "hand_reference_rms": 0.360852219213385,
+          "max_deviation": 0.05000000000000071,
+          "max_to_analytic_in": 0.019992852487224155,
+          "max_to_analytic_out": 0.05588515418110873,
+          "monotone": true,
+          "passes": [
+            {
+              "accepted": true,
+              "flips": 90,
+              "index": 1,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 47,
+              "index": 2,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 33,
+              "index": 3,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 29,
+              "index": 4,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 29,
+              "index": 5,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 29,
+              "index": 5,
+              "relaxation": 0.5
+            },
+            {
+              "accepted": false,
+              "flips": 29,
+              "index": 5,
+              "relaxation": 0.25
+            }
+          ],
+          "rms_error_reduction": 0.05568511845631474,
+          "rms_to_analytic_in": 0.011221985407623258,
+          "rms_to_analytic_out": 0.010597087820884721,
+          "tolerance_respected": true,
+          "volume_relative_change": 0.00019840793436215617
+        }
+      },
+      "noise": 0.02,
+      "tolerance": 0.05
+    },
+    "series60_cb060": {
+      "grid": [
+        25,
+        21
+      ],
+      "kernels": {
+        "energy": {
+          "families": {
+            "buttock": [
+              0,
+              0,
+              0
+            ],
+            "station": [
+              287,
+              220,
+              200
+            ],
+            "waterline": [
+              163,
+              0,
+              62
+            ]
+          },
+          "flips": [
+            450,
+            274,
+            258
+          ],
+          "hand_reference_max": 0.042620493841222684,
+          "hand_reference_rms": 0.00705513805695429,
+          "max_deviation": 0.010000000000000009,
+          "max_to_analytic_in": 0.003998133744789134,
+          "max_to_analytic_out": 0.013321772108396968,
+          "monotone": true,
+          "passes": [
+            {
+              "accepted": true,
+              "flips": 274,
+              "index": 1,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 318,
+              "index": 2,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 286,
+              "index": 2,
+              "relaxation": 0.5
+            },
+            {
+              "accepted": true,
+              "flips": 258,
+              "index": 2,
+              "relaxation": 0.25
+            },
+            {
+              "accepted": false,
+              "flips": 296,
+              "index": 3,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 280,
+              "index": 3,
+              "relaxation": 0.5
+            },
+            {
+              "accepted": false,
+              "flips": 276,
+              "index": 3,
+              "relaxation": 0.25
+            }
+          ],
+          "rms_error_reduction": -1.04219073568009,
+          "rms_to_analytic_in": 0.002212608416176576,
+          "rms_to_analytic_out": 0.0045185684092035995,
+          "tolerance_respected": true,
+          "volume_relative_change": 0.0007007693370270997
+        },
+        "local": {
+          "families": {
+            "buttock": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "station": [
+              287,
+              197,
+              135,
+              125,
+              108,
+              105
+            ],
+            "waterline": [
+              163,
+              10,
+              24,
+              23,
+              21,
+              21
+            ]
+          },
+          "flips": [
+            450,
+            224,
+            182,
+            166,
+            146,
+            139
+          ],
+          "hand_reference_max": 0.03624282159820402,
+          "hand_reference_rms": 0.005557586620658693,
+          "max_deviation": 0.010000000000000009,
+          "max_to_analytic_in": 0.003998133744789134,
+          "max_to_analytic_out": 0.008074918362161676,
+          "monotone": true,
+          "passes": [
+            {
+              "accepted": true,
+              "flips": 224,
+              "index": 1,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 182,
+              "index": 2,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 166,
+              "index": 3,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 146,
+              "index": 4,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 139,
+              "index": 5,
+              "relaxation": 1.0
+            }
+          ],
+          "rms_error_reduction": 0.32543497095129426,
+          "rms_to_analytic_in": 0.002212608416176576,
+          "rms_to_analytic_out": 0.0014925482605315627,
+          "tolerance_respected": true,
+          "volume_relative_change": 0.002298760097937151
+        }
+      },
+      "noise": 0.004,
+      "tolerance": 0.01
+    },
+    "wigley_iii": {
+      "grid": [
+        21,
+        17
+      ],
+      "kernels": {
+        "energy": {
+          "families": {
+            "buttock": [
+              2,
+              0
+            ],
+            "station": [
+              153,
+              0
+            ],
+            "waterline": [
+              64,
+              0
+            ]
+          },
+          "flips": [
+            219,
+            14
+          ],
+          "hand_reference_max": 0.005300802354248513,
+          "hand_reference_rms": 0.0013024093620317581,
+          "max_deviation": 0.0060566454290632565,
+          "max_to_analytic_in": 0.003998133744789134,
+          "max_to_analytic_out": 0.0022606525223924367,
+          "monotone": true,
+          "passes": [
+            {
+              "accepted": true,
+              "flips": 14,
+              "index": 1,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 38,
+              "index": 2,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 18,
+              "index": 2,
+              "relaxation": 0.5
+            },
+            {
+              "accepted": false,
+              "flips": 16,
+              "index": 2,
+              "relaxation": 0.25
+            }
+          ],
+          "rms_error_reduction": 0.7706507238467804,
+          "rms_to_analytic_in": 0.0021617740506097074,
+          "rms_to_analytic_out": 0.0004958013137141501,
+          "tolerance_respected": true,
+          "volume_relative_change": 0.000555357668961378
+        },
+        "local": {
+          "families": {
+            "buttock": [
+              2,
+              0,
+              0
+            ],
+            "station": [
+              153,
+              36,
+              20
+            ],
+            "waterline": [
+              64,
+              16,
+              7
+            ]
+          },
+          "flips": [
+            219,
+            81,
+            59
+          ],
+          "hand_reference_max": 0.0050000000000001155,
+          "hand_reference_rms": 0.000993636434481265,
+          "max_deviation": 0.008919112578497479,
+          "max_to_analytic_in": 0.003998133744789134,
+          "max_to_analytic_out": 0.005722848498033839,
+          "monotone": true,
+          "passes": [
+            {
+              "accepted": true,
+              "flips": 81,
+              "index": 1,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": true,
+              "flips": 59,
+              "index": 2,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 65,
+              "index": 3,
+              "relaxation": 1.0
+            },
+            {
+              "accepted": false,
+              "flips": 62,
+              "index": 3,
+              "relaxation": 0.5
+            },
+            {
+              "accepted": false,
+              "flips": 62,
+              "index": 3,
+              "relaxation": 0.25
+            }
+          ],
+          "rms_error_reduction": 0.37030874999289864,
+          "rms_to_analytic_in": 0.0021617740506097074,
+          "rms_to_analytic_out": 0.0013612502041613415,
+          "tolerance_respected": true,
+          "volume_relative_change": 0.00043414362022057884
+        }
+      },
+      "noise": 0.004,
+      "tolerance": 0.01
+    }
+  },
+  "schema": "tensorcad.lines_fairing.study/1"
+}
