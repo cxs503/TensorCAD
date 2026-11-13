@@ -98,6 +98,50 @@ def test_golden_library_covers_the_required_forms(committed: golden.SuiteResult)
         assert case.metrics, f"{case.name} asserts nothing"
 
 
+def test_dtmb5415_publishes_topology_instead_of_a_fake_displacement(
+    committed: golden.SuiteResult,
+) -> None:
+    """The 5415 shell is an open sheet: its tetrahedron sum must never be sold as a volume.
+
+    Regression for the recorded "surface-integral volume disagrees with the cloud integral"
+    limitation: the 2.6 relative discrepancy was an artifact of forcing ``closed=True`` on
+    a mesh that is open at the deck edge, not an integration error.
+    """
+    case = {result.name: result for result in committed.cases}["dtmb5415"]
+    asserted = {metric.name for metric in case.metrics}
+    assert "surface_integral_volume_m3" not in asserted
+    measured = case.measurements["fine"]
+    assert {"mesh_is_watertight", "boundary_edge_count", "boundary_component_count",
+            "signed_tetra_sum_open_shell_m3"} <= set(measured)
+    assert measured["mesh_is_watertight"] == 0.0
+    assert measured["boundary_edge_count"] > 0.0
+    assert measured["boundary_component_count"] == 1.0
+    assert "identity_open_shell_is_not_a_solid" in case.invariants
+    limitations = {entry["id"]: entry for entry in case.known_limitations}
+    assert "displacement-withheld-open-shell" in limitations
+    withheld = limitations["displacement-withheld-open-shell"]
+    assert withheld["asserted"] is False
+    assert withheld["signed_tetra_sum_open_shell_m3"] < 0.0 < withheld["displacement_volume_m3"]
+
+
+def test_forcing_closed_on_the_open_5415_shell_is_visible() -> None:
+    """``closed=True`` on an open shell is a caller error; the report must expose it."""
+    from tensorcad import mesh as meshlib
+    from tensorcad.dtmb5415 import DTMB5415Space, WATERLINE_Z
+    from tensorcad.hydrostatics import compute_hydrostatics
+
+    space = DTMB5415Space()
+    mesh = space.mesh()
+    assert not meshlib.is_watertight(mesh)
+    auto = compute_hydrostatics(mesh, waterline_z=WATERLINE_Z)
+    assert "not trustworthy" in auto.basis
+    forced = compute_hydrostatics(mesh, waterline_z=WATERLINE_Z, closed=True)
+    assert forced.basis == "closed surface integrals"
+    # The forced number is the signed tetrahedron sum of an open surface, not a volume:
+    # it is negative while the displacement reported by the hull model is positive.
+    assert forced.displacement_volume < 0.0 < space.hydrostatics()["displacement_volume_m3"]
+
+
 def test_every_analytic_metric_carries_a_derived_tolerance(
     committed: golden.SuiteResult,
 ) -> None:
@@ -151,16 +195,19 @@ def test_baseline_reference_values_reproduce_from_their_source() -> None:
 
 
 def test_known_limitations_are_recorded_not_hidden(committed: golden.SuiteResult) -> None:
-    """The 5415 surface-integral/cloud disagreement is disclosed with numbers."""
+    """The 5415 open-shell displacement is disclosed with numbers, not dressed up."""
     dtmb = next(case for case in committed.cases if case.name == "dtmb5415")
     limitation = next(
         entry
         for entry in dtmb.known_limitations
-        if entry["id"] == "surface-integral-volume-disagrees-with-cloud-integral"
+        if entry["id"] == "displacement-withheld-open-shell"
     )
     assert limitation["asserted"] is False
-    assert limitation["relative_discrepancy"] > 0.01
-    assert limitation["cloud_volume_m3"] > 0.0
+    assert limitation["boundary_edge_count"] > 0.0
+    assert limitation["displacement_volume_m3"] > 0.0
+    # The number that used to be published as a volume: it is the signed tetrahedron sum
+    # of an open surface, and it is negative, which no displacement can be.
+    assert limitation["signed_tetra_sum_open_shell_m3"] < 0.0
 
 
 # --------------------------------------------------------------------------------------
