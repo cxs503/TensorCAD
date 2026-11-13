@@ -187,3 +187,30 @@ class MeshBuilder:
             units=self.units,
             coordinate_frame=self.coordinate_frame,
         )
+
+
+# --------------------------------------------------------------------------- #
+# CAD import entry point (IGES/STEP -> watertight triangle mesh)
+# --------------------------------------------------------------------------- #
+def load_cad_geometry(path, *, u_samples: int = 24, v_samples: int = 12, **options):
+    """Load an IGES/STEP file as a :class:`Mesh` through the import pipeline.
+
+    Thin, documented integration surface: ``geomquality.trim_mesh.import_cad`` parses the
+    file, inverts the trims, tessellates, repairs and audits the result, and its gate
+    verdicts travel with the returned report.  Callers that only want the triangles use
+    this function; callers that need the audit trail call the pipeline directly.
+
+    Parameters
+    ----------
+    path:
+        ``.igs``/``.iges`` (trimmed 143/144 or patch-set 128) or ``.stp``/``.step``.
+    u_samples, v_samples:
+        Tessellation density for the untrimmed patch-set route (ignored by the trimmed
+        route, whose density follows the file's own trim curves).
+    options:
+        Forwarded to ``import_cad`` (``tolerance``, ``scale``, ``repair``, ...).
+    """
+    from .geomquality.trim_mesh import import_cad
+
+    result = import_cad(path, u_samples=u_samples, v_samples=v_samples, **options)
+    return result.mesh, result.report
