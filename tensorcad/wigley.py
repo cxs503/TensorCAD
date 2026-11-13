@@ -1202,3 +1202,212 @@ def export_wigley(
     if stl:
         paths["stl"] = write_stl(model.mesh, out / "wigley.stl")
     return {key: str(value) for key, value in paths.items()}
+
+
+# --------------------------------------------------- curvature energy (fairness)
+@dataclass(frozen=True)
+class WigleyFlankEnergy:
+    """Smoothing energy of the analytic Wigley flank, by quadrature on the surface.
+
+    Every number here is an integral of an **analytic** differential-geometry
+    integrand over the analytic surface ``y = h(x, w)`` -- not of a mesh estimate --
+    so it is the reference the mesh path in :mod:`tensorcad.fairness_energy` is
+    measured against. Both flanks are included: the starboard one is integrated and
+    doubled, which is exact because ``h`` enters the metric squared.
+
+    The integrands are ``k1**2 + k2**2``, ``H**2`` and ``K``, all dimensionless
+    (``dA`` carries ``1/m**2``), so a geometrically similar hull must return the
+    same three numbers at any model scale. That is the first claim the tests make.
+
+    Why ``gaussian`` is *not* ``4 pi``. Gauss-Bonnet charges ``4 pi`` to a closed,
+    boundary-free, genus-0 surface, and the lofted Wigley solid is closed -- but it
+    is closed by a flat deck cap **and** by both flanks meeting along the keel and
+    stem lines, which leaves four conical corner points (stem/stern x keel,
+    stem/stern x waterline). On the default 41 x 13 mesh each of those corners
+    carries a 180-degree angle defect; the smooth flank therefore carries
+    ``4 pi`` *minus* what the corners hold, and here that residue is a small
+    positive number (``~0.09``). The mesh path in
+    :mod:`tensorcad.fairness_energy` reproduces the same split -- its defect sum is
+    ``4 pi`` identically and the corner vertices hold almost all of it -- so the two
+    paths are comparable on the smooth part only, which is exactly the comparison
+    the energy study performs.
+    """
+
+    length: float
+    beam: float
+    draft: float
+    longitudinal_exponent: float
+    vertical_exponent: float
+    wetted_area: float
+    bending: float
+    willmore: float
+    gaussian: float
+    corner_charge: float
+    order: int
+    panels: int
+    quadrature_relative_change: float
+
+    @property
+    def bending_per_unit_area(self) -> float:
+        return self.bending / self.wetted_area if self.wetted_area > 0.0 else float("nan")
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["schema"] = "tensorcad.wigley.flank_energy/1"
+        payload["bending_per_unit_area"] = self.bending_per_unit_area
+        payload["willmore_inequality_slack"] = self.willmore - 4.0 * math.pi
+        payload["units"] = {
+            "bending": "dimensionless",
+            "willmore": "dimensionless",
+            "gaussian": "dimensionless",
+            "wetted_area": "m^2",
+        }
+        return payload
+
+
+def _flank_derivatives(
+    parameters: WigleyParameters, xi: float, depth: float
+) -> tuple[float, float, float, float, float, float]:
+    """``(h, hx, hw, hxx, hxw, hww)`` of the analytic flank at ``(xi, depth)``.
+
+    ``xi = 2x/L - 1`` in ``[-1, 1]`` and ``depth`` measured down from the waterline,
+    so the surface is the graph ``y = h(x, w)`` over the rectangle
+    ``[0, L] x [0, T]``. The taper ``1 - |xi|**n`` and the section ``1 - (w/T)**m``
+    are polynomials for the classic ``n = m = 2``; ``|xi|**n`` is ``C1`` across
+    ``xi = 0`` for every admissible ``n > 1`` and the Gauss nodes avoid the kink when
+    an even panel count puts a panel boundary there.
+    """
+    p = parameters
+    n, m = p.longitudinal_exponent, p.vertical_exponent
+    scale = 0.5 * p.beam
+    magnitude = min(abs(xi), 1.0)
+    sign = 1.0 if xi >= 0.0 else -1.0
+
+    taper = 1.0 - math.pow(magnitude, n)
+    dtaper = -n * math.pow(magnitude, n - 1.0) * sign
+    d2taper = -n * (n - 1.0) * math.pow(magnitude, n - 2.0)
+
+    ratio = min(max(depth / p.draft, 0.0), 1.0)
+    section = 1.0 - math.pow(ratio, m)
+    dsection = -m * math.pow(ratio, m - 1.0) / p.draft
+    d2section = -m * (m - 1.0) * math.pow(ratio, m - 2.0) / (p.draft * p.draft)
+
+    inverse_l = 2.0 / p.length
+    return (
+        scale * taper * section,
+        scale * dtaper * section * inverse_l,
+        scale * taper * dsection,
+        scale * d2taper * section * inverse_l * inverse_l,
+        scale * dtaper * dsection * inverse_l,
+        scale * taper * d2section,
+    )
+
+
+def _flank_integrand(
+    parameters: WigleyParameters, xi: float, depth: float
+) -> tuple[float, float, float, float]:
+    """``(bending, willmore, gaussian, jacobian)`` at one point of the flank.
+
+    The mean and Gaussian curvatures of the graph ``y = h(x, w)`` are the standard
+    first/second-fundamental-form expressions::
+
+        H = ((1 + hw**2) hxx - 2 hx hw hxw + (1 + hx**2) hww) / (2 J**3)
+        K = (hxx hww - hxw**2) / J**4,        J = sqrt(1 + hx**2 + hw**2)
+
+    and the bending density follows from the identity
+    ``k1**2 + k2**2 = 4 H**2 - 2 K``, so the three numbers cannot drift apart.
+    """
+    _, hx, hw, hxx, hxw, hww = _flank_derivatives(parameters, xi, depth)
+    jacobian = math.sqrt(1.0 + hx * hx + hw * hw)
+    mean = ((1.0 + hw * hw) * hxx - 2.0 * hx * hw * hxw + (1.0 + hx * hx) * hww) / (
+        2.0 * jacobian**3
+    )
+    gaussian = (hxx * hww - hxw * hxw) / (jacobian**4)
+    return 4.0 * mean * mean - 2.0 * gaussian, mean * mean, gaussian, jacobian
+
+
+def analytic_flank_energy(
+    parameters: Any = None,
+    *,
+    order: int = 64,
+    panels: int = 4,
+    **overrides: Any,
+) -> WigleyFlankEnergy:
+    """Smoothing energy of the analytic Wigley flank: ``int (k1**2+k2**2) dA`` etc.
+
+    Tensor-product Gauss-Legendre over ``xi in [-1, 1]`` (``panels`` composite
+    panels, so an even count puts a panel boundary on the midship kink of
+    ``|xi|**n``) and ``w in [0, T]``. ``order`` is the node count per direction; the
+    default ``64 x 4`` is converged to the round-off floor on the classic
+    ``n = m = 2`` Wigley, and
+    :attr:`WigleyFlankEnergy.quadrature_relative_change` reports the order-to-order
+    difference so the claim stays checkable rather than asserted.
+
+    The reason this exists at all: the mesh path's energy can only be judged
+    against something that is not also a mesh estimate. Nothing in the literature
+    quotes a Wigley bending energy, so it is derived here -- and the derivation is
+    checked two ways, by quadrature doubling and against the mesh at three
+    resolutions (``examples/fairness_energy``).
+    """
+    p = _resolve(parameters, dict(overrides))
+    p.validate()
+    if order < 4:
+        raise ValueError(f"order must be at least 4, got {order!r}")
+    if panels < 1 or panels % 2:
+        raise ValueError(f"panels must be a positive even number, got {panels!r}")
+
+    def integrate(node_count: int) -> tuple[float, float, float, float]:
+        nodes, weights = _legendre_nodes_weights(node_count)
+        depth_nodes = [0.5 * p.draft * (node + 1.0) for node in nodes]
+        depth_weights = [0.5 * p.draft * weight for weight in weights]
+        bending = willmore = gaussian = area = 0.0
+        bending_terms: list[float] = []
+        willmore_terms: list[float] = []
+        gaussian_terms: list[float] = []
+        area_terms: list[float] = []
+        for panel in range(panels):
+            low = -1.0 + 2.0 * panel / panels
+            high = -1.0 + 2.0 * (panel + 1) / panels
+            half = 0.5 * (high - low)
+            mid = 0.5 * (high + low)
+            # d xi -> dx: x = L (xi + 1) / 2, so dx = (L/2) d xi
+            xi_weights = [0.5 * p.length * half * weight for weight in weights]
+            for node, wx in zip(nodes, xi_weights, strict=True):
+                xi = mid + half * node
+                for depth, wd in zip(depth_nodes, depth_weights, strict=True):
+                    b, wf, g, jac = _flank_integrand(p, xi, depth)
+                    weight = wx * wd * jac
+                    bending_terms.append(weight * b)
+                    willmore_terms.append(weight * wf)
+                    gaussian_terms.append(weight * g)
+                    area_terms.append(weight)
+        bending = math.fsum(bending_terms)
+        willmore = math.fsum(willmore_terms)
+        gaussian = math.fsum(gaussian_terms)
+        area = math.fsum(area_terms)
+        # Both flanks are congruent: h enters the metric and the curvatures
+        # quadratically, so doubling the starboard integral is exact.
+        return 2.0 * bending, 2.0 * willmore, 2.0 * gaussian, 2.0 * area
+
+    bending, willmore, gaussian, area = integrate(order)
+    fine = integrate(2 * order)
+    scale = max(abs(fine[0]), abs(fine[1]), abs(fine[2]), 1e-30)
+    quadrature_relative_change = max(
+        abs(bending - fine[0]), abs(willmore - fine[1]), abs(gaussian - fine[2])
+    ) / scale
+
+    return WigleyFlankEnergy(
+        length=p.length,
+        beam=p.beam,
+        draft=p.draft,
+        longitudinal_exponent=p.longitudinal_exponent,
+        vertical_exponent=p.vertical_exponent,
+        wetted_area=area,
+        bending=bending,
+        willmore=willmore,
+        gaussian=gaussian,
+        corner_charge=4.0 * math.pi - gaussian,
+        order=order,
+        panels=panels,
+        quadrature_relative_change=quadrature_relative_change,
+    )
