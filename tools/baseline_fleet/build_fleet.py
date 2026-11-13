@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import re
 import sys
@@ -45,34 +46,57 @@ from tensorcad.fleet_baseline import (  # noqa: E402
 )
 
 #: ``ship -> (archive basename, IGES member inside the archive, publisher page key)``
-ARCHIVES: dict[str, tuple[str, str, str]] = {
-    "KCS": ("KCS-Hull.zip", "KCS_hull_SVA.igs", "kcs"),
-    "KVLCC2": ("KVLCC2-Hull.zip", "kvlcc2.igs", "kvlcc2"),
-    "JBC": ("JBC_IGES.zip", "jbc.igs", "jbc"),
-    "ONRT": ("onrt_wo_gap.zip", "onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs", "onrt"),
+#: ``ship -> (archive basename, IGES member inside the archive, page keys)``.
+#: Page keys are candidate publisher pages in preference order; the first one that is
+#: present in the cache supplies the reference numbers.  ``simman_summary`` is the
+#: SIMMAN 2020 "Ship Data" page whose Tables 1/2/3 carry the full-scale principal
+#: particulars of KVLCC2 / KCS / ONRT, including the model scale and the displacement.
+ARCHIVES: dict[str, tuple[str, str, tuple[str, ...]]] = {
+    "KCS": ("KCS-Hull.zip", "KCS_hull_SVA.igs", ("t2015_kcs", "simman_summary")),
+    "KVLCC2": ("KVLCC2-Hull.zip", "kvlcc2.igs", ("simman_summary",)),
+    "JBC": ("JBC_IGES.zip", "jbc.igs", ("t2015_jbc",)),
+    "ONRT": (
+        "onrt_wo_gap.zip",
+        "onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+        ("t2015_onrt", "simman_summary"),
+    ),
 }
 
-#: Publisher-page patterns.  Each entry is ``(field, regex)``; the **last** number
-#: in the first match is the full-scale value (every workshop table lists model
-#: scale first, full scale second).  Nothing here is typed in by hand: the values
-#: come from the HTML that ``fetch_sources.py`` cached.
-PATTERNS: dict[str, dict[str, str]] = {
-    "kcs": {
+#: Which model-space -> full-scale policy a hull's geometry file needs.
+#: ``("full", None)``          the bytes are already full scale;
+#: ``("inferred", None)``      no published model scale: normalise to the published L_PP
+#:                             (recorded in the manifest; the volume gate becomes a
+#:                             block-coefficient gate, see VolumeGateBasis);
+#: ``("published", key)``      read the published model scale from that page's table.
+GEOMETRY_SCALE_POLICY: dict[str, tuple[str, str | None]] = {
+    "KCS": ("full", None),
+    "KVLCC2": ("full", None),
+    "JBC": ("inferred", None),
+    "ONRT": ("published", "simman_summary"),
+}
+
+#: Publisher-page patterns.  Each entry is ``(field, regex)``; the **last** number in
+#: the first match is the full-scale value on the T2015 pages (those tables list model
+#: scale first, full scale second), and the **first** on the SIMMAN summary page (full
+#: scale first).  Nothing here is typed in by hand: the values come from the HTML that
+#: ``fetch_sources.py`` cached, and ``fleet_specs.json`` stores page sha256 + snippet.
+PAGE_PATTERNS: dict[str, dict[str, str]] = {
+    "t2015_kcs": {
         "length_pp": r"Length between perpendiculars L\s*PP\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
         "beam": r"Maximum beam of waterline B\s*WL\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
         "draft": r"Draft T\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
-        "volume": r"Displacement volume &nabla;\s*\(m\s*3\s*\)\s*([\d.]+(?:\s*[\d.]+)*)",
+        "volume": r"Displacement volume\s*(?:∇|&nabla;)\s*\(m\s*3\s*\)\s*([\d.]+(?:\s*[\d.]+)*)",
         "cb": r"Block coefficient \(CB\)[^0-9]{0,60}([\d.]+)",
         "lcb": r"LCB \(%L\s*PP\s*\), fwd\+\s*(?:&nbsp;|\s)*([-+\d.]+)",
     },
-    "jbc": {
-        "length_pp": r"Length between perpendiculars \\\(L_\{PP\}\\\)\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
-        "beam": r"(?:Maximum beam|Breadth)[^()]{0,40}\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
+    "t2015_jbc": {
+        "length_pp": r"Length between perpendiculars[^0-9]{0,40}\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
+        "beam": r"Maximum beam[^0-9]{0,40}\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
         "draft": r"Draft\(Full\)\s*T\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
-        "volume": r"Displacement volume of a hull\s*\\\( \nabla \\\)\s*\(m\s*3\s*\)\s*([\d.]+(?:\s*[\d.]+)*)",
-        "cb": r"Block coefficient\s*\\\(C_B\\\)[^0-9]{0,80}([\d.]+)",
+        "volume": r"Displacement volume of a hull[^0-9]{0,40}\(m\s*3\s*\)\s*([\d.]+(?:\s*[\d.]+)*)",
+        "cb": r"Block coefficient[^0-9]{0,80}([\d.]+)",
     },
-    "onrt": {
+    "t2015_onrt": {
         "length_pp": r"Length of waterline L\s*WL\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
         "beam": r"Maximum beam of waterline B\s*WL\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
         "draft": r"Draft T\s*\(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
@@ -80,28 +104,82 @@ PATTERNS: dict[str, dict[str, str]] = {
     },
 }
 
+#: The SIMMAN 2020 summary page holds three stacked tables; each ship's row block is
+#: sliced out before the patterns run so that "T (m)" cannot match a neighbour's table.
+SUMMARY_SECTIONS: dict[str, tuple[str, str | None]] = {
+    "KVLCC2": ("Table 1 Main Particulars of KVLCC2", "Table 2 Main Particulars of KCS"),
+    "KCS": ("Table 2 Main Particulars of KCS", "Table 3 Main Particulars of ONRT"),
+    "ONRT": ("Table 3 Main Particulars of ONRT", None),
+}
 
-#: Workshop tables list the model-scale column first (KCS, JBC) or the full-scale
-#: column second (ONRT); the full-scale value is what the geometry is compared to.
-PICK = {"kcs": "first", "jbc": "first", "onrt": "last", "kvlcc2": "last"}
+SUMMARY_PATTERNS: dict[str, str] = {
+    "length_pp": r"Lpp \(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
+    "length_wl": r"Lwl \(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
+    "beam": r"Bwl \(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
+    "draft": r"T \(m\)\s*([\d.]+(?:\s*[\d.]+)*)",
+    "volume": r"Displacement \(m3\)\s*([\d.]+(?:\s*[\d.]+)*)",
+    "cb": r"\bCB\s*([\d.]+)",
+    "lcb": r"LCB \(%\), fwd\+\s*([-+\d.]+)",
+    "scale_row": r"Scale 1\s*([\d.]+(?:\s*[\d.]+)*)",
+}
+
+#: Workshop tables list the full-scale value in the first column on the summary page
+#: and in the first (KCS, JBC) or second (ONRT) column on the T2015 pages.
+PICK = {
+    "t2015_kcs": "first",
+    "t2015_jbc": "first",
+    "t2015_onrt": "last",
+    "simman_summary": "first",
+}
 
 
-def page_text(path: Path) -> str:
-    raw = path.read_text(errors="replace")
-    text = re.sub(r"<[^>]+>", " ", raw)
+def page_text(raw_html: str) -> str:
+    text = re.sub(r"<script.*?</script>", " ", raw_html, flags=re.S)
+    text = re.sub(r"<style.*?</style>", " ", text, flags=re.S)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = html.unescape(text)
     return re.sub(r"\s+", " ", text)
 
 
-def extract(page: Path, patterns: dict[str, str]) -> dict[str, dict[str, object]]:
-    text = page_text(page)
-    digest = hashlib.sha256(page.read_bytes()).hexdigest()
+def locate_page(raw: Path, key: str) -> Path | None:
+    """Publisher page cache lookup: ``raw/pages/<key>.html`` then the legacy flat name."""
+    for candidate in (raw / "pages" / f"{key}.html", raw / f"{key}.html"):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def slice_summary(text: str, ship: str) -> str:
+    head, tail = SUMMARY_SECTIONS[ship]
+    start = text.find(head)
+    if start < 0:
+        return ""
+    end = text.find(tail, start) if tail else -1
+    return text[start: end if end > 0 else len(text)]
+
+
+def extract(text: str, patterns: dict[str, str], pick: str, digest: str,
+            page: str) -> dict[str, dict[str, object]]:
     found: dict[str, dict[str, object]] = {}
     for field_name, pattern in patterns.items():
         match = re.search(pattern, text)
         if not match:
             continue
         numbers = [float(value) for value in re.findall(r"[-+]?\d+\.?\d*", match.group(1))]
-        if PICK[page.stem] == "first":
+        if field_name == "scale_row":
+            # "Scale 1 48.9355 48.9355": the first number is the full-scale column
+            # marker, the second is the model scale of the first model column.
+            if len(numbers) < 2:
+                continue
+            found[field_name] = {
+                "value": numbers[1],
+                "all_numbers": numbers,
+                "snippet": match.group(0)[:180],
+                "page_sha256": digest,
+                "page": page,
+            }
+            continue
+        if pick == "first":
             numbers = numbers[:1]
         if not numbers:
             continue
@@ -109,7 +187,7 @@ def extract(page: Path, patterns: dict[str, str]) -> dict[str, dict[str, object]
             "value": numbers[-1],
             "snippet": match.group(0)[:180],
             "page_sha256": digest,
-            "page": str(page),
+            "page": page,
         }
     return found
 
@@ -133,13 +211,18 @@ def discover_iges(raw: Path, ship: str) -> Path | None:
 
 
 def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
+    """Assemble one :class:`ShipSpec` per hull from cached bytes only.
+
+    Every reference number travels with the page SHA-256 and the matched snippet, and
+    every repair the assembler applies to a publisher table is recorded in
+    ``evidence[ship]["corrections"]`` instead of being silently absorbed.
+    """
     specs: list[ShipSpec] = []
     evidence: dict[str, object] = {}
-    for ship, (archive_name, member, page_key) in ARCHIVES.items():
+    for ship, (archive_name, member, page_keys) in ARCHIVES.items():
         iges = discover_iges(raw, ship)
         archived = raw / archive_name
-        page = raw / "pages" / f"{page_key}.html"
-        record: dict[str, object] = {}
+        record: dict[str, object] = {"corrections": []}
         if iges is not None:
             record["iges"] = {
                 "path": str(iges.relative_to(REPO)),
@@ -151,11 +234,29 @@ def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
                 "path": str(archived.relative_to(REPO)),
                 "sha256": hashlib.sha256(archived.read_bytes()).hexdigest(),
             }
+        page = None
+        page_key = ""
+        for candidate in page_keys:
+            page = locate_page(raw, candidate)
+            if page is not None:
+                page_key = candidate
+                break
         fields: dict[str, dict[str, object]] = {}
-        if page.exists():
-            fields = extract(page, PATTERNS.get(page_key, {}))
-            record["page"] = str(page.relative_to(REPO))
-        record["published_fields"] = fields
+        if page is not None:
+            digest = hashlib.sha256(page.read_bytes()).hexdigest()
+            text = page_text(page.read_text(errors="replace"))
+            if page_key == "simman_summary":
+                text = slice_summary(text, ship)
+                patterns = SUMMARY_PATTERNS
+            else:
+                patterns = PAGE_PATTERNS.get(page_key, {})
+            fields = extract(text, patterns, PICK[page_key], digest, str(page.relative_to(REPO)))
+            record["page"] = {
+                "key": page_key,
+                "path": str(page.relative_to(REPO)),
+                "sha256": digest,
+            }
+            record["published_fields"] = fields
         evidence[ship] = record
         if iges is None:
             continue
@@ -166,7 +267,7 @@ def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
         cb = fields.get("cb", {}).get("value")
         lcb = fields.get("lcb", {}).get("value")
         if ship == "ONRT" and volume is None and None not in (cb, length, beam, draft):
-            # The ONRT page publishes Cb with its definition ∇/(L_WL B_WL T) and the
+            # The ONRT page publishes Cb with its definition nabla/(L_WL B_WL T) and the
             # three dimensions, so the displaced volume follows from the publisher's
             # own definition instead of the displacement in tonnes (which would need
             # an assumed water density).
@@ -175,12 +276,59 @@ def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
                 "formula": "Cb * Lwl * Bwl * T (publisher's own definition)",
                 "value": volume,
             }
+        # Decimal-shift repair for a publisher typo: the summary page prints KVLCC2's
+        # B_WL as 580 m while its own Cb = nabla/(L_PP B_WL T) = 0.8098 implies 58.0 m.
+        # Only a clean x10 discrepancy is corrected, and both the printed and the
+        # derived value stay in the evidence file.
+        if ship == "KVLCC2" and None not in (volume, cb, length, draft, beam):
+            derived_beam = float(volume) / (float(cb) * float(length) * float(draft))
+            for shift in (1.0, 10.0, 100.0):
+                if abs(float(beam) / shift - derived_beam) <= 0.01 * derived_beam:
+                    if shift != 1.0:
+                        record["corrections"].append({
+                            "field": "beam",
+                            "as_published": float(beam),
+                            "used": float(beam) / shift,
+                            "rule": "publisher decimal typo: "
+                                    f"nabla/(Cb*Lpp*T) = {derived_beam:.4f} m, printed {float(beam)} m",
+                            "page_sha256": fields["beam"]["page_sha256"],
+                        })
+                        beam = float(beam) / shift
+                    break
         if draft is None:
             record["skip_reason"] = (
                 "publisher page lacked the design draft, so the waterline cut "
                 "cannot be placed; no volume comparison is claimed"
             )
             continue
+        policy, scale_page = GEOMETRY_SCALE_POLICY[ship]
+        geometry_scale: float | None = 1.0
+        scale_basis = "geometry file is full scale (policy: full)"
+        if policy == "inferred":
+            geometry_scale = None
+            scale_basis = "no published model scale; normalised to the published L_PP"
+        elif policy == "published":
+            scale_fields = {}
+            if scale_page and scale_page != page_key:
+                other = locate_page(raw, scale_page)
+                if other is not None:
+                    other_digest = hashlib.sha256(other.read_bytes()).hexdigest()
+                    scale_fields = extract(
+                        slice_summary(page_text(other.read_text(errors="replace")), ship),
+                        SUMMARY_PATTERNS, PICK[scale_page], other_digest,
+                        str(other.relative_to(REPO)),
+                    )
+            else:
+                scale_fields = fields
+            if "scale_row" in scale_fields:
+                geometry_scale = float(scale_fields["scale_row"]["value"])
+                scale_basis = (
+                    "published model scale from "
+                    f"{scale_fields['scale_row']['page']}: {geometry_scale:.5f}"
+                )
+            else:
+                geometry_scale = None
+                scale_basis = "model scale not found on the cache; normalised to the published L_PP"
         specs.append(
             ShipSpec(
                 name=ship,
@@ -190,7 +338,9 @@ def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
                 published_volume_m3=None if volume is None else float(volume),
                 published_cb=None if cb is None else float(cb),
                 published_lcb_percent=None if lcb is None else float(lcb),
-                published_source=str(page.relative_to(REPO)) if page.exists() else "",
+                geometry_scale=geometry_scale,
+                scale_basis=scale_basis,
+                published_source=str(page.relative_to(REPO)) if page is not None else "",
                 source_url=ARCHIVES[ship][0],
                 publisher="NMRI T2015 / SIMMAN 2020 workshop archive",
                 license="not stated by publisher (see docs/baseline_fleet.md); bytes not redistributed",
@@ -203,6 +353,11 @@ def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
 
 
 def figures(out: Path, summary: dict, manifests: dict[str, dict]) -> list[str]:
+    """Diagnostic figures: displacement comparison plus one half-breadth field per hull.
+
+    Diagnostics only: a figure that cannot be drawn is reported and skipped, it never
+    invalidates a hull's verdict (the verdict lives in the manifest and benchmark).
+    """
     try:
         import matplotlib
 
@@ -212,66 +367,57 @@ def figures(out: Path, summary: dict, manifests: dict[str, dict]) -> list[str]:
     except Exception as error:  # pragma: no cover - optional dependency
         print(f"figures skipped: {error}", file=sys.stderr)
         return []
+    from tensorcad import fleet_baseline as baseline
+
     made: list[str] = []
     hulls = [name for name, item in summary["hulls"].items() if item.get("volume_m3")]
-    ref = [summary["hulls"][name]["published_volume_m3"] for name in hulls]
-    got = [summary["hulls"][name]["volume_m3"] for name in hulls]
-    fig, ax = plt.subplots(figsize=(6.4, 4.0))
-    positions = np.arange(len(hulls))
-    ax.bar(positions - 0.2, ref, 0.4, label="published ∇ (m³)", color="#4c72b0")
-    ax.bar(positions + 0.2, got, 0.4, label="mesh ∇ (m³)", color="#dd8452")
-    ax.set_xticks(positions)
-    ax.set_xticklabels(hulls)
-    ax.set_ylabel("displacement volume (m³)")
-    ax.set_title("Baseline fleet: reconstructed vs published displacement")
-    for index, name in enumerate(hulls):
-        error = summary["hulls"][name]["volume_rel_error_percent"]
-        ax.text(index, max(ref[index], got[index]) * 1.02, f"{error:+.2f}%", ha="center", fontsize=8)
-    ax.legend()
-    fig.tight_layout()
-    path = out / "figs" / "volume_vs_published.png"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=140)
-    plt.close(fig)
-    made.append(str(path.relative_to(REPO)))
-
-    for name, manifest in manifests.items():
-        field = manifest.get("field")
-        if not field:
-            continue
-        import importlib
-
-        baseline = importlib.import_module("tensorcad.fleet_baseline")
-        spec = ShipSpec(**{**manifest["spec"]})
-        model_points = baseline.build_ship.__globals__  # only for type checkers
-        del model_points
-        # Re-derive the field cheaply from the manifest geometry: read the STL is
-        # not invertible, so rebuild the field from the IGES at coarse resolution.
-        from tensorcad.iges import read_iges
-
-        surfaces = read_iges(spec.iges_path).surfaces()
-        points = baseline.sample_patches(surfaces, spacing=0.4)
-        grid = baseline.field_from_points(points, spec.draft, dx=1.0, dz=0.25)
-        data = np.array(grid.b).T
-        fig, ax = plt.subplots(figsize=(7.2, 3.4))
-        mesh = ax.pcolormesh(
-            np.array([grid.x(i) for i in range(grid.nx)]),
-            np.array([grid.z(k) for k in range(grid.nz)]),
-            data,
-            shading="auto",
-            cmap="viridis",
-        )
-        fig.colorbar(mesh, ax=ax, label="half-breadth b(x,z) (m)")
-        for level in (0.25, 0.5, 0.75):
-            ax.axhline(spec.draft * level, color="w", lw=0.5, alpha=0.5)
-        ax.set_xlabel("x from AP (m)")
-        ax.set_ylabel("z above keel (m)")
-        ax.set_title(f"{name}: half-breadth field from published IGES ({len(surfaces)} patches)")
+    if hulls:
+        ref = [summary["hulls"][name]["published_volume_m3"] for name in hulls]
+        got = [summary["hulls"][name]["volume_m3"] for name in hulls]
+        fig, ax = plt.subplots(figsize=(6.4, 4.0))
+        positions = np.arange(len(hulls))
+        ax.bar(positions - 0.2, ref, 0.4, label="published (m³)", color="#4c72b0")
+        ax.bar(positions + 0.2, got, 0.4, label="reconstructed (m³)", color="#dd8452")
+        ax.set_xticks(positions)
+        ax.set_xticklabels(hulls)
+        ax.set_ylabel("displacement volume below DWL (m³)")
+        ax.set_title("Baseline fleet: reconstructed vs published displacement")
+        for index, name in enumerate(hulls):
+            error = summary["hulls"][name]["volume_rel_error_percent"]
+            ax.text(index, max(ref[index], got[index]) * 1.02, f"{error:+.2f}%",
+                    ha="center", fontsize=8)
+        ax.legend()
         fig.tight_layout()
-        path = out / "figs" / f"{name}_half_breadth_field.png"
+        path = out / "figs" / "volume_vs_published.png"
+        path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, dpi=140)
         plt.close(fig)
         made.append(str(path.relative_to(REPO)))
+
+    for name, manifest in manifests.items():
+        try:
+            field = manifest.get("field")
+            if not field:
+                continue
+            spec = baseline.ShipSpec(**{key: manifest["spec"][key] for key in
+                                       ("name", "draft", "length_pp", "beam")})
+            points = [(row[0], 0.0, row[1]) for row in field["breadth_samples"]]
+            grid = baseline.field_from_points(points, spec.draft, dx=1.0, dz=0.25)
+            fig, ax = plt.subplots(figsize=(7.2, 3.2))
+            mesh = ax.pcolormesh(grid.x, grid.z, grid.breadth.T, shading="auto", cmap="viridis")
+            ax.set_aspect("equal")
+            ax.set_xlabel("x (m, aft -> fwd)")
+            ax.set_ylabel("z (m above keel)")
+            ax.set_title(f"{name}: reconstructed half-breadth field b(x, z)")
+            fig.colorbar(mesh, ax=ax, label="b (m)")
+            fig.tight_layout()
+            path = out / "figs" / f"{name}_half_breadth_field.png"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            fig.savefig(path, dpi=140)
+            plt.close(fig)
+            made.append(str(path.relative_to(REPO)))
+        except Exception as error:  # noqa: BLE001 - diagnostics only
+            print(f"figure skipped for {name}: {type(error).__name__}: {error}", file=sys.stderr)
     return made
 
 
