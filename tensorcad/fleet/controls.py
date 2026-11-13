@@ -12,6 +12,10 @@ gate, and the run harness records the verdict the fleet gate returns for it:
   so the route would accept it; the volume gate must still fail.
 * :func:`wrong_volume_record` — a record whose declared displacement disagrees with
   its own particulars, which must fail the particulars gate before any geometry runs.
+* :func:`mis_transcribed_beam` — the defect the round-2 cross-check actually found: a
+  published displacement quoted next to a beam that was transcribed wrongly (DTC carried
+  B = 45.8 m against a cited 173467 m^3, 11.3 % off its own Cb*L*B*T), which must fail
+  ``G6b_reference_consistency`` before any geometry is built.
 """
 
 from __future__ import annotations
@@ -159,3 +163,70 @@ def duplicate_manifest(base: FleetManifest, first: Path, second: Path) -> FleetM
                geometry_route="imported_stl"),
     )
     return FleetManifest(ships=ships, placeholder=dict(base.placeholder), path=base.path, sha256=base.sha256)
+
+def mis_transcribed_beam(base: ShipRecord, *, beam: float = 45.8) -> ShipRecord:
+    """The same record with one particular transcribed wrongly, volume left as cited.
+
+    This is not a synthetic trap: it is the DTC entry as it stood before the round-2
+    cross-check (B = 45.8 m next to a cited 173467 m^3), and it is the reason the gate
+    exists. A record like this passed every pre-existing gate because it had no cited
+    displacement and its reference was the closure, i.e. it was checked against itself.
+    """
+    return _clone(
+        base,
+        name=f"{base.name}_mis_transcribed",
+        beam=beam,
+        notes=base.notes + f" [negative control: beam mis-transcribed to {beam} m, volume kept as cited]",
+        provenance=Provenance(
+            source="negative control derived from " + base.provenance.source,
+            url=base.provenance.url,
+            license=base.provenance.license,
+            retrieval="derived_control",
+            verified=False,
+        ),
+    )
+
+
+#: The six stand-in files and the byte-identical pair, as reported by the owner on
+#: 2026-11-13. The partition is not reconstructable offline (the library itself is not in
+#: this repository), so the fixture reproduces the two *defect classes* at their reported
+#: sizes: six 304-triangle placeholders, and two files that share one sha256.
+DEFECT_PLACEHOLDERS = ("KCS", "KVLCC2", "ONRT", "JBC", "DTC", "Series60")
+DEFECT_DUPLICATE_PAIR = ("KVLCC1", "DTMB5415")
+
+
+def defect_geometry_library(
+    directory: str | Path,
+    *,
+    placeholders: Sequence[str] = DEFECT_PLACEHOLDERS,
+    duplicate_pair: Sequence[str] = DEFECT_DUPLICATE_PAIR,
+    duplicate_mesh=None,
+) -> dict[str, list[Path]]:
+    """Write an 8-file library carrying both reported defects; return the file paths.
+
+    ``duplicate_mesh`` lets a caller supply the hull written twice (the default builds one
+    with the Series-60 route at a coarse grid); both files must be *byte* identical, so the
+    same mesh and the same header are used and the header is then blanked, as an exporter
+    that ignores the solid name would produce.
+    """
+    root = Path(directory)
+    root.mkdir(parents=True, exist_ok=True)
+    box = placeholder_box(304)
+    written: dict[str, list[Path]] = {"placeholders": [], "duplicates": []}
+    for name in placeholders:
+        written["placeholders"].append(write_binary_stl(box, root / f"{name}.stl", solid_name=name))
+    if duplicate_mesh is None:
+        from tensorcad.fleet.build import build_ship_geometry
+        from tensorcad.fleet.manifest import load_manifest
+
+        record = next(
+            ship for ship in load_manifest().ships if ship.name == "KCS"
+        )
+        duplicate_mesh = build_ship_geometry(record, nx=81, nz=25).mesh
+    for name in duplicate_pair:
+        path = write_binary_stl(duplicate_mesh, root / f"{name}.stl", solid_name=name)
+        payload = bytearray(path.read_bytes())
+        payload[:80] = b" " * 80
+        path.write_bytes(bytes(payload))
+        written["duplicates"].append(path)
+    return written

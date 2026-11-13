@@ -19,11 +19,17 @@ from typing import Any, Iterable, Sequence
 from tensorcad import mesh as meshlib
 from tensorcad.geometry import Mesh
 from tensorcad.fleet.manifest import DERIVED_BASES, FleetManifest, ShipRecord
+from tensorcad.fleet.sources import SourceRegistry
 
 #: Volume agreement required by the mission statement (mission: error < 1%).
 VOLUME_TOLERANCE = 0.01
 #: Internal consistency of a declared (Cb, L, B, T, volume) set.
 PARTICULARS_TOLERANCE = 0.03
+#: Agreement required between a *cited* displacement volume and Cb*L*B*T. Seven
+#: significant digits are carried by the published sets, so a transcription error in any
+#: of L, B, T, Cb or the volume shows up far above this band, while round-off of the
+#: published particulars stays below it.
+REFERENCE_CONSISTENCY_TOLERANCE = 0.005
 
 
 @dataclass(frozen=True)
@@ -293,6 +299,89 @@ def gate_particulars_consistent(record: ShipRecord) -> GateResult:
     )
 
 
+def gate_source_anchor(record: ShipRecord, registry: SourceRegistry) -> GateResult:
+    """The record must name a source anchor: citation, URL, licence and locator.
+
+    ``G0_provenance`` checks that the record states *a* URL and licence. This gate checks
+    that the fleet's source registry holds the citation the digits would be re-derived
+    from, and reports the registry's own sha256 so the anchor set is itself auditable.
+    """
+    anchor = registry.for_ship(record.name)
+    if anchor is None:
+        return GateResult(
+            "G0b_source_anchor",
+            False,
+            f"no source anchor registered for {record.name!r}: a manifest digit with no named source "
+            f"cannot be re-derived by a reader",
+            {"registry_sha256": registry.sha256, "anchor_id": None},
+        )
+    covered = sorted(set(anchor.anchors))
+    return GateResult(
+        "G0b_source_anchor",
+        True,
+        f"anchor {anchor.anchor_id!r}: {anchor.citation[:64]!r}; locator {anchor.locator[:48]!r}; "
+        f"licence {anchor.license!r}; retrieval={anchor.retrieval}; verified={anchor.verified}; "
+        f"anchors={covered}",
+        {
+            "registry_sha256": registry.sha256,
+            "anchor_id": anchor.anchor_id,
+            "citation": anchor.citation,
+            "url": anchor.url,
+            "license": anchor.license,
+            "locator": anchor.locator,
+            "anchors": covered,
+            "retrieval": anchor.retrieval,
+            "verified": anchor.verified,
+        },
+    )
+
+
+def gate_reference_consistency(
+    record: ShipRecord, tolerance: float = REFERENCE_CONSISTENCY_TOLERANCE
+) -> GateResult:
+    """A cited displacement volume must agree with the record's own Cb*L*B*T.
+
+    This is the gate that catches a *transcription* error rather than a bad mesh: if a
+    published displacement is quoted next to published L, B, T and Cb, then the four
+    numbers over-determine each other, and any one of them entered wrongly makes the
+    set inconsistent. A closure reference is not a check at all (it is defined as
+    Cb*L*B*T), and the gate says so instead of reporting a vacuous pass.
+    """
+    closure = record.closed_form_volume()
+    if record.displacement_volume is None:
+        return GateResult(
+            "G6b_reference_consistency",
+            True,
+            f"reference is the closure Cb*L*B*T = {closure:.6g} m^3: no independent displacement is "
+            f"cited, so this gate cannot check anything (G7 then only proves the mesh matches the "
+            f"record's own particulars)",
+            {
+                "cited_volume": None,
+                "closure_volume": closure,
+                "relative_error": None,
+                "tolerance": tolerance,
+                "vacuous": True,
+            },
+        )
+    cited = float(record.displacement_volume)
+    rel = (cited - closure) / cited
+    return GateResult(
+        "G6b_reference_consistency",
+        abs(rel) <= tolerance,
+        f"cited V = {cited:.6g} m^3 vs Cb*L*B*T = {closure:.6g} m^3: {rel * 100:+.4f}% "
+        f"(tolerance {tolerance * 100:g}%); a disagreement beyond this band means L, B, T, Cb or the "
+        f"cited volume was mis-transcribed",
+        {
+            "cited_volume": cited,
+            "closure_volume": closure,
+            "relative_error": rel,
+            "tolerance": tolerance,
+            "vacuous": False,
+            "basis": record.displacement_basis,
+        },
+    )
+
+
 def gate_volume(record: ShipRecord, facts: TopologyFacts, tolerance: float = VOLUME_TOLERANCE) -> GateResult:
     reference = record.reference_volume()
     basis = record.reference_basis()
@@ -343,6 +432,7 @@ def evaluate_gates(
     manifest: FleetManifest,
     *,
     volume_tolerance: float = VOLUME_TOLERANCE,
+    registry: SourceRegistry | None = None,
 ) -> dict[str, Any]:
     """Run every gate for one ship and return a serialisable verdict block."""
     facts = measure(mesh)
@@ -354,9 +444,12 @@ def evaluate_gates(
         gate_manifold_oriented(facts),
         gate_single_closed_shell(facts),
         gate_particulars_consistent(record),
+        gate_reference_consistency(record),
         gate_volume(record, facts, volume_tolerance),
         gate_principal_dimensions(record, facts, volume_tolerance),
     ]
+    if registry is not None:
+        gates.insert(1, gate_source_anchor(record, registry))
     return {
         "ship": record.name,
         "ship_class": record.ship_class,
