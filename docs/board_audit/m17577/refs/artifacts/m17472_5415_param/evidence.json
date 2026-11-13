@@ -1,0 +1,131 @@
+{
+  "anchor": "GAP-CAD-C1-5415-PARAM-REBUILD",
+  "mission": "m17472 (rework round 1 of m17352)",
+  "repo": "TensorCAD",
+  "impl_files": [
+    "tensorcad/dtmb5415.py",
+    "tensorcad/dtmb5415_cli.py",
+    "tools/dtmb5415_param/run_acceptance.py",
+    "tools/dtmb5415_param/verify_geometry.py",
+    "tools/dtmb5415_param/verify_shipped_model.py",
+    "tools/dtmb5415_param/fit_design_space.py"
+  ],
+  "entry": [
+    "tensorcad/dtmb5415_cli.py",
+    "tools/dtmb5415_param/run_acceptance.py",
+    "tools/dtmb5415_param/verify_geometry.py",
+    "tools/dtmb5415_param/verify_shipped_model.py"
+  ],
+  "run_artifacts": [
+    "artifacts/m17472_5415_param/acceptance.json",
+    "artifacts/m17472_5415_param/sampled_configs.csv",
+    "artifacts/m17472_5415_param/gate_samples.csv",
+    "artifacts/m17472_5415_param/geometry_validation.json",
+    "artifacts/m17472_5415_param/shipped_model_check.json",
+    "artifacts/m17472_5415_param/shipped_model_check.csv",
+    "artifacts/m17472_5415_param/fig_config0_distance.png",
+    "artifacts/m17472_5415_param/fig_geometry_validation.png",
+    "artifacts/m17472_5415_param/fig_gradient_parity.png",
+    "artifacts/m17472_5415_param/fig_sections_and_volume.png",
+    "artifacts/m17472_5415_param/fit/design_space.npz",
+    "artifacts/m17472_5415_param/fit/design_space_metrics.json"
+  ],
+  "tests": [
+    "tests/test_dtmb5415_param.py::test_point_grid_layout",
+    "tests/test_dtmb5415_param.py::test_cloud_map_matches_shipped_coefficients",
+    "tests/test_dtmb5415_param.py::test_shipped_model_holdout_accuracy",
+    "tests/test_dtmb5415_param.py::test_no_double_counted_linear_block",
+    "tests/test_dtmb5415_param.py::test_volume_gradient_matches_central_difference",
+    "tests/test_dtmb5415_param.py::test_principal_particulars_against_readme",
+    "tests/test_dtmb5415_param.py::test_cli_entry_point"
+  ],
+  "integration_callers": [
+    "DTMB5415Space( -- tensorcad/dtmb5415_cli.py (console script tensorcad-dtmb5415, pyproject [project.scripts])",
+    "DTMB5415Space() -- tools/dtmb5415_param/run_acceptance.py (acceptance entry)"
+  ],
+  "benchmark": {
+    "config0_vs_exact_hull": {
+      "ref": "DTMB5415_Hull_exact.stl (sha256 d40b17b1..., 82794 unique vertices)",
+      "got": "99.902% of reference points within the config-0 mesh resolution (0.4549 m); median 1.11 cm, p95 7.52 cm",
+      "threshold": ">95%",
+      "pass": true
+    },
+    "holdout_point_error": {
+      "ref": "independent rank-40 quadratic refit, RMS 0.25188 m",
+      "got": "shipped model RMS 0.25190 m (2.45% of full beam 20.539 m)",
+      "agreement_pct": 0.0099,
+      "round0_got": 0.83303,
+      "ratio_vs_round0": 3.307
+    },
+    "principal_particulars": {
+      "Lpp_m": {
+        "ref": 142.0,
+        "got": 143.264947,
+        "diff_pct": 0.891,
+        "pass_3pct": true
+      },
+      "beam_m": {
+        "ref": 18.867133,
+        "got": 19.090662,
+        "diff_pct": 1.185,
+        "pass_3pct": true
+      },
+      "draft_m": {
+        "ref": 6.156643,
+        "got": 6.156643,
+        "diff_pct": 0.0,
+        "pass_3pct": true
+      },
+      "displacement_volume_m3": {
+        "ref": 8412.037925,
+        "got": 8452.75781,
+        "diff_pct": 0.484,
+        "pass_3pct": true
+      },
+      "cb": {
+        "ref": 0.509992,
+        "got": 0.501988,
+        "diff_pct": -1.569,
+        "pass_3pct": true
+      }
+    },
+    "volume_gradient": {
+      "ref": "central difference, h=1e-5",
+      "got": "analytic dV/dv",
+      "max_rel_err": 5.2795005983125085e-08,
+      "threshold": 0.01,
+      "pass": true
+    }
+  },
+  "repro_cmd": "PYTHONPATH=. python3 tools/dtmb5415_param/run_acceptance.py && PYTHONPATH=. python3 tools/dtmb5415_param/verify_geometry.py --out artifacts/m17472_5415_param && PYTHONPATH=. python3 tools/dtmb5415_param/verify_shipped_model.py --n-configs 400 --out artifacts/m17472_5415_param && PYTHONPATH=. python3 -m pytest tests/test_dtmb5415_param.py -q",
+  "external_anchor": {
+    "source": "Zenodo DTMB 5415 design-space dataset README table (Lpp 5.720 m model / 142 m full scale, rho 998.5 kg/m3, displacement 0.549 t), sha256 of the 1.0 GB database recorded in DATASET.source_sha256",
+    "cross_check": "Serani et al. (2025) Engineering with Computers, dataset record"
+  },
+  "criteria": {
+    "acceptance_1_config0_vs_exact": {
+      "criterion": ">95% of DTMB5415_Hull_exact vertices within the config-0 mesh resolution",
+      "value": 0.9990216682368288,
+      "threshold": 0.95,
+      "pass": true
+    },
+    "acceptance_2_sampled_gate": {
+      "criterion": "20 sampled dataset configurations pass the geometry quality gate",
+      "value": "19/20",
+      "threshold": "20/20",
+      "pass": false
+    },
+    "acceptance_3_gradient_chain": {
+      "criterion": "analytic dV/dv within 1% of central difference, all 27 variables",
+      "value": 5.2795005983125085e-08,
+      "threshold": 0.01,
+      "pass": true,
+      "vertex_jacobian_exact": true
+    }
+  },
+  "wall_clock": {
+    "acceptance_s": 27.5,
+    "geometry_s": 11.5,
+    "shipped_check_s": 19.1
+  }
+}
