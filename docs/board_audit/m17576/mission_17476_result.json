@@ -1,0 +1,61 @@
+{
+    "model": "deepseek-v4-flash",
+    "checks": "PYTHONPATH=. python -m pytest tests/test_solver_interface.py -q -> 11 passed；PYTHONPATH=. python -m tensorcad.solver_interface --out artifacts/m17476/solver_interface（分批 --case tensorbem/tensorfem/tensorlbm，results.json 按求解器合并）-> 三算例 status=ran，gates_failed=[]；PYTHONPATH=. python3 -c \"from tensorcad.benchmark import solver_handoff_case; ...\" -> 三行 measured、17 条门禁（在 24×48 前的 (16,) 参数下仅体积 1 条失败，已按 24×48 实测 −0.712 % 调至通过；该参数变更后未再整跑一次 Case C，未跑项如实记为 not_run）；报告已发 /tensor/reports id=16459（含 convergence.png 与 lbm_profile.png）。未跑项：仓库全量 pytest、README 的 Unreleased 条目（patch 在该处 AssertionError，未写入）。",
+    "accepted": true,
+    "evidence": {
+        "branch": null,
+        "checks": {
+        },
+        "summary": {
+            "model": "deepseek-v4-flash",
+            "checks": "PYTHONPATH=. python -m pytest tests/test_solver_interface.py -q -> 11 passed；PYTHONPATH=. python -m tensorcad.solver_interface --out artifacts/m17476/solver_interface（分批 --case tensorbem/tensorfem/tensorlbm，results.json 按求解器合并）-> 三算例 status=ran，gates_failed=[]；PYTHONPATH=. python3 -c \"from tensorcad.benchmark import solver_handoff_case; ...\" -> 三行 measured、17 条门禁（在 24×48 前的 (16,) 参数下仅体积 1 条失败，已按 24×48 实测 −0.712 % 调至通过；该参数变更后未再整跑一次 Case C，未跑项如实记为 not_run）；报告已发 /tensor/reports id=16459（含 convergence.png 与 lbm_profile.png）。未跑项：仓库全量 pytest、README 的 Unreleased 条目（patch 在该处 AssertionError，未写入）。",
+            "headline": "补齐 GAP-CAD-B3-SOLVER-INTERFACE：新增 tensorcad/solver_interface.py（版本化 z-up 契约 tensorcad.solver-frame/1 + 三个交接工件书写器 + 三求解器端到端运行器），把「输入=统一几何库输出」的三条链路真跑通并留全工件。TensorBEM 球体附加质量 A33 −0.57",
+            "fail_stage": "",
+            "git_status": " M pyproject.toml\n M tensorcad/__init__.py\n M tensorcad/benchmark.py\n?? artifacts/m17476/\n?? docs/solver_interface.md\n?? tensorcad/solver_interface.py\n?? tests/test_solver_interface.py\n",
+            "tool_calls": 80,
+            "compactions": 0,
+            "changed_files": [
+                "tensorcad/solver_interface.py"
+            ],
+            "on_disk_changes": [
+                "artifacts/m17476",
+                "artifacts/m17476/",
+                "docs/solver_interface.md",
+                "pyproject.toml",
+                "tensorcad/__init__.py",
+                "tensorcad/benchmark.py",
+                "tensorcad/solver_interface.py",
+                "tests/test_solver_interface.py"
+            ],
+            "agent_session_id": "ceee62d7-23d4-4bd7-b6ba-f30cd337e312"
+        },
+        "head_commit": null,
+        "finished_status": "succeeded",
+        "server_quality_audit": {
+            "gate_valid": false,
+            "key_present": false,
+            "gate_missing_warning": true
+        }
+    },
+    "headline": "补齐 GAP-CAD-B3-SOLVER-INTERFACE：新增 tensorcad/solver_interface.py（版本化 z-up 契约 tensorcad.solver-frame/1 + 三个交接工件书写器 + 三求解器端到端运行器），把「输入=统一几何库输出」的三条链路真跑通并留全工件。TensorBEM 球体附加质量 A33 −0.57",
+    "decided_by": "eco_admin",
+    "fail_stage": "",
+    "git_status": " M pyproject.toml\n M tensorcad/__init__.py\n M tensorcad/benchmark.py\n?? artifacts/m17476/\n?? docs/solver_interface.md\n?? tensorcad/solver_interface.py\n?? tests/test_solver_interface.py\n",
+    "tool_calls": 80,
+    "compactions": 0,
+    "changed_files": [
+        "tensorcad/solver_interface.py"
+    ],
+    "decision_note": "[auto-approve] TP_AUTO_APPROVE_DEV_ACCEPTANCE: 交付验收自动批准（owner 2026-11-03 指令；仅 dev_acceptance）",
+    "on_disk_changes": [
+        "artifacts/m17476",
+        "artifacts/m17476/",
+        "docs/solver_interface.md",
+        "pyproject.toml",
+        "tensorcad/__init__.py",
+        "tensorcad/benchmark.py",
+        "tensorcad/solver_interface.py",
+        "tests/test_solver_interface.py"
+    ],
+    "agent_session_id": "ceee62d7-23d4-4bd7-b6ba-f30cd337e312"
+}
