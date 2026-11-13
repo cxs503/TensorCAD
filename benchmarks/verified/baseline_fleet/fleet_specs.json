@@ -1,0 +1,309 @@
+{
+  "ships": [
+    {
+      "name": "KCS",
+      "draft": 10.8,
+      "length_pp": 230.0,
+      "beam": 32.2,
+      "published_volume_m3": 52030.0,
+      "published_cb": 0.6505,
+      "published_lcb_percent": -1.48,
+      "geometry_scale": 1.0,
+      "scale_basis": "geometry file is full scale (policy: full)",
+      "published_source": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html",
+      "source_url": "KCS-Hull.zip",
+      "publisher": "NMRI T2015 / SIMMAN 2020 workshop archive",
+      "license": "not stated by publisher (see docs/baseline_fleet.md); bytes not redistributed",
+      "iges_sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+      "iges_path": "/root/tp-agent/work/m18488/artifacts/baseline_fleet/raw/KCS/KCS_hull_SVA.igs",
+      "notes": "hull below design waterline only; source IGES patch set"
+    },
+    {
+      "name": "KVLCC2",
+      "draft": 20.8,
+      "length_pp": 320.0,
+      "beam": 58.0,
+      "published_volume_m3": 312622.0,
+      "published_cb": 0.8098,
+      "published_lcb_percent": 3.48,
+      "geometry_scale": 1.0,
+      "scale_basis": "geometry file is full scale (policy: full)",
+      "published_source": "artifacts/baseline_fleet/raw/pages/simman_summary.html",
+      "source_url": "KVLCC2-Hull.zip",
+      "publisher": "NMRI T2015 / SIMMAN 2020 workshop archive",
+      "license": "not stated by publisher (see docs/baseline_fleet.md); bytes not redistributed",
+      "iges_sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+      "iges_path": "/root/tp-agent/work/m18488/artifacts/baseline_fleet/raw/KVLCC2/kvlcc2.igs",
+      "notes": "hull below design waterline only; source IGES patch set"
+    },
+    {
+      "name": "JBC",
+      "draft": 16.5,
+      "length_pp": 280.0,
+      "beam": 45.0,
+      "published_volume_m3": 178369.9,
+      "published_cb": 0.858,
+      "published_lcb_percent": null,
+      "geometry_scale": null,
+      "scale_basis": "no published model scale; normalised to the published L_PP",
+      "published_source": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html",
+      "source_url": "JBC_IGES.zip",
+      "publisher": "NMRI T2015 / SIMMAN 2020 workshop archive",
+      "license": "not stated by publisher (see docs/baseline_fleet.md); bytes not redistributed",
+      "iges_sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+      "iges_path": "/root/tp-agent/work/m18488/artifacts/baseline_fleet/raw/JBC/jbc.igs",
+      "notes": "hull below design waterline only; source IGES patch set"
+    },
+    {
+      "name": "ONRT",
+      "draft": 5.494,
+      "length_pp": 154.0,
+      "beam": 18.78,
+      "published_volume_m3": 8500.7793948,
+      "published_cb": 0.535,
+      "published_lcb_percent": null,
+      "geometry_scale": 48.9355,
+      "scale_basis": "published model scale from artifacts/baseline_fleet/raw/pages/simman_summary.html: 48.93550",
+      "published_source": "artifacts/baseline_fleet/raw/pages/t2015_onrt.html",
+      "source_url": "onrt_wo_gap.zip",
+      "publisher": "NMRI T2015 / SIMMAN 2020 workshop archive",
+      "license": "not stated by publisher (see docs/baseline_fleet.md); bytes not redistributed",
+      "iges_sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+      "iges_path": "/root/tp-agent/work/m18488/artifacts/baseline_fleet/raw/ONRT/onr5613-full_appendage_deckhous_mergedR.igs",
+      "notes": "hull below design waterline only; source IGES patch set"
+    }
+  ],
+  "evidence": {
+    "KCS": {
+      "corrections": [],
+      "iges": {
+        "path": "artifacts/baseline_fleet/raw/KCS/KCS_hull_SVA.igs",
+        "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+        "bytes": 246164
+      },
+      "archive": {
+        "path": "artifacts/baseline_fleet/raw/KCS-Hull.zip",
+        "sha256": "b50adace1ddf255fc0b471d3394edaacd27d3bebb298f3b1fc5dad5ae4f7f88c"
+      },
+      "page": {
+        "key": "t2015_kcs",
+        "path": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4"
+      },
+      "published_fields": {
+        "length_pp": {
+          "value": 230.0,
+          "snippet": "Length between perpendiculars L PP (m) 230.0 7.27 86 6.070 2 2.700",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+        },
+        "beam": {
+          "value": 32.2,
+          "snippet": "Maximum beam of waterline B WL (m) 32.2 1.019 0 0.8 498 0.378",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+        },
+        "draft": {
+          "value": 10.8,
+          "snippet": "Draft T (m) 10.8 0.34 18 0.285 0 0.1268",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+        },
+        "volume": {
+          "value": 52030.0,
+          "snippet": "Displacement volume \u2207 (m 3 ) 52030 1.649 0 0.9571 0.084",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+        },
+        "cb": {
+          "value": 0.6505,
+          "snippet": "Block coefficient (CB) \u2207 /(L PP B WL T) 0.6505",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+        },
+        "lcb": {
+          "value": -1.48,
+          "snippet": "LCB (%L PP ), fwd+ -1.48",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+        }
+      }
+    },
+    "KVLCC2": {
+      "corrections": [
+        {
+          "field": "beam",
+          "as_published": 580.0,
+          "used": 58.0,
+          "rule": "publisher decimal typo: nabla/(Cb*Lpp*T) = 58.0001 m, printed 580.0 m",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3"
+        }
+      ],
+      "iges": {
+        "path": "artifacts/baseline_fleet/raw/KVLCC2/kvlcc2.igs",
+        "sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+        "bytes": 6270129
+      },
+      "archive": {
+        "path": "artifacts/baseline_fleet/raw/KVLCC2-Hull.zip",
+        "sha256": "dc032647f00a68d354ede2f4b1ee3d68cd048bc3d34d221c2a8c9aac3a6dd548"
+      },
+      "page": {
+        "key": "simman_summary",
+        "path": "artifacts/baseline_fleet/raw/pages/simman_summary.html",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3"
+      },
+      "published_fields": {
+        "length_pp": {
+          "value": 320.0,
+          "snippet": "Lpp (m) 320 7 4.2667 6.8927",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "length_wl": {
+          "value": 325.5,
+          "snippet": "Lwl (m) 325.5 7.1204 4.34 7.0112",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "beam": {
+          "value": 580.0,
+          "snippet": "Bwl (m) 580 1.1688 0.7733 1.2493",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "draft": {
+          "value": 20.8,
+          "snippet": "T (m) 20.8 0.455 0.2773 0.448",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "volume": {
+          "value": 312622.0,
+          "snippet": "Displacement (m3) 312622 3.2724 0.741 3.1242",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "cb": {
+          "value": 0.8098,
+          "snippet": "CB 0.8098",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "lcb": {
+          "value": 3.48,
+          "snippet": "LCB (%), fwd+ 3.48",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        },
+        "scale_row": {
+          "value": 75.0,
+          "all_numbers": [
+            45.714,
+            75.0,
+            46.426
+          ],
+          "snippet": "Scale 1 45.714 75 46.426",
+          "page_sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+          "page": "artifacts/baseline_fleet/raw/pages/simman_summary.html"
+        }
+      }
+    },
+    "JBC": {
+      "corrections": [],
+      "iges": {
+        "path": "artifacts/baseline_fleet/raw/JBC/jbc.igs",
+        "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+        "bytes": 1713554
+      },
+      "archive": {
+        "path": "artifacts/baseline_fleet/raw/JBC_IGES.zip",
+        "sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c"
+      },
+      "page": {
+        "key": "t2015_jbc",
+        "path": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875"
+      },
+      "published_fields": {
+        "length_pp": {
+          "value": 280.0,
+          "snippet": "Length between perpendiculars \\(L_{PP}\\) (m) 280.000",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html"
+        },
+        "beam": {
+          "value": 45.0,
+          "snippet": "Maximum beam of waterline \\(B_{WL}\\) (m) 45.000",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html"
+        },
+        "draft": {
+          "value": 16.5,
+          "snippet": "Draft(Full) T (m) 16.500",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html"
+        },
+        "volume": {
+          "value": 178369.9,
+          "snippet": "Displacement volume of a hull \\( \\nabla \\) (m 3 ) 178369.9 89185.9",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html"
+        },
+        "cb": {
+          "value": 0.858,
+          "snippet": "Block coefficient (\\(C_B\\)) \\( \\nabla / \\left( L_{PP} B_{WL} T_M \\right) \\) 0.8580",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_jbc.html"
+        }
+      }
+    },
+    "ONRT": {
+      "corrections": [],
+      "iges": {
+        "path": "artifacts/baseline_fleet/raw/ONRT/onr5613-full_appendage_deckhous_mergedR.igs",
+        "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+        "bytes": 3374136
+      },
+      "archive": {
+        "path": "artifacts/baseline_fleet/raw/onrt_wo_gap.zip",
+        "sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685"
+      },
+      "page": {
+        "key": "t2015_onrt",
+        "path": "artifacts/baseline_fleet/raw/pages/t2015_onrt.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11"
+      },
+      "published_fields": {
+        "length_pp": {
+          "value": 154.0,
+          "snippet": "Length of waterline L WL (m) 3.147 154.0",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_onrt.html"
+        },
+        "beam": {
+          "value": 18.78,
+          "snippet": "Maximum beam of waterline B WL (m) 0.384 18.78",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_onrt.html"
+        },
+        "draft": {
+          "value": 5.494,
+          "snippet": "Draft T (m) 0.112 5.494",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_onrt.html"
+        },
+        "cb": {
+          "value": 0.535,
+          "snippet": "Block coefficient (CB) \u2207 /(L WL B WL T) 0.535",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "page": "artifacts/baseline_fleet/raw/pages/t2015_onrt.html"
+        }
+      },
+      "volume_from_cb": {
+        "formula": "Cb * Lwl * Bwl * T (publisher's own definition)",
+        "value": 8500.7793948
+      }
+    }
+  }
+}
