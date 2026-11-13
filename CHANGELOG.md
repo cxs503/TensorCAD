@@ -1,6 +1,30 @@
 
 ## Unreleased
 
+- **`tensorcad.midsurface`: the GAP-CAD-013 ledger is closed, and the evidence ships with it**
+  (`docs/midsurface.md` §9, `examples/midsurface/`, `artifacts/midsurface/`, `tools/oss_inventory_cad/feature_points.json`).
+  The capability (ray-cast mid-surface extraction + planar defeaturing) already landed
+  incrementally; what was missing was the *bookkeeping that makes it auditable*, and a test
+  that had been truncated mid-way. Now: (a) `examples/midsurface/run_example.py` states the
+  anchor's acceptance criteria as named checks -- including the `face count <= 1/10`
+  criterion, which was quoted in the ledger but never measured -- and renders
+  `artifacts/midsurface/report.md` **from** the payload it writes to `results.json`, so the
+  prose is a view of the measurement rather than a transcription of it; (b) the committed
+  `artifacts/midsurface/{results.json,report.md,fig_*.png}` are the shipped provenance of the
+  20 checks (plate mid-plane area error **0**, tube **+1.000 %** and sphere **+1.826 %** equal
+  to the *predicted* `t/(2R)` / `t/R` translation surplus, Series 60 wall **-0.009 %** with a
+  0.99 %-of-`t/2` median against the independent vertex-offset route); (c) `GAP-CAD-013` moves
+  from `absent` to `closed` in `docs/oss_inventory_cad/GAP-ANCHORS.md` and `F13` from `absent`
+  to `real` in the census input, with evidence paths a test resolves on disk; (d)
+  `test_defeature_keeps_a_hole_region_untouched` was truncated after its "no hole yet"
+  assertion, so the documented *hole-skip* path (a coplanar region with an inner loop is
+  refused: `"region has 2 boundary loops; holes are not stitched"`) had no test at all -- it
+  now builds a square annulus (4x4 m sheet, 1x1 m hole) and pins the refusal, the unchanged
+  face count and the preserved area (15 m^2 to 1e-12). Counts quoted in the docs are pinned by
+  tests, so they cannot go stale silently: `tests/test_midsurface.py` (24 tests) fails if the
+  ledger regresses to `absent`, if the committed run stops being green, or if the document's
+  check count drifts from `results.json`.
+
 - **`tensorcad.nurbs_intersect`: NURBS x NURBS intersection curves and trim domains**
   (`GAP-CAD-A1-NURBS-INTERSECT`, `docs/nurbs_intersect.md`,
   `examples/nurbs_intersect/`, `tools/xcheck_occt_nurbs_intersect.py`, 18 tests).
