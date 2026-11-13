@@ -525,11 +525,14 @@ def test_load_exchange_dispatches_on_the_extension(tmp_path):
 
 
 def test_the_evidence_table_keeps_its_honest_levels():
-    """Interoperability is still WITHHELD: no third-party CAD kernel is installed."""
+    """Analytic B-rep reads are REAL for the supported table; external validation is WITHHELD."""
     routes = supported_routes()
     assert routes["step_facets_write"] == "REAL"
     assert routes["step_facets_read"] == "REAL"
     assert routes["patchset_read"] == "REAL"
-    assert routes["step_brep_read"].startswith("NOT_SUPPORTED")
+    # tensorcad.step_brep reads analytic trims; anything outside its table is refused
+    # by name, which is why the level is REAL *for that table* and not a blanket claim.
+    assert routes["step_brep_read"].startswith("REAL for")
+    assert "refused by name" in routes["step_brep_read"]
     assert routes["iges_read"].startswith("NOT_SUPPORTED")
     assert routes["step_file_external_validation"].startswith("WITHHELD")
