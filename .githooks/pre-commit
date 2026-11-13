@@ -1,0 +1,34 @@
+#!/bin/sh
+# Golden geometry gate (GAP-CAD-D2-GOLDEN-REGRESSION).
+#
+# Any staged change under tensorcad/ re-measures the four golden hulls against the
+# committed baseline before the commit is allowed through. The check is cheap (~5 s,
+# coarse grid only); the full two-grid run is what CI and `--bless` use.
+#
+# Install:  tools/golden/install_git_hooks.sh     (sets core.hooksPath = .githooks)
+# Bypass:   TENSORCAD_GOLDEN_SKIP=1 git commit ... (the bypass is per-commit, visible)
+# Python:   PYTHON=/path/to/python git commit ...  (default: python3)
+set -eu
+
+if [ "${TENSORCAD_GOLDEN_SKIP:-0}" = "1" ]; then
+    echo "golden: skipped (TENSORCAD_GOLDEN_SKIP=1)"
+    exit 0
+fi
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+python_bin=${PYTHON:-python3}
+if ! command -v "$python_bin" >/dev/null 2>&1; then
+    echo "golden: no $python_bin on PATH, gate not run (CI still enforces it)"
+    exit 0
+fi
+if ! "$python_bin" -c "import tensorcad.golden" >/dev/null 2>&1; then
+    echo "golden: tensorcad is not importable with $python_bin, gate not run (CI still enforces it)"
+    exit 0
+fi
+
+if [ -n "${TENSORCAD_GOLDEN_STAGED_FILE:-}" ]; then
+    exec "$python_bin" -m tensorcad.golden --staged "$TENSORCAD_GOLDEN_STAGED_FILE" --quick
+fi
+exec "$python_bin" -m tensorcad.golden --staged --quick

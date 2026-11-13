@@ -1,0 +1,66 @@
+name: golden-geometry
+
+# The golden geometry regression suite (GAP-CAD-D2-GOLDEN-REGRESSION).
+#
+# Any change to the geometry package re-measures the four golden hulls (Wigley,
+# Series 60, sphere/ellipsoid, DTMB 5415) against the committed baseline in
+# docs/golden/tensorcad_geometry_golden.json. The tolerance of every asserted metric is
+# derived from the two-grid change of that metric, and every reference is recomputed from
+# its declared source on every run, so a hand-edited baseline cannot buy a pass.
+on:
+  push:
+    paths:
+      - "tensorcad/**"
+      - "tests/test_golden_regression.py"
+      - "docs/golden/**"
+      - ".githooks/**"
+      - ".github/workflows/golden-geometry.yml"
+  pull_request:
+    paths:
+      - "tensorcad/**"
+      - "tests/test_golden_regression.py"
+      - "docs/golden/**"
+      - ".githooks/**"
+      - ".github/workflows/golden-geometry.yml"
+  workflow_dispatch:
+
+jobs:
+  golden:
+    runs-on: ci-loong64
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[test]"
+      - name: Golden geometry gate
+        # pipefail so the gate's exit code survives the tee that feeds the job summary
+        run: |
+          set -o pipefail
+          python -m tensorcad.golden --check --json /tmp/golden.json | tee /tmp/golden.txt
+      - name: Publish the table in the job summary
+        if: always()
+        run: |
+          {
+            echo '### Golden geometry regression'
+            echo '```'
+            cat /tmp/golden.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Assert report schema and the four golden cases
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open("/tmp/golden.json"))
+          assert data["schema"] == "tensorcad.golden/1", data["schema"]
+          assert data["passed"] is True, data["findings"]
+          names = {case["name"] for case in data["cases"]}
+          assert names == {"wigley", "series60", "sphere_ellipsoid", "dtmb5415"}, names
+          for case in data["cases"]:
+              assert case["measurements"]["coarse"] and case["measurements"]["fine"], case["name"]
+              assert case["reference"], case["name"]
+          print("golden report ok:", sorted(names))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golden-geometry-report
+          path: /tmp/golden.json
