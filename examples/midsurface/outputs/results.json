@@ -1,0 +1,216 @@
+{
+  "all_checks_passed": true,
+  "cases": {
+    "cylinder": {
+      "analytic_offset_area": 24.881413816431163,
+      "area_relative_error": 0.009999600218325017,
+      "mean_thickness": 0.01999397637392404,
+      "mid_area": 25.130218007462183,
+      "name": "cylinder",
+      "paired_fraction": 1.0,
+      "predicted_translation_surplus": 0.01,
+      "segments": 128,
+      "surplus_prediction_error": -3.997816750891253e-05,
+      "thickness": 0.02,
+      "thickness_relative_error": -0.00030118130379796354,
+      "unpaired_face_count": 0
+    },
+    "plate": {
+      "analytic_mid_area": 24.0,
+      "area_relative_error": 0.0,
+      "defeature": {
+        "area_relative_error": 5.32907051820078e-15,
+        "boundary_vertex_counts": [
+          60
+        ],
+        "face_count_after": 2,
+        "face_count_before": 400,
+        "face_reduction": 0.995,
+        "region_count": 1
+      },
+      "description": "8 m x 3 m x 20 mm solid plate, 20x10 mesh on the large faces",
+      "max_measured_thickness": 0.020000000000000007,
+      "mean_thickness": 0.019999999999999685,
+      "mid_area": 24.0,
+      "mid_face_count": 400,
+      "min_measured_thickness": 0.019999999999999997,
+      "name": "plate",
+      "paired_face_count": 800,
+      "source_face_count": 808,
+      "source_watertight": false,
+      "thickness_reference": 0.02,
+      "thickness_relative_error": -1.5785983631388945e-14,
+      "unpaired_face_count": 8
+    },
+    "sphere": {
+      "analytic_offset_area": 12.316299839133425,
+      "area_relative_error": 0.01825660334983334,
+      "mean_thickness": 0.019961382111203036,
+      "mid_area": 12.5411536400341,
+      "name": "sphere",
+      "paired_fraction": 0.983642578125,
+      "predicted_translation_surplus": 0.02,
+      "source_face_count": 8192,
+      "surplus_prediction_error": -0.08716983250833722,
+      "thickness_relative_error": -0.0019308944398482158,
+      "unpaired_area": 1.0842021724855044e-19,
+      "unpaired_area_fraction": 4.409893395272142e-21,
+      "unpaired_face_count": 134
+    }
+  },
+  "checks": {
+    "cylinder_area_within_3pct": true,
+    "cylinder_thickness_within_1pct": true,
+    "hull_area_matches_reference_route_1pct": true,
+    "hull_cb_improves_with_refinement": true,
+    "hull_cb_within_5pct": true,
+    "hull_curved_no_defeature": true,
+    "hull_defeature_area_preserved": true,
+    "hull_paired_over_95pct": true,
+    "hull_thickness_within_1pct": true,
+    "hull_two_route_median_below_half_wall_20pct": true,
+    "hull_watertight": true,
+    "plate_area_within_1pct": true,
+    "plate_defeature_area_preserved": true,
+    "plate_defeature_reduction_over_50pct": true,
+    "plate_thickness_within_1pct": true,
+    "solid_body_rejected": true,
+    "sphere_area_within_3pct": true,
+    "sphere_thickness_within_1pct": true,
+    "surplus_matches_prediction_20pct": true
+  },
+  "curvature_sweep": [
+    {
+      "analytic_offset_area": 25.007077522574754,
+      "area_relative_error": 0.004924225342856075,
+      "mean_thickness": 0.009996988186962026,
+      "mid_area": 25.130218007462183,
+      "name": "cylinder",
+      "paired_fraction": 1.0,
+      "predicted_translation_surplus": 0.005,
+      "segments": 128,
+      "surplus_prediction_error": -0.01515493142878379,
+      "thickness": 0.01,
+      "thickness_relative_error": -0.0003011813037974431,
+      "unpaired_face_count": 0
+    },
+    {
+      "analytic_offset_area": 24.881413816431163,
+      "area_relative_error": 0.009999600218325017,
+      "mean_thickness": 0.01999397637392404,
+      "mid_area": 25.130218007462183,
+      "name": "cylinder",
+      "paired_fraction": 1.0,
+      "predicted_translation_surplus": 0.01,
+      "segments": 128,
+      "surplus_prediction_error": -3.997816750891253e-05,
+      "thickness": 0.02,
+      "thickness_relative_error": -0.00030118130379796354,
+      "unpaired_face_count": 0
+    },
+    {
+      "analytic_offset_area": 24.630086404143977,
+      "area_relative_error": 0.02030571858789985,
+      "mean_thickness": 0.03998795274784808,
+      "mid_area": 25.130218007462183,
+      "name": "cylinder",
+      "paired_fraction": 1.0,
+      "predicted_translation_surplus": 0.02,
+      "segments": 128,
+      "surplus_prediction_error": 0.015285929394993382,
+      "thickness": 0.04,
+      "thickness_relative_error": -0.00030118130379796354,
+      "unpaired_face_count": 0
+    }
+  ],
+  "figures": [
+    {
+      "caption": "Left: the plate's mid-surface before and after planar defeaturing (400 triangles collapse to 2, area preserved to 5e-15). Right: the relative area surplus of a translated-facet mid-surface over the exact offset surface, against the t/(2R) prediction.",
+      "name": "fig_plate_and_curvature.png"
+    },
+    {
+      "caption": "Left: the extracted mid-surface of a Series 60 hull plating (deck cap excluded). Right: the measured wall thickness over the paired faces, centred on the requested 20 mm; the tails are the waterline edge where the offset surface folds.",
+      "name": "fig_hull_midsurface.png"
+    }
+  ],
+  "gap_anchor": "GAP-CAD-013",
+  "hull": {
+    "defeature": {
+      "area_relative_error": 9.274589741504627e-16,
+      "face_count_after": 1824,
+      "face_count_before": 1824,
+      "face_reduction": 0.0,
+      "region_count": 1824,
+      "skipped_region_count": 0
+    },
+    "description": "Series 60 parent hull plating (t = 20 mm), deck cap excluded",
+    "geometry_gate": {
+      "beam": 1.5,
+      "cb_mesh": 0.577937616859835,
+      "cb_reference": 0.6,
+      "cb_relative_error": -0.03677063856694159,
+      "draft": 0.6,
+      "length": 10.0,
+      "volume_mesh": 5.201438551738515,
+      "volume_reference": 5.3999999999999995,
+      "watertight": true
+    },
+    "hull_wetted_area": 19.7679929724376,
+    "max_measured_thickness": 0.022277591943793633,
+    "mean_thickness": 0.019998200851241477,
+    "mid_area": 19.15294249028495,
+    "mid_area_relative_to_hull": -0.031113451072661332,
+    "mid_area_relative_to_reference": 0.0025675715720255804,
+    "mid_face_count": 1824,
+    "min_measured_thickness": 0.0181283319088969,
+    "name": "hull",
+    "paired_face_count": 3743,
+    "paired_fraction": 0.9747395833333333,
+    "reference_mid_area": 19.10389188057733,
+    "source_face_count": 3840,
+    "thickness_relative_error": -8.995743792615529e-05,
+    "two_route_max_difference": 0.0940665596883974,
+    "two_route_max_difference_over_half_wall": 9.40665596883974,
+    "two_route_median_difference": 9.879377275297953e-05,
+    "unpaired_face_count": 97,
+    "wall_thickness": 0.02
+  },
+  "hull_refinement": {
+    "rows": [
+      {
+        "beam": 1.5,
+        "cb_mesh": 0.577937616859835,
+        "cb_reference": 0.6,
+        "cb_relative_error": -0.03677063856694159,
+        "draft": 0.6,
+        "grid": "41x13",
+        "length": 10.0,
+        "volume_mesh": 5.201438551738515,
+        "volume_reference": 5.3999999999999995,
+        "watertight": true
+      },
+      {
+        "beam": 1.5,
+        "cb_mesh": 0.5893520148554728,
+        "cb_reference": 0.6,
+        "cb_relative_error": -0.017746641907545234,
+        "draft": 0.6,
+        "grid": "81x25",
+        "length": 10.0,
+        "volume_mesh": 5.304168133699256,
+        "volume_reference": 5.3999999999999995,
+        "watertight": true
+      }
+    ]
+  },
+  "module": "tensorcad.midsurface",
+  "schema": "tensorcad.midsurface.verification/1.0",
+  "solid_body_rejection": {
+    "cube_edge": 1.0,
+    "max_thickness_band": 0.0714142842854285,
+    "mid_area": 0.0,
+    "name": "solid_body_rejection",
+    "paired_face_count": 0,
+    "unpaired_face_count": 24
+  }
+}
