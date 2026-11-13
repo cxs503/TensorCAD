@@ -43,9 +43,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 HULL = ROOT / "tensorcad" / "hull.py"
 ANA = ROOT / "tensorcad" / "hydrostatics_analytic.py"
+SERIES = ROOT / "tensorcad" / "series60.py"
 
 GEN_TESTS = ["tests/test_hull.py", "tests/test_analytic_hydrostatics.py"]
 ANA_TESTS = ["tests/test_hydrostatics_analytic.py", "tests/test_analytic_hydrostatics.py", "tests/test_hull.py"]
+#: The transom/bulb claims are guarded by the two Series 60 test modules: the first
+#: pins the new ends, the second pins that they did not move the legacy hull.
+SERIES_TESTS = ["tests/test_series60_bulb_transom.py", "tests/test_series60.py"]
 
 MUTANTS: list[dict] = [
     {
@@ -139,6 +143,142 @@ MUTANTS: list[dict] = [
         "claim": "TAPER_INTEGRAL = int_0^1 sin(pi*x)^0.7 dx, cross-derived from the volume identity",
         "tests": ANA_TESTS,
     },
+    # ------------------------------------------------------------------ Series 60 ends
+    # A mutant nobody kills is a documented number with no teeth. These target the
+    # transom blend, the bulb closed forms and the exported bulb solid.
+    {
+        "id": "S60-1-transom-blend-area",
+        "kind": "model",
+        "file": "series",
+        "old": "        keep * h + transom * 0.5,",
+        "new": "        keep * h + transom * 0.55,  # mutant S60-1 (transom share of the aft area)",
+        "claim": "transom_ratio blends the aft taper as (1-tau) f + tau, so the stern "
+                 "share of the waterplane is tau/2 and Cwp/LCB/Cb still close",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-2-transom-blend-keep",
+        "kind": "model",
+        "file": "series",
+        "old": "    keep = 1.0 - transom",
+        "new": "    keep = 1.0 + transom  # mutant S60-2",
+        "claim": "the base taper is *thinned* as the stern fills, not amplified",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-3-transom-first-moment",
+        "kind": "model",
+        "file": "series",
+        "old": "        keep * m + transom * 0.125,",
+        "new": "        keep * m + transom * 0.25,  # mutant S60-3 (int_0^1/2 xi dxi = 1/8)",
+        "claim": "the transom's own first moment is int_0^1/2 xi dxi = 1/8",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-4-transom-square-moment",
+        "kind": "model",
+        "file": "series",
+        "old": "        keep * keep * mq + 2.0 * keep * transom * m + transom * transom * 0.125,",
+        "new": "        keep * keep * mq + 2.0 * keep * transom * m + transom * transom * 0.25,  # mutant S60-4",
+        "claim": "the squared blend's transom term weights int xi dxi with 1/8, so the "
+                 "section taper gain and Cb stay on target",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-5-deck-taper-half",
+        "kind": "model",
+        "file": "series",
+        "old": "        if self.transom_ratio > 0.0 and xi < 0.5:",
+        "new": "        if self.transom_ratio > 0.0 and xi < 0.6:  # mutant S60-5",
+        "claim": "the transom applies to the aft half only, xi < 1/2",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-6-transom-area-factor",
+        "kind": "model",
+        "file": "series",
+        "old": "    return p.beam * law.deck_taper(0.0) * p.draft * law.fullness(0.0)",
+        "new": "    return 0.5 * p.beam * law.deck_taper(0.0) * p.draft * law.fullness(0.0)  # mutant S60-6",
+        "claim": "the immersed stern section area is B f T Cm (port and starboard), and "
+                 "the mesh's own stern faces must reproduce it",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-7-single-exponent-bracket",
+        "kind": "model",
+        "file": "series",
+        "old": "        if cwp(mid) < cwp_target:",
+        "new": "        if cwp(mid) > cwp_target:  # mutant S60-7",
+        "claim": "Cwp rises with the longitudinal exponent; the bisection direction",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-8-bulb-volume-cubic",
+        "kind": "model",
+        "file": "series",
+        "old": "    return 0.5 * math.pi * a * b * ((h + b) - (h ** 3 + b ** 3) / (3.0 * b * b))",
+        "new": "    return 0.5 * math.pi * a * b * ((h + b) - (h ** 3 + b ** 3) / (2.0 * b * b))  # mutant S60-8",
+        "claim": "the submerged half-spheroid volume (pi a b / 2)[(h+b) - (h^3+b^3)/(3b^2)], "
+                 "which collapses to 2/3 pi a b^2 and to pi a b^2 / 3",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-9-bulb-submerged-clip",
+        "kind": "model",
+        "file": "series",
+        "old": "    if waterline_offset >= b:",
+        "new": "    if waterline_offset >= 2.0 * b:  # mutant S60-9",
+        "claim": "a bulb whose axis is more than one radius below the waterline is fully "
+                 "submerged: its volume stops depending on the offset",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-10-bulb-centroid-k",
+        "kind": "model",
+        "file": "series",
+        "old": "    k = 0.125 * (s * (5.0 - 2.0 * s * s) * root + 3.0 * math.asin(s)) + 3.0 * math.pi / 16.0",
+        "new": "    k = 0.125 * (s * (5.0 - 2.0 * s * s) * root + 3.0 * math.asin(s)) + 3.0 * math.pi / 8.0  # mutant S60-10",
+        "claim": "the submerged bulb's x centroid, which must collapse to 3a/8 when the "
+                 "bulb is fully submerged",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-11-bulb-fp-segment",
+        "kind": "model",
+        "file": "series",
+        "old": "        fp_submerged = b * b * (theta - math.sin(theta) * math.cos(theta))",
+        "new": "        fp_submerged = b * b * (theta - math.sin(theta))  # mutant S60-11",
+        "claim": "the circular-segment area of the FP ellipse below the waterline",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-12-bulb-waterplane",
+        "kind": "model",
+        "file": "series",
+        "old": "        waterplane = 0.5 * math.pi * a * b * (1.0 - s * s)",
+        "new": "        waterplane = math.pi * a * b * (1.0 - s * s)  # mutant S60-12",
+        "claim": "the waterplane patch a piercing bulb adds is a *half* ellipse",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-13-bulb-wetted-arc",
+        "kind": "model",
+        "file": "series",
+        "old": "            arc = 2.0 * (math.pi - math.acos(ratio))",
+        "new": "            arc = 2.0 * (math.pi - math.asin(ratio))  # mutant S60-13",
+        "claim": "the submerged arc of a bulb ring is 2(pi - acos(h/r)), and the exported "
+                 "mesh's lateral area must agree with it",
+        "tests": SERIES_TESTS,
+    },
+    {
+        "id": "S60-14-bulb-wetted-stretch",
+        "kind": "model",
+        "file": "series",
+        "old": "        ring = math.sqrt(r2 * a * a + b ** 4 * u * u)",
+        "new": "        ring = math.sqrt(r2 * a * a + b ** 4 * u)  # mutant S60-14",
+        "claim": "the axial stretch enters the bulb area element as r sqrt(r'^2 + a^2)",
+        "tests": SERIES_TESTS,
+    },
 ]
 
 
@@ -191,6 +331,7 @@ def main() -> int:
     originals = {
         "hull": HULL.read_bytes(),
         "ana": ANA.read_bytes(),
+        "series": SERIES.read_bytes(),
     }
     digests = {key: sha256(data) for key, data in originals.items()}
 
@@ -200,12 +341,13 @@ def main() -> int:
         if mid in results:
             print(f"[skip] {mid} already recorded", flush=True)
             continue
-        path = HULL if mutant["file"] == "hull" else ANA
+        path = {"hull": HULL, "ana": ANA, "series": SERIES}[mutant["file"]]
         original = originals[mutant["file"]]
         if not clean_tree():
             print(f"[abort] dirty tree before {mid}; restoring and stopping", flush=True)
             HULL.write_bytes(originals["hull"])
             ANA.write_bytes(originals["ana"])
+            SERIES.write_bytes(originals["series"])
             return 1
         text = original.decode()
         if text.count(mutant["old"]) != 1:
@@ -232,8 +374,8 @@ def main() -> int:
         verdict = "KILLED" if run["killed"] else "SURVIVED"
         print(f"[done] {mid}: {verdict} ({run['wall_seconds']}s) {run['summary']}", flush=True)
 
-    # Baselines for the two test sets (recorded once).
-    for name, tests in (("gen", GEN_TESTS), ("ana", ANA_TESTS)):
+    # Baselines for the test sets (recorded once).
+    for name, tests in (("gen", GEN_TESTS), ("ana", ANA_TESTS), ("series", SERIES_TESTS)):
         if name not in results:
             results[f"baseline-{name}"] = {"status": "baseline", "run": run_pytest(tests)}
             out_path.write_text(json.dumps(results, indent=2))
