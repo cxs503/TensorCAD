@@ -83,7 +83,15 @@ def _summary(model: Any) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    argv_list = list(sys.argv[1:] if argv is None else argv)
+    if argv_list and argv_list[0] == "fleet":
+        # Integration caller for GAP-CAD-T1-BASELINE-FLEET: the package CLI reaches the
+        # baseline-fleet intake gate, so the gate is on a product entry point and not only
+        # on a module the tests happen to import.
+        from tensorcad.fleet.cli import main as fleet_main
+
+        return fleet_main(argv_list[1:])
+    args = build_parser().parse_args(argv_list)
     parameters = HullParameters(
         args.length,
         args.beam,
