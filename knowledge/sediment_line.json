@@ -1,0 +1,323 @@
+{
+  "schema": "tensorcad.sediment/1.0",
+  "about": "Sediment ledger: every entry is a claim plus the machines that can contradict it today. Probes recompute live through public callables; artifact checks pin a value at a JSON pointer and the artifact digest; doc checks pin a verbatim phrase the prose must still contain. Edited only after re-verification; the guard (tools/sediment_guard.py) is the reader.",
+  "entries": [
+    {
+      "id": "wigley.cb_rational",
+      "title": "Wigley block coefficient is the rational n m/((n+1)(m+1))",
+      "claim": "Cb = n m/((n+1)(m+1)); 4/9 at n = m = 2 (the classic Wigley form).",
+      "kind": "analytic_identity",
+      "acceptance": "live closed form equals 4/9 to 1e-15 relative; docs/wigley.md still tabulates the same expression and the 4/9 value",
+      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "probes": [
+        {
+          "call": "tensorcad.wigley:analytic_block_coefficient",
+          "args": [2.0, 2.0],
+          "expected": 0.4444444444444444,
+          "rel_tol": 1e-15
+        }
+      ],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "`n m/((n+1)(m+1))`"},
+        {"path": "docs/wigley.md", "contains": "`4/9`"}
+      ]
+    },
+    {
+      "id": "wigley.coefficient_chain",
+      "title": "Cp, Cm, Cwp of the Wigley form are all 2/3 at n = m = 2 and Cb = Cp*Cm",
+      "claim": "Cp = n/(n+1) = 2/3, Cm = m/(m+1) = 2/3, Cwp = n/(n+1) = 2/3, and 2/3*2/3 = 4/9 = Cb (the module's cheapest self-check).",
+      "kind": "analytic_identity",
+      "acceptance": "each coefficient equals 2/3 to 1e-15 relative; the product of the two live values equals the live Cb to 1e-15 relative",
+      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "probes": [
+        {
+          "call": "tensorcad.wigley:analytic_prismatic_coefficient",
+          "args": [2.0, 2.0],
+          "expected": 0.6666666666666666,
+          "rel_tol": 1e-15
+        },
+        {
+          "call": "tensorcad.wigley:analytic_midship_coefficient",
+          "args": [2.0],
+          "expected": 0.6666666666666666,
+          "rel_tol": 1e-15
+        },
+        {
+          "call": "tensorcad.wigley:analytic_waterplane_coefficient",
+          "args": [2.0],
+          "expected": 0.6666666666666666,
+          "rel_tol": 1e-15
+        }
+      ],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "`n/(n+1)`"}
+      ]
+    },
+    {
+      "id": "wigley.volume_ittc_case",
+      "title": "Wigley displacement volume at the ITTC reference case L/B = 10, B/T = 1.6",
+      "claim": "V = 4 L B T / 9 = 2.7777... m^3 for L = 10 m, B = 1 m, T = 0.625 m.",
+      "kind": "analytic_identity",
+      "acceptance": "live closed form equals 25/9 to 1e-15 relative",
+      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "probes": [
+        {
+          "call": "tensorcad.wigley:analytic_volume",
+          "args": [10.0, 1.0, 0.625, 2.0, 2.0],
+          "expected": 2.7777777777777777,
+          "rel_tol": 1e-15
+        }
+      ],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "`4LBT/9`"}
+      ]
+    },
+    {
+      "id": "wigley.waterplane_area_ittc_case",
+      "title": "Wigley waterplane area at the ITTC reference case",
+      "claim": "Awp = L B n/(n+1) = 2 L B / 3 = 6.6667 m^2 for L = 10 m, B = 1 m (n = 2).",
+      "kind": "analytic_identity",
+      "acceptance": "live closed form equals 20/3 to 1e-15 relative",
+      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "probes": [
+        {
+          "call": "tensorcad.wigley:analytic_waterplane_area",
+          "args": [10.0, 1.0, 2.0],
+          "expected": 6.666666666666667,
+          "rel_tol": 1e-15
+        }
+      ],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "`2LB/3`"}
+      ]
+    },
+    {
+      "id": "wigley.vcb_five_eighths",
+      "title": "Wigley vertical centre of buoyancy is 5T/8 above the keel at m = 2",
+      "claim": "VCB = T - T(m+1)/(2(m+2)) = 5T/8 = 0.390625 m for T = 0.625 m.",
+      "kind": "analytic_identity",
+      "acceptance": "live closed form equals 0.390625 to 1e-15 relative",
+      "tags": ["hydrostatics", "wigley", "closed-form"],
+      "probes": [
+        {
+          "call": "tensorcad.wigley:analytic_vertical_centre_buoyancy",
+          "args": [0.625, 2.0],
+          "expected": 0.390625,
+          "rel_tol": 1e-15
+        }
+      ],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "`5T/8`"}
+      ]
+    },
+    {
+      "id": "wigley.wetted_surface_literature_case",
+      "title": "Wigley wetted surface at L/B = 10, B/T = 1.6 (no elementary primitive: Gauss-Legendre)",
+      "claim": "S = 14.879063105 m^2 for L = 10 m, B = 1 m, T = 0.625 m; the value quoted in the module doc is the quadrature result actually returned.",
+      "kind": "analytic_identity",
+      "acceptance": "live composite Gauss-Legendre value equals the documented 14.879063105 m^2 to 1e-9 relative (the doc quotes 10 significant figures)",
+      "tags": ["hydrostatics", "wigley", "quadrature"],
+      "probes": [
+        {
+          "call": "tensorcad.wigley:analytic_wetted_surface_area",
+          "args": [10.0, 1.0, 0.625],
+          "expected": 14.879063104957783,
+          "rel_tol": 1e-9
+        }
+      ],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "14.879063105 m^2"}
+      ]
+    },
+    {
+      "id": "wigley.mesh_volume_default_grid",
+      "title": "Mesh-integrated Wigley volume on the default 41 x 13 grid (documented measurement)",
+      "claim": "The default grid integrates V = 2.7712221 m^3, i.e. -0.236 % against the closed form 25/9 -- the discretisation error that the convergence table reports.",
+      "kind": "audit_measurement",
+      "acceptance": "docs/wigley.md convergence table still reports the default-grid volume 2.7712221 m^3 (doc drift detector; the value is a mesh measurement, so it is pinned in prose, not recomputed by the guard)",
+      "tags": ["hydrostatics", "wigley", "convergence"],
+      "docs": [
+        {"path": "docs/wigley.md", "contains": "**2.7712221**"}
+      ]
+    },
+    {
+      "id": "hull.analytic_volume_default",
+      "title": "Analytic displacement of the default parametric hull (L/B/T = 10/2.0/0.8)",
+      "claim": "V = B L T I 2/3 = 7.512698 m^3 with taper integral I = 0.7043154582422714, matching the mesh route (7.446554 m^3, -0.88 %) recorded in the m241 audit.",
+      "kind": "analytic_identity",
+      "acceptance": "live taper integral equals 0.7043154582422714 to 1e-15 relative; the audit artifact still records analytic 7.512698 and mesh 7.446554; README still quotes both",
+      "tags": ["hydrostatics", "parametric-hull", "audit"],
+      "probes": [
+        {
+          "call": "tensorcad.hydrostatics_analytic:taper_integral",
+          "args": [],
+          "expected": 0.7043154582422714,
+          "rel_tol": 1e-15
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "validation_report.json",
+          "json_pointer": "/checks/hull_volume_default/analytic_volume_m3",
+          "expected": 7.512698,
+          "sha256": "0dda25b30eccb625c58889264841a803b2202ec3dfa44e626f4a72cfc9449838",
+          "note": "audit artifact rounded to 6 decimal places"
+        },
+        {
+          "path": "validation_report.json",
+          "json_pointer": "/checks/hull_volume_default/measured_volume_m3",
+          "expected": 7.446554,
+          "sha256": "0dda25b30eccb625c58889264841a803b2202ec3dfa44e626f4a72cfc9449838"
+        },
+        {
+          "path": "validation_report.json",
+          "json_pointer": "/checks/hull_volume_default/error_percent",
+          "expected": -0.88,
+          "sha256": "0dda25b30eccb625c58889264841a803b2202ec3dfa44e626f4a72cfc9449838"
+        }
+      ],
+      "docs": [
+        {"path": "README.md", "contains": "7.446554 m^3  (analytic form: 7.512698)"}
+      ]
+    },
+    {
+      "id": "highorder.sphere_volume_order4",
+      "title": "Order-4 curved elements integrate the sphere volume to 2.06e-7 relative",
+      "claim": "On 24 order-4 elements (2x2 subdivisions per knot span) the volume is 4.1887910675460525 m^3 against 4/3 pi = 4.1887902047863905 m^3, a relative error of 2.06e-7, i.e. the benchmark gate J3 criterion (<= 1e-6) holds with 5x margin.",
+      "kind": "benchmark_gate",
+      "acceptance": "pinned artifact values reproduced exactly at their JSON pointers and gate J3 recorded as passed",
+      "tags": ["high-order", "geometry", "benchmark"],
+      "artifacts": [
+        {
+          "path": "benchmarks/verified/cad_highorder_geometry/result.json",
+          "json_pointer": "/gates/J3/cases/0/rows/2/volume",
+          "expected": 4.1887910675460525,
+          "sha256": "601fc5e4a6f7e6fc56b81d52d3c95a7af47a6e49610e28229c9814f7fb7ab709"
+        },
+        {
+          "path": "benchmarks/verified/cad_highorder_geometry/result.json",
+          "json_pointer": "/gates/J3/cases/0/rows/2/volume_relative_error",
+          "expected": 2.0596869734583135e-07,
+          "sha256": "601fc5e4a6f7e6fc56b81d52d3c95a7af47a6e49610e28229c9814f7fb7ab709"
+        },
+        {
+          "path": "benchmarks/verified/cad_highorder_geometry/gates_verified.json",
+          "json_pointer": "/gates/J3/passed",
+          "expected": true,
+          "sha256": "0d3f5852036162bad044a79d4ca09fd79b80867c00219517513e1eb1c2b51ca2"
+        }
+      ]
+    },
+    {
+      "id": "highorder.sphere_volume_order6",
+      "title": "Order-6 elements cut the sphere volume error to 8.24e-11 (order-4 value preserved as the reference)",
+      "claim": "Volume 4.188790205131541 m^3, relative error 8.24e-11 -- three more digits than the order-4 row, which is the p-refinement evidence the gate J6 fitted order is built on.",
+      "kind": "benchmark_gate",
+      "acceptance": "pinned artifact values reproduced exactly at their JSON pointers",
+      "tags": ["high-order", "geometry", "benchmark"],
+      "artifacts": [
+        {
+          "path": "benchmarks/verified/cad_highorder_geometry/result.json",
+          "json_pointer": "/gates/J3/cases/0/rows/3/volume",
+          "expected": 4.188790205131541,
+          "sha256": "601fc5e4a6f7e6fc56b81d52d3c95a7af47a6e49610e28229c9814f7fb7ab709"
+        },
+        {
+          "path": "benchmarks/verified/cad_highorder_geometry/result.json",
+          "json_pointer": "/gates/J3/cases/0/exact_volume",
+          "expected": 4.1887902047863905,
+          "sha256": "601fc5e4a6f7e6fc56b81d52d3c95a7af47a6e49610e28229c9814f7fb7ab709"
+        }
+      ]
+    },
+    {
+      "id": "box.gz_peak_45deg",
+      "title": "Exact barge GZ peaks at 0.175598 m at 45 deg and is still 0.091252 m at 80 deg",
+      "claim": "For the example barge B = 2.0 m, T = 0.8 m, D = 1.2 m, KG = 0.55 m the clipped-section solver returns GZ(45 deg) = 0.1755981839946591 m in the bilge-and-deck regime and GZ(80 deg) = 0.09125182565735745 m -- the range of stability the one-line wall-sided formula cannot describe.",
+      "kind": "exact_section",
+      "acceptance": "live exact section values equal the two documented arms to 1e-12 relative; the quoted doc sentences survive",
+      "tags": ["stability", "box", "exact"],
+      "probes": [
+        {
+          "call": "tensorcad.box_gz:box_gz",
+          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 45.0},
+          "attr": "righting_arm",
+          "expected": 0.1755981839946591,
+          "rel_tol": 1e-12
+        },
+        {
+          "call": "tensorcad.box_gz:box_gz",
+          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 45.0},
+          "attr": "regime",
+          "expected": "bilge_and_deck"
+        },
+        {
+          "call": "tensorcad.box_gz:box_gz",
+          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 80.0},
+          "attr": "righting_arm",
+          "expected": 0.09125182565735745,
+          "rel_tol": 1e-12
+        }
+      ],
+      "docs": [
+        {"path": "docs/box_inclined_exact.md", "contains": "`0.175598 m` at `45°`"},
+        {"path": "docs/box_inclined_exact.md", "contains": "`0.091252 m` at"}
+      ]
+    },
+    {
+      "id": "box.wall_sided_matches_exact_10deg",
+      "title": "Inside its window the wall-sided closed form agrees with the exact section to 2e-16",
+      "claim": "At 10 deg the one-line wall-sided formula gives 0.04743095798991253 m and the clipped-section solver 0.04743095798991254 m: the closed form is exact there, which is why it may be used for the 1-15 deg band.",
+      "kind": "exact_section",
+      "acceptance": "both routes equal their recorded arms to 1e-12 relative and agree with each other to 1e-12 relative",
+      "tags": ["stability", "box", "cross-check"],
+      "probes": [
+        {
+          "call": "tensorcad.gz:box_righting_arms_analytic",
+          "args": [2.0, 0.8, 0.55, [10.0]],
+          "index": 0,
+          "expected": 0.04743095798991253,
+          "rel_tol": 1e-12
+        },
+        {
+          "call": "tensorcad.box_gz:box_gz",
+          "kwargs": {"breadth": 2.0, "draft": 0.8, "depth": 1.2, "kg": 0.55, "heel_deg": 10.0},
+          "attr": "righting_arm",
+          "expected": 0.04743095798991254,
+          "rel_tol": 1e-12
+        }
+      ],
+      "docs": [
+        {"path": "docs/box_inclined_exact.md", "contains": "wall-sided closed form"}
+      ]
+    },
+    {
+      "id": "box.wall_sided_limit_angle",
+      "title": "Wall-sided validity limit of the example barge is atan(T/(B/2)) = 38.6598 deg",
+      "claim": "box_wall_sided_limit_deg(2.0, 0.8) = 38.659808254090095 deg = atan(0.8): past it the deck edge or bilge enters and the one-line formula stops being the answer.",
+      "kind": "exact_section",
+      "acceptance": "live limit angle equals atan(0.8) to 1e-12 relative",
+      "tags": ["stability", "box", "validity-window"],
+      "probes": [
+        {
+          "call": "tensorcad.gz:box_wall_sided_limit_deg",
+          "args": [2.0, 0.8],
+          "expected": 38.659808254090095,
+          "rel_tol": 1e-12
+        }
+      ]
+    },
+    {
+      "id": "voxel.suboff_published_volume",
+      "title": "SUBOFF bare-hull voxel volume against the published displacement",
+      "claim": "Voxel integration of the SUBOFF bare hull gives 0.698982 m^3 against the published 0.699211 m^3 (-0.033 %), while hard cell counting is +1.18 % -- the partial-fill estimator is what makes the voxel route usable as a geometry source.",
+      "kind": "audit_measurement",
+      "acceptance": "docs/voxel_export.md still quotes both the measured 0.698982 m^3 and the published 0.699211 m^3 (doc drift detector; the grid is a 218x26x26 measurement, not recomputed by the guard)",
+      "tags": ["voxel", "suboff", "verification"],
+      "docs": [
+        {"path": "docs/voxel_export.md", "contains": "0.698982"},
+        {"path": "docs/voxel_export.md", "contains": "0.699211"}
+      ]
+    }
+  ]
+}
