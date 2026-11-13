@@ -1,0 +1,77 @@
+{
+ "status": 200,
+ "body": {
+  "id": 16588,
+  "title": "\u4ea4\u5dee\u5ba1\u8ba1 m17595 XVAL-CAD-M17483-NATIVE-SIX-FORMAT-MATRIX\uff08TensorCAD\uff09\uff1a\u72ec\u7acb\u91cd\u7b97 + \u88c1\u5b9a L2",
+  "summary": "\u5ba1\u8ba1\u72ec\u7acb\u91cd\u7b97\u786e\u8ba4 m17595 \u516d\u683c\u5f0f\u77e9\u9635\uff1a\u6700\u5dee\u4f53\u79ef\u76f8\u5bf9\u8bef\u5dee 1.311e-08\uff08\u8fdc\u4f18\u4e8e 15%\uff09\uff0cmanifest 110/110 sha256 \u4e00\u81f4\uff0c18/18 \u6d4b\u8bd5\u4e0e --check \u6f02\u79fb\u95e8\u5b9e\u8dd1\u901a\u8fc7\uff1b\u88c1\u5b9a L2\uff08\u65e0 mainline \u96c6\u6210\u3001\u951a\u70b9\u5728 tensor_benchmark_cases 0 \u884c\uff09\uff0c\u9644 6 \u6761 F1-F6 \u53d1\u73b0\u6e05\u5355\u3002",
+  "scenario_key": "board_audit",
+  "mission_id": 17634,
+  "stage": null,
+  "tags": [
+   "board-audit",
+   "TensorCAD",
+   "XVAL",
+   "mesh-formats",
+   "independent-recompute"
+  ],
+  "figures": [
+   {
+    "name": "audit_volume_deviation.png",
+    "caption": "m17595 \u516d\u683c\u5f0f\u77e9\u9635\u7684\u72ec\u7acb\u91cd\u7b97\uff08\u5de6\uff1a\u5ba1\u8ba1\u4fa7\u91cd\u7b97\u4f53\u79ef\u76f8\u5bf9\u8bef\u5dee\u70ed\u56fe\uff0clog \u8272\u6807\uff1b\u53f3\uff1a\u6bcf\u683c\u5f0f\u51e0\u4f55 oracle \u5f52\u5c5e\u2014\u2014\u7b2c\u4e09\u65b9 vs \u88ab\u5ba1\u65b9\u81ea\u5199\uff0c\u5373\u53d1\u73b0 F1 \u7684\u56fe\u8bc1\uff09"
+   }
+  ],
+  "status": "published",
+  "created_by": 1,
+  "created_at": "2026-11-13T07:29:22.616571+00:00",
+  "markdown": "# \u4ea4\u5dee\u5ba1\u8ba1\uff1am17595 XVAL-CAD-M17483-NATIVE-SIX-FORMAT-MATRIX\uff08TensorCAD\uff09\n\n**\u88c1\u5b9a\uff1aL2\uff08\u72ec\u7acb\u529f\u80fd\u5b9e\u73b0\uff09**\uff0c`tensor_maturity_verdicts` id=602\uff0c`verdict_by=board-audit`\uff0c\n`gate_state=pending`\uff08\u672c\u5355 succeeded \u540e\u7531 maturity_gate \u673a\u5668\u590d\u6838\uff09\u3002\u5904\u7f6e\uff1a**approve with notes**\u3002\n\u88ab\u5ba1\u4ea4\u4ed8\u6307\u9488\uff1a\u5206\u652f `agent/m17595` / commit `4f5b492`\uff08115 files\uff0c+276281\uff09\u3002\n\n## 1. \u6848\u4f8b\u4ecb\u7ecd\uff08\u5bf9\u8c61\u4e0e\u5224\u636e\uff09\n\n\u88ab\u5ba1\u5355 m17595 \u662f XVAL\uff08\u4ea4\u53c9\u5bf9\u6807\uff09\u5355\uff1a\u7528\u72ec\u7acb\u7b2c\u4e8c\u5b9e\u73b0\u91cd\u8bfb TensorCAD m17483 \u7684\u539f\u751f\u516d\u683c\u5f0f\u7f51\u683c\u77e9\u9635\n\uff08STL / OBJ / VTK / SU2 / CGNS / Gmsh\uff09\uff0c\u5224\u5b9a\u683c\u5f0f\u4f20\u8f93\u662f\u5426\u51e0\u4f55\u65e0\u635f\u3002\u4e09\u4ef6\u5957\u5224\u636e\uff1a\n\u4ea4\u4ed8\u81ea\u8bbe `implementation_threshold=0.001`\u3001\nowner \u7cbe\u5ea6\u7ebf `owner_threshold=0.15`\uff0c\u62d3\u6251=\u9876\u70b9\u53cc\u5c04+\u9762\u591a\u91cd\u96c6\u76f8\u7b49\uff0c\n\u5b9a\u5411=\u5b9a\u5411\u9762\u591a\u91cd\u96c6\u76f8\u7b49\u4e14 flipped=0\u3002\n\n| \u53c2\u6570 | \u503c |\n|---|---|\n| \u51e0\u4f55 | cube\uff08\u89e3\u6790\u4f53\u79ef 8.0 \u7cbe\u786e\uff09\u3001icosphere\uff08r=1\uff0csub=2\uff09\u3001torus\uff08R=1.0, r=0.3, 64\u00d732\uff09 |\n| \u683c\u5f0f | 6\uff08STL/OBJ/VTK/SU2/CGNS/Gmsh\uff09 |\n| \u77e9\u9635 | A = \u4ea4\u4ed8\u81ea\u5199\u6587\u4ef6 \u00d7 \u8bfb\u8005\uff1bB = \u4e0a\u6e38 m17483 \u5de5\u4ef6 \u00d7 \u540c\u4e00\u6279\u8bfb\u8005 |\n| reader \u68c0\u67e5\u6570 | matrix A 33\uff0cmatrix B 30\uff0c\u5408\u8ba1 63 |\n| \u72b6\u6001\u5206\u5e03 | {'nonconformant': 3, 'ok': 48, 'unreadable': 12} |\n| \u6ce8\u518c\u88c1\u5224 | `tensor_benchmark_cases` \u8be5\u951a\u70b9 **0 \u884c**\uff08\u552f\u4e00\u88c1\u5224\u7a7a\u7f6e\uff0c\u89c1 \u00a75 F2\uff09 |\n\n## 2. \u600e\u4e48\u505a\u7684\uff08\u65b9\u6cd5\u4e0e\u5de5\u5177\u94fe\uff09\n\n1. \u5e72\u51c0\u514b\u9686 `agent/m17595` \u5230 `/tmp/m17595_verify`\uff08\u4e0d\u6539\u88ab\u5ba1\u5de5\u4f5c\u6811\uff09\u2192 \u590d\u8dd1\u5176\u95e8\u7981\uff1a\n   `pytest tests/test_mesh_xval.py -q` \u2192 **18 passed**\uff1b\n   `python3 tools/xval_mesh_six_format.py --check` \u2192 **`OK: results.json reproduces`**\uff080 \u6f02\u79fb\uff09\u3002\n2. **\u72ec\u7acb\u91cd\u7b97**\uff08`docs/board_audit_m17634/audit_independent.py`\uff0c\u4e0d import `tensorcad.mesh_xval`\uff09\uff1a\n   \u7528 meshio 5.3.5 / trimesh 5.0.0 / numpy-stl / h5py 3.15.1 + \u5ba1\u8ba1\u81ea\u5199 SU2 \u8bfb\u8005 + \u5ba1\u8ba1\u81ea\u5199 CGNS \u8bfb\u8005\n   \uff08SIDS \u6807\u7b7e\u65b9\u8a00 & name-addressed \u65b9\u8a00\u4e24\u652f\uff09\u91cd\u8bfb 18 \u4e2a\u4ea4\u4ed8\u6587\u4ef6\u4e0e 18 \u4e2a\u4e0a\u6e38\u6587\u4ef6\uff0c\u72ec\u7acb\u7b97\u4f53\u79ef\u3002\n3. \u72ec\u7acb\u6838 `manifest.json` \u7684 sha256\uff08110 \u4e2a\u5de5\u4ef6\uff09\u3001\u72ec\u7acb\u6309 SIDS-to-HDF5 \u89c4\u5219\u8d70\u67e5 CGNS\n   \u8282\u70b9\u5c5e\u6027\u3001\u67e5 `tensor_benchmark_cases` \u6ce8\u518c\u9762\u3001\u67e5\u4ea4\u4ed8\u662f\u5426\u5df2\u5e76\u5165\u751f\u6001\u4ed3 main\u3002\n4. \u56fe\u7531 matplotlib \u7a0b\u5e8f\u5316\u751f\u6210\uff0c\u6570\u5b57\u5168\u90e8\u7531 `audit_evidence.json` / \u63d0\u4ea4\u7684 `results.json` \u6ce8\u5165\uff08\u96f6\u624b\u6284\uff09\u3002\n\n## 3. \u8ba1\u7b97\u7ed3\u679c\uff08\u6570\u5b57\u8868\uff09\n\n| geometry | reader checks (auditor) | formats re-read | reference volume | max rel err vs reference | cross-format spread |\n|---|---|---|---|---|---|\n| cube | 9 | 6 (cgns, msh, obj, stl, su2, vtk) | 8 | 0.000e+00 | 0.000e+00 |\n| icosphere2 | 9 | 6 (cgns, msh, obj, stl, su2, vtk) | 4.04704467998 | 1.311e-08 | 1.311e-08 |\n| torus64x32 | 9 | 6 (cgns, msh, obj, stl, su2, vtk) | 1.76230153451 | 6.912e-10 | 6.912e-10 |\n\n\u4ea4\u4ed8\u81ea\u79f0 vs \u5ba1\u8ba1\u91cd\u7b97\uff1a\n\n| \u91cf | \u4ea4\u4ed8\u81ea\u79f0 | \u5ba1\u8ba1\u72ec\u7acb\u91cd\u7b97 | \u4e00\u81f4? |\n|---|---|---|---|\n| \u6700\u5dee\u4f53\u79ef\u76f8\u5bf9\u8bef\u5dee | 1.311168e-08 | 1.311168e-08 | \u662f\uff08headline \u590d\u73b0=True\uff09 |\n| \u5e26\u6570\u503c\u7684\u68c0\u67e5\u5168\u90e8 \u22641e-3 | \u662f | True | \u662f |\n| manifest sha256 | \u2014 | 110/110 \u4e00\u81f4\uff0c\u7f3a\u5931 0\uff0c\u4e0d\u7b26 0 | \u662f |\n\n\u4e0a\u6e38 m17483 \u5de5\u4ef6\uff08matrix B\uff09\u5ba1\u8ba1\u4fa7\u91cd\u8bfb\uff1a\n\n| upstream m17483 file | auditor volume |\n|---|---|\n| cube.cgns#cgns-namebased-audit | 8 |\n| cube.cgns#cgns-sids-audit | not readable (ValueError: no CGNSBase) |\n| cube.cgns#meshio | not readable (SystemExit: 1) |\n| cube.msh | 8 |\n| cube.obj | 8 |\n| cube.stl | 8 |\n| cube.su2 | 8 |\n| cube.vtk | not readable (SystemExit: 1) |\n| icosphere.cgns#cgns-namebased-audit | 4.04704468 |\n| icosphere.cgns#cgns-sids-audit | not readable (ValueError: no CGNSBase) |\n| icosphere.cgns#meshio | not readable (SystemExit: 1) |\n| icosphere.msh | 4.04704468 |\n| icosphere.obj | 4.04704468 |\n| icosphere.stl | 4.047044627 |\n| icosphere.su2 | 4.04704468 |\n| icosphere.vtk | not readable (SystemExit: 1) |\n| torus.cgns#cgns-namebased-audit | 1.762301535 |\n| torus.cgns#cgns-sids-audit | not readable (ValueError: no CGNSBase) |\n| torus.cgns#meshio | not readable (SystemExit: 1) |\n| torus.msh | 1.762301535 |\n| torus.obj | 1.762301535 |\n| torus.stl | 1.762301536 |\n| torus.su2 | 1.762301535 |\n| torus.vtk | not readable (SystemExit: 1) |\n\nCGNS \u6620\u5c04\u7ed3\u6784\uff08\u5ba1\u8ba1\u4fa7\u6309 SIDS \u89c4\u5219\u72ec\u7acb\u8ba1\u6570\uff09\uff1a\u4e0a\u6e38 `cube.cgns` \u8282\u70b9 10 \u4e2a\u4e2d\n**10 \u7f3a name / 10 \u7f3a label /\n10 \u7f3a order\uff0c10 \u4e2a\u628a label \u585e\u5728 `type` \u69fd**\uff1b\n\u4ea4\u4ed8\u81ea\u5199 `cube.cgns` \u4e0a\u8ff0\u56db\u9879\u5747\u4e3a 0\uff0c\u4f46**\u65e0 `CGNSLibraryVersion` \u8282\u70b9**\n\uff08\u53ea\u7528\u6839\u5c5e\u6027 `format`/`version`\uff09\u2014\u2014\u5373\u4ea4\u4ed8\"\u4e0a\u6e38\u6620\u5c04\u8fdd\u89c4\u3001\u51e0\u4f55\u65e0\u635f\"\u7684\u7ed3\u8bba\u72ec\u7acb\u6210\u7acb\uff0c\u800c\u5176\u81ea\u5199\u65b9\u8a00\u4e5f\u4e0d\u662f\u5b8c\u6574 SIDS\u3002\n\n## 4. \u7ed3\u679c\u56fe\n\n\u5de6\uff1a\u5ba1\u8ba1\u4fa7\u91cd\u7b97\u7684\u4f53\u79ef\u76f8\u5bf9\u8bef\u5dee\uff08cube \u5168 0e+00 \u7cbe\u786e\uff1bicosphere \u6700\u5dee\n1.311e-08\uff1btorus 6.912e-10\uff09\u3002\n\u53f3\uff1a\u6bcf\u683c\u5f0f\u7684\u51e0\u4f55 oracle \u5f52\u5c5e\u2014\u2014STL 3 \u4e2a\u7b2c\u4e09\u65b9\u8bfb\u8005\u3001OBJ 2\u3001VTK 1\u3001Gmsh 1\uff0c\u800c CGNS/SU2 \u53ea\u6709\u88ab\u5ba1\u65b9\u81ea\u5199\u8bfb\u8005\n\uff08meshio \u7684 CGNS reader \u662f Zone1/\u56db\u9762\u4f53 stub\uff0c\u4e14 meshio \u65e0 SU2 reader\uff09\uff0c\u8fd9\u662f\u63aa\u8f9e\u7c7b\u53d1\u73b0 F1 \u7684\u56fe\u8bc1\u3002\n\n## 5. \u6ce8\u610f\u70b9\uff08\u53d1\u73b0\u4e0e\u5c40\u9650\uff09\n\n1. **F1\uff08minor\uff09**\uff1a\"\u72ec\u7acb\u5b9e\u73b0\u91cd\u8bfb\u516d\u683c\u5f0f\"\u628a 4 \u4e2a\u7b2c\u4e09\u65b9 oracle \u4e0e 2 \u4e2a\u81ea\u5199\u8bfb\u8005\u5e76\u79f0\uff1b\u8868\u5934 reader \u5217\u4e0e \u00a76 \u5dee\u5f02\u6e05\u5355\n   \u662f\u51c6\u786e\u7684\uff0c\u53ea\u6709 headline \u6982\u62ec\u8fc7\u5ea6\u3002\u6570\u5b57\u672c\u8eab\u7ecf\u5ba1\u8ba1\u4fa7\u91cd\u5bfc\u4ecd\u6210\u7acb\uff088.0 / 4.04704468 / 1.7623015345\uff09\u3002\n2. **F2\uff08moderate\uff09**\uff1a\u8be5\u951a\u70b9\u5728 `tensor_benchmark_cases` **0 \u884c**\uff0c\u673a\u5668\u88c1\u5224\u7a7a\u7f6e\uff1b\u5144\u5f1f\u951a\u70b9\n   `GAP-CAD-B2-MESH-FORMAT-MATRIX` \u767b\u8bb0\u4e86\u540c\u4e00 18 \u683c\u77e9\u9635\u4e0e\u540c\u4e00\u6700\u5dee\u6570 1.311e-08\uff0c\u4f46\u672a\u4e0e\u672c\u951a\u70b9\u4e92\u94fe\u3002\n3. **F3\uff08moderate\uff09**\uff1a\u4ea4\u4ed8**\u672a\u5e76\u5165\u751f\u6001\u4ed3 main**\uff084f5b492 \u4ec5\u5728 `agent/m17595`\uff1b`/root/tensor-ecosystem/TensorCAD`\n   main `928f3e3` \u65e0 `tensorcad/mesh_xval.py`\uff0cgrep 0 \u547d\u4e2d\uff0c\u65e0 CI \u63a5\u7ebf\uff09\u2192 `integration_callers` \u4e3a\u7a7a\uff0c\u8fd9\u662f L3 \u672a\u8fbe\u7684\u552f\u4e00\u539f\u56e0\u3002\n4. **F4\uff08minor\uff09**\uff1a\u81ea\u5199 CGNS \u65b9\u8a00\u7f3a `CGNSLibraryVersion` \u8282\u70b9\uff0c\"validated reference dialect\" \u63aa\u8f9e\u9ad8\u4e8e\u5b9e\u8bc1\u3002\n5. **F5\uff08positive\uff09**\uff1a12 \u4e2a unreadable + 3 \u4e2a nonconformant\n   \u5168\u90e8\u663e\u5f0f\u6807\u6ce8\u3001\u4e0d\u8ba1\u5165 pass\uff1b\u62a5\u544a \u00a76.2 \u8bef\u5dee\u8868\u6709\u4e24\u884c\u663e\u5f0f NO\u3002honest-FAIL \u5904\u7406\u6b63\u786e\u3002\n6. **F6\uff08minor\uff09**\uff1a`matrix_b` summary \u628a 3 \u4e2a CGNS nonconformant \u8ba1\u5165 green\uff08\u51e0\u4f55\u53ef\u8bfb\uff09\uff0c\u5efa\u8bae\u5355\u5217\u3002\n7. **\u672a\u8dd1\uff08unknown\uff0c\u4e0d\u7b97\u901a\u8fc7\uff09**\uff1acgnslib \u5b98\u65b9 CGNS \u6d88\u8d39\u8005\uff08\u955c\u50cf\u65e0 libcgns\uff09\u2192 CGNS \u65e0\u5b98\u65b9\u5e93\u4e00\u4fa7\u9a8c\u8bc1\uff1b\n   1000 m \u5750\u6807\u504f\u7f6e\u654f\u611f\u6027\u91cd\u7b97\uff08\u88ab\u5ba1\u65b9\u81ea\u62a5 NO \u884c\uff0c\u5ba1\u8ba1\u672a\u590d\u73b0\uff09\uff1b\u6536\u655b\u9636\u68af\u9010\u70b9\u91cd\u7b97\u3002\n\n## 6. \u8bef\u5dee\u5224\u5b9a\uff08\u9010\u9879\u56de\u7b54\u662f\u5426 <3%\uff09\n\n| \u5173\u952e\u91cf | \u53c2\u8003 | \u5ba1\u8ba1\u91cd\u7b97 got | \u8bef\u5dee | <3%? | <15%? |\n|---|---|---|---|---|---|\n| cube \u4f53\u79ef \u00d7 6 \u683c\u5f0f | 8.0\uff08\u89e3\u6790\uff09 | 8.0 | 0.000e+00 | \u662f | \u662f |\n| icosphere \u4f53\u79ef\uff08STL float32 \u6700\u5dee\uff09 | 4.047044679978 | 4.047044626915 | 1.311e-08 | \u662f | \u662f |\n| torus \u4f53\u79ef\uff08STL \u6700\u5dee\uff09 | 1.762301534515 | 1.76230153451 | 6.912e-10 | \u662f | \u662f |\n| \u4e0a\u6e38 CGNS \u51e0\u4f55\uff08name-addressed \u91cd\u8bfb\uff09 | \u4e0a\u6e38 obj/msh \u4f53\u79ef | \u5b8c\u5168\u4e00\u81f4 | \u22641e-09 | \u662f | \u662f |\n| \u4e0a\u6e38 CGNS \u7ed3\u6784\u5408\u89c4 | 0 \u8fdd\u89c4 | 10/10 \u8282\u70b9\u7f3a\u5fc5\u9700\u5c5e\u6027 | \u7ed3\u6784\u8fdd\u89c4 | **\u5426**\uff08\u975e\u51e0\u4f55\u91cf\uff09 | \u4e0d\u9002\u7528 |\n| STL \u5728 1000 m \u504f\u7f6e\u4e0b\u5750\u6807\u504f\u5dee | 0 m | 3.85e-05 m\uff08\u88ab\u5ba1\u65b9\u81ea\u62a5\uff09 | not_run | **\u672a\u77e5** | \u4e0d\u9002\u7528 |\n\n**\u7ed3\u8bba**\uff1a\u53ef\u72ec\u7acb\u590d\u6838\u7684\u51e0\u4f55\u91cf\u6700\u5dee 1.311e-08\uff08\u22481.31e-06%\uff09\uff0c\u8fdc\u4f18\u4e8e owner 15% \u7ea2\u7ebf\u4e0e 3% \u7ebf\uff1b\n\u4e24\u6761 NO \u9879\u4e00\u6761\u662f\"\u5750\u6807\u7cfb\u7528\u6cd5\"\u8981\u6c42\u3001\u4e00\u6761\u662f\"\u7ed3\u6784\u5408\u89c4\"\u800c\u975e\u51e0\u4f55\u7cbe\u5ea6\uff0c\u5747\u5df2\u5982\u5b9e\u5217\u51fa\u3002\n",
+  "ownership": {
+   "mission_id": 17634,
+   "owner": "1",
+   "bypass": null,
+   "figures_checked": 1
+  },
+  "readback": {
+   "submission_id": "fe19b6c8891041e2a738cd2254ff2d31",
+   "report_id": 16588,
+   "ok": true,
+   "readback": {
+    "ok": true,
+    "record_missing": false,
+    "codes": [],
+    "checks": [
+     {
+      "field": "markdown",
+      "ok": true,
+      "expected_digest": "d30a91f7480601032b5804de5b6ca3f6e00358d615b4976705a50d2d870da5d0",
+      "observed_digest": "d30a91f7480601032b5804de5b6ca3f6e00358d615b4976705a50d2d870da5d0",
+      "code": "",
+      "detail": ""
+     },
+     {
+      "field": "figures",
+      "ok": true,
+      "expected_digest": "dc96b2915e2ca9b7375c3a68b33d6dc072b2078e80436c65f396be36878b6227",
+      "observed_digest": "dc96b2915e2ca9b7375c3a68b33d6dc072b2078e80436c65f396be36878b6227",
+      "code": "",
+      "detail": ""
+     },
+     {
+      "field": "mission_id",
+      "ok": true,
+      "expected_digest": "166572dff8d5aedada06bc75f068301e14a3c203b9fd850bf4606292acd135f5",
+      "observed_digest": "166572dff8d5aedada06bc75f068301e14a3c203b9fd850bf4606292acd135f5",
+      "code": "",
+      "detail": ""
+     }
+    ],
+    "checked_fields": [
+     "markdown",
+     "figures",
+     "mission_id"
+    ]
+   },
+   "ledger_ok": true,
+   "ledger_error": null
+  }
+ }
+}
