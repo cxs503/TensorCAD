@@ -1,0 +1,499 @@
+{
+ "checks": {
+  "cgns_probe": {
+   "upstream_m17483_cube": {
+    "file": "artifacts/m17595_xval_six_format/upstream_m17483/files/cube.cgns",
+    "label_in_type_attr": 10,
+    "missing_label": 10,
+    "missing_name": 10,
+    "missing_order": 10,
+    "nodes": 10,
+    "nonstandard_order": 0,
+    "payload_as_dataset": 9,
+    "payload_datasets": 10,
+    "root_has_cgnslibversion_node": false,
+    "root_has_version_attr": false
+   },
+   "xval_written_cube": {
+    "file": "artifacts/m17595_xval_six_format/files/cube/cube.cgns",
+    "label_in_type_attr": 0,
+    "missing_label": 0,
+    "missing_name": 0,
+    "missing_order": 0,
+    "nodes": 10,
+    "nonstandard_order": 0,
+    "payload_as_dataset": 9,
+    "payload_datasets": 9,
+    "root_has_cgnslibversion_node": false,
+    "root_has_version_attr": true
+   }
+  },
+  "claimed_errors": {
+   "all_numbered_checks_within_impl_threshold": true,
+   "checks_with_a_number": 51,
+   "headline_claim": "worst 1.311e-8 (18 cells, 33+30 reader checks)",
+   "headline_reproduced": true,
+   "implementation_threshold": 0.001,
+   "max_volume_rel_err": 1.3111681010775757e-08,
+   "owner_threshold": 0.15,
+   "reader_checks_total": 63,
+   "status_histogram": {
+    "nonconformant": 3,
+    "ok": 48,
+    "unreadable": 12
+   },
+   "summary_A": {
+    "cells_all_oss_green": 12,
+    "combinations": 18,
+    "failing": [
+     {
+      "error": "SystemExit: 1",
+      "format": "vtk",
+      "geometry": "cube",
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": "POLYDATA"
+     },
+     {
+      "error": "StopIteration: ",
+      "format": "su2",
+      "geometry": "cube",
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": null
+     },
+     {
+      "error": "SystemExit: 1",
+      "format": "vtk",
+      "geometry": "icosphere2",
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": "POLYDATA"
+     },
+     {
+      "error": "StopIteration: ",
+      "format": "su2",
+      "geometry": "icosphere2",
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": null
+     },
+     {
+      "error": "SystemExit: 1",
+      "format": "vtk",
+      "geometry": "torus64x32",
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": "POLYDATA"
+     },
+     {
+      "error": "StopIteration: ",
+      "format": "su2",
+      "geometry": "torus64x32",
+      "reader": "meshio",
+      "status": "unreadable",
+      "variant": null
+     }
+    ],
+    "reader_checks": 33,
+    "reader_checks_green": 27,
+    "worst_volume_rel_err": 1.3111681010775757e-08
+   },
+   "summary_B_declared_green": 21,
+   "summary_B_declared_reader_checks": 30,
+   "worst_cell": {
+    "format": "stl",
+    "geometry": "icosphere2",
+    "matrix": "matrix_a",
+    "reader": "meshio",
+    "status": "ok",
+    "variant": null,
+    "volume_rel_err": 1.3111681010775757e-08
+   }
+  },
+  "independent_reread": {
+   "cube/cgns/cgns-sids-audit": {
+    "bytes": 18448,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/cgns/meshio": {
+    "bytes": 18448,
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "cube/msh/meshio": {
+    "bytes": 303,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/obj/meshio": {
+    "bytes": 194,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/obj/trimesh": {
+    "bytes": 194,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/stl/meshio": {
+    "bytes": 684,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/stl/numpy-stl": {
+    "bytes": 684,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/stl/trimesh": {
+    "bytes": 684,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/su2/su2-audit": {
+    "bytes": 248,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "cube/vtk/meshio": {
+    "bytes": 319,
+    "ok": true,
+    "triangles": 12,
+    "volume": 8.0
+   },
+   "icosphere2/cgns/cgns-sids-audit": {
+    "bytes": 26400,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.047044679978849
+   },
+   "icosphere2/cgns/meshio": {
+    "bytes": 26400,
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "icosphere2/msh/meshio": {
+    "bytes": 14963,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.047044679978849
+   },
+   "icosphere2/obj/meshio": {
+    "bytes": 12880,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.047044679978849
+   },
+   "icosphere2/obj/trimesh": {
+    "bytes": 12880,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.047044679978849
+   },
+   "icosphere2/stl/meshio": {
+    "bytes": 16084,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.04704462691529
+   },
+   "icosphere2/stl/numpy-stl": {
+    "bytes": 16084,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.04704462691529
+   },
+   "icosphere2/stl/trimesh": {
+    "bytes": 16084,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.04704462691529
+   },
+   "icosphere2/su2/su2-audit": {
+    "bytes": 12618,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.047044679978849
+   },
+   "icosphere2/vtk/meshio": {
+    "bytes": 13308,
+    "ok": true,
+    "triangles": 320,
+    "volume": 4.047044679978849
+   },
+   "torus64x32/cgns/cgns-sids-audit": {
+    "bytes": 116784,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015345146478
+   },
+   "torus64x32/cgns/meshio": {
+    "bytes": 116784,
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "torus64x32/msh/meshio": {
+    "bytes": 223261,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015345146478
+   },
+   "torus64x32/obj/meshio": {
+    "bytes": 190602,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015345146478
+   },
+   "torus64x32/obj/trimesh": {
+    "bytes": 190602,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015345146478
+   },
+   "torus64x32/stl/meshio": {
+    "bytes": 204884,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015357328218
+   },
+   "torus64x32/stl/numpy-stl": {
+    "bytes": 204884,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015357328218
+   },
+   "torus64x32/stl/trimesh": {
+    "bytes": 204884,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015357328218
+   },
+   "torus64x32/su2/su2-audit": {
+    "bytes": 186563,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015345146478
+   },
+   "torus64x32/vtk/meshio": {
+    "bytes": 194807,
+    "ok": true,
+    "triangles": 4096,
+    "volume": 1.7623015345146478
+   }
+  },
+  "manifest": {
+   "doc_path": "docs/xval_mesh_six_format.md",
+   "doc_sha256_matches": true,
+   "files_declared": 110,
+   "missing": [],
+   "sha256_mismatch": [],
+   "verified": 110
+  },
+  "report": {
+   "declares_nonzero_mismatch": true,
+   "doc": "docs/xval_mesh_six_format.md",
+   "figures": {
+    "fig_convergence.png": 84615,
+    "fig_offset_sensitivity.png": 63329,
+    "fig_volume_error.png": 47977
+   },
+   "has_error_table": true,
+   "sections": [
+    "## 1. Problem setting and references",
+    "## 2. Method and implementation",
+    "## 3. Parameters",
+    "## 4. Results",
+    "## 5. TensorCAD vs OSS: difference list and porting decisions",
+    "## 6. Failure modes, limits and artefacts"
+   ]
+  },
+  "upstream_reread": {
+   "cube.cgns#cgns-namebased-audit": {
+    "ok": true,
+    "volume": 8.0
+   },
+   "cube.cgns#cgns-sids-audit": {
+    "error": "ValueError: no CGNSBase",
+    "ok": false
+   },
+   "cube.cgns#meshio": {
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "cube.msh": {
+    "ok": true,
+    "volume": 8.0
+   },
+   "cube.obj": {
+    "ok": true,
+    "volume": 8.0
+   },
+   "cube.stl": {
+    "ok": true,
+    "volume": 8.0
+   },
+   "cube.su2": {
+    "ok": true,
+    "volume": 8.0
+   },
+   "cube.vtk": {
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "icosphere.cgns#cgns-namebased-audit": {
+    "ok": true,
+    "volume": 4.047044679978849
+   },
+   "icosphere.cgns#cgns-sids-audit": {
+    "error": "ValueError: no CGNSBase",
+    "ok": false
+   },
+   "icosphere.cgns#meshio": {
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "icosphere.msh": {
+    "ok": true,
+    "volume": 4.047044679978849
+   },
+   "icosphere.obj": {
+    "ok": true,
+    "volume": 4.047044679978849
+   },
+   "icosphere.stl": {
+    "ok": true,
+    "volume": 4.04704462691529
+   },
+   "icosphere.su2": {
+    "ok": true,
+    "volume": 4.047044679978849
+   },
+   "icosphere.vtk": {
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "torus.cgns#cgns-namebased-audit": {
+    "ok": true,
+    "volume": 1.7623015345146478
+   },
+   "torus.cgns#cgns-sids-audit": {
+    "error": "ValueError: no CGNSBase",
+    "ok": false
+   },
+   "torus.cgns#meshio": {
+    "error": "SystemExit: 1",
+    "ok": false
+   },
+   "torus.msh": {
+    "ok": true,
+    "volume": 1.7623015345146478
+   },
+   "torus.obj": {
+    "ok": true,
+    "volume": 1.7623015345146478
+   },
+   "torus.stl": {
+    "ok": true,
+    "volume": 1.7623015357328218
+   },
+   "torus.su2": {
+    "ok": true,
+    "volume": 1.7623015345146478
+   },
+   "torus.vtk": {
+    "error": "SystemExit: 1",
+    "ok": false
+   }
+  },
+  "volume_agreement": {
+   "cube": {
+    "analytic_exact": true,
+    "cross_format_spread_rel": 0.0,
+    "formats_read_independently": [
+     "cgns",
+     "msh",
+     "obj",
+     "stl",
+     "su2",
+     "vtk"
+    ],
+    "max_rel_err_vs_reference": 0.0,
+    "readers": 9,
+    "reference": 8.0,
+    "volumes": {
+     "cube/cgns/cgns-sids-audit": 8.0,
+     "cube/msh/meshio": 8.0,
+     "cube/obj/meshio": 8.0,
+     "cube/obj/trimesh": 8.0,
+     "cube/stl/meshio": 8.0,
+     "cube/stl/numpy-stl": 8.0,
+     "cube/stl/trimesh": 8.0,
+     "cube/su2/su2-audit": 8.0,
+     "cube/vtk/meshio": 8.0
+    }
+   },
+   "icosphere2": {
+    "analytic_exact": false,
+    "cross_format_spread_rel": 1.3111681182691938e-08,
+    "formats_read_independently": [
+     "cgns",
+     "msh",
+     "obj",
+     "stl",
+     "su2",
+     "vtk"
+    ],
+    "max_rel_err_vs_reference": 1.3111681010775757e-08,
+    "readers": 9,
+    "reference": 4.047044679978849,
+    "volumes": {
+     "icosphere2/cgns/cgns-sids-audit": 4.047044679979,
+     "icosphere2/msh/meshio": 4.047044679979,
+     "icosphere2/obj/meshio": 4.047044679979,
+     "icosphere2/obj/trimesh": 4.047044679979,
+     "icosphere2/stl/meshio": 4.047044626915,
+     "icosphere2/stl/numpy-stl": 4.047044626915,
+     "icosphere2/stl/trimesh": 4.047044626915,
+     "icosphere2/su2/su2-audit": 4.047044679979,
+     "icosphere2/vtk/meshio": 4.047044679979
+    }
+   },
+   "torus64x32": {
+    "analytic_exact": false,
+    "cross_format_spread_rel": 6.912403934595927e-10,
+    "formats_read_independently": [
+     "cgns",
+     "msh",
+     "obj",
+     "stl",
+     "su2",
+     "vtk"
+    ],
+    "max_rel_err_vs_reference": 6.912403934595927e-10,
+    "readers": 9,
+    "reference": 1.7623015345146478,
+    "volumes": {
+     "torus64x32/cgns/cgns-sids-audit": 1.762301534515,
+     "torus64x32/msh/meshio": 1.762301534515,
+     "torus64x32/obj/meshio": 1.762301534515,
+     "torus64x32/obj/trimesh": 1.762301534515,
+     "torus64x32/stl/meshio": 1.762301535733,
+     "torus64x32/stl/numpy-stl": 1.762301535733,
+     "torus64x32/stl/trimesh": 1.762301535733,
+     "torus64x32/su2/su2-audit": 1.762301534515,
+     "torus64x32/vtk/meshio": 1.762301534515
+    }
+   }
+  }
+ },
+ "subject_root": "/tmp/m17595_verify"
+}

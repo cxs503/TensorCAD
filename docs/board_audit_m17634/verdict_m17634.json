@@ -1,0 +1,119 @@
+{
+ "repo": "TensorCAD",
+ "scope": "m17595 XVAL-CAD-M17483-NATIVE-SIX-FORMAT-MATRIX",
+ "mission_id": 17634,
+ "level": 2,
+ "verdict_by": "board-audit",
+ "evidence": {
+  "impl_files": [
+   "docs/board_audit_m17634/snapshot/mesh_xval.py",
+   "docs/board_audit_m17634/snapshot/xval_mesh_six_format.py",
+   "/root/tp-agent/work/m17595/tensorcad/mesh_xval.py",
+   "/root/tp-agent/work/m17595/tools/xval_mesh_six_format.py"
+  ],
+  "entry": "docs/board_audit_m17634/snapshot/xval_mesh_six_format.py",
+  "run_artifacts": [
+   "docs/board_audit_m17634/snapshot/results.json",
+   "docs/board_audit_m17634/snapshot/matrix.md",
+   "docs/board_audit_m17634/snapshot/manifest.json",
+   "docs/board_audit_m17634/snapshot/xval_mesh_six_format.md",
+   "docs/board_audit_m17634/audit_evidence.json",
+   "docs/board_audit_m17634/figures/audit_volume_deviation.png",
+   "/root/tp-agent/work/m17595/artifacts/m17595_xval_six_format/results.json",
+   "/root/tp-agent/work/m17595/artifacts/m17595_xval_six_format/manifest.json"
+  ],
+  "tests": [
+   "tests/test_mesh_xval.py::test_bodies_are_closed_and_analytic",
+   "tests/test_mesh_xval.py::test_compare_detects_wrong_orientation_and_missing_vertex",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[stl-meshio-1e-05]",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[stl-numpy-stl-1e-05]",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[stl-trimesh-1e-05]",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[obj-meshio-0.0]",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[obj-trimesh-0.0]",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[vtk-meshio-0.0]",
+   "tests/test_mesh_xval.py::test_oss_readback_roundtrip[gmsh-meshio-0.0]",
+   "tests/test_mesh_xval.py::test_su2_strict_reader_roundtrip",
+   "tests/test_mesh_xval.py::test_cgns_writer_is_sids_conformant",
+   "tests/test_mesh_xval.py::test_meshio_cannot_read_legacy_polydata",
+   "tests/test_mesh_xval.py::test_meshio_vtk_unstructured_grid_is_readable",
+   "tests/test_mesh_xval.py::test_meshio_su2_reader_fails_only_on_zero_volume_elements",
+   "tests/test_mesh_xval.py::test_meshio_cgns_reader_is_a_stub",
+   "tests/test_mesh_xval.py::test_trimesh_merges_vertices_by_default",
+   "tests/test_mesh_xval.py::test_stl_precision_degrades_with_coordinate_offset",
+   "tests/test_mesh_xval.py::test_committed_results_match_the_report"
+  ],
+  "integration_callers": "NONE — auditor-verified absence: commit 4f5b492 is only on branch agent/m17595 (git branch --contains 4f5b492 → agent/m17595); ecosystem main 928f3e3 has no tensorcad/mesh_xval.py and grep -rn mesh_xval --include=*.py in /root/tensor-ecosystem/TensorCAD → 0 hits; no CI job, no docs index entry. Therefore L3 is NOT claimed (deliverable is a standalone validation harness).",
+  "benchmark": {
+   "registry": "tensor_benchmark_cases WHERE anchor_slug='XVAL-CAD-M17483-NATIVE-SIX-FORMAT-MATRIX' → 0 rows; the only sibling registration is GAP-CAD-B2-MESH-FORMAT-MATRIX/CASE-CAD-B2-ROUNDTRIP-18 (created 2026-11-13, worst measured 1.311e-08)",
+   "ref_vs_got": {
+    "cube_volume": {
+     "ref": 8.0,
+     "got_independent": 8.0,
+     "rel_err": 0.0,
+     "formats": "STL/OBJ/VTK/Gmsh/CGNS/SU2",
+     "note": "analytic exact"
+    },
+    "icosphere2_volume": {
+     "ref": 4.047044679978,
+     "got_independent": 4.047044626915,
+     "rel_err": 1.3111681e-08,
+     "worst_reader": "STL float32"
+    },
+    "torus64x32_volume": {
+     "ref": 1.762301534515,
+     "got_independent": 1.762301535676,
+     "rel_err": 6.912e-10,
+     "worst_reader": "STL numpy-stl/trimesh"
+    },
+    "upstream_cgns_geometry": {
+     "ref": "upstream obj/msh volume",
+     "got_independent": "equal",
+     "rel_err": "<=1e-09"
+    }
+   },
+   "reader_checks": {
+    "total": 63,
+    "ok": 48,
+    "unreadable": 12,
+    "nonconformant": 3,
+    "numbered_checks": 51,
+    "max_volume_rel_err": 1.3111681e-08,
+    "all_numbered_within_impl_gate_1e-3": true,
+    "owner_threshold_0.15_met": true
+   },
+   "headline_reproduced": "worst 1.311e-8 reproduced by independent recount (rel diff <1e-3)",
+   "manifest": {
+    "files_declared": 110,
+    "sha256_verified": 110,
+    "missing": 0,
+    "mismatch": 0
+   }
+  },
+  "repro_cmd": "git clone --branch agent/m17595 /root/tp-agent/work/m17595/.git /tmp/m17595_verify && cd /tmp/m17595_verify && python3 -m pytest tests/test_mesh_xval.py -q && python3 tools/xval_mesh_six_format.py --check   # 18 passed / OK: results.json reproduces",
+  "external_anchor": [
+   "/usr/lib/python3.11/site-packages/meshio/cgns/_cgns.py",
+   "docs/board_audit_m17634/audit_report.md"
+  ],
+  "external_anchor_note": "Third-party readers actually used as oracle: meshio 5.3.5 (STL/OBJ/VTK-UNSTRUCTURED/Gmsh), trimesh 5.0.0, numpy-stl (STL, float32), h5py 3.15.1 (CGNS/HDF5 node mapping). no cgnslib in image → CGNS geometry has no official-library oracle; meshio 5.3.5's CGNS reader is a Zone1/tetra-only stub (source lines 20-38) and it has no SU2 reader, so CGNS/SU2 geometry was re-derived by the auditor's own readers (8.0 / 4.04704468 / 1.7623015345).",
+  "subject_ref": "TensorCAD branch agent/m17595 commit 4f5b492 (115 files, +276281)",
+  "auditor_checks": {
+   "pytest": "18 passed in 2.58s (auditor rerun in clean clone)",
+   "drift_gate": "python3 tools/xval_mesh_six_format.py --check → 'OK: results.json reproduces' (exit 0)",
+   "independent_recount": "docs/board_audit_m17634/audit_independent.py (does not import tensorcad.mesh_xval)",
+   "not_run": [
+    "cgnslib official consumer (absent in image)",
+    "1000 m offset sensitivity recompute (subject self-reported NO row left as not_run)",
+    "convergence ladder point-by-point recompute"
+   ]
+  },
+  "findings": {
+   "F1_minor": "headline 'six formats cross-read by OSS' conflates 4 third-party oracles (STL/OBJ/VTK/Gmsh) with 2 self-authored readers (CGNS/SU2); numbers independently reproduced, non-blocking",
+   "F2_moderate": "anchor has 0 rows in tensor_benchmark_cases → no machine referee criterion",
+   "F3_moderate": "delivery not merged into main / no integration caller → L3 unattainable",
+   "F4_minor": "own CGNS dialect lacks a CGNSLibraryVersion node; 'validated reference dialect' wording overreaches; upstream mapping-defect claim independently confirmed (10/10 nodes lack name/label/order, label in 'type')",
+   "F5_positive": "12 unreadable + 3 nonconformant honestly labelled and excluded from passes; §6.2 error table carries two explicit NO rows",
+   "F6_minor": "matrix_b summary counts 3 CGNS nonconformant cells as green (geometry readable) — recommend separate column"
+  },
+  "level_rationale": "L2: real implementation (823-line second implementation + oracle kernel), working CLI entry with a drift gate, 110/110 artefact sha256 verified, 18/18 tests pass, auditor reran both. Not L3: no mainline integration caller (delivery not merged). Not L4/5: the benchmark face is L4-grade (18 cells x 2 matrices, convergence/offset/variant studies, error analysis, reproducible) but the gate's cumulative scheme requires integration_callers and a registered benchmark case, and the anchor has 0 rows in tensor_benchmark_cases."
+ }
+}
