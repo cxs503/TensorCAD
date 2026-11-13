@@ -834,6 +834,14 @@ __all__ = [
     "table_integrals",
     "write_offset_bundle",
     "write_offset_csv",
+    # ellipsoidal geodesics (WGS84): route/geodesic lengths in true metres
+    "GeodesicError",
+    "GeodesicSolution",
+    "clairaut_distance",
+    "great_circle",
+    "sphere_error",
+    "vincenty_direct",
+    "vincenty_inverse",
 
 ]
 
@@ -841,5 +849,15 @@ __all__ = [
 #: polluting the top-level namespace (its ``TriMesh`` must not shadow the hull
 #: contracts re-exported above).
 from . import mesh_formats  # noqa: E402,F401  (integration entry point)
+
+from .geodesy import (  # ellipsoidal geodesics (WGS84): the Earth model behind a route
+    GeodesicError,
+    GeodesicSolution,
+    clairaut_distance,
+    great_circle,
+    sphere_error,
+    vincenty_direct,
+    vincenty_inverse,
+)
 
 __version__ = "0.23.0"
