@@ -1,0 +1,102 @@
+{
+ "KCS": {
+  "bytes": 246164,
+  "read_s": 0.06,
+  "surfaces_s": 0.05,
+  "partition_s": 0.0,
+  "n_surfaces": 55,
+  "n_usable": 55,
+  "n_quarantined": 0,
+  "unit_flag": 6,
+  "unit_name": "M",
+  "unit_scale": 1.0,
+  "model_scale": 1.0,
+  "units": "m",
+  "warnings": [],
+  "sample_s": 0.19,
+  "n_points": 9762,
+  "bbox": [
+   -6.01,
+   237.844,
+   -0.26,
+   16.142,
+   -0.15,
+   23.597
+  ]
+ },
+ "JBC": {
+  "bytes": 1713554,
+  "read_s": 0.15,
+  "surfaces_s": 0.23,
+  "partition_s": 0.0,
+  "n_surfaces": 45,
+  "n_usable": 44,
+  "n_quarantined": 1,
+  "unit_flag": 2,
+  "unit_name": "MM",
+  "unit_scale": 0.001,
+  "model_scale": 1.0,
+  "units": "mm",
+  "warnings": [],
+  "sample_s": 31.41,
+  "n_points": 1009568,
+  "bbox": [
+   -3856.185,
+   3686.594,
+   -565.345,
+   565.345,
+   0.0,
+   630.385
+  ]
+ },
+ "KVLCC2": {
+  "bytes": 6270129,
+  "read_s": 1.07,
+  "surfaces_s": 2.79,
+  "partition_s": 0.0,
+  "n_surfaces": 19,
+  "n_usable": 19,
+  "n_quarantined": 0,
+  "unit_flag": 2,
+  "unit_name": "MM",
+  "unit_scale": 0.001,
+  "model_scale": 1.0,
+  "units": "mm",
+  "warnings": [],
+  "sample_s": 1.4,
+  "n_points": 31313,
+  "bbox": [
+   -328.116,
+   5.502,
+   -0.416,
+   29.374,
+   -28.067,
+   0.055
+  ]
+ },
+ "ONRT": {
+  "bytes": 3374136,
+  "read_s": 0.28,
+  "surfaces_s": 0.11,
+  "partition_s": 0.02,
+  "n_surfaces": 132,
+  "n_usable": 132,
+  "n_quarantined": 0,
+  "unit_flag": 6,
+  "unit_name": "M",
+  "unit_scale": 1.0,
+  "model_scale": 1.0,
+  "units": "m",
+  "warnings": [],
+  "sample_s": 0.06,
+  "n_points": 2112,
+  "bbox": [
+   -0.006,
+   1.0,
+   -0.061,
+   0.061,
+   -0.045,
+   0.058
+  ]
+ }
+}

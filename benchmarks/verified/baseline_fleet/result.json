@@ -18,7 +18,7 @@
       "verdict": "VERIFIED",
       "reasons": []
     },
-    "JBC": {
+    "KVLCC2": {
       "ref_volume_m3": null,
       "got_volume_m3": null,
       "rel_error_percent": null,
@@ -28,20 +28,34 @@
       "triangles": null,
       "verdict": "WITHHELD",
       "reasons": [
-        "IgesError: ambiguous control-point layout: candidates score within 4x (2.78e+06 vs 1.07e+07)"
+        "ValueError: field produced fewer than two usable waterline slices"
+      ]
+    },
+    "JBC": {
+      "ref_volume_m3": 178369.9,
+      "got_volume_m3": 145769.0490375513,
+      "rel_error_percent": -18.277103346724246,
+      "within_1_percent": false,
+      "watertight": true,
+      "edge_manifold": true,
+      "triangles": 75840,
+      "verdict": "WITHHELD",
+      "reasons": [
+        "volume 145769 m3 is -18.28% off the published 178370 m3 (tolerance 1%)"
       ]
     },
     "ONRT": {
       "ref_volume_m3": 8500.7793948,
-      "got_volume_m3": 0.005594730209829934,
-      "rel_error_percent": -99.99993418567934,
+      "got_volume_m3": 92.94890171498025,
+      "rel_error_percent": -98.9065837684032,
       "within_1_percent": false,
       "watertight": true,
       "edge_manifold": true,
-      "triangles": 960,
+      "triangles": 3360,
       "verdict": "WITHHELD",
       "reasons": [
-        "volume 0 m3 is -100.00% off the published 8501 m3 (tolerance 1%)"
+        "volume 93 m3 is -98.91% off the published 8501 m3 (tolerance 1%)",
+        "geometry extent 42.499 m vs published L_PP 154.0 m (ratio 0.2760): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 3.624^3 would give 4422.6 m3"
       ]
     }
   }

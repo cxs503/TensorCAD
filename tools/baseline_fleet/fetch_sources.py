@@ -59,6 +59,9 @@ PAGES: dict[str, str] = {
     "simman_kvlcc2": "https://simman2020.kr/contents/KVLCC2.php",
     "simman_kcs": "https://simman2020.kr/contents/KCS.php",
     "simman_onrt": "https://simman2020.kr/contents/ONRT.php",
+    #: Table 1/2/3 of this single page are the publishers' full-scale principal
+    #: particulars for KVLCC2 / KCS / ONRT (displacement, Cb, LCB, model scale).
+    "simman_summary": "https://simman2020.kr/contents/Ship_data_summary.php",
 }
 
 #: Licence as *stated by the publisher*, or the absence of one, quoted verbatim.
@@ -159,9 +162,10 @@ def main(argv: list[str] | None = None) -> int:
         except Exception as exc:
             pages[key] = {"url": url, "error": f"{type(exc).__name__}: {exc}"}
             continue
-        (raw / f"{key}.html").write_bytes(data)
+        (raw / "pages").mkdir(exist_ok=True)
+        (raw / "pages" / f"{key}.html").write_bytes(data)
         pages[key] = {"url": url, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),
-                      "local_path": str(raw / f"{key}.html")}
+                      "local_path": str(raw / "pages" / f"{key}.html")}
 
     registry_path.write_text(json.dumps({
         "schema": "tensorcad.baseline_fleet.sources/1.0",

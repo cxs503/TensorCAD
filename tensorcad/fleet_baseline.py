@@ -461,6 +461,14 @@ class ShipSpec:
     published_volume_m3: float | None = None
     published_cb: float | None = None
     published_lcb_percent: float | None = None
+    #: model-space -> full-scale factor of the *geometry file*.  Workshop archives
+    #: ship some hulls at model scale (ONRT 1:48.9355 as published, JBC in a
+    #: model frame) and some at full scale (KVLCC2).  ``None`` means "infer it by
+    #: normalising the point cloud's x-extent to the published L_PP"; that inference
+    #: is recorded in the report and turns the volume gate into a block-coefficient
+    #: (shape) gate, so it is never silent.
+    geometry_scale: float | None = 1.0
+    scale_basis: str = ""
     published_source: str = ""
     source_url: str = ""
     publisher: str = ""
@@ -520,10 +528,39 @@ def build_ship(
     usable, quarantined = partition_surfaces(surfaces)
     if not usable:
         raise ValueError(f"{spec.name}: every surface was quarantined")
-    points = [
-        (x * factor, y * factor, z * factor)
-        for x, y, z in sample_patches(usable, spacing=1.0 / max(samples_per_metre, 1e-6))
-    ]
+    raw_points = list(
+        sample_patches(usable, spacing=1.0 / max(samples_per_metre, 1e-6))
+    )
+    geometry_scale = spec.geometry_scale
+    scale_basis = spec.scale_basis or "geometry file is full scale"
+    if geometry_scale is None:
+        # No published model scale for this hull: normalise the point cloud's
+        # x-extent to the publisher's L_PP.  The factor is recorded, and the
+        # volume gate below degrades to a block-coefficient (shape) gate because
+        # one length has been fitted.
+        xs_raw = [point[0] for point in raw_points]
+        extent_raw = (max(xs_raw) - min(xs_raw)) * factor if xs_raw else float("nan")
+        if not (extent_raw and extent_raw == extent_raw and extent_raw > 0.0):
+            raise ValueError(f"{spec.name}: cannot infer a scale from an empty point cloud")
+        geometry_scale = spec.length_pp / extent_raw
+        scale_basis = (
+            f"inferred (no published model scale): published L_PP {spec.length_pp:.3f} m / "
+            f"geometric x-extent {extent_raw:.4f} m = {geometry_scale:.5f}"
+        )
+    factor = factor * geometry_scale
+    points = [(x * factor, y * factor, z * factor) for x, y, z in raw_points]
+    # Frame guard.  Workshop files do not share one origin: KCS/KVLCC2/JBC put the
+    # keel at z=0, but the KVLCC2 patch set has the *waterline* at z=0 (keel at
+    # z=-20.8 m).  Detect that layout from the data (every point at or below a plane
+    # that sits within one draft of the deepest point) and shift the hull up so the
+    # keel is z=0, which is the frame the waterline cut expects.  A translation does
+    # not change the volume, only the placement of the cut.
+    z_min = min(z for _, _, z in points)
+    z_max = max(z for _, _, z in points)
+    frame_shift_z = 0.0
+    if z_min < -0.5 * spec.draft and -0.05 * spec.draft <= z_max <= 0.05 * spec.draft:
+        frame_shift_z = -z_max
+        points = [(x, y, z + frame_shift_z) for x, y, z in points]
     field = field_from_points(points, spec.draft, dx=dx, dz=dz)
     mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
     mesh_stats = measure_mesh(mesh, spec.draft)
@@ -556,6 +593,12 @@ def build_ship(
 
     volume_error = None
     volume_ok: bool | None = None
+    volume_gate_basis = (
+        "shape (Cb): scale was fitted to the published L_PP, so a volume match is a "
+        "block-coefficient match, not an independent check of the absolute scale"
+        if spec.geometry_scale is None
+        else "absolute displacement at the publisher's own scale"
+    )
     if spec.published_volume_m3:
         volume_error = (volume - spec.published_volume_m3) / spec.published_volume_m3 * 100.0
         volume_ok = abs(volume_error) <= 100.0 * VOLUME_TOLERANCE
@@ -608,6 +651,7 @@ def build_ship(
 
     report = {
         "schema": SCHEMA,
+        "volume_gate_basis": volume_gate_basis,
         "spec": spec.to_dict(),
         "source": {
             "iges_stats": model.stats(),
@@ -616,6 +660,10 @@ def build_ship(
             "unit_name": model.unit_name,
             "unit_source": model.unit_source,
             "model_space_scale": model.model_scale,
+            "geometry_scale_to_full": geometry_scale,
+            "scale_basis": scale_basis,
+            "scale_inferred": spec.geometry_scale is None,
+            "frame_shift_z": frame_shift_z,
             "unit_scale_to_metres": factor,
             "unit_warnings": list(model.unit_warnings),
             "patches_total": len(surfaces),
