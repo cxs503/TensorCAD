@@ -47,11 +47,14 @@ import random
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Sequence
 
 from . import mesh as meshlib
 from .geometry import Mesh
 from .hydrostatics import Hydrostatics, compute_hydrostatics
+
+if TYPE_CHECKING:  # fairness_energy imports gaussian_curvature from this module
+    from .fairness_energy import FairnessEnergyReport
 
 __all__ = [
     "CREASE_DEGREES",
@@ -1436,6 +1439,12 @@ class GeometryAuditReport:
     tables: tuple[OffsetTable, ...] = ()
     stages_run: tuple[str, ...] = ()
     schema: str = SCHEMA_AUDIT
+    #: Total curvature cost of the surface (``tensorcad.fairness_energy``): the
+    #: integral of the curvature densities, split into a smooth bucket and a
+    #: designed-crease bucket.  ``audit_fairness`` asks *whether* curvature jumps;
+    #: this says *how much* curvature the shape carries and whether that number
+    #: converges under refinement.
+    smoothing_energy: "FairnessEnergyReport | None" = None
 
     @property
     def accepted(self) -> bool:
@@ -1472,6 +1481,8 @@ class GeometryAuditReport:
             data["declared_geometry"] = self.declared.to_dict()
         if self.consistency is not None:
             data["hydrostatic_consistency"] = self.consistency.to_dict()
+        if self.smoothing_energy is not None:
+            data["smoothing_energy"] = self.smoothing_energy.to_dict()
         if self.mesh_hydrostatics is not None:
             data["mesh_hydrostatics"] = self.mesh_hydrostatics.to_dict()
         if self.tables:
@@ -1499,6 +1510,8 @@ def audit_hull_geometry(
     dimension_tolerance: float = DIMENSION_TOLERANCE,
     cb_tolerance: float = DECLARED_CB_TOLERANCE,
     check_fairness: bool = True,
+    check_smoothing_energy: bool = True,
+    smoothing_crease_degrees: float = CREASE_DEGREES,
 ) -> GeometryAuditReport:
     """Run the full audit: topology, fairness, declared geometry, consistency.
 
@@ -1541,6 +1554,18 @@ def audit_hull_geometry(
         fairness = audit_fairness(mesh, threshold=curvature_threshold)
         stages.append("fairness")
 
+    smoothing = None
+    if check_smoothing_energy:
+        # The *magnitude* of the curvature, integrated: the fairness stage flags a
+        # jump, this says how much curvature cost the surface carries and how much
+        # of it is a designed crease (keel/deck edge) rather than a fair surface.
+        # Deferred import: fairness_energy reads gaussian_curvature from this
+        # module, so a module-level import would be circular.
+        from .fairness_energy import fairness_energy_report
+
+        smoothing = fairness_energy_report(mesh, crease_angle_degrees=smoothing_crease_degrees)
+        stages.append("smoothing_energy")
+
     top = float(box.maximum[2] if waterline_z is None else waterline_z)
     mesh_hydro = compute_hydrostatics(mesh, top, water_density=water_density, closed=True)
     stages.append("mesh_hydrostatics")
@@ -1564,6 +1589,7 @@ def audit_hull_geometry(
                 consistency=None,
                 mesh_hydrostatics=mesh_hydro,
                 stages_run=tuple(stages),
+                smoothing_energy=smoothing,
             )
 
     if offsets is None and half_breadth is not None:
@@ -1589,6 +1615,7 @@ def audit_hull_geometry(
         mesh_hydrostatics=mesh_hydro,
         tables=tuple(tables),
         stages_run=tuple(stages),
+        smoothing_energy=smoothing,
     )
 
 
