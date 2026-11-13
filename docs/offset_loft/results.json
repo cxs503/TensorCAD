@@ -1,0 +1,633 @@
+{
+  "comparisons": {
+    "kvlcc2_class": {
+      "degrees": [
+        3,
+        3
+      ],
+      "lcb": {
+        "nurbs_quadrature": 148.56898149559078,
+        "table_simpson": 148.92227716871182
+      },
+      "name": "kvlcc2_class",
+      "passed": true,
+      "reference": {
+        "lcb": 148.86400000000006,
+        "vcb": 10.89523809523809,
+        "volume": 312621.6703999997,
+        "waterplane_area": 16532.876799999995
+      },
+      "reference_full": {
+        "closed_form": {
+          "block_coefficient": 0.8098,
+          "lcb_fraction": -0.0348,
+          "note": "published KVLCC2 particulars used to calibrate the plan-form exponents",
+          "volume": 312621.6704
+        },
+        "lcb": 148.86400000000006,
+        "method": "analytic half-breadth + composite Gauss (independent of the patch set)",
+        "vcb": 10.89523809523809,
+        "volume": 312621.6703999997,
+        "waterplane_area": 16532.876799999995
+      },
+      "station_deviation": 1.2576606422953773e-12,
+      "tolerance": 0.005,
+      "vcb": {
+        "nurbs_quadrature": 10.895249842128035,
+        "table_simpson": 10.886405001332196
+      },
+      "volume": {
+        "loft_mesh": 312880.6989213982,
+        "nurbs_quadrature": 313250.4836966367,
+        "relative_error_mesh": 0.00038324557730435834,
+        "relative_error_nurbs": 0.0015655700060511811,
+        "relative_error_nurbs_vs_reference": 0.002011419412583929,
+        "table_simpson": 312760.83471473976
+      },
+      "waterplane": {
+        "loft_mesh": 16548.077375596014,
+        "nurbs_quadrature": 16566.188229708678,
+        "relative_error_mesh": 0.0012769976738391065,
+        "relative_error_nurbs": 0.0023728338377416937,
+        "relative_error_nurbs_vs_reference": 0.002014859852381114,
+        "table_simpson": 16526.97247019597
+      }
+    },
+    "series60_cb060": {
+      "degrees": [
+        3,
+        3
+      ],
+      "lcb": {
+        "nurbs_quadrature": 4.999999999999997,
+        "table_simpson": 5.000000000000001
+      },
+      "name": "series60_cb060",
+      "passed": true,
+      "reference": {
+        "lcb": 5.0,
+        "vcb": 0.3188704676772402,
+        "volume": 3.750000005484866,
+        "waterplane_area": 6.250000009142301
+      },
+      "reference_full": {
+        "closed_form": {
+          "cm": 0.96,
+          "cp": 0.625,
+          "lcb_x": 0.0,
+          "vcb_z": -0.30612244897959184,
+          "volume": 3.75,
+          "waterplane_area": 6.25
+        },
+        "lcb": 5.0,
+        "method": "analytic half-breadth + composite Gauss (independent of the patch set)",
+        "vcb": 0.3188704676772402,
+        "volume": 3.750000005484866,
+        "waterplane_area": 6.250000009142301
+      },
+      "station_deviation": 1.1851630787873546e-14,
+      "tolerance": 0.005,
+      "vcb": {
+        "nurbs_quadrature": 0.3188787367966796,
+        "table_simpson": 0.318491606004534
+      },
+      "volume": {
+        "loft_mesh": 3.7497823944653255,
+        "nurbs_quadrature": 3.7501708323279646,
+        "relative_error_mesh": 0.0012260077673285723,
+        "relative_error_nurbs": 0.001122545327648072,
+        "relative_error_nurbs_vs_reference": 4.55538247596807e-05,
+        "table_simpson": 3.7543853000046754
+      },
+      "waterplane": {
+        "loft_mesh": 6.249969150864119,
+        "nurbs_quadrature": 6.250308159772984,
+        "relative_error_mesh": 3.354266995429958e-05,
+        "relative_error_nurbs": 8.77861825134195e-05,
+        "relative_error_nurbs_vs_reference": 4.930410083709053e-05,
+        "table_simpson": 6.249759517243338
+      }
+    },
+    "wigley_iii": {
+      "degrees": [
+        3,
+        3
+      ],
+      "lcb": {
+        "nurbs_quadrature": 5.0,
+        "table_simpson": 5.0
+      },
+      "name": "wigley_iii",
+      "passed": true,
+      "reference": {
+        "lcb": 5.0,
+        "vcb": 0.3906249999999997,
+        "volume": 2.777777777777778,
+        "waterplane_area": 6.666666666666665
+      },
+      "reference_full": {
+        "closed_form": {
+          "lcb_x": 0.0,
+          "vcb_z": -0.234375,
+          "volume": 2.7777777777777777,
+          "waterplane_area": 6.666666666666666
+        },
+        "lcb": 5.0,
+        "method": "analytic half-breadth + composite Gauss (independent of the patch set)",
+        "vcb": 0.3906249999999997,
+        "volume": 2.777777777777778,
+        "waterplane_area": 6.666666666666665
+      },
+      "station_deviation": 1.5182299861749016e-14,
+      "tolerance": 0.005,
+      "vcb": {
+        "nurbs_quadrature": 0.39062499999999983,
+        "table_simpson": 0.390625
+      },
+      "volume": {
+        "loft_mesh": 2.777137302674503,
+        "nurbs_quadrature": 2.7777777789825313,
+        "relative_error_mesh": 0.0002305710371788905,
+        "relative_error_nurbs": 4.337113068686449e-10,
+        "relative_error_nurbs_vs_reference": 4.337111469965293e-10,
+        "table_simpson": 2.7777777777777777
+      },
+      "waterplane": {
+        "loft_mesh": 6.666259762937436,
+        "nurbs_quadrature": 6.666666669558072,
+        "relative_error_mesh": 6.103555938450356e-05,
+        "relative_error_nurbs": 4.3371093383370865e-10,
+        "relative_error_nurbs_vs_reference": 4.337110670604717e-10,
+        "table_simpson": 6.666666666666666
+      }
+    }
+  },
+  "failures": [],
+  "fast_path_cross_check": {
+    "table": "wigley_iii 13 x 9",
+    "volume_fast": 2.7777783017651547,
+    "volume_relative_difference": 9.59232512330874e-16,
+    "volume_slow": 2.777778301765152,
+    "waterplane_fast": 6.66666792423637,
+    "waterplane_relative_difference": 1.3322673782373244e-16,
+    "waterplane_slow": 6.666667924236369
+  },
+  "landed_tables": {
+    "kvlcc2_class": {
+      "beam": 58.0,
+      "csv": "docs/offset_loft/tables/kvlcc2_class.csv",
+      "csv_sha256": "ff0ea036ca3c37a503870c8f8ffaecaa4f30addd9a9f1302f7fbd33fdaed6ed1",
+      "design_draft": 20.8,
+      "digest": "ac450faf4195b2088e1ec79230d91c5aae68b4d392b1219a12761cb65b01fe32",
+      "length": 320.0,
+      "licence": "n/a (reconstruction of published particulars)",
+      "n_stations": 41,
+      "n_waterlines": 17,
+      "official": false,
+      "provenance_json": "docs/offset_loft/tables/kvlcc2_class.provenance.json",
+      "round_trip_identical": true,
+      "source": "KVLCC2-class tanker: published particulars L = 320 m, B = 58 m, T = 20.8 m, Cb = 0.8098, LCB = -3.48 % L (KRISO KVLCC2; ITTC 2010/2015 workshop benchmark)",
+      "waterline_exponent": 3.0
+    },
+    "series60_cb060": {
+      "beam": 1.0,
+      "csv": "docs/offset_loft/tables/series60_cb060.csv",
+      "csv_sha256": "50a341aefb3c195e05973398fb58710bdf2b6bd60dc00d1f854254d422fc8dc5",
+      "design_draft": 0.625,
+      "digest": "83f1341435b5d549676371546fcc5b4fdd4263f8c6e3fab3dfdd729bf0380230",
+      "length": 10.0,
+      "licence": "n/a (published parametric hull family)",
+      "n_stations": 21,
+      "n_waterlines": 17,
+      "official": false,
+      "provenance_json": "docs/offset_loft/tables/series60_cb060.provenance.json",
+      "round_trip_identical": true,
+      "source": "Series 60 parent form, Todd (1951) DTMB Report 1447; Cp = 0.625 and n = 5/3 from the published parent-form table encoded in tensorcad.geomquality.baselines._SERIES60_PARENTS",
+      "waterline_exponent": 3.0
+    },
+    "wigley_iii": {
+      "beam": 1.0,
+      "csv": "docs/offset_loft/tables/wigley_iii.csv",
+      "csv_sha256": "4b56853de107182b1ea017bb4a93e0dfbb1264cc7c67cca6aafec32b13cc28b3",
+      "design_draft": 0.625,
+      "digest": "8a8bf611ee9b3bfe97d829acdd889134a770192141cb2f32ce1f51b0d02526e3",
+      "length": 10.0,
+      "licence": "n/a (mathematical definition)",
+      "n_stations": 21,
+      "n_waterlines": 17,
+      "official": false,
+      "provenance_json": "docs/offset_loft/tables/wigley_iii.provenance.json",
+      "round_trip_identical": true,
+      "source": "Wigley III parabolic hull form y = (B/2)(1-(2x/L)^2)(1-(z/T-1)^2); the standard resistance/seakeeping verification hull (Wigley 1934; Journee & Massie 2001, 'Offshore Hydromechanics', section 3)",
+      "waterline_exponent": 1.0
+    }
+  },
+  "plot": "docs/offset_loft/plot.png",
+  "report": "docs/offset_loft/report.md",
+  "schema": "tensorcad.offset_loft.study/1",
+  "station_sensitivity": {
+    "kvlcc2_class": [
+      {
+        "n_stations": 11,
+        "relative_error_volume_vs_denominator": 0.016037153756316435,
+        "relative_error_volume_vs_own_table": 0.0031335758651636855,
+        "relative_error_volume_vs_reference": 0.015272659624392499,
+        "relative_error_waterplane_vs_denominator": 0.015246347257885045,
+        "relative_error_waterplane_vs_own_table": 0.003939789792465111,
+        "relative_error_waterplane_vs_reference": 0.015271547975048946,
+        "station_step": 32.0,
+        "volume_nurbs": 307847.1060367715,
+        "volume_table_simpson": 306885.4571747988,
+        "waterplane_nurbs": 16280.394178783221,
+        "waterplane_table_simpson": 16216.50455964965
+      },
+      {
+        "n_stations": 15,
+        "relative_error_volume_vs_denominator": 0.004981664586967847,
+        "relative_error_volume_vs_own_table": 0.004338825330465686,
+        "relative_error_volume_vs_reference": 0.004208580845560402,
+        "relative_error_waterplane_vs_denominator": 0.004181972841790569,
+        "relative_error_waterplane_vs_own_table": 0.005146007911321963,
+        "relative_error_waterplane_vs_reference": 0.00420745670608419,
+        "station_step": 22.857142857142858,
+        "volume_nurbs": 311305.9768260472,
+        "volume_table_simpson": 309961.1097117705,
+        "waterplane_nurbs": 16463.31543663697,
+        "waterplane_table_simpson": 16379.028824725165
+      },
+      {
+        "n_stations": 21,
+        "relative_error_volume_vs_denominator": 0.0015171561031318385,
+        "relative_error_volume_vs_own_table": 0.005114556159662591,
+        "relative_error_volume_vs_reference": 0.0022952891310046956,
+        "relative_error_waterplane_vs_denominator": 0.0023220709211657677,
+        "relative_error_waterplane_vs_own_table": 0.005922362191885057,
+        "relative_error_waterplane_vs_reference": 0.002296420612638265,
+        "station_step": 16.0,
+        "volume_nurbs": 313339.22752218536,
+        "volume_table_simpson": 311744.79127970303,
+        "waterplane_nurbs": 16570.843239069723,
+        "waterplane_table_simpson": 16473.28249365307
+      },
+      {
+        "n_stations": 31,
+        "relative_error_volume_vs_denominator": 0.002856814782715203,
+        "relative_error_volume_vs_own_table": 0.0038242225452450873,
+        "relative_error_volume_vs_reference": 0.003635988664115439,
+        "relative_error_waterplane_vs_denominator": 0.0036700071916648917,
+        "relative_error_waterplane_vs_own_table": 0.004638199401822216,
+        "relative_error_waterplane_vs_reference": 0.003644322388255737,
+        "station_step": 10.666666666666666,
+        "volume_nurbs": 313758.35924973094,
+        "volume_table_simpson": 312563.048592493,
+        "waterplane_nurbs": 16593.12793306451,
+        "waterplane_table_simpson": 16516.521015171755
+      },
+      {
+        "n_stations": 41,
+        "relative_error_volume_vs_denominator": 0.001233506767272889,
+        "relative_error_volume_vs_own_table": 0.0015655700060511811,
+        "relative_error_volume_vs_reference": 0.002011419412583929,
+        "relative_error_waterplane_vs_denominator": 0.002040502955335274,
+        "relative_error_waterplane_vs_own_table": 0.0023728338377416937,
+        "relative_error_waterplane_vs_reference": 0.002014859852381114,
+        "station_step": 8.0,
+        "volume_nurbs": 313250.4836966367,
+        "volume_table_simpson": 312760.83471473976,
+        "waterplane_nurbs": 16566.188229708678,
+        "waterplane_table_simpson": 16526.97247019597
+      },
+      {
+        "n_stations": 61,
+        "relative_error_volume_vs_denominator": 0.00072006203626098,
+        "relative_error_volume_vs_own_table": 0.0006676982629874365,
+        "relative_error_volume_vs_reference": 5.633277543234458e-05,
+        "relative_error_waterplane_vs_denominator": 8.305473965420314e-05,
+        "relative_error_waterplane_vs_own_table": 0.00013546059745621689,
+        "relative_error_waterplane_vs_reference": 5.7461729531594684e-05,
+        "station_step": 5.333333333333333,
+        "volume_nurbs": 312639.28124635364,
+        "volume_table_simpson": 312848.16942565795,
+        "waterplane_nurbs": 16533.826807695055,
+        "waterplane_table_simpson": 16531.587428985025
+      },
+      {
+        "n_stations": 81,
+        "relative_error_volume_vs_denominator": 0.0008899324395912889,
+        "relative_error_volume_vs_own_table": 0.0008899324395912889,
+        "relative_error_volume_vs_reference": 0.00011366960943266288,
+        "relative_error_waterplane_vs_denominator": 8.695218775460131e-05,
+        "relative_error_waterplane_vs_own_table": 8.695218775460131e-05,
+        "relative_error_waterplane_vs_reference": 0.00011254084724953593,
+        "station_step": 4.0,
+        "volume_nurbs": 312586.13481682516,
+        "volume_table_simpson": 312864.5631407627,
+        "waterplane_nurbs": 16531.01617603745,
+        "waterplane_table_simpson": 16532.453709056404
+      }
+    ],
+    "series60_cb060": [
+      {
+        "n_stations": 11,
+        "relative_error_volume_vs_denominator": 0.0008952110187164926,
+        "relative_error_volume_vs_own_table": 0.0017754065897554144,
+        "relative_error_volume_vs_reference": 0.00031068170722858997,
+        "relative_error_waterplane_vs_denominator": 0.0003153959505377949,
+        "relative_error_waterplane_vs_own_table": 0.000565866146159059,
+        "relative_error_waterplane_vs_reference": 0.0003144329775636041,
+        "station_step": 1.0,
+        "volume_nurbs": 3.751165061888677,
+        "volume_table_simpson": 3.757836750017884,
+        "waterplane_nurbs": 6.251965215254948,
+        "waterplane_table_simpson": 6.255504993758045
+      },
+      {
+        "n_stations": 15,
+        "relative_error_volume_vs_denominator": 0.0010823188052622027,
+        "relative_error_volume_vs_own_table": 0.001441095269016789,
+        "relative_error_volume_vs_reference": 0.00012334808659495285,
+        "relative_error_waterplane_vs_denominator": 0.00012806144704150953,
+        "relative_error_waterplane_vs_own_table": 0.00023114974317204774,
+        "relative_error_waterplane_vs_reference": 0.00012709865440850384,
+        "station_step": 0.7142857142857143,
+        "volume_nurbs": 3.7504625608102735,
+        "volume_table_simpson": 3.7558751346979045,
+        "waterplane_nurbs": 6.250794375733516,
+        "waterplane_table_simpson": 6.252239579306523
+      },
+      {
+        "n_stations": 21,
+        "relative_error_volume_vs_denominator": 0.001160019284699483,
+        "relative_error_volume_vs_own_table": 0.001122545327648072,
+        "relative_error_volume_vs_reference": 4.55538247596807e-05,
+        "relative_error_waterplane_vs_denominator": 5.0266818579591626e-05,
+        "relative_error_waterplane_vs_own_table": 8.77861825134195e-05,
+        "relative_error_waterplane_vs_reference": 4.930410083709053e-05,
+        "station_step": 0.5,
+        "volume_nurbs": 3.7501708323279646,
+        "volume_table_simpson": 3.7543853000046754,
+        "waterplane_nurbs": 6.250308159772984,
+        "waterplane_table_simpson": 6.249759517243338
+      },
+      {
+        "n_stations": 31,
+        "relative_error_volume_vs_denominator": 0.0011925158424911536,
+        "relative_error_volume_vs_own_table": 0.0012402546426944,
+        "relative_error_volume_vs_reference": 1.3018044492958874e-05,
+        "relative_error_waterplane_vs_denominator": 1.7730884979806113e-05,
+        "relative_error_waterplane_vs_own_table": 3.0065759930822087e-05,
+        "relative_error_waterplane_vs_reference": 1.6768198558651142e-05,
+        "station_step": 0.3333333333333333,
+        "volume_nurbs": 3.750048823151786,
+        "volume_table_simpson": 3.754705614221775,
+        "waterplane_nurbs": 6.250104810383446,
+        "waterplane_table_simpson": 6.250292730184169
+      },
+      {
+        "n_stations": 41,
+        "relative_error_volume_vs_denominator": 0.0012014809998373468,
+        "relative_error_volume_vs_own_table": 0.001196357450448321,
+        "relative_error_volume_vs_reference": 4.0420664419207675e-06,
+        "relative_error_waterplane_vs_denominator": 8.754864626459603e-06,
+        "relative_error_waterplane_vs_own_table": 1.3884622178069068e-05,
+        "relative_error_waterplane_vs_reference": 7.792186846244329e-06,
+        "station_step": 0.25,
+        "volume_nurbs": 3.7500151632340453,
+        "volume_table_simpson": 3.7545068955312737,
+        "waterplane_nurbs": 6.250048710310161,
+        "waterplane_table_simpson": 6.249961931950109
+      },
+      {
+        "n_stations": 61,
+        "relative_error_volume_vs_denominator": 0.001206623354265564,
+        "relative_error_volume_vs_own_table": 0.0012055171108428645,
+        "relative_error_volume_vs_reference": 1.106494670387534e-06,
+        "relative_error_waterplane_vs_denominator": 3.6062792488388966e-06,
+        "relative_error_waterplane_vs_own_table": 4.713863097600043e-06,
+        "relative_error_waterplane_vs_reference": 2.643606425008972e-06,
+        "station_step": 0.16666666666666666,
+        "volume_nurbs": 3.749995856129846,
+        "volume_table_simpson": 3.754521996639831,
+        "waterplane_nurbs": 6.250016531682482,
+        "waterplane_table_simpson": 6.249987070099071
+      },
+      {
+        "n_stations": 81,
+        "relative_error_volume_vs_denominator": 0.0012080382368945314,
+        "relative_error_volume_vs_own_table": 0.0012080382368945314,
+        "relative_error_volume_vs_reference": 2.5230850248000335e-06,
+        "relative_error_waterplane_vs_denominator": 2.189682219262996e-06,
+        "relative_error_waterplane_vs_own_table": 2.189682219262996e-06,
+        "relative_error_waterplane_vs_reference": 1.2270107591476163e-06,
+        "station_step": 0.125,
+        "volume_nurbs": 3.749990543916009,
+        "volume_table_simpson": 3.7545261550727576,
+        "waterplane_nurbs": 6.250007677959557,
+        "waterplane_table_simpson": 6.249993992458841
+      }
+    ],
+    "wigley_iii": [
+      {
+        "n_stations": 11,
+        "relative_error_volume_vs_denominator": 5.877291832412369e-07,
+        "relative_error_volume_vs_own_table": 5.877291832412369e-07,
+        "relative_error_volume_vs_reference": 5.877291829214925e-07,
+        "relative_error_waterplane_vs_denominator": 5.877291827882659e-07,
+        "relative_error_waterplane_vs_own_table": 5.877291827882659e-07,
+        "relative_error_waterplane_vs_reference": 5.877291829214927e-07,
+        "station_step": 1.0,
+        "volume_nurbs": 2.777779410358842,
+        "volume_table_simpson": 2.7777777777777772,
+        "waterplane_nurbs": 6.666670584861218,
+        "waterplane_table_simpson": 6.666666666666666
+      },
+      {
+        "n_stations": 15,
+        "relative_error_volume_vs_denominator": 6.566978369093592e-08,
+        "relative_error_volume_vs_own_table": 6.566978337119166e-08,
+        "relative_error_volume_vs_reference": 6.566978337119166e-08,
+        "relative_error_waterplane_vs_denominator": 6.566978347777309e-08,
+        "relative_error_waterplane_vs_own_table": 6.566978334454632e-08,
+        "relative_error_waterplane_vs_reference": 6.566978361099986e-08,
+        "station_step": 0.7142857142857143,
+        "volume_nurbs": 2.777777960193843,
+        "volume_table_simpson": 2.777777777777778,
+        "waterplane_nurbs": 6.666667104465223,
+        "waterplane_table_simpson": 6.666666666666667
+      },
+      {
+        "n_stations": 21,
+        "relative_error_volume_vs_denominator": 4.337114667407605e-10,
+        "relative_error_volume_vs_own_table": 4.337113068686449e-10,
+        "relative_error_volume_vs_reference": 4.337111469965293e-10,
+        "relative_error_waterplane_vs_denominator": 4.3371093383370865e-10,
+        "relative_error_waterplane_vs_own_table": 4.3371093383370865e-10,
+        "relative_error_waterplane_vs_reference": 4.337110670604717e-10,
+        "station_step": 0.5,
+        "volume_nurbs": 2.7777777789825313,
+        "volume_table_simpson": 2.7777777777777777,
+        "waterplane_nurbs": 6.666666669558072,
+        "waterplane_table_simpson": 6.666666666666666
+      },
+      {
+        "n_stations": 31,
+        "relative_error_volume_vs_denominator": 2.2203616545368736e-09,
+        "relative_error_volume_vs_own_table": 2.220361814408989e-09,
+        "relative_error_volume_vs_reference": 2.220361974281104e-09,
+        "relative_error_waterplane_vs_denominator": 2.2203621607985727e-09,
+        "relative_error_waterplane_vs_own_table": 2.2203621607985727e-09,
+        "relative_error_waterplane_vs_reference": 2.2203620275718098e-09,
+        "station_step": 0.3333333333333333,
+        "volume_nurbs": 2.777777771610106,
+        "volume_table_simpson": 2.7777777777777777,
+        "waterplane_nurbs": 6.666666651864252,
+        "waterplane_table_simpson": 6.666666666666666
+      },
+      {
+        "n_stations": 41,
+        "relative_error_volume_vs_denominator": 1.061922390022119e-09,
+        "relative_error_volume_vs_own_table": 1.0619225498942342e-09,
+        "relative_error_volume_vs_reference": 1.0619227097663497e-09,
+        "relative_error_waterplane_vs_denominator": 1.0619240153886268e-09,
+        "relative_error_waterplane_vs_own_table": 1.0619240153886268e-09,
+        "relative_error_waterplane_vs_reference": 1.061923882161864e-09,
+        "station_step": 0.25,
+        "volume_nurbs": 2.777777774827993,
+        "volume_table_simpson": 2.7777777777777777,
+        "waterplane_nurbs": 6.666666659587173,
+        "waterplane_table_simpson": 6.666666666666666
+      },
+      {
+        "n_stations": 61,
+        "relative_error_volume_vs_denominator": 2.800097753663522e-10,
+        "relative_error_volume_vs_own_table": 2.8001009511058325e-10,
+        "relative_error_volume_vs_reference": 2.8001009511058325e-10,
+        "relative_error_waterplane_vs_denominator": 2.8001134744215506e-10,
+        "relative_error_waterplane_vs_own_table": 2.800116138956809e-10,
+        "relative_error_waterplane_vs_reference": 2.800112142153922e-10,
+        "station_step": 0.16666666666666666,
+        "volume_nurbs": 2.7777777769999723,
+        "volume_table_simpson": 2.777777777777778,
+        "waterplane_nurbs": 6.666666664799924,
+        "waterplane_table_simpson": 6.666666666666668
+      },
+      {
+        "n_stations": 81,
+        "relative_error_volume_vs_denominator": 9.962111136019305e-11,
+        "relative_error_volume_vs_own_table": 9.962111136019305e-11,
+        "relative_error_volume_vs_reference": 9.96214311044241e-11,
+        "relative_error_waterplane_vs_denominator": 9.962217717429667e-11,
+        "relative_error_waterplane_vs_own_table": 9.962217717429667e-11,
+        "relative_error_waterplane_vs_reference": 9.962204394753373e-11,
+        "station_step": 0.125,
+        "volume_nurbs": 2.777777777501052,
+        "volume_table_simpson": 2.7777777777777772,
+        "waterplane_nurbs": 6.666666666002518,
+        "waterplane_table_simpson": 6.666666666666666
+      }
+    ]
+  },
+  "tolerance": 0.005,
+  "waterline_sensitivity": {
+    "kvlcc2_class": [
+      {
+        "first_waterline": 1.3,
+        "relative_error_volume_vs_reference": 0.011533954094453285,
+        "relative_error_volume_vs_table": 0.0023024483408766094,
+        "relative_error_waterplane_vs_reference": 0.0022555209554307913,
+        "relative_error_waterplane_vs_table": 0.0026135809179735786,
+        "volume_nurbs": 309015.9064046748,
+        "volume_table_simpson": 308306.04765676527,
+        "waterline_exponent": 1.0,
+        "waterplane_nurbs": 16570.16705007595,
+        "waterplane_table_simpson": 16526.97247019597
+      },
+      {
+        "first_waterline": 0.08125,
+        "relative_error_volume_vs_reference": 0.0019190005044451817,
+        "relative_error_volume_vs_table": 0.000637997856991309,
+        "relative_error_waterplane_vs_reference": 0.002145834156979926,
+        "relative_error_waterplane_vs_table": 0.002503854933456761,
+        "volume_nurbs": 313221.5915431978,
+        "volume_table_simpson": 313021.88425185374,
+        "waterline_exponent": 2.0,
+        "waterplane_nurbs": 16568.353611750576,
+        "waterplane_table_simpson": 16526.97247019597
+      },
+      {
+        "first_waterline": 0.005078125,
+        "relative_error_volume_vs_reference": 0.002011419412583929,
+        "relative_error_volume_vs_table": 0.0015655700060511811,
+        "relative_error_waterplane_vs_reference": 0.002014859852381114,
+        "relative_error_waterplane_vs_table": 0.0023728338377416937,
+        "volume_nurbs": 313250.4836966367,
+        "volume_table_simpson": 312760.83471473976,
+        "waterline_exponent": 3.0,
+        "waterplane_nurbs": 16566.188229708678,
+        "waterplane_table_simpson": 16526.97247019597
+      },
+      {
+        "first_waterline": 0.0003173828125,
+        "relative_error_volume_vs_reference": 0.001874887631935853,
+        "relative_error_volume_vs_table": 0.0019388526491629396,
+        "relative_error_waterplane_vs_reference": 0.0018772664681892222,
+        "relative_error_waterplane_vs_table": 0.0022351912977397713,
+        "volume_nurbs": 313207.8009033078,
+        "volume_table_simpson": 312601.71224538796,
+        "waterline_exponent": 4.0,
+        "waterplane_nurbs": 16563.913415239338,
+        "waterplane_table_simpson": 16526.97247019597
+      }
+    ],
+    "series60_cb060": [
+      {
+        "first_waterline": 0.0390625,
+        "relative_error_volume_vs_reference": 0.017693528832530753,
+        "relative_error_volume_vs_table": 0.0002675700389182701,
+        "relative_error_waterplane_vs_reference": 4.930299369412818e-05,
+        "relative_error_waterplane_vs_table": 8.778507532785409e-05,
+        "volume_nurbs": 3.683649272265829,
+        "volume_table_simpson": 3.68463517024173,
+        "waterline_exponent": 1.0,
+        "waterplane_nurbs": 6.25030815285334,
+        "waterplane_table_simpson": 6.249759517243338
+      },
+      {
+        "first_waterline": 0.00244140625,
+        "relative_error_volume_vs_reference": 0.00032999948338779413,
+        "relative_error_volume_vs_table": 0.0024429822394658844,
+        "relative_error_waterplane_vs_reference": 4.930358678798578e-05,
+        "relative_error_waterplane_vs_table": 8.778566844453405e-05,
+        "volume_nurbs": 3.7487625074203517,
+        "volume_table_simpson": 3.7579430956599724,
+        "waterline_exponent": 2.0,
+        "waterplane_nurbs": 6.250308156560177,
+        "waterplane_table_simpson": 6.249759517243338
+      },
+      {
+        "first_waterline": 0.000152587890625,
+        "relative_error_volume_vs_reference": 4.55538247596807e-05,
+        "relative_error_volume_vs_table": 0.001122545327648072,
+        "relative_error_waterplane_vs_reference": 4.930410083709053e-05,
+        "relative_error_waterplane_vs_table": 8.77861825134195e-05,
+        "volume_nurbs": 3.7501708323279646,
+        "volume_table_simpson": 3.7543853000046754,
+        "waterline_exponent": 3.0,
+        "waterplane_nurbs": 6.250308159772984,
+        "waterplane_table_simpson": 6.249759517243338
+      },
+      {
+        "first_waterline": 9.5367431640625e-06,
+        "relative_error_volume_vs_reference": 4.535652679036295e-05,
+        "relative_error_volume_vs_table": 0.00031597054457108896,
+        "relative_error_waterplane_vs_reference": 4.930454945970449e-05,
+        "relative_error_waterplane_vs_table": 8.778663115329654e-05,
+        "volume_nurbs": 3.7501700924605785,
+        "volume_table_simpson": 3.751355410272442,
+        "waterline_exponent": 4.0,
+        "waterplane_nurbs": 6.250308162576875,
+        "waterplane_table_simpson": 6.249759517243338
+      }
+    ]
+  }
+}
