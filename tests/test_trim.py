@@ -206,14 +206,50 @@ def test_the_nudge_fallback_is_reported_when_the_plane_cut_refuses(hull, monkeyp
 
 
 def test_a_failed_nudge_does_not_invent_a_waterplane(hull, monkeypatch):
-    """If the retry fails too the error propagates: no flag, no zero-area record."""
+    """If both retries fail, the refusal is ``TrimError`` chained to the cut error.
+
+    ``trim.py``'s contract is that its public functions raise :class:`TrimError`; a
+    double plane-cut failure used to leak the stability module's error instead.  The
+    cause is kept so the caller can still read what the plane cut said.
+    """
 
     def refuse_every_cut(mesh, waterline_z):
         raise StabilityError("no plane cut here")
 
     monkeypatch.setattr(trim_module, "waterplane_moments", refuse_every_cut)
-    with pytest.raises(StabilityError):
+    with pytest.raises(TrimError) as raised:
         hydrostatic_particulars(hull.mesh, -0.25 * hull.parameters.draft, station_count=21)
+    assert isinstance(raised.value.__cause__, StabilityError)
+
+
+def test_the_nudge_tries_above_the_waterline_too(hull, monkeypatch):
+    """A ring that bounds the body is only cut from the inside, so one direction is not enough.
+
+    The fallback used to nudge downward only.  For a degenerate plane on the hull's lower
+    boundary (the keel ring) the downward retry moves out of the body and refuses too, so
+    the flag could never be raised there.  Refuse every plane at or below the requested
+    waterline: the upward retry is the only cut left, and it must be taken and declared.
+    """
+    z = -0.25 * hull.parameters.draft
+    exact = hydrostatic_particulars(hull.mesh, z, station_count=21)
+    assert exact.waterline_nudged is False
+    seen: list[float] = []
+
+    def only_from_inside(mesh, waterline_z):
+        seen.append(waterline_z)
+        if waterline_z <= z + 1e-12:
+            raise StabilityError("degenerate ring: this plane must move into the body")
+        return waterplane_moments(mesh, waterline_z)
+
+    monkeypatch.setattr(trim_module, "waterplane_moments", only_from_inside)
+    nudged = hydrostatic_particulars(hull.mesh, z, station_count=21)
+
+    assert len(seen) == 3  # requested, downward retry (refused), upward retry
+    assert seen[0] == z
+    assert seen[1] < z < seen[2]
+    assert z - seen[1] == pytest.approx(seen[2] - z, rel=1e-12)
+    assert nudged.waterline_nudged is True
+    assert nudged.waterplane_area == pytest.approx(exact.waterplane_area, rel=2e-5)
 
 
 def test_hull_part_load_volume_against_the_analytic_scaling(hull):
