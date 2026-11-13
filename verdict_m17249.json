@@ -1,0 +1,32 @@
+{
+  "verdict_id": 504,
+  "repo": "TensorCAD",
+  "scope": "m17249 GAP-CAD-T1-BASELINE-FLEET",
+  "mission_id": 17269,
+  "level": 2,
+  "verdict_by": "board-audit",
+  "evidence": {
+    "impl_files": [
+      "tensorcad/fleet_gate.py:1-200 (MeshAudit, judge_mesh, audit_fleet, ShipVerdict)",
+      "tools/baseline_fleet/audit.py:1-80 (CLI wrapper for fleet_gate)",
+      "tools/baseline_fleet/fetch_sources.py:1-120 (HTTPS provenance acquisition)"
+    ],
+    "entry": "python3 tools/baseline_fleet/audit.py audit <geometry_dir> --published <published.json>",
+    "run_artifacts": [
+      "artifacts/baseline_fleet/sources.json (provenance registry, 5 sources)",
+      "artifacts/baseline_fleet/published.json (KCS=52030, JBC=178369)",
+      "artifacts/baseline_fleet/placeholder_audit.json (6 PLACEHOLDER + 1 WITHHELD, pass=false)",
+      "artifacts/baseline_fleet/iges_inventory.json (9 IGES files with SHA256)",
+      "artifacts/baseline_fleet/figs/facet_gate.png",
+      "artifacts/baseline_fleet/figs/volume_gate.png"
+    ],
+    "tests": "tests/test_fleet_gate.py: 7/7 passed (placeholder rejection, byte-twin detection, volume gate, provenance validator, JSON report)",
+    "integration_callers": "NOT_APPLICABLE — fleet_gate is a standalone audit tool; no API endpoint, no solver integration, no scheduler wiring",
+    "benchmark": "NO ENTRY in tensor_benchmark_cases for anchor_slug='GAP-CAD-T1-BASELINE-FLEET' (0 rows). The acceptance criteria (<1% volume error, 6/6 watertight) exist only in the mission report, not in the benchmark registry. Gate correctness verified by 7 offline unit tests using synthetic meshes.",
+    "repro_cmd": "python3 -m pytest tests/test_fleet_gate.py -v (7/7 pass); python3 tools/baseline_fleet/audit.py audit <dir> --published <pub.json> (verified on /root/ship-m2056/backend/data/geometry/ships)",
+    "external_anchor": "4/6 IGES sources acquired from official publishers (KCS from NMRI T2015 + SIMMAN2020, KVLCC2 from SIMMAN2020, JBC from NMRI T2015, ONRT from SIMMAN2020); DTC and Series60 NOT_LOCATED. Raw archives not stored in worktree (gitignored). TLS hostname mismatch on www.t2015.nmri.go.jp recorded per-source."
+  },
+  "rationale": "L2: Real code with input→calculation→output (fleet_gate.py), 7 unit tests pass, repro commands verified. NOT L3: No integration into main solver/platform. NOT L4: No benchmark case registered, no complete example with error analysis. Mission's primary goal (6 watertight meshes within 1% of published displacement) was NOT achieved (honest-FAIL declared).",
+  "report_id": 16254,
+  "created_at": "2026-11-13T03:15:01+00:00"
+}
