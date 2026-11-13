@@ -228,7 +228,7 @@ two-route difference, 0 % hull defeaturing), the cause is named and the number k
 
 ```bash
 python examples/midsurface/run_example.py      # writes artifacts/midsurface/*, exits 1 on any red check
-python -m pytest tests/test_midsurface.py -v   # 21 passed
+python -m pytest tests/test_midsurface.py tests/test_midsurface_oracle.py -v   # 21 + 15 passed
 ```
 
 | artefact | path |
@@ -239,7 +239,69 @@ python -m pytest tests/test_midsurface.py -v   # 21 passed
 | figures | `artifacts/midsurface/fig_plate_and_curvature.png`, `fig_hull_midsurface.png` |
 | tests | `tests/test_midsurface.py` |
 
-## 7. References
+## 7. Determinism: the answer may not depend on the face numbering
+
+A mid triangle is a **translated copy of one of the two facings** of a wall, and the two
+facings of a curved wall do not have the same area. The side the copy came from was
+therefore a decision the first version made by *default* -- "the lower-numbered face
+emits" -- which made the extracted area a property of the file's face order rather than of
+the geometry. Measured on the same geometry with the faces relabelled (3 random
+permutations, t/R = 2 %):
+
+| case | area before the fix | area after the fix | spread before |
+|---|---:|---:|---:|
+| tube skin, 24 segments | 24.769 / 24.810 / 24.842 m² vs 25.061 m² unpermuted | **25.061 m² in all four** | 1.2 % |
+| sphere skin, 8×12 | 11.789 / 11.814 / 11.816 m² vs 12.045 m² unpermuted | **12.045 m² in all four** | 2.1 % |
+
+Three further leaks of the labelling were found and closed in the same pass:
+
+* **Equidistant ray hits were ranked by face index.** On a symmetric mesh equidistant
+  candidates are the rule (the facets either side of a sphere's pole ring, 6 of them here),
+  and "the first one the grid listed" is that grid's index order. Candidates are now ranked
+  by distance rounded to the weld scale and then by their own centroid.
+* **One-sided walls emitted a mid triangle from whichever facing measured them.** A wall
+  whose two facings disagree (A's ray finds B, B's ray finds C) has no owner, and on the
+  hull plating those are exactly the faces at the folded waterline rim, where the inner
+  facing is 6.6 % smaller in area than the outer. Such walls stay in
+  `MidSurfaceResult.samples` -- the thickness was really measured -- but only a
+  **reciprocal** wall emits. Without that rule the hull mid area read +1.7 % high
+  (19.492 m² vs 19.153 m² for the reciprocal set).
+* **The side is now chosen from the geometry**: the facing whose outward normal points away
+  from the model's bounding-box centre owns the wall (on a skin, the outer facing -- the
+  side the `t/(2R)` surplus is stated for); a tie, which is a flat plate's two congruent
+  facings, is broken by the normal itself so one winding covers the whole sheet instead of
+  a checkerboard that no longer defeatures. Walls are visited in an order fixed by the
+  chosen face's centroid, so the greedy match does not depend on numbering either.
+
+**The independent oracle.** `tests/midsurface_oracle.py` re-derives the pairing the
+expensive way -- every face against every other, ray/triangle intersection by *plane
+intersection plus area barycentrics* rather than Moller-Trumbore -- because a candidate
+pruned at a bucket-grid cell boundary shows up as an "unpaired face", which is a legal
+outcome of the same function and therefore invisible to any area assertion.
+`tests/test_midsurface_oracle.py` (15 tests) pins:
+
+| property | pinned to |
+|---|---|
+| bucket grid vs the all-pairs scan, plate / tube / sphere | identical pairing set; thickness equal to 1e−12·L; partner antiparallel and its ray-plane distance equals the reported thickness |
+| relabelling invariance (plate, tube, sphere, 3 permutations each) | mid area and face count identical to 1e−12 |
+| relabelling invariance, Series 60 plating 21×7 | paired count, mid face count, area identical to 1e−12 |
+| closed forms | plate exact; tube/sphere surplus equal to `t/(2R)`, `t/R` within 10 % |
+| measured thickness | plate 1e−9, tube 1e−2, sphere 5e−2 (coarse-fixture sagitta, stated) |
+| one-sided walls | mid face count equals the number of *reciprocal* walls, which is fewer than `paired_face_count` |
+| the documented first-hit policy | zero faces hidden by a nearer non-antiparallel surface on all three skins |
+
+The example's own numbers do not move: cylinder surplus +1.000 % (prediction +1.000 %),
+sphere +1.826 %, hull wall 0.020000 m, hull area +0.257 % against the vertex-offset route,
+two-route median 0.99 % of `t/2`, and all 19 checks in `artifacts/midsurface/results.json`
+stay green.
+
+**What is *not* claimed.** The shadowing diagnostic (`oracle.shadowed_faces`) reports zero
+on all three skins, so the fixture set exercises the band/normal filter but not the
+"wall hidden behind a nearer surface" failure mode: the tilted-baffle fixture that was
+meant to demonstrate it never arranged for the centroid ray to cross the baffle, and the
+attempt is reported here rather than dressed up as a passing case.
+
+## 8. References
 
 * Gap anchor: `GAP-CAD-013` in `docs/oss_inventory_cad/GAP-ANCHORS.md` (mid-surface
   extraction and defeaturing, acceptance criteria quoted above).
