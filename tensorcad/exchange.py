@@ -50,6 +50,7 @@ __all__ = [
     "ExchangeError",
     "ExchangeUnavailable",
     "PatchGeometry",
+    "read_step",
     "read_step_facets",
     "read_patchset",
     "load_exchange",
@@ -618,19 +619,36 @@ def round_trip_facets(
 # --------------------------------------------------------------------------- #
 # dispatch
 # --------------------------------------------------------------------------- #
+def read_step(path: str | Path, *, length_scale: float | None = None) -> PatchGeometry:
+    """Read a STEP file of either dialect: faceted soup or analytic B-rep.
+
+    ``FACETED_BREP`` files go to :func:`read_step_facets` unchanged. Everything else
+    is handed to :mod:`tensorcad.step_brep`, which tessellates analytic trims
+    (planes, cylinders, cones, tori, spheres) and *refuses by name* the surface types
+    it cannot invert -- it never falls back to a guess.
+    """
+    source = Path(path)
+    text = source.read_text(encoding="utf-8", errors="replace")
+    if "FACETED_BREP" in text:
+        return read_step_facets(source, length_scale=length_scale)
+    from .step_brep import read_step_brep
+
+    return read_step_brep(source, length_scale=length_scale).to_patch_geometry()
+
+
 def load_exchange(path: str | Path, *, length_scale: float | None = None) -> PatchGeometry:
     """Load a geometry exchange file, dispatching on the file name.
 
     ``.json``/``.patchset`` -> :func:`read_patchset`; ``.step``/``.stp`` ->
-    :func:`read_step_facets`; ``.igs``/``.iges`` -> :class:`ExchangeUnavailable`
-    (IGES needs OpenCASCADE, which is not installed here).
+    :func:`read_step` (faceted or analytic B-rep); ``.igs``/``.iges`` ->
+    :class:`ExchangeUnavailable` (IGES needs OpenCASCADE, which is not installed here).
     """
     source = Path(path)
     name = source.name.lower()
     if name.endswith(".patchset.json") or name.endswith(".json"):
         return read_patchset(source)
     if name.endswith(".step") or name.endswith(".stp"):
-        return read_step_facets(source, length_scale=length_scale)
+        return read_step(source, length_scale=length_scale)
     if name.endswith(".igs") or name.endswith(".iges"):
         raise ExchangeUnavailable(
             "IGES import needs OpenCASCADE (pip install 'tensorcad[ocp]'); IGES also has no "
@@ -651,7 +669,14 @@ def supported_routes() -> dict[str, str]:
         "step_facets_read": "REAL",
         "step_facets_write": "REAL",
         "patchset_read": "REAL",
-        "step_brep_read": "NOT_SUPPORTED (needs OCP bridge)",
+        "step_brep_read": (
+            "REAL for PLANE/CYLINDRICAL/CONICAL/SPHERICAL/TOROIDAL trims over "
+            "LINE/CIRCLE/ELLIPSE/B_SPLINE curves (tensorcad.step_brep); "
+            "B-spline and swept surfaces are refused by name"
+        ),
         "iges_read": "NOT_SUPPORTED (needs OCP bridge)",
-        "step_file_external_validation": "WITHHELD (no third-party CAD kernel installed)",
+        "step_file_external_validation": (
+            "WITHHELD (no third-party CAD kernel on this machine: OCP/FreeCAD absent on "
+            "loong64); volumes are checked against closed-form nominals instead"
+        ),
     }
