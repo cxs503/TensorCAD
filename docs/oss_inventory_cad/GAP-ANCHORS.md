@@ -81,6 +81,13 @@
   - `mikedh/trimesh` (T2, permissive → fits) `src/f09/F09.cpp:10-17`
 - **船体影响**：船体/结构前处理直接阻塞
 
+### GAP-CAD-B1 — STEP AP203/AP214 读入管道（已交付，2026-11-13 m17349）
+
+- **交付**：`tensorcad/step_brep.py`（纯 Python ANALYTIC B-rep 读入：PLANE/CYLINDRICAL/CONICAL/SPHERICAL/TOROIDAL + LINE/CIRCLE/ELLIPSE/B_SPLINE_CURVE，含 FACE_BOUND 孔、长边二分细化、散度定理体积、水密/Euler 自检）；`exchange.read_step()` 按 `FACETED_BREP` 分流。
+- **验收证据**：3+1 个 AP214 实体 → 网格，体积 vs 闭式标称误差 0.000 %/+0.013 %/-0.234 %/-0.234 %（<1 %）；收敛阶 4.00/半细化（二阶）；真实第三方 NX/ST-Developer AP203 文件解析（英寸单位正确、线框如实拒绝）。
+- **如实不覆盖**：B_SPLINE/扫掠/裁剪复合曲面、单环球/环面极盖（歧义）、POLYLINE/TRIMMED_CURVE；无第三方 CAD 内核可交叉验证（loong64 无 OCP wheel）→ external validation 仍 WITHHELD。
+- **证据路径**：`docs/gap_cad_b1_step_reader.md`、`artifacts/gap-cad-b1-step-reader/{coverage,volume_validation,convergence}.json`、`repro: python tools/step_reader_audit.py`。
+
 ### GAP-CAD-010 — STEP/IGES 语义互操作（F10，P2）
 
 - **现状**：`partial` · 证据：`tensorcad/exchange.py`
