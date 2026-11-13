@@ -409,6 +409,7 @@ def measure_mesh(mesh: Mesh, draft: float) -> dict[str, Any]:
         "boundary_edges": len(meshlib.boundary_edges(mesh)),
         "bbox_min": list(bbox.minimum),
         "bbox_max": list(bbox.maximum),
+        "extent_m": [hi - lo for lo, hi in zip(bbox.minimum, bbox.maximum)],
         "draft": draft,
     }
 
@@ -472,6 +473,33 @@ class ShipSpec:
         return dict(self.__dict__)
 
 
+def partition_surfaces(
+    surfaces: Sequence[BSplineSurface],
+) -> tuple[list[BSplineSurface], list[dict[str, Any]]]:
+    """Split patches into ``(mesh_these, quarantined_with_reason)``.
+
+    A patch whose control-point layout is ambiguous (two candidate layouts within a
+    factor of four in control-net roughness) may be a mis-read net, so it is not meshed:
+    guessing would put a fictitious surface into the half-breadth field, and the field's
+    interior-hole fill already covers a small missing patch from its neighbours. The
+    census travels with the hull report so the deliverable never hides a hole.
+    """
+    usable: list[BSplineSurface] = []
+    quarantined: list[dict[str, Any]] = []
+    for index, surface in enumerate(surfaces):
+        if surface.layout_ambiguous:
+            quarantined.append(
+                {
+                    "patch_index": index,
+                    "layout_chosen": surface.layout,
+                    "reason": "ambiguous control-point layout (two candidates within 4x)",
+                }
+            )
+            continue
+        usable.append(surface)
+    return usable, quarantined
+
+
 def build_ship(
     spec: ShipSpec,
     dx: float = DEFAULT_DX,
@@ -484,12 +512,17 @@ def build_ship(
     surfaces = model.surfaces()
     if not surfaces:
         raise ValueError(f"{spec.name}: no B-spline surfaces in {spec.iges_path}")
-    # The workshop files are metres except JBC, whose global section declares
-    # millimetres; scale the samples to metres before any hydrostatics.
-    factor = unit_scale(model.unit_flag)
+    # Scale the samples to metres before any hydrostatics: units flag (metres,
+    # millimetres, ...) times the model-space scale.  The read of the flag is now
+    # Hollerith-positional (see iges.hollerith_fields); the previous content scan read
+    # the JBC file -- millimetres throughout -- as metres, i.e. a 1000x hull.
+    factor = unit_scale(model.unit_flag) * model.model_scale
+    usable, quarantined = partition_surfaces(surfaces)
+    if not usable:
+        raise ValueError(f"{spec.name}: every surface was quarantined")
     points = [
         (x * factor, y * factor, z * factor)
-        for x, y, z in sample_patches(surfaces, spacing=1.0 / max(samples_per_metre, 1e-6))
+        for x, y, z in sample_patches(usable, spacing=1.0 / max(samples_per_metre, 1e-6))
     ]
     field = field_from_points(points, spec.draft, dx=dx, dz=dz)
     mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
@@ -527,13 +560,24 @@ def build_ship(
         volume_error = (volume - spec.published_volume_m3) / spec.published_volume_m3 * 100.0
         volume_ok = abs(volume_error) <= 100.0 * VOLUME_TOLERANCE
 
+    # Scale guard: a model-scale file or a mis-read units flag shows up as a geometric
+    # extent that is not the published length. This is checked *before* the volume gate so
+    # that "1 m of model" cannot masquerade as a 99.99% volume error.
+    extent_x = mesh_stats.get("extent_m", [float("nan")] * 3)[0]
+    scale_ratio = extent_x / spec.length_pp if spec.length_pp and extent_x else float("nan")
+    scale_consistent = bool(
+        spec.length_pp and extent_x and 0.85 <= scale_ratio <= 1.20
+    )
+
     topology_ok = (
         mesh_stats["is_watertight"]
         and mesh_stats["is_edge_manifold"]
         and mesh_stats["zero_area_faces"] == 0
         and volume > 0.0
     )
-    verdict = VERIFIED if (topology_ok and volume_ok is True) else WITHHELD
+    verdict = (
+        VERIFIED if (topology_ok and volume_ok is True and scale_consistent) else WITHHELD
+    )
 
     reasons: list[str] = []
     if not mesh_stats["is_watertight"]:
@@ -549,6 +593,18 @@ def build_ship(
         )
     if spec.published_volume_m3 is None:
         reasons.append("no published displacement available for this hull")
+    if not scale_consistent:
+        reasons.append(
+            f"geometry extent {extent_x:.3f} m vs published L_PP {spec.length_pp:.1f} m "
+            f"(ratio {scale_ratio:.4f}): model-scale bytes or a units error, so a volume "
+            f"comparison against the full-scale displacement is not meaningful"
+            + (
+                f"; scaling by {1.0 / scale_ratio:.3f}^3 would give "
+                f"{volume * (1.0 / scale_ratio) ** 3:.1f} m3"
+                if scale_ratio and scale_ratio == scale_ratio and scale_ratio != 0
+                else ""
+            )
+        )
 
     report = {
         "schema": SCHEMA,
@@ -557,7 +613,14 @@ def build_ship(
             "iges_stats": model.stats(),
             "units": model.units,
             "unit_flag": model.unit_flag,
+            "unit_name": model.unit_name,
+            "unit_source": model.unit_source,
+            "model_space_scale": model.model_scale,
             "unit_scale_to_metres": factor,
+            "unit_warnings": list(model.unit_warnings),
+            "patches_total": len(surfaces),
+            "patches_used": len(usable),
+            "patches_quarantined": quarantined,
             "surface_count": len(surfaces),
             "sample_count": len(points),
             "sampling_spacing_m": 1.0 / max(samples_per_metre, 1e-6),
@@ -588,6 +651,8 @@ def build_ship(
             "edge_manifold": mesh_stats["is_edge_manifold"],
             "positive_volume": volume > 0.0,
             "volume_within_tolerance": volume_ok,
+            "scale_consistent_with_published_lpp": scale_consistent,
+            "extent_over_lpp": scale_ratio if scale_ratio == scale_ratio else None,
             "lwl_vs_lpp_percent": (
                 (length_wl - spec.length_pp) / spec.length_pp * 100.0
                 if length_wl and spec.length_pp

@@ -222,6 +222,12 @@ class BSplineSurface:
     weights: tuple[float, ...]
     count_u: int
     count_v: int
+    #: Which control-point layout the reader chose ("interleaved" / "weight_block" /
+    #: "polynomial"), and whether the choice was a coin flip between two plausible
+    #: layouts.  A caller that integrates the surface (a hull mesher) can quarantine an
+    #: ambiguous patch instead of silently meshing a mis-read control net.
+    layout: str = "unknown"
+    layout_ambiguous: bool = False
 
     @property
     def domain_u(self) -> tuple[float, float]:
@@ -305,7 +311,9 @@ class BSplineSurface:
         if len(knots_u) != knot_u_count or len(knots_v) != knot_v_count:
             raise IgesError("type-128 surface truncated in its knot vectors")
         body = values[cursor:]
-        control, weights = _split_control(body, points, rational, count_u, count_v)
+        control, weights, layout, ambiguous = _split_control(
+            body, points, rational, count_u, count_v
+        )
         return cls(
             degree_u=degree_u,
             degree_v=degree_v,
@@ -315,6 +323,8 @@ class BSplineSurface:
             weights=tuple(weights),
             count_u=count_u,
             count_v=count_v,
+            layout=layout,
+            layout_ambiguous=ambiguous,
         )
 
 
@@ -339,7 +349,7 @@ def _net_roughness(
 
 def _split_control(
     body: Sequence[float], points: int, rational: bool, count_u: int, count_v: int
-) -> tuple[list[tuple[float, float, float]], list[float]]:
+) -> tuple[list[tuple[float, float, float]], list[float], str, bool]:
     """Split the control-point tail into points + weights, choosing the layout.
 
     Three layouts occur: IGES 5.3 interleaved ``x, y, z, w``; a block of weights
@@ -347,6 +357,18 @@ def _split_control(
     appends the parameter bounds after the knots); and plain ``x, y, z`` for
     polynomial surfaces.  Writers also append a few trailing values that are not
     part of the control data, so the tail is matched from the front.
+
+    Returns ``(control, weights, layout, ambiguous)``.  When two layouts score
+    within a factor of four of each other the choice is *not* made silently and no
+    longer aborts the file: the smoother net wins, ``ambiguous`` is set, and the
+    caller (see :func:`tensorcad.fleet_baseline.partition_surfaces`) can quarantine
+    the patch rather than mesh a control net that may be mis-read -- a single
+    unreadable patch must not cost the whole hull.
+
+    The third return value used to be an :class:`IgesError`.  That turned one
+    degenerate 3x3 Rhino patch (JBC DE 386, a 3.4 m x 0.5 m flat keel piece) into a
+    hard failure for all 45 patches of the file, i.e. it made a 280 m hull
+    unreadable because of 1.7 m^2 of plating.
     """
     needed = 4 * points
     candidates: list[tuple[str, list[tuple[float, float, float]], list[float]]] = []
@@ -376,14 +398,11 @@ def _split_control(
         raise IgesError("no usable control-point layout for type-128 surface")
     scored.sort(key=lambda item: item[0])
     best = scored[0]
+    ambiguous = False
     if len(scored) > 1 and best[0] > 0.0:
         second = scored[1][0]
-        if second > 0.0 and best[0] * 4.0 > second:
-            raise IgesError(
-                "ambiguous control-point layout: candidates score within 4x "
-                f"({best[0]:.3g} vs {second:.3g})"
-            )
-    return list(best[2]), list(best[3])
+        ambiguous = second > 0.0 and best[0] * 4.0 > second
+    return list(best[2]), list(best[3]), best[1], ambiguous
 
 
 # --------------------------------------------------------------------------- #
@@ -465,6 +484,18 @@ class IgesFile:
     raw_parameters: dict[int, list[float]]  # DE sequence -> numeric parameter list
     units: str
     unit_flag: int
+    #: Raw units name (global field 15, e.g. ``"MM"``) and how the flag was decided
+    #: (``"positional"`` / ``"name"`` / ``"name_overrides_flag"`` / ``"content_scan"``).
+    unit_name: str = ""
+    unit_source: str = "positional"
+    #: Model-space scale (global field 13): multiply model coordinates by this to get
+    #: real-space lengths.  IGES writes it in front of the units flag.
+    model_scale: float = 1.0
+    unit_warnings: tuple[str, ...] = ()
+    #: Metres per model unit, model-space scale included.
+    @property
+    def metres_per_unit(self) -> float:
+        return unit_scale(self.unit_flag) * self.model_scale
 
     # ---- lookups -------------------------------------------------------- #
     def of_type(self, entity_type: int) -> list[DirectoryEntry]:
@@ -561,15 +592,90 @@ def unit_scale(unit_flag: int) -> float:
     return UNIT_SCALE.get(unit_flag, 1.0)
 
 
-def _unit_flag(fields: Sequence[str]) -> int:
-    """Locate the global unit flag.
+#: IGES units-name (global field 15) -> units flag (global field 14), for the flags
+#: :data:`UNIT_SCALE` knows how to convert.  The name is the field a human reads off the
+#: file, so it is used to cross-check (and, on disagreement, to correct) the numeric flag.
+UNIT_NAME_FLAGS: dict[str, int] = {
+    "IN": 1, "MM": 2, "CM": 3, "INCH": 1, "FT": 5, "M": 6, "KM": 7,
+    "MIL": 8, "UM": 9, "DM": 10, "HM": 11,
+}
 
-    Field 14 of the global section is the unit flag, but the receiver-product
-    field in front of it is allowed to be empty and several writers (the NMRI
-    JBC and SIMMAN ONRT files) leave it blank, which shifts the positional
-    index. The scale field is always a real number and the flag always a small
-    integer directly after it, so the pair is found by content.
+
+def hollerith_fields(payload: str) -> tuple[str, ...]:
+    """Split the IGES global section into its numbered fields.
+
+    The global section is comma separated *except* that a non-empty field is a
+    Hollerith string whose payload may itself contain commas, and the two delimiter
+    fields at the front (``1H,`` and ``1H;``) are those delimiter characters written as
+    Hollerith data.  A plain ``str.split(",")`` therefore yields a different number of
+    tokens depending on whether a writer emits those two fields, which shifts every
+    later field index.  That is exactly what used to mis-read the units flag: the KCS
+    file leaves fields 1-2 empty (unit flag on token 13) while the Rhino files
+    JBC/ONRT write ``1H,``/``1H;`` (unit flag on token 14), and the old content scan
+    returned 6 ("metres") for JBC, whose file is millimetres -- a silent factor of 1000.
+
+    The tokenizer is the tested one from :mod:`tensorcad.geomquality.iges_trim`; it is
+    imported lazily so the dependency stays one-way.
     """
+    from .geomquality.iges_trim import _tokenize_parameters
+
+    return tuple(_tokenize_parameters(payload))
+
+
+def _global_units(
+    fields: Sequence[str],
+) -> tuple[int, str, float, str, list[str]]:
+    """Return ``(unit_flag, unit_name, model_space_scale, source, warnings)``.
+
+    Positional first (global fields 13 model-space scale, 14 units flag, 15 units
+    name), then corrected by the units *name* when the two disagree, and only then by
+    the legacy content scan (which is unreliable: fields 7-11, the precision
+    magnitudes, are a real number followed by a small integer, so they mimic the
+    scale/flag pair).
+    """
+    warnings: list[str] = []
+    flag: int | None = None
+    name = ""
+    model_scale = 1.0
+    source = "positional"
+    if len(fields) > 13:
+        try:
+            candidate = int(float(fields[13].strip()))
+        except ValueError:
+            candidate = 0
+        if 1 <= candidate <= 11:
+            flag = candidate
+        if len(fields) > 14:
+            name = fields[14].strip()
+    named = UNIT_NAME_FLAGS.get(name.upper(), None) if name else None
+    if named is not None:
+        if flag is not None and flag != named:
+            warnings.append(
+                f"global units flag {flag} disagrees with units name {name!r}: "
+                f"the name ({named}) was used"
+            )
+            source = "name_overrides_flag"
+        elif flag is None:
+            source = "name"
+        flag = named
+    if flag is None:
+        # Last resort: the historical content scan, kept for files with a truncated
+        # global section.  It is what mis-read JBC, so it is only used when nothing
+        # else identifies the units, and it is flagged as such.
+        flag = _unit_flag_content_scan(fields)
+        source = "content_scan"
+    try:
+        model_scale = float(fields[12].strip().replace("D", "E").replace("d", "e"))
+    except (ValueError, IndexError):
+        model_scale = 1.0
+    if not (model_scale > 0.0):
+        warnings.append(f"model-space scale {fields[12]!r} is not positive: using 1.0")
+        model_scale = 1.0
+    return flag, name, model_scale, source, warnings
+
+
+def _unit_flag_content_scan(fields: Sequence[str]) -> int:
+    """Historical fallback: first real number followed by a small integer."""
     for index, field in enumerate(fields[:-1]):
         text = field.strip().replace("D", "E").replace("d", "e")
         try:
@@ -584,6 +690,11 @@ def _unit_flag(fields: Sequence[str]) -> int:
     return 1
 
 
+def _unit_flag(fields: Sequence[str]) -> int:
+    """Units flag for a tokenised global section (see :func:`_global_units`)."""
+    return _global_units(fields)[0]
+
+
 def read_iges(path: str) -> IgesFile:
     """Read ``path`` and return the parsed model."""
     with open(path, "r", errors="replace") as handle:
@@ -591,8 +702,8 @@ def read_iges(path: str) -> IgesFile:
     sections = _split_sections(lines)
 
     global_payload = "".join(line[0:72] for line in sections["G"])
-    global_fields = tuple(global_payload.split(","))
-    unit_flag = _unit_flag(global_fields)
+    global_fields = hollerith_fields(global_payload)
+    unit_flag, unit_name, model_scale, unit_source, unit_warnings = _global_units(global_fields)
     units = {1: "in", 2: "mm", 3: "cm", 4: "in", 5: "ft", 6: "m", 7: "km"}.get(unit_flag, "?")
 
     parameter_records: dict[int, str] = {}
@@ -665,6 +776,10 @@ def read_iges(path: str) -> IgesFile:
         raw_parameters=raw_parameters,
         units=units,
         unit_flag=unit_flag,
+        unit_name=unit_name,
+        unit_source=unit_source,
+        model_scale=model_scale,
+        unit_warnings=tuple(unit_warnings),
     )
 
 
