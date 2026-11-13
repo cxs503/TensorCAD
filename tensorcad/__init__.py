@@ -433,6 +433,33 @@ from .elliptic_section import (
     elliptic_righting_arm_curve,
     wall_sided_gm0,
 )
+from .offset_forms import (
+    builtin_forms as _offset_builtin_forms,  # noqa: F401  (registry, re-exported below)
+)
+from .offset_forms import (
+    HullForm,
+    offset_table,
+    reference_for,
+    sample_offset_table,
+)
+from .offset_loft import (
+    LoftComparison,
+    OffsetLoft,
+    OffsetProvenance,
+    OffsetTableError,
+    ShipOffsetTable,
+    TableIntegrals,
+    compare_offset_table,
+    loft_offset_table,
+    read_offset_bundle,
+    read_offset_csv,
+    simpson_integrate,
+    station_sensitivity,
+    table_integrals,
+    write_offset_bundle,
+    write_offset_csv,
+)
+
 from .loft import (
     Loft,
     LoftError,
@@ -771,6 +798,27 @@ __all__ = [
     "elliptic_righting_arm",
     "elliptic_righting_arm_curve",
     "wall_sided_gm0",
+    # offset table -> NURBS loft (GAP-CAD-T1-OFFSET-LOFT)
+    "HullForm",
+    "LoftComparison",
+    "OffsetLoft",
+    "OffsetProvenance",
+    "OffsetTableError",
+    "ShipOffsetTable",
+    "TableIntegrals",
+    "compare_offset_table",
+    "loft_offset_table",
+    "offset_table",
+    "read_offset_bundle",
+    "read_offset_csv",
+    "reference_for",
+    "sample_offset_table",
+    "simpson_integrate",
+    "station_sensitivity",
+    "table_integrals",
+    "write_offset_bundle",
+    "write_offset_csv",
+
 ]
 
 __version__ = "0.23.0"

@@ -1,0 +1,18 @@
+{
+  "csv": "wigley_iii.csv",
+  "csv_sha256": "4b56853de107182b1ea017bb4a93e0dfbb1264cc7c67cca6aafec32b13cc28b3",
+  "design_draft": 0.625,
+  "digest": "8a8bf611ee9b3bfe97d829acdd889134a770192141cb2f32ce1f51b0d02526e3",
+  "length": 10.0,
+  "licence": "n/a (mathematical definition)",
+  "method": "ordinates evaluated at run time from the closed form in tensorcad.geomquality.baselines.wigley_iii -- no hand-entered numbers",
+  "n_stations": 21,
+  "n_waterlines": 17,
+  "notes": "analytic definition, not an issuing body's tabulated ship table; used to pin the method because Cb = 4/9, Cwp = 2/3 and VCB = 5T/8 are exact",
+  "official": false,
+  "source": "Wigley III parabolic hull form y = (B/2)(1-(2x/L)^2)(1-(z/T-1)^2); the standard resistance/seakeeping verification hull (Wigley 1934; Journee & Massie 2001, 'Offshore Hydromechanics', section 3)",
+  "table": "wigley_iii",
+  "units": "m",
+  "url": "https://github.com/cxs503/TensorCAD/blob/main/tensorcad/geomquality/baselines.py",
+  "waterline_exponent": 1.0
+}

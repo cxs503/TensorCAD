@@ -1,0 +1,18 @@
+{
+  "csv": "series60_cb060.csv",
+  "csv_sha256": "50a341aefb3c195e05973398fb58710bdf2b6bd60dc00d1f854254d422fc8dc5",
+  "design_draft": 0.625,
+  "digest": "83f1341435b5d549676371546fcc5b4fdd4263f8c6e3fab3dfdd729bf0380230",
+  "length": 10.0,
+  "licence": "n/a (published parametric hull family)",
+  "method": "ordinates evaluated at run time from y = (B/2)(1-|2xi-1|^n) zeta^(1/m) in tensorcad.geomquality.baselines.series60",
+  "n_stations": 21,
+  "n_waterlines": 17,
+  "notes": "the family's Cwp equals Cp by construction (docs/series60_fidelity.md); the study therefore judges volume/waterplane against the same half-breadth function, not against measured Series 60 ship data",
+  "official": false,
+  "source": "Series 60 parent form, Todd (1951) DTMB Report 1447; Cp = 0.625 and n = 5/3 from the published parent-form table encoded in tensorcad.geomquality.baselines._SERIES60_PARENTS",
+  "table": "series60_cb060",
+  "units": "m",
+  "url": "https://github.com/cxs503/TensorCAD/blob/main/tensorcad/geomquality/baselines.py",
+  "waterline_exponent": 3.0
+}
