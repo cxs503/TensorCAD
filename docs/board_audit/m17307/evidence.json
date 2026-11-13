@@ -1,0 +1,152 @@
+{
+ "impl_files": [
+  "runs/m17307/subject_m17251/tensorcad/offset_loft.py",
+  "runs/m17307/subject_m17251/tensorcad/offset_forms.py"
+ ],
+ "impl_detail": "offset_loft.py 1282 lines: ShipOffsetTable/OffsetProvenance (CSV+sha256 bundle), classical and unequal-spacing Simpson, tensor-product NURBS loft via tensorcad.parametric_hull.loft_nurbs_surface, Green-theorem section integrals over the patch's own basis (Gauss 12/span), volume/LCB/VCB/waterplane/wetted area, mesh route via parametric_hull.compute_hydrostatics, and the slow NURBSSurface.derivatives cross-check. offset_forms.py 284 lines: builtin hull-form registry (wigley/series60/kvlcc2-class) that emits tables with provenance",
+ "entry": "runs/m17307/subject_m17251/examples/offset_loft/run_example.py",
+ "entry_detail": "python3 examples/offset_loft/run_example.py [--output docs/offset_loft] -> writes results.json + report.md + plot.png + tables/*.csv(+provenance); rc=0",
+ "run_artifacts": [
+  "runs/m17307/subject_m17251/docs/offset_loft/results.json",
+  "runs/m17307/subject_m17251/docs/offset_loft/report.md",
+  "runs/m17307/subject_m17251/docs/offset_loft/plot.png",
+  "runs/m17307/subject_m17251/docs/offset_loft/tables/wigley_iii.csv",
+  "runs/m17307/subject_m17251/docs/offset_loft/tables/series60_cb060.csv",
+  "runs/m17307/subject_m17251/docs/offset_loft/tables/kvlcc2_class.csv",
+  "runs/m17307/subject_m17251/docs/offset_loft/tables/kvlcc2_class.provenance.json",
+  "runs/m17307/independent_check.json",
+  "runs/m17307/tamper_probe.json",
+  "runs/m17307/logs/repro.json",
+  "runs/m17307/logs/pytest.log",
+  "runs/m17307/subject_m17251/MANIFEST.json"
+ ],
+ "tests": [
+  "runs/m17307/subject_m17251/tests/test_offset_loft.py: 18 collected tests, 18 passed (auditor rerun: python -m pytest tests/test_offset_loft.py -q -> 18 passed in 17.5s; with tests/test_loft.py -> 49 passed in 27.2s)",
+  "test_landed_tables_pass_the_half_percent_acceptance (per-table acceptance)",
+  "test_wigley_loft_reproduces_the_closed_form_volume_and_waterplane",
+  "test_loft_passes_through_every_tabulated_ordinate",
+  "test_bundle_round_trip_and_tamper_detection",
+  "test_fast_basis_matrix_path_matches_the_surface_derivative_path",
+  "test_station_sensitivity_converges_and_reports_both_baselines"
+ ],
+ "integration_callers": "",
+ "integration_note": "NOT MET and not claimed.  The module is re-exported through tensorcad/__init__.py (loft_offset_table, compare_offset_table, ShipOffsetTable, ...) and consumed by the companion tensorcad/offset_forms.py of the same commit, plus the example script: no solver, CLI, API endpoint or ship-performance-platform caller exists, and 'git ls-tree HEAD tensorcad/offset_loft.py' on /root/tensor-ecosystem/TensorCAD returns nothing (branch not merged).  No downstream hydrostatics/resistance path consumes the lofted patch yet.",
+ "benchmark": {
+  "registry_case": "tensor_benchmark_cases rows for anchor_slug='GAP-CAD-T1-OFFSET-LOFT' = 0 -> no registered ref/tolerance exists; the platform L4 rule cannot be satisfied and tensor_bench_results rows for mission 17251 = 0",
+  "acceptance_criterion": "lofted volume and waterplane area within 0.5% of the table's own Simpson integral",
+  "ref_vs_got": {
+   "wigley_iii": {
+    "volume_ref": 2.7777777777777777,
+    "volume_got": 2.7777777789825313,
+    "rel_err": 4.337113068686449e-10,
+    "waterplane_ref": 6.666666666666666,
+    "waterplane_got": 6.666666669558072,
+    "rel_err_wp": 4.3371093383370865e-10
+   },
+   "series60_cb060": {
+    "volume_ref": 3.7543853000046754,
+    "volume_got": 3.7501708323279646,
+    "rel_err": 0.001122545327648072,
+    "rel_err_wp": 8.77861825134195e-05
+   },
+   "kvlcc2_class": {
+    "volume_ref": 312760.83471473976,
+    "volume_got": 313250.4836966367,
+    "rel_err": 0.0015655700060511811,
+    "rel_err_wp": 0.0023728338377416937
+   }
+  },
+  "worst_relative_error_volume": 0.0015655700060511811,
+  "worst_relative_error_waterplane": 0.0023728338377416937,
+  "worst_relative_error_loft_mesh": 0.0012769976738391065,
+  "station_sensitivity_kvlcc2_dV_vs_81st_table": {
+   "11": {
+    "dV_vs_81st_table": 0.016037153756316435,
+    "dV_vs_closed_form": 0.015272659624392499
+   },
+   "15": {
+    "dV_vs_81st_table": 0.004981664586967847,
+    "dV_vs_closed_form": 0.004208580845560402
+   },
+   "21": {
+    "dV_vs_81st_table": 0.0015171561031318385,
+    "dV_vs_closed_form": 0.0022952891310046956
+   },
+   "31": {
+    "dV_vs_81st_table": 0.002856814782715203,
+    "dV_vs_closed_form": 0.003635988664115439
+   },
+   "41": {
+    "dV_vs_81st_table": 0.001233506767272889,
+    "dV_vs_closed_form": 0.002011419412583929
+   },
+   "61": {
+    "dV_vs_81st_table": 0.00072006203626098,
+    "dV_vs_closed_form": 5.633277543234458e-05
+   },
+   "81": {
+    "dV_vs_81st_table": 0.0008899324395912889,
+    "dV_vs_closed_form": 0.00011366960943266288
+   }
+  },
+  "auditor_baseline_reproduction": {
+   "method": "independent composite Simpson (uniform 1/3 + 3/8 tail; unequal-spacing quadratic rule for clustered waterlines) re-implemented from the CSV only, no import of tensorcad.offset_loft",
+   "max_rel_diff_vs_reported_table_simpson": 9.305458748784348e-16
+  },
+  "auditor_independent_quadrature": {
+   "method": "not-a-knot cubic spline in z per station then in x (a different rule)",
+   "rel_diff_volume_vs_reported_nurbs": {
+    "wigley_iii": 4.3371098693630846e-10,
+    "series60_cb060": 5.1230424137213675e-05,
+    "kvlcc2_class": 0.0023973200484593555
+   }
+  }
+ },
+ "repro_cmd": "python3 examples/offset_loft/run_example.py  # rc=0, results.json sha256 c1aeb70ea65db947 before and after -> byte_identical=True; python3 -m pytest tests/test_offset_loft.py tests/test_loft.py -q  # 49 passed",
+ "external_anchor": {
+  "analytic": {
+   "wigley_volume_4BLT_over_9": 2.7777777777777777,
+   "auditor_spline_volume": 2.7777777777777786,
+   "rel_diff": 3.1974423109204507e-16,
+   "wigley_waterplane_2LB_over_3": 6.666666666666667,
+   "rel_diff_waterplane": 0.0,
+   "note": "Cb=4/9, Cwp=2/3, VCB=5T/8 exact; reproduced by an independent quadrature from the landed CSV only"
+  },
+  "published_particulars": {
+   "kvlcc2": "L=320 m, B=58 m, T=20.8 m, Cb=0.8098, LCB=-3.48%L (KRISO/ITTC 2010+2015 benchmark particulars) used to calibrate the class reconstruction; Cb from the landed table = 0.810160",
+   "series60": "Todd (1951) DTMB 1447 parent form, Cp=0.625, n=5/3"
+  },
+  "NOT_AVAILABLE": "no issuing-body offset table was ingested: every provenance records official=false and the KVLCC2 sidecar states 'NOT the official KRISO offset table'; the acceptance is therefore a method/quadrature consistency check plus analytic identities, not validated ship data"
+ },
+ "integrity_probes": {
+  "tamper_detection": [
+   {
+    "probe": "wigley_iii: clean round trip",
+    "rejected": true
+   },
+   {
+    "probe": "wigley_iii: one ordinate +5 %",
+    "rejected": true
+   },
+   {
+    "probe": "wigley_iii: missing provenance sidecar",
+    "rejected": true
+   },
+   {
+    "probe": "kvlcc2_class: clean round trip",
+    "rejected": true
+   },
+   {
+    "probe": "kvlcc2_class: one ordinate +5 %",
+    "rejected": true
+   },
+   {
+    "probe": "kvlcc2_class: missing provenance sidecar",
+    "rejected": true
+   }
+  ],
+  "all_probes_pass": true,
+  "subject_worktree_clean_after_rerun": true
+ },
+ "snapshot": "runs/m17307/subject_m17251/MANIFEST.json"
+}
