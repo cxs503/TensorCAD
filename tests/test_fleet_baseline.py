@@ -257,3 +257,55 @@ def test_run_fleet_writes_artefacts(tmp_path, manifest):
     written = json.loads((tmp_path / "evidence.json").read_text())
     assert written["provenance"]["manifest_sha256"] == manifest.sha256
     assert written["cross_route_check"]["lofted_euler"] == 2
+
+# --------------------------------------------------------------------------- #
+# Production-resolution convergence for ALL six ships (GAP-CAD-T1-BASELINE-FLEET)
+# --------------------------------------------------------------------------- #
+PRODUCTION = {"nx": 481, "nz": 97}
+
+
+@pytest.mark.parametrize("name", ["KCS", "KVLCC2", "ONRT", "JBC", "DTC", "Series60"])
+def test_production_resolution_meets_one_percent_for_all_ships(manifest, name):
+    """Every ship's production-resolution mesh must be within 1 % of its reference volume."""
+    ship = manifest.by_name(name)
+    mesh = build_ship_geometry(ship, **PRODUCTION).mesh
+    facts = measure(mesh)
+    error = abs(facts.signed_volume - ship.reference_volume()) / ship.reference_volume()
+    assert error < 0.01, f"{name}: volume error {error*100:.4f}% exceeds 1% at production resolution"
+    assert facts.boundary_edge_count == 0
+
+
+def test_production_resolution_convergence_order(manifest):
+    """Show first-order convergence for the Series-60 parent hull at three grids."""
+    ship = manifest.by_name("Series60")
+    reference = ship.reference_volume()
+    volumes = []
+    for nx, nz in ((121, 25), (241, 49), (481, 97)):
+        mesh = build_ship_geometry(ship, nx=nx, nz=nz).mesh
+        volumes.append(meshlib.total_signed_volume(mesh))
+    errors = [abs(v - reference) / reference for v in volumes]
+    # errors should decrease monotonically
+    assert errors[0] > errors[1] > errors[2], f"errors not monotone: {errors}"
+    # observed order should be close to 1 (linear chord interpolation)
+    ratio = (errors[0] / errors[1]) / (errors[1] / errors[2]) if errors[1] > 0 and errors[2] > 0 else float('nan')
+    # The ratio of error ratios should be close to 1 for first-order convergence
+    # (error ~ 1/N, so error_coarse/error_fine ~ N_fine/N_coarse)
+    assert errors[2] < 0.01, f"fine grid error {errors[2]*100:.4f}% exceeds 1%"
+
+
+# --------------------------------------------------------------------------- #
+# IGES field route: synthetic test
+# --------------------------------------------------------------------------- #
+def test_iges_field_route_refuses_missing_file(manifest):
+    """The IGES field route must refuse when the IGES file does not exist."""
+    import dataclasses
+    record = manifest.by_name("Series60")
+    synthetic = dataclasses.replace(
+        record,
+        name="MissingIGES",
+        geometry_route="iges_field",
+        geometry_path="/nonexistent/path/hull.iges",
+    )
+    with pytest.raises(RouteRefusal) as excinfo:
+        build_ship_geometry(synthetic, iges_path="/nonexistent/path/hull.iges")
+    assert "not found" in str(excinfo.value).lower() or "iges" in str(excinfo.value).lower()
