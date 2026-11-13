@@ -1,6 +1,35 @@
 
 ## Unreleased
 
+- **`tensorcad.nurbs_intersect`: NURBS x NURBS intersection curves and trim domains**
+  (`GAP-CAD-A1-NURBS-INTERSECT`, `docs/nurbs_intersect.md`,
+  `examples/nurbs_intersect/`, `tools/xcheck_occt_nurbs_intersect.py`, 18 tests).
+  `surface_intersection` closed `GAP-CAD-002` for parametric-x-*implicit*; a B-rep kernel
+  also needs patch-x-patch, because that is what a fillet, a hull/appendage seam or a plate
+  boundary actually is, and two NURBS patches come with no signed field. The method is an
+  *oriented distance* `g(u, v) = (S1(u, v) - Q).n2` (with `Q` the closest point of `S2`),
+  marched with marching squares on `S1`'s own parameter rectangle so branch and loop
+  structure come from the cell topology, and then **polished** on the full 4-parameter
+  system `S1(u, v) = S2(s, t)` by minimum-norm Gauss-Newton on the 3x4 Jacobian. The march
+  seeds, the polish supplies the accuracy: vertices land on *both* surfaces to round-off
+  (`|S1 - S2|` = 1.6e-15 m on a patch scale of 8.5 m) instead of to grid precision.
+  Measured against references computed inside the example (closed forms, `2 pi r`, and the
+  complete elliptic integral by AGM cross-checked against a midpoint quadrature): circle
+  radius **5.6e-16 R** against the `1e-8 R` acceptance bound (three sphere pairs), arc
+  lengths **6.4e-06** relative (worst), a 30-degree ellipse **5.97e-06**, length
+  convergence order **2.00**, and agreement with the independent implicit-field marcher to
+  **2.8e-10**. Trim domains: the plane patch's kept disc to **4.7e-04** of `pi r^2`, the
+  sphere's latitude band to **1.6e-03** of `4 pi R^2 - 2 pi R (R - h)`, with
+  `TrimLoop.area_reliable` flagging the loops whose shoelace area is meaningless (a
+  latitude line, a seam-spanning trace). Limitations are stated and tested: tangential
+  contact returns no branch and is flagged `tangential_candidate` (the round-off cloud is
+  collapsed and counted), coincident patches raise, a finite patch truncates the curve, and
+  rank-deficient contact is Tikhonov-damped with `damped_steps` reported. **OpenCASCADE
+  parity is WITHHELD**, not approximated: the OCP/pythonocc wheels are absent here, so
+  `tools/xcheck_occt_nurbs_intersect.py` records `occt_available: false` and exits 2 rather
+  than inventing numbers. Evidence: `artifacts/m17346/nurbs_intersect/` (`results.json`,
+  three PNGs, `occt_xcheck.json`), `docs/nurbs_intersect.md`.
+
 - **`tensorcad.elliptic_section`: a third analytic righting-arm family (m17023).**
   `righting_arm` was verified against a wall-sided box and a circular section -- the two
   cases where the `(a^2 - b^2)` coupling term of the heeled centroid is degenerate. Added
