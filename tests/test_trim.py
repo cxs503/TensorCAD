@@ -5,9 +5,11 @@ import math
 
 import pytest
 
+import tensorcad.trim as trim_module
 from tensorcad import HullParameters, analytic_volume, generate_hull, generate_wigley
 from tensorcad.bonjean import section_properties
 from tensorcad.geometry import Mesh
+from tensorcad.stability import StabilityError, waterplane_moments
 from tensorcad.trim import (
     SEAWATER_DENSITY,
     TrimError,
@@ -148,14 +150,70 @@ def test_the_waterline_solve_reproduces_the_volume(hull):
 
 
 def test_a_ring_waterline_is_handled_gracefully(hull):
-    """The generator puts rings on even levels; the plane-cut tolerance handles them without nudging."""
-    row = hydrostatic_particulars(hull.mesh, -0.25 * hull.parameters.draft, station_count=21)
-    # The implementation uses PLANE_TOLERANCE to handle vertices on the waterline gracefully,
-    # so waterline_nudged is False (no fallback nudge was needed).
+    """The generator puts a vertex ring at -T/4; the plane cut goes through it without a nudge.
+
+    An earlier version of this test expected ``waterline_nudged is True``: a vertex ring
+    was taken to be a degenerate cut that the fallback had to rescue.  ``_plane_segments``
+    classifies vertices within ``PLANE_TOLERANCE`` as *on* the plane, so the ring is an
+    ordinary cut, the flag stays False, and the waterplane is continuous through it.
+    """
+    z = -0.25 * hull.parameters.draft
+    # Prove the waterline really lands on a ring; otherwise the test is about nothing.
+    level = min(hull.mesh.vertices, key=lambda vertex: abs(vertex[2] - z))[2]
+    assert level == pytest.approx(z, abs=1e-12)
+    assert sum(1 for vertex in hull.mesh.vertices if vertex[2] == level) >= 4
+
+    row = hydrostatic_particulars(hull.mesh, z, station_count=21)
     assert row.waterline_nudged is False
     assert row.waterplane_area > 0.0
-    neighbour = hydrostatic_particulars(hull.mesh, -0.25 * hull.parameters.draft + 1e-3, station_count=21)
-    assert row.waterplane_area == pytest.approx(neighbour.waterplane_area, rel=1e-3)
+    # A ring is not a special case: both one-sided limits agree with the cut through it.
+    for dz in (-1e-6, 1e-6):
+        neighbour = hydrostatic_particulars(hull.mesh, z + dz, station_count=21)
+        assert neighbour.waterline_nudged is False
+        assert row.waterplane_area == pytest.approx(neighbour.waterplane_area, rel=1e-5)
+        assert row.tpc == pytest.approx(neighbour.tpc, rel=1e-5)
+
+
+def test_the_nudge_fallback_is_reported_when_the_plane_cut_refuses(hull, monkeypatch):
+    """``waterline_nudged`` is the module's honest "I had to move the plane" flag.
+
+    Nothing else in the suite drives the fallback: the tolerance in ``_plane_segments``
+    makes every cut of the shipped geometries succeed, so the flag was only ever observed
+    as False.  Force one refusal and check the retry is (a) declared and (b) small enough
+    to leave the waterplane within the documented O(1e-6) relative move.
+    """
+    z = -0.25 * hull.parameters.draft
+    exact = hydrostatic_particulars(hull.mesh, z, station_count=21)
+    assert exact.waterline_nudged is False
+
+    seen: list[float] = []
+
+    def refuse_the_first_cut(mesh, waterline_z):
+        seen.append(waterline_z)
+        if len(seen) == 1:
+            raise StabilityError("simulated degenerate plane cut")
+        return waterplane_moments(mesh, waterline_z)
+
+    monkeypatch.setattr(trim_module, "waterplane_moments", refuse_the_first_cut)
+    nudged = hydrostatic_particulars(hull.mesh, z, station_count=21)
+
+    assert len(seen) == 2
+    assert seen[0] == z
+    offset = seen[0] - seen[1]
+    assert 0.0 < offset <= 1e-4  # documented: 1e-6 of the largest bounding coordinate
+    assert nudged.waterline_nudged is True
+    assert nudged.waterplane_area == pytest.approx(exact.waterplane_area, rel=2e-5)
+
+
+def test_a_failed_nudge_does_not_invent_a_waterplane(hull, monkeypatch):
+    """If the retry fails too the error propagates: no flag, no zero-area record."""
+
+    def refuse_every_cut(mesh, waterline_z):
+        raise StabilityError("no plane cut here")
+
+    monkeypatch.setattr(trim_module, "waterplane_moments", refuse_every_cut)
+    with pytest.raises(StabilityError):
+        hydrostatic_particulars(hull.mesh, -0.25 * hull.parameters.draft, station_count=21)
 
 
 def test_hull_part_load_volume_against_the_analytic_scaling(hull):
