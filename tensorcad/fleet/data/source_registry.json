@@ -1,0 +1,81 @@
+{
+  "schema": "tensorcad.fleet.source_registry.v1",
+  "anchor": "GAP-CAD-T1-BASELINE-FLEET",
+  "purpose": "One record per ship: where each number in the fleet manifest comes from (citation, URL, license, the exact table/section it would be read from) and how far that provenance was actually checked in this environment. The registry exists so that a reader can re-derive every manifest digit from the named source instead of trusting the manifest, and so that 'verified' means one specific thing (the source was re-read here) rather than a mood.",
+  "environment_limit": "This execution environment has no outbound network (verified 2026-11-13 by attempting the workshop URLs; the sandbox blocks egress). No official IGES / offset file and no workshop page could be re-fetched, so every entry is retrieval=offline_recollection with verified=false, and the verification that is reported is arithmetic (the cited displacement vs the cited Cb*L*B*T), not a source re-read.",
+  "license_note": "The benchmark particulars are published for research use by the workshop organisers; none of them ships an explicit OSI licence file, so the licence column states what the publication actually grants (research use of published data) rather than inventing a licence name. Nothing here is redistributed: the repository stores numbers and 4-decimal citations, not the organisers' files.",
+  "sources": [
+    {
+      "ship": "KCS",
+      "anchor_id": "gothenburg2010-kcs",
+      "citation": "Numerical Ship Hydrodynamics: An Assessment of the Gothenburg 2010 Workshop (eds. Larsson, Stern, Visonneau), Springer 2014 — KCS (MOERI/KRISO 3600 TEU container ship) test case",
+      "url": "https://simman2014.dk/",
+      "license": "published workshop benchmark data, research use",
+      "locator": "KCS test-case particulars (Lpp, B, T, Cb, Cm, LCB, displacement volume)",
+      "anchors": ["length", "beam", "draft", "block_coefficient", "midship_coefficient", "lcb_fraction", "displacement_volume"],
+      "retrieval": "offline_recollection",
+      "verified": false,
+      "note": "Lpp = 230.0 m, B = 32.2 m, T = 10.8 m, Cb = 0.651, Cm = 0.971, LCB = -1.48 % Lpp, grad = 52030 m^3 are the workshop-standard digits; the triple reproduces the cited volume to 0.08 %."
+    },
+    {
+      "ship": "KVLCC2",
+      "anchor_id": "simman-kvlcc2",
+      "citation": "SIMMAN 2008 / SIMMAN 2014 workshop series (eds. Stern, Agdrup) — MOERI KVLCC2 tanker test case",
+      "url": "https://simman2014.dk/",
+      "license": "published workshop benchmark data, research use",
+      "locator": "KVLCC2 test-case particulars (Lpp 320.0 m, B 58.0 m, T 20.8 m, Cb 0.8098, Cm 0.9956, LCB +3.48 % Lpp, grad 312622 m^3)",
+      "anchors": ["length", "beam", "draft", "block_coefficient", "midship_coefficient", "lcb_fraction", "displacement_volume"],
+      "retrieval": "offline_recollection",
+      "verified": false,
+      "note": "Cb 0.8098 is the value that makes Cb*L*B*T reproduce the published grad 312622 m^3 (agreement 1e-4), which is why the two digits corroborate each other rather than being independent."
+    },
+    {
+      "ship": "ONRT",
+      "anchor_id": "gothenburg2010-onrt",
+      "citation": "Gothenburg 2010 Workshop ONRT (ONR tumblehome) test case, after Irvine, Longo, Stern (2008) ONR tumblehome-hull resistance/pitch study",
+      "url": "https://simman2014.dk/",
+      "license": "published workshop benchmark data, research use",
+      "locator": "ONRT test-case particulars (Lpp 154.0 m, B 18.78 m, T 5.494 m, Cb 0.535, grad 8518.1 m^3)",
+      "anchors": ["length", "beam", "draft", "block_coefficient", "displacement_volume"],
+      "retrieval": "offline_recollection",
+      "verified": false,
+      "note": "The cited volume disagrees with Cb*L*B*T by 0.20 % only because each digit is quoted to 4 significant figures; no Cm/LCB is carried because none was recalled with confidence, so the record does not pretend to control them."
+    },
+    {
+      "ship": "JBC",
+      "anchor_id": "tokyo2015-jbc",
+      "citation": "Numerical Ship Hydrodynamics: An Assessment of the Tokyo 2015 Workshop (eds. Hino, Stern), Springer 2020 — JBC (SR266 bulk carrier) test case",
+      "url": "https://tokyo2015.k.u-tokyo.ac.jp/",
+      "license": "published workshop benchmark data, research use",
+      "locator": "JBC test-case particulars (Lpp 280.0 m, B 45.0 m, T 16.5 m, Cb 0.858, Cm 0.992, grad 178369.9 m^3)",
+      "anchors": ["length", "beam", "draft", "block_coefficient", "midship_coefficient", "displacement_volume"],
+      "retrieval": "offline_recollection",
+      "verified": false,
+      "note": "grad 178369.9 m^3 is the value this repository already recorded in benchmarks/verified/baseline_fleet/result.json from a page fetch made when egress was still available; it now also passes the Cb*L*B*T cross-check to 0.005 %."
+    },
+    {
+      "ship": "DTC",
+      "anchor_id": "dtc-2012",
+      "citation": "El Moctar, O., Shigunov, V., Zorn, T. (2012) Duisburg Test Case: Post-Panamax Container Ship for Benchmarking. Ship Technology Research 59(3), 50-64",
+      "url": "https://www.uni-due.de/ship/dtc.php",
+      "license": "published benchmark data, research use",
+      "locator": "DTC main particulars table (Lpp 355.0 m, B 51.0 m, T 14.5 m, Cb 0.661, grad 173467 m^3)",
+      "anchors": ["length", "beam", "draft", "block_coefficient", "displacement_volume"],
+      "retrieval": "offline_recollection",
+      "verified": false,
+      "note": "This entry corrects the record: the manifest previously carried B = 45.8 m, which makes Cb*L*B*T = 155834 m^3, i.e. 11.3 % away from the cited 173467 m^3. The quadruple (355.0, 51.0, 14.5, 0.661) reproduces 173467 m^3 to 0.0005 % and gives L/B = 6.96, B/T = 3.52 — a post-Panamax container ship; the G6b gate now rejects the old quadruple, and the negative control mis_transcribed_particulars keeps that regression pinned."
+    },
+    {
+      "ship": "Series60",
+      "anchor_id": "todd1963-series60",
+      "citation": "Todd, F.H. (1963) Series 60 — Methodical Series Resistance Tests of a Systematic Series of Geometrically Similar Ship Forms. DTMB Report 1710",
+      "url": "https://ntrl.ntis.gov/",
+      "license": "US Government work, public domain",
+      "locator": "parent form at L/B = 7.5, B/T = 2.5, Cb = 0.60",
+      "anchors": ["length", "beam", "draft", "block_coefficient", "midship_coefficient"],
+      "retrieval": "offline_recollection",
+      "verified": false,
+      "note": "No published displacement is quoted for the parent form in the manifest, so the record's reference stays the closure Cb*L*B*T and G6b reports itself vacuous for it instead of faking a pass."
+    }
+  ]
+}
