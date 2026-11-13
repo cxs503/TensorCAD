@@ -1,0 +1,36 @@
+{
+  "hull": {
+    "length_m": 10.0,
+    "beam_m": 2.0,
+    "draft_m": 0.8
+  },
+  "ring": {
+    "z_m": -0.2,
+    "vertices_on_ring": 80,
+    "ring_spacing_m": 0.06666666666666665,
+    "z_equals_quarter_draft": true
+  },
+  "ring_cut": {
+    "waterplane_area_m2": 12.17776273495055,
+    "tpc_t_per_cm": 0.12482206803324311,
+    "waterline_nudged": false
+  },
+  "one_sided": {
+    "-1e-06": {
+      "area_m2": 12.177752288081718,
+      "area_rel_diff": -8.578643761349255e-07,
+      "tpc_rel_diff": -8.578643760833378e-07,
+      "waterline_nudged": false
+    },
+    "+1e-06": {
+      "area_m2": 12.177772615844765,
+      "area_rel_diff": 8.113883009456648e-07,
+      "tpc_rel_diff": 8.113883010950917e-07,
+      "waterline_nudged": false
+    }
+  },
+  "documented_nudge": {
+    "offset_m": 9.999999999999999e-06,
+    "area_rel_diff": -8.578643762516205e-06
+  }
+}
