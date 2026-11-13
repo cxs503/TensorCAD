@@ -1,6 +1,20 @@
 
 ## Unreleased
 
+- **`tensorcad.elliptic_section`: a third analytic righting-arm family (m17023).**
+  `righting_arm` was verified against a wall-sided box and a circular section -- the two
+  cases where the `(a^2 - b^2)` coupling term of the heeled centroid is degenerate. Added
+  a half-immersed prism of **elliptic** cross-section, whose immersed section is an exact
+  half-ellipse at every heel, with closed forms `elliptic_kn`, `elliptic_righting_arm`,
+  `elliptic_gm0` and a watertight generator `elliptic_prism_mesh`. The mesh integrator
+  reproduces the closed form to 5.8e-8 (circle) / 2.5e-5 (a=1, b=0.35) with O(h^2) ring
+  convergence (1.05e-3 -> 3.76e-6 m over 24 -> 384 points), so the new family is a
+  working gate on the integrator rather than a second copy of it. `wall_sided_gm0` is
+  reported next to the exact slope because `KB + BM - KG` is wrong for these sections:
+  25% low at the circle limit (which gives `R - KG`, not `8R/3pi - KG`) and 48% low at
+  a=1, b=0.6. Evidence: `artifacts/elliptic_section/`, `docs/elliptic_section.md`,
+  `tests/test_elliptic_section.py` (24 cases).
+
 - **`tensorcad.savitsky` audited and fixed (m16954, verifier seat).** The trim solve never
   solved the wetted length ratio: `λ` stayed at its 3.0 initial guess, so every
   wetted-geometry-dependent number (wetted area, friction drag, total resistance, effective
