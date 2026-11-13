@@ -1,0 +1,185 @@
+{
+ "accuracy": {
+  "analytic_metrics": 24,
+  "max_abs_rel_error_analytic": 0.008590735297483998,
+  "max_abs_rel_error_any": 0.008590735297483998,
+  "metrics_over_15pct": [],
+  "metrics_over_3pct_analytic": [],
+  "platform_line": 0.15,
+  "worst_analytic": [
+   "series60",
+   "block_coefficient"
+  ],
+  "worst_tolerance_any": 0.018311813220118028
+ },
+ "anchor": "GAP-CAD-D2-GOLDEN-REGRESSION",
+ "audit_mission": 17870,
+ "audited_mission": 17833,
+ "audited_tree": "/root/tp-agent/work/m17833",
+ "gates_shipped": [
+  {
+   "criterion": "the four golden cases are registered and every one measured both levels",
+   "detail": "cases=['dtmb5415', 'series60', 'sphere_ellipsoid', 'wigley']",
+   "gate": "G1_golden_library_complete",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "each asserted metric within its derived tolerance; no error findings",
+   "detail": "metrics=8 failing=[] errors=[]",
+   "gate": "G2_wigley_reference_match",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "each asserted metric within its derived tolerance; no error findings",
+   "detail": "metrics=8 failing=[] errors=[]",
+   "gate": "G2_series60_reference_match",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "each asserted metric within its derived tolerance; no error findings",
+   "detail": "metrics=9 failing=[] errors=[]",
+   "gate": "G2_sphere_ellipsoid_reference_match",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "each asserted metric within its derived tolerance; no error findings",
+   "detail": "metrics=5 failing=[] errors=[]",
+   "gate": "G2_dtmb5415_reference_match",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "stored reference == recomputed reference (rel <= 1e-09)",
+   "detail": "worst 0.000e+00 on wigley/displacement_volume_m3 over 24 references",
+   "gate": "G3_stored_references_reproduce",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "measurements equal the blessed baseline (rel <= 1e-09)",
+   "detail": "drift findings=0",
+   "gate": "G4_baseline_drift_lock",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "worst asserted |rel err| <= 0.15",
+   "detail": "worst series60/block_coefficient = -8.591e-03",
+   "gate": "G5_platform_error_limit",
+   "verdict": "PASS"
+  },
+  {
+   "criterion": "every case records the sha256 of the geometry it measured",
+   "detail": "wigley=0ef07ca68299; series60=f9da70a467f6; sphere_ellipsoid=a0f68b295bec; dtmb5415=64fc9d7694be",
+   "gate": "G6_geometry_fingerprint",
+   "verdict": "PASS"
+  }
+ ],
+ "gates_shipped_passed": true,
+ "judge": {
+  "all_status_passed": true,
+  "all_within_tolerance": true,
+  "anchor_slug": "GAP-CAD-D2-GOLDEN-REGRESSION",
+  "n_cases": 4,
+  "n_metrics": 24,
+  "rows": [
+   {
+    "all_within_tolerance": true,
+    "case_name": "CASE-CAD-D2-GOLDEN-WIGLEY",
+    "case_row_id": 65,
+    "case_slug": "wigley",
+    "max_abs_rel_error_recorded": 0.0001953,
+    "metrics_parsed": 8,
+    "status": "passed",
+    "worst_case_tolerance": 0.004329,
+    "worst_case_tolerance_metric": "block_coefficient"
+   },
+   {
+    "all_within_tolerance": true,
+    "case_name": "CASE-CAD-D2-GOLDEN-SERIES60",
+    "case_row_id": 66,
+    "case_slug": "series60",
+    "max_abs_rel_error_recorded": 0.008591,
+    "metrics_parsed": 6,
+    "status": "passed",
+    "worst_case_tolerance": 0.01831,
+    "worst_case_tolerance_metric": "block_coefficient"
+   },
+   {
+    "all_within_tolerance": true,
+    "case_name": "CASE-CAD-D2-GOLDEN-SPHERE_ELLIPSOID",
+    "case_row_id": 67,
+    "case_slug": "sphere_ellipsoid",
+    "max_abs_rel_error_recorded": 0.000886,
+    "metrics_parsed": 9,
+    "status": "passed",
+    "worst_case_tolerance": 0.005457,
+    "worst_case_tolerance_metric": "ellipsoid_volume_m3"
+   },
+   {
+    "all_within_tolerance": true,
+    "case_name": "CASE-CAD-D2-GOLDEN-DTMB5415",
+    "case_row_id": 68,
+    "case_slug": "dtmb5415",
+    "max_abs_rel_error_recorded": 2.645e-08,
+    "metrics_parsed": 1,
+    "status": "passed",
+    "worst_case_tolerance": 0.0001,
+    "worst_case_tolerance_metric": "holdout_rms_m"
+   }
+  ],
+  "table": "tensor_benchmark_cases"
+ },
+ "reproduction": {
+  "bit_identical_to_shipped": true,
+  "command": "PYTHONPATH=. python3 benchmarks/verified/golden_geometry/run_benchmark.py --out /tmp/audit17870/bench",
+  "gates": [
+   [
+    "G1_golden_library_complete",
+    "PASS"
+   ],
+   [
+    "G2_wigley_reference_match",
+    "PASS"
+   ],
+   [
+    "G2_series60_reference_match",
+    "PASS"
+   ],
+   [
+    "G2_sphere_ellipsoid_reference_match",
+    "PASS"
+   ],
+   [
+    "G2_dtmb5415_reference_match",
+    "PASS"
+   ],
+   [
+    "G3_stored_references_reproduce",
+    "PASS"
+   ],
+   [
+    "G4_baseline_drift_lock",
+    "PASS"
+   ],
+   [
+    "G5_platform_error_limit",
+    "PASS"
+   ],
+   [
+    "G6_geometry_fingerprint",
+    "PASS"
+   ]
+  ],
+  "geometry_fingerprint": {
+   "equal": true,
+   "fresh": "3351b57966fc4a4489a58e8b7e8c297d4bc24d3fa6c545277f436b3580ed37f6",
+   "shipped": "3351b57966fc4a4489a58e8b7e8c297d4bc24d3fa6c545277f436b3580ed37f6"
+  },
+  "git_commit_fresh": "f2222d1e516f89918a69f47e261ad3d5240b452d",
+  "git_commit_shipped_artifact": "3c267f79a8a5f9cfd27e79eb270e743b3ae407d3",
+  "judge_values_missing_from_artifact": [],
+  "max_abs_diff_judge_vs_artifact": 2.4704878143211317e-09,
+  "max_abs_diff_vs_shipped_artifact": 0.0,
+  "passed": true,
+  "rows": 30,
+  "seconds": 24.085
+ }
+}
