@@ -151,14 +151,25 @@ class TetrahedralMesh:
     """Linear tetrahedral volume mesh: vertex positions plus 4-tuples.
 
     ``tets`` holds 0-based indices into ``vertices``.  All tetrahedra are
-    expected to be positively oriented (positive signed volume); the star
+    strictly positively oriented (positive signed volume); the star
     tessellation produced by :func:`tetrahedralise_surface` guarantees it.
+
+    ``edge_on_facets`` records how many surface facets the tessellation had to
+    drop because the star apex sees them exactly edge-on (the tetrahedron
+    spanned by the apex and such a facet has zero volume).  This is not an
+    approximation: a zero-volume cell carries no measure, so dropping it leaves
+    the tiling of the body exact -- :func:`tetrahedralise_surface` only reports
+    a non-zero count after it has certified that the remaining tets reproduce
+    the surface volume.  Real hull meshes hit this case: where a Wigley-type
+    ring collapses to zero breadth, the tip facets lie exactly in the
+    centreplane and are seen edge-on from any centreplane apex.
     """
 
     vertices: tuple[Vec3, ...]
     tets: tuple[Tet, ...]
     units: str = "m"
     coordinate_frame: str = "unspecified right-handed frame"
+    edge_on_facets: int = 0
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "vertices", tuple(tuple(float(c) for c in v) for v in self.vertices))
@@ -281,10 +292,21 @@ def tetrahedralise_surface(mesh: Mesh, *, interior_point: Vec3 | None = None) ->
 
     When ``interior_point`` is None an automatic search runs over a small
     deterministic candidate set (area-weighted surface centroid, vertex mean,
-    bounding-box centre, and +/- 5 % nudges along each axis); the candidate with
-    the largest minimum tetrahedron volume wins.  Degenerate (coplanar) cells are
-    rejected, never emitted: a solver receiving a zero-volume tetrahedron fails
-    much later and much less clearly than one that never got the mesh.
+    bounding-box centre, and +/- 5 % nudges along each axis).  Acceptance is a
+    *certificate*, not a heuristic: a candidate is accepted when (a) no
+    tetrahedron is inverted and (b) the tets it spans reproduce the surface
+    volume to ``1e-9`` relative.  Among accepted candidates the one that leaves
+    the fewest edge-on facets wins.
+
+    Facets the apex sees exactly edge-on span zero-volume tetrahedra.  Those
+    cells are dropped and counted in ``TetrahedralMesh.edge_on_facets``; the
+    certificate above is what makes the drop exact rather than a silent loss.
+    This matters for real hulls, not for toy bodies: where a Wigley-type section
+    ring collapses to zero breadth (see :func:`tensorcad.wigley.build_mesh`) the
+    resulting tip facets lie exactly in the centreplane, so *every* off-plane
+    apex inverts them while an on-plane apex sees them edge-on.  Requiring
+    strictly positive cells (the previous rule) refused such a hull outright and
+    falsely reported it as non star-shaped.
 
     Parameters
     ----------
@@ -307,9 +329,13 @@ def tetrahedralise_surface(mesh: Mesh, *, interior_point: Vec3 | None = None) ->
     lo, hi = _bbox(mesh)
     extent = np.subtract(hi, lo)
     scale = float(np.linalg.norm(extent))
-    # Volume below this is numerically coplanar: reject the apex instead of
-    # handing a zero-volume cell to a solver.
+    # Volume below this is numerically coplanar: such a cell is not emitted.
     tol = 1e-12 * (scale**3 if scale > 0.0 else 1.0)
+    # A tessellation is certified exact when the emitted tets reproduce the
+    # surface volume to this relative tolerance.  Together with "no negative
+    # tet" this is what distinguishes a genuinely star-shaped body that has
+    # edge-on facets (certified) from a non star-shaped one (refused).
+    rel_volume_tol = 1e-9
 
     faces_array = np.array(faces, dtype=np.int64)
     verts_array = np.array(verts, dtype=np.float64)
@@ -323,45 +349,65 @@ def tetrahedralise_surface(mesh: Mesh, *, interior_point: Vec3 | None = None) ->
         triple = np.einsum("ij,ij->i", pa, np.cross(pb, pc))
         return triple / 6.0
 
-    def min_tet_volume(apex: Vec3) -> float:
-        return float(tet_volumes(apex).min())
+    def assess(apex: Vec3) -> tuple[bool, float, int, int, float]:
+        """(certified, worst volume, n_negative, n_edge_on, relative volume error)."""
+        volumes = tet_volumes(apex)
+        n_negative = int(np.count_nonzero(volumes < -tol))
+        n_edge_on = int(np.count_nonzero(np.abs(volumes) <= tol))
+        rel_error = abs(float(volumes.sum()) - volume) / volume
+        certified = n_negative == 0 and rel_error <= rel_volume_tol
+        return certified, float(volumes.min()), n_negative, n_edge_on, rel_error
 
     if interior_point is not None:
         apex = tuple(float(c) for c in interior_point)
-        volumes = tet_volumes(apex)
-        worst = float(volumes.min())
-        if worst <= tol:
-            bad = [int(i) for i in np.flatnonzero(volumes <= tol)]
+        certified, worst, n_negative, n_edge_on, rel_error = assess(apex)
+        if not certified:
             raise TetrahedralisationError(
-                f"{len(bad)} of {len(faces)} tetrahedra are non-positive or coplanar "
-                f"(worst volume {worst:.3e} <= {tol:.3e}, first face {bad[0]}); the body "
-                f"is not star-shaped with respect to {apex!r}. Pass a different "
+                f"the body is not star-shaped with respect to {apex!r}: "
+                f"{n_negative} of {len(faces)} tetrahedra are inverted (volume < -{tol:.3e}), "
+                f"worst volume {worst:.3e}, and the tiling reproduces the surface volume "
+                f"only to {rel_error:.3e} (needs <= {rel_volume_tol:.3e}). Pass a different "
                 f"interior_point= or use a volume mesher."
             )
     else:
-        best: tuple[float, Vec3] | None = None
+        best: tuple[tuple[int, float], Vec3, int] | None = None
+        rejected: tuple[float, Vec3, int, float] | None = None
         for candidate in _interior_candidates(mesh):
-            worst = min_tet_volume(candidate)
-            if best is None or worst > best[0]:
-                best = (worst, candidate)
-        assert best is not None
-        worst, apex = best
-        if worst <= tol:
+            certified, worst, n_negative, n_edge_on, rel_error = assess(candidate)
+            if certified:
+                # Prefer strictly positive tets (fewer edge-on facets), then the
+                # largest worst-case cell.
+                key = (n_edge_on, -worst)
+                if best is None or key < best[0]:
+                    best = (key, candidate, n_edge_on)
+            elif rejected is None or n_negative < rejected[2]:
+                rejected = (worst, candidate, n_negative, rel_error)
+        if best is None:
+            assert rejected is not None
+            worst, apex_bad, n_negative, rel_error = rejected
             raise TetrahedralisationError(
-                f"no interior point sees the whole surface: best candidate {apex!r} still "
-                f"gives a worst-case tetrahedron volume {worst:.3e} (needs > {tol:.3e}). "
-                f"The body is not star-shaped; use a volume mesher instead."
+                f"no interior point sees the whole surface: best candidate {apex_bad!r} still "
+                f"leaves {n_negative} inverted tetrahedra (worst volume {worst:.3e}) and "
+                f"reproduces the surface volume only to {rel_error:.3e} "
+                f"(needs <= {rel_volume_tol:.3e}). The body is not star-shaped; use a volume "
+                f"mesher instead."
             )
+        _, apex, n_edge_on = best
 
     apex_index = len(verts)
     verts.append(apex)
-    tets: Tet = tuple((apex_index, a, b, c) for a, b, c in faces)
-
+    volumes = tet_volumes(apex)
+    kept = tuple(
+        (apex_index, a, b, c)
+        for (a, b, c), cell_volume in zip(faces, volumes, strict=True)
+        if cell_volume > tol
+    )
     return TetrahedralMesh(
         vertices=tuple(verts),
-        tets=tets,
+        tets=kept,
         units=mesh.units,
         coordinate_frame=mesh.coordinate_frame,
+        edge_on_facets=len(faces) - len(kept),
     )
 
 
