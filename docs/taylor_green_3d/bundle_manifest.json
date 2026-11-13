@@ -1,0 +1,15 @@
+{
+  "outdir": "/root/tp-agent/work/m17153/docs/taylor_green_3d/bundle",
+  "case": "CASE-TAYLOR-GREEN-3D",
+  "files": {
+    "case_spec.json": "050151b2cb6c1d5b9830e27262e9347eab9f330f99aba50aff33460dbf4d669b",
+    "metrics_table.json": "1e2969e5527d68bbb1d758c42babb526bc74573a508ec7c3102d8ed9c4d62ff0",
+    "mode_table_t1.json": "b040a799378a88fe7c2bdcc66d880e894173697e211ff8c0405f88d7d3c674d1",
+    "mode_table_t2.json": "f74d7d1a71a0eda20bbd7c5cd9caabfdc3a8d00aa1d3669f63fecfdbbf8d7f8b",
+    "mode_table_t3.json": "f80861072933769e4e966515aca97023b96ea0dbbbea6426f8c758a36abb2845",
+    "mode_table_t4.json": "152075f64cba4bf071185c26870378c49a244fe5de2affba8585956885c48df4",
+    "grid_8_t1.json": "6d233df77b25a92bad0f2bbe731f18e56476233214b2c7d89596d217d30eb50c",
+    "grid_16_t1.json": "4f082dbddf333cca10bcdd7270891a379006834149365fd0187e3a25f8b20917",
+    "closed_forms.json": "1ceb10aa9989a90356c165a9b18f224acc232ba7bc8afcc2a84c95d51b06958d"
+  }
+}

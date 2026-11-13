@@ -1,0 +1,49 @@
+{
+  "BeltramiABC": {
+    "amplitude": 1.0,
+    "viscosity": 0.01,
+    "wavenumber": 1.0
+  },
+  "TaylorGreenMode": {
+    "amplitude": 1.0,
+    "viscosity": 0.01
+  },
+  "rows": [
+    {
+      "abc_analytic_rate": 0.02,
+      "abc_energy": 1.4702980099601328,
+      "abc_enstrophy": 1.4702980099601328,
+      "invariant_mode_analytic_rate": 0.04,
+      "invariant_mode_energy": 0.2401973597880808,
+      "invariant_mode_enstrophy": 0.4803947195761616,
+      "t": 1.0
+    },
+    {
+      "abc_analytic_rate": 0.02,
+      "abc_energy": 1.4411841587284848,
+      "abc_enstrophy": 1.4411841587284848,
+      "invariant_mode_analytic_rate": 0.04,
+      "invariant_mode_energy": 0.23077908659665894,
+      "invariant_mode_enstrophy": 0.4615581731933179,
+      "t": 2.0
+    },
+    {
+      "abc_analytic_rate": 0.02,
+      "abc_energy": 1.412646800376373,
+      "abc_enstrophy": 1.412646800376373,
+      "invariant_mode_analytic_rate": 0.04,
+      "invariant_mode_energy": 0.22173010917928937,
+      "invariant_mode_enstrophy": 0.44346021835857874,
+      "t": 3.0
+    },
+    {
+      "abc_analytic_rate": 0.02,
+      "abc_energy": 1.3846745195799537,
+      "abc_enstrophy": 1.3846745195799537,
+      "invariant_mode_analytic_rate": 0.04,
+      "invariant_mode_energy": 0.21303594724155284,
+      "invariant_mode_enstrophy": 0.4260718944831057,
+      "t": 4.0
+    }
+  ]
+}
