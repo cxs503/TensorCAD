@@ -62,6 +62,15 @@ from .curvature import (
     principal_curvatures,
     vertex_mean_curvature,
 )
+from .fairness_energy import (
+    ENERGY_KINDS,
+    FairnessEnergyReport,
+    MeshCurvatureField,
+    SmoothingEnergy,
+    fairness_energy_report,
+    principal_curvature_field,
+    smoothing_energy,
+)
 from .design import (
     DESIGN_SCHEMA,
     DesignProblem,
@@ -545,6 +554,13 @@ __all__ = [
     "DesignTargets",
     "EllipsoidField",
     "FairnessReport",
+    "ENERGY_KINDS",
+    "FairnessEnergyReport",
+    "MeshCurvatureField",
+    "SmoothingEnergy",
+    "fairness_energy_report",
+    "principal_curvature_field",
+    "smoothing_energy",
     "FieldError",
     "FreeSurfaceCorrection",
     "GirderError",
