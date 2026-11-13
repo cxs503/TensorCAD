@@ -1,0 +1,18 @@
+{
+  "csv": "kvlcc2_class.csv",
+  "csv_sha256": "ff0ea036ca3c37a503870c8f8ffaecaa4f30addd9a9f1302f7fbd33fdaed6ed1",
+  "design_draft": 20.8,
+  "digest": "ac450faf4195b2088e1ec79230d91c5aae68b4d392b1219a12761cb65b01fe32",
+  "length": 320.0,
+  "licence": "n/a (reconstruction of published particulars)",
+  "method": "TensorCAD class hull calibrated to those particulars (tensorcad.geomquality.baselines.kvlcc2_class): plan form 1-(1-2xi)^a_aft / 1-(2xi-1)^a_fore with a zeta^(1/10) section; ordinates evaluated at run time, no hand-entered numbers",
+  "n_stations": 41,
+  "n_waterlines": 17,
+  "notes": "NOT the official KRISO offset table, which is not in this repository (docs/geomquality-pipeline.md, limitations) and was not reachable from the build sandbox; Cb/LCB agreement is a representation consistency check",
+  "official": false,
+  "source": "KVLCC2-class tanker: published particulars L = 320 m, B = 58 m, T = 20.8 m, Cb = 0.8098, LCB = -3.48 % L (KRISO KVLCC2; ITTC 2010/2015 workshop benchmark)",
+  "table": "kvlcc2_class",
+  "units": "m",
+  "url": "https://github.com/cxs503/TensorCAD/blob/main/tensorcad/geomquality/baselines.py",
+  "waterline_exponent": 3.0
+}
