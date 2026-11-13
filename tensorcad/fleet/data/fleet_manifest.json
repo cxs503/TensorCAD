@@ -1,0 +1,146 @@
+{
+  "schema": "tensorcad.fleet.baseline.v1",
+  "anchor": "GAP-CAD-T1-BASELINE-FLEET",
+  "generated_by": "tensorcad/fleet/manifest.py",
+  "purpose": "Registry + intake gate for the standard-hull baseline fleet. Every record carries provenance (source/url/license/retrieval/verified) so a geometry file can be admitted only when its origin is stated and its sha256 is pinned.",
+  "honesty_note": "This environment has no outbound network: no official IGES/offset file could be downloaded. Literature particulars below were entered offline (retrieval=offline_recollection, verified=false) and every derived or unrecalled displacement volume is marked basis=closure (Cb*L*B*T) instead of being presented as a published value. The gates and the ingest routes are the delivered capability; the digits are flagged, not laundered. Two geometry routes are used: 'series60_form' inside the Series-60 Cb window, and 'parametric_sections' (a generalized hull-surface surrogate solved to the published Cb, Cm and LCB) for the hulls the Series-60 law refuses. Neither route is the ship's official geometry: official IGES/offset files remain WITHHELD in this environment.",
+  "placeholder_signature": {
+    "source": "owner brief 2026-11-13: ship-platform geometry library ships 8 STL of which 6 are 304-triangle placeholders and KVLCC1/KVLCC2 are byte-identical",
+    "max_placeholder_triangles": 304,
+    "min_real_triangles": 1000
+  },
+  "ships": [
+    {
+      "name": "KCS",
+      "ship_class": "KRISO Container Ship",
+      "length": 230.0,
+      "beam": 32.2,
+      "draft": 10.8,
+      "block_coefficient": 0.651,
+      "displacement_volume": 52030.0,
+      "displacement_basis": "literature_value_recalled",
+      "lcb_fraction": -0.0148,
+      "geometry_route": "series60_form",
+      "provenance": {
+        "source": "MOERI KCS container-ship benchmark particulars (Gothenburg 2010 / SIMMAN workshop series)",
+        "url": "https://simman2014.dk/ (workshop hull data sheets)",
+        "license": "public benchmark data, workshop report",
+        "retrieval": "offline_recollection",
+        "verified": false
+      },
+      "notes": "Lpp/B/T/Cb triple is the workshop-standard one; closed-form Cb*L*B*T = 52140 m^3 agrees with the recalled 52030 m^3 to 0.2%. Cm = 0.971 (literature-recalled, same offline caveat as the other particulars).",
+      "midship_coefficient": 0.971,
+      "transom_ratio": 0.0
+    },
+    {
+      "name": "KVLCC2",
+      "ship_class": "MOERI very large crude carrier (KRISO Tanker)",
+      "length": 320.0,
+      "beam": 58.0,
+      "draft": 20.8,
+      "block_coefficient": 0.8098,
+      "displacement_volume": 312622.0,
+      "displacement_basis": "literature_value_recalled",
+      "lcb_fraction": 0.0348,
+      "geometry_route": "parametric_sections",
+      "provenance": {
+        "source": "MOERI KVLCC2 tanker benchmark particulars (SIMMAN 2008 workshop)",
+        "url": "https://simman2014.dk/ (workshop hull data sheets)",
+        "license": "public benchmark data, workshop report",
+        "retrieval": "offline_recollection",
+        "verified": false
+      },
+      "notes": "Cb*L*B*T = 312622 m^3 reproduces the recalled displacement volume exactly because the recalled Cb was rounded from the same triple. Cm = 0.9956 (literature-recalled, same offline caveat as the other particulars).",
+      "midship_coefficient": 0.9956,
+      "transom_ratio": 0.0
+    },
+    {
+      "name": "ONRT",
+      "ship_class": "ONR tumblehome topy (DTMB 5613)",
+      "length": 154.0,
+      "beam": 18.78,
+      "draft": 5.494,
+      "block_coefficient": 0.535,
+      "displacement_volume": 8518.1,
+      "displacement_basis": "literature_value_recalled",
+      "lcb_fraction": null,
+      "geometry_route": "parametric_sections",
+      "provenance": {
+        "source": "ONR tumblehome ONRT geometry description (Irvine et al. 2008; Gothenburg 2010 workshop)",
+        "url": "https://simman2014.dk/ (workshop hull data sheets)",
+        "license": "public benchmark data, workshop report",
+        "retrieval": "offline_recollection",
+        "verified": false
+      },
+      "notes": "Cb = 0.535 lies below the Series-60 form family's validated window [0.55, 0.85]; the route refuses it rather than clipping Cb, which is recorded as an honest per-ship failure. Cm = 0.75 (literature-recalled, same offline caveat as the other particulars).",
+      "midship_coefficient": 0.75,
+      "transom_ratio": 0.0
+    },
+    {
+      "name": "JBC",
+      "ship_class": "Japan Bulk Carrier (SR266)",
+      "length": 280.0,
+      "beam": 45.0,
+      "draft": 16.5,
+      "block_coefficient": 0.858,
+      "displacement_volume": null,
+      "displacement_basis": "closure",
+      "lcb_fraction": null,
+      "geometry_route": "parametric_sections",
+      "provenance": {
+        "source": "JBC (SR266) bulk-carrier benchmark particulars (Tokyo 2015 workshop)",
+        "url": "https://tokyo2015.k.u-tokyo.ac.jp/ (workshop hull data sheets)",
+        "license": "public benchmark data, workshop report",
+        "retrieval": "offline_recollection",
+        "verified": false
+      },
+      "notes": "No displacement volume recalled with confidence, so the reference volume is the closure Cb*L*B*T and the comparison is labelled closure, not literature. Cm = 0.992 (literature-recalled, same offline caveat as the other particulars).",
+      "midship_coefficient": 0.992,
+      "transom_ratio": 0.0
+    },
+    {
+      "name": "DTC",
+      "ship_class": "Duisburg Test Case container ship",
+      "length": 355.0,
+      "beam": 45.8,
+      "draft": 14.5,
+      "block_coefficient": 0.661,
+      "displacement_volume": null,
+      "displacement_basis": "closure",
+      "lcb_fraction": null,
+      "geometry_route": "series60_form",
+      "provenance": {
+        "source": "DTC container-ship benchmark particulars (el Moctar et al. 2012, HSVA)",
+        "url": "https://www.uni-due.de/ship/dtc.php",
+        "license": "public benchmark data, workshop report",
+        "retrieval": "offline_recollection",
+        "verified": false
+      },
+      "notes": "Reference volume is the closure Cb*L*B*T; no independent published displacement was available offline. Cm = 0.972 (literature-recalled, same offline caveat as the other particulars).",
+      "midship_coefficient": 0.972,
+      "transom_ratio": 0.0
+    },
+    {
+      "name": "Series60",
+      "ship_class": "Series 60 parent hull, Cb = 0.60",
+      "length": 100.0,
+      "beam": 13.3333,
+      "draft": 5.3333,
+      "block_coefficient": 0.6,
+      "displacement_volume": null,
+      "displacement_basis": "closure",
+      "lcb_fraction": null,
+      "geometry_route": "series60_form",
+      "provenance": {
+        "source": "Todd, F.H. (1963) Series 60 methodical series, DTMB Report 1710: L/B = 7.5, B/T = 2.5 at Cb = 0.60",
+        "url": "https://ntrl.ntis.gov/ (DTMB Report 1710)",
+        "license": "US Government work, public domain",
+        "retrieval": "offline_recollection",
+        "verified": false
+      },
+      "notes": "Parent-form parameters are the published series ratios, so the form family itself is the validated object here; the Cb=0.60 parent is reproduced by construction. Cm = 0.96 (literature-recalled, same offline caveat as the other particulars).",
+      "midship_coefficient": 0.96,
+      "transom_ratio": 0.0
+    }
+  ]
+}
