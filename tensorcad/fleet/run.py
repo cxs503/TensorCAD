@@ -30,12 +30,15 @@ from tensorcad.fleet.build import (
     RouteRefusal,
     build_ship_geometry,
     loft_station_table,
+    read_stl,
     sample_offset_table,
+    write_binary_stl,
 )
 from tensorcad.fleet.controls import (
     clipped_cb_record,
     duplicate_manifest,
     duplicate_stl_pair,
+    mis_transcribed_beam,
     placeholder_box,
     wrong_volume_record,
 )
@@ -43,11 +46,13 @@ from tensorcad.fleet.gates import (
     VOLUME_TOLERANCE,
     evaluate_gates,
     gate_particulars_consistent,
+    gate_reference_consistency,
     measure,
     placeholder_reasons,
     refused,
 )
 from tensorcad.fleet.manifest import FleetManifest, fleet_sha_index, load_manifest, sha256_file
+from tensorcad.fleet.sources import load_registry
 
 SCHEMA = "tensorcad.fleet.run.v1"
 
@@ -118,15 +123,96 @@ def _convergence(record, *, nx: int, nz: int) -> dict[str, Any] | None:
     }
 
 
+def _verification_conclusion(verdict: dict[str, Any], artifact: dict[str, Any] | None) -> str:
+    """One sentence a reviewer can check the manifest against, composed from the gates."""
+    topology = verdict.get("topology") or {}
+    record = verdict.get("record", {})
+    gate_names = [gate["name"] for gate in verdict.get("gates", [])]
+    failed = verdict.get("failed_gates") or []
+    if verdict.get("passed"):
+        head = f"ADMITTED ({len(gate_names) - len(failed)}/{len(gate_names)} gates passed)"
+    else:
+        head = f"REFUSED/FAILED (failed: {', '.join(failed)})"
+    volume = verdict.get("volume_relative_error")
+    reference = record.get("reference_volume")
+    volume_text = (
+        f"V_mesh {topology.get('signed_volume', float('nan')):.6g} m^3 vs V_ref {reference:.6g} m^3 "
+        f"= {volume * 100:.4f}% (basis {verdict.get('reference_basis')}, "
+        f"external={'yes' if verdict.get('reference_is_external') else 'no'})"
+        if volume is not None and reference is not None
+        else "no volume comparison"
+    )
+    topology_text = (
+        f"watertight (boundary edges {topology.get('boundary_edge_count')}), "
+        f"manifold+oriented (non-manifold {topology.get('nonmanifold_edge_count')}, "
+        f"inconsistent {topology.get('inconsistently_oriented_edge_count')}), "
+        f"Euler {topology.get('euler_characteristic')}"
+        if topology
+        else "no geometry built"
+    )
+    artifact_text = (
+        f"delivered artefact {artifact['file']} sha256 {artifact['sha256'][:16]}... "
+        f"({artifact['bytes']} bytes, re-ingest {'agrees' if artifact.get('reingest_ok') else 'DISAGREES'})"
+        if artifact
+        else "no artefact written"
+    )
+    return f"{head}; {topology_text}; {volume_text}; {artifact_text}."
+
+
+def _artifact_block(record, mesh, verdict: dict[str, Any], artifact_dir: Path | None) -> dict[str, Any] | None:
+    """Write the admitted mesh to disk, then read it back and re-measure it.
+
+    The digest has to belong to the file a consumer receives, so the file is written
+    first and gated second: the re-ingest repeats the topology and volume gates on the
+    bytes that were actually stored, which also catches a writer that silently loses
+    or merges triangles.
+    """
+    if artifact_dir is None:
+        return None
+    path = artifact_dir / f"{record.name}.stl"
+    written_sha = write_binary_stl(mesh, path)
+    stored_sha = sha256_file(path)
+    reread = read_stl(path)
+    facts = measure(reread)
+    reference = record.reference_volume()
+    in_memory = verdict["topology"]["signed_volume"]
+    # the delivered file must reproduce the geometry that was gated: float32 is the
+    # format's own precision, so the tolerance is 1e-6 relative and not "close enough"
+    roundtrip_rel = abs(facts.signed_volume - in_memory) / max(abs(in_memory), 1e-12)
+    reference_rel = abs(facts.signed_volume - reference) / reference
+    reingest_ok = (
+        stored_sha == written_sha
+        and facts.boundary_edge_count == 0
+        and facts.nonmanifold_edge_count == 0
+        and facts.inconsistently_oriented_edge_count == 0
+        and abs(facts.euler_characteristic - 2) == 0
+        and roundtrip_rel < 1e-6
+    )
+    return {
+        "file": path.name,
+        "path": str(path),
+        "bytes": path.stat().st_size,
+        "sha256": stored_sha,
+        "sha256_on_write": written_sha,
+        "triangles": facts.triangle_count,
+        "reingest_volume": facts.signed_volume,
+        "roundtrip_relative_error": roundtrip_rel,
+        "reingest_vs_reference_relative_error": reference_rel,
+        "reingest_ok": reingest_ok,
+    }
+
+
 def _ship_block(record, manifest: FleetManifest, *, nx: int, nz: int,
-                volume_tolerance: float, convergence: bool = True) -> dict[str, Any]:
+                volume_tolerance: float, convergence: bool = True,
+                registry=None, artifact_dir: Path | None = None) -> dict[str, Any]:
     try:
         built = build_ship_geometry(record, nx=nx, nz=nz)
     except RouteRefusal as exc:
         block = refused(record, str(exc))
         block["record"] = record.as_dict()
         return block
-    verdict = evaluate_gates(record, built.mesh, manifest, volume_tolerance=volume_tolerance)
+    verdict = evaluate_gates(record, built.mesh, manifest, volume_tolerance=volume_tolerance,
+                             registry=registry)
     verdict["record"] = record.as_dict()
     verdict["build"] = built.as_dict()
     verdict["hydrostatics"] = _hydrostatics(built.mesh)
@@ -137,6 +223,12 @@ def _ship_block(record, manifest: FleetManifest, *, nx: int, nz: int,
     scale = max(abs(mesh_volume), abs(hydro_volume), 1e-12)
     verdict["volume_integration_agreement"] = abs(mesh_volume - hydro_volume) / scale
     verdict["volume_integration_ok"] = verdict["volume_integration_agreement"] < 1e-6
+    artifact = _artifact_block(record, built.mesh, verdict, artifact_dir)
+    verdict["artifact"] = artifact
+    verdict["source_anchor"] = None if registry is None else (
+        registry.for_ship(record.name).as_dict() if registry.for_ship(record.name) else None
+    )
+    verdict["verification_conclusion"] = _verification_conclusion(verdict, artifact)
     if convergence:
         verdict["convergence"] = _convergence(record, nx=nx, nz=nz)
     return verdict
@@ -214,6 +306,23 @@ def _negative_controls(manifest: FleetManifest, out_dir: Path) -> list[dict[str,
             "detail": gate.detail,
         }
     )
+
+    # 5. a cited displacement quoted next to a mis-transcribed particular: the DTC defect
+    dtc = next((ship for ship in manifest.ships if ship.name == "DTC"), base)
+    mistyped = mis_transcribed_beam(dtc, beam=dtc.beam * 45.8 / 51.0)
+    gate = gate_reference_consistency(mistyped)
+    controls.append(
+        {
+            "control": "mis_transcribed_particulars",
+            "expected": "rejected",
+            "rejected": not gate.passed,
+            "failed_gates": [] if gate.passed else [gate.name],
+            "detail": gate.detail,
+            "cited_volume": gate.values["cited_volume"],
+            "closure_volume": gate.values["closure_volume"],
+            "relative_error": gate.values["relative_error"],
+        }
+    )
     return controls
 
 
@@ -252,9 +361,14 @@ def run_fleet(
 ) -> dict[str, Any]:
     """Build, gate and record the whole fleet. Returns the evidence dictionary."""
     manifest = load_manifest(manifest_path)
+    registry = load_registry()
     root = Path(out_dir)
+    artifact_dir = root / "manifests" if write else None
+    if artifact_dir is not None:
+        artifact_dir.mkdir(parents=True, exist_ok=True)
     ships = [
-        _ship_block(record, manifest, nx=nx, nz=nz, volume_tolerance=volume_tolerance)
+        _ship_block(record, manifest, nx=nx, nz=nz, volume_tolerance=volume_tolerance,
+                    registry=registry, artifact_dir=artifact_dir)
         for record in manifest.ships
     ]
     controls = _negative_controls(manifest, root)
@@ -290,6 +404,12 @@ def run_fleet(
             "platform": platform.platform(),
         },
         "provenance": fleet_sha_index(manifest),
+        "source_registry": {
+            "path": str(registry.path) if registry.path else None,
+            "sha256": registry.sha256,
+            "anchors_registered": [anchor.ship for anchor in registry.sources],
+            "anchors_missing": registry.missing_for(ship.name for ship in manifest.ships),
+        },
         "ships": ships,
         "cross_route_check": cross_route,
         "negative_controls": controls,
@@ -311,6 +431,20 @@ def run_fleet(
                 block.get("volume_integration_ok", False) for block in measured
             ),
             "hydrostatics_solver_calls": len(measured),
+            "artifacts_written": sum(1 for block in measured if block.get("artifact")),
+            "artifacts_reingest_ok": all(
+                block["artifact"]["reingest_ok"] for block in measured if block.get("artifact")
+            ),
+            "source_anchors_complete": not registry.missing_for(ship.name for ship in manifest.ships),
+            "worst_reference_consistency_relative_error": max(
+                (
+                    abs(gate["values"].get("relative_error") or 0.0)
+                    for block in measured
+                    for gate in block["gates"]
+                    if gate["name"] == "G6b_reference_consistency"
+                ),
+                default=None,
+            ),
         },
     }
 
@@ -334,6 +468,9 @@ def run_fleet(
                         },
                         "topology": block["topology"],
                         "gates": block["gates"],
+                        "source_anchor": block.get("source_anchor"),
+                        "artifact": block.get("artifact"),
+                        "verification_conclusion": block.get("verification_conclusion"),
                     },
                     indent=2,
                     default=_json_default,
