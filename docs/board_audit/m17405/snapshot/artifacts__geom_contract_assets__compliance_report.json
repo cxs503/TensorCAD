@@ -1,0 +1,290 @@
+[
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/box_barge.stl",
+    "passed": true,
+    "violations": [],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x aft->fore, y port->starboard, z up; right-handed",
+      "vertex_count": 786,
+      "triangle_count": 1568,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -4.0,
+          -4.0
+        ],
+        "max": [
+          30.0,
+          4.0,
+          1.0
+        ],
+        "size": [
+          30.0,
+          8.0,
+          5.0
+        ]
+      },
+      "diagonal_m": 31.448370387,
+      "signed_volume": 1200.0
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/inverted_wigley.stl",
+    "passed": false,
+    "violations": [
+      {
+        "convention": "coordinate_system",
+        "severity": "warning",
+        "message": "coordinate frame is unspecified; right-handed is assumed",
+        "detail": "coordinate_frame='x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft'"
+      },
+      {
+        "convention": "orientation",
+        "severity": "error",
+        "message": "closed mesh has non-positive signed volume (inward normals or inverted)",
+        "detail": "signed_volume=-2.77122214"
+      }
+    ],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+      "vertex_count": 1001,
+      "triangle_count": 1998,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -0.5,
+          -0.625
+        ],
+        "max": [
+          10.0,
+          0.5,
+          0.0
+        ],
+        "size": [
+          10.0,
+          1.0,
+          0.625
+        ]
+      },
+      "diagonal_m": 10.069291187,
+      "signed_volume": -2.771222144
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/left_handed.stl",
+    "passed": false,
+    "violations": [
+      {
+        "convention": "coordinate_system",
+        "severity": "error",
+        "message": "left-handed coordinate system is not supported",
+        "detail": "coordinate_frame='x fore, y starboard, z down; left-handed'"
+      }
+    ],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x fore, y starboard, z down; left-handed",
+      "vertex_count": 1001,
+      "triangle_count": 1998,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -0.5,
+          -0.625
+        ],
+        "max": [
+          10.0,
+          0.5,
+          0.0
+        ],
+        "size": [
+          10.0,
+          1.0,
+          0.625
+        ]
+      },
+      "diagonal_m": 10.069291187,
+      "signed_volume": 2.771222144
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/series60_cb60.stl",
+    "passed": true,
+    "violations": [],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x aft->fore, y port->starboard, z up; right-handed",
+      "vertex_count": 1001,
+      "triangle_count": 1998,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -1.5,
+          -1.5
+        ],
+        "max": [
+          20.0,
+          1.5,
+          0.0
+        ],
+        "size": [
+          20.0,
+          3.0,
+          1.5
+        ]
+      },
+      "diagonal_m": 20.279299791,
+      "signed_volume": 52.014385507
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/series60_cb75.stl",
+    "passed": true,
+    "violations": [],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x aft->fore, y port->starboard, z up; right-handed",
+      "vertex_count": 1001,
+      "triangle_count": 1998,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -1.5,
+          -1.5
+        ],
+        "max": [
+          20.0,
+          1.5,
+          0.0
+        ],
+        "size": [
+          20.0,
+          3.0,
+          1.5
+        ]
+      },
+      "diagonal_m": 20.279299791,
+      "signed_volume": 64.753744466
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/sphere_r1.stl",
+    "passed": true,
+    "violations": [],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x fore, y starboard, z up; right-handed",
+      "vertex_count": 1538,
+      "triangle_count": 3072,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          -1.0,
+          -1.0,
+          -1.0
+        ],
+        "max": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "size": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "diagonal_m": 3.464101615,
+      "signed_volume": 4.168925864
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/wigley.stl",
+    "passed": true,
+    "violations": [
+      {
+        "convention": "coordinate_system",
+        "severity": "warning",
+        "message": "coordinate frame is unspecified; right-handed is assumed",
+        "detail": "coordinate_frame='x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft'"
+      }
+    ],
+    "mesh_info": {
+      "units": "m",
+      "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+      "vertex_count": 1001,
+      "triangle_count": 1998,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -0.5,
+          -0.625
+        ],
+        "max": [
+          10.0,
+          0.5,
+          0.0
+        ],
+        "size": [
+          10.0,
+          1.0,
+          0.625
+        ]
+      },
+      "diagonal_m": 10.069291187,
+      "signed_volume": 2.771222144
+    }
+  },
+  {
+    "source": "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/wrong_units.stl",
+    "passed": false,
+    "violations": [
+      {
+        "convention": "coordinate_system",
+        "severity": "warning",
+        "message": "coordinate frame is unspecified; right-handed is assumed",
+        "detail": "coordinate_frame='x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft'"
+      },
+      {
+        "convention": "scale",
+        "severity": "error",
+        "message": "bounding-box diagonal 0.0100693 m is below minimum 0.05 m",
+        "detail": "declared units='mm'; the model may be in a different unit"
+      }
+    ],
+    "mesh_info": {
+      "units": "mm",
+      "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+      "vertex_count": 1001,
+      "triangle_count": 1998,
+      "watertight": true,
+      "bounding_box": {
+        "min": [
+          0.0,
+          -0.5,
+          -0.625
+        ],
+        "max": [
+          10.0,
+          0.5,
+          0.0
+        ],
+        "size": [
+          10.0,
+          1.0,
+          0.625
+        ]
+      },
+      "diagonal_m": 0.010069291,
+      "signed_volume": 2.771222144
+    }
+  }
+]

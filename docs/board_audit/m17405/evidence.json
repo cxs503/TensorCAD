@@ -1,0 +1,90 @@
+{
+  "impl_files": [
+    "/root/tp-agent/work/m17357/tensorcad/geom_contract.py",
+    "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/tensorcad__geom_contract.py",
+    "/root/tp-agent/work/m17357/tools/run_contract_compliance.py"
+  ],
+  "entry": [
+    "/root/tp-agent/work/m17357/tensorcad/geom_contract.py"
+  ],
+  "run_artifacts": [
+    "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/compliance_report.json",
+    "/root/tp-agent/work/m17405/artifacts/geom_contract_audit/probe_results.json",
+    "/root/tp-agent/work/m17405/artifacts/geom_contract_audit/contract_audit.png"
+  ],
+  "tests": [
+    "/root/tp-agent/work/m17357/tests/test_geom_contract.py"
+  ],
+  "repro_cmd": "cd /root/tp-agent/work/m17357 && python3 tools/run_contract_compliance.py  # auditor rerun: compliance_report.json sha256 identical",
+  "external_anchor": [
+    "/root/tp-agent/work/m17405/artifacts/geom_contract_audit/probe_results.json",
+    "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/box_barge.stl",
+    "/root/tp-agent/work/m17357/artifacts/geom_contract_assets/wigley.stl"
+  ],
+  "impl_pointer": {
+    "library_api": "tensorcad/geom_contract.py:240 validate_contract, :268 validate_stl_file",
+    "checks": "tensorcad/geom_contract.py:124 _check_coordinate_system, :149 _check_units, :161 _check_scale, :188 _check_orientation",
+    "cli": "tensorcad/geom_contract.py:282 main  (`python -m tensorcad.geom_contract <stl>`)",
+    "docs": "docs/geometry_contract.md (149 lines, four conventions + usage)",
+    "repro_tool": "tools/run_contract_compliance.py (8 assets -> compliance_report.json)"
+  },
+  "tests_pointer": {
+    "file": "tests/test_geom_contract.py",
+    "run": "cd <subject> && python3 -m pytest tests/test_geom_contract.py -q",
+    "result": "22 passed, 0 failed (auditor rerun, 0.4 s)",
+    "invariants": "each convention has both PASS and FAIL cases (test_right_handed_passes vs test_left_handed_fails, test_outward_normals_pass vs test_inward_normals_fail, test_tiny_model_fails/test_huge_model_fails)"
+  },
+  "run_artifacts_pointer": {
+    "compliance_report": "artifacts/geom_contract_assets/compliance_report.json (8 reports, 5 PASS / 3 FAIL)",
+    "assets": "artifacts/geom_contract_assets/*.stl (9 files incl. 3 red-team)",
+    "repro_sha256": "ee18be55cb3dbdc1ff43ebbf861dbf45340a83054498bd2e6d283a43de125a0f (before == after)"
+  },
+  "integration_callers": "NONE — grep -rn 'validate_contract' over the repo returns only the re-export at tensorcad/__init__.py:457; no solver/ingest caller => L3 explicitly refused",
+  "benchmark": "ABSENT — SELECT ... FROM tensor_benchmark_cases WHERE anchor_slug='GAP-CAD-D3-GEOM-CONTRACT' -> 0 rows; no ref/tolerance to compare against => L4 explicitly refused. Auditor substituted 3 closed-form anchors (box 1200 m3 exact, sphere -0.474%, Wigley -0.236%), which do NOT count as a registered benchmark case.",
+  "checks_not_run": [
+    "no external literature/witness lookup (offline sandbox); anchors are closed-form only",
+    "no cross-repo CAD consumer (TensorFEM/TensorBEM import path) exercised",
+    "no large-mesh performance/robustness sweep (validator is O(n) python loops)"
+  ],
+  "commit_state": {
+    "head_commit": null,
+    "git_status": "8 untracked/modified paths in the subject worktree; /root/tensor-ecosystem/TensorCAD has no tensorcad/geom_contract.py => the capability is invisible to every other repo until committed",
+    "server_quality_audit": {
+      "gate_valid": false,
+      "key_present": false,
+      "gate_missing_warning": true
+    },
+    "report_row": "tensor_reports has no row for mission_id=17357 (report_id empty)"
+  },
+  "auditor_probe": {
+    "script": "docs/board_audit/m17405/audit_probe.py",
+    "results": "artifacts/geom_contract_audit/probe_results.json",
+    "red_team": "5 independently built violations -> 4/4 conventions fire with correct label",
+    "false_negatives": 3,
+    "anchors": "3 closed-form volume anchors, all |err| < 0.5%"
+  },
+  "snapshot_manifest": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/MANIFEST.json",
+  "durable_after_push": [
+    "docs/board_audit/m17405/AUDIT.md",
+    "docs/board_audit/m17405/evidence.json",
+    "docs/board_audit/m17405/audit_probe.py",
+    "docs/board_audit/m17405/snapshot/",
+    "artifacts/geom_contract_audit/probe_results.json",
+    "artifacts/geom_contract_audit/contract_audit.png"
+  ],
+  "level_claimed": 2,
+  "level_refused": {
+    "L3": "no integration caller (only a re-export in tensorcad/__init__.py:457)",
+    "L4": "anchor has 0 rows in tensor_benchmark_cases; no ref/tolerance judge",
+    "L5": "no external anchor / no before-after comparison record"
+  },
+  "verdict_summary": "L2: real library+CLI that reads an STL, runs four convention checks and emits a report; 22 unit tests green, byte-identical regeneration of the 8-asset compliance table, 4/4 conventions caught on auditor-built fixtures. Not integrated into any solver path (L3 refused) and the anchor has no registered benchmark case (L4 refused).",
+  "sha256": {
+    "tensorcad/geom_contract.py": "1fa0b8980dbbea36c19ce0f819984eca5bd5173193d1563351072519b8f1a539",
+    "docs/geometry_contract.md": "d7013f74bccf575481282de85115408fd1811ce7c82c5f0adeb0e987260bc462",
+    "tests/test_geom_contract.py": "dd14c3d3e866f4ce4ee7d097956abf9a507db14ccc90afea59785a52b4dfd9c9",
+    "tools/run_contract_compliance.py": "0e2c54a72d600235de8997d60429268e0a14025ab526778f7de3e878264f1b31",
+    "tools/generate_contract_assets.py": "c1ce97d940d8a8e31264a7947041ce2a1eb769708438bb0b3c4c5408d59a0d76",
+    "artifacts/geom_contract_assets/compliance_report.json": "ee18be55cb3dbdc1ff43ebbf861dbf45340a83054498bd2e6d283a43de125a0f"
+  }
+}

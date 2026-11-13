@@ -1,0 +1,38 @@
+{
+  "tensorcad/geom_contract.py": {
+    "subject_sha256": "1fa0b8980dbbea36c19ce0f819984eca5bd5173193d1563351072519b8f1a539",
+    "snapshot_sha256": "1fa0b8980dbbea36c19ce0f819984eca5bd5173193d1563351072519b8f1a539",
+    "snapshot": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/tensorcad__geom_contract.py",
+    "bytes": 12713
+  },
+  "docs/geometry_contract.md": {
+    "subject_sha256": "d7013f74bccf575481282de85115408fd1811ce7c82c5f0adeb0e987260bc462",
+    "snapshot_sha256": "d7013f74bccf575481282de85115408fd1811ce7c82c5f0adeb0e987260bc462",
+    "snapshot": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/docs__geometry_contract.md",
+    "bytes": 5702
+  },
+  "tests/test_geom_contract.py": {
+    "subject_sha256": "dd14c3d3e866f4ce4ee7d097956abf9a507db14ccc90afea59785a52b4dfd9c9",
+    "snapshot_sha256": "dd14c3d3e866f4ce4ee7d097956abf9a507db14ccc90afea59785a52b4dfd9c9",
+    "snapshot": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/tests__test_geom_contract.py",
+    "bytes": 7963
+  },
+  "tools/run_contract_compliance.py": {
+    "subject_sha256": "0e2c54a72d600235de8997d60429268e0a14025ab526778f7de3e878264f1b31",
+    "snapshot_sha256": "0e2c54a72d600235de8997d60429268e0a14025ab526778f7de3e878264f1b31",
+    "snapshot": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/tools__run_contract_compliance.py",
+    "bytes": 4211
+  },
+  "tools/generate_contract_assets.py": {
+    "subject_sha256": "c1ce97d940d8a8e31264a7947041ce2a1eb769708438bb0b3c4c5408d59a0d76",
+    "snapshot_sha256": "c1ce97d940d8a8e31264a7947041ce2a1eb769708438bb0b3c4c5408d59a0d76",
+    "snapshot": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/tools__generate_contract_assets.py",
+    "bytes": 10341
+  },
+  "artifacts/geom_contract_assets/compliance_report.json": {
+    "subject_sha256": "ee18be55cb3dbdc1ff43ebbf861dbf45340a83054498bd2e6d283a43de125a0f",
+    "snapshot_sha256": "ee18be55cb3dbdc1ff43ebbf861dbf45340a83054498bd2e6d283a43de125a0f",
+    "snapshot": "/root/tp-agent/work/m17405/docs/board_audit/m17405/snapshot/artifacts__geom_contract_assets__compliance_report.json",
+    "bytes": 7711
+  }
+}
