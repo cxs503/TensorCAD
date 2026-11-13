@@ -1,0 +1,19 @@
+{
+  "schema": "published_reference/1.0",
+  "quantity_set": "Series 60 parent-form particulars (Cb, Cm, Cp, Cwp, LCB/L)",
+  "provenance": {
+    "citation": "Todd, F.H. -- Series 60 methodical series of single-screw merchant ship models (DTMB); parent-form particulars as tabulated in the resistance/design literature and cited in this repository as 'Todd 1951'",
+    "transcription_chain": "inherited from this repository's docs/series60_verification.md (section 2, table of parent particulars) and docs/series60_fidelity.md (table 1); no re-transcription was performed in m17252 -- the audit reads this file",
+    "retrieval": "no network access in this sandbox (outbound fetch is blocked by policy), so the values are documentary rather than freshly fetched: the chain above is the provenance, and docs/data/series60_published_parents.json's sha256 is recorded in the audit artifact so any edit is visible",
+    "license_note": "only dimensionless coefficients are reproduced (facts, no copyrightable expression); no offset tables, no figures, no typeset pages",
+    "self_consistency_audit": "Cb = Cp * Cm holds to within 0.4 % of Cb across the five parents; the audit reports the residual per row rather than smoothing it away",
+    "independent_transcription_risk": "the LCB/L column is the value the fidelity layer used as a target (docs/series60_fidelity.md table 2), which is itself downstream of the same source; it is therefore marked as an input target in the audit, not as an independent measurement"
+  },
+  "parents": [
+    {"cb": 0.60, "cm": 0.960, "cp": 0.625, "cwp": 0.700, "lcb_over_length": 0.475},
+    {"cb": 0.65, "cm": 0.970, "cp": 0.670, "cwp": 0.727, "lcb_over_length": 0.483},
+    {"cb": 0.70, "cm": 0.980, "cp": 0.715, "cwp": 0.753, "lcb_over_length": 0.490},
+    {"cb": 0.75, "cm": 0.985, "cp": 0.760, "cwp": 0.780, "lcb_over_length": 0.496},
+    {"cb": 0.80, "cm": 0.990, "cp": 0.805, "cwp": 0.807, "lcb_over_length": 0.502}
+  ]
+}
