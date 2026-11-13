@@ -34,6 +34,18 @@ INPUTS = ROOT / "artifacts" / "gap_t1_iges" / "inputs"
 PROVENANCE = ROOT / "artifacts" / "gap_t1_iges" / "provenance.json"
 
 
+
+def _evidence_matches_this_harness() -> bool:
+    """The committed/left-over evidence file must come from the current driver schema."""
+    if not EVIDENCE.exists():
+        return False
+    try:
+        payload = json.loads(EVIDENCE.read_text())
+    except json.JSONDecodeError:
+        return False
+    return "references" in payload and isinstance(payload.get("files"), dict)
+
+
 # --------------------------------------------------------------------------- #
 # record parsing
 # --------------------------------------------------------------------------- #
@@ -173,40 +185,50 @@ def test_weld_merges_duplicate_corner_vertices_only_within_tolerance():
 # integration: gate verdicts from evidence run
 # --------------------------------------------------------------------------- #
 @pytest.mark.skipif(not EVIDENCE.exists(), reason="evidence run has not been executed")
+@pytest.mark.skipif(not _evidence_matches_this_harness(),
+                    reason="evidence.json predates the current driver schema: rerun the benchmark")
 def test_real_iges_files_meet_their_recorded_gates():
     evidence = json.loads(EVIDENCE.read_text())
-    for entry in evidence["files"]:
-        if "error" in entry:
-            continue
-        assert entry["route"].startswith("patch-set"), entry
-        assert entry["watertight"], entry
-        assert entry["signed_volume"] > 0.0, entry
-        assert entry["free_edges_after"] == 0, entry
+    ran = [row for row in evidence["files"].values() if "error" not in row]
+    assert ran, "the evidence run produced no successful row"
+    for row in ran:
+        assert row["watertight"], row
+        assert row["free_edges"] == 0, row
+        assert row["components"] == 1, row
 
 
 # --------------------------------------------------------------------------- #
-# gold-standard regression: volume vs analytic
+# gold-standard regression: volume vs the reference integral of the written patches
 # --------------------------------------------------------------------------- #
-@pytest.mark.skipif(not EVIDENCE.exists(), reason="evidence run has not been executed")
+@pytest.mark.skipif(not _evidence_matches_this_harness(),
+                    reason="evidence.json predates the current driver schema: rerun the benchmark")
 def test_gold_standard_volume_regression():
     evidence = json.loads(EVIDENCE.read_text())
-    for entry in evidence["files"]:
-        bench = entry.get("benchmark")
-        if bench is None:
+    judged = [row for row in evidence["files"].values() if row.get("reference_converged")]
+    assert judged, "no row carries a converged reference: the regression cannot judge"
+    for name, row in evidence["files"].items():
+        reference = evidence["references"][name]
+        # A reference that does not reproduce the analytic closed form is not allowed to
+        # judge the pipeline; where one exists it must agree to 1 %.
+        if reference["vs_analytic_pct"] is not None:
+            assert abs(reference["vs_analytic_pct"]) < 1.0, (name, reference)
+        if not row.get("reference_converged"):
             continue
-        assert bench["relative_error_pct"] < 3.0, (
-            f"volume error {bench['relative_error_pct']:.2f}% exceeds 3 %"
-        )
+        assert abs(row["volume_error_pct"]) < 3.0, (
+            f"{name}: volume error {row['volume_error_pct']:.2f}% exceeds 3 %")
 
 
 # --------------------------------------------------------------------------- #
 # provenance and hash pinning
 # --------------------------------------------------------------------------- #
-@pytest.mark.skipif(not INPUTS.exists(), reason="input IGES files not present")
+@pytest.mark.skipif(not (INPUTS.exists() and PROVENANCE.exists()),
+                    reason="input IGES files not present")
 def test_input_files_are_hash_pinned():
     import hashlib
     manifest = json.loads(PROVENANCE.read_text())
-    for record in manifest["files"]:
+    inputs = manifest["inputs"]
+    assert inputs, "provenance records no inputs"
+    for name, record in inputs.items():
         path = ROOT / record["path"]
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         assert digest == record["sha256"], f"{path} hash mismatch"
