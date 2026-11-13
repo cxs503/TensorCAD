@@ -41,8 +41,11 @@ __all__ = [
     "gmsh_element_qualities",
     "icn_from_singular_values",
     "reference_hexahedra",
+    "reference_non_orthogonality",
+    "reference_skewness",
     "reference_tets",
     "reference_triangles",
+    "trimesh_topology",
     "trimesh_triangle_metrics",
 ]
 
@@ -118,6 +121,22 @@ def reference_triangles(
         out["aspect_ratio"].append(circumradius / (2.0 * inradius) if inradius > 0.0 else math.inf)
         out["gamma"].append(2.0 * inradius / circumradius if circumradius not in (0.0, math.inf) else 0.0)
     return {name: tuple(values) for name, values in out.items()}
+
+
+def reference_skewness(
+    points: Sequence[Sequence[float]], triangles: Sequence[Sequence[int]]
+) -> tuple[float, ...]:
+    """Equiangle skewness of triangles via the ``atan2`` angles of :func:`reference_triangles`.
+
+    Same definition, different angles: no code path is shared with
+    :mod:`tensorcad.meshquality.metrics`, so a wrong angle set or a swapped min/max in the
+    library shows up as a mismatch rather than as a silently equal number.
+    """
+    angles = reference_triangles(points, triangles)
+    out: list[float] = []
+    for low, high in zip(angles["min_angle"], angles["max_angle"]):
+        out.append(max((high - 60.0) / 120.0, (60.0 - low) / 60.0))
+    return tuple(out)
 
 
 def _cayley_menger(p0: Vec3, p1: Vec3, p2: Vec3, p3: Vec3) -> float:
@@ -365,3 +384,101 @@ def gmsh_element_qualities(
     finally:
         gmsh.finalize()
     return result
+
+
+def trimesh_topology(
+    points: Sequence[Sequence[float]], triangles: Sequence[Sequence[int]]
+) -> dict[str, Any] | None:
+    """Closure, winding, Euler number, shell count and volume from ``trimesh``.
+
+    A live third-party implementation of exactly the checks
+    :mod:`tensorcad.meshquality.topology` makes, so the library is not its own judge:
+    ``is_watertight`` for closure, ``is_winding_consistent`` for orientation,
+    ``euler_number`` for the topology, ``body_count`` for shells and ``volume`` for the
+    enclosed volume. Returns ``None`` when trimesh is not importable, which the benchmark
+    records instead of silently skipping. ``process=False`` is deliberate: trimesh's
+    merge/repair passes would hide the defects being compared.
+    """
+    try:
+        import trimesh  # noqa: PLC0415 -- optional dependency, imported on demand
+    except Exception:  # noqa: BLE001 - any import failure means "no oracle here"
+        return None
+    mesh = trimesh.Trimesh(
+        vertices=[[float(c) for c in p] for p in points],
+        faces=[[int(i) for i in face] for face in triangles],
+        process=False,
+        validate=False,
+    )
+    return {
+        "version": getattr(trimesh, "__version__", None),
+        "watertight": bool(mesh.is_watertight),
+        "winding_consistent": bool(mesh.is_winding_consistent),
+        "euler_number": int(mesh.euler_number),
+        "body_count": int(mesh.body_count),
+        "volume": float(mesh.volume),
+        "area": float(mesh.area),
+    }
+
+
+def reference_non_orthogonality(
+    points: Sequence[Sequence[float]], cells: Sequence[Sequence[int]], kind: str
+) -> tuple[float, ...]:
+    """Internal-face non-orthogonality by a different arithmetic route than the library.
+
+    :func:`tensorcad.meshquality.topology.non_orthogonality` computes the angle with
+    ``acos`` of a normalised dot product and orients each face normal by comparing it with
+    the centre-to-centre vector. This route instead builds the normal by summing the
+    triangles of a fan around the face centroid and takes the angle with ``atan2(|u x v|,
+    u . v)``, which stays accurate for nearly parallel vectors where ``acos`` loses half
+    its digits. Both must agree to about 1e-9 deg on a well-conditioned face.
+    """
+    from .topology import CELL_FACES  # local import: reference must not import at module load
+
+    table = CELL_FACES[kind]
+    pts = [tuple(float(c) for c in p) for p in points]
+    owners: dict[tuple[int, ...], list[int]] = {}
+    order: dict[tuple[int, ...], tuple[int, ...]] = {}
+    for index, cell in enumerate(cells):
+        for nodes in table:
+            face = tuple(int(cell[i]) for i in nodes)
+            key = tuple(sorted(face))
+            owners.setdefault(key, []).append(index)
+            order.setdefault(key, face)
+    centres = [
+        tuple(sum(pts[i][axis] for i in cell) / len(cell) for axis in range(3)) for cell in cells
+    ]
+
+    def fan_normal(face: tuple[int, ...]) -> tuple[float, float, float]:
+        centre = tuple(sum(pts[i][axis] for i in face) / len(face) for axis in range(3))
+        total = [0.0, 0.0, 0.0]
+        for position in range(len(face)):
+            a = pts[face[position]]
+            b = pts[face[(position + 1) % len(face)]]
+            for axis in range(3):
+                total[axis] += (a[axis] - centre[axis] + b[axis] - centre[axis]) * 0.0
+            # triangle (centre, a, b) contributes cross(a-centre, b-centre)
+            u = [a[i] - centre[i] for i in range(3)]
+            v = [b[i] - centre[i] for i in range(3)]
+            total[0] += u[1] * v[2] - u[2] * v[1]
+            total[1] += u[2] * v[0] - u[0] * v[2]
+            total[2] += u[0] * v[1] - u[1] * v[0]
+        return (total[0], total[1], total[2])
+
+    angles: list[float] = []
+    for key, sharing in owners.items():
+        if len(sharing) != 2:
+            continue
+        low, high = sorted(sharing)
+        normal = fan_normal(order[key])
+        d = [centres[high][i] - centres[low][i] for i in range(3)]
+        if sum(normal[i] * d[i] for i in range(3)) < 0.0:
+            normal = [-normal[i] for i in range(3)]
+        cross = [
+            normal[1] * d[2] - normal[2] * d[1],
+            normal[2] * d[0] - normal[0] * d[2],
+            normal[0] * d[1] - normal[1] * d[0],
+        ]
+        magnitude = math.sqrt(sum(c * c for c in cross))
+        dot = sum(normal[i] * d[i] for i in range(3))
+        angles.append(math.degrees(math.atan2(magnitude, dot)))
+    return tuple(angles)
