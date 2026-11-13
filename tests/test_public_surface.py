@@ -30,6 +30,16 @@ SHEAR_FLOW_API = {
     "t_section",
 }
 
+ELLIPTIC_SECTION_API = {
+    "EllipticSectionError",
+    "elliptic_gm0",
+    "elliptic_kn",
+    "elliptic_prism_mesh",
+    "elliptic_righting_arm",
+    "elliptic_righting_arm_curve",
+    "wall_sided_gm0",
+}
+
 MID_SURFACE_API = {
     "CoplanarRegion",
     "DefeatureResult",
@@ -185,7 +195,7 @@ EXPECTED_API = {
 
 
 def test_declared_api_is_importable() -> None:
-    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API | MID_SURFACE_API
+    assert set(tensorcad.__all__) == EXPECTED_API | SHEAR_FLOW_API | MID_SURFACE_API | ELLIPTIC_SECTION_API
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None
     assert tensorcad.__version__ == "0.23.0"

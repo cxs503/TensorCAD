@@ -424,6 +424,15 @@ from .shell import (
     offset_inward,
     shell,
 )
+from .elliptic_section import (
+    EllipticSectionError,
+    elliptic_gm0,
+    elliptic_kn,
+    elliptic_prism_mesh,
+    elliptic_righting_arm,
+    elliptic_righting_arm_curve,
+    wall_sided_gm0,
+)
 from .loft import (
     Loft,
     LoftError,
@@ -755,6 +764,13 @@ __all__ = [
     "SpherePatch", "SurfaceIntersectionError", "cylinder_implicit", "plane_implicit",
     "sphere_implicit", "surface_surface_intersection",
     # surface--surface intersection (0.25.0): parameter-space marching for GAP-CAD-002
+    "EllipticSectionError",
+    "elliptic_gm0",
+    "elliptic_kn",
+    "elliptic_prism_mesh",
+    "elliptic_righting_arm",
+    "elliptic_righting_arm_curve",
+    "wall_sided_gm0",
 ]
 
 __version__ = "0.23.0"
