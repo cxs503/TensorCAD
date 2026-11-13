@@ -334,7 +334,10 @@ def hydrostatic_particulars(
 
     ``waterline_z`` is a height in the mesh's own frame, exactly as in
     :func:`tensorcad.stability.waterplane_moments`; it has to cross the body, so a
-    waterline below the keel or above the deck is an error rather than a zero.
+    waterline below the keel or above the deck is a :class:`TrimError` rather than a
+    zero.  The waterplane's own cut is retried ``1e-6`` of the mesh scale either side
+    of ``waterline_z`` if the plane is degenerate, and ``waterline_nudged`` says that
+    happened; if neither retry cuts, that too is a :class:`TrimError`.
     """
     if not math.isfinite(waterline_z):
         raise TrimError(f"waterline_z must be finite, got {waterline_z!r}")
@@ -363,19 +366,35 @@ def hydrostatic_particulars(
     nudged = False
     try:
         waterplane: WaterplaneMoments = waterplane_moments(mesh, waterline_z)
-    except StabilityError:
+    except StabilityError as first_error:
         # The generated hulls put vertex rings on evenly spaced levels, so a "round"
         # waterline such as -T/2 lands exactly on a ring where the plane cut is
         # degenerate. ``bonjean`` nudges its station planes for the same reason; the
         # offset here is 1e-6 of the mesh scale, which moves the waterplane area by
         # O(1e-6) relative -- three orders below the discretisation error it is used
         # to measure -- and the report says so rather than hiding it.
+        #
+        # Both sides are tried, downward first (the direction the docstring quotes):
+        # a degenerate ring that *bounds* the body is only cut from the inside, so a
+        # single direction would leave the fallback blind for the keel ring (down
+        # leaves the hull) as well as for the deck ring (up leaves it).
         offset = 1e-6 * max(abs(value) for value in mesh.bounding_box().maximum)
-        try:
-            waterplane = waterplane_moments(mesh, waterline_z - offset)
-        except StabilityError:
-            raise
-        nudged = True
+        for candidate in (waterline_z - offset, waterline_z + offset):
+            try:
+                waterplane = waterplane_moments(mesh, candidate)
+            except StabilityError:
+                continue
+            nudged = True
+            break
+        else:
+            # Both retries refused: report it as this module's own refusal, chained to
+            # the cut error that started it, rather than leaking ``StabilityError``
+            # out of a function whose contract is ``TrimError``.
+            raise TrimError(
+                f"the waterplane at z={waterline_z!r} cannot be cut, and neither can the "
+                f"planes {offset!r} m either side of it; refusing rather than reporting "
+                "a zero-area waterplane"
+            ) from first_error
     if waterplane.area <= 0.0:
         raise TrimError(f"the waterplane at z={waterline_z!r} has no area")
     length = box.sizes[0]
