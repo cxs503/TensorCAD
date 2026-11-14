@@ -517,9 +517,18 @@ def build_ship(
 ) -> tuple[Mesh, dict[str, Any]]:
     """Run the whole IGES -> mesh -> hydrostatics chain for one hull."""
     model = read_iges(spec.iges_path)
+    census = model.surface_census()
     surfaces = model.surfaces()
     if not surfaces:
-        raise ValueError(f"{spec.name}: no B-spline surfaces in {spec.iges_path}")
+        detail = (
+            f" ({census['unreadable_type126']} type-126 B-spline surfaces present "
+            "and not decoded by this reader)"
+            if census["unreadable_type126"]
+            else ""
+        )
+        raise ValueError(
+            f"{spec.name}: no type-128 B-spline surfaces in {spec.iges_path}{detail}"
+        )
     # Scale the samples to metres before any hydrostatics: units flag (metres,
     # millimetres, ...) times the model-space scale.  The read of the flag is now
     # Hollerith-positional (see iges.hollerith_fields); the previous content scan read
@@ -561,8 +570,24 @@ def build_ship(
     if z_min < -0.5 * spec.draft and -0.05 * spec.draft <= z_max <= 0.05 * spec.draft:
         frame_shift_z = -z_max
         points = [(x, y, z + frame_shift_z) for x, y, z in points]
-    field = field_from_points(points, spec.draft, dx=dx, dz=dz)
-    mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
+    try:
+        field = field_from_points(points, spec.draft, dx=dx, dz=dz)
+        mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
+    except ValueError as exc:
+        # Attribute the refusal to the reader, not to the hull.  Without this the
+        # verdict reads "field produced fewer than two usable waterline slices",
+        # which blames the shape for what is a dropped entity type: KVLCC2 ships
+        # 304 type-126 B-spline surfaces and this reader decodes type 128 only.
+        unread = census["unreadable_type126"]
+        if unread:
+            raise ValueError(
+                f"{spec.name}: {exc} -- the source carries {unread} type-126 "
+                f"(non-rational B-spline) surfaces against "
+                f"{census['readable_type128']} type-128; this reader decodes type "
+                "128 only, so the hull arrived partial and the refusal is a "
+                "reader gap, not a shape verdict"
+            ) from exc
+        raise
     mesh_stats = measure_mesh(mesh, spec.draft)
     integrals = field_integrals(field)
 
@@ -672,6 +697,7 @@ def build_ship(
             "surface_count": len(surfaces),
             "sample_count": len(points),
             "sampling_spacing_m": 1.0 / max(samples_per_metre, 1e-6),
+            "surface_census": census,
         },
         "field": field.to_dict(),
         "mesh_info": mesh_info,
