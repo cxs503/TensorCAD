@@ -1,7 +1,7 @@
 {
   "cases": {
     "dtmb5415": {
-      "geometry_sha256": "",
+      "geometry_sha256": "30c05a782971768c7a8b6c0e4e9a30938d14878f6ad9f218b112fc7ee6ccc2bc",
       "invariants": {
         "identity_cb_equals_volume_over_lbt": {
           "basis": "Cb = \u2207 / (L\u00b7B\u00b7T) on the reported particulars",
@@ -106,7 +106,7 @@
       }
     },
     "series60": {
-      "geometry_sha256": "",
+      "geometry_sha256": "f9da70a467f6d4270dc0dac74423ffa4ddb6347106b451bd114bcaff829faf9d",
       "invariants": {
         "identity_cb_equals_cp_times_cm": {
           "basis": "Cb = Cp\u00b7Cm with Cm = A_midship / (B\u00b7T)",
@@ -176,7 +176,7 @@
       }
     },
     "sphere_ellipsoid": {
-      "geometry_sha256": "",
+      "geometry_sha256": "f6ded09395f752148a916d9da9150e3faea6375667030258a6045de5ee452219",
       "invariants": {},
       "known_limitations": [],
       "measurements": {
@@ -343,8 +343,8 @@
   },
   "provenance": {
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "c6d30d62b12f361251ff17d36d330fb8027b6d3dab43a6821c4c10379b0d1f41",
-    "git_commit": "3a97f30420441cca0535b5bdcc90eaead0e31a7f",
+    "geometry_fingerprint": "72762a77f1f303be9035ea65f132bed4c23e06e340625183059f83de709c38de",
+    "git_commit": "c772985a66c550b316b9dcfb1bec53d80e4d69b3",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },

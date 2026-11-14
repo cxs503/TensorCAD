@@ -614,14 +614,22 @@ def test_case_without_fingerprint_is_reported_not_silent(tmp_path: Path) -> None
     assert "geometry_fingerprint_missing" in codes, codes
 
 
-def test_baseline_without_fingerprint_is_a_warning(tmp_path: Path) -> None:
+def test_baseline_without_fingerprint_is_an_error(tmp_path: Path) -> None:
+    """An un-blessed mesh is an unguarded case: fail closed, do not warn and pass.
+
+    A baseline entry whose ``geometry_sha256`` is empty locks the integrated numbers but
+    not the mesh, so re-triangulation or vertex renumbering passes silently. The gate
+    therefore rejects it; only ``--bless`` (a deliberate act) clears the finding.
+    """
     path = _bless(tmp_path, ProbeCase())
     data = json.loads(path.read_text(encoding="utf-8"))
     data["cases"]["probe"]["geometry_sha256"] = ""
     path.write_text(json.dumps(data), encoding="utf-8")
     result = golden.run_suite(baseline_path=path, cases=[ProbeCase()])
-    assert result.passed
-    assert "geometry_fingerprint_not_blessed" in _codes(result)
+    assert not result.passed
+    codes = _codes(result)
+    assert "geometry_fingerprint_not_blessed" in codes, codes
+    assert "geometry_fingerprint_not_blessed" in [f.code for f in result.errors]
 
 
 def test_every_golden_case_fingerprints_its_mesh(committed: golden.SuiteResult) -> None:
