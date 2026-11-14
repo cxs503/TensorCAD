@@ -13,3 +13,6 @@ tensorcad-output/
 .venv*/
 artifacts/baseline_fleet/raw/
 artifacts/baseline_fleet/iges/
+
+# fetched third-party sources (no licence: digests only in git)
+.cache/
