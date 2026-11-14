@@ -1,0 +1,3 @@
+claimed level: 3
+maturity_gate.judge(3, evidence, 'TensorCAD', 20506) -> gate_level=3, reasons=[]
+keys: ['audit_artifacts', 'benchmark', 'deliverable_state', 'entry', 'entry_cmd', 'external_anchor', 'external_anchor_doc', 'findings', 'impl_files', 'impl_pointers', 'impl_upstream', 'integration_callers', 'integration_note', 'level_rationale', 'repro_cmd', 'run_artifacts', 'run_artifacts_upstream', 'snapshot_sha256', 'tests', 'tests_rerun']
