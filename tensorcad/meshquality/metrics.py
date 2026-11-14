@@ -43,8 +43,11 @@ from typing import Sequence
 __all__ = [
     "ELEMENT_KINDS",
     "METRIC_NAMES",
+    "NODES_PER_CELL",
     "ElementQuality",
     "hex_metrics",
+    "prism_metrics",
+    "pyramid_metrics",
     "quad_metrics",
     "tet_metrics",
     "tri_metrics",
@@ -52,9 +55,21 @@ __all__ = [
 
 Vec3 = tuple[float, float, float]
 
-#: Cell shapes with a metric set. ``tri``/``quad`` are surface cells, ``tet``/``hex``
-#: volume cells.
-ELEMENT_KINDS = ("tri", "quad", "tet", "hex")
+#: Cell shapes with a metric set. ``tri``/``quad`` are surface cells, ``tet``/``hex``/
+#: ``prism``/``pyramid`` volume cells.
+ELEMENT_KINDS = ("tri", "quad", "tet", "hex", "prism", "pyramid")
+
+#: Node count of one cell of each kind. The single source of truth: the readers, the
+#: exchange format and the gate all validate against this table instead of carrying
+#: their own copy.
+NODES_PER_CELL: dict[str, int] = {
+    "tri": 3,
+    "quad": 4,
+    "tet": 4,
+    "hex": 8,
+    "prism": 6,
+    "pyramid": 5,
+}
 
 #: Metric name -> what one value means. Kept as data so a gate can be written without
 #: importing the implementation, and so the documentation cannot drift from the code.
@@ -76,7 +91,10 @@ METRIC_NAMES: dict[str, str] = {
     "scaled_jacobian": "min corner det(J)/prod|column| (shape only; 1 = orthogonal, "
                        "regular tetrahedron = 1/sqrt(2), <= 0 = inverted/flat)",
     "min_sicn": "min corner d |det J|^(2/d) / ||J||_F^2 normalised to the ideal element "
-                "(<= 0 = inverted/flat)",
+                "(<= 0 = inverted/flat); for prisms and pyramids the sampled point is "
+                "normalised against the same point of the reference element, so an ideal "
+                "prism/pyramid reads 1 and the apex of a pyramid is excluded (singular by "
+                "construction -- see docs/mesh_quality_prism_pyramid.md)",
     "gmsh_icn": "Gmsh minSICN unit: same expression normalised to Gmsh's reference "
                 "tetrahedron (1 = right-corner tetrahedron, regular tetrahedron = 0.7937)",
 }
@@ -685,5 +703,236 @@ def tet_metrics(points: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> Elemen
             "scaled_jacobian": tuple(sj),
             "min_sicn": tuple(sicn),
             "gmsh_icn": tuple(gmsh_icn),
+        },
+    )
+# --------------------------------------------------------------------------------------
+# prisms (wedge6) and pyramids (5 nodes): the boundary-layer cells
+# --------------------------------------------------------------------------------------
+# Ship CFD meshes are hex-dominant with prism layers, and a tet-to-hex transition leaves
+# pyramids behind: both shapes reach a solver without ever meeting the four kinds above.
+# The isoparametric maps below are the standard ones (Gmsh/VTK node order), and the
+# metrics are the same columns as the other kinds, with the deviations this file states.
+#
+# Prism: nodes 0,1,2 on one triangular face and 3,4,5 on the other with 3 above 0.
+#   N0=(1-xi-eta)(1-zeta)  N1=xi(1-zeta)  N2=eta(1-zeta)
+#   N3=(1-xi-eta)zeta      N4=xi*zeta     N5=eta*zeta,  xi,eta>=0, xi+eta<=1, zeta in [0,1]
+# Pyramid: nodes 0..3 the base quad, node 4 the apex.
+#   N0=(1-zeta)(1-xi)(1-eta)  N1=(1-zeta)xi(1-eta)  N2=(1-zeta)xi*eta
+#   N3=(1-zeta)(1-xi)eta      N4=zeta,             xi,eta,zeta in [0,1]
+
+#: Prism sample points: the six corners of the reference prism (xi, eta, zeta).
+_PRISM_CORNERS = ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0),
+                  (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (0.0, 1.0, 1.0))
+_PRISM_EDGES = ((0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3), (0, 3), (1, 4), (2, 5))
+#: Triangular faces (ideal interior angle 60 deg) and quad faces (ideal 90 deg).
+_PRISM_TRIS = ((0, 1, 2), (3, 4, 5))
+_PRISM_QUADS = ((0, 1, 4, 3), (1, 2, 5, 4), (2, 0, 3, 5))
+#: Conforming tet decomposition (a prism is exactly three tetrahedra).
+_PRISM_TETS = ((0, 1, 2, 3), (1, 2, 3, 4), (2, 3, 4, 5))
+
+#: Pyramid sample points. The apex (zeta = 1) is *not* sampled: every base shape function
+#: carries a (1-zeta) factor, so d/dxi and d/deta vanish there and the Jacobian is
+#: singular for every pyramid ever built. That is a property of the shape, not a defect.
+_PYRAMID_POINTS = ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0),
+                   (0.5, 0.5, 0.0))
+_PYRAMID_EDGES = ((0, 1), (1, 2), (2, 3), (3, 0), (0, 4), (1, 4), (2, 4), (3, 4))
+_PYRAMID_BASE = (0, 1, 2, 3)
+_PYRAMID_SIDES = ((0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4))
+_PYRAMID_TETS = ((0, 1, 2, 4), (0, 2, 3, 4))
+
+
+def _prism_jacobian(p: Sequence[Vec3], xi: float, eta: float, zeta: float) -> list[list[float]]:
+    """3x3 Jacobian of the prism map at ``(xi, eta, zeta)`` (rows d/dxi, d/deta, d/dzeta)."""
+    one_m_z = 1.0 - zeta
+    weights = (
+        # (dN/dxi, dN/deta, dN/dzeta)
+        (-one_m_z, -one_m_z, -(1.0 - xi - eta)),
+        (one_m_z, 0.0, -xi),
+        (0.0, one_m_z, -eta),
+        (-zeta, -zeta, 1.0 - xi - eta),
+        (zeta, 0.0, xi),
+        (0.0, zeta, eta),
+    )
+    return _jacobian_from_weights(p, weights)
+
+
+def _pyramid_jacobian(p: Sequence[Vec3], xi: float, eta: float, zeta: float) -> list[list[float]]:
+    """3x3 Jacobian of the pyramid map at ``(xi, eta, zeta)`` (rows d/dxi, d/deta, d/dzeta)."""
+    one_m_z = 1.0 - zeta
+    weights = (
+        (-one_m_z * (1.0 - eta), -one_m_z * (1.0 - xi), -(1.0 - xi) * (1.0 - eta)),
+        (one_m_z * (1.0 - eta), -one_m_z * xi, -xi * (1.0 - eta)),
+        (one_m_z * eta, one_m_z * xi, -xi * eta),
+        (-one_m_z * eta, one_m_z * (1.0 - xi), -(1.0 - xi) * eta),
+        (0.0, 0.0, 1.0),
+    )
+    return _jacobian_from_weights(p, weights)
+
+
+def _jacobian_from_weights(
+    p: Sequence[Vec3], weights: Sequence[tuple[float, float, float]]
+) -> list[list[float]]:
+    jac = [[0.0, 0.0, 0.0] for _ in range(3)]
+    for k, (d_xi, d_eta, d_zeta) in enumerate(weights):
+        x, y, z = p[k]
+        for row, value in ((0, x), (1, y), (2, z)):
+            jac[row][0] += value * d_xi
+            jac[row][1] += value * d_eta
+            jac[row][2] += value * d_zeta
+    return jac
+
+
+def _icn(jac: Sequence[Sequence[float]]) -> float:
+    """``d |det J|^(2/d) / ||J||_F^2``, signed by ``det J`` (1 for the identity)."""
+    det = _det3(jac)
+    fro2 = _frobenius2(jac)
+    if fro2 == 0.0:
+        return 0.0
+    value = 3.0 * abs(det) ** (2.0 / 3.0) / fro2
+    return value if det >= 0.0 else -value
+
+
+def _ideal_prism() -> tuple[Vec3, ...]:
+    """Right prism of unit height on an equilateral base of unit edge (the ideal prism)."""
+    h = math.sqrt(3.0) / 2.0
+    return ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.5, h, 0.0),
+            (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (0.5, h, 1.0))
+
+
+def _ideal_pyramid() -> tuple[Vec3, ...]:
+    """Unit square base, apex above the base centre at unit height (the ideal pyramid)."""
+    return ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0), (0.5, 0.5, 1.0))
+
+
+def _reference_icn(
+    reference: Sequence[Vec3], points: Sequence[Sequence[float]], jacobian
+) -> tuple[float, ...]:
+    """``icn`` of the reference element at every sample point (the normaliser)."""
+    return tuple(
+        _icn(jacobian(reference, xi, eta, zeta)) for xi, eta, zeta in points
+    )
+
+
+def _tet_split_volume(p: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> float:
+    """Absolute volume as the sum of the signed volumes of a conforming tet split."""
+    total = 0.0
+    for a, b, c, d in tets:
+        total += _tet_signed_volume(p[a], p[b], p[c], p[d])
+    return abs(total)
+
+
+def _quad_volume_split(p: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> float:
+    """Alias kept readable at the call sites: the split is exact for planar faces."""
+    return _tet_split_volume(p, tets)
+
+
+def prism_metrics(points: Sequence[Vec3], prisms: Sequence[Sequence[int]]) -> ElementQuality:
+    """Volume, angles/skewness, edge ratio, scaled Jacobian and SICN of wedge6 cells."""
+    ideal = _ideal_prism()
+    normaliser = _reference_icn(ideal, _PRISM_CORNERS, _prism_jacobian)
+    volume: list[float] = []
+    min_edge: list[float] = []
+    max_edge: list[float] = []
+    edge_ratio: list[float] = []
+    min_angle: list[float] = []
+    max_angle: list[float] = []
+    skew: list[float] = []
+    sj: list[float] = []
+    sicn: list[float] = []
+    for prism in prisms:
+        p = [points[i] for i in prism]
+        volume.append(_quad_volume_split(p, _PRISM_TETS))
+        lengths = [_norm(_sub(p[j], p[i])) for i, j in _PRISM_EDGES]
+        shortest, longest = min(lengths), max(lengths)
+        min_edge.append(shortest)
+        max_edge.append(longest)
+        edge_ratio.append(longest / shortest if shortest > 0.0 else math.inf)
+        tri_angles = [a for face in _PRISM_TRIS for a in _triangle_angles(*[p[i] for i in face])]
+        quad_angles = [a for face in _PRISM_QUADS for a in _quad_angles([p[i] for i in face])]
+        angles = tri_angles + quad_angles
+        valid = [a for a in angles if not math.isnan(a)]
+        min_angle.append(min(valid) if valid else _NAN)
+        max_angle.append(max(valid) if valid else _NAN)
+        # One skew number for two face families: the worst of each family scored against
+        # its own ideal angle. An ideal prism (equilateral base, right height) scores 0.
+        skew.append(max(_equiangle_skew(tri_angles, 60.0), _equiangle_skew(quad_angles, 90.0)))
+        worst_sj = math.inf
+        worst_sicn = math.inf
+        for k, (xi, eta, zeta) in enumerate(_PRISM_CORNERS):
+            jac = _prism_jacobian(p, xi, eta, zeta)
+            det = _det3(jac)
+            cols = [math.sqrt(sum(jac[row][column] ** 2 for row in range(3))) for column in range(3)]
+            corner_sj = det / (cols[0] * cols[1] * cols[2]) if all(c > 0.0 for c in cols) else 0.0
+            worst_sj = min(worst_sj, corner_sj)
+            worst_sicn = min(worst_sicn, _icn(jac) / normaliser[k])
+        sj.append(worst_sj)
+        sicn.append(worst_sicn)
+    return ElementQuality(
+        "prism",
+        {
+            "volume": tuple(volume),
+            "min_edge": tuple(min_edge),
+            "max_edge": tuple(max_edge),
+            "edge_ratio": tuple(edge_ratio),
+            "min_angle": tuple(min_angle),
+            "max_angle": tuple(max_angle),
+            "skewness": tuple(skew),
+            "scaled_jacobian": tuple(sj),
+            "min_sicn": tuple(sicn),
+        },
+    )
+
+
+def pyramid_metrics(points: Sequence[Vec3], pyramids: Sequence[Sequence[int]]) -> ElementQuality:
+    """Volume, angles/skewness, edge ratio, scaled Jacobian and SICN of 5-node pyramids."""
+    ideal = _ideal_pyramid()
+    normaliser = _reference_icn(ideal, _PYRAMID_POINTS, _pyramid_jacobian)
+    volume: list[float] = []
+    min_edge: list[float] = []
+    max_edge: list[float] = []
+    edge_ratio: list[float] = []
+    min_angle: list[float] = []
+    max_angle: list[float] = []
+    skew: list[float] = []
+    sj: list[float] = []
+    sicn: list[float] = []
+    for pyramid in pyramids:
+        p = [points[i] for i in pyramid]
+        volume.append(_quad_volume_split(p, _PYRAMID_TETS))
+        lengths = [_norm(_sub(p[j], p[i])) for i, j in _PYRAMID_EDGES]
+        shortest, longest = min(lengths), max(lengths)
+        min_edge.append(shortest)
+        max_edge.append(longest)
+        edge_ratio.append(longest / shortest if shortest > 0.0 else math.inf)
+        base_angles = list(_quad_angles([p[i] for i in _PYRAMID_BASE]))
+        side_angles = [a for face in _PYRAMID_SIDES for a in _triangle_angles(*[p[i] for i in face])]
+        angles = base_angles + side_angles
+        valid = [a for a in angles if not math.isnan(a)]
+        min_angle.append(min(valid) if valid else _NAN)
+        max_angle.append(max(valid) if valid else _NAN)
+        skew.append(max(_equiangle_skew(base_angles, 90.0), _equiangle_skew(side_angles, 60.0)))
+        worst_sj = math.inf
+        worst_sicn = math.inf
+        for k, (xi, eta, zeta) in enumerate(_PYRAMID_POINTS):
+            jac = _pyramid_jacobian(p, xi, eta, zeta)
+            det = _det3(jac)
+            cols = [math.sqrt(sum(jac[row][column] ** 2 for row in range(3))) for column in range(3)]
+            corner_sj = det / (cols[0] * cols[1] * cols[2]) if all(c > 0.0 for c in cols) else 0.0
+            worst_sj = min(worst_sj, corner_sj)
+            worst_sicn = min(worst_sicn, _icn(jac) / normaliser[k])
+        sj.append(worst_sj)
+        sicn.append(worst_sicn)
+    return ElementQuality(
+        "pyramid",
+        {
+            "volume": tuple(volume),
+            "min_edge": tuple(min_edge),
+            "max_edge": tuple(max_edge),
+            "edge_ratio": tuple(edge_ratio),
+            "min_angle": tuple(min_angle),
+            "max_angle": tuple(max_angle),
+            "skewness": tuple(skew),
+            "scaled_jacobian": tuple(sj),
+            "min_sicn": tuple(sicn),
         },
     )

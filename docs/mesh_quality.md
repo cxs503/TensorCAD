@@ -13,7 +13,9 @@ and the Kuhn tetrahedra) and `tensorcad.geomquality.mesh_defects` (facet defect 
 None of them named a reference, so none of them could be checked against Gmsh or VTK, and
 a solver asking "is this mesh usable?" had to know which of the three to ask.
 
-`tensorcad.meshquality` is the library behind that question: four cell kinds, an explicit
+`tensorcad.meshquality` is the library behind that question: six cell kinds
+(`tri`/`quad`/`tet`/`hex` and, since the prism/pyramid extension, `prism`/`pyramid` -- see
+`docs/mesh_quality_prism_pyramid.md`), an explicit
 normalisation for every metric, outlier-resistant statistics, a threshold gate that returns
 data, a JSON exchange format and a CLI whose exit status is the CI contract.
 
