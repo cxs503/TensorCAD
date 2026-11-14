@@ -1,0 +1,39 @@
+{
+ "feature": "XVAL-GEOM-VOLCROSS",
+ "gates": [
+  {
+   "name": "G1_engine_agreement",
+   "value": 2.682977940443835e-08,
+   "limit": 1e-06,
+   "passed": true
+  },
+  {
+   "name": "G2_reference_at_finest_wigley",
+   "value": 0.00032105836677327916,
+   "limit": 0.003,
+   "passed": true
+  },
+  {
+   "name": "G3_quadrature_is_exact_for_the_reference_hull",
+   "value": 1.5987211554602254e-16,
+   "limit": 1e-09,
+   "passed": true
+  },
+  {
+   "name": "G4_measured_order",
+   "value": 2.020500631935433,
+   "limit": [
+    1.5,
+    2.6
+   ],
+   "passed": true
+  },
+  {
+   "name": "G5_committed_rows_hold",
+   "value": [],
+   "limit": [],
+   "passed": true
+  }
+ ],
+ "passed": true
+}
