@@ -79,11 +79,14 @@ class TestFieldOffsets:
         assert wrapper.boundary == 35
         assert wrapper.inner == (41,)
 
-    def test_type_142_basis_surface_is_parameter_3(self):
+    def test_type_142_fields_follow_the_spec_order(self):
+        # 142, CRV, SPTR, BPTR, CPTR, IT -- read off KVLCC2 DE 36 verbatim.
         curve = CurveOnSurface.from_parameters([142.0, 0.0, 5.0, 33.0, 19.0, 1.0, 0.0])
-        assert curve.surface == 5, "SPTR is parameter 3; parameter 2 is the spare CRV field"
-        assert curve.curve_3d == 33
-        assert curve.curve_uv == 19
+        assert curve.surface == 5, "SPTR is parameter 3 (index 2)"
+        assert curve.curve_3d == 0, "CRV is parameter 2 (index 1); this writer leaves it 0"
+        assert curve.curve_uv == 33, "BPTR (the (u, v) trim loop) is parameter 4 (index 3)"
+        assert curve.preferred == 19, "CPTR, the preferred-representation composite"
+        assert curve.preferred_flag == 1
 
     def test_type_141_pointers_start_at_parameter_5(self):
         boundary = Boundary.from_parameters([141.0, 4.0, 11.0, 1.0, 21.0, 23.0, 25.0, 27.0])

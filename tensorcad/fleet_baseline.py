@@ -521,9 +521,9 @@ def build_ship(
     surfaces = model.surfaces()
     if not surfaces:
         detail = (
-            f" ({census['unreadable_type126']} type-126 B-spline surfaces present "
-            "and not decoded by this reader)"
-            if census["unreadable_type126"]
+            f" ({census['curves_type126']} type-126 rational B-spline *curves* present: "
+            "they are trim boundaries, not surfaces, so they cannot carry the hull)"
+            if census["curves_type126"]
             else ""
         )
         raise ValueError(
@@ -574,20 +574,22 @@ def build_ship(
         field = field_from_points(points, spec.draft, dx=dx, dz=dz)
         mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
     except ValueError as exc:
-        # Attribute the refusal to the reader, not to the hull.  Without this the
-        # verdict reads "field produced fewer than two usable waterline slices",
-        # which blames the shape for what is a dropped entity type: KVLCC2 ships
-        # 304 type-126 B-spline surfaces and this reader decodes type 128 only.
-        unread = census["unreadable_type126"]
-        if unread:
-            raise ValueError(
-                f"{spec.name}: {exc} -- the source carries {unread} type-126 "
-                f"(non-rational B-spline) surfaces against "
-                f"{census['readable_type128']} type-128; this reader decodes type "
-                "128 only, so the hull arrived partial and the refusal is a "
-                "reader gap, not a shape verdict"
-            ) from exc
-        raise
+        # Attribute the refusal to what was measured, not to a hypothesis about it.
+        # The verdict used to say "the file carries N type-126 B-spline surfaces and
+        # this reader decodes type 128 only"; type 126 is the rational B-spline
+        # *curve* and it is decoded (docs/baseline_fleet_type126_falsified.md).  What
+        # the bytes do show is how much of the basis surface set is trimmed: a patch
+        # integrated without its trim loop describes sheet the hull does not have.
+        raise ValueError(
+            f"{spec.name}: {exc} -- the source binds "
+            f"{census['basis_surfaces_trimmed']}/{census['surfaces_type128']} type-128 "
+            f"basis surfaces to a trimmed patch and leaves "
+            f"{census['basis_surfaces_untrimmed']} untrimmed "
+            f"({census['curves_type126']} type-126 trim curves, "
+            f"{census['boundaries_type141']} type-141 boundaries, "
+            f"{census['curves_on_surface_type142']} type-142 curves-on-surface), so the "
+            "refusal describes the patch set that arrived, not the shape"
+        ) from exc
     mesh_stats = measure_mesh(mesh, spec.draft)
     integrals = field_integrals(field)
 
