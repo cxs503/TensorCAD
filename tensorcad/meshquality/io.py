@@ -26,7 +26,7 @@ from typing import Any, Mapping, Sequence
 
 __all__ = ["MeshSpec", "load_spec", "write_spec"]
 
-from .metrics import ELEMENT_KINDS
+from .metrics import ELEMENT_KINDS, NODES_PER_CELL
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,7 @@ class MeshSpec:
 
 
 def _as_cells(kind: str, raw: Sequence[Sequence[int]], count: int) -> tuple[tuple[int, ...], ...]:
-    expected = {"tri": 3, "quad": 4, "tet": 4, "hex": 8}[kind]
+    expected = NODES_PER_CELL[kind]
     cells: list[tuple[int, ...]] = []
     for position, cell in enumerate(raw):
         if len(cell) != expected:

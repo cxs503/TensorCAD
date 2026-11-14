@@ -3,7 +3,8 @@
 The point of this module is that :mod:`tensorcad.meshquality.metrics` is never its own
 judge. Four independent references are provided:
 
-``reference_triangles`` / ``reference_tets`` / ``reference_hexahedra``
+``reference_triangles`` / ``reference_tets`` / ``reference_hexahedra`` /
+``reference_prisms`` / ``reference_pyramids``
     Second implementations of the same quantities by *different arithmetic*: Heron's
     formula instead of a cross product, ``atan2`` instead of ``acos``, Cayley-Menger
     instead of a triple product, and central finite differences of the isoparametric
@@ -42,6 +43,8 @@ __all__ = [
     "icn_from_singular_values",
     "reference_hexahedra",
     "reference_non_orthogonality",
+    "reference_prisms",
+    "reference_pyramids",
     "reference_skewness",
     "reference_tets",
     "reference_triangles",
@@ -482,3 +485,235 @@ def reference_non_orthogonality(
         dot = sum(normal[i] * d[i] for i in range(3))
         angles.append(math.degrees(math.atan2(magnitude, dot)))
     return tuple(angles)
+
+
+# --------------------------------------------------------------------------------------
+# prisms and pyramids: second implementations
+# --------------------------------------------------------------------------------------
+# Same quantities as :func:`tensorcad.meshquality.metrics.prism_metrics` /
+# ``pyramid_metrics``, by *different arithmetic*: the Jacobian is a central finite
+# difference of the isoparametric map instead of its analytic derivative, volumes come
+# from Cayley-Menger determinants of a conforming tet split instead of triple products,
+# and angles come from ``atan2(|u x w|, u.w)`` instead of ``acos`` of the normalised dot
+# product. What survives both derivations is a property of the shape; what does not is a
+# bug in one of them.
+
+
+def _prism_map(p: Sequence[Vec3], xi: float, eta: float, zeta: float) -> Vec3:
+    """Physical point of the prism map at ``(xi, eta, zeta)``."""
+    one_m_z = 1.0 - zeta
+    w = (
+        (1.0 - xi - eta) * one_m_z,
+        xi * one_m_z,
+        eta * one_m_z,
+        (1.0 - xi - eta) * zeta,
+        xi * zeta,
+        eta * zeta,
+    )
+    return (
+        sum(weight * point[0] for weight, point in zip(w, p)),
+        sum(weight * point[1] for weight, point in zip(w, p)),
+        sum(weight * point[2] for weight, point in zip(w, p)),
+    )
+
+
+def _pyramid_map(p: Sequence[Vec3], xi: float, eta: float, zeta: float) -> Vec3:
+    """Physical point of the pyramid map at ``(xi, eta, zeta)``."""
+    one_m_z = 1.0 - zeta
+    w = (
+        one_m_z * (1.0 - xi) * (1.0 - eta),
+        one_m_z * xi * (1.0 - eta),
+        one_m_z * xi * eta,
+        one_m_z * (1.0 - xi) * eta,
+        zeta,
+    )
+    return (
+        sum(weight * point[0] for weight, point in zip(w, p)),
+        sum(weight * point[1] for weight, point in zip(w, p)),
+        sum(weight * point[2] for weight, point in zip(w, p)),
+    )
+
+
+def _fd_jacobian(shape, p: Sequence[Vec3], xi: float, eta: float, zeta: float, h: float = 1.0e-5) -> list[list[float]]:
+    """Central finite differences of the isoparametric map in ``(xi, eta, zeta)``."""
+    jac = [[0.0, 0.0, 0.0] for _ in range(3)]
+    for column, (d_xi, d_eta, d_zeta) in enumerate(
+        ((h, 0.0, 0.0), (0.0, h, 0.0), (0.0, 0.0, h))
+    ):
+        plus = shape(p, xi + d_xi, eta + d_eta, zeta + d_zeta)
+        minus = shape(p, xi - d_xi, eta - d_eta, zeta - d_zeta)
+        for row in range(3):
+            jac[row][column] = (plus[row] - minus[row]) / (2.0 * h)
+    return jac
+
+
+def _icn_fd(jac: Sequence[Sequence[float]]) -> float:
+    """``3 |det|^(2/3) / ||J||_F^2`` of a finite-difference Jacobian, signed by ``det``."""
+    det = (
+        jac[0][0] * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1])
+        - jac[0][1] * (jac[1][0] * jac[2][2] - jac[1][2] * jac[2][0])
+        + jac[0][2] * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0])
+    )
+    fro2 = sum(value * value for row in jac for value in row)
+    if fro2 == 0.0:
+        return 0.0
+    value = 3.0 * abs(det) ** (2.0 / 3.0) / fro2
+    return value if det >= 0.0 else -value
+
+
+def _sj_fd(jac: Sequence[Sequence[float]]) -> float:
+    """``det J / prod|column|`` of a finite-difference Jacobian."""
+    det = (
+        jac[0][0] * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1])
+        - jac[0][1] * (jac[1][0] * jac[2][2] - jac[1][2] * jac[2][0])
+        + jac[0][2] * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0])
+    )
+    cols = [math.sqrt(sum(jac[row][column] ** 2 for row in range(3))) for column in range(3)]
+    if not all(c > 0.0 for c in cols):
+        return 0.0
+    return det / (cols[0] * cols[1] * cols[2])
+
+
+def _atan2_angle(u: Vec3, w: Vec3) -> float:
+    """Angle between two vectors in degrees via ``atan2`` (not ``acos``)."""
+    cross = _cross(u, w)
+    return math.degrees(math.atan2(_norm(cross), u[0] * w[0] + u[1] * w[1] + u[2] * w[2]))
+
+
+def _atan2_triangle_angles(a: Vec3, b: Vec3, c: Vec3) -> tuple[float, float, float]:
+    return (
+        _atan2_angle(_sub(b, a), _sub(c, a)),
+        _atan2_angle(_sub(a, b), _sub(c, b)),
+        _atan2_angle(_sub(a, c), _sub(b, c)),
+    )
+
+
+def _atan2_quad_angles(p: Sequence[Vec3]) -> tuple[float, float, float, float]:
+    return tuple(  # type: ignore[return-value]
+        _atan2_angle(_sub(p[(i - 1) % 4], p[i]), _sub(p[(i + 1) % 4], p[i])) for i in range(4)
+    )
+
+
+def _equiangle(angles: Sequence[float], ideal: float) -> float:
+    valid = [a for a in angles if not math.isnan(a)]
+    if not valid:
+        return math.nan
+    low, high = min(valid), max(valid)
+    return max((high - ideal) / (180.0 - ideal), (ideal - low) / ideal)
+
+
+def _relative_icn(shape, reference: Sequence[Vec3], p: Sequence[Vec3], point: Sequence[float]) -> float:
+    """Finite-difference ICN of the physical cell divided by the reference element's."""
+    ideal = _icn_fd(_fd_jacobian(shape, reference, *point))
+    return _icn_fd(_fd_jacobian(shape, p, *point)) / ideal
+
+
+#: Sample points, edges and face tables, duplicated here on purpose: the reference route
+#: must not import the tables it is meant to check.
+_REF_PRISM_CORNERS = ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0),
+                      (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (0.0, 1.0, 1.0))
+_REF_PRISM_EDGES = ((0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3), (0, 3), (1, 4), (2, 5))
+_REF_PRISM_TRIS = ((0, 1, 2), (3, 4, 5))
+_REF_PRISM_QUADS = ((0, 1, 4, 3), (1, 2, 5, 4), (2, 0, 3, 5))
+_REF_PRISM_TETS = ((0, 1, 2, 3), (1, 2, 3, 4), (2, 3, 4, 5))
+_REF_PYRAMID_POINTS = ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0),
+                       (0.5, 0.5, 0.0))
+_REF_PYRAMID_EDGES = ((0, 1), (1, 2), (2, 3), (3, 0), (0, 4), (1, 4), (2, 4), (3, 4))
+_REF_PYRAMID_BASE = (0, 1, 2, 3)
+_REF_PYRAMID_SIDES = ((0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4))
+_REF_PYRAMID_TETS = ((0, 1, 2, 4), (0, 2, 3, 4))
+
+
+def _ideal_prism_points() -> tuple[Vec3, ...]:
+    h = math.sqrt(3.0) / 2.0
+    return ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.5, h, 0.0),
+            (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (0.5, h, 1.0))
+
+
+def _ideal_pyramid_points() -> tuple[Vec3, ...]:
+    return ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0), (0.5, 0.5, 1.0))
+
+
+def _cayley_menger_split(p: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> float:
+    total = 0.0
+    for a, b, c, d in tets:
+        total += _cayley_menger(p[a], p[b], p[c], p[d])
+    return abs(total)
+
+
+def reference_prisms(
+    points: Sequence[Vec3], prisms: Sequence[Sequence[int]]
+) -> dict[str, tuple[float, ...]]:
+    """Second route to the prism metric set (FD Jacobian, Cayley-Menger, atan2)."""
+    ideal = _ideal_prism_points()
+    out: dict[str, list[float]] = {
+        "volume": [],
+        "min_edge": [],
+        "max_edge": [],
+        "edge_ratio": [],
+        "min_angle": [],
+        "max_angle": [],
+        "skewness": [],
+        "scaled_jacobian": [],
+        "min_sicn": [],
+    }
+    for prism in prisms:
+        p = [points[i] for i in prism]
+        out["volume"].append(_cayley_menger_split(p, _REF_PRISM_TETS))
+        lengths = [_norm(_sub(p[j], p[i])) for i, j in _REF_PRISM_EDGES]
+        out["min_edge"].append(min(lengths))
+        out["max_edge"].append(max(lengths))
+        out["edge_ratio"].append(max(lengths) / min(lengths))
+        tri = [a for face in _REF_PRISM_TRIS for a in _atan2_triangle_angles(*[p[i] for i in face])]
+        quad = [a for face in _REF_PRISM_QUADS for a in _atan2_quad_angles([p[i] for i in face])]
+        out["min_angle"].append(min(tri + quad))
+        out["max_angle"].append(max(tri + quad))
+        out["skewness"].append(max(_equiangle(tri, 60.0), _equiangle(quad, 90.0)))
+        sjs: list[float] = []
+        sicns: list[float] = []
+        for point in _REF_PRISM_CORNERS:
+            jac = _fd_jacobian(_prism_map, p, *point)
+            sjs.append(_sj_fd(jac))
+            sicns.append(_relative_icn(_prism_map, ideal, p, point))
+        out["scaled_jacobian"].append(min(sjs))
+        out["min_sicn"].append(min(sicns))
+    return {name: tuple(values) for name, values in out.items()}
+
+
+def reference_pyramids(
+    points: Sequence[Vec3], pyramids: Sequence[Sequence[int]]
+) -> dict[str, tuple[float, ...]]:
+    """Second route to the pyramid metric set (the apex is excluded, as in the library)."""
+    ideal = _ideal_pyramid_points()
+    out: dict[str, list[float]] = {
+        "volume": [],
+        "min_edge": [],
+        "max_edge": [],
+        "edge_ratio": [],
+        "min_angle": [],
+        "max_angle": [],
+        "skewness": [],
+        "scaled_jacobian": [],
+        "min_sicn": [],
+    }
+    for pyramid in pyramids:
+        p = [points[i] for i in pyramid]
+        out["volume"].append(_cayley_menger_split(p, _REF_PYRAMID_TETS))
+        lengths = [_norm(_sub(p[j], p[i])) for i, j in _REF_PYRAMID_EDGES]
+        out["min_edge"].append(min(lengths))
+        out["max_edge"].append(max(lengths))
+        out["edge_ratio"].append(max(lengths) / min(lengths))
+        base = list(_atan2_quad_angles([p[i] for i in _REF_PYRAMID_BASE]))
+        side = [a for face in _REF_PYRAMID_SIDES for a in _atan2_triangle_angles(*[p[i] for i in face])]
+        out["min_angle"].append(min(base + side))
+        out["max_angle"].append(max(base + side))
+        out["skewness"].append(max(_equiangle(base, 90.0), _equiangle(side, 60.0)))
+        sjs: list[float] = []
+        sicns: list[float] = []
+        for point in _REF_PYRAMID_POINTS:
+            jac = _fd_jacobian(_pyramid_map, p, *point)
+            sjs.append(_sj_fd(jac))
+            sicns.append(_relative_icn(_pyramid_map, ideal, p, point))
+        out["scaled_jacobian"].append(min(sjs))
+        out["min_sicn"].append(min(sicns))
+    return {name: tuple(values) for name, values in out.items()}
