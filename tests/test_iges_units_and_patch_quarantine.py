@@ -145,7 +145,18 @@ def test_cached_jbc_is_millimetres_and_parses_completely():
     surfaces = model.surfaces()  # must not raise on the ambiguous patch
     assert len(surfaces) == 45
     usable, quarantined = partition_surfaces(surfaces)
-    assert (len(usable), len(quarantined)) == (44, 1)
+    # 3 of the 45 patches are 2x2 nets whose control-net layout the smoothness
+    # score cannot decide (every second difference is identically zero), so they
+    # are quarantined instead of being meshed from a possibly mis-read net: the
+    # pre-existing 3x3 keel patch (DE 386) plus two 2x2 patches.  Before the
+    # weight-test prior in tensorcad.iges._split_control they were read as
+    # ``interleaved`` and used silently.
+    assert (len(usable), len(quarantined)) == (41, 4)
+    quarantined_de = {
+        entry if isinstance(entry, int) else (entry.get("de") if isinstance(entry, dict) else getattr(entry, "sequence", None))
+        for entry in quarantined
+    }
+    assert 386 in quarantined_de
 
 
 @pytest.mark.skipif(not (RAW / "KCS" / "KCS_hull_SVA.igs").exists(), reason="cached IGES absent")
