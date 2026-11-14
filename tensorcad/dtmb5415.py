@@ -45,6 +45,32 @@ move), so::
 is affine in the modal amplitudes and its Jacobian is exact.  The geometry is differentiable
 by construction, not by finite-differencing a CAD kernel.
 
+Symmetry plane (the one place where the map is not affine)
+----------------------------------------------------------
+
+``y >= 0`` on the starboard side is a *hard* geometric constraint of a hull, and the
+data-recovered displacement field does not preserve it: at the stern the surrogate
+undershoots the near-centreline ``y`` tail by up to ~0.3 m, so the interpolated surface can
+cross the symmetry plane and the mirrored mesh then folds through itself (the round-1
+acceptance failure, configuration 4915).  The pipeline therefore ends with an explicit
+**feasibility restoration**: the interpolated starboard grid is projected onto the closed
+half-space ``y >= 0``,:
+
+    grid_feasible = max(grid_raw, 0)          # Euclidean projection, minimal norm
+
+which is the smallest possible correction (it moves only the offending coordinate, in the
+offending direction) and makes the constraint hold *by construction* for every ``v``.
+``station_grid`` returns the feasible grid; :meth:`DTMB5415Space.raw_station_grid` returns
+the unprojected one, and :meth:`DTMB5415Space.quality` reports both, so the restoration can
+never hide how far the surrogate overshot: ``half_breadth_raw_min_m`` is the honest model
+error, ``half_breadth_min_m`` is the feasible-geometry value.  The projection is piecewise
+affine, so :meth:`DTMB5415Space.vertex_jacobian` carries the same 0/1 mask and stays exact
+wherever the active set does not switch (the switch set is a measure-zero level set of a
+linear functional of ``v``).
+
+This repairs *geometric validity*, not the underlying model error: the point-cloud residual
+against the database is unchanged by it (~0.25 m RMS on the holdout split, 2.4 % of beam).
+
 What the derivative is, and is not
 ----------------------------------
 
@@ -59,7 +85,10 @@ What the derivative is, and is not
   Displacement below the waterline is available, non-differentiated, from
   :meth:`DTMB5415Space.hydrostatics`.
 * The chain is therefore intact through geometry -> mesh -> integral, and bypassed only at the
-  waterline clip; that gap is reported rather than hidden.
+  waterline clip; that gap is reported rather than hidden.  The symmetry-plane projection is
+  the second (and only other) piecewise-smooth link: its Jacobian is the exact 0/1 mask of
+  the active set, so the chain is exact a.e., and the fraction of active vertices is reported
+  per design vector (``half_breadth_clamped_fraction``).
 
 Data layout
 -----------
@@ -87,6 +116,7 @@ from .geometry import Mesh
 __all__ = [
     "DATASET",
     "GRID",
+    "HALF_BREADTH_FLOOR",
     "MESH_RESOLUTION",
     "REFERENCE",
     "SPACE_SCHEMA",
@@ -97,7 +127,22 @@ __all__ = [
 ]
 
 #: Schema tag for :meth:`DTMB5415Space.to_dict`; bump on incompatible change.
-SPACE_SCHEMA = "tensorcad.dtmb5415.space/1"
+#: v2 adds the symmetry-plane restoration fields of :meth:`DTMB5415Space.quality`
+#: (``raw_station_grid`` semantics: ``station_grid`` is now the projected grid).
+SPACE_SCHEMA = "tensorcad.dtmb5415.space/2"
+
+#: Tolerance used when *counting* (not repairing) half-breadth violations: the natural
+#: spline rings by ~1e-9 m at the centreline seam, which is not a physical crossing.  This is
+#: the same 1e-6 m the mesh gate uses, kept here so the report can separate "the surrogate
+#: crossed the symmetry plane" from "floating-point noise on the seam".
+HALF_BREADTH_TOL = 1e-6
+
+#: Floor of the starboard half-breadth.  ``y >= 0`` about the centreline is a hard geometric
+#: constraint of the hull, not a modelling choice: a negative half-breadth means the surface
+#: has crossed the symmetry plane and the mirrored mesh folds through itself.  The
+#: data-recovered surrogate does not preserve it (see the module docstring), so the mesh
+#: pipeline projects the interpolated grid onto this floor.
+HALF_BREADTH_FLOOR = 0.0
 
 #: Provenance of the design database this module was fitted from.  ``source_sha256`` is of
 #: the 1.0 GB ``DTMB5415-database.mat`` actually read; matrix layout and the reference table
@@ -286,6 +331,26 @@ def _refine(grid: Any) -> Any:
     return np.einsum("gj,jsc->gsc", ops.along_girth, out)
 
 
+def half_breadth_mask(grid: Any) -> Any:
+    """Boolean mask of the starboard grid points that violate ``y >= HALF_BREADTH_FLOOR``."""
+    import numpy as np
+
+    return np.asarray(grid)[..., 1] < HALF_BREADTH_FLOOR
+
+
+def project_half_breadth(grid: Any) -> Any:
+    """Euclidean projection of a starboard grid onto ``{y >= HALF_BREADTH_FLOOR}``.
+
+    ``max(y, floor)`` is the minimal-norm correction: only the offending coordinate of the
+    offending points moves.  Returns a new array; the input is not modified.
+    """
+    import numpy as np
+
+    out = np.array(grid, dtype=np.float64, copy=True)
+    np.maximum(out[..., 1], HALF_BREADTH_FLOOR, out=out[..., 1])
+    return out
+
+
 def _connectivity(n_girth: int, n_station: int) -> tuple[Any, Any, Any]:
     """Fixed triangle list for the starboard shell (two patches + seam bridge)."""
     import numpy as np
@@ -425,12 +490,25 @@ class DTMB5415Space:
         v = self.zero() if v is None else v
         return (self.phi @ self._d_amplitudes(v)).reshape(-1, 3, self.n_variables)
 
-    def station_grid(self, v: Sequence[float] | None = None) -> Any:
-        """Refined starboard patch grid ``(2, n_girth_out, n_station_out, 3)``."""
+    def raw_station_grid(self, v: Sequence[float] | None = None) -> Any:
+        """Refined starboard patch grid **before** the symmetry-plane projection.
+
+        This is the surrogate speaking for itself: it is the array on which the model error
+        is measured, and the one that can cross ``y = 0`` (see the module docstring).
+        """
         import numpy as np
 
         grid = point_grid(self.cloud(v))
         return np.stack([_refine(grid[k]) for k in range(2)], axis=0)
+
+    def station_grid(self, v: Sequence[float] | None = None) -> Any:
+        """Feasible refined starboard patch grid ``(2, n_girth_out, n_station_out, 3)``.
+
+        ``raw_station_grid`` projected onto ``y >= HALF_BREADTH_FLOOR``; this is the array
+        every downstream consumer (mesh, volume, hydrostatics, quality) uses, so the
+        symmetry-plane constraint holds by construction rather than by luck.
+        """
+        return project_half_breadth(self.raw_station_grid(v))
 
     def vertices(self, v: Sequence[float] | None = None) -> Any:
         """Mesh vertices ``(n_vertices, 3)``: starboard patches then their mirror image."""
@@ -448,11 +526,17 @@ class DTMB5415Space:
         return self._all_tris
 
     def vertex_jacobian(self, v: Sequence[float] | None = None) -> Any:
-        """Exact ``d vertices / d v``, shape ``(n_vertices, 3, 27)``."""
+        """Exact ``d vertices / d v``, shape ``(n_vertices, 3, 27)``.
+
+        Exact everywhere except across the symmetry-plane projection's switch set: the
+        clamped vertices contribute ``d y / d v = 0`` (their ``y`` is pinned to the floor),
+        which is the one-sided derivative from the interior of the feasible half-space.
+        """
         import numpy as np
 
         if v is None:
             v = self.zero()
+        active = half_breadth_mask(self.raw_station_grid(v))   # (2, girth_out, station_out)
         dcloud = self.cloud_jacobian(v)                     # (2250, 3, 27)
         arr = np.stack([point_grid(dcloud[:, :, k], check=False)
                         for k in range(self.n_variables)],
@@ -462,6 +546,7 @@ class DTMB5415Space:
         ref = np.stack([_refine(arr[k]) for k in range(2)], axis=0).reshape(
             2, MESH_RESOLUTION["n_girth_out"], MESH_RESOLUTION["n_station_out"],
             3, self.n_variables)
+        ref[..., 1, :] = np.where(active[..., None], 0.0, ref[..., 1, :])
         star = np.concatenate([ref[0].reshape(-1, 3, self.n_variables),
                                ref[1].reshape(-1, 3, self.n_variables)], axis=0)
         off = np.flatnonzero(~self._starboard_centre)
@@ -663,6 +748,8 @@ class DTMB5415Space:
         _, counts = np.unique(edges, axis=0, return_counts=True)
         # station monotonicity per patch: x must decrease with station index
         grid = self.station_grid(v)
+        raw = self.raw_station_grid(v)
+        active = half_breadth_mask(raw)
         dx_station = np.diff(grid[:, :, :, 0].mean(axis=1), axis=1)
         return {
             "n_vertices": int(verts.shape[0]),
@@ -681,6 +768,10 @@ class DTMB5415Space:
             "boundary_edges": int((counts == 1).sum()),
             "non_finite_vertices": int((~np.isfinite(verts)).any(axis=1).sum()),
             "half_breadth_min_m": float(grid[:, :, :, 1].min()),
+            "half_breadth_raw_min_m": float(raw[:, :, :, 1].min()),
+            "half_breadth_clamped_vertices": int(active.sum()),
+            "half_breadth_clamped_fraction": float(active.mean()),
+            "half_breadth_significant_vertices": int((raw[:, :, :, 1] < -HALF_BREADTH_TOL).sum()),
             "stations_monotone": bool(np.all(dx_station < 0.0)),
             "bbox": [[float(a), float(b)] for a, b in zip(verts.min(axis=0), verts.max(axis=0))],
         }
