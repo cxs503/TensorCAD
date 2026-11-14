@@ -1,0 +1,307 @@
+{
+  "analytic_reference": {
+    "block_coefficient": 0.7,
+    "bulb_centroid_x_ahead": 0.0,
+    "bulb_fp_area": 0.0,
+    "bulb_fp_area_submerged": 0.0,
+    "bulb_volume": 0.0,
+    "bulb_waterplane_area": 0.0,
+    "bulb_wetted_area": 0.0,
+    "displacement_volume": 6.3,
+    "longitudinal_centre_buoyancy": 4.8999999999999995,
+    "longitudinal_centre_flotation": 4.912070525855091,
+    "maximum_section_area": 0.8811188811188809,
+    "midship_coefficient": 0.979020979020979,
+    "prismatic_coefficient": 0.715,
+    "total_displacement_volume": 6.3,
+    "total_longitudinal_centre_buoyancy": 4.8999999999999995,
+    "total_vertical_centre_buoyancy": 0.3105119256073103,
+    "total_waterplane_area": 11.295000000000002,
+    "transom_area": 0.0,
+    "transom_area_ratio": 0.0,
+    "vertical_centre_buoyancy": 0.3105119256073103,
+    "vertical_centre_buoyancy_z": -0.2894880743926897,
+    "waterplane_area": 11.295000000000002,
+    "waterplane_coefficient": 0.7530000000000001
+  },
+  "analytic_relative_errors": {
+    "block_coefficient": -0.009393646094253734,
+    "displacement_volume": -0.009393646094253734,
+    "longitudinal_centre_buoyancy": 8.351039047493676e-05,
+    "longitudinal_centre_flotation": 5.028179783345658e-06,
+    "maximum_section_area": -0.011342331792960757,
+    "midship_coefficient": -0.011342331792960793,
+    "prismatic_coefficient": 0.0019710419100287396,
+    "vertical_centre_buoyancy": -0.009937030690205927,
+    "waterplane_area": -5.3205763175148514e-05,
+    "waterplane_coefficient": -5.3205763175207495e-05,
+    "wetted_surface_area": null
+  },
+  "appendages": {
+    "bodies": 1,
+    "bulb": null,
+    "note": "the bulb is a separate closed solid, not boolean-unioned with the hull; totals add its closed-form displacement"
+  },
+  "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+  "discretisation": {
+    "grid": [
+      161,
+      41
+    ],
+    "within_tolerance": true,
+    "worst_quantity": "midship_coefficient",
+    "worst_relative_error": -0.011342331792960793
+  },
+  "engineering_status": "geometry and hydrostatics only",
+  "exponents": {
+    "m": 46.66666666666662,
+    "n": 2.508771929824561
+  },
+  "gate": {
+    "checks": [
+      {
+        "name": "finite_vertex_coordinates",
+        "passed": true
+      },
+      {
+        "name": "non_empty_mesh",
+        "passed": true
+      },
+      {
+        "name": "face_indices_in_range",
+        "passed": true
+      },
+      {
+        "name": "no_degenerate_faces",
+        "passed": true
+      },
+      {
+        "name": "watertight",
+        "passed": true
+      },
+      {
+        "name": "edge_manifold",
+        "passed": true
+      },
+      {
+        "detail": "signed volume is 6.24082 m^3; a closed solid must have positive volume",
+        "name": "outward_orientation",
+        "passed": true
+      },
+      {
+        "detail": "volume 6.24082003 exceeds the 9 bounding-box volume, which means self-intersection or inverted faces",
+        "name": "volume_within_bounding_box",
+        "passed": true
+      },
+      {
+        "name": "vertex_manifold",
+        "passed": true
+      },
+      {
+        "detail": "1 connected components, expected 1",
+        "name": "component_count",
+        "passed": true
+      },
+      {
+        "detail": "V-E+F = 12961-38877+25918 = 2, expected 2 (1 closed genus-0 component(s))",
+        "name": "euler_characteristic",
+        "passed": true
+      },
+      {
+        "detail": "integrated 6.24082 m^3 against reference 6.3 (-0.939 %, limit 2 %)",
+        "name": "reference_volume",
+        "passed": true
+      }
+    ],
+    "failures": [],
+    "measurements": {
+      "boundary_edges": 0,
+      "bounding_box_size": [
+        10.0,
+        1.5,
+        0.6
+      ],
+      "components": 1,
+      "edges": 38877,
+      "euler_characteristic": 2,
+      "max_edge_length": 1.5013012829522498,
+      "max_facet_aspect": 48.08333384883694,
+      "max_relative_edge_length": 0.15013012829522498,
+      "non_manifold_edges": 0,
+      "reference_volume": 6.3,
+      "relative_volume_error": -0.009393646094247532,
+      "signed_volume": 6.24082002960624,
+      "surface_area": 32.51673299375142,
+      "triangles": 25918,
+      "units": "m",
+      "vertices": 12961,
+      "zero_area_faces": 0
+    },
+    "passed": true,
+    "schema": "tensorcad.mesh.gate/1"
+  },
+  "generator": {
+    "backend": "tensorcad.geometry (standard library)",
+    "kind": "series_60_lofted_surface",
+    "longitudinal_taper": "1 - |2*xi - 1|^n(side)",
+    "topology": "one closed section ring per station, capped at WL",
+    "vertical_taper": "zeta^(1/m(xi))"
+  },
+  "hydrostatics": {
+    "basis": "closed surface integrals",
+    "block_coefficient": 0.693424,
+    "displacement_mass_kg": 6396.841,
+    "displacement_volume_m3": 6.24082003,
+    "keel_z_m": -0.6,
+    "longitudinal_centre_buoyancy_m": 4.900409201,
+    "longitudinal_centre_flotation_m": 4.912095225,
+    "maximum_section_area_m2": 0.871124938,
+    "prismatic_coefficient": 0.716409,
+    "vertical_centre_buoyancy_m": -0.286611423,
+    "water_density_kg_per_m3": 1025.0,
+    "waterline_z_m": 0.0,
+    "waterplane_area_m2": 11.294399041,
+    "waterplane_inertia_longitudinal_m4": 63.002450011,
+    "waterplane_inertia_transverse_m4": 1.640804781,
+    "wetted_surface_area_m2": 21.222333953
+  },
+  "mesh": {
+    "bounding_box": {
+      "max": [
+        10.0,
+        0.75,
+        0.0
+      ],
+      "min": [
+        0.0,
+        -0.75,
+        -0.6
+      ],
+      "size": [
+        10.0,
+        1.5,
+        0.6
+      ]
+    },
+    "coordinate_frame": "x=longitudinal, from the aft end (x=0) toward the forward end (x=length); y=transverse, positive to starboard; z=vertical, positive up; z=0 is the design waterline, the keel lies at z=-draft",
+    "triangle_count": 25918,
+    "units": "m",
+    "vertex_count": 12961
+  },
+  "model_type": "series_60_parametric_displacement_hull",
+  "offset_count": 161,
+  "parameters": {
+    "beam": 1.5,
+    "bulb_area_ratio": 0.0,
+    "bulb_centre_height_ratio": 0.35,
+    "bulb_length_ratio": 0.0,
+    "cb": 0.7,
+    "cwp": 0.753,
+    "draft": 0.6,
+    "lcb": 0.49,
+    "length": 10.0,
+    "nx": 161,
+    "nz": 41,
+    "transom_ratio": 0.0,
+    "water_density": 1025.0
+  },
+  "schema_version": "2.0",
+  "station_law": {
+    "block_coefficient": 0.7,
+    "cm_mid": 0.979020979020979,
+    "lcb_over_length": 0.48999999999999994,
+    "lcf_over_length": 0.49120705258550906,
+    "legacy_single_exponent": false,
+    "n_aft": 3.416689874110987,
+    "n_fore": 2.737114959842593,
+    "section_taper_gain": -0.3586891012122816,
+    "transom_ratio": 0.0,
+    "vcb_over_draft": 0.5175198760121839,
+    "waterplane_coefficient": 0.7530000000000001
+  },
+  "tolerance": {
+    "discretisation": 0.02,
+    "published": 0.03
+  },
+  "transom": {
+    "definition": "aft-end deck-breadth ratio f(0) = b_T/(B/2)",
+    "immersed_area_m2": 0.0,
+    "immersed_area_ratio_of_mid_section": 0.0,
+    "transom_ratio": 0.0
+  },
+  "units": "m",
+  "validation": {
+    "checks": [
+      {
+        "name": "finite_vertex_coordinates",
+        "passed": true
+      },
+      {
+        "name": "non_empty_mesh",
+        "passed": true
+      },
+      {
+        "name": "face_indices_in_range",
+        "passed": true
+      },
+      {
+        "name": "no_degenerate_faces",
+        "passed": true
+      },
+      {
+        "name": "watertight",
+        "passed": true
+      },
+      {
+        "name": "edge_manifold",
+        "passed": true
+      },
+      {
+        "detail": "V-E+F = 12961-38877+25918 = 2, expected 2 for a closed genus-0 shell",
+        "name": "euler_characteristic_genus_zero",
+        "passed": true
+      },
+      {
+        "detail": "signed volume is 6.24082 m^3; a closed solid must have positive volume",
+        "name": "outward_orientation",
+        "passed": true
+      },
+      {
+        "detail": "volume 6.24082003 exceeds the 9 bounding-box volume, which means self-intersection or inverted faces",
+        "name": "volume_within_bounding_box",
+        "passed": true
+      },
+      {
+        "name": "vertex_manifold",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "name": "length_matches_request",
+        "passed": true
+      },
+      {
+        "name": "draft_matches_request",
+        "passed": true
+      },
+      {
+        "name": "waterline_plane_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "realised beam 1.5 m vs requested 1.5 (grid deficit +0.0000%, allowance 0.0000%)",
+        "name": "beam_matches_request",
+        "passed": true
+      },
+      {
+        "detail": "volume 6.240820 vs analytic 6.300000 = -0.9394%",
+        "name": "series60_volume_convergence",
+        "passed": true,
+        "severity": "warning"
+      }
+    ],
+    "errors": [],
+    "passed": true,
+    "warnings": []
+  }
+}

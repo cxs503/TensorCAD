@@ -54,6 +54,9 @@ _PARENT_FORMS: dict[float, tuple[float, float]] = {
     0.80: (0.805, 0.805/(1-0.805)),  # Cp=0.805, n=4.128, m=160.0
 }
 
+#: The five Todd (1951) parent forms, ascending: the family's published ladder.
+PARENT_CB: tuple[float, ...] = tuple(sorted(_PARENT_FORMS))
+
 SAMPLING_ERROR_WARNING = 0.02
 MAX_STATIONS = 4001
 MAX_LEVELS = 513

@@ -128,7 +128,11 @@ def five_cb_gradient(published: dict, nx: int, nz: int) -> dict:
                 "relative": model_value / published_value - 1.0,
                 "role": ("input target (closure check)" if key in
                          ("waterplane_coefficient", "lcb_over_length", "block_coefficient")
-                         else "shape-derived (independent of the target)"),
+                         # m17308 audit F1: Cp is the *published ladder* the exponents
+                         # are read from and Cm = Cb/Cp follows from it, so neither is
+                         # "independent of the target".  Labelling them so let any
+                         # machine reader score a closure as an external verification.
+                         else "published ladder (input, not a prediction)"),
             }
             row.setdefault("error_vs_published", {})[key]["within_bar"] = (
                 abs(model_value / published_value - 1.0) <= TOLERANCE)

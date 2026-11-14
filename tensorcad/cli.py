@@ -91,6 +91,13 @@ def main(argv: list[str] | None = None) -> int:
         from tensorcad.fairness_cli import main as fairness_main
 
         return fairness_main(argv_list[1:])
+    if argv_list and argv_list[0] == "series60":
+        # Integration caller for GAP-CAD-T2-PARAM-SERIES: the package console script
+        # reaches the Series 60 parent-form family (generate -> export -> gate), so the
+        # capability sits on a product entry point and not only on an import.
+        from tensorcad.series60_cli import main as series60_main
+
+        return series60_main(argv_list[1:])
     if argv_list and argv_list[0] == "fleet":
         # Integration caller for GAP-CAD-T1-BASELINE-FLEET: the package CLI reaches the
         # baseline-fleet intake gate, so the gate is on a product entry point and not only
