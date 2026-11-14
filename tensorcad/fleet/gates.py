@@ -487,4 +487,10 @@ def refused(record: ShipRecord, reason: str) -> dict[str, Any]:
         "volume_relative_error": None,
         "reference_basis": record.reference_basis(),
         "reference_is_external": record.reference_is_external(),
+        # A ship whose geometry could not be built still *has* a published reference: the
+        # KVLCC2 312 622 m^3 case was reported as "no reference" for as long as the route
+        # refused, which made a known benchmark look like an unbenchmarked hull.  Report the
+        # number and the provenance here, and leave the mesh volume empty.
+        "reference_volume": record.reference_volume() if record.displacement_volume is not None else None,
+        "reference_provenance": record.published_provenance("displacement_volume"),
     }
