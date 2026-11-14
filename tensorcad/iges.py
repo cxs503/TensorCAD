@@ -420,7 +420,14 @@ def _split_control(
         )
     scored = []
     for name, control, weights in candidates:
-        if any(w == 0.0 for w in weights) or any(len(point) != 3 for point in control):
+        # A non-positive weight is not representable in these archives: every
+        # rational patch here carries strictly positive weights, so a zero or
+        # negative member means the tail was split at the wrong offset and a
+        # coordinate was read as a weight.  Rejecting the candidate is what decides
+        # a degenerate (2x2, 2xn) net, where the smoothness score is identically 0
+        # for every reading -- that is how 15 ONRT patches kept a control point at
+        # (1.0, 1.0, 1.0) m and spanned the unit cube.
+        if any(not (w > 0.0) for w in weights) or any(len(point) != 3 for point in control):
             continue
         scored.append((_net_roughness(control, count_u, count_v), name, control, weights))
     if not scored:
@@ -429,6 +436,17 @@ def _split_control(
     if len(uniform) == 1:
         best = uniform[0]
         return list(best[2]), list(best[3]), best[1], False
+    if uniform:
+        # Several readings claim constant weights.  ``weight_block`` read them out
+        # of the record (``body[:points]``); ``polynomial`` merely assumes an
+        # all-ones vector and swallows whatever constant block the record carries
+        # as the first coordinates.  The block that is *in the data* wins: on a
+        # 2x2 patch the polynomial reading is how the weight block ``1,1,1,1``
+        # turned into the control point (1.0, 1.0, 1.0).
+        from_record = [item for item in uniform if item[1] == "weight_block"]
+        if len(from_record) == 1:
+            best = from_record[0]
+            return list(best[2]), list(best[3]), best[1], False
     scored.sort(key=lambda item: item[0])
     best = scored[0]
     ambiguous = False
@@ -554,6 +572,29 @@ class IgesFile:
             for entry in self.of_type(ENTITY_BSPLINE_SURFACE)
         ]
 
+    def resolve(self, pointer: int) -> DirectoryEntry | None:
+        """Look up the entity a pointer carried by another entity refers to.
+
+        Writers disagree about which of a directory entry's two 80-column records
+        the pointer names.  IGES 5.3 numbers the *first* record, and the workshop
+        archives split both ways: the ONRT/Rhino export carries odd pointers
+        (``141,1,3,27,...`` names DE 27) while this reader keys every entry by its
+        second record (``second[73:80]``), i.e. the same entry is key 28.  A lookup
+        by exact key therefore missed every reference in that file, and
+        ``trimmed_surfaces`` failed with "boundary DE 1 missing" instead of
+        resolving the patch.
+
+        The neighbour is only consulted for an *odd* pointer, whose second record
+        is ``pointer + 1`` -- an entry cannot have a third record, so the step can
+        never land on an unrelated entity.
+        """
+        entry = self.entries.get(pointer)
+        if entry is not None:
+            return entry
+        if pointer % 2 == 1:
+            return self.entries.get(pointer + 1)
+        return None
+
     def curve(self, sequence: int) -> BSplineCurve:
         params = self.parameters(sequence)
         entity_type = int(params[0])
@@ -567,18 +608,18 @@ class IgesFile:
         for entry in self.of_type(ENTITY_TRIMMED_SURFACE) + self.of_type(ENTITY_BOUNDED_SURFACE):
             wrapper = BoundedSurface.from_parameters(self.parameters(entry.sequence))
             basis = None
-            basis_entry = self.entries.get(wrapper.surface)
+            basis_entry = self.resolve(wrapper.surface)
             if basis_entry is not None and basis_entry.entity_type == ENTITY_BSPLINE_SURFACE:
-                basis = BSplineSurface.from_parameters(self.parameters(wrapper.surface))
+                basis = BSplineSurface.from_parameters(self.parameters(basis_entry.sequence))
             curves: list[CurveOnSurface] = []
             if wrapper.boundary:
-                boundary_entry = self.entries.get(wrapper.boundary)
+                boundary_entry = self.resolve(wrapper.boundary)
                 if boundary_entry is None:
                     raise IgesError(f"boundary DE {wrapper.boundary} missing")
                 if boundary_entry.entity_type == ENTITY_BOUNDARY:
                     boundary = Boundary.from_parameters(self.parameters(wrapper.boundary))
                     for pointer in boundary.curves:
-                        target = self.entries.get(pointer)
+                        target = self.resolve(pointer)
                         if target is not None and target.entity_type == ENTITY_CURVE_ON_SURFACE:
                             curves.append(CurveOnSurface.from_parameters(self.parameters(pointer)))
                 elif boundary_entry.entity_type == ENTITY_CURVE_ON_SURFACE:
