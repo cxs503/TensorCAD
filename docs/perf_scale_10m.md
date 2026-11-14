@@ -147,3 +147,57 @@
 | 原始测量 | `artifacts/perf_scale/{full_ladder,ladder_mesh,ladder_voxel,ladder_10m}.json` |
 | 图 | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
 | 作图脚本 | `scripts/gen_perf_scale_figures.py` |
+
+---
+
+## 8. 10⁷ 带：多体 (fleet) 几何源 + 复杂度回归门（新增，`tensorcad.perf_benchmark`）
+
+### 8.1 为什么需要 fleet 源
+
+单船参数化船体受 `HullParameters` 上限约束（`nx ≤ 4001` stations、`nz ≤ 513` levels），
+最大只到 **8,192,000 三角面**，10⁷ 带用 `generate_hull` 结构上到不了（§6 第 1 条的欠账）。
+新增 `build_fleet_mesh(model, copies)`：把 k 个互不相交的平移副本（默认间距 2 个型宽，留 1 倍型宽水隙）
+组装成一个网格，**k 倍三角面以 O(N) 拷贝得到，不起生成器循环**；因为刚体彼此不接触，
+体积积分保留闭式解 —— 总排水 = `copies × hull.analytic_volume(10,2,0.8)`，每个 rung 的
+`note` 里直接写出 `analytic=` 与 `rel_err=`，快而不准的 rung 无法蒙混。
+
+诚实边界（写进代码 docstring）：fleet 不是"单个大网格导入"的替代品；装配开销单列为
+`fleet_assemble` 子任务与 `load`（生成）分开报，二者的工程问题不同（生成器规模 vs 纯拷贝规模）。
+`_RayCaster` 是星形单体参考实现，`copies > 1` 时直接 `ValueError`，不静默给错答案。
+
+CLI：`python -m tensorcad.perf_benchmark --fleet-tier --ladder 2001,501 --fleet-copies 2,3 ...`
+（2001×501 单体 = 4.0e6 → 2 体 8.0e6 → 3 体 1.2e7，一次生成两档装配）。
+
+### 8.2 复杂度（指数）回归门 —— 补上 10⁶ 带没有 CI 闸门的洞
+
+§6 第 4 条承认：墙上时钟基线只覆盖 quick 阶梯（≤2.6×10⁴ tri），10⁶ 带没有 CI 基线。
+新增 `scaling_gates()`：对每个子任务拟合 `log(秒) vs log(规模)` 的最小二乘指数，超限即 RED。
+
+- 这个门是**尺度不变量**：把某个 O(N) 通道改成 O(N²)，即便是小阶梯也会给出指数 ~2 → RED；
+  而 2× 墙上时钟门在小网格上完全看不见。
+- 数据不足（不同规模 < `MIN_SCALING_POINTS=3`）时报 `status=not_run`，**不是**静默通过
+  （`GateVerdict.status` 新字段，已进 JSON）。
+- 上限：`load/fleet_assemble/point_locate/volume/voxelize ≤ 1.5`、`point_locate_accel ≤ 0.8`。
+
+实测（本机 quick 阶梯，4 档，`python -m tensorcad.perf_benchmark --quick --n-queries 200 --baseline benchmarks/perf_scale/baseline.json`，26 个闸门全绿）：
+
+| 门 | 拟合指数 | 上限 | 判定 |
+|---|---:|---:|---|
+| `load` | 1.08 | 1.50 | ✅ pass |
+| `point_locate` | 1.08 | 1.50 | ✅ pass |
+| `point_locate_accel` | 0.39 | 0.80 | ✅ pass |
+| `volume` | 1.11 | 1.50 | ✅ pass |
+| `voxelize` | 1.07 | 1.50 | ✅ pass |
+
+结论：加速点定位路径指数 0.39（远低于 O(N)），体积/生成/暴力路径 ~1.08–1.11（线性，留 0.4 余量）。
+`tests/test_perf_benchmark.py::test_scaling_gate_flags_quadratic_blowup` 是**反证测试**：
+注入指数 ~2 的合成数据必须 RED；`test_scaling_gate_is_not_run_below_min_points` 守住 `not_run` 语义。
+
+### 8.3 10⁷ 带实测：本轮仍未拿到数（honest FAIL，附根因）
+
+两次集群递交 `cj2967`、`cj2976`（n330，rc=0）跑的就是 §8.1 的命令，但**取回的工件包里没有作业写入的文件**
+（`artifacts/perf_scale/ladder_fleet_10m.json`、`benchmarks/perf_scale/baseline_fleet.json` 均不在 tar 中，
+tar 只有递交时的已跟踪文件）。因此 10⁷ 带**本轮仍未实测**，本文件不提供任何 10⁷ 数字，只有代码与命令就位。
+根因不是物理限制而是取件口径：作业写在 worktree 里的新文件不会被 fetch 打包。下次的最短路径是
+（a）让作业把结果写成**已跟踪路径并在节点内提交**后再 fetch，或（b）作业把 JSON 打到 stdout 由调度器回传。
+本机单干不可行：4e6 单体生成 ~213 s + 1.2e7 装配，属重计算，按计算调度令必须递交集群。
