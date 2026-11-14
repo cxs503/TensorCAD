@@ -28,11 +28,16 @@ if str(ROOT) not in sys.path:
 from tensorcad.perf_benchmark import (  # noqa: E402
     BENCHMARK_SCHEMA,
     DEFAULT_LADDER,
+    FLEET_BASE_LADDER,
+    FLEET_COPIES_LADDER,
     QUICK_LADDER,
     QUICK_VOXEL_LADDER,
     VOXEL_LADDER,
     _environment,
+    clear_fleet_cache,
     clear_mesh_cache,
+    measurement_key,
+    run_fleet_benchmark,
     run_perf_benchmark,
 )
 
@@ -42,6 +47,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--runs", type=int, default=3, help="repeat the ladder, keep the slowest")
     ap.add_argument("--n-queries", type=int, default=500)
     ap.add_argument("--full", action="store_true", help="use the full ladder (10^6--10^7)")
+    ap.add_argument("--fleet", action="store_true",
+                    help="build the 10^6--10^7 multi-body (fleet) tier baseline "
+                         "(cluster-tier project: minutes, several GB)")
     ap.add_argument("--max-triangles", type=int, default=None)
     ap.add_argument("--max-naive-triangles", type=int, default=300_000)
     ap.add_argument("--output", type=str, default="benchmarks/perf_scale/baseline.json")
@@ -53,15 +61,26 @@ def main(argv: list[str] | None = None) -> int:
     merged: dict[str, dict] = {}
     for run_index in range(args.runs):
         clear_mesh_cache()
-        result = run_perf_benchmark(
-            ladder=ladder,
-            voxel_ladder=voxel_ladder,
-            n_queries=args.n_queries,
-            max_triangles=args.max_triangles,
-            max_naive_triangles=args.max_naive_triangles,
-        )
+        clear_fleet_cache()
+        if args.fleet:
+            result = run_fleet_benchmark(
+                base_ladder=FLEET_BASE_LADDER,
+                copies_ladder=FLEET_COPIES_LADDER,
+                n_queries=args.n_queries,
+                max_triangles=args.max_triangles,
+            )
+        else:
+            result = run_perf_benchmark(
+                ladder=ladder,
+                voxel_ladder=voxel_ladder,
+                n_queries=args.n_queries,
+                max_triangles=args.max_triangles,
+                max_naive_triangles=args.max_naive_triangles,
+            )
         for record in result.to_dict()["results"]:
-            key = f"{record['subtask']}:{record['nx']}x{record['nz']}"
+            key = measurement_key(
+                record["subtask"], record["nx"], record["nz"], record.get("copies", 1)
+            )
             if record["seconds"] is None:
                 merged.setdefault(key, record)
                 continue
@@ -85,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
         "gates": [],
         "results": [merged[k] for k in sorted(merged)],
     }
+    if args.fleet and args.output == "benchmarks/perf_scale/baseline.json":
+        args.output = "benchmarks/perf_scale/baseline_fleet.json"
     out = Path(args.output)
     if not out.is_absolute():
         out = ROOT / out
