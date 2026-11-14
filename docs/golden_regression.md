@@ -118,8 +118,8 @@ Now:
 * all four golden forms fingerprint their fine mesh (`series60`, `sphere_ellipsoid` — both
   bodies folded into one digest, `dtmb5415`, `wigley`);
 * `evaluate_case` compares the measured fingerprint with the blessed one and raises
-  `geometry_changed` (error) on a mismatch, `geometry_fingerprint_not_blessed` (warning)
-  when the baseline predates the fingerprint, and `geometry_fingerprint_missing`
+  `geometry_changed` (error) on a mismatch, `geometry_fingerprint_not_blessed` (error)
+  when the baseline entry does not lock the mesh, and `geometry_fingerprint_missing`
   (warning) when a case cannot identify its mesh at all;
 * the baseline was re-blessed: the diff is `geometry_sha256` only, every measurement is
   unchanged (`dtmb5415` moved by 7.8e-13 relative, four orders below the 1e-9 drift lock).
