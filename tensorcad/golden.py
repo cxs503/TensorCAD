@@ -347,7 +347,13 @@ class SphereEllipsoidGolden(GoldenCase):
 
     name = "sphere_ellipsoid"
     title = "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra"
-    reference_source = "(4/3)πr³, 4πr² and (4/3)πabc over the exact primitive fields"
+    reference_source = (
+        "(4/3)πr³ and (4/3)πabc over the exact primitive fields; the areas from the exact "
+        "semi-axes: 4πr² for the sphere and "
+        "tensorcad.analytic_solids.ellipsoid_surface_area for the triaxial ellipsoid "
+        "(converged Gauss-Legendre quadrature of the exact area element, cross-checked "
+        "against the spheroid closed form)"
+    )
     AXES = (2.0, 1.5, 0.5)
     RADIUS = 1.0
 
@@ -373,29 +379,19 @@ class SphereEllipsoidGolden(GoldenCase):
         return values
 
     def reference(self) -> dict[str, float]:
+        from .analytic_solids import ellipsoid_surface_area, ellipsoid_volume
+
         reference = {
             "sphere_volume_m3": 4.0 / 3.0 * math.pi * self.RADIUS**3,
             "sphere_surface_area_m2": 4.0 * math.pi * self.RADIUS**2,
-            "ellipsoid_volume_m3": 4.0 / 3.0 * math.pi * self.AXES[0] * self.AXES[1] * self.AXES[2],
+            "ellipsoid_volume_m3": ellipsoid_volume(self.AXES),
+            "ellipsoid_surface_area_m2": ellipsoid_surface_area(self.AXES),
         }
         for axis, extent in zip("xyz", (2 * self.RADIUS,) * 3, strict=True):
             reference[f"sphere_extent_{axis}_m"] = extent
         for axis, extent in zip("xyz", (2.0 * axis for axis in self.AXES), strict=True):
             reference[f"ellipsoid_extent_{axis}_m"] = extent
         return reference
-
-    def known_limitations(self, values: Mapping[str, float]) -> list[dict[str, Any]]:
-        return [
-            {
-                "id": "ellipsoid-area-not-asserted",
-                "detail": (
-                    "the ellipsoid surface area has no elementary closed form (elliptic "
-                    "integrals), so it is drift-locked but not asserted against a reference"
-                ),
-                "measured_surface_area_m2": _number(values["ellipsoid_surface_area_m2"]),
-                "asserted": False,
-            }
-        ]
 
 
 class DTMB5415Golden(GoldenCase):
@@ -956,15 +952,21 @@ def run_suite(
             )
         )
     for case in registered:
-        result.cases.append(
-            evaluate_case(
-                case,
-                blessed_cases.get(case.name),
-                quick=quick,
-                findings=findings,
-                baseline_optional=baseline_optional,
-            )
+        # Each case keeps the findings it raised. Without this, ``CaseResult.passed`` is
+        # vacuously true and the report tells a reader that a failing case passed -- the
+        # suite-level flag was right, the per-case column was noise. The same Finding
+        # objects stay in the single suite list, so ``SuiteResult.all_findings``
+        # (suite-level + per-case) still reports each error exactly once.
+        case_findings: list[Finding] = []
+        evaluated = evaluate_case(
+            case,
+            blessed_cases.get(case.name),
+            quick=quick,
+            findings=case_findings,
+            baseline_optional=baseline_optional,
         )
+        evaluated.findings = case_findings
+        result.cases.append(evaluated)
     result.findings = findings
     result.seconds = time.perf_counter() - started
     return result
