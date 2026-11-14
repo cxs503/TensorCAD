@@ -21,6 +21,11 @@ import numpy as np
 from tensorcad.dtmb5415 import DATASET, REFERENCE, WATERLINE_Z, DTMB5415Space
 
 OUT = Path("artifacts/m17472_5415_param")
+def _out_dir() -> Path:
+    import sys
+    if "--out" in sys.argv:
+        return Path(sys.argv[sys.argv.index("--out") + 1])
+    return OUT
 DATASET_MAT = "/root/ship-data-official/dtmb5415/DTMB5415-database.mat"
 HOLDOUT_MODULUS = 5          # same split as the fit
 N_SAMPLED = 20
@@ -91,6 +96,8 @@ def gate(q: dict, base: dict) -> list[dict]:
 
 
 def main() -> None:
+    global OUT
+    OUT = _out_dir()
     OUT.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     space = DTMB5415Space()
@@ -145,6 +152,9 @@ def main() -> None:
             "max_point_m": float(err.max()),
             "rms_pct_beam": float(100 * np.sqrt((err ** 2).mean()) / space.beam_full_m),
             "rms_pct_half_beam": float(100 * np.sqrt((err ** 2).mean()) / space.beam_m),
+            "half_breadth_raw_min_m": q["half_breadth_raw_min_m"],
+            "half_breadth_min_m": q["half_breadth_min_m"],
+            "half_breadth_clamped_vertices": q["half_breadth_clamped_vertices"],
             "edge_median_m": q["edge_median_m"], "min_angle_deg": q["min_angle_deg"],
             "aspect_p99": q["aspect_p99"], "boundary_edges": q["boundary_edges"],
             "degenerate_faces": q["degenerate_faces"],
@@ -283,6 +293,32 @@ def main() -> None:
     ax[1].set_xlabel("dataset configuration index"); ax[1].set_ylabel("shell volume (m$^3$)")
     ax[1].legend(); ax[1].set_title("20 sampled configurations")
     fig.tight_layout(); fig.savefig(OUT / "fig_sections_and_volume.png", dpi=140)
+    plt.close(fig)
+
+    # symmetry-plane restoration: the raw surrogate profile vs the feasible geometry
+    worst = min(rows, key=lambda r: r["half_breadth_raw_min_m"])
+    vw = V[worst["config_index"]]
+    raw_w = space.raw_station_grid(vw)
+    fea_w = space.station_grid(vw)
+    patch, _, col = np.unravel_index(np.argmin(raw_w[..., 1]), raw_w[..., 1].shape)
+    prof_raw = raw_w[patch, :, col, 1]
+    prof_fea = fea_w[patch, :, col, 1]
+    fig, ax = plt.subplots(1, 2, figsize=(11, 4.2))
+    ax[0].plot(prof_raw, "o-", ms=3, label=f"raw surrogate (min {prof_raw.min():.3f} m)")
+    ax[0].plot(prof_fea, "s-", ms=3, label="after y >= 0 projection")
+    ax[0].axhline(0.0, color="k", ls=":", lw=1)
+    ax[0].set_xlabel(f"girth index (patch {patch}, station {col})")
+    ax[0].set_ylabel("half breadth y (m)")
+    ax[0].set_title(f"config {worst['config_index']}: symmetry-plane restoration")
+    ax[0].legend(fontsize=8)
+    mins = [r["half_breadth_raw_min_m"] for r in rows]
+    ax[1].bar(range(len(rows)), mins, color="#c05621")
+    ax[1].axhline(0.0, color="k", ls=":")
+    ax[1].axhline(-1e-6, color="crimson", ls="--", label="gate tolerance -1e-6 m")
+    ax[1].set_xlabel("sampled configuration (20)"); ax[1].set_ylabel("raw min half breadth (m)")
+    ax[1].set_title("surrogate overshoot, repaired to 0 by construction")
+    ax[1].legend(fontsize=8)
+    fig.tight_layout(); fig.savefig(OUT / "fig_symmetry_plane_restoration.png", dpi=140)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(5.6, 5.0))
