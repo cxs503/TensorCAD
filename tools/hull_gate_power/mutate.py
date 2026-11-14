@@ -44,12 +44,18 @@ ROOT = Path(__file__).resolve().parents[2]
 HULL = ROOT / "tensorcad" / "hull.py"
 ANA = ROOT / "tensorcad" / "hydrostatics_analytic.py"
 SERIES = ROOT / "tensorcad" / "series60.py"
+SERIES_CLI = ROOT / "tensorcad" / "series60_cli.py"
 
 GEN_TESTS = ["tests/test_hull.py", "tests/test_analytic_hydrostatics.py"]
 ANA_TESTS = ["tests/test_hydrostatics_analytic.py", "tests/test_analytic_hydrostatics.py", "tests/test_hull.py"]
 #: The transom/bulb claims are guarded by the two Series 60 test modules: the first
 #: pins the new ends, the second pins that they did not move the legacy hull.
 SERIES_TESTS = ["tests/test_series60_bulb_transom.py", "tests/test_series60.py"]
+#: The product entry (``tensorcad-hull series60``) has its own claims: that the
+#: command reaches the family, that the exported document carries the analytic
+#: reference, that the gate refuses instead of writing, and that the published
+#: comparison labels a closure as a closure.
+SERIES_CLI_TESTS = ["tests/test_series60_cli.py"]
 
 MUTANTS: list[dict] = [
     {
@@ -279,6 +285,50 @@ MUTANTS: list[dict] = [
         "claim": "the axial stretch enters the bulb area element as r sqrt(r'^2 + a^2)",
         "tests": SERIES_TESTS,
     },
+    # ---------------------------------------------------------------- Series 60 entry
+    # Every round of this anchor was audited down for the same reason: the kernel had
+    # no product entry, so nothing downstream could consume it.  These four mutants
+    # put the entry itself under the same single-defect discipline -- a CLI whose
+    # flags, gate or role labels can be broken without a test noticing is a wrapper,
+    # not an integration.
+    {
+        "id": "S60-15-entry-ignores-cb",
+        "kind": "model",
+        "file": "cli",
+        "old": "        cb=args.cb,",
+        "new": "        cb=0.70,  # mutant S60-15 (the --cb flag is dropped)",
+        "claim": "the entry generates the block coefficient the caller asked for",
+        "tests": SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-16-entry-vcb-frame",
+        "kind": "model",
+        "file": "cli",
+        "old": '    ("vertical_centre_buoyancy", "vertical_centre_buoyancy_z"),',
+        "new": '    ("vertical_centre_buoyancy", "vertical_centre_buoyancy"),  # mutant S60-16',
+        "claim": "the measured VCB is compared in the frame the closed form states "
+                 "(mesh z-frame against z-frame), not against the above-keel value",
+        "tests": SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-17-entry-self-referential-gate",
+        "kind": "model",
+        "file": "cli",
+        "old": "        reference_volume=analytic[\"displacement_volume\"],",
+        "new": "        reference_volume=model.hydrostatics.displacement_volume,  # mutant S60-17",
+        "claim": "the gate's reference volume comes from outside the mesh; a mesh that "
+                 "only agrees with itself is not evidence",
+        "tests": SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-18-entry-closure-as-prediction",
+        "kind": "model",
+        "file": "cli",
+        "old": '        return "input target (closure check)"',
+        "new": '        return "derived"  # mutant S60-18 (a closure reported as a prediction)',
+        "claim": "Cwp and LCB are generator targets, and the record says so",
+        "tests": SERIES_CLI_TESTS,
+    },
 ]
 
 
@@ -332,6 +382,7 @@ def main() -> int:
         "hull": HULL.read_bytes(),
         "ana": ANA.read_bytes(),
         "series": SERIES.read_bytes(),
+        "cli": SERIES_CLI.read_bytes(),
     }
     digests = {key: sha256(data) for key, data in originals.items()}
 
@@ -341,13 +392,14 @@ def main() -> int:
         if mid in results:
             print(f"[skip] {mid} already recorded", flush=True)
             continue
-        path = {"hull": HULL, "ana": ANA, "series": SERIES}[mutant["file"]]
+        path = {"hull": HULL, "ana": ANA, "series": SERIES, "cli": SERIES_CLI}[mutant["file"]]
         original = originals[mutant["file"]]
         if not clean_tree():
             print(f"[abort] dirty tree before {mid}; restoring and stopping", flush=True)
             HULL.write_bytes(originals["hull"])
             ANA.write_bytes(originals["ana"])
             SERIES.write_bytes(originals["series"])
+            SERIES_CLI.write_bytes(originals["cli"])
             return 1
         text = original.decode()
         if text.count(mutant["old"]) != 1:
@@ -375,7 +427,8 @@ def main() -> int:
         print(f"[done] {mid}: {verdict} ({run['wall_seconds']}s) {run['summary']}", flush=True)
 
     # Baselines for the test sets (recorded once).
-    for name, tests in (("gen", GEN_TESTS), ("ana", ANA_TESTS), ("series", SERIES_TESTS)):
+    for name, tests in (("gen", GEN_TESTS), ("ana", ANA_TESTS), ("series", SERIES_TESTS),
+                        ("cli", SERIES_CLI_TESTS)):
         if name not in results:
             results[f"baseline-{name}"] = {"status": "baseline", "run": run_pytest(tests)}
             out_path.write_text(json.dumps(results, indent=2))
