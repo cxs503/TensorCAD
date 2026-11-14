@@ -123,3 +123,23 @@ def test_verify_only_is_green():
     from tools.baseline_fleet.hunt_sources import main
 
     assert main(["--out", "artifacts/baseline_fleet", "--verify-only"]) == 0
+
+def test_fleet_gate_validates_source_hunt_record():
+    """Integration: fleet_gate.validate_source_hunt_record consumes the hunt record."""
+    from tensorcad.fleet_gate import validate_source_hunt_record
+
+    result = validate_source_hunt_record(RECORD)
+    assert result["total"] == 11
+    assert result["invalid"] == 0, "all reachable sources must carry valid digests"
+    assert result["official"] >= 5, "at least 5 official workshop sources"
+    assert result["dead_ends"] >= 3, "DTC and geometry-dir dead ends recorded"
+    assert result["third_party"] == 1, "GitHub mirror classified as third party"
+    assert result["all_reachable_valid"] is True
+
+    # Check specific classifications
+    by_key = {e["key"]: e for e in result["entries"]}
+    assert by_key["t2015_index"]["classification"] == "official"
+    assert by_key["simman_summary"]["classification"] == "official"
+    assert by_key["t2015_onrt_geometry"]["classification"] == "official"
+    assert by_key["dtc_unidue_page"]["classification"] == "dead_end"
+    assert by_key["dtc_mirror_repo"]["classification"] == "third_party"
