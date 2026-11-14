@@ -1,5 +1,7 @@
 # TensorCAD 大几何性能基准（GAP-CAD-D4-PERF-SCALE）
 
+> **已被 `docs/perf_scale_10m.md` 取代**（本版最高只测到 1.0e5 三角面；新文档含 10⁶ 带实测、空间索引加速路径、集群判据修订）。
+
 **版本**: 0.2.0  
 **日期**: 2026-11-14  
 **锚点**: `GAP-CAD-D4-PERF-SCALE`  

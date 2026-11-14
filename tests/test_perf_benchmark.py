@@ -32,6 +32,12 @@ from tensorcad.perf_benchmark import (
 
 ROOT = Path(__file__).resolve().parents[1]
 
+#: The committed regression baseline.  It used to live in ``runs/``, which the
+#: merge gate strips from the branch, so on every fresh checkout the baseline was
+#: missing and the 2x regression gate silently had nothing to compare against.
+#: ``benchmarks/`` is tracked, so the gate is actually armed here.
+BASELINE = ROOT / "benchmarks" / "perf_scale" / "baseline.json"
+
 
 def _env() -> dict[str, str]:
     existing = os.environ.get("PYTHONPATH", "")
@@ -298,7 +304,7 @@ def test_cli_regression_gate(tmp_path: Path) -> None:
 
 def test_baseline_file_exists_and_valid() -> None:
     """Verify the committed baseline file exists and conforms to the schema."""
-    bl_path = ROOT / "runs" / "perf_baseline.json"
+    bl_path = BASELINE
     assert bl_path.exists(), f"Baseline file not found at {bl_path}"
 
     data = json.loads(bl_path.read_text())
@@ -306,12 +312,10 @@ def test_baseline_file_exists_and_valid() -> None:
     assert "results" in data
     assert len(data["results"]) >= 4, "Baseline should have results for all 4 sub-tasks"
 
-    # Verify all 4 sub-tasks are represented
+    # Verify all sub-tasks are represented (including the indexed point path)
     subtasks = {r["subtask"] for r in data["results"]}
-    assert "load" in subtasks
-    assert "point_locate" in subtasks
-    assert "voxelize" in subtasks
-    assert "volume" in subtasks
+    for name in ("load", "point_locate", "point_locate_accel", "voxelize", "volume"):
+        assert name in subtasks, f"baseline is missing sub-task {name}"
 
     # Verify all results have required fields
     required_fields = {"subtask", "nx", "nz", "triangles", "vertices",
@@ -324,7 +328,7 @@ def test_baseline_file_exists_and_valid() -> None:
 
 def test_baseline_regression_gate_passes() -> None:
     """Verify that running the quick benchmark against the baseline passes all gates."""
-    bl_path = ROOT / "runs" / "perf_baseline.json"
+    bl_path = BASELINE
     if not bl_path.exists():
         pytest.skip("Baseline file not available")
 
@@ -340,3 +344,60 @@ def test_baseline_regression_gate_passes() -> None:
     )
     assert result.returncode == 0, f"Regression gates failed:\n{result.stdout}\n{result.stderr}"
     assert "All gates passed" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# Accelerated point location (GAP-CAD-D4-PERF-SCALE: 10^6--10^7 regime)
+# ---------------------------------------------------------------------------
+
+def test_accelerated_locate_is_measured_and_faster() -> None:
+    """The indexed path is recorded on the same rung as the brute-force one."""
+    from tensorcad.perf_benchmark import clear_mesh_cache
+
+    clear_mesh_cache()
+    result = run_perf_benchmark(
+        ladder=((41, 13),),
+        subtasks=("point_locate", "point_locate_accel"),
+        n_queries=200,
+    )
+    by_task = {r.subtask: r for r in result.results}
+    naive = by_task["point_locate"]
+    accel = by_task["point_locate_accel"]
+    assert naive.status == MEASURED and accel.status == MEASURED
+    assert accel.triangles == naive.triangles
+    assert accel.build_seconds is not None and accel.build_seconds >= 0.0
+    assert accel.index_cells > 0 and accel.index_entries >= accel.triangles
+    assert accel.index_bytes > 0
+    assert accel.throughput is not None and accel.throughput > 0.0
+    # Same number of hits: the index must not change the geometry.
+    assert accel.note.split(",")[0] == naive.note.split(",")[0]
+    clear_mesh_cache()
+
+
+def test_naive_reference_skipped_above_threshold() -> None:
+    """Above ``max_naive_triangles`` the O(N) reference is NOT_RUN, not slow."""
+    from tensorcad.perf_benchmark import clear_mesh_cache
+
+    clear_mesh_cache()
+    result = run_perf_benchmark(
+        ladder=((161, 41),),
+        subtasks=("point_locate", "point_locate_accel"),
+        n_queries=20,
+        max_naive_triangles=1000,
+    )
+    by_task = {r.subtask: r for r in result.results}
+    assert by_task["point_locate"].status == NOT_RUN
+    assert "brute-force" in by_task["point_locate"].note
+    assert by_task["point_locate_accel"].status == MEASURED
+    clear_mesh_cache()
+
+
+def test_mesh_cache_is_bounded() -> None:
+    """The shared mesh cache keeps at most two rungs (10^7 rungs are GB-scale)."""
+    from tensorcad import perf_benchmark
+
+    perf_benchmark.clear_mesh_cache()
+    for nx, nz in ((21, 9), (41, 13), (81, 21)):
+        perf_benchmark._cached_hull(nx, nz)
+    assert len(perf_benchmark._MESH_CACHE) == perf_benchmark.MESH_CACHE_SIZE
+    perf_benchmark.clear_mesh_cache()
