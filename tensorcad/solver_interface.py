@@ -61,11 +61,16 @@ __all__ = [
     "channel_grid_2d",
     "check_frame",
     "ellipsoid_mesh",
+    "grid_quads",
+    "read_grid_table",
+    "read_lattice_table",
     "read_gmsh_volume",
     "signed_volume",
     "to_z_up",
     "total_volume",
     "verify_bundle",
+    "write_bundle_grid",
+    "write_bundle_lattice",
     "write_bundle_surface",
     "write_bundle_volume",
 ]
@@ -438,6 +443,182 @@ def write_bundle_surface(
     return handoff
 
 
+def _quad_area(vertices: Sequence[Sequence[float]], quad: Sequence[int]) -> float:
+    """Area of a planar quad, split into two triangles."""
+    a, b, c, d = (vertices[i] for i in quad)
+    return 0.5 * math.dist((0.0, 0.0, 0.0), _cross(_sub(b, a), _sub(c, a))) + 0.5 * math.dist(
+        (0.0, 0.0, 0.0), _cross(_sub(c, a), _sub(d, a))
+    )
+
+
+def grid_quads(nx: int, ny: int) -> tuple[tuple[int, int, int, int], ...]:
+    """Counter-clockwise quads of an ``nx x ny`` structured node grid.
+
+    Node ``(i, j)`` sits at index ``j * (nx + 1) + i``; each quad lists its four
+    corners counter-clockwise seen from above, so a plate mid-surface has its
+    outward normal on ``+z``.
+    """
+    if nx < 1 or ny < 1:
+        raise HandoffError("nx, ny >= 1 are required for a structured grid")
+    quads = []
+    for j in range(ny):
+        for i in range(nx):
+            a = j * (nx + 1) + i
+            quads.append((a, a + 1, a + 1 + (nx + 1), a + (nx + 1)))
+    return tuple(quads)
+
+
+def write_bundle_grid(
+    outdir: str | Path,
+    *,
+    xs: Sequence[float],
+    ys: Sequence[float],
+    case: str = "unnamed",
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Write ``grid.json`` (structured quad grid) plus ``handoff.json``.
+
+    The route exists because a plate or shell solver consumes a *2-D* mesh while
+    this module previously only handed out triangles (BEM) and tetrahedra
+    (FEM/FVM).  Nodes are written in the contract frame (``z = 0`` mid-surface,
+    counter-clockwise quads about ``+z``), so a consumer never re-derives
+    connectivity from spacing -- the same rule the other two routes follow.
+    """
+    if len(xs) < 2 or len(ys) < 2:
+        raise HandoffError("a structured grid needs at least 2 nodes per axis")
+    xs_f = [float(v) for v in xs]
+    ys_f = [float(v) for v in ys]
+    if any(b <= a for a, b in zip(xs_f, xs_f[1:])) or any(b <= a for a, b in zip(ys_f, ys_f[1:])):
+        raise HandoffError("grid coordinates must be strictly increasing on both axes")
+    nx, ny = len(xs_f) - 1, len(ys_f) - 1
+    vertices = tuple((x, y, 0.0) for y in ys_f for x in xs_f)
+    quads = grid_quads(nx, ny)
+    # A clockwise quad would face -z and a shell solver would assemble a
+    # negative-definite bending operator, so the winding is measured, not assumed.
+    area_z = sum(
+        (vertices[q[1]][0] - vertices[q[0]][0]) * (vertices[q[3]][1] - vertices[q[0]][1])
+        - (vertices[q[2]][0] - vertices[q[0]][0]) * (vertices[q[1]][1] - vertices[q[0]][1])
+        for q in quads
+    )
+    if not (area_z > 0.0):
+        raise HandoffError(f"quad winding gives a non-positive projected area ({area_z:.6g})")
+    area = sum(_quad_area(vertices, q) for q in quads)
+
+    out = Path(outdir)
+    out.mkdir(parents=True, exist_ok=True)
+    table = {
+        "vertices": [[float(c) for c in v] for v in vertices],
+        "quads": [[int(i) for i in q] for q in quads],
+        "axis": {"i": "+x", "j": "+y", "normal": "+z"},
+    }
+    (out / "grid.json").write_text(json.dumps(table) + "\n", encoding="utf-8")
+    handoff = {
+        "schema": BUNDLE_SCHEMA,
+        "case": case,
+        "frame": dict(COORDINATE_CONTRACT),
+        "solver_family": "surface (plate / shell FEM)",
+        "tables": {"grid_json": "grid.json"},
+        "counts": {"nodes": len(vertices), "quads": len(quads)},
+        "surface_area_m2": area,
+        "digest_sha256": _digest(vertices, quads),
+        "extra": dict(extra or {}),
+    }
+    (out / "handoff.json").write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n")
+    return handoff
+
+
+def write_bundle_lattice(
+    outdir: str | Path,
+    *,
+    shape: Sequence[int],
+    origin: Sequence[float],
+    spacing: Sequence[float],
+    fluid_cells: Sequence[Sequence[int]],
+    walls: dict[str, Any] | None = None,
+    case: str = "unnamed",
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Write ``lattice.json`` (cell-centred occupancy) plus ``handoff.json``.
+
+    This is the LBM / voxel-solver consumption surface: the CAD side says which
+    *cells* are fluid, where the box starts and how large a cell is; the solver
+    never sees the CAD representation.  Cells are ``(i, j, k)`` indices with
+    ``i`` along ``+x``, ``j`` along ``+y``, ``k`` along ``+z`` (the z-up contract
+    every route follows) and ``origin`` is the corner of cell ``(0, 0, 0)``.
+    """
+    dims = tuple(int(v) for v in shape)
+    if len(dims) != 3 or min(dims) < 1:
+        raise HandoffError(f"shape must be three positive cell counts, got {shape!r}")
+    org = tuple(float(v) for v in origin)
+    spacing_f = tuple(float(v) for v in spacing)
+    if len(org) != 3 or len(spacing_f) != 3:
+        raise HandoffError("origin and spacing must be three-vectors")
+    if min(spacing_f) <= 0.0:
+        raise HandoffError(f"spacing must be positive, got {spacing_f!r}")
+    cells = sorted({tuple(int(c) for c in cell) for cell in fluid_cells})
+    for cell in cells:
+        if len(cell) != 3 or any(not (0 <= cell[axis] < dims[axis]) for axis in range(3)):
+            raise HandoffError(f"cell {cell!r} lies outside the lattice {dims}")
+    volume = len(cells) * spacing_f[0] * spacing_f[1] * spacing_f[2]
+
+    out = Path(outdir)
+    out.mkdir(parents=True, exist_ok=True)
+    table = {
+        "shape": list(dims),
+        "origin": list(org),
+        "spacing": list(spacing_f),
+        "axis": {"i": "+x", "j": "+y", "k": "+z"},
+        "fluid_cells": [list(cell) for cell in cells],
+        "walls": dict(walls or {}),
+    }
+    (out / "lattice.json").write_text(json.dumps(table) + "\n", encoding="utf-8")
+    handoff = {
+        "schema": BUNDLE_SCHEMA,
+        "case": case,
+        "frame": dict(COORDINATE_CONTRACT),
+        "solver_family": "voxel (LBM / cut-cell FVM)",
+        "tables": {"lattice_json": "lattice.json"},
+        "counts": {"cells": dims[0] * dims[1] * dims[2], "fluid_cells": len(cells)},
+        "fluid_volume_m3": volume,
+        "digest_sha256": _digest((org, spacing_f), cells),
+        "extra": dict(extra or {}),
+    }
+    (out / "handoff.json").write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n")
+    return handoff
+
+
+def read_grid_table(path: str | Path) -> dict[str, Any]:
+    """Independent reader for ``grid.json``: nodes, quads and axis map."""
+    table = json.loads(Path(path).read_text(encoding="utf-8"))
+    vertices = [tuple(float(c) for c in v) for v in table["vertices"]]
+    quads = [tuple(int(i) for i in q) for q in table["quads"]]
+    if any(len(q) != 4 for q in quads):
+        raise HandoffError("every grid cell must be a quad")
+    if any(not (0 <= i < len(vertices)) for q in quads for i in q):
+        raise HandoffError("a grid quad references a node outside the table")
+    return {"vertices": vertices, "quads": quads, "axis": table.get("axis", {})}
+
+
+def read_lattice_table(path: str | Path) -> dict[str, Any]:
+    """Independent reader for ``lattice.json``."""
+    table = json.loads(Path(path).read_text(encoding="utf-8"))
+    dims = tuple(int(v) for v in table["shape"])
+    origin = tuple(float(v) for v in table["origin"])
+    spacing = tuple(float(v) for v in table["spacing"])
+    cells = [tuple(int(i) for i in cell) for cell in table["fluid_cells"]]
+    for cell in cells:
+        if any(not (0 <= cell[axis] < dims[axis]) for axis in range(3)):
+            raise HandoffError(f"lattice cell {cell!r} lies outside {dims}")
+    return {
+        "shape": dims,
+        "origin": origin,
+        "spacing": spacing,
+        "fluid_cells": cells,
+        "walls": table.get("walls", {}),
+        "axis": table.get("axis", {}),
+    }
+
+
 def read_gmsh_volume(path: str | Path) -> dict[str, Any]:
     """Independent gmsh 2.2 ASCII reader for the subset this module writes.
 
@@ -544,6 +725,52 @@ def verify_bundle(outdir: str | Path) -> dict[str, Any]:
                 "nodes": len(vertices),
                 "triangles": len(faces),
                 "signed_volume_m3": volume,
+                "digest_matches": True,
+            }
+        )
+    elif "grid_json" in manifest.get("tables", {}):
+        data = read_grid_table(out / "grid.json")
+        vertices, quads = data["vertices"], data["quads"]
+        digest = _digest(vertices, quads)
+        area = sum(_quad_area(vertices, quad) for quad in quads)
+        declared_area = float(manifest["surface_area_m2"])
+        if abs(area - declared_area) > 1e-12 * max(1.0, abs(declared_area)):
+            raise HandoffError(
+                f"re-read grid area {area:.12g} m2 disagrees with declared {declared_area:.12g} m2"
+            )
+        if digest != manifest["digest_sha256"]:
+            raise HandoffError("re-read grid digest differs from the declared digest")
+        if len(vertices) != manifest["counts"]["nodes"] or len(quads) != manifest["counts"]["quads"]:
+            raise HandoffError("re-read grid counts differ from the declared counts")
+        report.update(
+            {
+                "route": "grid",
+                "nodes": len(vertices),
+                "quads": len(quads),
+                "surface_area_m2": area,
+                "digest_matches": True,
+            }
+        )
+    elif "lattice_json" in manifest.get("tables", {}):
+        data = read_lattice_table(out / "lattice.json")
+        cells = data["fluid_cells"]
+        digest = _digest((tuple(data["origin"]), tuple(data["spacing"])), cells)
+        declared = float(manifest["fluid_volume_m3"])
+        volume = len(cells) * math.prod(data["spacing"])
+        if abs(volume - declared) > 1e-12 * max(1.0, abs(declared)):
+            raise HandoffError(
+                f"re-read lattice volume {volume:.12g} m3 disagrees with declared {declared:.12g} m3"
+            )
+        if digest != manifest["digest_sha256"]:
+            raise HandoffError("re-read lattice digest differs from the declared digest")
+        if len(cells) != manifest["counts"]["fluid_cells"]:
+            raise HandoffError("re-read fluid-cell count differs from the declared count")
+        report.update(
+            {
+                "route": "lattice",
+                "shape": list(data["shape"]),
+                "fluid_cells": len(cells),
+                "fluid_volume_m3": volume,
                 "digest_matches": True,
             }
         )
