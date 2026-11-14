@@ -1,0 +1,2795 @@
+{
+  "cases": [
+    {
+      "accepted_at": [
+        0.004,
+        0.008,
+        0.016,
+        0.032
+      ],
+      "analytic_flips": {
+        "buttocks": 0,
+        "stations": 0,
+        "waterlines": 0
+      },
+      "form": "wigley_iii",
+      "grid": {
+        "draft_m": 0.625,
+        "half_beam_m": 0.5,
+        "length_m": 10.0,
+        "n_stations": 21,
+        "n_waterlines": 17,
+        "waterline_exponent": 1.0
+      },
+      "name": "wigley_iii",
+      "settings": {
+        "iterations": 3,
+        "noise_amplitude_m": 0.002,
+        "noise_fraction_of_half_beam": 0.004,
+        "order": 2,
+        "seed": 20261114
+      },
+      "sweep": [
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 1,
+            "station_m": 0.5,
+            "waterline_index": 9,
+            "waterline_m": 0.3515625
+          },
+          "deviation_fraction_of_half_beam": 0.0038986354294277825,
+          "deviation_max_m": 0.0019493177147138913,
+          "flips_after": 19,
+          "flips_before": 140,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 17,
+              "before": 17
+            },
+            "waterlines": {
+              "after": 2,
+              "before": 2
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "0ae4ddee65b523475765ee41f498fdca1ea1737a1cd98d6b274a17751ebf6add",
+            "digest_before": "63f4d633bfe6875e89c48b5617a3a1fb72fc1bd770b8320cf19875431c4fd529",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.4442119800350925,
+              "lcb": 4.999363981903022,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6651483005589596,
+              "prismatic_coefficient": 0.6678390062213155,
+              "section_areas": [
+                0.0,
+                0.0786315770939168,
+                0.15013541122564025,
+                0.21243466518817636,
+                0.266618841102062,
+                0.31275258671936357,
+                0.3504489345681222,
+                0.3794803104512126,
+                0.4000520469954741,
+                0.41202363936893904,
+                0.4157176878493497,
+                0.41197859682245286,
+                0.40002933865981966,
+                0.3789862474252231,
+                0.34976383544825246,
+                0.3123284039564949,
+                0.26672840111685825,
+                0.212729769012744,
+                0.14994661882933383,
+                0.07842095889301261,
+                0.0
+              ],
+              "vcb": 0.3906871362114728,
+              "volume": 2.776324875219328,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "before": {
+              "block_coefficient": 0.444450350279241,
+              "lcb": 4.999243183117354,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6659382748086963,
+              "prismatic_coefficient": 0.6674047236688985,
+              "section_areas": [
+                0.0,
+                0.07935400519927754,
+                0.1506047856412018,
+                0.21249982859082797,
+                0.2666142111513412,
+                0.3128749474224212,
+                0.35043683609665593,
+                0.37941088045738686,
+                0.4000240413273466,
+                0.41201100526552253,
+                0.4162114217554352,
+                0.4118456154877233,
+                0.4003553378454336,
+                0.3789205784535533,
+                0.3498936731918891,
+                0.31227183835348965,
+                0.2667585623354223,
+                0.21294374503647273,
+                0.15019338881744956,
+                0.07904346052012202,
+                0.0
+              ],
+              "vcb": 0.390670537477245,
+              "volume": 2.777814689245256,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "relative_change": {
+              "lcb": 2.4163414589566873e-05,
+              "vcb": 4.248780656702397e-05,
+              "volume": -0.0005363259225665201,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 22,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0019487472325197264,
+              "directions": [
+                {
+                  "bending_energy_after": 551.6718439833991,
+                  "bending_energy_before": 615.5126940654349,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.8962802055951605,
+                  "flips_after": 2,
+                  "flips_before": 34,
+                  "flips_delta": -32
+                },
+                {
+                  "bending_energy_after": 44.55326792961085,
+                  "bending_energy_before": 76.8423924679177,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.5798006347630598,
+                  "flips_after": 17,
+                  "flips_before": 100,
+                  "flips_delta": -83
+                },
+                {
+                  "bending_energy_after": 241.14931831180306,
+                  "bending_energy_before": 287.0639075171577,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.840054468698367,
+                  "flips_after": 0,
+                  "flips_before": 6,
+                  "flips_delta": -6
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 1.715437896342879e-05,
+                "stations": 1.715437896342879e-05,
+                "waterlines": 1.715437896342879e-05
+              },
+              "total_flips_after": 19,
+              "total_flips_before": 140
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 22,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0019493177147138913,
+              "directions": [
+                {
+                  "bending_energy_after": 551.6119782914866,
+                  "bending_energy_before": 551.6718439833991,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9998914831478797,
+                  "flips_after": 2,
+                  "flips_before": 2,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 44.54033322781821,
+                  "bending_energy_before": 44.55326792961085,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9997096800662731,
+                  "flips_after": 17,
+                  "flips_before": 17,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 242.1642866179177,
+                  "bending_energy_before": 242.13102394459557,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.0001373746857394,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 1.715437896342879e-05,
+                "stations": 1.715437896342879e-05,
+                "waterlines": 1.715437896342879e-05
+              },
+              "total_flips_after": 19,
+              "total_flips_before": 19
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.0019307115269910496,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 1.035446074270656,
+            "reference": "wigley_iii analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.0006200124879637913,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 1.6576456491643412
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "wigley_iii (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.004,
+          "tolerance_m": 0.002,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 15,
+            "waterline_m": 0.5859375
+          },
+          "deviation_fraction_of_half_beam": 0.0077640616650107575,
+          "deviation_max_m": 0.0038820308325053787,
+          "flips_after": 7,
+          "flips_before": 140,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 5,
+              "before": 5
+            },
+            "waterlines": {
+              "after": 2,
+              "before": 2
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "fd18b35edaf3503740d44ab2598754b3d288cad75fc45882371aab9960ae4343",
+            "digest_before": "63f4d633bfe6875e89c48b5617a3a1fb72fc1bd770b8320cf19875431c4fd529",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.4435353128223756,
+              "lcb": 4.999429592432561,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6642145975421243,
+              "prismatic_coefficient": 0.6677590562803715,
+              "section_areas": [
+                0.0,
+                0.07739394854471697,
+                0.14888616161305146,
+                0.21194791042057132,
+                0.2664937441119899,
+                0.3126530724902303,
+                0.3503570638031244,
+                0.3794617232658842,
+                0.3999143061876264,
+                0.41163531059947234,
+                0.41513412346382766,
+                0.4115483886978254,
+                0.39971558298650894,
+                0.3789987174224663,
+                0.3498171162573837,
+                0.31233343243015166,
+                0.2665019583826928,
+                0.21206615320045535,
+                0.14881384821883833,
+                0.07728794812547508,
+                0.0
+              ],
+              "vcb": 0.39075155220543695,
+              "volume": 2.7720957051398476,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "before": {
+              "block_coefficient": 0.444450350279241,
+              "lcb": 4.999243183117354,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6659382748086963,
+              "prismatic_coefficient": 0.6674047236688985,
+              "section_areas": [
+                0.0,
+                0.07935400519927754,
+                0.1506047856412018,
+                0.21249982859082797,
+                0.2666142111513412,
+                0.3128749474224212,
+                0.35043683609665593,
+                0.37941088045738686,
+                0.4000240413273466,
+                0.41201100526552253,
+                0.4162114217554352,
+                0.4118456154877233,
+                0.4003553378454336,
+                0.3789205784535533,
+                0.3498936731918891,
+                0.31227183835348965,
+                0.2667585623354223,
+                0.21294374503647273,
+                0.15019338881744956,
+                0.07904346052012202,
+                0.0
+              ],
+              "vcb": 0.390670537477245,
+              "volume": 2.777814689245256,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "relative_change": {
+              "lcb": 3.728750700433435e-05,
+              "vcb": 0.00020737352940688634,
+              "volume": -0.002058806920256614,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 45,
+              "contraction": 1.0,
+              "deviation_max_m": 0.003888689514565724,
+              "directions": [
+                {
+                  "bending_energy_after": 535.3106123449021,
+                  "bending_energy_before": 615.5126940654349,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.8696987365267782,
+                  "flips_after": 2,
+                  "flips_before": 34,
+                  "flips_delta": -32
+                },
+                {
+                  "bending_energy_after": 39.27392797335863,
+                  "bending_energy_before": 76.8423924679177,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.5110971523922268,
+                  "flips_after": 6,
+                  "flips_before": 100,
+                  "flips_delta": -94
+                },
+                {
+                  "bending_energy_after": 230.58076712487136,
+                  "bending_energy_before": 287.0639075171577,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.8032384465159196,
+                  "flips_after": 0,
+                  "flips_before": 6,
+                  "flips_delta": -6
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 8.429100850284559e-05,
+                "stations": 8.429100850284559e-05,
+                "waterlines": 8.429100850284559e-05
+              },
+              "total_flips_after": 8,
+              "total_flips_before": 140
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 44,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0038861439331678294,
+              "directions": [
+                {
+                  "bending_energy_after": 535.6453432779273,
+                  "bending_energy_before": 535.3106123449021,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 1.000625302255001,
+                  "flips_after": 2,
+                  "flips_before": 2,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 39.325930282943496,
+                  "bending_energy_before": 39.27392797335863,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.001324092400947,
+                  "flips_after": 5,
+                  "flips_before": 6,
+                  "flips_delta": -1
+                },
+                {
+                  "bending_energy_after": 234.26327938603842,
+                  "bending_energy_before": 233.85520958534656,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.0017449677576797,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 7.98626560971533e-05,
+                "stations": 7.98626560971533e-05,
+                "waterlines": 7.98626560971533e-05
+              },
+              "total_flips_after": 7,
+              "total_flips_before": 8
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 44,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0038820308325053787,
+              "directions": [
+                {
+                  "bending_energy_after": 535.6526695104492,
+                  "bending_energy_before": 535.6453432779273,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 1.0000136773942196,
+                  "flips_after": 2,
+                  "flips_before": 2,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 39.32793870038318,
+                  "bending_energy_before": 39.325930282943496,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.000051071072578,
+                  "flips_after": 5,
+                  "flips_before": 5,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 234.086003418099,
+                  "bending_energy_before": 234.07433463734444,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.0000498507483644,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 3,
+              "penalty": {
+                "buttocks": 7.98626560971533e-05,
+                "stations": 7.98626560971533e-05,
+                "waterlines": 7.98626560971533e-05
+              },
+              "total_flips_after": 7,
+              "total_flips_before": 7
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.002918139869896988,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.6850760279844149,
+            "reference": "wigley_iii analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.0008517412237934187,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 1.2066587531402733
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "wigley_iii (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.008,
+          "tolerance_m": 0.004,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 15,
+            "waterline_m": 0.5859375
+          },
+          "deviation_fraction_of_half_beam": 0.015668027328875844,
+          "deviation_max_m": 0.007834013664437922,
+          "flips_after": 13,
+          "flips_before": 140,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 11,
+              "before": 11
+            },
+            "waterlines": {
+              "after": 2,
+              "before": 2
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "34a4bdb40f8c7c17e3333cb49d8ce0bcc8ef7ce9a9acaf2365684556a7815d76",
+            "digest_before": "63f4d633bfe6875e89c48b5617a3a1fb72fc1bd770b8320cf19875431c4fd529",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.44028160046960385,
+              "lcb": 4.999494674074273,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.660945605508872,
+              "prismatic_coefficient": 0.6661389330679103,
+              "section_areas": [
+                0.0,
+                0.07457141918522993,
+                0.14494500341574665,
+                0.20858222959288003,
+                0.26420611422299284,
+                0.31122373165689265,
+                0.34935720069688136,
+                0.37845787037547063,
+                0.39850056651120913,
+                0.4097277698613436,
+                0.413091003443045,
+                0.40963267322205194,
+                0.3983059902952665,
+                0.3781655459528501,
+                0.34904576840978024,
+                0.31099250593007466,
+                0.2640917141371128,
+                0.2085344416835712,
+                0.14489338622747677,
+                0.07453344326241627,
+                0.0
+              ],
+              "vcb": 0.391174328216218,
+              "volume": 2.751760002935024,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "before": {
+              "block_coefficient": 0.444450350279241,
+              "lcb": 4.999243183117354,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6659382748086963,
+              "prismatic_coefficient": 0.6674047236688985,
+              "section_areas": [
+                0.0,
+                0.07935400519927754,
+                0.1506047856412018,
+                0.21249982859082797,
+                0.2666142111513412,
+                0.3128749474224212,
+                0.35043683609665593,
+                0.37941088045738686,
+                0.4000240413273466,
+                0.41201100526552253,
+                0.4162114217554352,
+                0.4118456154877233,
+                0.4003553378454336,
+                0.3789205784535533,
+                0.3498936731918891,
+                0.31227183835348965,
+                0.2667585623354223,
+                0.21294374503647273,
+                0.15019338881744956,
+                0.07904346052012202,
+                0.0
+              ],
+              "vcb": 0.390670537477245,
+              "volume": 2.777814689245256,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "relative_change": {
+              "lcb": 5.030580584045511e-05,
+              "vcb": 0.00128955396080346,
+              "volume": -0.009379562434854561,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 106,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0077783815778399434,
+              "directions": [
+                {
+                  "bending_energy_after": 515.3517797463713,
+                  "bending_energy_before": 615.5126940654349,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.8372723823817426,
+                  "flips_after": 2,
+                  "flips_before": 34,
+                  "flips_delta": -32
+                },
+                {
+                  "bending_energy_after": 36.4222690548197,
+                  "bending_energy_before": 76.8423924679177,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.4739866613344487,
+                  "flips_after": 11,
+                  "flips_before": 100,
+                  "flips_delta": -89
+                },
+                {
+                  "bending_energy_after": 214.42859575594082,
+                  "bending_energy_before": 287.0639075171577,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.746971632938998,
+                  "flips_after": 0,
+                  "flips_before": 6,
+                  "flips_delta": -6
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 0.0005725487884358379,
+                "stations": 0.0005725487884358379,
+                "waterlines": 0.0005725487884358379
+              },
+              "total_flips_after": 13,
+              "total_flips_before": 140
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 104,
+              "contraction": 1.0,
+              "deviation_max_m": 0.007834013664437922,
+              "directions": [
+                {
+                  "bending_energy_after": 516.0574632031867,
+                  "bending_energy_before": 515.3517797463713,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 1.001369323798906,
+                  "flips_after": 2,
+                  "flips_before": 2,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 36.58289267134586,
+                  "bending_energy_before": 36.4222690548197,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0044100387124262,
+                  "flips_after": 11,
+                  "flips_before": 11,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 224.14231188372088,
+                  "bending_energy_before": 223.93582095473025,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.0009220986982355,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 0.0005280271456481317,
+                "stations": 0.0005280271456481317,
+                "waterlines": 0.0005280271456481317
+              },
+              "total_flips_after": 13,
+              "total_flips_before": 13
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.007929849100767938,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.2521041252825839,
+            "reference": "wigley_iii analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.002661019808491439,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 0.3862282422028967
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "wigley_iii (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.016,
+          "tolerance_m": 0.008,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 13,
+            "waterline_m": 0.5078125
+          },
+          "deviation_fraction_of_half_beam": 0.030923202256418203,
+          "deviation_max_m": 0.015461601128209101,
+          "flips_after": 19,
+          "flips_before": 140,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 15,
+              "before": 13
+            },
+            "waterlines": {
+              "after": 4,
+              "before": 4
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "f0519a1e1859dcba6ca9982843a6ac568339e42ab1c5a6c61da15a9351c4ab56",
+            "digest_before": "63f4d633bfe6875e89c48b5617a3a1fb72fc1bd770b8320cf19875431c4fd529",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.430799846212087,
+              "lcb": 4.999703044260785,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6512005755858591,
+              "prismatic_coefficient": 0.661547090655615,
+              "section_areas": [
+                0.0,
+                0.07104808260987944,
+                0.13888987765413974,
+                0.20133168766923654,
+                0.25677868608780124,
+                0.3041724427892882,
+                0.34278927584817387,
+                0.37221442903315044,
+                0.3924093738366001,
+                0.4037008916190267,
+                0.40700035974116194,
+                0.4036642664781888,
+                0.3923529746434131,
+                0.37208750518243844,
+                0.342602943076314,
+                0.3040158202761941,
+                0.2566882534496535,
+                0.20128357516473178,
+                0.13886922561679285,
+                0.07103937243915537,
+                0.0
+              ],
+              "vcb": 0.3924827125367964,
+              "volume": 2.692499038825544,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "before": {
+              "block_coefficient": 0.444450350279241,
+              "lcb": 4.999243183117354,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.6659382748086963,
+              "prismatic_coefficient": 0.6674047236688985,
+              "section_areas": [
+                0.0,
+                0.07935400519927754,
+                0.1506047856412018,
+                0.21249982859082797,
+                0.2666142111513412,
+                0.3128749474224212,
+                0.35043683609665593,
+                0.37941088045738686,
+                0.4000240413273466,
+                0.41201100526552253,
+                0.4162114217554352,
+                0.4118456154877233,
+                0.4003553378454336,
+                0.3789205784535533,
+                0.3498936731918891,
+                0.31227183835348965,
+                0.2667585623354223,
+                0.21294374503647273,
+                0.15019338881744956,
+                0.07904346052012202,
+                0.0
+              ],
+              "vcb": 0.390670537477245,
+              "volume": 2.777814689245256,
+              "waterplane_area": 6.666666666666666,
+              "waterplane_coefficient": 0.6666666666666666
+            },
+            "relative_change": {
+              "lcb": 9.198615202067399e-05,
+              "vcb": 0.00463862740009398,
+              "volume": -0.03071322602980869,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 169,
+              "contraction": 1.0,
+              "deviation_max_m": 0.015461601128209101,
+              "directions": [
+                {
+                  "bending_energy_after": 491.89432880722234,
+                  "bending_energy_before": 615.5126940654349,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.7991619564468792,
+                  "flips_after": 4,
+                  "flips_before": 34,
+                  "flips_delta": -30
+                },
+                {
+                  "bending_energy_after": 31.569461919236083,
+                  "bending_energy_before": 76.8423924679177,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.41083392780120137,
+                  "flips_after": 13,
+                  "flips_before": 100,
+                  "flips_delta": -87
+                },
+                {
+                  "bending_energy_after": 196.32443371394527,
+                  "bending_energy_before": 287.0639075171577,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.6839049722829089,
+                  "flips_after": 0,
+                  "flips_before": 6,
+                  "flips_delta": -6
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 0.0024582440689201973,
+                "stations": 0.0024582440689201973,
+                "waterlines": 0.0024582440689201973
+              },
+              "total_flips_after": 17,
+              "total_flips_before": 140
+            },
+            {
+              "accepted": false,
+              "cg_iterations": 165,
+              "contraction": 1.0,
+              "deviation_max_m": 0.01561737017316589,
+              "directions": [
+                {
+                  "bending_energy_after": 492.7242782794845,
+                  "bending_energy_before": 491.89432880722234,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 1.0016872515572088,
+                  "flips_after": 4,
+                  "flips_before": 4,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 31.92993858365142,
+                  "bending_energy_before": 31.569461919236083,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0114185241844649,
+                  "flips_after": 15,
+                  "flips_before": 13,
+                  "flips_delta": 2
+                },
+                {
+                  "bending_energy_after": 210.69108498770643,
+                  "bending_energy_before": 212.7624986380614,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9902641975742222,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 0.002392799173428138,
+                "stations": 0.002392799173428138,
+                "waterlines": 0.002392799173428138
+              },
+              "total_flips_after": 19,
+              "total_flips_before": 17
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.01644950566872594,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.12153238592286679,
+            "reference": "wigley_iii analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.007261515577452633,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 0.14153532993745635
+          },
+          "rejected_steps": 1,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "wigley_iii (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.032,
+          "tolerance_m": 0.016,
+          "within_tolerance": true
+        }
+      ],
+      "unfair_flips": {
+        "buttocks": 6,
+        "stations": 100,
+        "waterlines": 34
+      }
+    },
+    {
+      "accepted_at": [
+        0.004,
+        0.008,
+        0.016,
+        0.032
+      ],
+      "analytic_flips": {
+        "buttocks": 0,
+        "stations": 0,
+        "waterlines": 0
+      },
+      "form": "series60_cb060",
+      "grid": {
+        "draft_m": 0.625,
+        "half_beam_m": 0.5,
+        "length_m": 10.0,
+        "n_stations": 21,
+        "n_waterlines": 17,
+        "waterline_exponent": 1.0
+      },
+      "name": "series60_cb060",
+      "settings": {
+        "iterations": 3,
+        "noise_amplitude_m": 0.002,
+        "noise_fraction_of_half_beam": 0.004,
+        "order": 2,
+        "seed": 20261114
+      },
+      "sweep": [
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 1,
+            "waterline_m": 0.0390625
+          },
+          "deviation_fraction_of_half_beam": 0.003907314346655588,
+          "deviation_max_m": 0.001953657173327794,
+          "flips_after": 174,
+          "flips_before": 180,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 174,
+              "before": 174
+            },
+            "waterlines": {
+              "after": 0,
+              "before": 0
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "57dd0504d468a40fffbd8c75a0549a14ec81bd6357a876232d11bcad10212d6b",
+            "digest_before": "d3e566359749b78672019d6583673204d9d4e7703cbf8acc25885e65c1955bc6",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.5894107417662838,
+              "lcb": 4.9994425625377925,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9419405719942459,
+              "prismatic_coefficient": 0.6257409005309141,
+              "section_areas": [
+                0.0,
+                0.09507505043495368,
+                0.18364193771872359,
+                0.2641206676013346,
+                0.33778726691943084,
+                0.4041308988072547,
+                0.46189030840113354,
+                0.510429308606526,
+                0.5491564792718927,
+                0.5763632698814496,
+                0.5887128574964037,
+                0.5762095923559764,
+                0.5494533633513018,
+                0.5099505124047673,
+                0.46130821498954167,
+                0.4035494716270671,
+                0.3379270890879737,
+                0.26456522136151706,
+                0.1832413950547805,
+                0.09477225483247356,
+                0.0
+              ],
+              "vcb": 0.3246372318599851,
+              "volume": 3.683817136039274,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "before": {
+              "block_coefficient": 0.5895475330734734,
+              "lcb": 4.999429447992368,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9425745074169661,
+              "prismatic_coefficient": 0.6254651790754147,
+              "section_areas": [
+                0.0,
+                0.09513503399903842,
+                0.18371219980692213,
+                0.2642063177919722,
+                0.3378697740412284,
+                0.4042381377156071,
+                0.4619752477646443,
+                0.5105462366453335,
+                0.5492627216694187,
+                0.576373539253573,
+                0.5891090671356038,
+                0.5762081494757736,
+                0.5495940181875058,
+                0.5100559346415,
+                0.4614320848598774,
+                0.40363502864667555,
+                0.33801412522530944,
+                0.26465023423761697,
+                0.18330080298316992,
+                0.09482448931988302,
+                0.0
+              ],
+              "vcb": 0.3245637949764249,
+              "volume": 3.684672081709209,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "relative_change": {
+              "lcb": 2.6232084203144624e-06,
+              "vcb": 0.00022626332541354915,
+              "volume": -0.00023202761357764433,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 6,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0019539725370023575,
+              "directions": [
+                {
+                  "bending_energy_after": 823.7893921449567,
+                  "bending_energy_before": 837.0954010818049,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9841045489920833,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 28933.617727687364,
+                  "bending_energy_before": 29529.8555702132,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9798089820958263,
+                  "flips_after": 174,
+                  "flips_before": 180,
+                  "flips_delta": -6
+                },
+                {
+                  "bending_energy_after": 1671.9029038310914,
+                  "bending_energy_before": 1706.9350154826325,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9794765990891365,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 5.002864610575233e-07,
+                "stations": 5.002864610575233e-07,
+                "waterlines": 5.002864610575233e-07
+              },
+              "total_flips_after": 174,
+              "total_flips_before": 180
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 6,
+              "contraction": 1.0,
+              "deviation_max_m": 0.001953657173327794,
+              "directions": [
+                {
+                  "bending_energy_after": 823.759997751381,
+                  "bending_energy_before": 823.7893921449567,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9999643180722452,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 28933.769562622423,
+                  "bending_energy_before": 28933.617727687364,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0000052476996306,
+                  "flips_after": 174,
+                  "flips_before": 174,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 1664.7039198264486,
+                  "bending_energy_before": 1664.7128957849745,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.999994608104167,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 5.002864610575233e-07,
+                "stations": 5.002864610575233e-07,
+                "waterlines": 5.002864610575233e-07
+              },
+              "total_flips_after": 174,
+              "total_flips_before": 174
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.003343027513669883,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.5980051504204873,
+            "reference": "series60_cb060 analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.0010369268435179036,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 0.9911605717660176
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "series60_cb060 (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.004,
+          "tolerance_m": 0.002,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 1,
+            "waterline_m": 0.0390625
+          },
+          "deviation_fraction_of_half_beam": 0.007585284228037503,
+          "deviation_max_m": 0.0037926421140187516,
+          "flips_after": 172,
+          "flips_before": 180,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 172,
+              "before": 172
+            },
+            "waterlines": {
+              "after": 0,
+              "before": 0
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "2d882580049ff3d968f1d78960f9fa0fb0c877e11e6c274e26ae8acf81e99890",
+            "digest_before": "d3e566359749b78672019d6583673204d9d4e7703cbf8acc25885e65c1955bc6",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.5892796338039545,
+              "lcb": 4.999452338608743,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9413645016304159,
+              "prismatic_coefficient": 0.6259845498564471,
+              "section_areas": [
+                0.0,
+                0.09501988089719793,
+                0.18357390026591444,
+                0.26404185939693603,
+                0.33770772857140996,
+                0.4040315197990782,
+                0.46180579827039875,
+                0.5103204087047696,
+                0.5490587897117946,
+                0.5763392951591004,
+                0.5883528135190099,
+                0.5761952095198026,
+                0.5493270061717074,
+                0.5098486805289966,
+                0.4611932001156381,
+                0.4034668417362488,
+                0.33784505715659213,
+                0.26448513479942515,
+                0.18318431273879748,
+                0.09472343310988775,
+                0.0
+              ],
+              "vcb": 0.32470728153400547,
+              "volume": 3.682997711274716,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "before": {
+              "block_coefficient": 0.5895475330734734,
+              "lcb": 4.999429447992368,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9425745074169661,
+              "prismatic_coefficient": 0.6254651790754147,
+              "section_areas": [
+                0.0,
+                0.09513503399903842,
+                0.18371219980692213,
+                0.2642063177919722,
+                0.3378697740412284,
+                0.4042381377156071,
+                0.4619752477646443,
+                0.5105462366453335,
+                0.5492627216694187,
+                0.576373539253573,
+                0.5891090671356038,
+                0.5762081494757736,
+                0.5495940181875058,
+                0.5100559346415,
+                0.4614320848598774,
+                0.40363502864667555,
+                0.33801412522530944,
+                0.26465023423761697,
+                0.18330080298316992,
+                0.09482448931988302,
+                0.0
+              ],
+              "vcb": 0.3245637949764249,
+              "volume": 3.684672081709209,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "relative_change": {
+              "lcb": 4.57864574607207e-06,
+              "vcb": 0.00044209046049324636,
+              "volume": -0.0004544150462682598,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 7,
+              "contraction": 1.0,
+              "deviation_max_m": 0.003793855700017612,
+              "directions": [
+                {
+                  "bending_energy_after": 813.5628483361396,
+                  "bending_energy_before": 837.0954010818049,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9718878484874562,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 28377.74140617153,
+                  "bending_energy_before": 29529.8555702132,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9609847680662615,
+                  "flips_after": 172,
+                  "flips_before": 180,
+                  "flips_delta": -8
+                },
+                {
+                  "bending_energy_after": 1643.6101140849532,
+                  "bending_energy_before": 1706.9350154826325,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9629013988093892,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 9.955128609158502e-07,
+                "stations": 9.955128609158502e-07,
+                "waterlines": 9.955128609158502e-07
+              },
+              "total_flips_after": 172,
+              "total_flips_before": 180
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 7,
+              "contraction": 1.0,
+              "deviation_max_m": 0.0037926421140187516,
+              "directions": [
+                {
+                  "bending_energy_after": 813.4766292169382,
+                  "bending_energy_before": 813.5628483361396,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9998940227919974,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 28378.12394595913,
+                  "bending_energy_before": 28377.74140617153,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0000134802760419,
+                  "flips_after": 172,
+                  "flips_before": 172,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 1629.7142293513577,
+                  "bending_energy_before": 1629.741762728598,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.999983105680992,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 9.955128609158502e-07,
+                "stations": 9.955128609158502e-07,
+                "waterlines": 9.955128609158502e-07
+              },
+              "total_flips_after": 172,
+              "total_flips_before": 172
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.004808893270045855,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.4157188689598268,
+            "reference": "series60_cb060 analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.001142934716385592,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 0.8992298408354596
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "series60_cb060 (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.008,
+          "tolerance_m": 0.004,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 1,
+            "waterline_m": 0.0390625
+          },
+          "deviation_fraction_of_half_beam": 0.01556308117165417,
+          "deviation_max_m": 0.007781540585827085,
+          "flips_after": 168,
+          "flips_before": 180,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 168,
+              "before": 168
+            },
+            "waterlines": {
+              "after": 0,
+              "before": 0
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "ed53367ac27007492f7ca840d12b8d265983063a439de461fdc67b5c21a16f3b",
+            "digest_before": "d3e566359749b78672019d6583673204d9d4e7703cbf8acc25885e65c1955bc6",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.5889892491876112,
+              "lcb": 4.99946758348633,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9401786971342847,
+              "prismatic_coefficient": 0.6264652145202632,
+              "section_areas": [
+                0.0,
+                0.09490361815505839,
+                0.1834225260608558,
+                0.26387576861934153,
+                0.3375317325337012,
+                0.4038196587648228,
+                0.46161128600651785,
+                0.5100878520772218,
+                0.5488536721638299,
+                0.5762454287844424,
+                0.587611685708928,
+                0.5761188044583283,
+                0.549069024838426,
+                0.5096230848140938,
+                0.4609483109101368,
+                0.4032827554415913,
+                0.3376670608313413,
+                0.26431207104352367,
+                0.18305767312002452,
+                0.09461868288855024,
+                0.0
+              ],
+              "vcb": 0.32486144929879834,
+              "volume": 3.68118280742257,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "before": {
+              "block_coefficient": 0.5895475330734734,
+              "lcb": 4.999429447992368,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9425745074169661,
+              "prismatic_coefficient": 0.6254651790754147,
+              "section_areas": [
+                0.0,
+                0.09513503399903842,
+                0.18371219980692213,
+                0.2642063177919722,
+                0.3378697740412284,
+                0.4042381377156071,
+                0.4619752477646443,
+                0.5105462366453335,
+                0.5492627216694187,
+                0.576373539253573,
+                0.5891090671356038,
+                0.5762081494757736,
+                0.5495940181875058,
+                0.5100559346415,
+                0.4614320848598774,
+                0.40363502864667555,
+                0.33801412522530944,
+                0.26465023423761697,
+                0.18330080298316992,
+                0.09482448931988302,
+                0.0
+              ],
+              "vcb": 0.3245637949764249,
+              "volume": 3.684672081709209,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "relative_change": {
+              "lcb": 7.627969222992986e-06,
+              "vcb": 0.0009170903439647737,
+              "volume": -0.0009469700991738414,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 9,
+              "contraction": 1.0,
+              "deviation_max_m": 0.007784907252871065,
+              "directions": [
+                {
+                  "bending_energy_after": 796.9596694162566,
+                  "bending_energy_before": 837.0954010818049,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9520535752392384,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 27197.39071133422,
+                  "bending_energy_before": 29529.8555702132,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9210133333252148,
+                  "flips_after": 168,
+                  "flips_before": 180,
+                  "flips_delta": -12
+                },
+                {
+                  "bending_energy_after": 1595.625470820014,
+                  "bending_energy_before": 1706.9350154826325,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9347898170387313,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 2.1479850285170085e-06,
+                "stations": 2.1479850285170085e-06,
+                "waterlines": 2.1479850285170085e-06
+              },
+              "total_flips_after": 168,
+              "total_flips_before": 180
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 9,
+              "contraction": 1.0,
+              "deviation_max_m": 0.007781540585827085,
+              "directions": [
+                {
+                  "bending_energy_after": 796.7569963804781,
+                  "bending_energy_before": 796.9596694162566,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9997456922306659,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 27197.384747606884,
+                  "bending_energy_before": 27197.39071133422,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9999997807242834,
+                  "flips_after": 168,
+                  "flips_before": 168,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 1567.1715347380937,
+                  "bending_energy_before": 1567.1840987216092,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9999919830838472,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 2.1479850285170085e-06,
+                "stations": 2.1479850285170085e-06,
+                "waterlines": 2.1479850285170085e-06
+              },
+              "total_flips_after": 168,
+              "total_flips_before": 168
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.008139083110004497,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.24562320400864923,
+            "reference": "series60_cb060 analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.0015868724916831103,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 0.6476645152570806
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "series60_cb060 (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.016,
+          "tolerance_m": 0.008,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 10,
+            "station_m": 5.0,
+            "waterline_index": 1,
+            "waterline_m": 0.0390625
+          },
+          "deviation_fraction_of_half_beam": 0.030757672299484562,
+          "deviation_max_m": 0.015378836149742281,
+          "flips_after": 168,
+          "flips_before": 180,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 0,
+              "before": 0
+            },
+            "stations": {
+              "after": 168,
+              "before": 166
+            },
+            "waterlines": {
+              "after": 0,
+              "before": 0
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "410b8e88cfa38b93ee181305e3cae2fd5ab3c4da189b982b8436da6cd7cd4196",
+            "digest_before": "d3e566359749b78672019d6583673204d9d4e7703cbf8acc25885e65c1955bc6",
+            "draft_m": 0.625,
+            "half_beam_m": 0.5,
+            "length_m": 10.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.5884179369367653,
+              "lcb": 4.999483513488554,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9382020650695843,
+              "prismatic_coefficient": 0.6271761263850167,
+              "section_areas": [
+                0.0,
+                0.09469233839963667,
+                0.18312605354149114,
+                0.26356566742145937,
+                0.33718562313475525,
+                0.40342068328467245,
+                0.46121393718930537,
+                0.5096544031566771,
+                0.5484816889403717,
+                0.5759320309708282,
+                0.5863762906684902,
+                0.57583055768722,
+                0.5486180232338865,
+                0.5091887287203184,
+                0.4604937769148096,
+                0.402916059332545,
+                0.3373243878981546,
+                0.2639804053907923,
+                0.18280690352318732,
+                0.09442394189579975,
+                0.0
+              ],
+              "vcb": 0.32516080757257104,
+              "volume": 3.677612105854783,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "before": {
+              "block_coefficient": 0.5895475330734734,
+              "lcb": 4.999429447992368,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.9425745074169661,
+              "prismatic_coefficient": 0.6254651790754147,
+              "section_areas": [
+                0.0,
+                0.09513503399903842,
+                0.18371219980692213,
+                0.2642063177919722,
+                0.3378697740412284,
+                0.4042381377156071,
+                0.4619752477646443,
+                0.5105462366453335,
+                0.5492627216694187,
+                0.576373539253573,
+                0.5891090671356038,
+                0.5762081494757736,
+                0.5495940181875058,
+                0.5100559346415,
+                0.4614320848598774,
+                0.40363502864667555,
+                0.33801412522530944,
+                0.26465023423761697,
+                0.18330080298316992,
+                0.09482448931988302,
+                0.0
+              ],
+              "vcb": 0.3245637949764249,
+              "volume": 3.684672081709209,
+              "waterplane_area": 6.249759517243338,
+              "waterplane_coefficient": 0.6249759517243338
+            },
+            "relative_change": {
+              "lcb": 1.0814333265072457e-05,
+              "vcb": 0.0018394306616654674,
+              "volume": -0.001916039120406929,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 12,
+              "contraction": 1.0,
+              "deviation_max_m": 0.015378836149742281,
+              "directions": [
+                {
+                  "bending_energy_after": 778.1377748764063,
+                  "bending_energy_before": 837.0954010818049,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9295688088487815,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 25067.72088720985,
+                  "bending_energy_before": 29529.8555702132,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.8488941243754571,
+                  "flips_after": 166,
+                  "flips_before": 180,
+                  "flips_delta": -14
+                },
+                {
+                  "bending_energy_after": 1542.7877655192076,
+                  "bending_energy_before": 1706.9350154826325,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9038350912749818,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 4.634635938794986e-06,
+                "stations": 4.634635938794986e-06,
+                "waterlines": 4.634635938794986e-06
+              },
+              "total_flips_after": 166,
+              "total_flips_before": 180
+            },
+            {
+              "accepted": false,
+              "cg_iterations": 12,
+              "contraction": 1.0,
+              "deviation_max_m": 0.015390860498026515,
+              "directions": [
+                {
+                  "bending_energy_after": 777.9270904619518,
+                  "bending_energy_before": 778.1377748764063,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9997292453582685,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 25058.388894213615,
+                  "bending_energy_before": 25067.72088720985,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9996277287018543,
+                  "flips_after": 168,
+                  "flips_before": 166,
+                  "flips_delta": 2
+                },
+                {
+                  "bending_energy_after": 1484.600794693945,
+                  "bending_energy_before": 1483.6859774638635,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.0006165841316674,
+                  "flips_after": 0,
+                  "flips_before": 0,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 4.634635938794986e-06,
+                "stations": 4.634635938794986e-06,
+                "waterlines": 4.634635938794986e-06
+              },
+              "total_flips_after": 168,
+              "total_flips_before": 166
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.015334024058461126,
+            "max_before_m": 0.0019991476711719858,
+            "max_improvement": 0.13037332298098753,
+            "reference": "series60_cb060 analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.0027313954900918948,
+            "rms_before_m": 0.0010277610031007372,
+            "rms_improvement": 0.37627689099909856
+          },
+          "rejected_steps": 1,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "series60_cb060 (+-0.002 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.032,
+          "tolerance_m": 0.016,
+          "within_tolerance": true
+        }
+      ],
+      "unfair_flips": {
+        "buttocks": 0,
+        "stations": 180,
+        "waterlines": 0
+      }
+    },
+    {
+      "accepted_at": [
+        0.016,
+        0.032
+      ],
+      "analytic_flips": {
+        "buttocks": 0,
+        "stations": 0,
+        "waterlines": 0
+      },
+      "form": "kvlcc2_class",
+      "grid": {
+        "draft_m": 20.8,
+        "half_beam_m": 29.0,
+        "length_m": 320.0,
+        "n_stations": 21,
+        "n_waterlines": 17,
+        "waterline_exponent": 1.0
+      },
+      "name": "kvlcc2_class",
+      "settings": {
+        "iterations": 3,
+        "noise_amplitude_m": 0.116,
+        "noise_fraction_of_half_beam": 0.004,
+        "order": 2,
+        "seed": 20261114
+      },
+      "sweep": [
+        {
+          "accepted": false,
+          "deviation_argmax": {
+            "station_index": 1,
+            "station_m": 16.0,
+            "waterline_index": 1,
+            "waterline_m": 1.3
+          },
+          "deviation_fraction_of_half_beam": 0.0038555401272036788,
+          "deviation_max_m": 0.11181066368890669,
+          "flips_after": 302,
+          "flips_before": 302,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 40,
+              "before": 40
+            },
+            "stations": {
+              "after": 160,
+              "before": 162
+            },
+            "waterlines": {
+              "after": 102,
+              "before": 100
+            }
+          },
+          "flips_reduced": false,
+          "grid": {
+            "digest_after": "6c40576bc8b0f35645ba907aa20889598c70553beb20ec4c019489fd119080a6",
+            "digest_before": "b59755a608c0cde01c0d53b9520a3fcfbf96be08ae9d9b3dbef627fbeaf91136",
+            "draft_m": 20.8,
+            "half_beam_m": 29.0,
+            "length_m": 320.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.7958742118002243,
+              "lcb": 149.43701545360577,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.897510099056103,
+              "prismatic_coefficient": 0.8867579458295036,
+              "section_areas": [
+                0.0,
+                1029.0717232208192,
+                1082.4690843552276,
+                1081.9453236955349,
+                1081.8111727398998,
+                1082.62518353113,
+                1082.7561835012827,
+                1082.380084354684,
+                1081.9535555357097,
+                1080.9728617897163,
+                1081.0191080854563,
+                1080.6280493664544,
+                1081.664027564732,
+                1076.03885648851,
+                1062.5211863503282,
+                1030.2787425457163,
+                967.8608542041441,
+                857.6292270591354,
+                677.0638041878975,
+                401.01019642282205,
+                0.0
+              ],
+              "vcb": 11.04585655659502,
+              "volume": 307245.647717053,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "before": {
+              "block_coefficient": 0.796032503991707,
+              "lcb": 149.42158378196393,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8975604872025666,
+              "prismatic_coefficient": 0.8868845223709739,
+              "section_areas": [
+                0.0,
+                1031.5503832001164,
+                1081.4791979651966,
+                1081.9390126072028,
+                1081.8721295445737,
+                1082.6975098000107,
+                1082.8169717611765,
+                1082.445164484392,
+                1082.0201787886906,
+                1081.0298960607154,
+                1081.0950413195378,
+                1080.66770067514,
+                1081.7520559830527,
+                1076.0923053947602,
+                1062.5908769390726,
+                1030.3277258393437,
+                967.9128341264097,
+                857.6868725948324,
+                677.1236327236683,
+                401.23616200172927,
+                0.0
+              ],
+              "vcb": 11.045109714975371,
+              "volume": 307306.7561009905,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "relative_change": {
+              "lcb": 0.00010327605457825232,
+              "vcb": 6.76174016302901e-05,
+              "volume": -0.00019885141710787477,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 5,
+              "contraction": 1.0,
+              "deviation_max_m": 0.1118106636889068,
+              "directions": [
+                {
+                  "bending_energy_after": 92091.66127500983,
+                  "bending_energy_before": 93053.0295206053,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9896685981042391,
+                  "flips_after": 102,
+                  "flips_before": 100,
+                  "flips_delta": 2
+                },
+                {
+                  "bending_energy_after": 33734.51345156489,
+                  "bending_energy_before": 33959.33971470312,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9933795455086281,
+                  "flips_after": 160,
+                  "flips_before": 162,
+                  "flips_delta": -2
+                },
+                {
+                  "bending_energy_after": 5365.042504522126,
+                  "bending_energy_before": 5432.887791954411,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9875121132571968,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 1.5468675358375511e-07,
+                "stations": 1.5468675358375511e-07,
+                "waterlines": 1.5468675358375511e-07
+              },
+              "total_flips_after": 302,
+              "total_flips_before": 302
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.2129454550043235,
+            "max_before_m": 0.1159505649279744,
+            "max_improvement": 0.5445082869959362,
+            "reference": "kvlcc2_class analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.06142674619605417,
+            "rms_before_m": 0.05961013817984272,
+            "rms_improvement": 0.9704264326420053
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "kvlcc2_class (+-0.116 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.004,
+          "tolerance_m": 0.116,
+          "within_tolerance": true
+        },
+        {
+          "accepted": false,
+          "deviation_argmax": {
+            "station_index": 1,
+            "station_m": 16.0,
+            "waterline_index": 1,
+            "waterline_m": 1.3
+          },
+          "deviation_fraction_of_half_beam": 0.007564749122293741,
+          "deviation_max_m": 0.2193777245465185,
+          "flips_after": 302,
+          "flips_before": 302,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 40,
+              "before": 40
+            },
+            "stations": {
+              "after": 158,
+              "before": 162
+            },
+            "waterlines": {
+              "after": 104,
+              "before": 100
+            }
+          },
+          "flips_reduced": false,
+          "grid": {
+            "digest_after": "85aa4b0993557842aeab4e727af28aee0ca954e469d72ef4b515b9a6c17c46a0",
+            "digest_before": "b59755a608c0cde01c0d53b9520a3fcfbf96be08ae9d9b3dbef627fbeaf91136",
+            "draft_m": 20.8,
+            "half_beam_m": 29.0,
+            "length_m": 320.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.7957204085572399,
+              "lcb": 149.45194766803937,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8980474301740801,
+              "prismatic_coefficient": 0.8860561055255123,
+              "section_areas": [
+                0.0,
+                1026.6644758151385,
+                1083.4044197620103,
+                1081.973145822666,
+                1081.7478847009013,
+                1082.5542984217745,
+                1082.6960732850905,
+                1082.316620408706,
+                1081.8882657715376,
+                1080.9164801724023,
+                1080.9457667566369,
+                1080.5878978841092,
+                1081.5789536764298,
+                1075.9857676284569,
+                1062.4535954015819,
+                1030.2304669198181,
+                967.8102044880321,
+                857.5732381167007,
+                677.0036346480045,
+                400.7897228169321,
+                0.0
+              ],
+              "vcb": 11.046585406837343,
+              "volume": 307186.27228270535,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "before": {
+              "block_coefficient": 0.796032503991707,
+              "lcb": 149.42158378196393,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8975604872025666,
+              "prismatic_coefficient": 0.8868845223709739,
+              "section_areas": [
+                0.0,
+                1031.5503832001164,
+                1081.4791979651966,
+                1081.9390126072028,
+                1081.8721295445737,
+                1082.6975098000107,
+                1082.8169717611765,
+                1082.445164484392,
+                1082.0201787886906,
+                1081.0298960607154,
+                1081.0950413195378,
+                1080.66770067514,
+                1081.7520559830527,
+                1076.0923053947602,
+                1062.5908769390726,
+                1030.3277258393437,
+                967.9128341264097,
+                857.6868725948324,
+                677.1236327236683,
+                401.23616200172927,
+                0.0
+              ],
+              "vcb": 11.045109714975371,
+              "volume": 307306.7561009905,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "relative_change": {
+              "lcb": 0.000203209504991874,
+              "vcb": 0.0001336059034316867,
+              "volume": -0.00039206368195033274,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 5,
+              "contraction": 1.0,
+              "deviation_max_m": 0.21937772454651605,
+              "directions": [
+                {
+                  "bending_energy_after": 91169.81803421686,
+                  "bending_energy_before": 93053.0295206053,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9797619540589871,
+                  "flips_after": 104,
+                  "flips_before": 100,
+                  "flips_delta": 4
+                },
+                {
+                  "bending_energy_after": 33516.327455981715,
+                  "bending_energy_before": 33959.33971470312,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9869546268436544,
+                  "flips_after": 158,
+                  "flips_before": 162,
+                  "flips_delta": -4
+                },
+                {
+                  "bending_energy_after": 5301.788340827184,
+                  "bending_energy_before": 5432.887791954411,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9758692879095767,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 3.0780895465456744e-07,
+                "stations": 3.0780895465456744e-07,
+                "waterlines": 3.0780895465456744e-07
+              },
+              "total_flips_after": 302,
+              "total_flips_before": 302
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.3205125158619353,
+            "max_before_m": 0.1159505649279744,
+            "max_improvement": 0.36176610643785756,
+            "reference": "kvlcc2_class analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.06649524714914604,
+            "rms_before_m": 0.05961013817984272,
+            "rms_improvement": 0.8964571264189708
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "kvlcc2_class (+-0.116 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.008,
+          "tolerance_m": 0.232,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 1,
+            "station_m": 16.0,
+            "waterline_index": 1,
+            "waterline_m": 1.3
+          },
+          "deviation_fraction_of_half_beam": 0.015202830337069246,
+          "deviation_max_m": 0.44088207977500815,
+          "flips_after": 298,
+          "flips_before": 302,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 40,
+              "before": 40
+            },
+            "stations": {
+              "after": 154,
+              "before": 154
+            },
+            "waterlines": {
+              "after": 104,
+              "before": 104
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "d8fafd42a621f96ba986b4e69b909050d4abe8d787418ef72252ca7df86988a5",
+            "digest_before": "b59755a608c0cde01c0d53b9520a3fcfbf96be08ae9d9b3dbef627fbeaf91136",
+            "draft_m": 20.8,
+            "half_beam_m": 29.0,
+            "length_m": 320.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.7953975927654828,
+              "lcb": 149.48311244374634,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8996162720330221,
+              "prismatic_coefficient": 0.884152074048174,
+              "section_areas": [
+                0.0,
+                1021.6195346499679,
+                1085.2970705806379,
+                1082.084495896241,
+                1081.6074012116794,
+                1082.4030072173205,
+                1082.5669902342568,
+                1082.182664362064,
+                1081.7497490734079,
+                1080.795603864172,
+                1080.7931776835721,
+                1080.4989869005014,
+                1081.4016965847422,
+                1075.871006165605,
+                1062.3123164706587,
+                1030.127256034615,
+                967.7035880370876,
+                857.4560483431702,
+                676.871634738811,
+                400.32442294309453,
+                0.0
+              ],
+              "vcb": 11.048123731764873,
+              "volume": 307061.6498919291,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "before": {
+              "block_coefficient": 0.796032503991707,
+              "lcb": 149.42158378196393,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8975604872025666,
+              "prismatic_coefficient": 0.8868845223709739,
+              "section_areas": [
+                0.0,
+                1031.5503832001164,
+                1081.4791979651966,
+                1081.9390126072028,
+                1081.8721295445737,
+                1082.6975098000107,
+                1082.8169717611765,
+                1082.445164484392,
+                1082.0201787886906,
+                1081.0298960607154,
+                1081.0950413195378,
+                1080.66770067514,
+                1081.7520559830527,
+                1076.0923053947602,
+                1062.5908769390726,
+                1030.3277258393437,
+                967.9128341264097,
+                857.6868725948324,
+                677.1236327236683,
+                401.23616200172927,
+                0.0
+              ],
+              "vcb": 11.045109714975371,
+              "volume": 307306.7561009905,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "relative_change": {
+              "lcb": 0.00041177894267394917,
+              "vcb": 0.000272882467198594,
+              "volume": -0.000797594599517526,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 6,
+              "contraction": 1.0,
+              "deviation_max_m": 0.441531756197046,
+              "directions": [
+                {
+                  "bending_energy_after": 89276.33156956316,
+                  "bending_energy_before": 93053.0295206053,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9594134874436749,
+                  "flips_after": 104,
+                  "flips_before": 100,
+                  "flips_delta": 4
+                },
+                {
+                  "bending_energy_after": 33060.03329559041,
+                  "bending_energy_before": 33959.33971470312,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9735181417934534,
+                  "flips_after": 154,
+                  "flips_before": 162,
+                  "flips_delta": -8
+                },
+                {
+                  "bending_energy_after": 5176.944882144739,
+                  "bending_energy_before": 5432.887791954411,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9528900798966068,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 6.378043838892178e-07,
+                "stations": 6.378043838892178e-07,
+                "waterlines": 6.378043838892178e-07
+              },
+              "total_flips_after": 298,
+              "total_flips_before": 302
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 6,
+              "contraction": 1.0,
+              "deviation_max_m": 0.4408820797750086,
+              "directions": [
+                {
+                  "bending_energy_after": 89272.13764989578,
+                  "bending_energy_before": 89276.33156956316,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9999530231630978,
+                  "flips_after": 104,
+                  "flips_before": 104,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 33060.21293273058,
+                  "bending_energy_before": 33060.03329559041,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0000054336648292,
+                  "flips_after": 154,
+                  "flips_before": 154,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 5159.213472918408,
+                  "bending_energy_before": 5158.4821862501785,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.000141763922376,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 6.378043838892178e-07,
+                "stations": 6.378043838892178e-07,
+                "waterlines": 6.378043838892178e-07
+              },
+              "total_flips_after": 298,
+              "total_flips_before": 298
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.542016871090425,
+            "max_before_m": 0.1159505649279744,
+            "max_improvement": 0.21392427267938363,
+            "reference": "kvlcc2_class analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.08464034765419302,
+            "rms_before_m": 0.05961013817984272,
+            "rms_improvement": 0.7042756774037148
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "kvlcc2_class (+-0.116 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.016,
+          "tolerance_m": 0.464,
+          "within_tolerance": true
+        },
+        {
+          "accepted": true,
+          "deviation_argmax": {
+            "station_index": 1,
+            "station_m": 16.0,
+            "waterline_index": 1,
+            "waterline_m": 1.3
+          },
+          "deviation_fraction_of_half_beam": 0.030859779177317564,
+          "deviation_max_m": 0.8949335961422094,
+          "flips_after": 294,
+          "flips_before": 302,
+          "flips_by_direction": {
+            "buttocks": {
+              "after": 40,
+              "before": 40
+            },
+            "stations": {
+              "after": 152,
+              "before": 152
+            },
+            "waterlines": {
+              "after": 102,
+              "before": 102
+            }
+          },
+          "flips_reduced": true,
+          "grid": {
+            "digest_after": "f7b3a0c9934d210fd2c63c8ea3a7f09edcea6c6f1ebcafd60f227dce42a138bc",
+            "digest_before": "b59755a608c0cde01c0d53b9520a3fcfbf96be08ae9d9b3dbef627fbeaf91136",
+            "draft_m": 20.8,
+            "half_beam_m": 29.0,
+            "length_m": 320.0,
+            "n_stations": 21,
+            "n_waterlines": 17
+          },
+          "hydrostatics": {
+            "after": {
+              "block_coefficient": 0.7921970033765711,
+              "lcb": 149.54835574471343,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8997999331251136,
+              "prismatic_coefficient": 0.8804146057503867,
+              "section_areas": [
+                0.0,
+                1010.9833058217471,
+                1088.9675561282645,
+                1082.540395077004,
+                1081.3039017988842,
+                1082.067035494269,
+                1082.2814054755067,
+                1081.8953341052043,
+                1081.4503935140413,
+                1080.5289527188497,
+                1080.474536429677,
+                1080.2925471747224,
+                1081.031060722671,
+                1075.6153762487863,
+                1062.0146923800419,
+                1029.9012094342288,
+                967.4762570730236,
+                857.2085894829004,
+                676.5644400375342,
+                399.32925671688906,
+                0.0
+              ],
+              "vcb": 11.051419854703619,
+              "volume": 306797.741313161,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.8847580409325123
+            },
+            "before": {
+              "block_coefficient": 0.796032503991707,
+              "lcb": 149.42158378196393,
+              "method": "composite Simpson over waterlines, then over stations",
+              "midship_coefficient": 0.8975604872025666,
+              "prismatic_coefficient": 0.8868845223709739,
+              "section_areas": [
+                0.0,
+                1031.5503832001164,
+                1081.4791979651966,
+                1081.9390126072028,
+                1081.8721295445737,
+                1082.6975098000107,
+                1082.8169717611765,
+                1082.445164484392,
+                1082.0201787886906,
+                1081.0298960607154,
+                1081.0950413195378,
+                1080.66770067514,
+                1081.7520559830527,
+                1076.0923053947602,
+                1062.5908769390726,
+                1030.3277258393437,
+                967.9128341264097,
+                857.6868725948324,
+                677.1236327236683,
+                401.23616200172927,
+                0.0
+              ],
+              "vcb": 11.045109714975371,
+              "volume": 307306.7561009905,
+              "waterplane_area": 16473.28249365307,
+              "waterplane_coefficient": 0.887569099873549
+            },
+            "relative_change": {
+              "lcb": 0.00084841800990737,
+              "vcb": 0.0005713062061929682,
+              "volume": -0.0016563735672061217,
+              "waterplane_area": 0.0
+            }
+          },
+          "iterations": [
+            {
+              "accepted": true,
+              "cg_iterations": 8,
+              "contraction": 1.0,
+              "deviation_max_m": 0.8974059406194211,
+              "directions": [
+                {
+                  "bending_energy_after": 85441.10014212212,
+                  "bending_energy_before": 93053.0295206053,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.918197941349157,
+                  "flips_after": 102,
+                  "flips_before": 100,
+                  "flips_delta": 2
+                },
+                {
+                  "bending_energy_after": 32101.253577212152,
+                  "bending_energy_before": 33959.33971470312,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9452849745283332,
+                  "flips_after": 154,
+                  "flips_before": 162,
+                  "flips_delta": -8
+                },
+                {
+                  "bending_energy_after": 4942.22012121493,
+                  "bending_energy_before": 5432.887791954411,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.9096856608255166,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 1,
+              "penalty": {
+                "buttocks": 1.3761693309076788e-06,
+                "stations": 1.3761693309076788e-06,
+                "waterlines": 1.3761693309076788e-06
+              },
+              "total_flips_after": 296,
+              "total_flips_before": 302
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 8,
+              "contraction": 1.0,
+              "deviation_max_m": 0.8949249824821248,
+              "directions": [
+                {
+                  "bending_energy_after": 85423.24190008637,
+                  "bending_energy_before": 85441.10014212212,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9997909876861834,
+                  "flips_after": 102,
+                  "flips_before": 102,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 32101.9219390645,
+                  "bending_energy_before": 32101.253577212152,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0000208204284216,
+                  "flips_after": 152,
+                  "flips_before": 154,
+                  "flips_delta": -2
+                },
+                {
+                  "bending_energy_after": 4904.842080495486,
+                  "bending_energy_before": 4902.02036582666,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.000575622795959,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 1.3761693309076788e-06,
+                "stations": 1.3761693309076788e-06,
+                "waterlines": 1.3761693309076788e-06
+              },
+              "total_flips_after": 294,
+              "total_flips_before": 296
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 8,
+              "contraction": 1.0,
+              "deviation_max_m": 0.8949335961422082,
+              "directions": [
+                {
+                  "bending_energy_after": 85423.27586792965,
+                  "bending_energy_before": 85423.24190008637,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 1.0000003976417018,
+                  "flips_after": 102,
+                  "flips_before": 102,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 32101.911189535716,
+                  "bending_energy_before": 32101.9219390645,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 0.9999996651437629,
+                  "flips_after": 152,
+                  "flips_before": 152,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 4904.831554673428,
+                  "bending_energy_before": 4904.847310120902,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 0.999996787780235,
+                  "flips_after": 40,
+                  "flips_before": 40,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 3,
+              "penalty": {
+                "buttocks": 1.3761693309076788e-06,
+                "stations": 1.3761693309076788e-06,
+                "waterlines": 1.3761693309076788e-06
+              },
+              "total_flips_after": 294,
+              "total_flips_before": 294
+            }
+          ],
+          "monotone": true,
+          "reference": {
+            "max_after_m": 0.9960683874576262,
+            "max_before_m": 0.1159505649279744,
+            "max_improvement": 0.11640823701264895,
+            "reference": "kvlcc2_class analytic ordinates (manual-fairing stand-in)",
+            "rms_after_m": 0.13795157357635246,
+            "rms_before_m": 0.05961013817984272,
+            "rms_improvement": 0.4321091571083103
+          },
+          "rejected_steps": 0,
+          "schema": "tensorcad.lines_fairing.report/1",
+          "table": "kvlcc2_class (+-0.116 m ordinate jitter, seed 20261114)",
+          "tolerance_fraction_of_half_beam": 0.032,
+          "tolerance_m": 0.928,
+          "within_tolerance": true
+        }
+      ],
+      "unfair_flips": {
+        "buttocks": 40,
+        "stations": 162,
+        "waterlines": 100
+      }
+    }
+  ],
+  "cases_meeting_criterion_at_a_tolerance": 3,
+  "cases_total": 3,
+  "criterion": "deviation <= tolerance, curvature sign-flip count non-increasing over the accepted iterations and strictly lower overall, on >= 2 hull tables",
+  "order": 2,
+  "schema": "tensorcad.lines_fairing.report/1",
+  "study": "three-direction offset-table fairing (curvature-energy minimisation)"
+}
