@@ -1,0 +1,1656 @@
+{
+ "hulls": {
+  "JBC": {
+   "degenerate_patches": 0,
+   "file": "jbc.igs",
+   "histogram": {
+    "126": 172,
+    "128": 45,
+    "141": 19,
+    "143": 19,
+    "314": 1,
+    "406": 1
+   },
+   "partly_degenerate_patches": 0,
+   "patches": 19,
+   "per_patch": [
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 5,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 31,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 77,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 97,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 117,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 135,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 157,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 183,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 205,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 247,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 295,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 319,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 345,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 367,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 387,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 407,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 437,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 463,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 489,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    }
+   ],
+   "reference_volume_m3": 178369.9,
+   "status": "read",
+   "surface_pointer_resolved": 0,
+   "trim_bound": 19,
+   "usable_patches": 0,
+   "uv_loops": 0
+  },
+  "KCS": {
+   "degenerate_patches": 0,
+   "file": "KCS_hull_SVA.igs",
+   "histogram": {
+    "128": 55
+   },
+   "partly_degenerate_patches": 0,
+   "patches": 0,
+   "per_patch": [],
+   "reference_volume_m3": 52030.0,
+   "status": "read",
+   "surface_pointer_resolved": 0,
+   "trim_bound": 0,
+   "usable_patches": 0,
+   "uv_loops": 0
+  },
+  "KVLCC2": {
+   "degenerate_patches": 3,
+   "file": "kvlcc2.igs",
+   "histogram": {
+    "102": 38,
+    "126": 304,
+    "128": 19,
+    "142": 19,
+    "144": 19
+   },
+   "partly_degenerate_patches": 0,
+   "patches": 19,
+   "per_patch": [
+    {
+     "basis_surface_bound": true,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 2,
+     "sample_points": 2,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -319.86,
+       0.5,
+       -22.5
+      ],
+      [
+       -312.48,
+       11.4,
+       -21.14
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 14,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -165.36,
+       27.49,
+       -1.43
+      ],
+      [
+       -165.36,
+       28.79,
+       -0.17
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 2,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 196,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 2,
+     "sample_points": 2,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -154.56,
+       3.8,
+       -26.59
+      ],
+      [
+       -36.97,
+       29.01,
+       -0.12
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 116,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 1,
+     "sample_points": 1,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -23.66,
+       10.91,
+       -21.19
+      ],
+      [
+       -16.97,
+       19.71,
+       -16.28
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 40,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -12.49,
+       1.08,
+       -6.8
+      ],
+      [
+       -10.86,
+       1.71,
+       -6.04
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 36,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 200,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -9.41,
+       0.14,
+       -6.27
+      ],
+      [
+       -7.58,
+       1.13,
+       -3.92
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 21,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -7.49,
+       0.69,
+       -27.28
+      ],
+      [
+       4.96,
+       14.89,
+       -15.18
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 132,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 200,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -15.69,
+       0.18,
+       -5.85
+      ],
+      [
+       -9.73,
+       2.75,
+       -0.03
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 99,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -15.66,
+       6.11,
+       -18.75
+      ],
+      [
+       -10.3,
+       14.44,
+       -16.26
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 23,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -23.4,
+       0.81,
+       -15.25
+      ],
+      [
+       -10.46,
+       12.0,
+       -7.19
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 47,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -23.67,
+       1.49,
+       -6.49
+      ],
+      [
+       -17.68,
+       4.73,
+       -0.66
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 20,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 200,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -31.67,
+       2.2,
+       -0.28
+      ],
+      [
+       -25.67,
+       3.33,
+       -0.26
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 3,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 192,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -319.43,
+       1.06,
+       -4.58
+      ],
+      [
+       -312.54,
+       5.48,
+       -0.25
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 12,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 198,
+     "wrapper_de": 144
+    },
+    {
+     "basis_surface_bound": true,
+     "bbox": [
+      [
+       -311.08,
+       4.83,
+       -14.45
+      ],
+      [
+       -289.06,
+       21.93,
+       -0.07
+      ]
+     ],
+     "boundary_bound": true,
+     "boundary_count": 1,
+     "curve_on_surface": 1,
+     "degenerate_samples": 0,
+     "sample_points": 30,
+     "surface_pointer_resolved": true,
+     "uv_loop_points": 200,
+     "wrapper_de": 144
+    }
+   ],
+   "reference_volume_m3": 312622.0,
+   "status": "read",
+   "surface_pointer_resolved": 19,
+   "trim_bound": 19,
+   "usable_patches": 14,
+   "uv_loops": 19
+  },
+  "ONRT": {
+   "degenerate_patches": 0,
+   "file": "onr5613-full_appendage_deckhous_mergedR.igs",
+   "histogram": {
+    "126": 820,
+    "128": 132,
+    "141": 98,
+    "143": 80,
+    "314": 5,
+    "406": 135
+   },
+   "partly_degenerate_patches": 0,
+   "patches": 80,
+   "per_patch": [
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 27,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 45,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 63,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 87,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 105,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 123,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 147,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 195,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 243,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 271,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 327,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 351,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 375,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 407,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 439,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 459,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 479,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 511,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 535,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 563,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 599,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 635,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 667,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 691,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 719,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 755,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 791,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 815,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 855,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 891,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 915,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 939,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 963,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 987,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1011,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1039,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1063,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1087,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1115,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1139,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1163,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1191,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1211,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1235,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1259,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1291,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1315,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1339,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1363,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1395,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1419,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1447,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1471,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1495,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1523,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1543,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1567,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1595,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1619,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1643,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1667,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1691,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1715,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1751,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1791,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1815,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1859,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1883,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1907,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1943,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1967,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 1995,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2043,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2071,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2095,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2123,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2155,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2179,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2211,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    },
+    {
+     "basis_surface_bound": false,
+     "bbox": null,
+     "boundary_bound": true,
+     "boundary_count": 2373,
+     "curve_on_surface": 0,
+     "degenerate_samples": 0,
+     "sample_points": 0,
+     "surface_pointer_resolved": false,
+     "uv_loop_points": 0,
+     "wrapper_de": 143
+    }
+   ],
+   "reference_volume_m3": 8500.7793948,
+   "status": "read",
+   "surface_pointer_resolved": 0,
+   "trim_bound": 80,
+   "usable_patches": 0,
+   "uv_loops": 0
+  }
+ },
+ "schema": "tensorcad.fleet.patch_census.v1"
+}
