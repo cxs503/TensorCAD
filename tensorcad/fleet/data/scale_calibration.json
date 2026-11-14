@@ -1,0 +1,192 @@
+{
+  "schema": "tensorcad.fleet.scale_calibration.v1",
+  "anchor": "GAP-CAD-T1-SOURCE-HUNT",
+  "subject": "JBC (Japan Bulk Carrier, T2015 benchmark hull) model scale factor",
+  "generated_by": "python -m tensorcad.fleet.scale_calibration",
+  "command": "python -m tensorcad.fleet.scale_calibration --iges artifacts/baseline_fleet/raw/jbc/jbc.igs --draft 16.5 --length-wl 285.0 --beam-wl 45.0 --length-pp 280.0 --beam 45.0 --volume 178369.9 --midship-coefficient 0.9981 --out artifacts/baseline_fleet/jbc_scale.json",
+  "artifact": {
+    "source_url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/JBC_IGES.zip",
+    "source_page": "https://t2015.nmri.go.jp/jbc_gc.html",
+    "publisher": "National Maritime Research Institute (NMRI), Tokyo 2015 workshop",
+    "license": "published workshop benchmark geometry, research use; no OSI licence file shipped by the publisher, bytes NOT redistributed in this repository",
+    "retrieved": "2026-11-14",
+    "zip_sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c",
+    "zip_bytes": 2508534,
+    "iges_member": "jbc.igs",
+    "iges_sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+    "iges_bytes": 1713554,
+    "iges_path_in_worktree": "artifacts/baseline_fleet/raw/jbc/jbc.igs",
+    "iges_sha256_matches_fleet_specs": true,
+    "notes": "unit flag 2 (millimetres), model space scale 1.0; jbc.igs is the bare hull, duct/rudder/propeller are separate members of the same archive"
+  },
+  "published_particulars": {
+    "page": "https://t2015.nmri.go.jp/jbc_gc.html",
+    "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+    "length_pp_m": 280.0,
+    "length_wl_m": 285.0,
+    "beam_wl_m": 45.0,
+    "depth_m": 25.0,
+    "draft_m": 16.5,
+    "block_coefficient": 0.858,
+    "midship_coefficient": 0.9981,
+    "displacement_volume_m3": 178369.9,
+    "lcb_percent_lpp": 2.5475,
+    "model_scale_published": null,
+    "note": "the T2015 JBC page publishes NO model-scale row: its two numeric columns are DESIGNED and FULL/BALLAST, both full scale"
+  },
+  "calibration": {
+    "schema": "tensorcad.fleet.scale_calibration.v1",
+    "scale": 39.739300970089744,
+    "scale_by_length": 39.47860684909817,
+    "scale_by_beam": 39.999995091081324,
+    "published": {
+      "draft": 16.5,
+      "length_wl": 285.0,
+      "beam_wl": 45.0,
+      "length_pp": 280.0,
+      "beam": 45.0,
+      "volume": 178369.9,
+      "midship_coefficient": 0.9981
+    },
+    "waterline_at_scale": {
+      "immersion_model_m": 0.4152060956587767,
+      "length_model_m": 7.212469953433221,
+      "length_full_m": 286.6185142172119,
+      "beam_model_m": 1.125,
+      "beam_full_m": 44.70671359135096,
+      "area_model_m2": 1.0684661203596688,
+      "area_full_m2": 1687.334563304409,
+      "length_error_percent": 0.5678997253375062,
+      "beam_error_percent": -0.6517475747756407
+    },
+    "patch_quality": {
+      "patches_total": 45,
+      "patches_evaluable": 16,
+      "patches_degenerate": 29,
+      "degenerate_indices": [
+        3,
+        5,
+        6,
+        7,
+        8,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        19,
+        22,
+        24,
+        25,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        37,
+        38,
+        39,
+        42,
+        43,
+        44
+      ],
+      "degenerate_fraction": 0.6444,
+      "unit_to_metre_factor": 0.001,
+      "bbox_min_m": [
+        -3.856185,
+        -0.565345,
+        0.0
+      ],
+      "bbox_max_m": [
+        3.686589,
+        0.565345,
+        0.630385
+      ],
+      "extent_m": [
+        7.542774,
+        1.130691,
+        0.630385
+      ]
+    },
+    "volume_closure": {
+      "volume_model_m3": 2.667210736467908,
+      "midship_section_model_m2": 0.43987625508153994,
+      "grid_cover": 0.3678249678249678,
+      "dx_m": 0.01,
+      "dz_m": 0.005,
+      "cloud_points": 803847,
+      "volume_full_m3": 167385.5643806168,
+      "volume_error_percent": -6.158177820015154,
+      "scale_that_would_close_volume": 40.59022070183415,
+      "cb_from_geometry": 0.8051253697961366,
+      "cm_from_geometry": 0.9417036977929311,
+      "cm_published": 0.9981,
+      "within_tolerance": false
+    },
+    "gate": "WITHHELD",
+    "closure_tolerance": 0.03,
+    "notes": [
+      "two independent waterline conditions: length gives 39.4786, beam gives 40.0000 (spread 1.30 %)",
+      "volume closure fails at the calibrated scale: the file's evaluated surface carries less volume than the publisher's displacement, so the scale may not be quoted as validated by displacement \u2014 only by the waterline conditions",
+      "29 of 45 patches evaluate to a single point and were excluded from the waterline and volume statistics"
+    ],
+    "conditions": {
+      "length": {
+        "root_m": 0.41794787903912367,
+        "iterations": 12,
+        "converged": true,
+        "ratio_at_root": 17.27275817869583,
+        "quantity_at_root": 7.2191126459416,
+        "bracket_m": [
+          0.4099708847500001,
+          0.42046679500000017
+        ],
+        "quantity": "length_m",
+        "target_ratio": 17.272727272727273,
+        "bracketed": true,
+        "all_roots_m": [
+          0.022096,
+          0.417948
+        ],
+        "all_roots_quantity": [
+          0.157424,
+          7.219113
+        ]
+      },
+      "beam": {
+        "root_m": 0.41250005062323003,
+        "iterations": 12,
+        "converged": true,
+        "ratio_at_root": 2.727272392573727,
+        "quantity_at_root": 1.125,
+        "bracket_m": [
+          0.4099708847500001,
+          0.42046679500000017
+        ],
+        "quantity": "beam_m",
+        "target_ratio": 2.727272727272727,
+        "bracketed": true,
+        "all_roots_m": [
+          0.022388,
+          0.4125
+        ],
+        "all_roots_quantity": [
+          0.060607,
+          1.125
+        ]
+      }
+    }
+  },
+  "verdict": {
+    "scale_factor": 39.999995091081324,
+    "basis": "waterline-beam condition B_wl(z)/z = B_WL/T solved on the file's own surface; it lands on exactly 1:40 (model B = 1.1250 m against B_WL = 45.0 m)",
+    "length_condition": 39.47860684909817,
+    "spread_percent": 1.3034707649236832,
+    "retires": "the earlier geometry_scale=null shortcut in benchmarks/verified/baseline_fleet/fleet_specs.json, which normalised the point cloud x-extent (LENGTH OVERALL 7.5428 m) to L_PP and therefore produced s = 37.12 instead of 39.7-40.0 (a 7 % bias)",
+    "open": "volume closure at the calibrated scale is -6.16 % and the midship section is 5.6 % thin (Cm 0.9417 vs 0.9981 published); 29 of 45 IGES patches evaluate to a single point, which is the most likely cause and is NOT yet fixed"
+  }
+}
