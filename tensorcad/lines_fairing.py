@@ -53,6 +53,15 @@ Three design decisions worth stating up front:
   every ordinate that is already ``0`` are frozen: those values belong to the principal
   dimensions, not to the fairing.  The watertight closure of the sections downstream
   depends on it.
+* **A buttock is a level set, and a level set can have several branches.** With
+  tumblehome -- any section whose half-breadth falls again above its maximum breadth --
+  a level ``eta = const`` is crossed twice, and the two crossings are two different
+  buttocks.  :func:`buttock_curves` traces the crossings station to station and returns
+  one polyline per branch, splitting where a level set disappears for a stretch; the
+  levels themselves come from the table (:func:`buttock_levels`) rather than being fixed
+  fractions of the global peak, because a near-deck level spans only a few stations and
+  used to drop out of the flip count altogether.  Both are reported per level in
+  :func:`buttock_coverage`, so the third family cannot shrink to nothing unnoticed.
 * **Monotonicity is enforced, and rejections are reported.**  An outer iteration is
   kept only if the total sign-flip count does not rise; a rejected step leaves the
   table untouched and increments :attr:`FairingResult.rejected_steps`.  The
@@ -706,12 +715,209 @@ def _flips_per_direction(grid: _Grid, flat: Sequence[float]) -> dict[str, int]:
     return {"waterlines": waterlines, "stations": stations, "buttocks": buttocks}
 
 
-def _buttock_levels(grid: _Grid, count: int = 5) -> tuple[float, ...]:
-    """Level values ``eta = const`` spread over the midbody, where buttocks exist."""
-    peak = max(max(row) for row in grid.eta)
+#: Fallback level fractions (of the peak ordinate) used when no candidate level of
+#: :func:`buttock_levels` is straddled by enough stations.
+_FALLBACK_LEVEL_FRACTIONS: tuple[float, ...] = (0.2, 0.35, 0.5, 0.65, 0.8)
+
+#: Number of candidate levels the adaptive search scans, and their range as fractions of
+#: the peak ordinate.  The bottom of the range is above ``0`` because the keel row is
+#: frozen and a level at ``eta = 0`` degenerates onto it.
+_LEVEL_CANDIDATES = 61
+_LEVEL_RANGE = (0.05, 0.95)
+
+#: Default coverage floor of a chosen level, as a fraction of the station count: a buttock
+#: has to carry at least this many samples for its flip count to mean anything.
+_MIN_COVERAGE = 0.3
+
+#: Largest ``zeta`` step (as a fraction of the draft) at which two crossings of the same
+#: level are still the same branch.  Above it the branch ends and a new one starts: a
+#: level set that jumps is a gap, not a chord, and joining the two would invent curvature.
+_TRACE_JUMP = 0.35
+
+
+def _straddling_stations(eta: Sequence[Sequence[float]], level: float) -> int:
+    """How many stations have ``level`` strictly inside their ``zeta`` profile."""
+    return sum(1 for row in eta if min(row) < level < max(row))
+
+
+def _longest_branch(
+    eta: Sequence[Sequence[float]],
+    xi: Sequence[float],
+    zeta: Sequence[float],
+    level: float,
+) -> int:
+    """Samples on the longest traced branch of the level set -- the coverage of ``level``.
+
+    A level that only grazes a section (``level`` just under the local maximum breadth) is
+    crossed at every station there, but at a ``zeta`` that jumps between neighbours: the
+    traced branches are then 1, 5 and 1 points long, not one 7-point buttock.  Counting
+    the traced branches instead of the straddled stations is what keeps such a level from
+    passing the coverage floor on the strength of stations it does not actually join.
+    """
+    return max((len(branch) for branch in _trace_branches(eta, xi, zeta, level)), default=0)
+
+
+def buttock_levels(
+    eta: Sequence[Sequence[float]],
+    xi: Sequence[float],
+    zeta: Sequence[float],
+    *,
+    count: int = 5,
+    min_samples: int | None = None,
+) -> tuple[float, ...]:
+    """Levels ``eta = const`` at which the buttock family is contoured, chosen from the table.
+
+    A buttock exists only over the length where that half-breadth is reached, so a level
+    near the peak spans a handful of stations and contributes nothing to the flip count
+    once the ``>= 3`` point floor is applied.  Fixed fractions of the *global* peak
+    therefore under-cover the third family on any table whose maximum breadth lives over
+    a short stretch: on the built-in forms' 21 x 17 grids most of the five nominal levels
+    came back with one or two points.  The levels are instead chosen from the data --
+    scan :data:`_LEVEL_CANDIDATES` fractions of the peak in :data:`_LEVEL_RANGE`, keep
+    those whose longest traced branch carries at least ``min_samples`` samples (default
+    ``max(5, round(_MIN_COVERAGE * n_stations))``, i.e. a third of the stations), and spread
+    ``count`` of the survivors evenly over the surviving range -- so the number of stations behind the
+    metric is a property of the report, not of the caller's luck.
+
+    ``xi`` and ``zeta`` are accepted (and length-checked) because the caller's grid is
+    the definition of the table; the selection itself reads only ``eta``.
+    """
+    rows = [list(row) for row in eta]
+    if not rows:
+        return ()
+    width = len(zeta)
+    if any(len(row) != width for row in rows):
+        raise FairingError("buttock_levels: eta is not a (station x waterline) grid")
+    if len(xi) != len(rows):
+        raise FairingError(
+            f"buttock_levels: {len(rows)} stations against {len(xi)} abscissae"
+        )
+    if count < 1:
+        raise FairingError(f"buttock_levels: count must be >= 1, got {count!r}")
+    floor = max(5, round(_MIN_COVERAGE * len(rows))) if min_samples is None else min_samples
+    if floor < 3:
+        raise FairingError(
+            f"buttock_levels: min_samples must be >= 3 (a flip count needs 3 points), "
+            f"got {floor!r}"
+        )
+    peak = max((max(row) for row in rows if row), default=0.0)
     if not (peak > 0.0):
         return ()
-    return tuple(peak * fraction for fraction in (0.2, 0.35, 0.5, 0.65, 0.8))[:count]
+    low, high = _LEVEL_RANGE
+    candidates = [
+        peak * (low + (high - low) * k / (_LEVEL_CANDIDATES - 1))
+        for k in range(_LEVEL_CANDIDATES)
+    ]
+    eligible = [
+        level for level in candidates
+        if _longest_branch(rows, xi, zeta, level) >= floor
+    ]
+    if not eligible:
+        eligible = [
+            peak * fraction
+            for fraction in _FALLBACK_LEVEL_FRACTIONS
+            if _straddling_stations(rows, peak * fraction) >= 3
+        ]
+    if not eligible:
+        return ()
+    if len(eligible) <= count:
+        return tuple(eligible)
+    picked: list[float] = []
+    for k in range(count):
+        index = round(k * (len(eligible) - 1) / (count - 1))
+        level = eligible[index]
+        if not picked or level > picked[-1]:
+            picked.append(level)
+    return tuple(picked)
+
+
+def _buttock_levels(grid: _Grid, count: int = 5) -> tuple[float, ...]:
+    """Adaptive levels of :func:`buttock_levels` for a normalised grid."""
+    return buttock_levels(grid.eta, grid.xi, grid.zeta, count=count)
+
+
+def _level_crossings(
+    profile: Sequence[float], zeta: Sequence[float], level: float
+) -> dict[int, float]:
+    """Every ``zeta`` at which the piecewise-linear profile crosses ``level``.
+
+    Keyed by the *segment* ``[j, j + 1]`` the crossing falls in.  That key is what makes
+    the branches of a level set separable: along one branch a level is crossed between
+    the same pair of waterlines from station to station, so grouping the crossings of a
+    level by their key recovers the branches without fitting or sorting anything.  The
+    old contour bailed out whenever ``level`` was not bracketed by the endpoints of the
+    profile, which silently dropped every level that a tumblehome section crosses twice.
+    Exact node hits are assigned to the segment that starts at the node, the last node to
+    the segment that ends there, so a crossing is produced once.
+    """
+    marks: dict[int, float] = {}
+    last = len(profile) - 1
+    for j in range(last):
+        below, above = profile[j], profile[j + 1]
+        if below == above:
+            continue
+        if below == level:
+            key, value = (j if j > 0 else 0), zeta[j]
+        elif above == level:
+            key, value = (j + 1 if j + 1 < last else j), zeta[j + 1]
+        elif (below - level) * (above - level) < 0.0:
+            key = j
+            value = zeta[j] + (level - below) / (above - below) * (zeta[j + 1] - zeta[j])
+        else:
+            continue
+        marks.setdefault(key, value)
+    return marks
+
+
+def _trace_branches(
+    eta: Sequence[Sequence[float]],
+    xi: Sequence[float],
+    zeta: Sequence[float],
+    level: float,
+    *,
+    samples: int = 0,
+) -> list[list[tuple[float, float]]]:
+    """Branches of the level set ``eta = level``, traced station by station.
+
+    At every station the level is crossed once per branch; a crossing is attached to the
+    open branch whose last sample is nearest in ``zeta``, and a branch that no crossing
+    matches simply ends (and a later crossing starts a new branch).  Continuity tracking
+    -- rather than grouping the crossings by the waterline segment they fall in -- is what
+    keeps a buttock that runs across several segments one curve: on the Wigley table the
+    topmost level crosses segment 12 amidships and segment 14 near the ends, and grouping
+    by segment cuts one 5-point buttock into a branch of 3 and an orphan of 2.  A crossing
+    further than :data:`_TRACE_JUMP` (fraction of the ``zeta`` range) from every open
+    branch is treated as a new branch, so a jump in ``zeta`` is never a chord.
+    """
+    span = (zeta[-1] - zeta[0]) if len(zeta) > 1 else 0.0
+    max_jump = _TRACE_JUMP * span
+    open_branches: list[list[tuple[float, float]]] = []
+    done: list[list[tuple[float, float]]] = []
+    for i, x in enumerate(xi):
+        crossings = sorted(_level_crossings(eta[i], zeta, level).values())
+        taken = [False] * len(open_branches)
+        for value in crossings:
+            best: int | None = None
+            best_distance = math.inf
+            for index, branch in enumerate(open_branches):
+                if taken[index]:
+                    continue
+                distance = abs(branch[-1][1] - value)
+                if distance <= max_jump and distance < best_distance:
+                    best, best_distance = index, distance
+            if best is None:
+                open_branches.append([(x, value)])
+                taken.append(True)
+            else:
+                open_branches[best].append((x, value))
+                taken[best] = True
+        keep = [branch for index, branch in enumerate(open_branches) if taken[index]]
+        done.extend(branch for index, branch in enumerate(open_branches) if not taken[index])
+        open_branches = keep
+    done.extend(open_branches)
+    if samples > 0:
+        done = [_resample(branch, samples) if len(branch) >= 3 else branch for branch in done]
+    return done
 
 
 def buttock_curves(
@@ -721,42 +927,71 @@ def buttock_curves(
     *,
     levels: Iterable[float],
     samples: int = 0,
+    min_points: int = 3,
 ) -> list[list[tuple[float, float]]]:
     """Contour the ``eta`` grid at each level: the buttock ``zeta(xi)`` polylines.
 
-    Inversion is by bisection on the piecewise-linear interpolant in ``zeta`` at each
-    station.  A station whose ordinates do not straddle the level contributes no point,
+    Inversion is by linear interpolation on the piecewise-linear profile at each station,
     so a buttock appears only over the length where that half-breadth exists -- which is
-    the shape of a real buttock plan.  ``samples > 0`` resamples each curve on a uniform
-    ``xi`` grid (the default keeps the tabulated stations).
+    the shape of a real buttock plan.  A level set may have **more than one branch**: a
+    section that is widest below the deck (tumblehome, or any hull whose half-breadth
+    falls again above the maximum breadth) crosses a level twice, and the two crossings
+    are different buttocks.  Every branch is returned as its own polyline (see
+    :func:`_trace_branches`), and a polyline needs ``min_points`` samples to be returned
+    at all.  ``samples > 0`` resamples each branch on a uniform ``xi`` grid (the default
+    keeps the tabulated stations).
     """
     curves: list[list[tuple[float, float]]] = []
     for level in levels:
-        points: list[tuple[float, float]] = []
-        for i, x in enumerate(xi):
-            profile = [eta[i][j] for j in range(len(zeta))]
-            if level < profile[0] or level > profile[-1]:
-                continue
-            low, high = 0, len(zeta) - 1
-            if profile[low] == level:
-                points.append((x, zeta[low]))
-                continue
-            while high - low > 1:
-                middle = (low + high) // 2
-                if profile[middle] <= level:
-                    low = middle
-                else:
-                    high = middle
-            if profile[high] == profile[low]:
-                continue
-            weight = (level - profile[low]) / (profile[high] - profile[low])
-            points.append((x, zeta[low] + weight * (zeta[high] - zeta[low])))
-        if len(points) >= 3 and samples > 0:
-            points = _resample(points, samples)
-        if len(points) >= 3:
-            curves.append(points)
+        for branch in _trace_branches(eta, xi, zeta, level, samples=samples):
+            if len(branch) >= min_points:
+                curves.append(branch)
     return curves
 
+
+def buttock_coverage(
+    eta: Sequence[Sequence[float]],
+    xi: Sequence[float],
+    zeta: Sequence[float],
+    *,
+    levels: Sequence[float] | None = None,
+    min_points: int = 3,
+) -> dict[str, Any]:
+    """How much of the third family the metric actually sees, per level.
+
+    A flip count is only as meaningful as the curves behind it, so the report states, for
+    every level: how many stations straddle it, how many branches it has, and how many
+    samples each returned branch carries.  A level whose branches are all shorter than
+    ``min_points`` contributes nothing and shows up here as ``branches: 0`` instead of
+    passing as a silent zero -- which is exactly how the third family lost most of its
+    weight in the earlier report of this gap.
+    """
+    chosen = tuple(levels) if levels is not None else buttock_levels(eta, xi, zeta)
+    peak = max((max(row) for row in eta if row), default=0.0)
+    detail: list[dict[str, Any]] = []
+    curves_total = 0
+    for level in chosen:
+        kept = [
+            branch
+            for branch in _trace_branches(eta, xi, zeta, level)
+            if len(branch) >= min_points
+        ]
+        curves_total += len(kept)
+        detail.append(
+            {
+                "level": level,
+                "fraction_of_peak": (level / peak) if peak > 0.0 else None,
+                "stations_straddling": _straddling_stations(eta, level),
+                "branches": len(kept),
+                "samples": [len(branch) for branch in kept],
+            }
+        )
+    return {
+        "levels": list(chosen),
+        "curves": curves_total,
+        "stations_total": len(xi),
+        "detail": detail,
+    }
 
 def _resample(points: Sequence[tuple[float, float]], count: int) -> list[tuple[float, float]]:
     first, last = points[0][0], points[-1][0]
@@ -1382,6 +1617,10 @@ def fairing_study(
         unfair = perturb_table(clean, amplitude=noise_fraction * half_beam, seed=seed)
         clean_flips = _flips_per_direction(*_grid_and_flat(clean))
         unfair_flips = _flips_per_direction(*_grid_and_flat(unfair))
+        # The third family is contoured, not tabulated, so its weight is only as real as
+        # the number of samples behind its curves.  Record that, per level.
+        grid_unfair = _grid_of(unfair)
+        coverage = buttock_coverage(grid_unfair.eta, grid_unfair.xi, grid_unfair.zeta)
         sweep: list[dict[str, Any]] = []
         for fraction in tolerance_fractions:
             result = fair_offset_table(
@@ -1423,6 +1662,7 @@ def fairing_study(
                 },
                 "analytic_flips": clean_flips,
                 "unfair_flips": unfair_flips,
+                "buttock_coverage": coverage,
                 "sweep": sweep,
                 "accepted_at": [
                     entry["tolerance_fraction_of_half_beam"]
@@ -1495,15 +1735,19 @@ def _plot(result: FairingResult, path: Path, *, form: str) -> Path:
     grid_before = _grid_of(before)
     grid_after = _grid_of(after)
     levels = _buttock_levels(grid_before)
-    for level, curve_before, curve_after in zip(
-        levels,
-        buttock_curves(grid_before.eta, grid_before.xi, grid_before.zeta, levels=levels),
-        buttock_curves(grid_after.eta, grid_after.xi, grid_after.zeta, levels=levels),
-    ):
-        ax_bt.plot([p[0] for p in curve_before], [p[1] for p in curve_before], "o--",
-                   ms=3, lw=0.8, color="tab:gray", alpha=0.9)
-        ax_bt.plot([p[0] for p in curve_after], [p[1] for p in curve_after], "-",
-                   lw=1.4, label=f"y = {level * half_beam:.2f} m")
+    for level in levels:
+        # Plot every branch of the level set on both tables.  Zipping one "before" list
+        # against one "after" list would mislabel the figure as soon as the fairing
+        # changes how many branches a level has -- which it does as soon as a section
+        # loses its tumblehome.
+        for curve in buttock_curves(grid_before.eta, grid_before.xi, grid_before.zeta,
+                                    levels=(level,)):
+            ax_bt.plot([p[0] for p in curve], [p[1] for p in curve], "o--",
+                       ms=3, lw=0.8, color="tab:gray", alpha=0.9)
+        for curve in buttock_curves(grid_after.eta, grid_after.xi, grid_after.zeta,
+                                    levels=(level,)):
+            ax_bt.plot([p[0] for p in curve], [p[1] for p in curve], "-", lw=1.4,
+                       label=f"y = {level * half_beam:.3f} m")
     ax_bt.set_xlabel("x / L")
     ax_bt.set_ylabel("z / T")
     ax_bt.set_title("buttocks (level sets), dashed = before")
