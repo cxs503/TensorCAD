@@ -1,0 +1,42 @@
+{
+  "anchor": "CASE-CAD-CURVATURE-SPHERE",
+  "audited_mission": 20002,
+  "reference_sum_R1": 2.0,
+  "probes": {
+    "radial_dent_1_percent": {
+      "question": "does a +-1 % shape error move the measurement by ~1 %?",
+      "baseline_integral": 2.0000014129276513,
+      "baseline_relative_error": 7.064638256615297e-07,
+      "perturbed_integral": 1.9996419674845878,
+      "perturbed_relative_error": -0.00017901625770611052,
+      "sensitivity_ratio": 253.39762802218567,
+      "verdict": "mesh-driven"
+    },
+    "which_reading_discriminates": {
+      "question": "the gated metric is the integral; does it see a +-1 % dent as well as the pointwise one?",
+      "integral_response_absolute": 0.00017972272153177205,
+      "pointwise_median_error_baseline": 0.000999152455663177,
+      "pointwise_median_error_dented": 0.1986274953051026,
+      "pointwise_response_absolute": 0.19762834284943942,
+      "note": "on a closed surface int S dA is nearly shape-invariant, so a 2 % gate on it is a weak discriminator; the pointwise reading is the sensitive one and it is the untested one"
+    },
+    "scaled_mesh_stale_reference": {
+      "question": "is the measured value independent of the analytic reference?",
+      "mesh_radius": 2.0,
+      "reference_used": 2.0,
+      "measured_integral": 1.0000007064638257,
+      "ratio_to_reference": 0.5000003532319128,
+      "expected_if_measured_from_geometry": 0.5,
+      "verdict": "reference-independent"
+    },
+    "sphere_with_stale_radius": {
+      "question": "same sphere, reference for R = 2 -- only the reported error may change",
+      "measured_integral": 2.0000014129276513,
+      "unperturbed_measured_integral": 2.0000014129276513,
+      "reported_relative_error": 1.0000014129276513,
+      "expected_relative_error_if_independent": 1.0000014129276513,
+      "verdict": "measured side unchanged"
+    }
+  },
+  "conclusion": "the measured side is computed from mesh vertices and faces only; the analytic reference enters through reference_sum() and nothing else, so the +0.0119 % headline is a geometry measurement and not a restatement of 2/R"
+}
