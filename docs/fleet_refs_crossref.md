@@ -102,6 +102,25 @@ Honest gaps, with the reason each document could not be used:
 * **JBC**: one lineage only (NMRI Tokyo 2015). Its ∇ 178 369.9 m³ is *not* yet external in the sense this anchor requires; the reconstruction currently reads 145 769 m³ (−18.3 %) with the control-net layout guard fired, so the hull is `WITHHELD` in the benchmark for a reason that must not be blamed on the reference.
 * **ONRT**: ∇ and LCB are `CONFLICT` — the NMRI page prints displacement as a *mass* (8 507 t → 8 299.5 m³ at 1.025 t/m³) while SIMMAN prints 8 507 m³, and LCB is printed on different references (the NMRI cell is a metre offset that the parser reads as 1.625, the SIMMAN cell is −1.68 %Lpp). Both cells are kept, unflagged as agreement, because picking either one would be a flattering choice.
 
+### 6.1 Where the KVLCC2 refusal actually comes from (census, not verdict)
+
+`docs/fleet_patch_census.md` counts, per hull and per trimmed patch, whether the reader
+binds the trim data. Measured on the asset store: KVLCC2 ships 19 type-144 wrappers and
+**19/19** now bind their outer boundary and basis surface, of which **14/19** evaluate to
+real geometry and **3/19** decode to a degenerate (all-zero) control net; JBC (19) and
+ONRT (80) bind their wrappers but their trim loops are written as type-141 alternating
+curve lists, which this reader does not yet turn into `(u, v)` polygons; KCS ships no
+type-144 at all. Two consequences for this library:
+
+* the KVLCC2 benchmark verdict stays `WITHHELD`, and the reason is **reader coverage**
+  (14/19 patches, no bottom closure), not a shape defect. The old message
+  ("field produced fewer than two usable waterline slices") named a symptom;
+* the KVLCC2 file's own frame puts the z origin at the top of the model, not at the keel
+  (extent 0 … -28.1 in file z, breadth 29.0 m at the lower end). The `iges_field` route
+  assumes a keel-origin, up-positive frame (the KCS convention), so a faithful rebuild
+  needs a frame policy before any volume from this file can be compared with 312 622 m³.
+  Recorded here as a *known gap*, not as a result.
+
 ## Reproduce
 
 ```bash
