@@ -589,3 +589,50 @@ def test_fleet_benchmark_smoke() -> None:
         assert r.triangles == r.copies * base_tris
         rel = float(r.note.split("rel_err=")[1].split("%")[0].replace("+", "")) / 100.0
         assert abs(rel) < 0.05
+
+
+def test_verdict_distinguishes_not_checked_from_passed() -> None:
+    """A gate that could not run must not make the whole run look green.
+
+    This is the accounting hole the 10^7 fleet tier exposed: with one base rung
+    every exponent gate is ``not_run``, yet ``passed`` was True (``not_run``
+    gates carry ``passed=True`` for compatibility) and the CLI printed
+    "All gates passed."  ``verdict`` is the honest three-way answer.
+    """
+    not_checked = PerfBenchmarkResult(
+        results=tuple(_synth("volume", [10_000, 100_000], [0.001, 0.010])),
+        gates=scaling_gates(_synth("volume", [10_000, 100_000], [0.001, 0.010])),
+    )
+    assert not_checked.gates_checked == 0
+    assert not_checked.gates_not_run == 1
+    assert not_checked.verdict == "not_run"
+    assert not_checked.to_dict()["verdict"] == "not_run"
+    assert not_checked.to_dict()["gates_checked"] == 0
+
+    checked = PerfBenchmarkResult(
+        results=tuple(_synth("volume", [10_000, 100_000, 1_000_000], [0.001, 0.01, 0.1])),
+        gates=scaling_gates(_synth("volume", [10_000, 100_000, 1_000_000], [0.001, 0.01, 0.1])),
+    )
+    assert checked.gates_checked == 1
+    assert checked.verdict == "pass"
+
+    regressed = PerfBenchmarkResult(
+        results=tuple(_synth("load", [10_000, 100_000, 1_000_000], [0.001, 0.1, 10.0])),
+        gates=scaling_gates(_synth("load", [10_000, 100_000, 1_000_000], [0.001, 0.1, 10.0])),
+    )
+    assert regressed.verdict == "fail"
+
+
+def test_cli_does_not_claim_pass_when_no_gate_was_checked(tmp_path: Path) -> None:
+    """End-to-end: a one-rung run must say "NOT a pass", not "All gates passed"."""
+    out = tmp_path / "one_rung.json"
+    proc = subprocess.run(
+        [sys.executable, "-m", "tensorcad.perf_benchmark", "--ladder", "21,9",
+         "--subtasks", "load,volume", "--n-queries", "10", "--output", str(out)],
+        capture_output=True, text=True, timeout=600,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert "NOT a pass" in proc.stdout
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["verdict"] == "not_run"
+    assert payload["gates_checked"] == 0
