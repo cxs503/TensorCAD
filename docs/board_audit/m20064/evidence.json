@@ -1,0 +1,586 @@
+{
+  "audited_mission": 20002,
+  "audited_tree": "/root/tp-agent/work/m20002",
+  "generated_at": "2026-11-14T08:17:15.196262+00:00",
+  "audited_head": "4558ef6d3d18e91090d777ab05987528a85fe72e",
+  "head_matches_expected": true,
+  "dirty": false,
+  "on_main": false,
+  "branches_containing_head": [
+    "agent/m20002"
+  ],
+  "commit_subject": "benchmarks: verified case CASE-CAD-CURVATURE-SPHERE (sphere discrete mean curvature vs analytic 2/R)",
+  "commit_files": [
+    "benchmarks/verified/sphere_mean_curvature/README.md",
+    "benchmarks/verified/sphere_mean_curvature/figures/convergence.png",
+    "benchmarks/verified/sphere_mean_curvature/figures/error_cloud.png",
+    "benchmarks/verified/sphere_mean_curvature/figures/readings.png",
+    "benchmarks/verified/sphere_mean_curvature/gates_verified.json",
+    "benchmarks/verified/sphere_mean_curvature/make_report.py",
+    "benchmarks/verified/sphere_mean_curvature/result.json",
+    "benchmarks/verified/sphere_mean_curvature/run_benchmark.py",
+    "docs/sphere_mean_curvature.md",
+    "tests/test_case_cad_curvature_sphere.py"
+  ],
+  "artifacts": {
+    "benchmarks/verified/sphere_mean_curvature/run_benchmark.py": {
+      "exists": true,
+      "bytes": 34989,
+      "sha256": "fbc4ddc4ec4c009212faef88b13462d1a91fbda080fbd3e6f3e41f338a8f6b8c"
+    },
+    "benchmarks/verified/sphere_mean_curvature/result.json": {
+      "exists": true,
+      "bytes": 31984,
+      "sha256": "3f19e9d4bf53193c483521c25a077c68d985aff355fdbf76c60ca0974ff61541"
+    },
+    "benchmarks/verified/sphere_mean_curvature/gates_verified.json": {
+      "exists": true,
+      "bytes": 6651,
+      "sha256": "6da7da79e99674151a56d9006b77a18199d8ce6a1afa39261d03a8ce3ca8a376"
+    },
+    "benchmarks/verified/sphere_mean_curvature/README.md": {
+      "exists": true,
+      "bytes": 2958,
+      "sha256": "abdcb9811d8be7596b75e9503f7ce1c4dd49c68d27d927ffdb9756eb3408a5ff"
+    },
+    "docs/sphere_mean_curvature.md": {
+      "exists": true,
+      "bytes": 11739,
+      "sha256": "1dd3164c09c236bb6a9d183fca0c5f7f2d4560c17dd1b0be6dd21d3bf82c8b01"
+    },
+    "tests/test_case_cad_curvature_sphere.py": {
+      "exists": true,
+      "bytes": 4558,
+      "sha256": "ebb7186c2bd8ca7bfe1aeabbd0417fcc81a3849f1a3ecb82da625b8209392a98"
+    },
+    "benchmarks/verified/sphere_mean_curvature/figures/convergence.png": {
+      "exists": true,
+      "bytes": 96726,
+      "sha256": "8254f56183ca3c8a87a1b996d401f821fdeda446fd0963c62065567f2d339663"
+    },
+    "benchmarks/verified/sphere_mean_curvature/figures/error_cloud.png": {
+      "exists": true,
+      "bytes": 483422,
+      "sha256": "cc5310e963d2b95e45a02e817fd01ee73b96d310c6191a06daf0056081f32939"
+    },
+    "benchmarks/verified/sphere_mean_curvature/figures/readings.png": {
+      "exists": true,
+      "bytes": 39870,
+      "sha256": "4525849f3b59803de142f731594eec801052b7e6f40ef259c94da0bd49648807"
+    }
+  },
+  "figures_present": [
+    "convergence.png",
+    "error_cloud.png",
+    "readings.png"
+  ],
+  "ledger": {
+    "tensor_benchmark_cases_rows_for_anchor": "0",
+    "tensor_benchmark_cases_rows_cad_any": "9",
+    "tensor_benchmark_cases_total": "121",
+    "tensorbench_results_rows_metric_curvature": "0",
+    "tensorbench_results_rows_total": "14",
+    "tensorbench_evaluations_rows_total": "3",
+    "cad_anchor_rows": [
+      [
+        "GAP-CAD-T1-BASELINE-FLEET",
+        "CASE-CAD-BASELINE-FLEET-KCS-DISPLACEMENT",
+        "passed",
+        "2026-11-13 04:17:30.962059+00"
+      ],
+      [
+        "GAP-CAD-B2-MESH-FORMAT-MATRIX",
+        "CASE-CAD-B2-ROUNDTRIP-18",
+        "passed",
+        "-"
+      ],
+      [
+        "GAP-CAD-D2-GOLDEN-REGRESSION",
+        "CASE-CAD-D2-GOLDEN-WIGLEY",
+        "passed",
+        "2026-11-13 09:33:43.96714+00"
+      ],
+      [
+        "GAP-CAD-D2-GOLDEN-REGRESSION",
+        "CASE-CAD-D2-GOLDEN-SERIES60",
+        "passed",
+        "2026-11-13 09:33:43.968803+00"
+      ],
+      [
+        "GAP-CAD-D2-GOLDEN-REGRESSION",
+        "CASE-CAD-D2-GOLDEN-SPHERE_ELLIPSOID",
+        "passed",
+        "2026-11-13 09:33:43.979803+00"
+      ],
+      [
+        "GAP-CAD-D2-GOLDEN-REGRESSION",
+        "CASE-CAD-D2-GOLDEN-DTMB5415",
+        "passed",
+        "2026-11-13 09:33:43.980249+00"
+      ],
+      [
+        "GAP-CAD-T2-PARAM-SERIES",
+        "Series60 父型五档 Cb 系数 vs 公开父型表",
+        "pending",
+        "-"
+      ],
+      [
+        "GAP-CAD-T2-PARAM-SERIES",
+        "Series60 网格积分 vs 解析闭式（分辨率阶梯）",
+        "pending",
+        "-"
+      ],
+      [
+        "GAP-CAD-T2-PARAM-SERIES",
+        "Series60 gate-power 突变测试",
+        "pending",
+        "-"
+      ]
+    ]
+  },
+  "repro_returncode": 0,
+  "repro_stdout": [
+    "case CASE-CAD-CURVATURE-SPHERE: 16 gates, 1 diagnostics",
+    "headline S vs 2/R: measured 2.000238 vs 2.000000 (+0.0119 %)  -> within 2 %",
+    "pointwise median: raw 50.12 %, conditioned 1.94 %",
+    "figures: ['figures/convergence.png', 'figures/readings.png', 'figures/error_cloud.png']",
+    "seconds: 46.7"
+  ],
+  "fresh_result_sha256": "100f3b1fd8641486f5dbc634973433ada40a8cf89292d0be50f8cdc1cc4444d5",
+  "committed_result_sha256": "3f19e9d4bf53193c483521c25a077c68d985aff355fdbf76c60ca0974ff61541",
+  "numeric_mismatches_vs_committed": [],
+  "numeric_leaves_compared": 590,
+  "headline": {
+    "measured": 2.0002377872364367,
+    "pointwise_median_relative_error_conditioned": 0.019394977383461576,
+    "pointwise_median_relative_error_raw": 0.5011773098888714,
+    "pointwise_within_2_percent_raw": false,
+    "quantity": "discrete mean curvature, kappa_1+kappa_2 (S = 2H), area-weighted integral",
+    "radius": 1.0,
+    "reference": 2.0,
+    "relative_error": 0.00011889361821837419,
+    "tolerance": 0.02,
+    "within_2_percent": true
+  },
+  "fresh_seconds": 46.71766484901309,
+  "environment": {
+    "git_branch": "agent/m20002",
+    "git_commit": "4558ef6d3d18e91090d777ab05987528a85fe72e",
+    "git_status_porcelain": "",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "python": "3.11.6",
+    "repro_cmd": "python benchmarks/verified/sphere_mean_curvature/run_benchmark.py",
+    "sources": {
+      "benchmarks/verified/sphere_mean_curvature/run_benchmark.py": "fbc4ddc4ec4c009212faef88b13462d1a91fbda080fbd3e6f3e41f338a8f6b8c",
+      "tensorcad/curvature.py": "3dc54bfe0df5077e77723e3fbedc6bca4c1c1e9789fc61d1e6352c2798c8a665",
+      "tensorcad/geometry_field.py": "774fee2c122b49ea9f35771b6a4075c30c41f16396c42f202895211264967270",
+      "tensorcad/mesh_conditioning.py": "fee3a50bc99027a69d462a3668b1d76668d52d2d351b7cdac82f45a94200ce84"
+    },
+    "tensorcad_version": "0.23.0"
+  },
+  "identical_leaves": 590,
+  "gates": [
+    {
+      "gate": "G1",
+      "criterion": "G1: discrete mean curvature, area-weighted integral, 1 m sphere, marching tets level 48",
+      "reference": 2.0,
+      "measured": 2.0002377872364367,
+      "error_percent": 0.011889361821837419,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.00011889361821837419,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G2",
+      "criterion": "G2: pointwise discrete mean curvature, median relative error, structured UV sphere 1 m, 16x32",
+      "reference": 0.0,
+      "measured": 0.003938717571492001,
+      "error_percent": null,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "absolute": 0.003938717571492001,
+        "tolerance": 0.02,
+        "convention": "absolute (reference = 0 error)"
+      }
+    },
+    {
+      "gate": "G3",
+      "criterion": "G3: observed order of the pointwise estimate on the structured sphere",
+      "reference": 2.0,
+      "measured": 1.9462042190330666,
+      "error_percent": -2.689789048346669,
+      "tolerance": 0.5,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "absolute_delta": 0.05379578096693338,
+        "tolerance": 0.5
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=0.1 m, 40 Fibonacci probes",
+      "reference": 20.0,
+      "measured": 19.99999952075227,
+      "error_percent": -2.396238651947158e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.39623865638805e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=0.25 m, 40 Fibonacci probes",
+      "reference": 8.0,
+      "measured": 7.999999808301041,
+      "error_percent": -2.396236986612621e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.396236986612621e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=0.5 m, 40 Fibonacci probes",
+      "reference": 4.0,
+      "measured": 3.9999999041505205,
+      "error_percent": -2.396236986612621e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.396236986612621e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=1 m, 40 Fibonacci probes",
+      "reference": 2.0,
+      "measured": 1.9999999520752603,
+      "error_percent": -2.396236986612621e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.396236986612621e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=10 m, 40 Fibonacci probes",
+      "reference": 0.2,
+      "measured": 0.19999999520751865,
+      "error_percent": -2.3962406725530627e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.396240678104178e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=2 m, 40 Fibonacci probes",
+      "reference": 1.0,
+      "measured": 0.9999999760376301,
+      "error_percent": -2.396236986612621e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.396236986612621e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G4",
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=5 m, 40 Fibonacci probes",
+      "reference": 0.4,
+      "measured": 0.3999999904150373,
+      "error_percent": -2.3962406725530627e-06,
+      "tolerance": 1e-06,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 2.396240678104178e-08,
+        "tolerance": 1e-06,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G5",
+      "criterion": "G5: surface integral of kappa_1+kappa_2 over the mesh, level 48",
+      "reference": 25.132741228718345,
+      "measured": 25.124261904237144,
+      "error_percent": -0.03373816013158004,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.0003373816013157943,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G6",
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=0.1 m, level 24",
+      "reference": 20.0,
+      "measured": 20.00979778572167,
+      "error_percent": 0.04898892860834003,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.0004898892860834891,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G6",
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=0.5 m, level 24",
+      "reference": 4.0,
+      "measured": 4.001959557144333,
+      "error_percent": 0.04898892860831783,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.0004898892860831783,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G6",
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=1 m, level 24",
+      "reference": 2.0,
+      "measured": 2.0009797785721664,
+      "error_percent": 0.04898892860831783,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.0004898892860831783,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G6",
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=10 m, level 24",
+      "reference": 0.2,
+      "measured": 0.2000979778572167,
+      "error_percent": 0.04898892860834003,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.0004898892860834281,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G6",
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=2 m, level 24",
+      "reference": 1.0,
+      "measured": 1.0004898892860832,
+      "error_percent": 0.04898892860831783,
+      "tolerance": 0.02,
+      "verdict": "pass",
+      "independent_check": {
+        "pass": true,
+        "relative_error": 0.0004898892860831783,
+        "tolerance": 0.02,
+        "convention": "relative"
+      }
+    },
+    {
+      "gate": "G7",
+      "criterion": "G7: pointwise discrete mean curvature, median relative error, raw marching tets level 32",
+      "reference": null,
+      "measured": null,
+      "error_percent": null,
+      "tolerance": 0.02,
+      "verdict": "diagnostic-fail",
+      "independent_check": {
+        "pass": null,
+        "relative_error": null,
+        "note": "not a numeric gate (diagnostic without a value)"
+      }
+    }
+  ],
+  "gates_all_pass_claim": true,
+  "gates_failing_claim": [],
+  "gates_numeric_fail_after_recheck": [],
+  "diagnostics": {
+    "G7: pointwise discrete mean curvature, median relative error, raw marching tets level 32": {
+      "criterion": "G7: pointwise discrete mean curvature, median relative error, raw marching tets level 32",
+      "error_percent": null,
+      "scope": "diagnostic only: the raw pointwise reading on a sliver-ridden mesh",
+      "tolerance": 0.02,
+      "verdict": "fail"
+    }
+  },
+  "tests": {
+    "returncode": 0,
+    "tail": [
+      "    from _pytest.python import CallSpec2",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "8 passed, 1 warning in 15.50s"
+    ],
+    "summary": "8 passed, 1 warning in 15.50s"
+  },
+  "test_names": [
+    "test_the_analytic_reference_is_the_sum_of_the_principal_curvatures",
+    "test_the_integral_reading_is_inside_the_two_percent_criterion",
+    "test_the_pointwise_reading_needs_a_well_shaped_triangulation",
+    "test_the_pointwise_estimate_keeps_second_order_on_a_structured_sphere",
+    "test_the_relative_error_does_not_depend_on_the_radius",
+    "test_the_field_path_is_the_reference_for_the_measurement_chain",
+    "test_every_gate_of_the_case_passes",
+    "test_the_uv_sphere_fixture_is_a_legal_closed_mesh"
+  ],
+  "integration_callers_repo": [
+    "tensorcad/__init__.py:63:    vertex_mean_curvature,",
+    "tensorcad/__init__.py:751:    \"vertex_mean_curvature\",",
+    "tensorcad/fairness_energy.py:66:from .curvature import CurvatureError, principal_curvatures, vertex_mean_curvature",
+    "tensorcad/fairness_energy.py:161:    ``H`` from the cotangent Laplacian (:func:`tensorcad.curvature.vertex_mean_curvature`)",
+    "tensorcad/fairness_energy.py:170:    mean = vertex_mean_curvature(mesh)",
+    "tensorcad/fairness_energy.py:486:        mean = vertex_mean_curvature(mesh)",
+    "examples/fairness/run_example.py:47:    vertex_mean_curvature,",
+    "examples/fairness/run_example.py:174:        values = vertex_mean_curvature(mesh)",
+    "tensorcad/adapters/ocp.py:99:def _measure(ocp: dict[str, Any], shape: Any, properties: str) -> float:",
+    "tensorcad/adapters/ocp.py:273:    volume = sum(_measure(ocp, solid, \"VolumeProperties_s\") for solid in solids) / length_scale**3",
+    "tensorcad/adapters/ocp.py:274:    area = sum(_measure(ocp, solid, \"SurfaceProperties_s\") for solid in solids) / length_scale**2",
+    "tensorcad/adapters/ocp.py:322:    volume = _measure(ocp, shape, \"VolumeProperties_s\") / length_scale**3",
+    "tensorcad/adapters/ocp.py:323:    area = _measure(ocp, shape, \"SurfaceProperties_s\") / length_scale**2",
+    "tensorcad/design.py:341:            report=_measure(mesh),",
+    "tensorcad/design.py:498:def _measure(mesh: Mesh) -> _MeshFacts:",
+    "tensorcad/fleet/gates.py:80:def measure(mesh: Mesh) -> TopologyFacts:",
+    "tensorcad/fleet/gates.py:438:    facts = measure(mesh)",
+    "tensorcad/fleet/replace.py:125:        facts = measure(mesh)",
+    "tensorcad/fleet/replace.py:215:    facts = measure(reread)",
+    "tensorcad/fleet/run.py:176:    facts = measure(reread)",
+    "tensorcad/fleet/run.py:243:    facts = measure(placeholder)",
+    "tensorcad/geomquality/continuity_ood.py:203:def measure(",
+    "tensorcad/geomquality/continuity_ood.py:268:        measured = measure(",
+    "tensorcad/geomquality/continuity_ood.py:320:            truth = measure(",
+    "tensorcad/geomquality/continuity_ood.py:328:            coarse = measure(",
+    "tensorcad/geomquality/continuity_ood.py:336:            adaptive = measure(",
+    "tensorcad/geomquality/continuity_ood.py:395:        fixed = measure(face_a, face_b, samples=samples, scale=scale)",
+    "tensorcad/geomquality/continuity_ood.py:396:        adaptive = measure(",
+    "tensorcad/golden.py:211:    def measure(self, level: str) -> dict[str, float]:",
+    "tensorcad/golden.py:251:    def measure(self, level: str) -> dict[str, float]:",
+    "tensorcad/golden.py:297:    def measure(self, level: str) -> dict[str, float]:",
+    "tensorcad/golden.py:357:    def measure(self, level: str) -> dict[str, float]:",
+    "tensorcad/golden.py:427:    def measure(self, level: str) -> dict[str, float]:",
+    "tensorcad/golden.py:714:                key: float(value) for key, value in case.measure(level).items()",
+    "tensorcad/loft.py:532:    def measure(self, *, samples: int = 65, deviation_samples: int = 33) -> LoftMeasurement:",
+    "tensorcad/meshquality/cli.py:91:        quality = measure(spec.points, spec.elements)",
+    "tensorcad/meshquality/report.py:137:def measure(",
+    "tools/audit_m17306_publish.py:32:def measure() -> None:",
+    "tools/autodiff_gradcheck_report.py:119:def measure():",
+    "tools/autodiff_gradcheck_report.py:327:    m = measure()",
+    "tools/crosscheck_curvature_thirdparty.py:147:    def mean_measure(points, radius):",
+    "tools/crosscheck_curvature_thirdparty.py:157:    def gaussian_measure(points, radius):",
+    "tools/crosscheck_curvature_thirdparty.py:200:        def mean_measure(points, radius):",
+    "tools/crosscheck_curvature_thirdparty.py:201:            return discrete_mean_curvature_measure(tm, np.asarray(points), radius)",
+    "tools/crosscheck_curvature_thirdparty.py:203:        def gaussian_measure(points, radius):",
+    "tools/crosscheck_curvature_thirdparty.py:204:            return discrete_gaussian_curvature_measure(tm, np.asarray(points), radius)",
+    "tools/crosscheck_curvature_thirdparty.py:335:    mean_measures = mean_measure(points, radius)",
+    "tools/crosscheck_curvature_thirdparty.py:336:    gaussian_measures = gaussian_measure(points, radius)",
+    "tools/crosscheck_curvature_thirdparty.py:386:    total_mean = mean_measure([(0.0, 0.0, 0.0)], 1.0e3)[0]",
+    "tools/crosscheck_curvature_thirdparty.py:387:    total_gauss = gaussian_measure([(0.0, 0.0, 0.0)], 1.0e3)[0]",
+    "tools/hull_nurbs_report.py:55:def measure() -> dict:",
+    "tools/hull_nurbs_report.py:488:    measured = measure()",
+    "tools/mesh_quality_crosscheck.py:380:        conditioning = conditioning_measure(mesh)",
+    "tools/patch_fleet_run_round2.py:186:    facts = measure(reread)",
+    "examples/asymmetric_hull/run_example.py:48:def measure(fore: float, aft: float, nx: int, nz: int) -> dict[str, float]:",
+    "examples/asymmetric_hull/run_example.py:105:        mesh = measure(fore, 0.9, 81, 25)",
+    "examples/asymmetric_hull/run_example.py:121:            row = measure(fore, aft, nx, nz)",
+    "examples/asymmetric_hull/run_example.py:132:        mesh_one = measure(fore, aft, 81, 25)[\"lcb_mesh_m\"]",
+    "examples/asymmetric_hull/run_example.py:133:        mesh_two = measure(aft, fore, 81, 25)[\"lcb_mesh_m\"]",
+    "examples/design_loop/run_example.py:61:    def measure(parameters: HullParameters):",
+    "examples/design_loop/run_example.py:66:    _, brief = measure(BRIEF_HULL)",
+    "examples/design_loop/run_example.py:229:    _, refined_hydro = measure(refined)",
+    "examples/freeboard_seam/run_example.py:113:def measure(nx: int, nz: int) -> dict[str, object]:",
+    "examples/freeboard_seam/run_example.py:313:    rows = [measure(nx, nz) for nx, nz in GRIDS]",
+    "examples/icechannel_geodesy/run_example.py:74:def measure():",
+    "examples/icechannel_geodesy/run_example.py:273:    results = measure()",
+    "examples/loft/run_example.py:106:    cylinder_measure = cylinder.measure(samples=101, deviation_samples=41)",
+    "examples/loft/run_example.py:152:    parabola_measure = parabola.measure(samples=101, deviation_samples=41)",
+    "examples/loft/run_example.py:164:        measurement = loft_sections(tapered_family(), degree_u=degree_u).measure()",
+    "examples/loft/run_example.py:184:    mixed_measure = mixed.measure(samples=81, deviation_samples=21)",
+    "examples/loft/run_example.py:191:    rotating_measure = rotating.measure(samples=91, deviation_samples=31)",
+    "examples/mesh_quality/run_benchmark.py:189:        quality = measure(points, elements)",
+    "examples/mesh_quality/run_benchmark.py:255:                    library_tri = measure(points, {\"tri\": face_tris})",
+    "examples/mesh_quality/run_benchmark.py:307:    bad_quality = measure(bad_points, {\"tri\": [(0, 1, 2)]})",
+    "examples/mesh_quality/run_benchmark.py:368:    hull_quality = measure(*meshes[\"hull_hex\"])",
+    "examples/wigley_stability/run_example.py:125:def measure(exponent_pair: tuple[float, float], grid: tuple[int, int]) -> dict[str, object]:",
+    "examples/wigley_stability/run_example.py:612:            \"n=2\": [measure((2.0, 2.0), grid) for grid in LADDER],",
+    "examples/wigley_stability/run_example.py:613:            \"n=3\": [measure((3.0, 2.0), grid) for grid in LADDER],"
+  ],
+  "integration_callers_platform": [],
+  "console_scripts": [
+    "tensorcad-hull = \"tensorcad.cli:main\"",
+    "tensorcad-parametric-hull = \"tensorcad.parametric_hull_cli:main\"",
+    "tensorcad-neural = \"tensorcad.cli_neural:main\"",
+    "tensorcad-dtmb5415 = \"tensorcad.dtmb5415_cli:main\"",
+    "tensorcad = [\"py.typed\"]"
+  ],
+  "doc_sections": [
+    "1. Question and reference",
+    "2. Method",
+    "3. Parameters (all dimensionless groups)",
+    "4. Reference vs measured",
+    "5. Convergence and sensitivity",
+    "6. Failure modes and artifacts"
+  ],
+  "doc_bytes": 11739,
+  "result_schema": "tensorcad.benchmark.sphere_mean_curvature/1",
+  "result_sections": [
+    "all_gates_pass",
+    "campaign_node",
+    "case",
+    "diagnostic",
+    "diagnostics",
+    "environment",
+    "failing",
+    "figures",
+    "headline",
+    "marching",
+    "radius",
+    "reference",
+    "reference_chain",
+    "rows",
+    "schema",
+    "seconds",
+    "structured",
+    "tolerance"
+  ]
+}
