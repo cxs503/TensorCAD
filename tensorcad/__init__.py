@@ -396,6 +396,7 @@ from .validation import (
     inspect_geometry,
     inspect_mesh_quality,
 )
+from .spatial_index import RayHit, TriangleGrid, brute_force_nearest
 from .voxel import VoxelGrid, to_voxel_grid
 from .wigley import (
     REFERENCE_CASE as WIGLEY_REFERENCE_CASE,
@@ -631,6 +632,9 @@ __all__ = [
     "TransomModel",
     "ValidationReport",
     "VoxelGrid",
+    "RayHit",
+    "TriangleGrid",
+    "brute_force_nearest",
     "WaterplaneMoments",
     "WeatherCriterionReport",
     "WigleyAnalytic",
