@@ -125,10 +125,16 @@ class SubTaskResult:
     index_bytes: int = 0
     #: Peak resident set size of the process when this measurement finished.
     peak_rss_mb: float | None = None
+    #: Number of disjoint bodies in the measured mesh.  ``1`` is a single
+    #: parametric hull; ``>1`` marks a multi-body *fleet* rung, which exists
+    #: because ``HullParameters`` caps one body at 8.19e6 triangles and the
+    #: 10^7 band is otherwise unreachable (see :func:`build_fleet_mesh`).
+    copies: int = 1
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "subtask": self.subtask,
+            "copies": self.copies,
             "nx": self.nx,
             "nz": self.nz,
             "triangles": self.triangles,
@@ -156,11 +162,16 @@ class GateVerdict:
     baseline_seconds: float | None = None
     measured_seconds: float | None = None
     ratio: float | None = None
+    #: ``measured`` when the gate had enough data to judge, ``not_run`` when it
+    #: did not.  A ``not_run`` gate is not a pass: it is an explicit statement
+    #: that the check could not be performed on the data at hand.
+    status: str = MEASURED
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "passed": self.passed,
+            "status": self.status,
             "detail": self.detail,
             "baseline_seconds": self.baseline_seconds,
             "measured_seconds": self.measured_seconds,
@@ -283,6 +294,100 @@ def clear_mesh_cache() -> None:
     """Drop cached meshes (tests and repeated benchmark runs)."""
     _MESH_CACHE.clear()
 
+# ---------------------------------------------------------------------------
+# Multi-body source for the 10^7 band
+# ---------------------------------------------------------------------------
+
+#: Centre-to-centre spacing between hull copies, in beams.  One beam of gap
+#: keeps the bodies strictly disjoint, so the assembled mesh has no shared
+#: faces and the signed-volume integral stays exact (``copies * V``).
+FLEET_SPACING_BEAMS = 2.0
+
+#: Bound on retained fleet meshes: one rung at a time.  A 10^7-triangle fleet
+#: is several GB of Python tuples, keeping two would OOM the node.
+_FLEET_CACHE: "OrderedDict[tuple[int, int, int], Any]" = OrderedDict()
+FLEET_CACHE_SIZE = 1
+
+
+def build_fleet_mesh(model: Any, copies: int, spacing: float | None = None) -> Any:
+    """Assemble ``copies`` translated copies of one hull into a single mesh.
+
+    Why this exists: ``HullParameters`` refuses ``nx > 4001`` stations and
+    ``nz > 513`` levels, so the largest *parametric* hull is 8,192,000
+    triangles and the 10^7 band of GAP-CAD-D4-PERF-SCALE cannot be reached by
+    ``generate_hull`` alone.  Translating k disjoint copies gives a k-fold
+    larger mesh at O(N) copy cost (no generator loop), and because the bodies
+    do not touch, every geometry operation used here keeps a closed-form
+    answer: total signed volume is exactly ``copies`` x the single hull volume.
+
+    The mesh is *not* a substitute for a single large imported body when the
+    question is "how does the generator scale" - the assembly cost is measured
+    and reported separately as the ``fleet_assemble`` sub-task for exactly that
+    reason.  The brute-force ``_RayCaster`` reference is star-shaped only and
+    must not be used on a fleet.
+
+    Parameters
+    ----------
+    model:
+        A generated hull model (``model.mesh`` is the :class:`~tensorcad.geometry.Mesh`).
+    copies:
+        Number of bodies, ``>= 1``.
+    spacing:
+        Centre-to-centre spacing in model units; defaults to
+        ``FLEET_SPACING_BEAMS * beam`` of the hull parameters.
+    """
+    if copies < 1:
+        raise ValueError("copies must be >= 1")
+
+    from tensorcad.geometry import Mesh
+
+    base = model.mesh
+    if copies == 1:
+        return base
+    if spacing is None:
+        beam = getattr(getattr(model, "parameters", None), "beam", None)
+        if beam is None:
+            raise ValueError("spacing is required when the model has no beam parameter")
+        spacing = FLEET_SPACING_BEAMS * float(beam)
+
+    base_verts = base.vertices
+    base_faces = base.faces
+    n_verts = len(base_verts)
+    vertices: list[Any] = []
+    faces: list[Any] = []
+    for k in range(copies):
+        dy = k * spacing
+        vertices.extend((x, y + dy, z) for (x, y, z) in base_verts)
+        offset = k * n_verts
+        faces.extend((a + offset, b + offset, c + offset) for (a, b, c) in base_faces)
+    return Mesh(vertices=tuple(vertices), faces=tuple(faces), units=base.units,
+                coordinate_frame=base.coordinate_frame)
+
+
+def _cached_fleet(nx: int, nz: int, copies: int) -> Any:
+    """Return (and cache) the fleet mesh for one (resolution, body count) key."""
+    key = (nx, nz, copies)
+    mesh = _FLEET_CACHE.get(key)
+    if mesh is None:
+        mesh = build_fleet_mesh(_cached_hull(nx, nz), copies)
+        _FLEET_CACHE[key] = mesh
+        _FLEET_CACHE.move_to_end(key)
+        while len(_FLEET_CACHE) > FLEET_CACHE_SIZE:
+            _FLEET_CACHE.popitem(last=False)
+    else:
+        _FLEET_CACHE.move_to_end(key)
+    return mesh
+
+
+def clear_fleet_cache() -> None:
+    """Drop cached fleet meshes."""
+    _FLEET_CACHE.clear()
+
+
+def _mesh_for(nx: int, nz: int, copies: int) -> Any:
+    """Mesh accessor shared by the mesh sub-tasks (single body or fleet)."""
+    return _cached_hull(nx, nz).mesh if copies == 1 else _cached_fleet(nx, nz, copies)
+
 
 # ---------------------------------------------------------------------------
 # Sub-task implementations
@@ -312,7 +417,7 @@ def _run_load(nx: int, nz: int) -> SubTaskResult:
     )
 
 
-def _run_point_locate(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
+def _run_point_locate(nx: int, nz: int, n_queries: int = 1000, copies: int = 1) -> SubTaskResult:
     """Measure ray-casting / point-location throughput.
 
     The _RayCaster casts rays from the origin; the hull is centered at the
@@ -321,6 +426,11 @@ def _run_point_locate(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
     """
     from tensorcad.benchmark import _RayCaster
 
+    if copies != 1:
+        raise ValueError(
+            "_RayCaster is a star-shaped single-body reference; "
+            "use point_locate_accel for multi-body fleet rungs"
+        )
     model = _cached_hull(nx, nz)
     tris = len(model.mesh.faces)
     verts = len(model.mesh.vertices)
@@ -346,22 +456,28 @@ def _run_point_locate(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
     )
 
 
-def _run_point_locate_accel(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
+def _run_point_locate_accel(
+    nx: int, nz: int, n_queries: int = 1000, copies: int = 1
+) -> SubTaskResult:
     """Measure the indexed point-location path (uniform grid + DDA).
 
     ``seconds`` is the query time only; ``build_seconds`` is reported
     separately because index construction is a one-off cost.  The two numbers
     answer different engineering questions ("can I afford one index build" vs
     "what does a query cost").
+
+    With ``copies > 1`` the measured mesh is a multi-body fleet (see
+    :func:`build_fleet_mesh`); the queries are the same Fibonacci directions
+    from the origin, so for a fleet they report the nearest body's intersection.
     """
     from tensorcad.spatial_index import TriangleGrid
 
-    model = _cached_hull(nx, nz)
-    tris = len(model.mesh.faces)
-    verts = len(model.mesh.vertices)
+    mesh = _mesh_for(nx, nz, copies)
+    tris = len(mesh.faces)
+    verts = len(mesh.vertices)
 
     t0 = time.perf_counter()
-    grid = TriangleGrid(model.mesh)
+    grid = TriangleGrid(mesh)
     build = time.perf_counter() - t0
 
     directions = _fibonacci_directions(n_queries)
@@ -375,6 +491,7 @@ def _run_point_locate_accel(nx: int, nz: int, n_queries: int = 1000) -> SubTaskR
 
     return SubTaskResult(
         subtask="point_locate_accel", nx=nx, nz=nz, triangles=tris, vertices=verts,
+        copies=copies,
         grid_cells=int(stats["cells"]),
         seconds=round(elapsed, 6),
         throughput=round(n_queries / elapsed, 1) if elapsed > 0 else None,
@@ -386,7 +503,7 @@ def _run_point_locate_accel(nx: int, nz: int, n_queries: int = 1000) -> SubTaskR
         note=(
             f"hits={hits}/{n_queries}, grid={tuple(stats['resolution'])}, "
             f"entries/tri={stats['entries_per_triangle']:.2f}, "
-            f"build={build:.3f}s"
+            f"build={build:.3f}s, bodies={copies}"
         ),
     )
 
@@ -421,24 +538,70 @@ def _run_voxelize(grid_res: int) -> SubTaskResult:
     )
 
 
-def _run_volume(nx: int, nz: int) -> SubTaskResult:
-    """Measure volume integration time."""
-    from tensorcad import mesh as meshlib
+def _run_volume(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
+    """Measure volume integration time (divergence theorem over the triangles).
 
-    model = _cached_hull(nx, nz)
-    tris = len(model.mesh.faces)
-    verts = len(model.mesh.vertices)
+    The measured volume is reported together with its analytic reference
+    (``copies`` x ``hull.analytic_volume``) and the relative error, so a rung
+    that produces a fast-but-wrong number cannot pass unnoticed.
+    """
+    from tensorcad import mesh as meshlib
+    from tensorcad.hull import analytic_volume
+
+    mesh = _mesh_for(nx, nz, copies)
+    tris = len(mesh.faces)
+    verts = len(mesh.vertices)
 
     t0 = time.perf_counter()
-    vol = meshlib.total_signed_volume(model.mesh)
+    vol = meshlib.total_signed_volume(mesh)
     elapsed = time.perf_counter() - t0
+
+    reference = copies * analytic_volume(10.0, 2.0, 0.8)
+    rel_err = (vol - reference) / reference if reference else float("nan")
 
     return SubTaskResult(
         subtask="volume", nx=nx, nz=nz, triangles=tris, vertices=verts,
         grid_cells=0,
+        copies=copies,
         seconds=round(elapsed, 6),
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
-        note=f"volume={vol:.6f} m^3",
+        note=(
+            f"volume={vol:.6f} m^3, analytic={reference:.6f} m^3, "
+            f"rel_err={rel_err:+.3%}, bodies={copies}"
+        ),
+        peak_rss_mb=peak_rss_mb(),
+    )
+
+
+def _run_fleet_assemble(nx: int, nz: int, copies: int) -> SubTaskResult:
+    """Measure the O(N) multi-body assembly of a fleet mesh.
+
+    Timed separately from ``load`` (generation) because they answer different
+    questions: generation is a generator-loop cost, assembly is a pure copy.  A
+    fleet rung is only interpretable if both numbers are on the table.
+    """
+    from tensorcad.mesh import total_signed_volume  # noqa: F401  (import check)
+
+    base = _cached_hull(nx, nz)
+    base_tris = len(base.mesh.faces)
+
+    t0 = time.perf_counter()
+    mesh = build_fleet_mesh(base, copies)
+    elapsed = time.perf_counter() - t0
+
+    _FLEET_CACHE[(nx, nz, copies)] = mesh
+    _FLEET_CACHE.move_to_end((nx, nz, copies))
+    while len(_FLEET_CACHE) > FLEET_CACHE_SIZE:
+        _FLEET_CACHE.popitem(last=False)
+
+    tris = len(mesh.faces)
+    return SubTaskResult(
+        subtask="fleet_assemble", nx=nx, nz=nz, triangles=tris, vertices=len(mesh.vertices),
+        grid_cells=0,
+        copies=copies,
+        seconds=round(elapsed, 6),
+        throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
+        note=f"bodies={copies} x {base_tris:,} tri from one generated body",
         peak_rss_mb=peak_rss_mb(),
     )
 
@@ -584,6 +747,7 @@ def run_perf_benchmark(
     elapsed = time.perf_counter() - t_start
     return PerfBenchmarkResult(
         results=tuple(results),
+        gates=scaling_gates(results),
         environment=_environment(),
         seconds=round(elapsed, 3),
         cluster_warnings=tuple(cluster_warnings),
@@ -591,8 +755,223 @@ def run_perf_benchmark(
 
 
 # ---------------------------------------------------------------------------
-# Regression gate
+# 10^7-band fleet runner
 # ---------------------------------------------------------------------------
+
+#: Default base rung for the fleet tier: one 4.0e6-triangle generated hull,
+#: assembled into 2 (8.0e6) and 3 (1.2e7) bodies.  Two fleet sizes from one
+#: generation give the 10^6 -> 10^7 doubling without paying for a second
+#: multi-minute generation.
+FLEET_BASE_LADDER: tuple[tuple[int, int], ...] = ((2001, 501),)
+FLEET_COPIES_LADDER: tuple[int, ...] = (2, 3)
+
+
+def run_fleet_benchmark(
+    base_ladder: tuple[tuple[int, int], ...] = FLEET_BASE_LADDER,
+    copies_ladder: tuple[int, ...] = FLEET_COPIES_LADDER,
+    subtasks: tuple[str, ...] = ("load", "fleet_assemble", "point_locate_accel", "volume"),
+    n_queries: int = 2000,
+    max_triangles: int | None = None,
+) -> PerfBenchmarkResult:
+    """Measure the 10^6-10^7 band on multi-body (fleet) meshes.
+
+    One hull is generated per base rung (``load``, timed); each body count then
+    gets ``fleet_assemble`` (the O(N) copy), ``point_locate_accel`` and
+    ``volume``.  The brute-force ``point_locate`` reference is deliberately not
+    offered here: ``_RayCaster`` assumes a star-shaped single body.
+    """
+    t_start = time.perf_counter()
+    results: list[SubTaskResult] = []
+    cluster_warnings: list[str] = []
+
+    for nx, nz in base_ladder:
+        base_tris = 4 * (nx - 1) * (nz - 1)
+        if max_triangles is not None and base_tris * max(copies_ladder) > max_triangles:
+            continue
+        try:
+            load = _run_load(nx, nz)
+        except Exception as exc:  # pragma: no cover - defensive
+            results.append(SubTaskResult(
+                subtask="load", nx=nx, nz=nz, triangles=0, vertices=0,
+                grid_cells=0, seconds=None, status=FAILED, note=str(exc),
+            ))
+            continue
+        results.append(load)
+        for copies in copies_ladder:
+            try:
+                results.append(_run_fleet_assemble(nx, nz, copies))
+            except Exception as exc:
+                results.append(SubTaskResult(
+                    subtask="fleet_assemble", nx=nx, nz=nz, triangles=0, vertices=0,
+                    grid_cells=0, seconds=None, status=FAILED, note=str(exc), copies=copies,
+                ))
+                continue
+            for task_name in subtasks:
+                if task_name in ("load", "fleet_assemble"):
+                    continue
+                try:
+                    if task_name == "point_locate_accel":
+                        r = _run_point_locate_accel(nx, nz, n_queries=n_queries, copies=copies)
+                    elif task_name == "volume":
+                        r = _run_volume(nx, nz, copies=copies)
+                    else:
+                        r = _SUBTASKS_MESH[task_name](nx, nz, copies=copies)
+                    results.append(r)
+                    if r.triangles >= CLUSTER_THRESHOLD:
+                        cluster_warnings.append(
+                            f"{task_name} at {nx}x{nz} x{copies} bodies "
+                            f"({r.triangles:,} triangles) took {r.seconds:.3f}s, "
+                            f"peak RSS {r.peak_rss_mb or 0:.0f} MiB"
+                        )
+                except Exception as exc:
+                    results.append(SubTaskResult(
+                        subtask=task_name, nx=nx, nz=nz, triangles=0, vertices=0,
+                        grid_cells=0, seconds=None, status=FAILED, note=str(exc),
+                        copies=copies,
+                    ))
+        clear_mesh_cache()
+        # The fleet cache is dropped per rung too: one 10^7 mesh is several GB.
+        clear_fleet_cache()
+
+    elapsed = time.perf_counter() - t_start
+    return PerfBenchmarkResult(
+        results=tuple(results),
+        gates=scaling_gates(results),
+        environment=_environment(),
+        seconds=round(elapsed, 3),
+        cluster_warnings=tuple(cluster_warnings),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Regression gates
+# ---------------------------------------------------------------------------
+
+#: Prefix of the scale-derived (complexity) gates, so they can be recognised and
+#: preserved when wall-clock regression gates are added on top.
+SCALING_GATE_PREFIX = "scaling_"
+
+#: Upper bound on the fitted log-log exponent, per sub-task.  A wall-clock gate
+#: against a baseline measured on tiny meshes cannot see an algorithmic
+#: regression; the exponent can.  Measured exponents on the committed ladder are
+#: ~1.0 for the O(N) paths (``load``, ``volume``, brute-force ``point_locate``)
+#: and ~0.3 for the indexed point location; these limits leave head-room for
+#: shared-machine noise while still flagging a regression towards O(N^2)
+#: (exponent ~2).
+SCALING_LIMITS: dict[str, float] = {
+    "load": 1.5,
+    "fleet_assemble": 1.5,
+    "point_locate": 1.5,
+    "point_locate_accel": 0.8,
+    "volume": 1.5,
+    "voxelize": 1.5,
+}
+
+#: Fewest distinct sizes needed before an exponent is gated at all.
+MIN_SCALING_POINTS = 3
+
+
+def measurement_key(subtask: str, nx: int, nz: int, copies: int = 1) -> str:
+    """Stable identity of one measurement, used as the baseline/gate key.
+
+    Single-body keys keep the historical ``subtask:nxXxnz`` spelling so existing
+    baselines stay valid; fleet rungs append the body count.
+    """
+    key = f"{subtask}:{nx}x{nz}"
+    if copies != 1:
+        key += f":b{copies}"
+    return key
+
+
+def _scale_axis(result: SubTaskResult) -> float:
+    """The size axis of a measurement: triangles for meshes, cells for voxels."""
+    if result.subtask == "voxelize":
+        return float(result.grid_cells)
+    return float(result.triangles)
+
+
+def _loglog_slope(points: list[tuple[float, float]]) -> tuple[float, float]:
+    """Least-squares slope of log(seconds) vs log(size), and the R^2 of the fit."""
+    xs = [math.log(x) for x, _ in points]
+    ys = [math.log(y) for _, y in points]
+    n = len(points)
+    mx = sum(xs) / n
+    my = sum(ys) / n
+    sxx = sum((x - mx) ** 2 for x in xs)
+    if sxx == 0.0:
+        raise ValueError("degenerate size axis (all sizes equal)")
+    sxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    slope = sxy / sxx
+    intercept = my - slope * mx
+    ss_res = sum((y - (intercept + slope * x)) ** 2 for x, y in zip(xs, ys))
+    ss_tot = sum((y - my) ** 2 for y in ys)
+    r_squared = 1.0 - ss_res / ss_tot if ss_tot > 0.0 else 1.0
+    return slope, r_squared
+
+
+def scaling_gates(
+    results: tuple[SubTaskResult, ...] | list[SubTaskResult],
+    limits: dict[str, float] | None = None,
+    min_points: int = MIN_SCALING_POINTS,
+) -> tuple[GateVerdict, ...]:
+    """Gate the measured complexity exponent of every sub-task.
+
+    This is the *scale-invariant* half of the performance gate.  The wall-clock
+    gate (:func:`evaluate_gates`) compares one run against a stored baseline at
+    the same size, which is why its committed baseline only covers the cheap
+    ladder: a 10^6-triangle run is too slow for CI, so that band had no gate at
+    all.  Fitting the exponent closes that hole cheaply - a change that turns an
+    O(N) pass into O(N^2) shows up as exponent ~2 even on small rungs.
+
+    A sub-task with fewer than ``min_points`` distinct sizes is reported with
+    ``status=NOT_RUN`` (explicitly "not checked", never a silent pass).
+    """
+    table = SCALING_LIMITS if limits is None else limits
+    groups: dict[tuple[str, int], dict[float, float]] = {}
+    for r in results:
+        if r.seconds is None or r.seconds <= 0.0:
+            continue
+        size = _scale_axis(r)
+        if size <= 0.0:
+            continue
+        # Keep the slowest observation per exact size (repeat runs).
+        bucket = groups.setdefault((r.subtask, r.copies), {})
+        bucket[size] = max(bucket.get(size, 0.0), r.seconds)
+
+    gates: list[GateVerdict] = []
+    for (subtask, copies), bucket in sorted(groups.items()):
+        suffix = "" if copies == 1 else f"[x{copies}]"
+        name = f"{SCALING_GATE_PREFIX}{subtask}{suffix}"
+        limit = table.get(subtask)
+        points = sorted(bucket.items())
+        if limit is None:
+            gates.append(GateVerdict(
+                name=name, passed=True, status=NOT_RUN,
+                detail=f"not_run: no exponent limit configured for {subtask!r}",
+            ))
+            continue
+        if len(points) < min_points:
+            gates.append(GateVerdict(
+                name=name, passed=True, status=NOT_RUN,
+                detail=(
+                    f"not_run: {len(points)} distinct size(s), need {min_points} "
+                    f"to fit an exponent"
+                ),
+            ))
+            continue
+        slope, r_squared = _loglog_slope(points)
+        passed = slope <= limit
+        gates.append(GateVerdict(
+            name=name,
+            passed=passed,
+            detail=(
+                f"exponent={slope:.2f} (limit {limit:.2f}), R^2={r_squared:.3f}, "
+                f"{len(points)} sizes {int(points[0][0]):,}..{int(points[-1][0]):,}"
+            ),
+            ratio=round(slope, 3),
+        ))
+    return tuple(gates)
+
 
 def evaluate_gates(
     result: PerfBenchmarkResult,
@@ -611,7 +990,9 @@ def evaluate_gates(
         if bp.exists():
             data = json.loads(bp.read_text(encoding="utf-8"))
             for entry in data.get("results", []):
-                key = f"{entry['subtask']}:{entry['nx']}x{entry['nz']}"
+                key = measurement_key(
+                    entry["subtask"], entry["nx"], entry["nz"], entry.get("copies", 1)
+                )
                 if entry.get("seconds") is not None:
                     baseline[key] = entry["seconds"]
 
@@ -619,7 +1000,7 @@ def evaluate_gates(
     for r in result.results:
         if r.seconds is None:
             continue
-        key = f"{r.subtask}:{r.nx}x{r.nz}"
+        key = measurement_key(r.subtask, r.nx, r.nz, r.copies)
         if key not in baseline:
             continue
         bl = baseline[key]
@@ -634,6 +1015,10 @@ def evaluate_gates(
             ratio=round(ratio, 3),
         ))
 
+    # Preserve the scale-derived gates computed by the runner; this function
+    # only appends the wall-clock comparison against a stored baseline.
+    scaling = tuple(g for g in result.gates if g.name.startswith(SCALING_GATE_PREFIX))
+    gates = list(scaling) + gates
     return replace(result, gates=tuple(gates)), [
         g.name for g in gates if not g.passed
     ]
@@ -655,6 +1040,11 @@ def main(argv: list[str] | None = None) -> int:
                         help="Skip steps producing more than this many triangles")
     parser.add_argument("--n-queries", type=int, default=None,
                         help="Number of ray queries for point_locate")
+    parser.add_argument("--fleet-tier", action="store_true",
+                        help="Measure the 10^6-10^7 band on multi-body fleet meshes "
+                             "(see build_fleet_mesh); uses --ladder/--fleet-copies")
+    parser.add_argument("--fleet-copies", type=str, default="2,3",
+                        help="Comma-separated body counts for --fleet-tier (default 2,3)")
     parser.add_argument("--max-naive-triangles", type=int, default=DEFAULT_MAX_NAIVE_TRIANGLES,
                         help="Skip the brute-force point_locate reference above this triangle count")
     parser.add_argument("--save-baseline", type=str, default=None,
@@ -690,14 +1080,28 @@ def main(argv: list[str] | None = None) -> int:
 
     subtasks = tuple(s.strip() for s in args.subtasks.split(","))
 
-    result = run_perf_benchmark(
-        ladder=ladder,
-        voxel_ladder=voxel_ladder,
-        subtasks=subtasks,
-        max_triangles=args.max_triangles,
-        n_queries=n_queries,
-        max_naive_triangles=args.max_naive_triangles,
-    )
+    if args.fleet_tier:
+        copies_ladder = tuple(int(c) for c in args.fleet_copies.split(",") if c.strip())
+        if args.ladder and not (args.quick or args.full):
+            base_ladder = ladder
+        else:
+            base_ladder = FLEET_BASE_LADDER
+        result = run_fleet_benchmark(
+            base_ladder=base_ladder,
+            copies_ladder=copies_ladder,
+            subtasks=subtasks,
+            n_queries=n_queries or FULL_N_QUERIES,
+            max_triangles=args.max_triangles,
+        )
+    else:
+        result = run_perf_benchmark(
+            ladder=ladder,
+            voxel_ladder=voxel_ladder,
+            subtasks=subtasks,
+            max_triangles=args.max_triangles,
+            n_queries=n_queries,
+            max_naive_triangles=args.max_naive_triangles,
+        )
 
     failed_gates = []
     if args.baseline:
@@ -743,7 +1147,8 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
     for r in result.results:
         by_task.setdefault(r.subtask, []).append(r)
 
-    for task_name in ("load", "point_locate", "point_locate_accel", "voxelize", "volume"):
+    for task_name in ("load", "fleet_assemble", "point_locate", "point_locate_accel",
+                      "voxelize", "volume"):
         entries = by_task.get(task_name, [])
         if not entries:
             continue
@@ -755,13 +1160,13 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
                 sec = f"{r.seconds:.4f}" if r.seconds is not None else "N/A"
                 print(f"  {r.nx:>6} {r.grid_cells:>12,} {sec:>10} {tp:>14} {r.status:>10}")
         else:
-            print(f"  {'nx':>5} {'nz':>5} {'triangles':>10} {'vertices':>10} {'seconds':>10} {'throughput':>14} {'build':>8} {'rss_MB':>8} {'status':>10}")
+            print(f"  {'nx':>5} {'nz':>5} {'bodies':>6} {'triangles':>11} {'vertices':>11} {'seconds':>10} {'throughput':>14} {'build':>8} {'rss_MB':>8} {'status':>10}")
             for r in entries:
                 tp = f"{r.throughput:,.0f}" if r.throughput else "N/A"
                 sec = f"{r.seconds:.4f}" if r.seconds is not None else "N/A"
                 bld = f"{r.build_seconds:.3f}" if r.build_seconds is not None else "-"
                 rss = f"{r.peak_rss_mb:,.0f}" if r.peak_rss_mb is not None else "-"
-                print(f"  {r.nx:>5} {r.nz:>5} {r.triangles:>10,} {r.vertices:>10,} {sec:>10} {tp:>14} {bld:>8} {rss:>8} {r.status:>10}")
+                print(f"  {r.nx:>5} {r.nz:>5} {r.copies:>6} {r.triangles:>11,} {r.vertices:>11,} {sec:>10} {tp:>14} {bld:>8} {rss:>8} {r.status:>10}")
         print()
 
     if result.cluster_warnings:
@@ -771,10 +1176,13 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
         print()
 
     if result.gates:
-        print("--- Regression Gates ---")
+        print("--- Regression Gates (wall-clock ratio + measured complexity exponent) ---")
         for g in result.gates:
-            mark = "✓" if g.passed else "✗ RED"
-            print(f"  {mark} {g.name}: {g.detail}")
+            if g.status == NOT_RUN:
+                mark = "· not_run"
+            else:
+                mark = "✓" if g.passed else "✗ RED"
+            print(f"  {mark:>9} {g.name}: {g.detail}")
         print()
 
 
