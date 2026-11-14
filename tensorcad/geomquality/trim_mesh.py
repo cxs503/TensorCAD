@@ -73,14 +73,57 @@ Triangle = tuple[int, int, int]
 # --------------------------------------------------------------------------- #
 # surface inversion
 # --------------------------------------------------------------------------- #
+def _grid_seeds(u0: float, u1: float, v0: float, v1: float, steps: int,
+                around: tuple[float, float] | None = None,
+                half_width: tuple[float, float] | None = None) -> list[tuple[float, float]]:
+    """A rectangular seed lattice, either over the whole domain or around one point."""
+    if around is None or half_width is None:
+        return [
+            (u0 + (u1 - u0) * i / steps, v0 + (v1 - v0) * j / steps)
+            for i in range(steps + 1)
+            for j in range(steps + 1)
+        ]
+    cu, cv = around
+    hu, hv = half_width
+    return [
+        (min(max(cu + hu * (2.0 * i / steps - 1.0), u0), u1),
+         min(max(cv + hv * (2.0 * j / steps - 1.0), v0), v1))
+        for i in range(steps + 1)
+        for j in range(steps + 1)
+    ]
+
+
+def _best_over(surface: Surface, point: Sequence[float], seeds: Sequence[tuple[float, float]],
+               iterations: int, tolerance: float) -> tuple[float, float, float]:
+    best: tuple[float, float, float] | None = None
+    for seed in seeds:
+        candidate = _gauss_newton(surface, point, seed, iterations, tolerance)
+        if best is None or candidate[2] < best[2]:
+            best = candidate
+        if best[2] <= tolerance:
+            break
+    assert best is not None
+    return best
+
+
 def invert_point(surface: Surface, point: Sequence[float], *,
                  seeds: Sequence[tuple[float, float]] = (),
-                 iterations: int = 60, tolerance: float = 1e-12) -> tuple[float, float, float]:
+                 iterations: int = 60, tolerance: float = 1e-12,
+                 fallback_tolerance: float | None = None) -> tuple[float, float, float]:
     """Project ``point`` onto ``surface``: returns ``(u, v, residual)``.
 
     Gauss-Newton on ``|S(u,v) - p|^2`` with a finite-difference Jacobian.  ``seeds`` lets
     a caller walk along a curve (each point seeded by its predecessor), which is what
     keeps a trim loop's parameter image continuous instead of jumping between branches.
+
+    A seeded walk is only *fast*, not *sufficient*: on a real patch set the loop crosses
+    edges where one parametric direction collapses (a knuckle line, a keel line), the
+    predecessor's parameter is a poor seed there, and the damped step cannot leave the
+    domain wall it walks into -- the walk then stays pinned at the wall for the rest of
+    the loop.  ``fallback_tolerance`` is the caller's acceptance residual: a seeded
+    attempt that misses it is retried from a grid, and, if the grid also misses, from one
+    refined lattice around the grid winner.  Passing ``None`` keeps the historical
+    seed-only behaviour for callers that want a cheap walk and do their own checking.
     """
     (u0, u1), (v0, v1) = surface.domain
     if isinstance(surface, PlaneSurface):
@@ -89,22 +132,25 @@ def invert_point(surface: Surface, point: Sequence[float], *,
         return (u, v, residual)
 
     best: tuple[float, float, float] | None = None
-    grid_seeds = list(seeds)
-    if not grid_seeds:
-        steps = 6
-        grid_seeds = [
-            (u0 + (u1 - u0) * i / steps, v0 + (v1 - v0) * j / steps)
-            for i in range(steps + 1)
-            for j in range(steps + 1)
-        ]
-    for seed in grid_seeds:
-        candidate = _gauss_newton(surface, point, seed, iterations, tolerance)
-        if best is None or candidate[2] < best[2]:
-            best = candidate
-        if best[2] <= tolerance:
-            break
-    assert best is not None
-    return best
+    accepted = tolerance if fallback_tolerance is None else max(tolerance, fallback_tolerance)
+    if seeds:
+        best = _best_over(surface, point, seeds, iterations, tolerance)
+        if best[2] <= accepted:
+            return best
+
+    grid_steps = 6
+    coarse = _best_over(surface, point, _grid_seeds(u0, u1, v0, v1, grid_steps),
+                        iterations, tolerance)
+    if best is None or coarse[2] < best[2]:
+        best = coarse
+    if best[2] <= tolerance or fallback_tolerance is None or best[2] <= fallback_tolerance:
+        return best
+
+    half = ((u1 - u0) / grid_steps, (v1 - v0) / grid_steps)
+    fine = _best_over(surface, point,
+                      _grid_seeds(u0, u1, v0, v1, 4, (best[0], best[1]), half),
+                      iterations, tolerance)
+    return fine if fine[2] < best[2] else best
 
 
 def _gauss_newton(surface: Surface, point: Sequence[float], seed: tuple[float, float],
@@ -127,6 +173,15 @@ def _gauss_newton(surface: Surface, point: Sequence[float], seed: tuple[float, f
         a11, a12 = _dot(du, du), _dot(du, dv)
         a22 = _dot(dv, dv)
         b1, b2 = -_dot(du, residual), -_dot(dv, residual)
+        # Levenberg damping, relative to the trace: on a collapsed parametric direction
+        # (du or dv ~ 0, as at a knuckle/keel edge) the undamped normal matrix is
+        # singular and the old code bailed out of the iteration at the domain wall.
+        trace = a11 + a22
+        if trace <= 0.0:
+            break
+        damping_lm = 1e-6 * trace
+        a11 += damping_lm
+        a22 += damping_lm
         determinant = a11 * a22 - a12 * a12
         if abs(determinant) < 1e-18:
             break
@@ -249,14 +304,7 @@ def triangulate_trimmed_domain(loops: Sequence[Sequence[tuple[float, float]]]) -
     indexes into the concatenated, de-duplicated vertex list built here, so the caller can
     rebuild the exact boundary vertices.
     """
-    cleaned: list[list[tuple[float, float]]] = []
-    for loop in loops:
-        points = list(loop)
-        if len(points) > 1 and points[0] == points[-1]:
-            points = points[:-1]
-        if len(points) < 3:
-            continue
-        cleaned.append(points)
+    cleaned = _without_duplicate(loops)
     if not cleaned:
         raise ValueError("no loop with at least three points")
     areas = [_signed_area(loop) for loop in cleaned]
@@ -287,6 +335,7 @@ class Tessellation:
     refused: dict[int, str]
     max_residual: float
     residual_tolerance: float
+    chord_tolerance: float = 0.0
 
     @property
     def triangle_count(self) -> int:
@@ -294,25 +343,97 @@ class Tessellation:
 
 
 def _loop_to_uv(surface: Surface, loop: Sequence[Vec3], tolerance: float) -> tuple[list[tuple[float, float]], float]:
-    """Invert a 3-D loop onto ``(u, v)``; returns the parameters and the worst residual."""
+    """Invert a 3-D loop onto ``(u, v)``; returns the parameters and the worst residual.
+
+    A produced patch set has *singular edges*: a whole parametric edge whose 3-D image is
+    one point (the tip a patch closes on, the apex of a collapsed patch).  Inverting such
+    an edge is ill-posed -- the 3-D points are identical, so the walk pins every one of
+    them against whichever domain wall it reached -- and the parametric loop collapses to
+    a sliver that no triangulator can fill.  The 3-D points carry no information about
+    *where along the edge* they came from, but the domain does: the run sits on a domain
+    wall, so it is rebuilt as a span along that wall between the neighbour parameters.
+    """
+    (u0, u1), (v0, v1) = surface.domain
+    points = list(loop)
+    if points and points[0] != points[-1]:
+        points.append(points[0])
     parameters: list[tuple[float, float]] = []
     worst = 0.0
     seed: list[tuple[float, float]] = []
-    for point in loop:
-        u, v, residual = invert_point(surface, point, seeds=seed)
+    for point in points:
+        u, v, residual = invert_point(surface, point, seeds=seed,
+                                      fallback_tolerance=tolerance)
         worst = max(worst, residual)
         parameters.append((u, v))
         seed = [(u, v)]
-    if parameters and parameters[0] != parameters[-1]:
-        parameters.append(parameters[0])
-    return parameters, worst
+    rebuilt = _rebuild_singular_edges(parameters, points,
+                                      (u0, u1, v0, v1), max(tolerance * 1e-3, 1e-12))
+    return rebuilt, worst
+
+
+def _rebuild_singular_edges(parameters: Sequence[tuple[float, float]],
+                            points: Sequence[Vec3],
+                            domain: tuple[float, float, float, float],
+                            coincident_tolerance: float) -> list[tuple[float, float]]:
+    """Replace runs of 3-D-coincident loop points by the domain wall they collapsed onto."""
+    u0, u1, v0, v1 = domain
+    count = len(parameters)
+    if count < 4:
+        return list(parameters)
+    rebuilt: list[tuple[float, float]] = []
+    index = 0
+    while index < count - 1:
+        run_end = index
+        while run_end + 1 < count - 1 and _distance(points[run_end], points[run_end + 1]) <= coincident_tolerance:
+            run_end += 1
+        if run_end > index:
+            previous = parameters[index - 1] if index > 0 else parameters[-2]
+            following = parameters[run_end + 1]
+            span = _wall_span(parameters[index:run_end + 1], previous, following, domain)
+            rebuilt.extend(span if span else [parameters[index]])
+        else:
+            rebuilt.append(parameters[index])
+        index = run_end + 1
+    rebuilt.append(rebuilt[0] if rebuilt else parameters[0])
+    return rebuilt
+
+
+def _wall_span(run: Sequence[tuple[float, float]], previous: tuple[float, float],
+               following: tuple[float, float],
+               domain: tuple[float, float, float, float]) -> list[tuple[float, float]]:
+    """Two parameters spanning the collapsed edge along the wall the run sits on."""
+    u0, u1, v0, v1 = domain
+    span_u = max(u1 - u0, 1e-12)
+    span_v = max(v1 - v0, 1e-12)
+    candidates: list[tuple[float, list[tuple[float, float]]]] = []
+    for wall in (u0, u1):
+        if all(abs(point[0] - wall) <= 1e-6 * span_u for point in run):
+            start, end = previous[1], following[1]
+            if abs(end - start) <= 1e-9 * span_v:
+                start, end = v0, v1
+            candidates.append((abs(end - start), [(wall, start), (wall, end)]))
+    for wall in (v0, v1):
+        if all(abs(point[1] - wall) <= 1e-6 * span_v for point in run):
+            start, end = previous[0], following[0]
+            if abs(end - start) <= 1e-9 * span_u:
+                start, end = u0, u1
+            candidates.append((abs(end - start), [(start, wall), (end, wall)]))
+    if not candidates:
+        return []
+    return max(candidates, key=lambda item: item[0])[1]
+
+
+def _distance(a: Sequence[float], b: Sequence[float]) -> float:
+    return _norm(_sub(a, b))
 
 
 def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float | None = None,
-                             scale: float = 1.0) -> Tessellation:
+                             scale: float = 1.0, chord_tolerance: float | None = None,
+                             refine_levels: int = 6) -> Tessellation:
     """Tessellate every face; faces whose trim does not lie on the surface are refused."""
     extent = _model_extent_from_faces(model.faces)
     tolerance = residual_tolerance if residual_tolerance is not None else 1e-6 * max(extent, 1e-9)
+    chord = chord_tolerance if chord_tolerance is not None else 1e-3 * max(extent, 1e-9)
     vertices: list[Vec3] = []
     faces: list[Triangle] = []
     stats: list[dict[str, Any]] = []
@@ -339,8 +460,10 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
             # Boundary vertices are emitted from the (u, v) parameters, so two faces that
             # share a trim curve produce identical 3-D boundary points and stitch exactly.
             flat = [point for loop in cleaned for point in loop]
-            for u, v in flat:
-                vertices.append(_scale(face.surface.evaluate(u, v), scale))
+            flat, positions, triangles = refine_parametric(
+                face.surface, flat, triangles, chord, refine_levels)
+            for position in positions:
+                vertices.append(_scale(position, scale))
             face_triangles: list[Triangle] = []
             for a, b, c in triangles:
                 if a >= len(flat) or b >= len(flat) or c >= len(flat):
@@ -359,6 +482,8 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
                 "loop_points": sum(len(loop) for loop in uv_loops),
                 "triangles": len(face_triangles),
                 "inversion_residual": face_residual,
+                "chord_tolerance": chord,
+                "surface_vertices": len(flat),
                 "parametric_area": polygon_area,
                 "mesh_area": area,
                 "area_relative_error": (
@@ -376,18 +501,111 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
         refused=refused,
         max_residual=worst_residual,
         residual_tolerance=tolerance,
+        chord_tolerance=chord,
     )
 
 
 def _without_duplicate(loops: Sequence[Sequence[tuple[float, float]]]) -> list[list[tuple[float, float]]]:
+    """Drop the closing point and consecutive coincident points of every loop.
+
+    Both the triangulator and the vertex emitter go through this one function, so the
+    triangle indices stay aligned with the vertex list.  A trim loop that walks a
+    collapsed (singular) edge can hand back a run of *nearly* identical parameters
+    instead of bit-identical ones; ear clipping reads such a run as a degenerate corner
+    and refuses the face, so coincident neighbours are removed here as well as exact
+    duplicates.
+    """
     out: list[list[tuple[float, float]]] = []
     for loop in loops:
         points = list(loop)
         if len(points) > 1 and points[0] == points[-1]:
             points = points[:-1]
         if len(points) >= 3:
+            points = _drop_coincident(points)
+        if len(points) >= 3:
             out.append(points)
     return out
+
+
+def refine_parametric(surface: Surface, uv: Sequence[tuple[float, float]],
+                      triangles: Sequence[Triangle], chord_tolerance: float,
+                      levels: int = 6) -> tuple[list[tuple[float, float]], list[Vec3], list[Triangle]]:
+    """Refine a parametric triangulation until every interior edge complies with the chord
+    tolerance; returns ``(uv, positions, triangles)`` with positions evaluated on the surface.
+
+    Ear clipping only ever emits triangles whose vertices are *trim loop* vertices, so a
+    patch is represented by a fan across its boundary: on a real hull that measured 30 %
+    low in wetted area (KCS, 6 635 m2 against a published ~9 500 m2) because no sample
+    ever lands on the patch interior.  Edges that lie on the trim loop (single incidence
+    within the face) are deliberately never split: their endpoints are the loop vertices
+    shared with the neighbouring face, and a split would place a *different* 3-D point on
+    each side of a seam and open a crack.  Interior diagonals are split 1->2 / 1->3 / 1->4
+    at their parametric midpoints, which is conforming because every edge midpoint is
+    shared by the two triangles that own that edge.
+    """
+    uv_list = list(uv)
+    positions = [surface.evaluate(u, v) for (u, v) in uv_list]
+    current = list(triangles)
+    for _ in range(levels):
+        incidence: dict[tuple[int, int], int] = {}
+        for a, b, c in current:
+            for first, second in ((a, b), (b, c), (c, a)):
+                key = (first, second) if first < second else (second, first)
+                incidence[key] = incidence.get(key, 0) + 1
+        split: dict[tuple[int, int], int] = {}
+        for (a, b), count in incidence.items():
+            if count != 2 or a == b:
+                continue
+            midpoint = _scale(_add(positions[a], positions[b]), 0.5)
+            uv_mid = (0.5 * (uv_list[a][0] + uv_list[b][0]),
+                      0.5 * (uv_list[a][1] + uv_list[b][1]))
+            on_surface = surface.evaluate(*uv_mid)
+            if _norm(_sub(on_surface, midpoint)) > chord_tolerance:
+                split[(a, b)] = len(uv_list)
+                uv_list.append(uv_mid)
+                positions.append(on_surface)
+        if not split:
+            break
+        refined: list[Triangle] = []
+        for a, b, c in current:
+            m_ab = split.get((a, b) if a < b else (b, a))
+            m_bc = split.get((b, c) if b < c else (c, b))
+            m_ca = split.get((c, a) if c < a else (a, c))
+            marked = [m_ab, m_bc, m_ca]
+            if not any(marked):
+                refined.append((a, b, c))
+            elif m_ab and not m_bc and not m_ca:
+                refined.extend([(a, m_ab, c), (m_ab, b, c)])
+            elif m_bc and not m_ab and not m_ca:
+                refined.extend([(b, m_bc, a), (m_bc, c, a)])
+            elif m_ca and not m_ab and not m_bc:
+                refined.extend([(c, m_ca, b), (m_ca, a, b)])
+            elif m_ab and m_bc and not m_ca:
+                refined.extend([(a, m_ab, m_bc), (a, m_bc, c), (m_ab, b, m_bc)])
+            elif m_bc and m_ca and not m_ab:
+                refined.extend([(b, m_bc, m_ca), (b, m_ca, a), (m_bc, c, m_ca)])
+            elif m_ca and m_ab and not m_bc:
+                refined.extend([(c, m_ca, m_ab), (c, m_ab, b), (m_ca, a, m_ab)])
+            else:
+                refined.extend([(a, m_ab, m_ca), (m_ab, b, m_bc), (m_ca, m_bc, c),
+                                (m_ab, m_bc, m_ca)])
+        current = refined
+    return uv_list, positions, current
+
+
+def _drop_coincident(points: Sequence[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Remove consecutive parameters closer than a millionth of the loop bounding box."""
+    xs = [point[0] for point in points]
+    ys = [point[1] for point in points]
+    epsilon = 1e-6 * max(max(xs) - min(xs), max(ys) - min(ys), 1e-12)
+    kept: list[tuple[float, float]] = []
+    for point in points:
+        if not kept or abs(point[0] - kept[-1][0]) > epsilon or abs(point[1] - kept[-1][1]) > epsilon:
+            kept.append(point)
+    while len(kept) > 3 and abs(kept[0][0] - kept[-1][0]) <= epsilon \
+            and abs(kept[0][1] - kept[-1][1]) <= epsilon:
+        kept.pop()
+    return kept
 
 
 def _triangle_area(a: Sequence[float], b: Sequence[float], c: Sequence[float]) -> float:
@@ -762,7 +980,8 @@ class CadImport:
 
 def import_iges(path: str | Path, *, tolerance: float | None = None, scale: float | None = None,
                 weld_tolerance: float | None = None, repair: bool = True,
-                fill_holes: bool = True, max_hole_edges: int = 32) -> CadImport:
+                fill_holes: bool = True, max_hole_edges: int = 32,
+                chord_tolerance: float | None = None, refine_levels: int = 6) -> CadImport:
     """Import an IGES file: parse, invert trims, tessellate, repair, audit.
 
     ``scale`` converts the file's units to metres; it defaults to the file's own declared
@@ -772,7 +991,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
     digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
     model = read_iges_trimmed(path, tolerance=tolerance)
     unit_scale = scale if scale is not None else model.metres_per_unit
-    tessellation = tessellate_trimmed_model(model, scale=unit_scale)
+    tessellation = tessellate_trimmed_model(model, scale=unit_scale,
+                                           chord_tolerance=chord_tolerance,
+                                           refine_levels=refine_levels)
     extent = _model_extent_from_faces(model.faces) * unit_scale
     weld = weld_tolerance if weld_tolerance is not None else 1e-6 * max(extent, 1e-9)
 
@@ -814,6 +1035,7 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
             "reader_refused": {str(key): value for key, value in model.refused.items()},
             "max_inversion_residual": tessellation.max_residual,
             "residual_tolerance": tessellation.residual_tolerance,
+            "chord_tolerance": tessellation.chord_tolerance,
             "weld_tolerance": weld,
             "face_stats": tessellation.face_stats,
             "entity_census": {str(key): value for key, value in model.census.items()},
