@@ -341,6 +341,12 @@ class Series60Golden(GoldenCase):
             ),
         }
 
+    def geometry_sha256(self) -> str:
+        """Fingerprint of the fine grid the measurements were taken on."""
+        from . import series60
+
+        return _mesh_sha256(series60.generate_series60(self._parameters("fine")).mesh)
+
 
 class SphereEllipsoidGolden(GoldenCase):
     """SDF primitives through marching tetrahedra: the closed forms are exact."""
@@ -392,6 +398,26 @@ class SphereEllipsoidGolden(GoldenCase):
         for axis, extent in zip("xyz", (2.0 * axis for axis in self.AXES), strict=True):
             reference[f"ellipsoid_extent_{axis}_m"] = extent
         return reference
+
+
+    def geometry_sha256(self) -> str:
+        """Fingerprint of both sampled fields (sphere + triaxial ellipsoid, fine grid).
+
+        Two meshes, one case: each mesh is hashed and the pair is folded into a single
+        digest so a change to either body drifts the case.
+        """
+        from .geometry_field import EllipsoidField, SphereField, to_mesh
+
+        digest = hashlib.sha256()
+        for name, geometry in (
+            ("sphere", SphereField(radius=self.RADIUS, center=(0.0, 0.0, 0.0))),
+            ("ellipsoid", EllipsoidField(semi_axes=self.AXES, center=(0.0, 0.0, 0.0))),
+        ):
+            mesh = to_mesh(geometry, resolution=self._resolution("fine")).mesh
+            digest.update(name.encode())
+            digest.update(b"\0")
+            digest.update(_mesh_sha256(mesh).encode())
+        return digest.hexdigest()
 
 
 class DTMB5415Golden(GoldenCase):
@@ -502,6 +528,10 @@ class DTMB5415Golden(GoldenCase):
             "the open sheet carries a single boundary loop (deck edge + stem seam)",
         )
         return invariants
+
+    def geometry_sha256(self) -> str:
+        """Fingerprint of the shipped shell: vertices, faces and their order."""
+        return _mesh_sha256(self._space().mesh())
 
     def known_limitations(self, values: Mapping[str, float]) -> list[dict[str, Any]]:
         return [
@@ -899,6 +929,49 @@ def evaluate_case(
                         metric=key,
                     )
                 )
+
+    # ---- geometry identity: the mesh itself, not only the numbers integrated on it ----
+    # ``geometry_sha256`` is written by ``--bless``; until this block existed it was never
+    # read back, so a change that keeps every measured quantity bit-identical
+    # (re-triangulation, vertex renumbering, inverted winding -- the surface area takes
+    # the norm and the sphere/ellipsoid volume the absolute value) passed silently.
+    blessed_fingerprint = str(blessed.get("geometry_sha256") or "")
+    measured_fingerprint = result.geometry_sha256
+    if not measured_fingerprint:
+        findings.append(
+            Finding(
+                WARNING,
+                "geometry_fingerprint_missing",
+                case.name,
+                "this case does not fingerprint its geometry: only the integrated "
+                "quantities are drift-locked",
+            )
+        )
+    elif not blessed_fingerprint:
+        if blessed and not baseline_optional:
+            findings.append(
+                Finding(
+                    WARNING,
+                    "geometry_fingerprint_not_blessed",
+                    case.name,
+                    "the baseline records no geometry fingerprint for this case; "
+                    "re-run '--bless' to lock the mesh itself",
+                )
+            )
+    elif measured_fingerprint != blessed_fingerprint:
+        findings.append(
+            Finding(
+                ERROR,
+                "geometry_changed",
+                case.name,
+                (
+                    f"geometry fingerprint {blessed_fingerprint[:16]}... -> "
+                    f"{measured_fingerprint[:16]}... (the mesh changed; blessing the new "
+                    "mesh is a deliberate act, not a side effect of a refactor)"
+                ),
+            )
+        )
+
     result.seconds = time.perf_counter() - started
     return result
 
