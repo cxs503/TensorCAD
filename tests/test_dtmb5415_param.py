@@ -22,8 +22,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from tensorcad.dtmb5415 import (DATASET, DRAFT_M, GRID, SCALE_LAMBDA, WATERLINE_Z,
-                                DTMB5415Space, point_grid)
+from tensorcad.dtmb5415 import (DATASET, DRAFT_M, GRID, HALF_BREADTH_FLOOR, SCALE_LAMBDA,
+                                WATERLINE_Z, DTMB5415Space, half_breadth_mask, point_grid,
+                                project_half_breadth)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "docs" / "data" / "dtmb5415" / "holdout_fixture.npz"
@@ -170,6 +171,71 @@ def test_symmetric_across_the_centreplane(space):
 
 
 # ---------------------------------------------------------------------------
+# symmetry plane: the surrogate crosses y = 0, the mesh must not
+# ---------------------------------------------------------------------------
+def test_surrogate_does_cross_the_symmetry_plane_on_the_fixture(space, fixture):
+    """Regression on the defect: the raw surrogate overshoots the centreline at the stern.
+
+    Without this fixture the symmetry-plane restoration would look like a no-op, so the
+    test pins the *unrepaired* behaviour: at least one holdout configuration has the raw
+    grid more than 0.1 m below y = 0 (worst observed -0.30 m), i.e. the gate would fail.
+    """
+    worst = min(space.raw_station_grid(v)[..., 1].min() for v in fixture["design_vector"])
+    assert worst < -0.1, f"fixture no longer exercises the crossing (min raw y = {worst:.4f})"
+
+
+def test_symmetry_plane_is_feasible_by_construction(space, fixture):
+    """Every configuration's mesh satisfies y >= 0 exactly -- pinned, not merely small."""
+    for v in fixture["design_vector"]:
+        q = space.quality(v)
+        assert q["half_breadth_min_m"] == HALF_BREADTH_FLOOR
+        assert q["half_breadth_min_m"] >= -1e-6
+        # and the mesh stays valid where it was repaired (no collapsed triangles)
+        assert q["degenerate_faces"] == 0
+        assert q["non_finite_vertices"] == 0
+        assert q["min_angle_deg"] >= 20.0
+        # the reported raw minimum is the honest surrogate statement, never hidden
+        assert q["half_breadth_raw_min_m"] <= q["half_breadth_min_m"] + 1e-12
+        assert q["half_breadth_clamped_vertices"] == int(
+            half_breadth_mask(space.raw_station_grid(v)).sum())
+
+
+def test_projection_is_the_minimal_correction(space, fixture):
+    """The restoration moves one coordinate of the offending points and nothing else."""
+    v = max(fixture["design_vector"], key=lambda v: -space.raw_station_grid(v)[..., 1].min())
+    raw = space.raw_station_grid(v)
+    feasible = space.station_grid(v)
+    assert np.array_equal(raw[..., [0, 2]], feasible[..., [0, 2]])
+    expected_y = np.maximum(raw[..., 1], HALF_BREADTH_FLOOR)
+    assert np.array_equal(feasible[..., 1], expected_y)
+    # idempotent (a second pass is a no-op) and inactive inside the feasible set
+    assert np.array_equal(project_half_breadth(feasible), feasible)
+    ok = raw[..., 1] >= HALF_BREADTH_FLOOR
+    assert np.array_equal(feasible[..., 1][ok], raw[..., 1][ok])
+
+
+def test_projection_is_inactive_on_the_reference_hull(space):
+    """v = 0: nothing but the ~1e-9 spline ringing at the seam is touched."""
+    raw = space.raw_station_grid(space.zero())
+    feasible = space.station_grid(space.zero())
+    shift = np.abs(feasible[..., 1] - raw[..., 1]).max()
+    assert shift < 1e-8
+    assert np.array_equal(raw[..., [0, 2]], feasible[..., [0, 2]])
+
+
+def test_mesh_is_symmetric_after_the_projection(space, fixture):
+    """Mirroring happens after the projection, so the two sides meet on y = 0."""
+    v = max(fixture["design_vector"], key=lambda v: -space.raw_station_grid(v)[..., 1].min())
+    verts = space.vertices(v)
+    star = verts[: space._n_patch_vertices]
+    port = verts[space._n_patch_vertices:]
+    assert star[:, 1].min() >= HALF_BREADTH_FLOOR
+    assert port[:, 1].max() <= 0.0
+    # no self-intersection through the symmetry plane: the port shell never crosses it
+    assert np.abs(port[port[:, 1] > -1e-9][:, 1]).max() < 1e-9
+
+
+# ---------------------------------------------------------------------------
 # analytic differentiation chain
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("mode", [0, 4, 13, 26])
@@ -181,6 +247,43 @@ def test_volume_gradient_matches_central_difference(space, mode):
     ana = space.volume_gradient(space.zero())[mode]
     assert abs(fd) > 1.0
     assert abs(ana - fd) / abs(fd) < 1e-4
+
+
+def test_vertex_jacobian_exact_across_the_projection(space, fixture):
+    """The analytic derivative survives an active projection (mask carried, not ignored).
+
+    The worst holdout configuration has ~2 % of the grid clamped, so the finite difference
+    crosses the clamp: the analytic Jacobian must still match it.
+    """
+    v = max(fixture["design_vector"], key=lambda v: -space.raw_station_grid(v)[..., 1].min())
+    assert half_breadth_mask(space.raw_station_grid(v)).sum() > 100
+    jac = space.vertex_jacobian(v)
+    h = 1e-5
+    for mode in (0, 9, 26):
+        e = np.zeros(27)
+        e[mode] = h
+        # the active set must not switch over the stencil, else the comparison is meaningless
+        assert np.array_equal(half_breadth_mask(space.raw_station_grid(v + e)),
+                              half_breadth_mask(space.raw_station_grid(v - e)))
+        fd = (space.vertices(v + e) - space.vertices(v - e)) / (2 * h)
+        assert np.abs(fd - jac[:, :, mode]).max() < 1e-6
+    # clamped vertices carry a zero y-derivative (their y is pinned to the floor)
+    active_star = half_breadth_mask(space.raw_station_grid(v))
+    n_star = space._n_patch_vertices
+    starred = np.concatenate([active_star[0].reshape(-1), active_star[1].reshape(-1)])
+    assert np.abs(jac[:n_star, 1, :][starred]).max() == 0.0
+
+
+def test_volume_gradient_exact_where_the_projection_is_active(space, fixture):
+    """dV/dv still matches a central difference on the repaired configuration (<1 %)."""
+    v = max(fixture["design_vector"], key=lambda v: -space.raw_station_grid(v)[..., 1].min())
+    grad = space.volume_gradient(v)
+    h = 1e-5
+    for mode in (0, 13):
+        e = np.zeros(27)
+        e[mode] = h
+        fd = (space.volume(v + e) - space.volume(v - e)) / (2 * h)
+        assert abs(grad[mode] - fd) / abs(fd) < 1e-4
 
 
 def test_vertex_jacobian_matches_central_difference(space):
