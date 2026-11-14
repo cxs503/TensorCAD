@@ -267,9 +267,14 @@ def test_metadata_is_complete_and_json_serialisable(tmp_path) -> None:
     assert loaded["schema_version"] == "2.0"
     assert loaded["units"] == "m"
     assert "coordinate_frame" in loaded
+    # The family dispatch extended the parameter set (all Series 60 knobs are at
+    # their neutrals on the default sine family), so every field is pinned here.
     assert loaded["parameters"] == {
         "length": 10.0, "beam": 2.0, "draft": 0.8, "nx": 11, "nz": 5, "water_density": 1025.0,
         "fore_exponent": 0.7, "aft_exponent": 0.7,
+        "family": "sine", "block_coefficient": None, "waterplane_coefficient": None,
+        "lcb_ratio": None, "transom_ratio": 0.0, "bulb_length_ratio": 0.0,
+        "bulb_area_ratio": 0.0, "bulb_centre_height_ratio": 0.35,
     }
     assert loaded["validation"]["passed"] is True
     assert loaded["mesh"]["vertex_count"] == len(model.vertices)
