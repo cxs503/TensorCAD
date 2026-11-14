@@ -54,10 +54,19 @@ and all) and hands over its Kuhn-split tetrahedra.  That second path is the one 
 for the package's own hull generator, whose rings collapse to zero breadth at the stem and
 post and are therefore refused by star tessellation.
 
-(*) SU2/CGNS surface triangles remain genuinely unsupported -- the formats only
-carry volume cells -- but :func:`round_trip_meshio` now raises a
-``MeshioFormatError`` telling the caller to call
-:func:`tetrahedralise_surface` instead of silently having nothing to offer.
+(*) SU2/CGNS surface triangles are not supported *by meshio* in this environment,
+but they are **not** unsupported by the formats: SU2 carries triangles as element
+type 5 and CGNS carries ``TRI_3``/``QUAD_4``, and :mod:`tensorcad.mesh_formats`
+writes and reads both.  The limitation is upstream and reproducible (meshio 5.3.5):
+its SU2 writer raises ``TypeError: cannot unpack non-iterable CellBlock object``
+for surface cells, and its CGNS reader raises ``KeyError: object ' data' doesn't
+exist`` on its own triangle output -- tetrahedra work through both.  So
+:func:`round_trip_meshio` raises a ``MeshioFormatError`` pointing the caller at
+:func:`tetrahedralise_surface` (volume path) or at
+``tensorcad.mesh_formats.write``/``read`` (surface path) instead of silently
+having nothing to offer.  ``tests/test_mesh_formats_foreign_intake.py`` pins the
+surface path; this docstring previously claimed the formats themselves could not
+carry a surface, which was wrong.
 
 A caveat that is stated rather than hidden: the CGNS path goes through meshio's
 CGNS writer, which stores a *single* uniform element block (tetra only) and does
