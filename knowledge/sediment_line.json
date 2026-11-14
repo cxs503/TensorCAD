@@ -378,7 +378,7 @@
       "docs": [
         {
           "path": "docs/box_inclined_exact.md",
-          "contains": "`0.175598 m` at `45\u00b0`"
+          "contains": "`0.175598 m` at `45°`"
         },
         {
           "path": "docs/box_inclined_exact.md",
@@ -530,6 +530,108 @@
         {
           "path": "docs/nurbs_intersect.md",
           "contains": "WITHHELD"
+        }
+      ]
+    },
+    {
+      "id": "mesh_volume.box_exact",
+      "title": "A triangle mesh represents a box exactly: divergence-theorem volume equals a*b*c to round-off",
+      "claim": "For a closed axis-aligned box a x b x c tessellated into 12 triangles, tensorcad.mesh_xval.TriMesh.volume() reproduces a*b*c to floating-point round-off (benchmarked at 0 absolute error for 2x2x2, 1.5x0.75x3 and a rotated+translated copy).",
+      "kind": "analytic_identity",
+      "acceptance": "live closed form equals 8.0 exactly for a 2x2x2 box; the benchmark artifact still reports measured_volume 8.0 for box_2x2x2",
+      "tags": [
+        "mesh",
+        "volume",
+        "closed-body",
+        "analytic"
+      ],
+      "probes": [
+        {
+          "call": "tensorcad.mesh_volume:analytic_box_volume",
+          "args": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "expected": 8.0,
+          "rel_tol": 0.0,
+          "abs_tol": 0.0
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "benchmarks/verified/mesh_volume_watertight/result.json",
+          "json_pointer": "/bodies/box_2x2x2/measured_volume",
+          "expected": 8.0,
+          "sha256": "04500c3eedfd7778ed0699bb9785d801e379f778d39b50a95d9689a98486835c",
+          "rel_tol": 0.0,
+          "abs_tol": 0.0
+        }
+      ],
+      "docs": [
+        {
+          "path": "docs/mesh_volume_watertight_bench.md",
+          "contains": "CASE-CAD-VOLUME-CLOSED"
+        }
+      ]
+    },
+    {
+      "id": "mesh_volume.icosahedron_closed_form",
+      "title": "The sub0 icosphere's volume matches the regular-icosahedron closed form",
+      "claim": "The 20-triangle icosphere of circumradius R has volume (5/12)(3+sqrt5)a^3 with a = 4R/sqrt(10+2sqrt5); the mesh route reproduces it to round-off.",
+      "kind": "analytic_identity",
+      "acceptance": "live closed form at R=1 agrees with the benchmark artifact's measured volume for sphere_r1_sub0 within 1e-12 relative",
+      "tags": [
+        "mesh",
+        "volume",
+        "icosahedron",
+        "analytic"
+      ],
+      "probes": [
+        {
+          "call": "tensorcad.mesh_volume:analytic_icosahedron_volume",
+          "args": [
+            1.0
+          ],
+          "expected": 2.5361507101204097,
+          "rel_tol": 1e-15
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "benchmarks/verified/mesh_volume_watertight/result.json",
+          "json_pointer": "/bodies/sphere_r1_sub0/measured_volume",
+          "expected": 2.5361507101204097,
+          "sha256": "04500c3eedfd7778ed0699bb9785d801e379f778d39b50a95d9689a98486835c",
+          "rel_tol": 1e-12
+        }
+      ]
+    },
+    {
+      "id": "mesh_volume.sphere_second_order",
+      "title": "Inscribed icosphere volume converges to the sphere at second order",
+      "claim": "The volume deficit of the inscribed icosphere against 4/3 pi r^3 falls at the observed order p = 1.9888 over sub0..sub6, reaching -1.35e-4 relative at sub6 (81920 facets); topology stays closed (0 open edges, chi = 2) at every rung.",
+      "kind": "benchmark_gate",
+      "acceptance": "the artifact's observed order stays within 1 % of 1.9888 and the doc still reports the fit",
+      "tags": [
+        "mesh",
+        "volume",
+        "convergence",
+        "sphere"
+      ],
+      "artifacts": [
+        {
+          "path": "benchmarks/verified/mesh_volume_watertight/result.json",
+          "json_pointer": "/convergence/observed_order_volume",
+          "expected": 1.9887553774398368,
+          "sha256": "04500c3eedfd7778ed0699bb9785d801e379f778d39b50a95d9689a98486835c",
+          "rel_tol": 0.001
+        }
+      ],
+      "docs": [
+        {
+          "path": "docs/mesh_volume_watertight_bench.md",
+          "contains": "观测阶（log|误差| 对 log h 最小二乘）"
         }
       ]
     }

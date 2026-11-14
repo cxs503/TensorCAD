@@ -1,0 +1,930 @@
+{
+  "schema": "tensorcad.mesh_volume_watertight/1",
+  "anchor": "CASE-CAD-VOLUME-CLOSED",
+  "passed": true,
+  "tolerances": {
+    "relative": 0.001,
+    "exact": 1e-12,
+    "route": 1e-10,
+    "order_band": [
+      1.5,
+      2.5
+    ]
+  },
+  "gates": [
+    {
+      "case": "box_2x2x2",
+      "quantity": "volume",
+      "reference": 8.0,
+      "measured": 8.0,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "box_2x2x2",
+      "quantity": "area",
+      "reference": 24.0,
+      "measured": 24.0,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "box_2x2x2",
+      "quantity": "route_agreement",
+      "reference": 8.0,
+      "measured": 8.0,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-10,
+      "passed": true,
+      "note": "divergence theorem vs centroid-tet summation"
+    },
+    {
+      "case": "box_2x2x2",
+      "quantity": "topology_closed",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "open=0 euler=2 defects=[]"
+    },
+    {
+      "case": "box_2x2x2",
+      "quantity": "trimesh_volume",
+      "reference": 8.0,
+      "measured": 8.0,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-09,
+      "passed": true,
+      "note": "third-party implementation (trimesh), same triangles"
+    },
+    {
+      "case": "box_1.5x0.75x3",
+      "quantity": "volume",
+      "reference": 3.375,
+      "measured": 3.375,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "box_1.5x0.75x3",
+      "quantity": "area",
+      "reference": 15.75,
+      "measured": 15.75,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "box_1.5x0.75x3",
+      "quantity": "route_agreement",
+      "reference": 3.375,
+      "measured": 3.375,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-10,
+      "passed": true,
+      "note": "divergence theorem vs centroid-tet summation"
+    },
+    {
+      "case": "box_1.5x0.75x3",
+      "quantity": "topology_closed",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "open=0 euler=2 defects=[]"
+    },
+    {
+      "case": "box_1.5x0.75x3",
+      "quantity": "trimesh_volume",
+      "reference": 3.375,
+      "measured": 3.375,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-09,
+      "passed": true,
+      "note": "third-party implementation (trimesh), same triangles"
+    },
+    {
+      "case": "box_2x2x2_rot_trans",
+      "quantity": "volume",
+      "reference": 8.0,
+      "measured": 7.999999999999933,
+      "error": -8.326672684688674e-15,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "box_2x2x2_rot_trans",
+      "quantity": "area",
+      "reference": 24.0,
+      "measured": 24.000000000000014,
+      "error": 5.921189464667501e-16,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "box_2x2x2_rot_trans",
+      "quantity": "route_agreement",
+      "reference": 7.999999999999933,
+      "measured": 8.000000000000007,
+      "error": 9.214851104388877e-15,
+      "error_kind": "relative",
+      "tolerance": 1e-10,
+      "passed": true,
+      "note": "divergence theorem vs centroid-tet summation"
+    },
+    {
+      "case": "box_2x2x2_rot_trans",
+      "quantity": "topology_closed",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "open=0 euler=2 defects=[]"
+    },
+    {
+      "case": "box_2x2x2_rot_trans",
+      "quantity": "trimesh_volume",
+      "reference": 8.0,
+      "measured": 8.00000000000001,
+      "error": 1.3322676295501878e-15,
+      "error_kind": "relative",
+      "tolerance": 1e-09,
+      "passed": true,
+      "note": "third-party implementation (trimesh), same triangles"
+    },
+    {
+      "case": "sphere_r1_sub0",
+      "quantity": "icosahedron_closed_form",
+      "reference": 2.5361507101204097,
+      "measured": 2.53615071012041,
+      "error": 1.7510363563093552e-16,
+      "error_kind": "relative",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": "(5/12)(3+sqrt5)a^3, a = 4R/sqrt(10+2sqrt5): the sub0 mesh's own closed form, independent of any mesh summation"
+    },
+    {
+      "case": "sphere_r1_sub6",
+      "quantity": "volume",
+      "reference": 4.1887902047863905,
+      "measured": 4.188223738179637,
+      "error": -0.00013523394084192125,
+      "error_kind": "relative",
+      "tolerance": 0.001,
+      "passed": true,
+      "note": "finest level of the ladder (declared before the run)"
+    },
+    {
+      "case": "sphere_r1_sub6",
+      "quantity": "area",
+      "reference": 12.566370614359172,
+      "measured": 12.565431142476388,
+      "error": -7.476079702047789e-05,
+      "error_kind": "relative",
+      "tolerance": 0.001,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "sphere_r1_sub6",
+      "quantity": "route_agreement",
+      "reference": 4.188223738179637,
+      "measured": 4.188223738179637,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-10,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "sphere_r1_sub6",
+      "quantity": "topology_closed",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "open=0 euler=2"
+    },
+    {
+      "case": "reference_provenance",
+      "quantity": "sphere_volume_two_derivations",
+      "reference": 4.1887902047863905,
+      "measured": 4.1887902047863905,
+      "error": 0.0,
+      "error_kind": "relative",
+      "tolerance": 1e-15,
+      "passed": true,
+      "note": "4/3 pi r^3 vs (2/3)(pi r^2)(2r) (Euclid XII.18, circumscribed cylinder)"
+    },
+    {
+      "case": "sphere_r1_sub4",
+      "quantity": "coarse_must_exceed_tolerance",
+      "reference": 0.001,
+      "measured": 0.0021608283894018676,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "negative control on the ladder: an inscribed polyhedron at this resolution may not reproduce the sphere"
+    },
+    {
+      "case": "sphere_ladder",
+      "quantity": "observed_order_volume",
+      "reference": 2.0,
+      "measured": 1.9887553774398368,
+      "error": -0.011244622560163231,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "least-squares slope of log|err| vs log h over sub0..sub6; accepted band [1.5, 2.5] around the theoretical 2"
+    },
+    {
+      "case": "sphere_r2.5_sub6",
+      "quantity": "volume",
+      "reference": 65.44984694978736,
+      "measured": 65.44099590905682,
+      "error": -0.0001352339408421231,
+      "error_kind": "relative",
+      "tolerance": 0.001,
+      "passed": true,
+      "note": ""
+    },
+    {
+      "case": "scaling_invariance",
+      "quantity": "volume_error_difference",
+      "reference": -0.00013523394084192125,
+      "measured": -0.0001352339408421231,
+      "error": -2.018513394624888e-16,
+      "error_kind": "absolute",
+      "tolerance": 1e-12,
+      "passed": true,
+      "note": "r=1 vs r=2.5 at sub6"
+    },
+    {
+      "case": "box_stl_roundtrip",
+      "quantity": "volume",
+      "reference": 5.423,
+      "measured": 5.423000447991193,
+      "error": 8.26094767816675e-08,
+      "error_kind": "relative",
+      "tolerance": 1e-06,
+      "passed": true,
+      "note": "binary STL stores float32 coordinates, so the format's 1.2e-7 precision, not the 1e-12 in-memory box line, is the applicable tolerance"
+    },
+    {
+      "case": "control:hole",
+      "quantity": "defect_detected",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "facets removed inside an x/z window -> named ['seam_gap', 'seam_gap']"
+    },
+    {
+      "case": "control:flipped_facet",
+      "quantity": "defect_detected",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "facet winding reversed on 4 facets -> named ['normal_inconsistency']"
+    },
+    {
+      "case": "control:duplicate_facet",
+      "quantity": "defect_detected",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "3 facets repeated -> named ['nonmanifold_edge', 'duplicate_facets']"
+    },
+    {
+      "case": "control:unwelded_soup",
+      "quantity": "defect_detected",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "connectivity destroyed (STL before welding) -> named ['component_count']"
+    },
+    {
+      "case": "blind_spot:duplicate_single",
+      "quantity": "defect_detected_by_audit",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "volume effect +1.153e-05 at sub6; named ['nonmanifold_edge', 'duplicate_facets']"
+    },
+    {
+      "case": "blind_spot:flipped_single",
+      "quantity": "defect_detected_by_audit",
+      "reference": 1.0,
+      "measured": 1.0,
+      "error": 0.0,
+      "error_kind": "flag",
+      "tolerance": 0.0,
+      "passed": true,
+      "note": "volume effect -2.307e-05 at sub6; named ['normal_inconsistency']"
+    }
+  ],
+  "failures": [],
+  "bodies": {
+    "box_2x2x2": {
+      "name": "box_2x2x2",
+      "family": "box",
+      "faces": 12,
+      "vertices": 8,
+      "mean_edge_length": 2.2761423749153966,
+      "reference_volume": 8.0,
+      "measured_volume": 8.0,
+      "tet_volume": 8.0,
+      "volume_error": 0.0,
+      "reference_area": 24.0,
+      "measured_area": 24.0,
+      "area_error": 0.0,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 8.0,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "box_1.5x0.75x3": {
+      "name": "box_1.5x0.75x3",
+      "family": "box",
+      "faces": 12,
+      "vertices": 8,
+      "mean_edge_length": 2.069275796509752,
+      "reference_volume": 3.375,
+      "measured_volume": 3.375,
+      "tet_volume": 3.375,
+      "volume_error": 0.0,
+      "reference_area": 15.75,
+      "measured_area": 15.75,
+      "area_error": 0.0,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 3.375,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "box_2x2x2_rot_trans": {
+      "name": "box_2x2x2_rot_trans",
+      "family": "box",
+      "faces": 12,
+      "vertices": 8,
+      "mean_edge_length": 2.276142374915397,
+      "reference_volume": 8.0,
+      "measured_volume": 7.999999999999933,
+      "tet_volume": 8.000000000000007,
+      "volume_error": -8.326672684688674e-15,
+      "reference_area": 24.0,
+      "measured_area": 24.000000000000014,
+      "area_error": 5.921189464667501e-16,
+      "route_difference": 9.2148511043888e-15,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 7.999999999999896,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r1_sub0": {
+      "name": "sphere_r1_sub0",
+      "family": "sphere",
+      "faces": 20,
+      "vertices": 12,
+      "mean_edge_length": 1.0514622242382674,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 2.53615071012041,
+      "tet_volume": 2.53615071012041,
+      "volume_error": -0.3945386170874742,
+      "reference_area": 12.566370614359172,
+      "measured_area": 9.574541383273937,
+      "area_error": -0.23808220550701983,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 2.5361507101204106,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": [
+        "icosahedron closed form 2.536150710120; divergence route +1.751e-16 relative"
+      ]
+    },
+    "sphere_r1_sub1": {
+      "name": "sphere_r1_sub1",
+      "family": "sphere",
+      "faces": 80,
+      "vertices": 42,
+      "mean_edge_length": 0.5822835232876192,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 3.6587122085121595,
+      "tet_volume": 3.6587122085121595,
+      "volume_error": -0.12654679999693674,
+      "reference_area": 12.566370614359172,
+      "measured_area": 11.665931391718317,
+      "area_error": -0.07165467661855791,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 3.658712208512154,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r1_sub2": {
+      "name": "sphere_r1_sub2",
+      "family": "sphere",
+      "faces": 320,
+      "vertices": 162,
+      "mean_edge_length": 0.29933207531855877,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 4.047044679978849,
+      "tet_volume": 4.047044679978849,
+      "volume_error": -0.0338392514014127,
+      "reference_area": 12.566370614359172,
+      "measured_area": 12.329848595234669,
+      "area_error": -0.018821824246870282,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 4.047044679978835,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r1_sub3": {
+      "name": "sphere_r1_sub3",
+      "family": "sphere",
+      "faces": 1280,
+      "vertices": 642,
+      "mean_edge_length": 0.1507297051948821,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 4.152740817093058,
+      "tet_volume": 4.152740817093058,
+      "volume_error": -0.008606157370245074,
+      "reference_area": 12.566370614359172,
+      "measured_area": 12.506492733969928,
+      "area_error": -0.0047649303229067505,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 4.152740817093066,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r1_sub4": {
+      "name": "sphere_r1_sub4",
+      "family": "sphere",
+      "faces": 5120,
+      "vertices": 2562,
+      "mean_edge_length": 0.07549909830150697,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 4.17973894799464,
+      "tet_volume": 4.17973894799464,
+      "volume_error": -0.0021608283894018676,
+      "reference_area": 12.566370614359172,
+      "measured_area": 12.551353880096109,
+      "area_error": -0.001194993743532019,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 4.179738947994639,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r1_sub5": {
+      "name": "sphere_r1_sub5",
+      "family": "sphere",
+      "faces": 20480,
+      "vertices": 10242,
+      "mean_edge_length": 0.03776637041792051,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 4.186524949278792,
+      "tet_volume": 4.186524949278792,
+      "volume_error": -0.0005407899171006856,
+      "reference_area": 12.566370614359172,
+      "measured_area": 12.56261346805837,
+      "area_error": -0.00029898420284609866,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 4.186524949278856,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r1_sub6": {
+      "name": "sphere_r1_sub6",
+      "family": "sphere",
+      "faces": 81920,
+      "vertices": 40962,
+      "mean_edge_length": 0.01888528913724259,
+      "reference_volume": 4.1887902047863905,
+      "measured_volume": 4.188223738179637,
+      "tet_volume": 4.188223738179637,
+      "volume_error": -0.00013523394084192125,
+      "reference_area": 12.566370614359172,
+      "measured_area": 12.565431142476388,
+      "area_error": -7.476079702047789e-05,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 4.188223738179511,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "sphere_r2.5_sub6": {
+      "name": "sphere_r2.5_sub6",
+      "family": "sphere",
+      "faces": 81920,
+      "vertices": 40962,
+      "mean_edge_length": 0.04721322284310647,
+      "reference_volume": 65.44984694978736,
+      "measured_volume": 65.44099590905682,
+      "tet_volume": 65.44099590905684,
+      "volume_error": -0.0001352339408421231,
+      "reference_area": 78.53981633974483,
+      "measured_area": 78.53394464047744,
+      "area_error": -7.476079702030825e-05,
+      "route_difference": 2.1712586625457608e-16,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 65.4409959090557,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    },
+    "box_stl_roundtrip": {
+      "name": "box_stl_roundtrip",
+      "family": "box",
+      "faces": 12,
+      "vertices": 8,
+      "mean_edge_length": 2.2097784456186025,
+      "reference_volume": 5.423,
+      "measured_volume": 5.423000447991193,
+      "tet_volume": 5.423000447991193,
+      "volume_error": 8.26094767816675e-08,
+      "reference_area": 19.98,
+      "measured_area": 19.980001134879217,
+      "area_error": 5.6800761580586267e-08,
+      "route_difference": 0.0,
+      "open_edges": 0,
+      "boundary_edges": 0,
+      "euler_characteristic": 2,
+      "audit": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "signed_volume": 5.423000447991193,
+        "watertight": true,
+        "defects": []
+      },
+      "topologically_closed": true,
+      "notes": []
+    }
+  },
+  "convergence": {
+    "radius": 1.0,
+    "levels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "observed_order_volume": 1.9887553774398368,
+    "observed_order_area": 2.0051441001054147,
+    "first_level_within_tolerance": "sphere_r1_sub5",
+    "rows": [
+      {
+        "name": "sphere_r1_sub0",
+        "faces": 20,
+        "h": 1.0514622242382674,
+        "volume": 2.53615071012041,
+        "volume_error": -0.3945386170874742,
+        "area_error": -0.23808220550701983,
+        "open_edges": 0,
+        "euler": 2
+      },
+      {
+        "name": "sphere_r1_sub1",
+        "faces": 80,
+        "h": 0.5822835232876192,
+        "volume": 3.6587122085121595,
+        "volume_error": -0.12654679999693674,
+        "area_error": -0.07165467661855791,
+        "open_edges": 0,
+        "euler": 2
+      },
+      {
+        "name": "sphere_r1_sub2",
+        "faces": 320,
+        "h": 0.29933207531855877,
+        "volume": 4.047044679978849,
+        "volume_error": -0.0338392514014127,
+        "area_error": -0.018821824246870282,
+        "open_edges": 0,
+        "euler": 2
+      },
+      {
+        "name": "sphere_r1_sub3",
+        "faces": 1280,
+        "h": 0.1507297051948821,
+        "volume": 4.152740817093058,
+        "volume_error": -0.008606157370245074,
+        "area_error": -0.0047649303229067505,
+        "open_edges": 0,
+        "euler": 2
+      },
+      {
+        "name": "sphere_r1_sub4",
+        "faces": 5120,
+        "h": 0.07549909830150697,
+        "volume": 4.17973894799464,
+        "volume_error": -0.0021608283894018676,
+        "area_error": -0.001194993743532019,
+        "open_edges": 0,
+        "euler": 2
+      },
+      {
+        "name": "sphere_r1_sub5",
+        "faces": 20480,
+        "h": 0.03776637041792051,
+        "volume": 4.186524949278792,
+        "volume_error": -0.0005407899171006856,
+        "area_error": -0.00029898420284609866,
+        "open_edges": 0,
+        "euler": 2
+      },
+      {
+        "name": "sphere_r1_sub6",
+        "faces": 81920,
+        "h": 0.01888528913724259,
+        "volume": 4.188223738179637,
+        "volume_error": -0.00013523394084192125,
+        "area_error": -7.476079702047789e-05,
+        "open_edges": 0,
+        "euler": 2
+      }
+    ]
+  },
+  "negative_controls": [
+    {
+      "name": "hole",
+      "defect": "facets removed inside an x/z window",
+      "expected": {
+        "open_edges": 1,
+        "watertight": 1
+      },
+      "measured": {
+        "open_edges": 16,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "watertight": 1
+      },
+      "defects_named": [
+        "seam_gap",
+        "seam_gap"
+      ],
+      "detected": true,
+      "volume_error": -0.023665782072355042
+    },
+    {
+      "name": "flipped_facet",
+      "defect": "facet winding reversed on 4 facets",
+      "expected": {
+        "winding_conflicts": 1,
+        "watertight": 1
+      },
+      "measured": {
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 12,
+        "watertight": 1
+      },
+      "defects_named": [
+        "normal_inconsistency"
+      ],
+      "detected": true,
+      "volume_error": -0.023766023410181705
+    },
+    {
+      "name": "duplicate_facet",
+      "defect": "3 facets repeated",
+      "expected": {
+        "duplicate_faces": 3,
+        "watertight": 1
+      },
+      "measured": {
+        "open_edges": 0,
+        "nonmanifold_edges": 9,
+        "duplicate_faces": 3,
+        "winding_conflicts": 0,
+        "watertight": 1
+      },
+      "defects_named": [
+        "nonmanifold_edge",
+        "duplicate_facets"
+      ],
+      "detected": true,
+      "volume_error": 0.008958253575969898
+    },
+    {
+      "name": "unwelded_soup",
+      "defect": "connectivity destroyed (STL before welding)",
+      "expected": {
+        "open_edges": 1,
+        "watertight": 1
+      },
+      "measured": {
+        "open_edges": 960,
+        "nonmanifold_edges": 0,
+        "duplicate_faces": 0,
+        "winding_conflicts": 0,
+        "watertight": 1
+      },
+      "defects_named": [
+        "component_count"
+      ],
+      "detected": true,
+      "volume_error": 0.0
+    }
+  ],
+  "blind_spot": {
+    "clean_volume": 4.188223738179637,
+    "level": 6,
+    "duplicate_single": {
+      "volume_effect": 1.1534452027730959e-05,
+      "invisible_to_volume_gate": true,
+      "detected": true,
+      "duplicate_faces": 1,
+      "winding_conflicts": 0,
+      "nonmanifold_edges": 3,
+      "defects": [
+        "nonmanifold_edge",
+        "duplicate_facets"
+      ]
+    },
+    "flipped_single": {
+      "volume_effect": -2.306890405524985e-05,
+      "invisible_to_volume_gate": true,
+      "detected": true,
+      "duplicate_faces": 0,
+      "winding_conflicts": 3,
+      "nonmanifold_edges": 0,
+      "defects": [
+        "normal_inconsistency"
+      ]
+    }
+  },
+  "seconds": 17.881,
+  "environment": {
+    "python": "3.11.6",
+    "tensorcad": "0.23.0",
+    "modules": {
+      "numpy": "2.4.6",
+      "trimesh": "5.0.0",
+      "matplotlib": "3.10.8"
+    },
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38"
+  }
+}
