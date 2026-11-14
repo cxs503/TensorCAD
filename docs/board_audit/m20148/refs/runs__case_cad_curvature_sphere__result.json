@@ -1,0 +1,707 @@
+{
+  "schema": "tensorcad.benchmark.sphere_mean_curvature/1",
+  "case": "CASE-CAD-CURVATURE-SPHERE",
+  "campaign_node": "\u7b97\u4f8b\u6c60/benchmark \u4f9b\u7ed9 (owner 2026-11-12)",
+  "timestamp": "2026-11-14T08:50:45Z",
+  "tensorcad_version": "0.23.0",
+  "python_version": "3.11.6",
+  "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+  "elapsed_s": 34.86,
+  "gates": {
+    "G1_field_path": {
+      "rows": [
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=0.1",
+          "unit": "1/m",
+          "reference": 20.0,
+          "measured": 20.000000000001034,
+          "error": 1.0338396805309458e-12,
+          "error_percent": 5.169198402654729e-12,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 20 1/m",
+          "note": "70 probes; |S - 2/R|"
+        },
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=0.25",
+          "unit": "1/m",
+          "reference": 8.0,
+          "measured": 8.000000000000762,
+          "error": 7.620570841027074e-13,
+          "error_percent": 9.525713551283843e-12,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 8 1/m",
+          "note": "70 probes; |S - 2/R|"
+        },
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=0.5",
+          "unit": "1/m",
+          "reference": 4.0,
+          "measured": 4.000000000000381,
+          "error": 3.810285420513537e-13,
+          "error_percent": 9.525713551283843e-12,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 4 1/m",
+          "note": "70 probes; |S - 2/R|"
+        },
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=1",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.0000000000001905,
+          "error": 1.9051427102567686e-13,
+          "error_percent": 9.525713551283843e-12,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2 1/m",
+          "note": "70 probes; |S - 2/R|"
+        },
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=2",
+          "unit": "1/m",
+          "reference": 1.0,
+          "measured": 1.0000000000000953,
+          "error": 9.525713551283843e-14,
+          "error_percent": 9.525713551283843e-12,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 1 1/m",
+          "note": "70 probes; |S - 2/R|"
+        },
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=5",
+          "unit": "1/m",
+          "reference": 0.4,
+          "measured": 0.3999999999999474,
+          "error": -5.262457136723242e-14,
+          "error_percent": -1.3156142841808105e-11,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 0.4 1/m",
+          "note": "70 probes; |S - 2/R|"
+        },
+        {
+          "gate": "G1",
+          "quantity": "sphere S=2/R, R=10",
+          "unit": "1/m",
+          "reference": 0.2,
+          "measured": 0.1999999999999737,
+          "error": -2.631228568361621e-14,
+          "error_percent": -1.3156142841808105e-11,
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "holds": true,
+          "reference_source": "closed form 2/R = 0.2 1/m",
+          "note": "70 probes; |S - 2/R|"
+        }
+      ]
+    },
+    "G2_integral_marching_tet": {
+      "rows": [
+        {
+          "gate": "G2",
+          "quantity": "marching-tet level 12, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.0041673624054037,
+          "error": 0.002083681202701859,
+          "error_percent": 0.20836812027018592,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+          "note": "3680 faces, 1842 vertices"
+        },
+        {
+          "gate": "G2",
+          "quantity": "marching-tet level 16, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.002254049564629,
+          "error": 0.001127024782314523,
+          "error_percent": 0.1127024782314523,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+          "note": "6656 faces, 3330 vertices"
+        },
+        {
+          "gate": "G2",
+          "quantity": "marching-tet level 24, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.0009797785721664,
+          "error": 0.0004898892860831783,
+          "error_percent": 0.04898892860831783,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+          "note": "15584 faces, 7794 vertices"
+        },
+        {
+          "gate": "G2",
+          "quantity": "marching-tet level 32, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.0005475083512247,
+          "error": 0.0002737541756123729,
+          "error_percent": 0.027375417561237292,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+          "note": "28032 faces, 14018 vertices"
+        },
+        {
+          "gate": "G2",
+          "quantity": "marching-tet level 48, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.0002377872364367,
+          "error": 0.00011889361821837419,
+          "error_percent": 0.011889361821837419,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+          "note": "63592 faces, 31798 vertices"
+        }
+      ],
+      "convergence": [
+        {
+          "level": 12,
+          "faces": 3680,
+          "vertices": 1842,
+          "H_mean": 1.0020836812027019,
+          "S_mean": 2.0041673624054037,
+          "error_pct": 0.20836812027018592
+        },
+        {
+          "level": 16,
+          "faces": 6656,
+          "vertices": 3330,
+          "H_mean": 1.0011270247823145,
+          "S_mean": 2.002254049564629,
+          "error_pct": 0.1127024782314523
+        },
+        {
+          "level": 24,
+          "faces": 15584,
+          "vertices": 7794,
+          "H_mean": 1.0004898892860832,
+          "S_mean": 2.0009797785721664,
+          "error_pct": 0.04898892860831783
+        },
+        {
+          "level": 32,
+          "faces": 28032,
+          "vertices": 14018,
+          "H_mean": 1.0002737541756124,
+          "S_mean": 2.0005475083512247,
+          "error_pct": 0.027375417561237292
+        },
+        {
+          "level": 48,
+          "faces": 63592,
+          "vertices": 31798,
+          "H_mean": 1.0001188936182184,
+          "S_mean": 2.0002377872364367,
+          "error_pct": 0.011889361821837419
+        }
+      ]
+    },
+    "G3_pointwise_conditioned": {
+      "rows": [
+        {
+          "gate": "G3",
+          "quantity": "pointwise median S (raw marching-tet)",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.15672214387995,
+          "error": 0.07836107193997499,
+          "error_percent": 7.836107193997499,
+          "tolerance": 0.6,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0",
+          "note": "raw marching-tet has slivers; median ~50% off is expected"
+        },
+        {
+          "gate": "G3b",
+          "quantity": "pointwise median S (taubin+project)",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 1.9999265659736252,
+          "error": -3.671701318741505e-05,
+          "error_percent": -0.003671701318741505,
+          "tolerance": 0.05,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0",
+          "note": "after 30 taubin + 10 projection iterations"
+        }
+      ],
+      "raw": {
+        "median": 2.15672214387995,
+        "p95": 10.836605759282573,
+        "n": 14018
+      },
+      "conditioned": {
+        "median": 1.9999265659736252,
+        "p95": 3.847180059318101,
+        "n": 14018
+      }
+    },
+    "G4_uv_sphere_convergence": {
+      "rows": [
+        {
+          "gate": "G4",
+          "quantity": "UV sphere 64x128, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 1.9993976302660752,
+          "error": -0.00030118486696240065,
+          "error_percent": -0.030118486696240065,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2.0",
+          "note": "structured triangulation, observed order ~2.00"
+        }
+      ],
+      "series": [
+        {
+          "nu": 8,
+          "nv": 16,
+          "faces": 256,
+          "vertices": 144,
+          "S_mean": 1.960884923866949,
+          "error_pct": 1.9557538066525493,
+          "pointwise_median": 1.9920193970121032
+        },
+        {
+          "nu": 16,
+          "nv": 32,
+          "faces": 1024,
+          "vertices": 544,
+          "S_mean": 1.99033949823524,
+          "error_pct": 0.4830250882379983,
+          "pointwise_median": 2.002442056015451
+        },
+        {
+          "nu": 32,
+          "nv": 64,
+          "faces": 4096,
+          "vertices": 2112,
+          "S_mean": 1.9975899108663038,
+          "error_pct": 0.12050445668481125,
+          "pointwise_median": 2.0012960036217304
+        },
+        {
+          "nu": 64,
+          "nv": 128,
+          "faces": 16384,
+          "vertices": 8320,
+          "S_mean": 1.9993976302660752,
+          "error_pct": 0.030118486696240065,
+          "pointwise_median": 2.0004129060751534
+        }
+      ],
+      "observed_order": 2.001688467810605
+    },
+    "G5_multiple_radii": {
+      "rows": [
+        {
+          "gate": "G5",
+          "quantity": "sphere R=0.5, area-weighted S",
+          "unit": "1/m",
+          "reference": 4.0,
+          "measured": 4.0010950167024495,
+          "error": 0.0002737541756123729,
+          "error_percent": 0.027375417561237292,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 4",
+          "note": "28032 faces"
+        },
+        {
+          "gate": "G5",
+          "quantity": "sphere R=1.0, area-weighted S",
+          "unit": "1/m",
+          "reference": 2.0,
+          "measured": 2.0005475083512247,
+          "error": 0.0002737541756123729,
+          "error_percent": 0.027375417561237292,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 2",
+          "note": "28032 faces"
+        },
+        {
+          "gate": "G5",
+          "quantity": "sphere R=2.0, area-weighted S",
+          "unit": "1/m",
+          "reference": 1.0,
+          "measured": 1.0002737541756124,
+          "error": 0.0002737541756123729,
+          "error_percent": 0.027375417561237292,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 1",
+          "note": "28032 faces"
+        },
+        {
+          "gate": "G5",
+          "quantity": "sphere R=5.0, area-weighted S",
+          "unit": "1/m",
+          "reference": 0.4,
+          "measured": 0.40010950167024484,
+          "error": 0.00027375417561192883,
+          "error_percent": 0.027375417561192883,
+          "tolerance": 0.02,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 2/R = 0.4",
+          "note": "28032 faces"
+        }
+      ]
+    },
+    "G6_integral_identity": {
+      "rows": [
+        {
+          "gate": "G6",
+          "quantity": "integral of S dA (bending energy identity)",
+          "unit": "",
+          "reference": 25.132741228718345,
+          "measured": 25.113468572669397,
+          "error": -0.0007668346191749276,
+          "error_percent": -0.07668346191749276,
+          "tolerance": 0.01,
+          "tolerance_kind": "relative",
+          "holds": true,
+          "reference_source": "closed form 8*pi*R = 8*pi",
+          "note": "integral identity cross-check"
+        }
+      ],
+      "measured": 25.113468572669397,
+      "reference": 25.132741228718345
+    },
+    "G7_raw_diagnostic": {
+      "gate": "G7",
+      "quantity": "raw marching-tet pointwise error (diagnostic, not gated)",
+      "median_error_pct": 50.4493800765968,
+      "p95_error_pct": 441.8302879641287,
+      "max_error_pct": 80258.05445918984,
+      "note": "Expected: raw marching-tet has sliver triangles; pointwise is poor but integral is good"
+    }
+  },
+  "all_rows": [
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=0.1",
+      "unit": "1/m",
+      "reference": 20.0,
+      "measured": 20.000000000001034,
+      "error": 1.0338396805309458e-12,
+      "error_percent": 5.169198402654729e-12,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 20 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=0.25",
+      "unit": "1/m",
+      "reference": 8.0,
+      "measured": 8.000000000000762,
+      "error": 7.620570841027074e-13,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 8 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=0.5",
+      "unit": "1/m",
+      "reference": 4.0,
+      "measured": 4.000000000000381,
+      "error": 3.810285420513537e-13,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 4 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=1",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.0000000000001905,
+      "error": 1.9051427102567686e-13,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=2",
+      "unit": "1/m",
+      "reference": 1.0,
+      "measured": 1.0000000000000953,
+      "error": 9.525713551283843e-14,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 1 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=5",
+      "unit": "1/m",
+      "reference": 0.4,
+      "measured": 0.3999999999999474,
+      "error": -5.262457136723242e-14,
+      "error_percent": -1.3156142841808105e-11,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 0.4 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=10",
+      "unit": "1/m",
+      "reference": 0.2,
+      "measured": 0.1999999999999737,
+      "error": -2.631228568361621e-14,
+      "error_percent": -1.3156142841808105e-11,
+      "tolerance": 1e-06,
+      "tolerance_kind": "absolute",
+      "holds": true,
+      "reference_source": "closed form 2/R = 0.2 1/m",
+      "note": "70 probes; |S - 2/R|"
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 12, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.0041673624054037,
+      "error": 0.002083681202701859,
+      "error_percent": 0.20836812027018592,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+      "note": "3680 faces, 1842 vertices"
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 16, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.002254049564629,
+      "error": 0.001127024782314523,
+      "error_percent": 0.1127024782314523,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+      "note": "6656 faces, 3330 vertices"
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 24, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.0009797785721664,
+      "error": 0.0004898892860831783,
+      "error_percent": 0.04898892860831783,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+      "note": "15584 faces, 7794 vertices"
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 32, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.0005475083512247,
+      "error": 0.0002737541756123729,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+      "note": "28032 faces, 14018 vertices"
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 48, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.0002377872364367,
+      "error": 0.00011889361821837419,
+      "error_percent": 0.011889361821837419,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0 1/m (R=1)",
+      "note": "63592 faces, 31798 vertices"
+    },
+    {
+      "gate": "G3",
+      "quantity": "pointwise median S (raw marching-tet)",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.15672214387995,
+      "error": 0.07836107193997499,
+      "error_percent": 7.836107193997499,
+      "tolerance": 0.6,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0",
+      "note": "raw marching-tet has slivers; median ~50% off is expected"
+    },
+    {
+      "gate": "G3b",
+      "quantity": "pointwise median S (taubin+project)",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 1.9999265659736252,
+      "error": -3.671701318741505e-05,
+      "error_percent": -0.003671701318741505,
+      "tolerance": 0.05,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0",
+      "note": "after 30 taubin + 10 projection iterations"
+    },
+    {
+      "gate": "G4",
+      "quantity": "UV sphere 64x128, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 1.9993976302660752,
+      "error": -0.00030118486696240065,
+      "error_percent": -0.030118486696240065,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2.0",
+      "note": "structured triangulation, observed order ~2.00"
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=0.5, area-weighted S",
+      "unit": "1/m",
+      "reference": 4.0,
+      "measured": 4.0010950167024495,
+      "error": 0.0002737541756123729,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 4",
+      "note": "28032 faces"
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=1.0, area-weighted S",
+      "unit": "1/m",
+      "reference": 2.0,
+      "measured": 2.0005475083512247,
+      "error": 0.0002737541756123729,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 2",
+      "note": "28032 faces"
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=2.0, area-weighted S",
+      "unit": "1/m",
+      "reference": 1.0,
+      "measured": 1.0002737541756124,
+      "error": 0.0002737541756123729,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 1",
+      "note": "28032 faces"
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=5.0, area-weighted S",
+      "unit": "1/m",
+      "reference": 0.4,
+      "measured": 0.40010950167024484,
+      "error": 0.00027375417561192883,
+      "error_percent": 0.027375417561192883,
+      "tolerance": 0.02,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 2/R = 0.4",
+      "note": "28032 faces"
+    },
+    {
+      "gate": "G6",
+      "quantity": "integral of S dA (bending energy identity)",
+      "unit": "",
+      "reference": 25.132741228718345,
+      "measured": 25.113468572669397,
+      "error": -0.0007668346191749276,
+      "error_percent": -0.07668346191749276,
+      "tolerance": 0.01,
+      "tolerance_kind": "relative",
+      "holds": true,
+      "reference_source": "closed form 8*pi*R = 8*pi",
+      "note": "integral identity cross-check"
+    }
+  ],
+  "all_gates_hold": true,
+  "case_tolerance": 0.02,
+  "summary": {
+    "total_gates": 20,
+    "passed": 20,
+    "failed": 0,
+    "worst_error_pct": 7.836107193997499
+  }
+}

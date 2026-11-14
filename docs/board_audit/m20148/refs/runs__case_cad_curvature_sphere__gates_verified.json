@@ -1,0 +1,188 @@
+{
+  "schema": "tensorcad.gates_verified/1",
+  "case": "CASE-CAD-CURVATURE-SPHERE",
+  "timestamp": "2026-11-14T08:50:45Z",
+  "gates": [
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=0.1",
+      "reference": 20.0,
+      "measured": 20.000000000001034,
+      "error_percent": 5.169198402654729e-12,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=0.25",
+      "reference": 8.0,
+      "measured": 8.000000000000762,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=0.5",
+      "reference": 4.0,
+      "measured": 4.000000000000381,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=1",
+      "reference": 2.0,
+      "measured": 2.0000000000001905,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=2",
+      "reference": 1.0,
+      "measured": 1.0000000000000953,
+      "error_percent": 9.525713551283843e-12,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=5",
+      "reference": 0.4,
+      "measured": 0.3999999999999474,
+      "error_percent": -1.3156142841808105e-11,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G1",
+      "quantity": "sphere S=2/R, R=10",
+      "reference": 0.2,
+      "measured": 0.1999999999999737,
+      "error_percent": -1.3156142841808105e-11,
+      "tolerance": 1e-06,
+      "holds": true
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 12, area-weighted S",
+      "reference": 2.0,
+      "measured": 2.0041673624054037,
+      "error_percent": 0.20836812027018592,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 16, area-weighted S",
+      "reference": 2.0,
+      "measured": 2.002254049564629,
+      "error_percent": 0.1127024782314523,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 24, area-weighted S",
+      "reference": 2.0,
+      "measured": 2.0009797785721664,
+      "error_percent": 0.04898892860831783,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 32, area-weighted S",
+      "reference": 2.0,
+      "measured": 2.0005475083512247,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G2",
+      "quantity": "marching-tet level 48, area-weighted S",
+      "reference": 2.0,
+      "measured": 2.0002377872364367,
+      "error_percent": 0.011889361821837419,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G3",
+      "quantity": "pointwise median S (raw marching-tet)",
+      "reference": 2.0,
+      "measured": 2.15672214387995,
+      "error_percent": 7.836107193997499,
+      "tolerance": 0.6,
+      "holds": true
+    },
+    {
+      "gate": "G3b",
+      "quantity": "pointwise median S (taubin+project)",
+      "reference": 2.0,
+      "measured": 1.9999265659736252,
+      "error_percent": -0.003671701318741505,
+      "tolerance": 0.05,
+      "holds": true
+    },
+    {
+      "gate": "G4",
+      "quantity": "UV sphere 64x128, area-weighted S",
+      "reference": 2.0,
+      "measured": 1.9993976302660752,
+      "error_percent": -0.030118486696240065,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=0.5, area-weighted S",
+      "reference": 4.0,
+      "measured": 4.0010950167024495,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=1.0, area-weighted S",
+      "reference": 2.0,
+      "measured": 2.0005475083512247,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=2.0, area-weighted S",
+      "reference": 1.0,
+      "measured": 1.0002737541756124,
+      "error_percent": 0.027375417561237292,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G5",
+      "quantity": "sphere R=5.0, area-weighted S",
+      "reference": 0.4,
+      "measured": 0.40010950167024484,
+      "error_percent": 0.027375417561192883,
+      "tolerance": 0.02,
+      "holds": true
+    },
+    {
+      "gate": "G6",
+      "quantity": "integral of S dA (bending energy identity)",
+      "reference": 25.132741228718345,
+      "measured": 25.113468572669397,
+      "error_percent": -0.07668346191749276,
+      "tolerance": 0.01,
+      "holds": true
+    }
+  ],
+  "all_hold": true
+}
