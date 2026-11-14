@@ -1,0 +1,273 @@
+{
+ "schema": "tensorcad.assetlib.physics_from_store.v1",
+ "anchor": "GAP-GEOM-ASSET-LIB",
+ "registry": "/root/tp-agent/work/m20465/assets/geometry_registry.json",
+ "specs": "/root/tp-agent/work/m20465/benchmarks/verified/baseline_fleet/fleet_specs.json",
+ "tolerance_percent": 1.0,
+ "resolutions_m": [
+  0.5,
+  0.25
+ ],
+ "hulls": {
+  "KCS": {
+   "spec_pointer": "/root/tp-agent/assets/geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "iges_sha256_expected": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "published_volume_m3": 52030.0,
+   "published_cb": 0.6505,
+   "published_lcb_percent": -1.48,
+   "resolutions": {
+    "dx=0.5": {
+     "verdict": "VERIFIED",
+     "volume_m3": 52214.08066871739,
+     "field_volume_m3": 52224.23382247733,
+     "mesh_vs_field_volume_percent": -0.019441460442387124,
+     "cb": 0.6528000403666369,
+     "lcb_percent": -1.5055541981819531,
+     "length_waterline_m": 232.5,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 52320,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": true,
+      "scale_consistent_with_published_lpp": true,
+      "extent_over_lpp": 1.0391304347826085,
+      "lwl_vs_lpp_percent": 1.0869565217391304
+     },
+     "reasons": [],
+     "seconds": 7.27,
+     "volume_rel_error_percent": 0.3537971722417642,
+     "cb_rel_error_percent": 0.35358037919091323,
+     "lcb_abs_error_percent_lpp": -0.025554198181953147,
+     "within_tolerance": true
+    },
+    "dx=0.25": {
+     "verdict": "VERIFIED",
+     "volume_m3": 52134.65142094009,
+     "field_volume_m3": 52145.43755102437,
+     "mesh_vs_field_volume_percent": -0.02068470529895082,
+     "cb": 0.6518069860891079,
+     "lcb_percent": -1.5018415777518674,
+     "length_waterline_m": 232.5,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 52320,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": true,
+      "scale_consistent_with_published_lpp": true,
+      "extent_over_lpp": 1.0402173913043478,
+      "lwl_vs_lpp_percent": 1.0869565217391304
+     },
+     "reasons": [],
+     "seconds": 7.14,
+     "volume_rel_error_percent": 0.2011366921777668,
+     "cb_rel_error_percent": 0.20092022891744096,
+     "lcb_abs_error_percent_lpp": -0.021841577751867458,
+     "within_tolerance": true
+    },
+    "dx=0.125": {
+     "verdict": "VERIFIED",
+     "volume_m3": 52075.277478188014,
+     "field_volume_m3": 52110.70982546441,
+     "mesh_vs_field_volume_percent": -0.06799436698342419,
+     "cb": 0.6510646707647954,
+     "lcb_percent": -1.4925291367489928,
+     "length_waterline_m": 232.25,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 52320,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": true,
+      "scale_consistent_with_published_lpp": true,
+      "extent_over_lpp": 1.0402173913043475,
+      "lwl_vs_lpp_percent": 0.9782608695652175
+     },
+     "reasons": [],
+     "seconds": 7.51,
+     "volume_rel_error_percent": 0.08702186851434625,
+     "cb_rel_error_percent": 0.08680565177484752,
+     "lcb_abs_error_percent_lpp": -0.012529136748992808,
+     "within_tolerance": true
+    }
+   },
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "resolved_path": "/root/tp-agent/assets/geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "iges_sha256_read": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "sha_match": true
+  },
+  "KVLCC2": {
+   "spec_pointer": "/root/tp-agent/assets/geometry/hulls/KVLCC2/kvlcc2.igs",
+   "iges_sha256_expected": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+   "published_volume_m3": 312622.0,
+   "published_cb": 0.8098,
+   "published_lcb_percent": 3.48,
+   "resolutions": {
+    "dx=0.5": {
+     "error": "ValueError: field produced fewer than two usable waterline slices"
+    },
+    "dx=0.25": {
+     "error": "ValueError: field produced fewer than two usable waterline slices"
+    }
+   },
+   "asset_id": "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "resolved_path": "/root/tp-agent/assets/geometry/hulls/KVLCC2/kvlcc2.igs",
+   "iges_sha256_read": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+   "sha_match": true
+  },
+  "JBC": {
+   "spec_pointer": "/root/tp-agent/assets/geometry/hulls/JBC/jbc.igs",
+   "iges_sha256_expected": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+   "published_volume_m3": 178369.9,
+   "published_cb": 0.858,
+   "published_lcb_percent": null,
+   "resolutions": {
+    "dx=0.5": {
+     "verdict": "WITHHELD",
+     "volume_m3": 4.437321227205365,
+     "field_volume_m3": 4.9355813597290545,
+     "mesh_vs_field_volume_percent": -10.095267329379869,
+     "cb": 2.134353644639425e-05,
+     "lcb_percent": -49.99224061805289,
+     "length_waterline_m": NaN,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 3360,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": false,
+      "scale_consistent_with_published_lpp": false,
+      "extent_over_lpp": 0.026781423985050533,
+      "lwl_vs_lpp_percent": NaN
+     },
+     "reasons": [
+      "volume 4 m3 is -100.00% off the published 178370 m3 (tolerance 1%)",
+      "geometry extent 7.499 m vs published L_PP 280.0 m (ratio 0.0268): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 37.339^3 would give 231004.2 m3"
+     ],
+     "seconds": 33.43,
+     "volume_rel_error_percent": -99.99751229258568,
+     "cb_rel_error_percent": -99.99751240833959,
+     "lcb_abs_error_percent_lpp": null,
+     "within_tolerance": false
+    },
+    "dx=0.25": {
+     "verdict": "WITHHELD",
+     "volume_m3": 4.390312780122238,
+     "field_volume_m3": 4.812764578176445,
+     "mesh_vs_field_volume_percent": -8.777736604234113,
+     "cb": 2.111742558981355e-05,
+     "lcb_percent": -49.98786651451992,
+     "length_waterline_m": NaN,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 3360,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": false,
+      "scale_consistent_with_published_lpp": false,
+      "extent_over_lpp": 0.02678333951919509,
+      "lwl_vs_lpp_percent": NaN
+     },
+     "reasons": [
+      "volume 4 m3 is -100.00% off the published 178370 m3 (tolerance 1%)",
+      "geometry extent 7.499 m vs published L_PP 280.0 m (ratio 0.0268): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 37.337^3 would give 228507.9 m3"
+     ],
+     "seconds": 33.69,
+     "volume_rel_error_percent": -99.99753864705865,
+     "cb_rel_error_percent": -99.99753876158627,
+     "lcb_abs_error_percent_lpp": null,
+     "within_tolerance": false
+    }
+   },
+   "asset_id": "geometry/hulls/JBC/jbc.igs",
+   "resolved_path": "/root/tp-agent/assets/geometry/hulls/JBC/jbc.igs",
+   "iges_sha256_read": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+   "sha_match": true
+  },
+  "ONRT": {
+   "spec_pointer": "/root/tp-agent/assets/geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "iges_sha256_expected": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+   "published_volume_m3": 8500.7793948,
+   "published_cb": 0.535,
+   "published_lcb_percent": null,
+   "resolutions": {
+    "dx=0.5": {
+     "verdict": "WITHHELD",
+     "volume_m3": 0.0055920628502016114,
+     "field_volume_m3": 0.010100670309547297,
+     "mesh_vs_field_volume_percent": -44.63671539782945,
+     "cb": 3.519387441918494e-07,
+     "lcb_percent": -49.641863011855634,
+     "length_waterline_m": NaN,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 960,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": false,
+      "scale_consistent_with_published_lpp": false,
+      "extent_over_lpp": 0.006493506493506494,
+      "lwl_vs_lpp_percent": NaN
+     },
+     "reasons": [
+      "volume 0 m3 is -100.00% off the published 8501 m3 (tolerance 1%)",
+      "geometry extent 1.000 m vs published L_PP 154.0 m (ratio 0.0065): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 154.000^3 would give 20423.7 m3"
+     ],
+     "seconds": 0.36,
+     "volume_rel_error_percent": -99.99993421705715,
+     "cb_rel_error_percent": -99.99993421705717,
+     "lcb_abs_error_percent_lpp": null,
+     "within_tolerance": false
+    },
+    "dx=0.25": {
+     "verdict": "WITHHELD",
+     "volume_m3": 0.005445289093535837,
+     "field_volume_m3": 0.007921394658415615,
+     "mesh_vs_field_volume_percent": -31.258454750126447,
+     "cb": 3.4270147826959495e-07,
+     "lcb_percent": -49.708376850320725,
+     "length_waterline_m": NaN,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 960,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": false,
+      "scale_consistent_with_published_lpp": false,
+      "extent_over_lpp": 0.0064897037570113055,
+      "lwl_vs_lpp_percent": NaN
+     },
+     "reasons": [
+      "volume 0 m3 is -100.00% off the published 8501 m3 (tolerance 1%)",
+      "geometry extent 0.999 m vs published L_PP 154.0 m (ratio 0.0065): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 154.090^3 would give 19922.6 m3"
+     ],
+     "seconds": 0.36,
+     "volume_rel_error_percent": -99.99993594364894,
+     "cb_rel_error_percent": -99.99993594364891,
+     "lcb_abs_error_percent_lpp": null,
+     "within_tolerance": false
+    }
+   },
+   "asset_id": "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "resolved_path": "/root/tp-agent/assets/geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "iges_sha256_read": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+   "sha_match": true
+  }
+ },
+ "note_resolution_study": "KCS carries three resolutions; the 0.125 m run was executed separately (same command, --ships KCS --dx 0.5 0.25 0.125) because the four-ship three-resolution sweep exceeds the per-call wall clock."
+}

@@ -1,0 +1,441 @@
+{
+ "path": "benchmarks/verified/baseline_fleet/fleet_specs.json",
+ "pointers": 43,
+ "resolved": 8,
+ "cited": 35,
+ "dead": 0,
+ "withheld": 0,
+ "resolvable_fraction": 0.186047,
+ "detail": [
+  {
+   "where": "ships[0](KCS).iges_path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "status": "resolved",
+   "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/KCS/KCS_hull_SVA.igs"
+  },
+  {
+   "where": "ships[0](KCS).published_source",
+   "kind": "published_source",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "ships[1](KVLCC2).iges_path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/KVLCC2/kvlcc2.igs",
+   "status": "resolved",
+   "sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+   "asset_id": "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/KVLCC2/kvlcc2.igs"
+  },
+  {
+   "where": "ships[1](KVLCC2).published_source",
+   "kind": "published_source",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "ships[2](JBC).iges_path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/JBC/jbc.igs",
+   "status": "resolved",
+   "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+   "asset_id": "geometry/hulls/JBC/jbc.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/JBC/jbc.igs"
+  },
+  {
+   "where": "ships[2](JBC).published_source",
+   "kind": "published_source",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "ships[3](ONRT).iges_path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "status": "resolved",
+   "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+   "asset_id": "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs"
+  },
+  {
+   "where": "ships[3](ONRT).published_source",
+   "kind": "published_source",
+   "value": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "status": "cited",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.iges.path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "status": "resolved",
+   "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/KCS/KCS_hull_SVA.igs"
+  },
+  {
+   "where": "evidence.KCS.archive.path",
+   "kind": "archive",
+   "value": "https://simman2020.kr/download/KCS-Hull.zip",
+   "status": "cited",
+   "sha256": "b50adace1ddf255fc0b471d3394edaacd27d3bebb298f3b1fc5dad5ae4f7f88c",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.page.path",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.published_fields.length_pp.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.published_fields.beam.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.published_fields.draft.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.published_fields.volume.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.published_fields.cb.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KCS.published_fields.lcb.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "status": "cited",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.iges.path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/KVLCC2/kvlcc2.igs",
+   "status": "resolved",
+   "sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+   "asset_id": "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/KVLCC2/kvlcc2.igs"
+  },
+  {
+   "where": "evidence.KVLCC2.archive.path",
+   "kind": "archive",
+   "value": "https://simman2020.kr/download/KVLCC2-Hull.zip",
+   "status": "cited",
+   "sha256": "dc032647f00a68d354ede2f4b1ee3d68cd048bc3d34d221c2a8c9aac3a6dd548",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.page.path",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.length_pp.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.length_wl.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.beam.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.draft.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.volume.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.cb.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.lcb.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.KVLCC2.published_fields.scale_row.page",
+   "kind": "page",
+   "value": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "status": "cited",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.iges.path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/JBC/jbc.igs",
+   "status": "resolved",
+   "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+   "asset_id": "geometry/hulls/JBC/jbc.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/JBC/jbc.igs"
+  },
+  {
+   "where": "evidence.JBC.archive.path",
+   "kind": "archive",
+   "value": "https://www.t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/JBC_IGES.zip",
+   "status": "cited",
+   "sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.page.path",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.published_fields.length_pp.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.published_fields.beam.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.published_fields.draft.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.published_fields.volume.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.JBC.published_fields.cb.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "status": "cited",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.ONRT.iges.path",
+   "kind": "geometry",
+   "value": "asset://geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "status": "resolved",
+   "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+   "asset_id": "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "replacement": "",
+   "detail": "/root/tp-agent/assets/geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs"
+  },
+  {
+   "where": "evidence.ONRT.archive.path",
+   "kind": "archive",
+   "value": "https://simman2020.kr/download/onrt_wo_gap.zip",
+   "status": "cited",
+   "sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.ONRT.page.path",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "status": "cited",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.ONRT.published_fields.length_pp.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "status": "cited",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.ONRT.published_fields.beam.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "status": "cited",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.ONRT.published_fields.draft.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "status": "cited",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  },
+  {
+   "where": "evidence.ONRT.published_fields.cb.page",
+   "kind": "page",
+   "value": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "status": "cited",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "asset_id": "",
+   "replacement": "",
+   "detail": "durable publisher URL (no local byte to verify)"
+  }
+ ]
+}

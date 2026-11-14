@@ -1,0 +1,52 @@
+{
+ "schema": "tensorcad.assetlib.physics_from_store.v1",
+ "anchor": "GAP-GEOM-ASSET-LIB",
+ "registry": "/root/tp-agent/work/m20465/assets/geometry_registry.json",
+ "specs": "/root/tp-agent/work/m20465/benchmarks/verified/baseline_fleet/fleet_specs.json",
+ "tolerance_percent": 1.0,
+ "resolutions_m": [
+  0.5
+ ],
+ "hulls": {
+  "KCS": {
+   "spec_pointer": "/root/tp-agent/assets/geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "iges_sha256_expected": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "published_volume_m3": 52030.0,
+   "published_cb": 0.6505,
+   "published_lcb_percent": -1.48,
+   "resolutions": {
+    "dx=0.5": {
+     "verdict": "VERIFIED",
+     "volume_m3": 52214.08066871739,
+     "field_volume_m3": 52224.23382247733,
+     "mesh_vs_field_volume_percent": -0.019441460442387124,
+     "cb": 0.6528000403666369,
+     "lcb_percent": -1.5055541981819531,
+     "length_waterline_m": 232.5,
+     "watertight": true,
+     "edge_manifold": true,
+     "triangles": 52320,
+     "checks": {
+      "watertight": true,
+      "edge_manifold": true,
+      "positive_volume": true,
+      "volume_within_tolerance": true,
+      "scale_consistent_with_published_lpp": true,
+      "extent_over_lpp": 1.0391304347826085,
+      "lwl_vs_lpp_percent": 1.0869565217391304
+     },
+     "reasons": [],
+     "seconds": 8.71,
+     "volume_rel_error_percent": 0.3537971722417642,
+     "cb_rel_error_percent": 0.35358037919091323,
+     "lcb_abs_error_percent_lpp": -0.025554198181953147,
+     "within_tolerance": true
+    }
+   },
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "resolved_path": "/root/tp-agent/assets/geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "iges_sha256_read": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "sha_match": true
+  }
+ }
+}
