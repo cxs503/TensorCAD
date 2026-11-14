@@ -347,6 +347,23 @@ def _net_roughness(
     return total
 
 
+def _uniform_weights(weights: Sequence[float], tol: float = 1e-9) -> bool:
+    """True when every weight is positive and equal to the others.
+
+    Every writer seen in the workshop archives emits *unit* weights for the
+    rational surfaces it writes (KCS, KVLCC2, JBC, ONRT all carry
+    ``weights == 1.0`` throughout), so "this block is constant and positive" is a
+    far stronger signal than "this net looks smooth" -- and it is the only signal
+    that survives on a degenerate net, see :func:`_split_control`.
+    """
+    if not weights:
+        return False
+    lo, hi = min(weights), max(weights)
+    if lo <= 0.0:
+        return False
+    return (hi - lo) <= tol * max(1.0, hi)
+
+
 def _split_control(
     body: Sequence[float], points: int, rational: bool, count_u: int, count_v: int
 ) -> tuple[list[tuple[float, float, float]], list[float], str, bool]:
@@ -358,17 +375,29 @@ def _split_control(
     polynomial surfaces.  Writers also append a few trailing values that are not
     part of the control data, so the tail is matched from the front.
 
-    Returns ``(control, weights, layout, ambiguous)``.  When two layouts score
-    within a factor of four of each other the choice is *not* made silently and no
-    longer aborts the file: the smoother net wins, ``ambiguous`` is set, and the
-    caller (see :func:`tensorcad.fleet_baseline.partition_surfaces`) can quarantine
-    the patch rather than mesh a control net that may be mis-read -- a single
-    unreadable patch must not cost the whole hull.
+    **Layout choice.**  The original rule was "pick the net with the smallest sum
+    of squared second differences".  That rule is undefined on a net with no
+    interior control points: for a 2x2 or 2xn patch every second difference is
+    identically zero, both candidate readings score 0.0, and the sort order (i.e.
+    the string ``"interleaved"`` < ``"weight_block"``) silently decided.  Measured
+    on the authoritative sources: 15 of the 132 ONRT patches and 2 of the 45 JBC
+    patches were read this way, yielding control points inside the unit cube
+    (``max|y| = 1.0 m`` on a hull whose half-beam is 9.39 m).  So the weight test
+    comes first: a candidate whose weights are a *positive constant block* is
+    preferred, because that is exactly what these writers emit.  The smoothness
+    score is kept for genuinely rational patches with non-unit weights, where the
+    weight test is silent.
 
-    The third return value used to be an :class:`IgesError`.  That turned one
-    degenerate 3x3 Rhino patch (JBC DE 386, a 3.4 m x 0.5 m flat keel piece) into a
-    hard failure for all 45 patches of the file, i.e. it made a 280 m hull
-    unreadable because of 1.7 m^2 of plating.
+    ``rational`` is the PROP3 flag (``False`` means rational, matching the IGES
+    convention ``PROP3 = 0 ; 1 = polynomial``).  The polynomial layout is only a
+    candidate when the record cannot be read as ``x, y, z, w`` quadruples or when
+    PROP3 *declares* polynomial data: offering it unconditionally let a rational
+    patch be parsed as truncated triples whenever the tail happened to be smooth.
+
+    Returns ``(control, weights, layout, ambiguous)``.  ``ambiguous`` means the
+    choice was not backed by the weight test and two layouts scored within a factor
+    of four, so the caller (:func:`tensorcad.fleet_baseline.partition_surfaces`)
+    may quarantine the patch instead of meshing a possibly mis-read net.
     """
     needed = 4 * points
     candidates: list[tuple[str, list[tuple[float, float, float]], list[float]]] = []
@@ -382,7 +411,7 @@ def _split_control(
         candidates.append(("interleaved", interleaved, weights_interleaved))
         block = [tuple(body[points + 3 * index:points + 3 * index + 3]) for index in range(points)]
         candidates.append(("weight_block", block, list(body[:points])))  # type: ignore[arg-type]
-    if len(body) >= 3 * points:
+    if len(body) >= 3 * points and (not rational or len(body) < needed):
         plain = [tuple(body[3 * index:3 * index + 3]) for index in range(points)]
         candidates.append(("polynomial", plain, [1.0] * points))  # type: ignore[arg-type]
     if not candidates:
@@ -396,12 +425,20 @@ def _split_control(
         scored.append((_net_roughness(control, count_u, count_v), name, control, weights))
     if not scored:
         raise IgesError("no usable control-point layout for type-128 surface")
+    uniform = [item for item in scored if _uniform_weights(item[3])]
+    if len(uniform) == 1:
+        best = uniform[0]
+        return list(best[2]), list(best[3]), best[1], False
     scored.sort(key=lambda item: item[0])
     best = scored[0]
     ambiguous = False
     if len(scored) > 1 and best[0] > 0.0:
         second = scored[1][0]
         ambiguous = second > 0.0 and best[0] * 4.0 > second
+    elif len(scored) > 1:
+        # every candidate is perfectly smooth (degenerate net, no interior control
+        # point): the smoothness test carries no information at all.
+        ambiguous = True
     return list(best[2]), list(best[3]), best[1], ambiguous
 
 
