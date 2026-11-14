@@ -30,6 +30,21 @@ SU2     NOT_SUPPORTED (*)    REAL                            round trip
 CGNS    NOT_SUPPORTED (*)    REAL                            round trip
 ======  ===================  ==============================  ============
 
+Import direction (files TensorCAD did not write)
+------------------------------------------------
+The table above is about what TensorCAD can *emit*.  Reading is a different
+problem: files arriving from a CAD kernel, Salome/Pointwise or a structured
+panel generator are usually **quad** or **polygon** cages, often in several
+cell blocks (several Gmsh volume regions, several CGNS zones), and meshes
+written in one block often come back split in two.  :func:`meshio_to_mesh`
+therefore consumes *every* surface block and triangulates quads (diagonal
+0-2) and polygons (fan from vertex 0), preserving winding, and
+:func:`meshio_to_tetrahedral` concatenates *every* tetra block instead of
+taking the first.  Before that, a six-quad cube -- the simplest closed body
+there is -- was rejected as "contains no triangle cells", and a file whose
+first triangle block was a boundary patch silently lost the rest of its
+geometry.  ``tests/test_meshio_import_cells.py`` gates both directions.
+
 Two producers of the tetrahedra
 --------------------------------
 :func:`tetrahedralise_surface` star-tessellates a *closed surface*; it is exact for
@@ -65,6 +80,8 @@ from . import mesh as meshlib
 from .geometry import Mesh
 
 __all__ = [
+    "SURFACE_CELL_TYPES",
+    "VOLUME_CELL_TYPES",
     "FORMATS_ALL",
     "FORMATS_SURFACE",
     "FORMATS_VOLUME",
@@ -466,11 +483,63 @@ def mesh_to_meshio(mesh: Mesh | TetrahedralMesh) -> Any:
     return meshio.Mesh(points, [("triangle", cells)])
 
 
-def _find_block(mio: Any, cell_type: str) -> np.ndarray | None:
-    for block in _cell_blocks(mio.cells):
-        if block.type == cell_type:
-            return np.asarray(block.data)
-    return None
+#: Cell types that carry a 2-D surface facet, and how many triangles each splits into.
+SURFACE_CELL_TYPES: tuple[str, ...] = ("triangle", "quad", "polygon")
+
+#: Cell types that carry a 3-D volume cell.
+VOLUME_CELL_TYPES: tuple[str, ...] = ("tetra", "hexahedron", "wedge", "pyramid")
+
+
+def _triangulate_block(block_type: str, data: Any) -> list[tuple[int, int, int]]:
+    """Split one meshio cell block of a surface type into 0-based triangles.
+
+    ``triangle`` passes through; ``quad`` splits along the ``0-2`` diagonal and
+    ``polygon`` is fanned from its first vertex.  Both splits preserve the
+    winding order of the parent facet, so an outward-oriented quad cage stays
+    outward-oriented as triangles (verified by the signed volume in the tests).
+    Triangles with a repeated index are dropped: they are topologically invalid
+    (zero area, self-edge) and cannot come from a conforming writer.
+    """
+    if block_type == "triangle":
+        rows = data
+    elif block_type == "quad":
+        rows = data
+    elif block_type == "polygon":
+        rows = data
+    else:  # pragma: no cover - guarded by the caller
+        raise MeshioFormatError(f"cell type '{block_type}' is not a surface facet")
+
+    triangles: list[tuple[int, int, int]] = []
+    for row in rows:
+        idx = [int(i) for i in row]
+        if block_type == "triangle":
+            if len(idx) != 3:
+                raise MeshioFormatError(
+                    f"triangle block carries a cell with {len(idx)} indices"
+                )
+            if len(set(idx)) == 3:
+                triangles.append((idx[0], idx[1], idx[2]))
+            continue
+        if block_type == "quad":
+            if len(idx) != 4:
+                raise MeshioFormatError(f"quad block carries a cell with {len(idx)} indices")
+            for tri in ((idx[0], idx[1], idx[2]), (idx[0], idx[2], idx[3])):
+                if len(set(tri)) == 3:
+                    triangles.append(tri)
+            continue
+        # polygon: fan from vertex 0
+        if len(idx) < 3:
+            continue
+        for k in range(1, len(idx) - 1):
+            tri = (idx[0], idx[k], idx[k + 1])
+            if len(set(tri)) == 3:
+                triangles.append(tri)
+    return triangles
+
+
+def _present_cell_types(mio: Any) -> str:
+    blocks = _cell_blocks(mio.cells)
+    return ", ".join(sorted({block.type for block in blocks})) or "none"
 
 
 def meshio_to_mesh(
@@ -481,15 +550,42 @@ def meshio_to_mesh(
 ) -> Mesh:
     """Convert a ``meshio.Mesh`` back to a :class:`tensorcad.geometry.Mesh`.
 
-    Only the first triangle cell block is used; other cell types are ignored.
+    Every surface cell block is consumed, not just the first one: ``triangle``
+    blocks are concatenated and ``quad``/``polygon`` blocks are triangulated
+    (:func:`_triangulate_block`, winding preserved).  One-sided and vertex
+    blocks (boundary ``line`` sets, isolated points) are not geometry and are
+    skipped; 3-D volume blocks are *also* skipped, so importing a volume file
+    through this function returns its boundary surface -- use
+    :func:`meshio_to_tetrahedral` when the cells themselves are wanted.
     """
-    triangle_data = _find_block(mio, "triangle")
-    if triangle_data is None:
-        raise MeshioFormatError("meshio mesh contains no triangle cells")
-
     vertices = tuple(tuple(float(c) for c in row) for row in np.asarray(mio.points))
-    faces = tuple(tuple(int(idx) for idx in row) for row in triangle_data)
-    return Mesh(vertices=vertices, faces=faces, units=units, coordinate_frame=coordinate_frame)
+    faces: list[tuple[int, int, int]] = []
+    for block in _cell_blocks(mio.cells):
+        if block.type in SURFACE_CELL_TYPES:
+            faces.extend(_triangulate_block(block.type, np.asarray(block.data)))
+
+    if not faces:
+        present = _present_cell_types(mio)
+        if any(t in present.split(", ") for t in VOLUME_CELL_TYPES):
+            raise MeshioFormatError(
+                f"meshio mesh contains no surface facets (cell types present: {present}); "
+                "the file is a volume mesh -- use meshio_to_tetrahedral() for its cells"
+            )
+        raise MeshioFormatError(
+            f"meshio mesh contains no surface facets (cell types present: {present})"
+        )
+
+    max_index = max(max(face) for face in faces)
+    if max_index >= len(vertices):
+        raise MeshioFormatError(
+            f"cell block references vertex {max_index} but the file only has {len(vertices)} points"
+        )
+    return Mesh(
+        vertices=vertices,
+        faces=tuple(faces),
+        units=units,
+        coordinate_frame=coordinate_frame,
+    )
 
 
 def meshio_to_tetrahedral(
@@ -498,16 +594,45 @@ def meshio_to_tetrahedral(
     units: str = "m",
     coordinate_frame: str = "unspecified right-handed frame",
 ) -> TetrahedralMesh:
-    """Convert a ``meshio.Mesh`` carrying a tetra cell block to a TetrahedralMesh."""
-    tetra_data = _find_block(mio, "tetra")
-    if tetra_data is None:
-        found = ", ".join(sorted({b.type for b in _cell_blocks(mio.cells)})) or "none"
-        raise MeshioFormatError(
-            f"meshio mesh contains no tetra cells (cell types present: {found})"
-        )
+    """Convert a ``meshio.Mesh`` carrying tetra cells to a ``TetrahedralMesh``.
 
+    *All* tetra blocks are concatenated (multi-region/multi-zone files: a CGNS
+    or Gmsh volume written as several tetra zones used to lose every zone but
+    the first, silently).  Non-tetra volume cells (hexahedra, wedges, pyramids)
+    are not convertible without splitting, so they are reported as an error
+    rather than dropped.
+    """
     vertices = tuple(tuple(float(c) for c in row) for row in np.asarray(mio.points))
-    tets = tuple(tuple(int(idx) for idx in row) for row in tetra_data)
+    tets: list[Tet] = []
+    other_volume: set[str] = set()
+    for block in _cell_blocks(mio.cells):
+        if block.type == "tetra":
+            for row in np.asarray(block.data):
+                idx = tuple(int(i) for i in row)
+                if len(idx) != 4:
+                    raise MeshioFormatError(
+                        f"tetra block carries a cell with {len(idx)} indices"
+                    )
+                if len(set(idx)) == 4:
+                    tets.append(idx)  # type: ignore[arg-type]
+        elif block.type in VOLUME_CELL_TYPES:
+            other_volume.add(block.type)
+
+    if not tets:
+        present = _present_cell_types(mio)
+        detail = f" (cell types present: {present})"
+        if other_volume:
+            detail += (
+                "; non-tetra volume cells "
+                + ", ".join(sorted(other_volume))
+                + " would have to be split into tetrahedra first"
+            )
+        raise MeshioFormatError("meshio mesh contains no tetra cells" + detail)
+
+    if any(max(tet) >= len(vertices) for tet in tets):
+        raise MeshioFormatError(
+            "tetra block references a vertex outside the point array"
+        )
     return TetrahedralMesh(
         vertices=vertices, tets=tets, units=units, coordinate_frame=coordinate_frame
     )
