@@ -118,7 +118,12 @@ def test_conflict_is_reported_not_averaged():
     report = cross_reference({"SHIP": {"a": left, "simman2020_summary": right}})
     cell = report["SHIP"]["quantities"]["displacement_volume"]
     assert cell["verdict"] == "CONFLICT"
-    assert cell["family_values"] == {"F": 100.0, "SIMMAN-SERIES": 110.0}
+    # An unregistered source key is its own family ("a"); the registered one collapses to
+    # its lineage.  Two families disagree, so neither value is averaged.
+    assert cell["family_values"] == {"a": 100.0, "SIMMAN-SERIES": 110.0}
+    assert cell["disputed"] is True
+    assert {item["family"] for item in cell["published_values"]} == {"a", "SIMMAN-SERIES"}
+    assert 105.0 not in [item["value"] for item in cell["published_values"]]
 
 
 # --------------------------------------------------------------------------- the built library
@@ -169,9 +174,18 @@ def test_honest_gaps_are_recorded(library):
     assert library["report"]["DTC"]["cross_verified"] == 0
     assert library["report"]["Series60"]["cross_verified"] == 0
     assert library["report"]["JBC"]["quantities"]["displacement_volume"]["verdict"] == "SINGLE_SOURCE"
-    # ONRT disagrees between publishers on displacement (mass vs volume) and on LCB.
+    # ONRT disagrees between publishers on displacement (mass vs volume).
     assert library["report"]["ONRT"]["quantities"]["displacement_volume"]["verdict"] == "CONFLICT"
-    assert library["report"]["ONRT"]["quantities"]["lcb_percent"]["verdict"] == "CONFLICT"
+    # ONRT LCB is *not* a second publisher disagreeing: the NMRI cell was read from a
+    # fallback column, so its scale is unknown and it must not vote.  The cell stays in the
+    # audit trail (`entries`) while the verdict falls back to one lineage -- a fallback cell
+    # that votes is how a spurious CONFLICT gets published.
+    onrt_lcb = library["report"]["ONRT"]["quantities"]["lcb_percent"]
+    assert onrt_lcb["verdict"] == "SINGLE_SOURCE"
+    assert set(onrt_lcb["family_values"]) == {"SIMMAN-SERIES"}
+    assert any(
+        entry["cell"]["unit_basis"].startswith("fallback_column") for entry in onrt_lcb["entries"]
+    )
 
 
 def test_missing_reconstructions_are_not_quoted_as_errors(library):
