@@ -1,5 +1,5 @@
 {
-  "baseline": "/root/tp-agent/work/m20111/docs/golden/tensorcad_geometry_golden.json",
+  "baseline": "/root/tp-agent/work/m20527/docs/golden/tensorcad_geometry_golden.json",
   "cases": [
     {
       "findings": [],
@@ -122,7 +122,7 @@
         "wetted_surface_area_m2": 14.879063104957783
       },
       "reference_source": "tensorcad.wigley.wigley_analytic_hydrostatics (closed forms)",
-      "seconds": 2.223,
+      "seconds": 2.207,
       "title": "Wigley hull (L=10, B=1, T=0.625, n=m=2): lofted and capped surface"
     },
     {
@@ -240,20 +240,13 @@
         "waterplane_area_m2": 9.374999999999998
       },
       "reference_source": "tensorcad.series60.analytic_* over the exponents fitted from Cb",
-      "seconds": 1.836,
+      "seconds": 1.518,
       "title": "Series 60 hull (L=10, B=1.5, T=0.6, Cb=0.60): fitted exponent family"
     },
     {
       "findings": [],
       "geometry_sha256": "",
-      "known_limitations": [
-        {
-          "asserted": false,
-          "detail": "the ellipsoid surface area has no elementary closed form (elliptic integrals), so it is drift-locked but not asserted against a reference",
-          "id": "ellipsoid-area-not-asserted",
-          "measured_surface_area_m2": 22.066714649980803
-        }
-      ],
+      "known_limitations": [],
       "measurements": {
         "coarse": {
           "ellipsoid_extent_x_m": 4,
@@ -310,6 +303,16 @@
           "relative_error": 0,
           "tolerance": 0.0001,
           "value": 1
+        },
+        {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.388e-03 = 2.776e-03",
+          "kind": "analytic",
+          "name": "ellipsoid_surface_area_m2",
+          "passed": true,
+          "reference": 22.076658276751232,
+          "relative_error": -0.00045041358369444476,
+          "tolerance": 0.002775709300300617,
+          "value": 22.066714649980803
         },
         {
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.728e-03 = 5.457e-03",
@@ -378,6 +381,7 @@
         "ellipsoid_extent_x_m": 4,
         "ellipsoid_extent_y_m": 3,
         "ellipsoid_extent_z_m": 1,
+        "ellipsoid_surface_area_m2": 22.076658276751232,
         "ellipsoid_volume_m3": 6.283185307179586,
         "sphere_extent_x_m": 2,
         "sphere_extent_y_m": 2,
@@ -385,8 +389,8 @@
         "sphere_surface_area_m2": 12.566370614359172,
         "sphere_volume_m3": 4.1887902047863905
       },
-      "reference_source": "(4/3)\u03c0r\u00b3, 4\u03c0r\u00b2 and (4/3)\u03c0abc over the exact primitive fields",
-      "seconds": 12.685,
+      "reference_source": "(4/3)\u03c0r\u00b3 and (4/3)\u03c0abc over the exact primitive fields; the areas from the exact semi-axes: 4\u03c0r\u00b2 for the sphere and tensorcad.analytic_solids.ellipsoid_surface_area for the triaxial ellipsoid (converged Gauss-Legendre quadrature of the exact area element, cross-checked against the spheroid closed form)",
+      "seconds": 8.419,
       "title": "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra"
     },
     {
@@ -398,25 +402,25 @@
           "boundary_component_count": 1,
           "boundary_edge_count": 722,
           "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld and only the dataset/station-area displacement is reported. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
-          "displacement_volume_m3": 8452.757810030433,
+          "displacement_volume_m3": 8452.757810023813,
           "id": "displacement-withheld-open-shell",
           "signed_tetra_sum_open_shell_m3": -13658.368296262934
         }
       ],
       "measurements": {
         "coarse": {
-          "block_coefficient": 0.5019881926994797,
+          "block_coefficient": 0.5019881926990867,
           "boundary_component_count": 1,
           "boundary_edge_count": 722,
           "boundary_vertex_count": 722,
           "cloud_extent_x_m": 151.9004461,
           "cloud_extent_y_m": 10.2695,
           "cloud_extent_z_m": 19.195270999999998,
-          "displacement_volume_m3": 8452.757810030433,
+          "displacement_volume_m3": 8452.757810023813,
           "draft_m": 6.156643356643357,
           "holdout_rms_m": 0.11738199143838947,
           "length_stations_m": 143.264946698,
-          "longitudinal_centre_buoyancy_m": 70.38701397183036,
+          "longitudinal_centre_buoyancy_m": 70.38701397178868,
           "mesh_extent_x_m": 151.9004461,
           "mesh_extent_y_m": 20.539,
           "mesh_extent_z_m": 19.195270999999998,
@@ -428,18 +432,18 @@
           "waterplane_area_m2": 2100.3253858657763
         },
         "fine": {
-          "block_coefficient": 0.5019881926994797,
+          "block_coefficient": 0.5019881926990867,
           "boundary_component_count": 1,
           "boundary_edge_count": 722,
           "boundary_vertex_count": 722,
           "cloud_extent_x_m": 151.9004461,
           "cloud_extent_y_m": 10.2695,
           "cloud_extent_z_m": 19.195270999999998,
-          "displacement_volume_m3": 8452.757810030433,
+          "displacement_volume_m3": 8452.757810023813,
           "draft_m": 6.156643356643357,
           "holdout_rms_m": 0.11738199143838947,
           "length_stations_m": 143.264946698,
-          "longitudinal_centre_buoyancy_m": 70.38701397183036,
+          "longitudinal_centre_buoyancy_m": 70.38701397178868,
           "mesh_extent_x_m": 151.9004461,
           "mesh_extent_y_m": 20.539,
           "mesh_extent_z_m": 19.195270999999998,
@@ -529,7 +533,7 @@
         "holdout_rms_m": 0.11738199454341851
       },
       "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]",
-      "seconds": 2.323,
+      "seconds": 1.637,
       "title": "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)"
     }
   ],
@@ -537,5 +541,5 @@
   "passed": true,
   "quick": false,
   "schema": "tensorcad.golden/1",
-  "seconds": 19.068
+  "seconds": 13.781
 }
