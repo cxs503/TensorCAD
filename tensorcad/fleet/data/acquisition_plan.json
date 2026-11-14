@@ -1,0 +1,82 @@
+{
+  "schema": "tensorcad.fleet.acquisition_plan.v1",
+  "anchor": "GAP-CAD-T1-BASELINE-FLEET",
+  "purpose": "One acquisition order per standard hull: which official file satisfies the anchor, which geometry route consumes it, under which licence, and under which digest. The plan exists so the remaining blocker is a named, single-valued fact (a URL and a sha256) rather than a paragraph saying 'official geometry is unavailable'.",
+  "url_null_policy": "url is null for the entries that were not retrieved: a deep link written from memory would be a fabricated citation that the first real fetch would have to disprove. The custodian supplies it on the command line (--url SHIP=URL) and the value lands in the evidence with retrieval=network_fetch.",
+  "sha256_null_policy": "sha256 is null where no bytes have been read in this environment, because no digest exists to pin. A payload read without a pin is refused (UnpinnedDigest) rather than praised as verified -- the digest of the first read is printed so the custodian can pin it.",
+  "pin_basis_note": "Where a digest IS pinned below (KCS, KVLCC2), the pin basis is 'first_retrieval': the digest of the bytes as served by the publisher's portal on 2026-11-14. That is trust-on-first-use, not an independently published checksum -- it proves that a second retrieval returns the same file, not that the file is genuine. The HTTP response's own Last-Modified/ETag are recorded alongside so the retrieval can be replayed.",
+  "ships": [
+    {
+      "ship": "KCS",
+      "anchor_id": "gothenburg2010-kcs",
+      "file_format": "iges",
+      "url": "https://simman2014.dk/wp-content/uploads/2015/07/KCS-Hull.zip",
+      "sha256": "b50adace1ddf255fc0b471d3394edaacd27d3bebb298f3b1fc5dad5ae4f7f88c",
+      "license": "published workshop benchmark data, research use",
+      "locator": "MOERI KCS hull definition in IGES + offset form, published with the SIMMAN 2014 / Gothenburg 2010 KCS test case (Lpp 230.0 m, B 32.2 m, T 10.8 m)",
+      "expected_file": "KCS-Hull.zip -> KCS_hull_SVA.igs (single member, 246164 bytes)",
+      "max_bytes": 67108864,
+      "notes": "Retrieved 2026-11-14 from the geometry-and-conditions page of the SIMMAN 2014 KCS test case (https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/); HTTP 200 application/zip, ETag \"5cb08c74-11e4f\", Last-Modified Fri, 12 Apr 2019 13:02:44 GMT. pin_basis=first_retrieval."
+    },
+    {
+      "ship": "KVLCC2",
+      "anchor_id": "simman-kvlcc2",
+      "file_format": "iges",
+      "url": "https://simman2014.dk/wp-content/uploads/2015/07/KVLCC2-Hull.zip",
+      "sha256": "dc032647f00a68d354ede2f4b1ee3d68cd048bc3d34d221c2a8c9aac3a6dd548",
+      "license": "published workshop benchmark data, research use",
+      "locator": "MOERI KVLCC2 hull definition in IGES form, published with the SIMMAN 2008/2014 KVLCC2 test case (Lpp 320.0 m, B 58.0 m, T 20.8 m)",
+      "expected_file": "KVLCC2-Hull.zip -> kvlcc2.igs (single member, 6270129 bytes)",
+      "max_bytes": 67108864,
+      "notes": "Retrieved 2026-11-14 from the geometry-and-conditions page of the SIMMAN 2014 KVLCC2 test case; HTTP 200 application/zip, ETag \"5cb08c74-148738\", Last-Modified Fri, 12 Apr 2019 13:02:44 GMT. pin_basis=first_retrieval. This is the hull the ship platform currently ships as a 304-triangle placeholder byte-identical to KVLCC1."
+    },
+    {
+      "ship": "ONRT",
+      "anchor_id": "gothenburg2010-onrt",
+      "file_format": "iges",
+      "url": null,
+      "sha256": null,
+      "license": "published workshop benchmark data, research use",
+      "locator": "ONRT (ONR tumblehome) hull-surface geometry distributed with the Gothenburg 2010 test case (Lpp 154.0 m, B 18.78 m, T 5.494 m)",
+      "expected_file": "the tumblehome hull surface (IGES or offset table) accompanying the ONRT data sheet",
+      "max_bytes": 67108864,
+      "notes": "NOT the SIMMAN 'US Navy combatant' package: that test case is DTMB 5415 (a different hull), so downloading 5415-Hull.zip would not satisfy this order and is deliberately not done. ONRT geometry is a Gothenburg 2010 artefact; the portal that serves it was not located here."
+    },
+    {
+      "ship": "JBC",
+      "anchor_id": "tokyo2015-jbc",
+      "file_format": "iges",
+      "url": null,
+      "sha256": null,
+      "license": "published workshop benchmark data, research use",
+      "locator": "JBC (Japan Bulk Carrier) hull-surface geometry distributed with the Tokyo 2015 test case (Lpp 280.0 m, B 45.0 m, T 16.5 m, Cb 0.858)",
+      "expected_file": "the bulk-carrier hull surface, without the duct and rudder bulb (appendages are separate solids)",
+      "max_bytes": 67108864,
+      "notes": "JBC's reference volume is currently a closure value (Cb*L*B*T), i.e. no external validation; the official file turns G7 into a real comparison. Appendages (duct, rudder bulb) would break the single-closed-shell gate, so the hull alone is ordered."
+    },
+    {
+      "ship": "DTC",
+      "anchor_id": "dtc-2012",
+      "file_format": "iges",
+      "url": null,
+      "sha256": null,
+      "license": "published benchmark data, research use",
+      "locator": "DTC (Duisburg Test Case) hull-surface geometry published by the University of Duisburg-Essen institute page (Lpp 355.0 m, B 51.0 m, T 14.5 m, Cb 0.661)",
+      "expected_file": "the post-panamax container-ship hull surface published with the DTC test case",
+      "max_bytes": 67108864,
+      "notes": "The registry URL (https://www.uni-due.de/ship/dtc.php) answers HTTP 404 from this environment, so the portal has moved; the order stays open until a custodian supplies the current file URL rather than guessing one."
+    },
+    {
+      "ship": "Series60",
+      "anchor_id": "todd1963-series60",
+      "file_format": "offset_csv",
+      "url": null,
+      "sha256": null,
+      "license": "US Government work, public domain",
+      "locator": "Todd's Series 60 parent-form offsets at L/B 7.5, B/T 2.5, Cb 0.60: stations x waterline half-breadths, as tabulated in the DTMB report",
+      "expected_file": "the parent-form offset table (stations x waterline half-breadths) digitised as CSV: header row of x/L values, one row per waterline, half-breadth in metres",
+      "max_bytes": 8388608,
+      "notes": "The only genuinely public-domain source in the fleet. Offset tables go through the offset_table loft route, which closes the hull by construction (shared keel and deck vertices), so a table is enough to produce a watertight mesh."
+    }
+  ]
+}
