@@ -406,8 +406,12 @@ def gate_volume(record: ShipRecord, facts: TopologyFacts, tolerance: float = VOL
 def gate_principal_dimensions(record: ShipRecord, facts: TopologyFacts, tolerance: float = VOLUME_TOLERANCE) -> GateResult:
     """The mesh must actually span L, B and T of the record, not merely its volume."""
     xmin, xmax, ymin, ymax, zmin, zmax = facts.bbox
-    measured = {"length": xmax - xmin, "beam": ymax - ymin, "draft": -(zmin if zmin < 0 else zmin)}
-    measured["draft"] = zmax - zmin if zmax <= 0.0 else abs(zmin)
+    # Draft is the *extent* of the hull in z. The waterline's absolute position is a
+    # property of the file's frame, not of the hull: an imported IGES authored with the
+    # keel at z = 0 and the waterline at z = T spans the same draft as one authored with
+    # z in [-T, 0]. Reading the draft off one end only (the old ``abs(zmin)``) measured
+    # 0.0 m for every keel-at-origin file, which is how a real KCS came to fail this gate.
+    measured = {"length": xmax - xmin, "beam": ymax - ymin, "draft": zmax - zmin}
     declared = {"length": record.length, "beam": record.beam, "draft": record.draft}
     errors = {
         key: abs(measured[key] - declared[key]) / declared[key] for key in declared

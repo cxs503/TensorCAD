@@ -473,7 +473,12 @@ def iges_field_mesh(
         raise RouteRefusal(f"IGES file not found: {iges_path}")
 
     iges = read_iges(str(iges_path))
-    surfaces = [s for s in iges.surfaces if hasattr(s, 'sample')]
+    # ``IgesFile.surfaces`` is a method on the reader; older call sites treated it as an
+    # attribute, which made this route raise ``TypeError: 'method' object is not iterable``
+    # before it ever touched a file. Accept both spellings.
+    surface_source = iges.surfaces
+    candidates = surface_source() if callable(surface_source) else surface_source
+    surfaces = [s for s in candidates if hasattr(s, 'sample')]
     if not surfaces:
         raise RouteRefusal(f"no B-spline surfaces found in {iges_path}")
 
@@ -550,6 +555,7 @@ def build_ship_geometry(
     dx: float = 0.5,
     dz: float = 0.1,
     ring_points: int = 240,
+    samples_per_metre: float = 8.0,
 ) -> BuiltGeometry:
     """Dispatch on ``record.geometry_route``; raise :class:`RouteRefusal` if unsupported.
 
@@ -567,6 +573,8 @@ def build_ship_geometry(
         Field cell sizes for the ``iges_field`` route (metres).
     ring_points : int
         Vertices per waterline ring for the ``iges_field`` route.
+    samples_per_metre : float
+        Patch sampling density for the ``iges_field`` route (samples per metre of surface).
     """
     route = record.geometry_route
     if route == "series60_form":
@@ -592,5 +600,6 @@ def build_ship_geometry(
         target = iges_path or record.geometry_path
         if target is None:
             raise RouteRefusal("iges_field route needs a path (record.geometry_path or iges_path)")
-        return iges_field_mesh(record, target, dx=dx, dz=dz, ring_points=ring_points)
+        return iges_field_mesh(record, target, dx=dx, dz=dz, ring_points=ring_points,
+                               samples_per_metre=samples_per_metre)
     raise RouteRefusal(f"unknown geometry route {route!r}")
