@@ -1,0 +1,51 @@
+{
+  "verdict_id": null,
+  "repo": "TensorCAD",
+  "scope": "m19974 CASE-CAD-VOLUME-CLOSED",
+  "mission_id": 19974,
+  "level": 4,
+  "verdict_by": "board-audit",
+  "evidence": {
+    "impl_files": [
+      "tensorcad/mesh_volume.py:1-450 (analytic_sphere_volume/analytic_box_volume/check_closed_body/convergence_study/observed_order/defect_detection; 真代码：解析闭式→闭体检查→收敛阶梯→负控，无硬编码结果)",
+      "tensorcad/geometry_audit.py:346-500 (audit_watertightness: 自由边/非流形边/重复面/绕向冲突/有符号体积/缝距)",
+      "benchmarks/verified/mesh_volume_watertight/run_benchmark.py:1-450 (判据组装+工件输出+环境记录)"
+    ],
+    "entry": "python benchmarks/verified/mesh_volume_watertight/run_benchmark.py --out runs/mesh_volume_watertight",
+    "run_artifacts": [
+      "benchmarks/verified/mesh_volume_watertight/result.json (25KB, 32 gates, anchor=CASE-CAD-VOLUME-CLOSED, passed=True)",
+      "benchmarks/verified/mesh_volume_watertight/convergence.csv (7 levels, h/V/error/open_edges/euler)",
+      "benchmarks/verified/mesh_volume_watertight/convergence.png (log-log error vs h, slope-2 reference, 0.1% line)",
+      "benchmarks/verified/mesh_volume_watertight/gates.png (32 gates, green/red pass/fail)",
+      "benchmarks/verified/mesh_volume_watertight/box_stl.stl (float32 round-trip sample)",
+      "runs/mesh_volume_watertight/repro.log (full run output, 32/32 ✓, 16.074s)"
+    ],
+    "tests": "tests/test_mesh_volume.py: 12/12 passed (24.78s): test_sphere_reference_has_two_derivations, test_icosahedron_closed_form_matches_the_divergence_route, test_box_volume_and_area_are_exact[×3], test_box_volume_is_invariant_under_rotation_and_translation, test_sphere_ladder_converges_at_second_order_and_crosses_the_acceptance_line, test_sphere_error_is_dimensionless_and_healthily_below_the_line, test_every_injected_defect_is_named, test_volume_alone_cannot_see_an_unwelded_soup, test_audit_rejects_a_body_with_a_hole, test_benchmark_case_passes_its_declared_gates — 断言均为不变量（rel_tol/exact_tol/route_tol），非仅执行",
+    "integration_callers": "none：grep -rn 'mesh_volume' --include='*.py'（排除模块自身与其测试）仅见 benchmarks/verified/mesh_volume_watertight/run_benchmark.py 与 tests/test_mesh_volume.py 调用 → L3 不达（无求解器/平台集成）",
+    "benchmark": {
+      "anchor": "CASE-CAD-VOLUME-CLOSED",
+      "registered": "SELF_DECLARED — 案号在 run_benchmark.py:419 与 result.json:3 自声明；tolerances 预声明于 tensorcad/mesh_volume.py 模块常量（RELATIVE_TOLERANCE=1e-3, EXACT_TOLERANCE=1e-12, ROUTE_TOLERANCE=1e-10, FLOAT32_TOLERANCE=1e-6），不看结果再调",
+      "gates_total": 32,
+      "gates_passed": 32,
+      "gates_failed": 0,
+      "key_metrics": {
+        "box_volume_error": "0.000e+00 (exact, 3 variants incl. rotated+translated)",
+        "sphere_sub6_volume_error": "-1.352e-04 (-0.0135%, within 0.1% tolerance)",
+        "sphere_sub6_area_error": "-7.476e-05 (-0.0075%, within 0.1% tolerance)",
+        "observed_order_volume": 1.9887553774398368,
+        "observed_order_area": 2.0051441001054147,
+        "first_level_within_0.1pct": "sphere_r1_sub5",
+        "negative_controls_detected": 4,
+        "blind_spots_documented": 2
+      },
+      "tolerance_compliance": "ALL 32 gates within pre-declared tolerances; worst relative error = -0.0135% (sphere sub6 volume), well within 0.1% acceptance line"
+    },
+    "repro_cmd": "cd /root/tp-agent/work/m19974 && python benchmarks/verified/mesh_volume_watertight/run_benchmark.py --out runs/mesh_volume_watertight (本单复算: 32/32 ✓, 16.074s, rc=0); python -m pytest tests/test_mesh_volume.py -v (12/12 passed, 24.78s, rc=0)",
+    "external_anchor": "解析闭式（Euclid《几何原本》XII.18 球=外切圆柱2/3；立体几何 V=4/3πr³, A=4πr², V=abc, A=2(ab+bc+ca)；正二十面体闭式 V=(5/12)(3+√5)a³）；trimesh 5.0.0 第三方交叉（长方体族一致到 ≤1.3e-15 相对）",
+    "report": "docs/mesh_volume_watertight_bench.md 六段齐全（##①问题与ref出处 → ##⑥失败模式与工件 + 一键复现）；所有数字由 publish_report.py 从 result.json 程序化注入，零手抄",
+    "level_rationale": "L4：完整基准算例（32 条判据全过）+ 误差分析（收敛阶梯 p=1.989/2.005、尺度不变性、刚体运动不变性、容差敏感性）+ 可复现（repro_cmd 验证通过，result.json/convergence.csv/gates.png 工件齐全）。不达 L3：无求解器/平台集成调用者（grep 0 命中）。不达 L5：非科研工程成果，为验证基准。"
+  },
+  "rationale": "L4: Complete benchmark case with 32 gates all passed, pre-declared tolerances in module constants, convergence study showing second-order behavior (p=1.989 volume, p=2.005 area), negative controls proving defect detection, blind spots documented, full reproducibility (repro_cmd verified, 12/12 tests pass). NOT L3: No integration into main solver/platform (grep 0 callers). NOT L5: Verification benchmark, not a full research/engineering product.",
+  "report_id": null,
+  "created_at": "2026-11-14T08:00:00+00:00"
+}
