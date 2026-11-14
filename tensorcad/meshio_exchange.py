@@ -30,6 +30,15 @@ SU2     NOT_SUPPORTED (*)    REAL                            round trip
 CGNS    NOT_SUPPORTED (*)    REAL                            round trip
 ======  ===================  ==============================  ============
 
+Two producers of the tetrahedra
+--------------------------------
+:func:`tetrahedralise_surface` star-tessellates a *closed surface*; it is exact for
+star-shaped bodies and refuses the rest.  :func:`volume_mesh_to_tetrahedral` takes the
+body-fitted grid :mod:`tensorcad.volume_mesh` builds (a real hull, boundary layer grading
+and all) and hands over its Kuhn-split tetrahedra.  That second path is the one that works
+for the package's own hull generator, whose rings collapse to zero breadth at the stem and
+post and are therefore refused by star tessellation.
+
 (*) SU2/CGNS surface triangles remain genuinely unsupported -- the formats only
 carry volume cells -- but :func:`round_trip_meshio` now raises a
 ``MeshioFormatError`` telling the caller to call
@@ -70,6 +79,7 @@ __all__ = [
     "surface_signed_volume",
     "tetrahedral_volume",
     "tetrahedralise_surface",
+    "volume_mesh_to_tetrahedral",
     "write_meshio",
 ]
 
@@ -150,6 +160,13 @@ def tetrahedral_volume(vertices: Sequence[Vec3], tet: Sequence[int]) -> float:
 class TetrahedralMesh:
     """Linear tetrahedral volume mesh: vertex positions plus 4-tuples.
 
+    ``degenerate_cells`` counts zero-volume tetrahedra that were present in the
+    source topology and dropped here: :func:`volume_mesh_to_tetrahedral` hits
+    them on every real hull body, where the keel line and the two end stations
+    collapse to zero breadth, so the cells of those columns have no measure.
+    Dropping them is exact (a zero-volume cell contributes nothing to the
+    volume), and the count is carried so it is visible instead of silent.
+
     ``tets`` holds 0-based indices into ``vertices``.  All tetrahedra are
     strictly positively oriented (positive signed volume); the star
     tessellation produced by :func:`tetrahedralise_surface` guarantees it.
@@ -170,6 +187,7 @@ class TetrahedralMesh:
     units: str = "m"
     coordinate_frame: str = "unspecified right-handed frame"
     edge_on_facets: int = 0
+    degenerate_cells: int = 0
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "vertices", tuple(tuple(float(c) for c in v) for v in self.vertices))
@@ -492,6 +510,106 @@ def meshio_to_tetrahedral(
     tets = tuple(tuple(int(idx) for idx in row) for row in tetra_data)
     return TetrahedralMesh(
         vertices=vertices, tets=tets, units=units, coordinate_frame=coordinate_frame
+    )
+
+
+
+# ---------------------------------------------------------------------------
+# Body-fitted volume mesh (tensorcad.volume_mesh) -> tetrahedra
+# ---------------------------------------------------------------------------
+
+def volume_mesh_to_tetrahedral(
+    volume_mesh: Any,
+    *,
+    units: str = "m",
+    coordinate_frame: str = "ship frame: x aft-to-fore, y to starboard, z up",
+    tolerance: float | None = None,
+) -> TetrahedralMesh:
+    """Hand a body-fitted :class:`tensorcad.volume_mesh.VolumeMesh` to the volume formats.
+
+    Why this exists
+    ---------------
+    :func:`tetrahedralise_surface` star-tessellates a *surface*, which is exact only for
+    star-shaped bodies and is refused for the package's own hull generator (its rings
+    collapse to zero breadth at the stem and post).  The documented remedy was "use
+    :mod:`tensorcad.volume_mesh` and feed the tetrahedra instead" -- but nothing performed
+    that hand-off, so the remedy was unbacked exactly like the earlier claim it replaced.
+    This function is the missing link: a hull body grid (hexahedra, Kuhn-split into six
+    tetrahedra each) becomes a :class:`TetrahedralMesh`, which SU2 and CGNS accept.
+
+    What is checked, and not assumed
+    --------------------------------
+    * Every tetrahedron is classified on its *signed* volume.  A negative one is a real
+      orientation defect (the solver would see an inverted cell), so it raises
+      :class:`MeshioFormatError` naming the offending cell -- it is never reordered here.
+    * Zero-volume cells are dropped and *counted* in
+      :attr:`TetrahedralMesh.degenerate_cells`.  Structured hull grids always contain
+      them (collapsed columns at the keel and the end stations); dropping is exact.
+    * Conservation is asserted, not hoped for: the kept tetrahedra must reproduce
+      ``volume_mesh.volume()`` to ``tolerance``, so a silent loss of measure is a raise.
+
+    Parameters
+    ----------
+    volume_mesh :
+        A :class:`tensorcad.volume_mesh.VolumeMesh` built with ``split_tets=True``.
+    units, coordinate_frame :
+        Carried onto the returned :class:`TetrahedralMesh`.
+    tolerance :
+        Absolute volume tolerance for the degenerate/conservation tests.  Defaults to
+        ``1e-12 * volume()`` so it scales with the body.
+    """
+    from .volume_mesh import VolumeMesh
+
+    if not isinstance(volume_mesh, VolumeMesh):
+        raise TypeError(
+            f"volume_mesh_to_tetrahedral expects a VolumeMesh, got {type(volume_mesh).__name__}; "
+            "surface meshes belong to tetrahedralise_surface()"
+        )
+    if not volume_mesh.tets:
+        raise MeshioFormatError(
+            "volume mesh carries no tetrahedra (it was built with split_tets=False); "
+            "rebuild with tensorcad.volume_mesh.build_volume_mesh(..., split_tets=True) "
+            "before exporting to " + ", ".join(FORMATS_VOLUME)
+        )
+
+    vertices = tuple(tuple(float(c) for c in v) for v in volume_mesh.vertices)
+    reference = volume_mesh.volume()
+    tol = 1e-12 * abs(reference) if tolerance is None else float(tolerance)
+
+    kept: list[Tet] = []
+    degenerate = 0
+    inverted: list[tuple[int, float]] = []
+    for index, tet in enumerate(volume_mesh.tets):
+        signed = tetrahedral_volume(vertices, tuple(int(i) for i in tet))
+        if signed < -tol:
+            inverted.append((index, signed))
+        elif signed <= tol:
+            degenerate += 1
+        else:
+            kept.append(tuple(int(i) for i in tet))
+
+    if inverted:
+        index, signed = inverted[0]
+        raise MeshioFormatError(
+            f"{len(inverted)} of {len(volume_mesh.tets)} tetrahedra are inverted "
+            f"(cell {index} has signed volume {signed:.6e}); the source volume mesh is "
+            "inconsistent and must be fixed at the builder, not reordered here"
+        )
+
+    kept_volume = sum(tetrahedral_volume(vertices, tet) for tet in kept)
+    if abs(kept_volume - reference) > tol * max(1.0, len(kept)):
+        raise MeshioFormatError(
+            f"dropping {degenerate} zero-volume cells lost measure: kept tetrahedra sum to "
+            f"{kept_volume:.16e} but the volume mesh measures {reference:.16e} "
+            f"(difference {kept_volume - reference:.3e} exceeds {tol:.3e})"
+        )
+
+    return TetrahedralMesh(
+        vertices=vertices,
+        tets=tuple(kept),
+        units=units,
+        coordinate_frame=coordinate_frame,
+        degenerate_cells=degenerate,
     )
 
 
