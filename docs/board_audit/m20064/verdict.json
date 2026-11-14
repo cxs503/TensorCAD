@@ -1,0 +1,135 @@
+{
+  "repo": "TensorCAD",
+  "scope": "m20002 CASE-CAD-CURVATURE-SPHERE",
+  "mission_id": 20064,
+  "level": 3,
+  "evidence": {
+    "impl_files": [
+      "/root/tp-agent/work/m20002/tensorcad/curvature.py:292-361 （vertex_mean_curvature：余切 Laplacian，:347 cotangent clamp，:359 K/(2A) 后 0.5·(K·n) 得 H）@ 4558ef6；本工作树同文件 sha256=3dc54bfe…c2798c8a665 与审计树一致",
+      "/root/tp-agent/work/m20002/benchmarks/verified/sphere_mean_curvature/run_benchmark.py:127-134 （reference_sum=1/R+1/R、reference_total=2/R·4πR²，参考值由计算得出而非字面量）",
+      "/root/tp-agent/work/m20002/benchmarks/verified/sphere_mean_curvature/run_benchmark.py:140-153 area_weights (每顶点入射三角形面积/3)；:178-213 measure()（积分读数 2·ΣH·w/Σw 与点式读数，测量侧不接收解析半径以外的任何形状先验）"
+    ],
+    "entry": "/root/tp-agent/work/m20002/benchmarks/verified/sphere_mean_curvature/run_benchmark.py:748 main()（argparse --out/--radius/--quick）；:537 repro_cmd=\"python benchmarks/verified/sphere_mean_curvature/run_benchmark.py\"；pytest 入口 tests/test_case_cad_curvature_sphere.py",
+    "run_artifacts": [
+      "/root/tp-agent/work/m20064/runs/m20064_sphere_curvature/result.json（审计方独立复跑；590 数值叶中 590 与提交值逐位一致）",
+      "/root/tp-agent/work/m20064/runs/m20064_sphere_curvature/gates_verified.json（16 gate + 1 诊断项原始判据）",
+      "/root/tp-agent/work/m20064/runs/m20064_sphere_curvature/repro.log（命令、commit、stdout 全文、returncode 0）",
+      "/root/tp-agent/work/m20064/runs/m20064_sphere_curvature/figures/error_cloud.png（逐顶点曲率误差场）",
+      "/root/tp-agent/work/m20064/runs/m20064_sphere_curvature/figures/convergence.png、readings.png（复跑生成，sha 与提交版对照见 evidence.json）",
+      "/root/tp-agent/work/m20002/benchmarks/verified/sphere_mean_curvature/result.json（被审提交值 sha256=3f19e9d4bf53193c…）"
+    ],
+    "tests": [
+      "tests/test_case_cad_curvature_sphere.py —— 审计方复跑：8 passed, 1 warning in 15.50s（/root/tp-agent/work/m20002，4558ef6）",
+      "断言为不变量而非跑通：test_the_integral_reading_is_inside_the_two_percent_criterion（<2% 且 <5e-3）、test_the_pointwise_reading_needs_a_well_shaped_triangulation（结构化 <2% 且 raw >20% 且 conditioned <3%）、test_the_pointwise_estimate_keeps_second_order_on_a_structured_sphere（2±0.5）、test_the_relative_error_does_not_depend_on_the_radius、test_the_analytic_reference_is_the_sum_of_the_principal_curvatures"
+    ],
+    "integration_callers": [
+      "/root/tp-agent/work/m20002/tensorcad/fairness_energy.py:170 与 :486 `mean = vertex_mean_curvature(mesh)`（fairing/bending 能量主路径，被测算子即其上游）",
+      "/root/tp-agent/work/m20002/tensorcad/__init__.py:751 公共导出 \"vertex_mean_curvature\"",
+      "/root/tp-agent/work/m20002/examples/fairness/run_example.py:174 `values = vertex_mean_curvature(mesh)`",
+      "平台侧：/root/tensor-ecosystem/TensorPlatform/backend 与 /api 全量 grep 'vertex_mean_curvature|tensorcad.curvature' → 0 命中（无平台调用方，L3 仅由库内主路径支撑）",
+      "交付未并入主线：git branch --contains 4558ef6 = ['agent/m20002']（origin/main 不含该 commit）"
+    ],
+    "benchmark": null,
+    "absent_reason": {
+      "benchmark": "tensor_benchmark_cases 中 anchor_slug='CASE-CAD-CURVATURE-SPHERE' 实查 0 行（表内总 121 行，CAD 锚点 9 行均有行）；tensorbench_results 中 metric ilike '%curvature%' 亦 0 行 → 基准判据唯一裁判无行可裁，ref_source/metric/tolerance 仅存在于被审方自带的 gates_verified.json，L4 不可确认（被审方未登记，非遗漏举证）",
+      "integration_callers_platform": "平台后端无调用方；L3 依据为同仓库内主路径 fairness_energy.py:170/:486 与公共导出"
+    },
+    "repro_cmd": "cd /root/tp-agent/work/m20002 && git checkout 4558ef6 && python benchmarks/verified/sphere_mean_curvature/run_benchmark.py --out /tmp/repro && python -m pytest tests/test_case_cad_curvature_sphere.py -q → 审计方实跑：returncode 0，590/590 数值叶与提交一致，8 passed, 1 warning in 15.50s",
+    "external_anchor": {
+      "closed_form": "kappa_1 = kappa_2 = 1/R（球面），S = kappa_1+kappa_2 = 2/R；do Carmo, Differential Geometry of Curves and Surfaces (1976) Sec. 3-3 Example 2",
+      "discrete_convention": "Meyer / Desbrun / Schröder / Barr, VisMath 2003, Sec. 3.3（cotangent Laplacian 的 mean-curvature normal 约定）",
+      "independent_identity": "∫_S S dA = 8πR —— 算例 G5 用同一网格独立复算，相对误差 -0.0337 %"
+    },
+    "independent_reverification": {
+      "identity": {
+        "audited_tree": "/root/tp-agent/work/m20002",
+        "head": "4558ef6d3d18e91090d777ab05987528a85fe72e",
+        "head_matches_expected": true,
+        "dirty": false,
+        "artifacts_sha256": {
+          "benchmarks/verified/sphere_mean_curvature/run_benchmark.py": "fbc4ddc4ec4c0092",
+          "benchmarks/verified/sphere_mean_curvature/result.json": "3f19e9d4bf53193c",
+          "benchmarks/verified/sphere_mean_curvature/gates_verified.json": "6da7da79e9967415",
+          "benchmarks/verified/sphere_mean_curvature/README.md": "abdcb9811d8be759",
+          "docs/sphere_mean_curvature.md": "1dd3164c09c236bb",
+          "tests/test_case_cad_curvature_sphere.py": "ebb7186c2bd8ca7b",
+          "benchmarks/verified/sphere_mean_curvature/figures/convergence.png": "8254f56183ca3c8a",
+          "benchmarks/verified/sphere_mean_curvature/figures/error_cloud.png": "cc5310e963d2b95e",
+          "benchmarks/verified/sphere_mean_curvature/figures/readings.png": "4525849f3b59803d"
+        }
+      },
+      "repro_rerun": {
+        "returncode": 0,
+        "seconds": 46.7,
+        "leaves_compared": 590,
+        "leaves_identical": 590,
+        "mismatches": [],
+        "note": "仅排除 wall-clock / environment / figure-path 字段"
+      },
+      "gates_recomputed": {
+        "mission_gates_all_pass": true,
+        "mission_failing": [],
+        "audit_numeric_fail": [],
+        "headline": {
+          "measured": 2.0002377872364367,
+          "reference": 2.0,
+          "relative_error": 0.00011889361821837419,
+          "tolerance": 0.02,
+          "within_2_percent": true
+        }
+      },
+      "anti_tautology": {
+        "radial_dent_1pct": {
+          "baseline_relative_error": 7.064638256615297e-07,
+          "perturbed_relative_error": -0.00017901625770611052,
+          "verdict": "mesh-driven"
+        },
+        "scaled_mesh_stale_reference": {
+          "question": "is the measured value independent of the analytic reference?",
+          "mesh_radius": 2.0,
+          "reference_used": 2.0,
+          "measured_integral": 1.0000007064638257,
+          "ratio_to_reference": 0.5000003532319128,
+          "expected_if_measured_from_geometry": 0.5,
+          "verdict": "reference-independent"
+        },
+        "which_reading_discriminates": {
+          "question": "the gated metric is the integral; does it see a +-1 % dent as well as the pointwise one?",
+          "integral_response_absolute": 0.00017972272153177205,
+          "pointwise_median_error_baseline": 0.000999152455663177,
+          "pointwise_median_error_dented": 0.1986274953051026,
+          "pointwise_response_absolute": 0.19762834284943942,
+          "note": "on a closed surface int S dA is nearly shape-invariant, so a 2 % gate on it is a weak discriminator; the pointwise reading is the sensitive one and it is the untested one"
+        }
+      }
+    },
+    "material_defects": [
+      "F1(blocking/L4) 本锚点在 tensor_benchmark_cases 0 行：判据未入台账，基准裁判无行可裁，L4 不可确认；同表 9 个 CAD 锚点已登记，说明是漏登记而非无通路",
+      "F2(material) 被 gate 的积分读数近似形状不变：±1% 径向扰动只推动 +7.065e-07→-1.790e-04，而同扰动点式中位误差 +0.100%→19.86%（约 200 倍）→ 2% 门放在弱读数上；敏感的点式读数在 marching-tets 网格为 50.1% raw，超 15% 精度底线 3.3 倍",
+      "F3(material/L3 caveat) 交付 commit 4558ef6 未并入 origin/main（仅 agent/m20002 分支）；平台侧无调用方，L3 仅由库内主路径 fairness_energy 支撑",
+      "F4(minor) gates_verified.json 单位约定混用：error_percent 为百分数而 tolerance 为小数，G3 用绝对偏差、G4 用相对误差 → 机器对读会差 100 倍",
+      "F5(minor) conditioned 读数在 level 48 先经 taubin_drift=0.0261 m（R 的 2.6%）平滑 + 投影到隐式场，是改了几何后的 1.94%，且 project_to_field 在一般 B-rep 上无对应物"
+    ],
+    "honest_disclosure": "被审方无粉饰：G7 点式 raw 50.1% 在 README、docs §5/§6、gates_verified.json 三处如实披露并明确「reported, not gated」；gates/failing 字段为空与 all_gates_pass=true 一致；复跑 590/590 数值叶逐位复现 → 数据非手抄",
+    "level_rationale": {
+      "L1": "yes：解析 2/R 与闭式 ∫S dA=8πR 双向校核",
+      "L2": "yes：tensorcad/curvature.py:292 真实现（输入=mesh 顶点/面 → 余切权重 → 输出 H/S），measure() 无解析形状先验，反同义反复探针见 independent_reverification.anti_tautology",
+      "L3": "yes（有保留）：被测算子在同仓 fairing/bending 能量主路径被调用（fairness_energy.py:170/:486）并公共导出；平台侧 0 调用方，且交付未并入 main",
+      "L4": "WITHHELD：算例工程本身达 L4 形态（16 gate、两条收敛序列、半径扫描、误差分析、可复现），但 F1 使唯一裁判无行可裁，F2 使被 gate 的量不敏感 → 按累积制 L4 不可确认",
+      "L5": "no：算子与二阶收敛性均为教科书结果（Meyer et al. 2003），无新科研结果"
+    },
+    "rework_recommendation": [
+      "① 向 tensor_benchmark_cases 登记本锚点：ref_source=do Carmo Sec.3-3 Ex.2 + Meyer et al. Sec.3.3，metric='area-weighted integral of S=k1+k2 vs 2/R'，tolerance=2%，并注明点式读数为 diagnostic",
+      "② 修点式估计器（mixed Voronoi 面积 / angle-based 权重 / 法向周期重构），使其在非结构网格 <15%，或把算例主张收窄到积分读数并在 README/docs 明示适用范围",
+      "③ 把 agent/m20002 合入 main，使 L3 的集成在审计分支上真实存在"
+    ],
+    "audit_artifacts": [
+      "docs/board_audit/m20064/reproduce_and_evidence.py + evidence.json",
+      "docs/board_audit/m20064/probe_mesh_dependence.py + mesh_dependence.json",
+      "docs/board_audit/m20064/make_doc_report.py + figures/fig1..3 + CASE-CAD-CURVATURE-SPHERE-audit.md",
+      "docs/board_audit/m20064/gates_table.md"
+    ],
+    "disposition": "request changes / gate reopened（remediation ①②③）"
+  },
+  "verdict_by": "board-audit"
+}
