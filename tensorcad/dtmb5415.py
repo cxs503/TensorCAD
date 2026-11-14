@@ -114,6 +114,8 @@ from typing import Any
 from .geometry import Mesh
 
 __all__ = [
+    "half_breadth_mask",
+    "project_half_breadth",
     "DATASET",
     "GRID",
     "HALF_BREADTH_FLOOR",

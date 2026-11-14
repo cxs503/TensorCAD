@@ -14,7 +14,7 @@ import numpy as np
 import pytest
 
 from tensorcad.dtmb5415 import (DATASET, HALF_BREADTH_FLOOR, MESH_RESOLUTION, REFERENCE,
-                                DTMB5415Space)
+                                DTMB5415Space, half_breadth_mask)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "docs" / "data" / "dtmb5415" / "holdout_fixture.npz"
@@ -257,6 +257,65 @@ def test_gradient_chain_vertex_jacobian_all_modes(space):
                 fd_val = fd[vi, coord]
                 abs_diff = abs(ana - fd_val)
                 # Combined tolerance: pass if either absolute or relative is OK
+                if abs_diff > atol + rtol * abs(fd_val):
+                    raise AssertionError(
+                        f"Mode {mode}, vertex {vi}, coord {coord}: "
+                        f"analytic={ana:.6e}, fd={fd_val:.6e}, abs_diff={abs_diff:.2e}, "
+                        f"tolerance={atol + rtol * abs(fd_val):.2e}"
+                    )
+
+
+def test_gradient_chain_vertex_jacobian_with_active_projection(space):
+    """Acceptance: d(vertex)/dv matches central difference on a config with active symmetry-plane projection.
+
+    This is the critical gap: the vertex jacobian carries a 0/1 mask for clamped vertices,
+    and the derivative must still match finite difference when the active set is stable.
+    Tests all 27 modes on the worst holdout configuration (most clamped vertices).
+    """
+    fixture = np.load(FIXTURE)
+    # Find the configuration with the most clamped vertices
+    worst_v = None
+    worst_clamped = -1
+    for v in fixture["design_vector"]:
+        v = v.astype(np.float64)
+        raw = space.raw_station_grid(v)
+        n_clamped = int(half_breadth_mask(raw).sum())
+        if n_clamped > worst_clamped:
+            worst_clamped = n_clamped
+            worst_v = v
+
+    assert worst_clamped > 100, f"Fixture no longer exercises active projection (clamped={worst_clamped})"
+
+    v = worst_v
+    jac = space.vertex_jacobian(v)
+    h = 1e-5
+    verts = space.vertices(v)
+
+    # Test every 200th vertex to keep runtime reasonable (more vertices than v=0 case)
+    vertex_indices = list(range(0, len(verts), 200))
+
+    atol = 1e-6  # absolute tolerance for near-zero derivatives
+    rtol = 3e-3  # slightly relaxed relative tolerance for active projection case
+
+    for mode in range(27):
+        e = np.zeros(27)
+        e[mode] = h
+        # Verify active set is stable over the stencil
+        mask_plus = half_breadth_mask(space.raw_station_grid(v + e))
+        mask_minus = half_breadth_mask(space.raw_station_grid(v - e))
+        assert np.array_equal(mask_plus, mask_minus), (
+            f"Mode {mode}: active set switches over FD stencil"
+        )
+
+        verts_plus = space.vertices(v + e)
+        verts_minus = space.vertices(v - e)
+        fd = (verts_plus - verts_minus) / (2 * h)
+
+        for vi in vertex_indices:
+            for coord in range(3):
+                ana = jac[vi, coord, mode]
+                fd_val = fd[vi, coord]
+                abs_diff = abs(ana - fd_val)
                 if abs_diff > atol + rtol * abs(fd_val):
                     raise AssertionError(
                         f"Mode {mode}, vertex {vi}, coord {coord}: "
