@@ -378,6 +378,18 @@ from .transom import (
     truncated_taper_integral,
     truncated_taper_moment,
 )
+from .series60 import (
+    PARENT_CB,
+    Series60Model,
+    Series60Parameters,
+    Series60SectionLaw,
+    analytic_series60_hydrostatics,
+    build_bulb_mesh,
+    build_series60_mesh,
+    generate_series60,
+    series60_bulb,
+    series60_section_law,
+)
 from .validation import (
     Check,
     ValidationReport,
@@ -834,6 +846,18 @@ __all__ = [
     "table_integrals",
     "write_offset_bundle",
     "write_offset_csv",
+    # Series 60 parent-form family (Todd 1951): generated, exported via the
+    # ``series60`` CLI subcommand, judged against the published particulars
+    "PARENT_CB",
+    "Series60Model",
+    "Series60Parameters",
+    "Series60SectionLaw",
+    "analytic_series60_hydrostatics",
+    "build_bulb_mesh",
+    "build_series60_mesh",
+    "generate_series60",
+    "series60_bulb",
+    "series60_section_law",
     # ellipsoidal geodesics (WGS84): route/geodesic lengths in true metres
     "GeodesicError",
     "GeodesicSolution",
