@@ -67,6 +67,14 @@ class Case:
     pipeline_is_smooth: bool = True
     stations: Sequence[int] = (21, 41, 81, 161)
     levels_of: Callable[[int], int] = lambda n: max(3, n // 4 + 2)
+    #: Overrides for shapes the half-breadth loft cannot represent (a body of
+    #: revolution, whose circular sections do not span the global level grid).
+    #: ``None`` means "build the half-breadth loft" / "use the sectional route".
+    solid_of: Callable[[int], Mesh] | None = None
+    smooth_volume: Callable[[], float] | None = None
+    smooth_route_name: str = "sectional quadrature of the half-breadth field"
+    #: What the second refinement column of the table counts, for the reader.
+    resolution_axis: str = "waterline levels"
 
 
 #: Published KCS principal particulars (KRISO; SIMMAN 2008 / Tokyo 2015 workshop
@@ -180,6 +188,76 @@ def nurbs_hull_case(*, full_scale: bool) -> Case:
     )
 
 
+def suboff_case() -> Case:
+    """DARPA SUBOFF bare hull: geometry from a *published offset table*, revolved.
+
+    The three hulls above share one property that limits what they can prove: their
+    half-breadth field comes out of *our* parametric generator (Wigley's closed form,
+    the NURBS patch), so cross-integrating them checks the integrators against each
+    other but says nothing about whether our geometry *description* matches someone
+    else's.  The JBC failure was in the geometry, not the integrator.
+
+    SUBOFF closes that gap from the other side: its radius profile is the published
+    four-segment DARPA offset table (Groves, Huang & Chang 1989), transcribed in
+    :mod:`tensorcad.suboff` and pinned against TensorLBM's independent transcription
+    in ``tests/test_suboff.py``.  The volume is therefore a *prediction* from an
+    external geometry definition, not something the form was calibrated to.
+
+    It also forces a different solid builder.  A submarine section is a circle that
+    occupies only the band ``[h - r, h + r]`` of the ``z`` grid, so the half-breadth
+    loft cannot close it (see :func:`tensorcad.volume_xval.solid_of_revolution`);
+    the solid is revolved instead, and the second refinement column is the azimuthal
+    segment count rather than the waterline level count.
+    """
+    from tensorcad import suboff as so
+
+    length = so.SUBOFF_LENGTH_M
+    radius_max = so.SUBOFF_RADIUS_M
+
+    def radius(x: float) -> float:
+        return radius_max * so.suboff_radius_fraction(x / length)
+
+    reference = so.suboff_reference_geometry()
+    return Case(
+        key="suboff",
+        name="DARPA SUBOFF bare hull (published offset table, revolved)",
+        length=length,
+        beam=2.0 * radius_max,
+        draft=2.0 * radius_max,
+        breadth=lambda x, z: 0.0,  # unused: this case supplies solid_of below
+        pipeline_volume=lambda: xv.volume_revolution_sectional(
+            radius, length=length, samples=200_001
+        ),
+        pipeline_name="Simpson quadrature of pi r(x)^2 over the published DARPA radius "
+        "profile (tensorcad.suboff.suboff_radius_fraction)",
+        reference_volume=reference["volume"],
+        reference_kind="geometry-derived from a published offset table (no volume calibration)",
+        reference_source="Groves, Huang & Chang (1989) DARPA SUBOFF offset equations; the volume "
+        "is the 1e6-sample meridian quadrature of those offsets in "
+        "tensorcad.suboff.suboff_reference_geometry, so agreement with it measures the integrator "
+        "and the revolved solid, not a fitted displacement",
+        caveat=(
+            "no published *displacement volume* for SUBOFF is asserted here (only the offsets and "
+            "the wetted area are published), so the reference column is a quadrature of the "
+            "external geometry rather than an outside number; and for an axisymmetric body the "
+            "'smooth' route (pi r^2 meridian quadrature) shares its section area with the pipeline, "
+            "so it is not a third independent integral for this shape"
+        ),
+        pipeline_is_smooth=True,
+        stations=(21, 41, 81, 161),
+        levels_of=lambda n: max(16, 2 * n),
+        solid_of=lambda n: xv.solid_of_revolution(
+            radius, length=length, stations=n, segments=max(16, 2 * n)
+        ),
+        smooth_volume=lambda: xv.volume_revolution_sectional(
+            radius, length=length, samples=200_001
+        ),
+        smooth_route_name="meridian quadrature pi r(x)^2 (shares the section area with the "
+        "pipeline -- not an independent route for an axisymmetric body)",
+        resolution_axis="azimuthal segments",
+    )
+
+
 def integrator_battery() -> dict[str, Any]:
     """Same-triangle integrator identity on hulls that have no symmetric breadth field.
 
@@ -239,20 +317,26 @@ def run_case(case: Case) -> dict[str, Any]:
     # The smooth-field quadrature does not depend on the mesh resolution, so it is
     # evaluated once per case rather than once per row: a NURBS patch evaluation
     # costs ~200 us in pure Python and repeating it 4x would dominate the run.
-    smooth = xv.volume_sectional(
-        case.breadth, length=case.length, draft=case.draft, stations=201, levels=101
-    )
+    if case.smooth_volume is not None:
+        smooth = case.smooth_volume()
+    else:
+        smooth = xv.volume_sectional(
+            case.breadth, length=case.length, draft=case.draft, stations=201, levels=101
+        )
     rows: list[xv.CaseRow] = []
     same_mesh_rows: list[dict[str, Any]] = []
     for stations in case.stations:
         levels = case.levels_of(stations)
-        solid = xv.closed_solid_from_breadth(
-            case.breadth,
-            length=case.length,
-            draft=case.draft,
-            stations=stations,
-            levels=levels,
-        )
+        if case.solid_of is not None:
+            solid = case.solid_of(stations)
+        else:
+            solid = xv.closed_solid_from_breadth(
+                case.breadth,
+                length=case.length,
+                draft=case.draft,
+                stations=stations,
+                levels=levels,
+            )
         topo = xv.topology_report(solid)
         divergence = xv.volume_divergence(solid)
         engine_a = xv.volume_trimesh(solid)
@@ -368,6 +452,8 @@ def run_case(case: Case) -> dict[str, Any]:
         "reference_kind": case.reference_kind,
         "reference_source": case.reference_source,
         "caveat": case.caveat,
+        "smooth_route": case.smooth_route_name,
+        "resolution_axis": case.resolution_axis,
         "rows": [row.as_dict() for row in rows],
         "same_mesh_rows": same_mesh_rows,
         "verdict": verdict,
@@ -736,6 +822,7 @@ def build_bundle(outdir: Path) -> dict[str, Any]:
         wigley_case(),
         nurbs_hull_case(full_scale=True),
         nurbs_hull_case(full_scale=False),
+        suboff_case(),
     ]
     results: dict[str, Any] = {
         "schema": xv.SCHEMA,

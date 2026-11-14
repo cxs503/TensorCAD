@@ -83,7 +83,8 @@ python -m pytest tests/test_volume_xval.py -q # 28 passed
 
 ## 6. 注意点与残留缺口
 
-- **Gmsh / OpenCASCADE 在本环境不可安装**（无软件包索引可达）。锚点写明的"BRep 实体体积"这一路
+- **Gmsh / OpenCASCADE 在本环境不可安装**（m20574 复核：loongnix 镜像上 `gmsh`、`cadquery-ocp`、
+  `pythonocc-core` 均无可用分发，`OCP` 这个名字是无关包，系统亦无 gmsh/FreeCAD 二进制）。锚点写明的"BRep 实体体积"这一路
   因此没有做到：第二台独立引擎改为 `numpy-stl` 的 Mirtich 实现，无三角化路径改为截面 Simpson 求积。
   这是环境能力限制，如实记录，不做静默绕过——BRep 路仍列为未完成工作（`docs/oss_inventory_cad/`）。
 - 表中 `pipeline` 对 Wigley 用的是**平台自己的网格路径**（`wigley.build_mesh` + 散度定理），因为它
@@ -91,6 +92,46 @@ python -m pytest tests/test_volume_xval.py -q # 28 passed
 - 非对称艉板船进不了主表：`closed_solid_from_breadth` 只接受对称半宽场。它以"积分器恒等性检验组"
   出现（同网格三路径 + 解析闭式），不回答"几何源对不对"。
 - 交叉验证不覆盖**附体**（舵/轴/球鼻）与自由液面修正后的体积；这些仍是各自模块的账。
+
+## 6bis. 轴向对称体：DARPA SUBOFF（外部几何来源）与半宽 loft 的适用边界
+
+前三条船型的半宽场都来自**本仓自己的参数化生成器**（Wigley 闭式、NURBS 片），所以它们只能证明
+积分器之间互相一致，证明不了我们的**几何描述**与别人一致——而 JBC 事件的错在几何源，不在积分器。
+本单新增 SUBOFF 案例从另一侧补这个洞：半径剖面是公开的 DARPA 四段偏移表（Groves, Huang & Chang
+1989，`tensorcad.suboff` 转录，并与 TensorLBM 的独立转录在 `tests/test_suboff.py` 中逐站钉死），
+体积是这份**外部几何**的预测值，不是把体积标定出来的恒等式。
+
+### 6bis.1 半宽 loft 装不下回转体（负面知识，已入账）
+
+潜艇横剖面是占 ``[h-r, h+r]`` 一条带的圆，半宽在带的上下方连续多行恒为 0，于是环在中心线上
+重复经过同一点，loft 出来不是有效实体：21 站位时 `closed_solid_from_breadth` 直接抛
+「not watertight: 0 boundary edges」（0 条边界边 ⇒ 缺陷是非流形顶点，不是洞）。这不是 bug 而是
+该 loft 的适用前提（船体剖面必须跨满全局水位网格）。因此新增 `solid_of_revolution`：按余弦站位
+布环、`(x, r sin t, h + r cos t)`、两端 `r→0` 的极四边形由 `add_quad` 塌成单三角自闭合，
+并校水密与正向体积。测试 `test_half_breadth_loft_cannot_represent_a_body_of_revolution` 把
+这个前提钉死，防止将来被“修好”成能返回错体积。
+
+### 6bis.2 结果（由 `tools/volume_xval_report.py` 写入，零手抄）
+
+| 站位 | 方位段 | 引擎A `trimesh` (m³) | 引擎B `numpy-stl` (m³) | 引擎A/B 相对差 | 引擎A vs 偏移表求积 | 亏欠 vs 管线 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 21 | 42 | 0.691660962 | 0.691660961 | -1.72e-09 | -1.0798 % | +1.0915 % |
+| 41 | 82 | 0.697289157 | 0.697289154 | -4.23e-09 | -0.2748 % | +0.2756 % |
+| 81 | 162 | 0.698722551 | 0.698722550 | -1.07e-09 | -0.0698 % | +0.0699 % |
+| 161 | 322 | 0.699088269 | 0.699088267 | -3.11e-09 | -0.0175 % | +0.0175 % |
+
+判定 `agrees`：两条独立引擎在读**同一批三角形**时最大相对差 4.23e-09（STL float32 预算内），管线（偏移表的 πr² Simpson 求积）比内接多面体高 +0.0175 %，随加密以实测阶 1.99 收敛，Richardson 外推后的引擎体积与管线差 -1.18e-05。拓扑：所有档位水密、亏格 [0]、零面积面 0。
+
+**误差判定（对基准，逐项）**：SUBOFF 没有公开的排水体积可引（公开的是偏移表与湿面积），所以基准取
+偏移表的 1e6 采样经线求积 0.699210785 m³。最粗档（21 站位 / 42 段）引擎体积
++1.0915 %，最细档（161 站位 / 322 段）+0.0175 %，
+即**细档 <3% 且 <0.3% 验收线成立，粗档不成立**——与 Wigley/KCS 同一条结论：粗网格体积不能对 0.3% 说话。
+管线对基准（两条互相独立的求积）相对差 -1.84e-13，是求积分辨率差，不是模型差。
+
+### 6bis.3 这一路**不是**第三条独立积分
+对回转体，所谓“光滑路径”就是 π∫r²dx 的经线求积，与管线共用 πr² 剖面面积，因此对 SUBOFF 只有
+**两条独立引擎 + 一份外部几何来源**，如实标注在 `results.json` 的 `smooth_route` 字段里，
+不冒充三路。
 
 ## 7. 验收对照
 
@@ -100,4 +141,6 @@ python -m pytest tests/test_volume_xval.py -q # 28 passed
 | ② 三路互证偏差表（自研 / 引擎A / 引擎B / 公开值） | 达成 | `results.md` 每船一张表 |
 | ③ >0.3 % 管线级差异定位到积分方法并记 negative-knowledge ledger | 达成（无管线级偏置；粗网格 0.9 % 亏欠定位为 O(h²) 细分，已入账） | `negative_knowledge_ledger` entry `NK-XVAL-GEOM-VOLCROSS-1` |
 | ④ 工具选型落 `oss_solutions`（feature_slug=本锚） | 达成 | `oss_solutions` 行 `XVAL-GEOM-VOLCROSS` |
-| ⑤ pytest 0 fail | 达成 | `tests/test_volume_xval.py` 28 passed |
+| ⑤ pytest 0 fail | 达成 | `tests/test_volume_xval.py` 33 passed（m20574 增加 5 条回转体用例） |
+| ⑥（m20574 增量）外部几何来源船型互证 | 达成 | SUBOFF 案例：`results.json` → `cases[suboff]`，§6bis |
+| ⑦（m20574 增量）证据包入库 | 达成 | `artifacts/xval_geom_volcross/{results.json,results.md,figures/}` 随分支提交（此前文档指向的文件未在仓内） |

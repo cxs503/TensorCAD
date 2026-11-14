@@ -248,6 +248,118 @@ def closed_solid_from_breadth(
     return solid
 
 
+def solid_of_revolution(
+    radius: Callable[[float], float],
+    *,
+    length: float,
+    stations: int = 81,
+    segments: int = 64,
+) -> Mesh:
+    """Close a body of revolution into a watertight triangle solid.
+
+    Why this exists next to :func:`closed_solid_from_breadth`: the half-breadth
+    loft requires **every** station section to span the whole global
+    ``z`` grid -- a ship section runs keel to waterline, so a ring touches the
+    grid extremes but never leaves them.  An axisymmetric body (a submarine hull,
+    a sonar dome, a shaft, a bulb) has circular sections that occupy only the band
+    ``[h - r, h + r]``; above and below that band the half-breadth is exactly zero
+    at several consecutive levels, so the ring runs through the same centreline
+    point repeatedly and the loft comes out non-manifold -- measured, not assumed:
+    the DARPA SUBOFF field at 21 stations raises ``lofted solid is not watertight:
+    0 boundary edges`` (i.e. the defect is non-manifold vertices, not a hole).
+    Revolved solids therefore get their own builder instead of a distorted
+    half-breadth encoding.
+
+    Construction: one ring of ``segments`` vertices per cosine-clustered station,
+    ``(x, r sin t, h + r cos t)`` with the axis at height ``h = max(r)`` so the
+    body rests on ``z = 0``.  Adjacent rings are lofted quad by quad with
+    :meth:`~tensorcad.geometry.MeshBuilder.add_quad`, whose pole handling (the
+    ``r -> 0`` bow and stern tips) collapses the quad to a single triangle; the
+    apex vertices are deduplicated on exact coordinates, so the tips close onto
+    themselves with no fan and no seam.  The result is checked for watertightness
+    and positive oriented volume, exactly like the half-breadth loft.
+
+    ``segments`` is the *azimuthal* resolution and is not implied by ``stations``:
+    the inscribed-polygon deficit of a circle decays as ``O(1/segments**2)``, so a
+    caller refining only ``stations`` would measure a floor that never moves and
+    would misread it as a systematic bias.  Refine both together (see
+    ``tools/volume_xval_report.py``'s SUBOFF case, which ties
+    ``segments = 2 * stations``).
+    """
+    if stations < 2:
+        raise VolumeXvalError("need at least 2 stations")
+    if segments < 8:
+        raise VolumeXvalError("need at least 8 azimuthal segments")
+    if not length > 0.0:
+        raise VolumeXvalError("length must be positive")
+
+    xs = cosine_stations(length, stations)
+    radii = [float(radius(x)) for x in xs]
+    for x, r in zip(xs, radii):
+        if not (math.isfinite(r) and r >= 0.0):
+            raise VolumeXvalError(f"radius must be finite and non-negative, got {r!r} at x={x}")
+    axis_height = max(radii) if radii else 0.0
+
+    thetas = [2.0 * math.pi * j / segments for j in range(segments)]
+    builder = MeshBuilder(units="m", coordinate_frame="x aft->fore, y starboard, z up from keel")
+    rings: list[list[int]] = []
+    for x, r in zip(xs, radii):
+        rings.append(
+            [
+                builder.add_vertex((x, r * math.sin(t), axis_height + r * math.cos(t)))
+                for t in thetas
+            ]
+        )
+    for i in range(len(xs) - 1):
+        for k in range(segments):
+            nxt = (k + 1) % segments
+            builder.add_quad(rings[i][k], rings[i][nxt], rings[i + 1][nxt], rings[i + 1][k])
+
+    oriented = meshlib.orient_outward(meshlib.remove_degenerate_faces(builder.build()))
+    solid = oriented.mesh
+    if not meshlib.is_watertight(solid):
+        counts = meshlib.edge_face_counts(solid)
+        raise VolumeXvalError(
+            "revolved solid is not watertight: "
+            f"{sum(1 for c in counts.values() if c == 1)} boundary edges, "
+            f"{sum(1 for c in counts.values() if c > 2)} non-manifold edges"
+        )
+    if meshlib.total_signed_volume(solid) <= 0.0:
+        raise VolumeXvalError("revolved solid has non-positive volume after orientation")
+    return solid
+
+
+def volume_revolution_sectional(
+    radius: Callable[[float], float],
+    *,
+    length: float,
+    samples: int = 200_001,
+) -> float:
+    """Meridian quadrature ``pi * int r(x)**2 dx`` -- a route with no triangles.
+
+    For a body of revolution this is the analogue of :func:`volume_sectional`:
+    the section area is analytic (``pi r**2``) and only the axial integral is
+    numerical, so a triangle-free number exists for the class of shapes
+    :func:`solid_of_revolution` builds.  Simpson over a uniform grid (odd sample
+    count), which is exact for the piecewise-smooth radius of a submersible body
+    up to the tips.
+    """
+    if samples < 3 or samples % 2 == 0:
+        raise VolumeXvalError("need an odd number of samples >= 3 for Simpson")
+    if not length > 0.0:
+        raise VolumeXvalError("length must be positive")
+    h = length / (samples - 1)
+    total = 0.0
+    for i in range(samples):
+        x = i * h
+        r = float(radius(x))
+        if not (math.isfinite(r) and r >= 0.0):
+            raise VolumeXvalError(f"radius must be finite and non-negative, got {r!r} at x={x}")
+        weight = 1.0 if i in (0, samples - 1) else (4.0 if i % 2 else 2.0)
+        total += weight * r * r
+    return math.pi * total * h / 3.0
+
+
 def _breadth_tolerance(draft: float) -> float:
     """Breadth below which a station is treated as a point (the stem closes itself)."""
     return 1e-12 * max(draft, 1.0)
