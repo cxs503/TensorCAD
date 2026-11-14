@@ -25,7 +25,8 @@ Three disciplines are structural here, not conventions:
    coarse-to-fine change of the metric (a two-grid bound), with a 1e-4 relative floor
    for metrics that do not move. The derivation is recomputed and printed every run.
 3. **Fail closed.** A missing baseline, a case the baseline does not know, a case the
-   baseline knows and the code forgot, a missing npz — all are errors, never "skipped".
+   baseline knows and the code forgot, a missing npz, a baseline entry that does not lock
+   the mesh (no ``geometry_sha256``) — all are errors, never "skipped".
 
 Usage::
 
@@ -949,13 +950,19 @@ def evaluate_case(
         )
     elif not blessed_fingerprint:
         if blessed and not baseline_optional:
+            # Fail closed: a baseline entry without a fingerprint locks the integrated
+            # numbers but not the mesh they were integrated on, so a re-tessellation that
+            # keeps every metric would pass. That is an unguarded case, not a warning: a
+            # merge that drops the field (observed: the committed baseline carried
+            # geometry_sha256 = "" for three of four cases) must turn the gate red.
             findings.append(
                 Finding(
-                    WARNING,
+                    ERROR,
                     "geometry_fingerprint_not_blessed",
                     case.name,
-                    "the baseline records no geometry fingerprint for this case; "
-                    "re-run '--bless' to lock the mesh itself",
+                    "the baseline records no geometry fingerprint for this case, so its "
+                    "mesh is not locked (only its integrated quantities are); "
+                    "re-run '--bless' and commit the fingerprint",
                 )
             )
     elif measured_fingerprint != blessed_fingerprint:

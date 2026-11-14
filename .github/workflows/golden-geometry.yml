@@ -69,6 +69,12 @@ jobs:
               assert case["reference"], case["name"]
           print("golden report ok:", sorted(names))
           PY
+      - name: The suite's own tests (engine contract + the committed baseline)
+        # The gate script above only asserts that the run passed. tests/test_golden_regression.py
+        # is what holds the committed baseline to the contract -- e.g. that every golden case
+        # actually locks its mesh (geometry_sha256), not only the numbers integrated on it.
+        # Without this step a baseline that lost those fingerprints stays green here.
+        run: python -m pytest tests/test_golden_regression.py -q
       - uses: actions/upload-artifact@v4
         if: always()
         with:
