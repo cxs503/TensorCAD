@@ -1,0 +1,181 @@
+# 几何模型库资产化：持久店 · 登记簿 · 增长指标 · 消费面
+
+锚点 `GAP-GEOM-ASSET-LIB`（第 1 轮）。仓库 TensorCAD，分支 `agent/m20465`。
+
+## ① 问题设定与基准出处
+
+**问题。** 平台把 KCS/KVLCC2/JBC/ONRT/KP505 的 IGES 字节收进了持久店
+`$TENSORCAD_ASSET_ROOT/geometry/hulls/<hull>/`（默认 `/srv/tensor/agent/assets`，每船一份
+`MANIFEST.json`），但仓库里的消费者仍然指着**任务工作树**：
+
+```
+"iges_path": "/srv/tensor/agent/work/m18488/artifacts/baseline_fleet/raw/KCS/KCS_hull_SVA.igs"
+"published_source": "artifacts/baseline_fleet/raw/pages/t2015_kcs.html"
+"evidence.KCS.iges.path": "artifacts/baseline_fleet/raw/KCS/KCS_hull_SVA.igs"
+```
+
+工作树随任务关闭而删除，这些指针全部失效，而**失效是静默的**：`benchmarks/verified/baseline_fleet/result.json`
+依旧写着 KCS `VERIFIED`，但没有任何一条数字还能被重跑出来。这就是本锚点要解的缺口：
+字节有了持久家，**名字却没有**——没有可校验的登记簿、没有增长指标、没有消费面。
+
+**基准（ref）出处。** 物理基准不是自造的，沿用该锚点既有的公开工作坊数据：
+
+| 量 | 值 | 出处 |
+|---|---|---|
+| KCS 排水体积 ∇ | 52030 m³ | NMRI T2015 KCS 页面 Table（页面 SHA-256 `68d9c246…`，摘要串存于 `fleet_specs.json` evidence）|
+| KCS Cb / LCB | 0.6505 / −1.48 %Lpp | 同上 |
+| KVLCC2 ∇ | 312622 m³ | SIMMAN 2020 Ship Data Summary（页面 SHA-256 `c1a668f6…`）|
+| JBC ∇ | 178369.9 m³ | NMRI T2015 JBC 页面（页面 SHA-256 `fc2ce905…`）|
+| ONRT ∇ | 8500.78 m³ | NMRI T2015 ONRT 页面（页面 SHA-256 `5e134273…`）|
+| 验收容差 | ∇ 相对误差 ≤ 1 % | `result.json.acceptance.volume_rel_error_percent_max` |
+
+平台精度标准（>15 % 不可接受）之上，本锚点用更严的 1 % 与"是否 <3 %"两条线同时报。
+
+## ② 方法与实现（格式/出处 + 代码指针）
+
+### 2.1 四层结构
+
+| 层 | 文件 | 作用 |
+|---|---|---|
+| 字节层 | `tensorcad/assetlib/store.py` | 解析店根（`$TENSORCAD_ASSET_ROOT`）、SHA-256、读每船 `MANIFEST.json` 并**对其声明做复核**、按内容哈希定位（改名不丢）、带期望哈希的原子导入 |
+| 登记簿 | `tensorcad/assetlib/registry.py` | `assets/geometry_registry.json`：13 条资产行（asset_id/uri/sha256/bytes/hull/status/duplicate_of）+ 4 条船舶绑定 + 5 船块 + 快照；`verify()/resolve()/growth()/coverage` |
+| 指针卫生 | `tensorcad/assetlib/specs.py` | 扫描/修复 `fleet_specs.json` 的 43 个指针，三态 `resolved / dead / withheld`，另 `cited`=已指向持久 URL |
+| 消费面 | `tensorcad/assetlib/consumer.py` + `tensorcad/fleet_baseline.py::specs_from_json` | `resolve_pointer(value, sha256)`：`asset://` → 存在且哈希相符的路径 → **按内容哈希在店里找** → 原样返回。`geometry_path(ship)` / `open_geometry(ship)` 供下游直接用 |
+
+### 2.2 关键格式选择
+
+1. **指针写成 `asset://geometry/hulls/KCS/KCS_hull_SVA.igs`**，不是绝对路径：仓库要能跨机移植，
+   店根由环境变量给。绝对路径只出现在运行工件里（证明这次跑的是哪块盘）。
+2. **按内容修复（repair by content）**：`iges_path` 只在 `iges_sha256` 于店中命中时改写，
+   绝不按文件名猜。8 条几何指针全部命中（KCS/KVLCC2/JBC/ONRT 各 2 条：`ships[*]` + `evidence.*`）。
+3. **字节互相重复时保留规范副本**：`KCS_hull_SVA.igs` 与 `KCS_hull_SVA/KCS_hull_SVA.igs`
+   同哈希，后者登记为 `duplicate`，`resolve()` 归一化到规范副本。
+4. **字节完整性与物理验收分离**：`resolve()` 默认只要哈希相符就给路径；`require_verified=True`
+   才要求店 MANIFEST 声明 `status=verified`。理由见第⑥节（KVLCC2 字节干净但排水量未修好）。
+5. **重复实现规避**：复用店内既有的 `MANIFEST.json`（协调者资产）与
+   `tensorcad/fleet/{manifest,sources}.py` 的 sha/来源范式，`fleet_baseline.specs_from_json`
+   只加一个解析钩子（+ 一个可选 `asset_registry` 参数），不改几何/水动力链路。
+
+### 2.3 页面与压缩包的“诚实修复”
+
+31 条页面指针与 4 条压缩包指针**在店里没有字节**（发布方未授予再分发权，仓库不存字节）。
+修复不是删掉它们，而是升级为**持久引用**：路径 → 发布方 URL（真值来源：
+`tools/baseline_fleet/fetch_sources.py::PAGES/TARGETS`），同时保留 `sha256`（可核对是否同一页面）、
+`pointer_status: {path: "cache-lost"}` 与原路径 `legacy_path`。于是"丢了"是一等状态，不是静默。
+
+## ③ 参数表
+
+| 参数 | 值 | 说明 |
+|---|---|---|
+| 店根 | `/srv/tensor/agent/assets` | `TENSORCAD_ASSET_ROOT` 可覆盖 |
+| 布局 | `geometry/hulls/<HULL>/…` + `MANIFEST.json` | 5 船 |
+| 登记资产 | 13 文件 / 20 165 115 B（哈希吻合 13/13：`ok` 2 + `present_unverified` 11）| 重复字节计一次 |
+| 船体 | KCS, KVLCC2, JBC, ONRT, KP505 | 5 |
+| 船舶绑定 | 4（fleet_specs 的 4 条） | coverage 1.00 |
+| 网格分辨率 | dx = 0.5 / 0.25 / 0.125 m，dz = 0.1 m，ring = 240，采样 8 /m | `fleet_baseline.DEFAULT_*` |
+| 验收容差 | ∇ 相对误差 ≤ 1 % | `result.json` |
+| 基准状态 | 15.470 °C? 不适用（本锚点无粘流） | — |
+| 环境 | python3.11, 本机 1 核串行；单分辨率 KCS 7.1–7.5 s | 计算量远低于集群门槛 |
+
+## ④ 对照表（ref vs got + 误差，逐条判据）
+
+### 4.1 指针修复（判据 ①：死指针全清）
+
+| 指标 | 修复前（`git show HEAD:…fleet_specs.json`） | 修复后 | 判据 |
+|---|---|---|---|
+| 指针总数 | 43 | 43 | — |
+| 解析成功 | 0 | 8（全部 `asset://`） | ✅ |
+| 死指针 | 8 | **0** | ✅ |
+| 无米之炊（页面/压缩包） | 35 | 0（→ 35 条 `cited` 持久 URL + `cache-lost` 标记） | ✅ |
+| 几何指针可解析率 | 0.00 | **1.00** | ✅ |
+| 船舶覆盖（绑定/船舶） | 0/4 | **4/4** | ✅ |
+
+### 4.2 登记簿与字节一致性（判据 ②：登记簿可校验）
+
+| 判据 | 结果 |
+|---|---|
+| 全部 13 条资产重新哈希 vs 登记值 | 13/13 哈希全部相符（`ok` 2 + `present_unverified` 11；后者仅表示店 MANIFEST 未声明物理已验证，非哈希问题）✅ |
+| `fleet_specs` 记录 sha 与店字节逐位一致 | 4/4 船 ✅（KCS `6f5556b2…`、KVLCC2 `ed06c287…`、JBC `2de08d29…`、ONRT `ff061ab8…`）|
+| 登记簿 vs 现店重建（防漂移） | asset_ids 与总字节完全一致 ✅ |
+| 篡改检测（同长度改 1 字节） | `sha_mismatch` ✅（`tests/test_assetlib.py::test_tampered_byte_is_detected_with_the_reason`）|
+| 长度变化 | `size_mismatch` ✅；文件删除 → `missing` ✅ |
+| 无 sha 的死指针 | 拒绝改写，落 `unresolved` ✅ |
+
+### 4.3 物理（判据 ③：店里的字节能用，不只是“在”）
+
+消费者 `specs_from_json` 解析后，四条 `iges_path` 全部落在店内（`Path.is_relative_to(store.root)` 有测试守护）。
+
+| 船 | 指针 | 读到 sha | ∇ ref [m³] | ∇ got [m³] (dx=0.5) | 误差 | Cb ref/got | LCB ref/got [%Lpp] | 判定 |
+|---|---|---|---|---|---|---|---|---|
+| KCS | `asset://…/KCS/KCS_hull_SVA.igs` | `6f5556b2…` ✅ | 52030 | 52214.08 | **+0.354 %** | 0.6505/0.65280 (+0.354 %) | −1.48/−1.506 | VERIFIED ✅（<1 %，<3 %）|
+| KVLCC2 | `asset://…/KVLCC2/kvlcc2.igs` | `ed06c287…` ✅ | 312622 | — | — | — | — | WITHHELD（`ValueError: field produced fewer than two usable waterline slices`）❌（遗留缺陷）|
+| JBC | `asset://…/JBC/jbc.igs` | `2de08d29…` ✅ | 178369.9 | 4.44 | −99.998 % | 0.858/0.00002 | — | WITHHELD（几何伸出 7.499 m vs Lpp 280 m，模型尺度未换算）❌ |
+| ONRT | `asset://…/ONRT/…mergedR.igs` | `ff061ab8…` ✅ | 8500.78 | 0.01 | −100.0 % | 0.535/0.000 | — | WITHHELD（伸出 1.000 m vs Lpp 154 m，模型尺度 1:48.94）❌ |
+
+结论：**1/4 船以店字节通过 1 % 判据（KCS +0.354 %）**；KVLCC2/JBC/ONRT 的失败原因与
+`result.json`（m18488）记录**同类**——水位切片、模型尺度换算——属既有缺陷，不在本锚点修复范围，
+但**现在它们是可复现地失败**，而不是"文件找不到"。
+
+## ⑤ 收敛性 / 参数敏感性（两分辨率→三分辨率）
+
+KCS 在店字节上做网格加密（同一命令，三个 dx）：
+
+| dx [m] | ∇ got [m³] | 误差 vs 52030 | 网格 vs 场积分体积差 | Cb | LCB [%Lpp] | 用时 |
+|---|---|---|---|---|---|---|
+| 0.500 | 52214.08 | +0.354 % | −0.019 % | 0.65280 | −1.506 | 7.3 s |
+| 0.250 | 52134.65 | +0.201 % | −0.021 % | 0.65181 | −1.502 | 7.1 s |
+| 0.125 | 52075.28 | +0.087 % | −0.068 % | 0.65106 | −1.493 | 7.5 s |
+
+误差随 dx 减半按 ≈0.57→0.43 倍衰减（近一阶），外推剩余误差 <0.05 %，同时 `mesh` 与
+`field` 两条积分路径相差 <0.07 %（离散自洽）。即 **KCS 的 +0.354 % 不是巧合，是收敛到 ref 的序列**。
+
+参数敏感性第二点（库增长侧，两组状态）：见 `artifacts/assetlib/growth_report.json` ——
+可解析几何指针比例 0.00 → 1.00；店管字节 0 → 20 165 115 B；覆盖 0 → 1.00。
+
+## ⑥ 失败模式与工件
+
+**失败的（honest-FAIL，留第 2 轮）**
+
+1. **KVLCC2 水位切片**：`field produced fewer than two usable waterline slices`（dx=0.5/0.25 均失败）。
+   已试：更换解析来源（店字节，sha 一致）、两分辨率重跑——均同错。缺的方法：该 IGES 的
+   水线附近面片可能只覆盖部分船艏艉，需要按 z 分层的切片回退策略（或改半边宽场重建的内插）。
+2. **JBC / ONRT 尺度换算**：厂方字节是模型尺度（JBC 1:37.34 由 7.499 m→280 m 推得；ONRT 1:48.9355
+   由 spec 记录），`fleet_specs` 的 `geometry_scale` 对 JBC 为 `null`（"normalised to published L_PP"
+   未真正实现）。缺的方法：把 `build_ship` 的规范化步骤与 spec 的 `geometry_scale/scale_basis` 打通。
+3. **页面/压缩包字节**：35 条指针只能升级为 URL + `cache-lost`，因为发布方未授权再分发、且本环境无出网。
+4. **归档漂移**：`result.json`（m18488）里 KCS 记 +0.304 %，本次同默认参数得 +0.354 %；JBC 记
+   145769 m³（−18.28 %），本次 4.44 m³。二者之间 `tensorcad/iges.py` 被 m20163 改过（`git log 35f9cf5..HEAD -- tensorcad/iges.py`）。
+   即**归档基准已不能复现**，本次数字是当前代码的真值。建议单开一单：把归档 result.json 重新生成并加
+   "代码版本→数字"绑定（本次已把 sha 与读数写进工件，可直接复用）。
+
+**工件（worktree 内）**
+
+| 路径 | 内容 |
+|---|---|
+| `assets/geometry_registry.json` | 登记簿（13 资产 + 4 绑定 + 5 船块 + 快照） |
+| `assets/geometry_registry_history.jsonl` | 增长快照历史（每行一次构建） |
+| `benchmarks/verified/baseline_fleet/fleet_specs.json` | 43 条指针全修：8 `asset://` + 35 URL |
+| `artifacts/assetlib/pointer_scan_before.json` / `_after.json` | 修复前后指针三态逐条 |
+| `artifacts/assetlib/pointer_repair.json` | 43 条改动日志（每条含 sha 与新旧值） |
+| `artifacts/assetlib/registry_build.json` | 登记簿构建快照 + 问题清单（空） |
+| `artifacts/assetlib/physics_from_store.json` | 每船：解析路径、实读 sha、两/三分辨率 ∇/Cb/LCB 与误差 |
+| `artifacts/assetlib/growth_report.json` | 增长指标（before/after/delta + 快照历史） |
+| `artifacts/assetlib/assetlib_growth.png` | 图：(a) 死指针清零 (b) 各船店管字节 (c) KCS 误差-分辨率收敛 |
+| `tensorcad/assetlib/*.py`, `tools/assetlib/*.py`, `tests/test_assetlib.py` | 实现、运维面、14 条测试 |
+
+**repro_cmd（一键复现）**
+
+```bash
+export TENSORCAD_ASSET_ROOT=/srv/tensor/agent/assets
+python -m tensorcad.assetlib build-registry            # 重建登记簿（失败退出码 1 并列出问题）
+python -m tensorcad.assetlib verify                    # 重新哈希 13 条资产
+python -m tensorcad.assetlib scan-specs                # 指针三态（期望 dead=0 withheld=0）
+python -m tensorcad.assetlib resolve KCS               # 船名 → 店内路径（哈希校验）
+python tools/assetlib/verify_from_store.py --ships KCS --dx 0.5 0.25 0.125
+python tools/assetlib/growth_report.py
+python -m pytest tests/test_assetlib.py -q             # 14 passed
+```
+
+**误差判定（显式回答）**：KCS 排水体积 +0.354 %（dx=0.5）/ +0.201 %（0.25）/ +0.087 %（0.125），
+**<3 % 成立、<1 % 成立**；Cb 同误差；LCB 绝对偏差 0.026 %Lpp（ref −1.48）。KVLCC2/JBC/ONRT
+**无有效 got 值，不能声称 <3 %**，如实记 WITHHELD，原因见上。
