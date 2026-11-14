@@ -67,13 +67,60 @@ ARCHIVES: dict[str, tuple[str, str, tuple[str, ...]]] = {
 #: ``("inferred", None)``      no published model scale: normalise to the published L_PP
 #:                             (recorded in the manifest; the volume gate becomes a
 #:                             block-coefficient gate, see VolumeGateBasis);
-#: ``("published", key)``      read the published model scale from that page's table.
+#: ``("published", key)``      read the published model scale from that page's table;
+#: ``("derived", ship)``       no published scale row exists, so take the value derived
+#:                             from the publisher's own CAD by
+#:                             ``tools/baseline_fleet/<ship>_model_scale.py`` (record under
+#:                             ``artifacts/baseline_fleet/``); see DERIVED_SCALE_RECORDS.
 GEOMETRY_SCALE_POLICY: dict[str, tuple[str, str | None]] = {
     "KCS": ("full", None),
     "KVLCC2": ("full", None),
-    "JBC": ("inferred", None),
+    "JBC": ("derived", "jbc"),
     "ONRT": ("published", "simman_summary"),
 }
+
+#: Committed derived-scale records, keyed by the policy's ship tag.  Each record is
+#: produced by the matching tool and re-checked offline by its own ``--verify-only``,
+#: so the scale in ``fleet_specs.json`` is a *pointer into a reproducible derivation*
+#: rather than a typed constant.
+DERIVED_SCALE_RECORDS: dict[str, Path] = {
+    "jbc": REPO / "artifacts" / "baseline_fleet" / "jbc_model_scale.json",
+}
+
+
+def derived_scale(tag: str) -> tuple[float, str] | None:
+    """Read a committed derived-scale record.
+
+    Returns ``(scale, basis)`` where *basis* names the record and carries the digests
+    of the publisher sources the derivation rests on, or ``None`` when the record is
+    absent/unreadable so the caller can fall back to the historical policy.  The
+    schema tag is checked on purpose: a record written by a different derivation must
+    not be adopted silently.
+    """
+    path = DERIVED_SCALE_RECORDS.get(tag)
+    if path is None or not path.exists():
+        return None
+    try:
+        record = json.loads(path.read_text())
+        scale = float(record["scale_derived"]["value"])
+        sources = record["sources"]
+        page = sources["particulars_page"]["sha256"][:16]
+        archive = sources["iges_archive"]["sha256"][:16]
+    except (KeyError, TypeError, ValueError):
+        return None
+    if record.get("schema") != "tensorcad.fleet.model_scale.v1" or not scale > 0:
+        return None
+    money = record.get("published_full_scale", {})
+    beam = money.get("beam_m", {}).get("value")
+    depth = money.get("depth_m", {}).get("value")
+    basis = (
+        f"derived from the publisher CAD by {record.get('generated_by', tag + '_model_scale.py')}"
+        f" (record {path.relative_to(REPO)}): s = B_full|D_full / measured model span,"
+        f" B={beam} m, D={depth} m, half-spread"
+        f" {record['scale_derived'].get('relative_half_spread', float('nan')):.2%},"
+        f" page sha256 {page}…, archive sha256 {archive}…"
+    )
+    return scale, basis
 
 #: Publisher-page patterns.  Each entry is ``(field, regex)``; the **last** number in
 #: the first match is the full-scale value on the T2015 pages (those tables list model
@@ -307,6 +354,19 @@ def build_specs(raw: Path) -> tuple[list[ShipSpec], dict[str, object]]:
         if policy == "inferred":
             geometry_scale = None
             scale_basis = "no published model scale; normalised to the published L_PP"
+        elif policy == "derived":
+            # A published scale row does not exist for this hull.  Prefer the scale
+            # derived from the publisher's own CAD data; only fall back to the L_PP fit
+            # when the record is missing, and say so in the basis string.
+            derived = derived_scale(scale_page or "")
+            if derived is None:
+                geometry_scale = None
+                scale_basis = (
+                    "no published model scale and no committed derived-scale record; "
+                    "normalised to the published L_PP"
+                )
+            else:
+                geometry_scale, scale_basis = derived
         elif policy == "published":
             scale_fields = {}
             if scale_page and scale_page != page_key:
