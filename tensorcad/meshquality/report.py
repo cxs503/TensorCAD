@@ -24,7 +24,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-from .metrics import ELEMENT_KINDS, ElementQuality, hex_metrics, quad_metrics, tet_metrics, tri_metrics
+from .metrics import (
+    ELEMENT_KINDS,
+    NODES_PER_CELL,
+    ElementQuality,
+    hex_metrics,
+    prism_metrics,
+    pyramid_metrics,
+    quad_metrics,
+    tet_metrics,
+    tri_metrics,
+)
 
 __all__ = [
     "DEFAULT_GATE",
@@ -40,7 +50,14 @@ __all__ = [
 
 Vec3 = tuple[float, float, float]
 
-_MEASURERS = {"tri": tri_metrics, "quad": quad_metrics, "tet": tet_metrics, "hex": hex_metrics}
+_MEASURERS = {
+    "tri": tri_metrics,
+    "quad": quad_metrics,
+    "tet": tet_metrics,
+    "hex": hex_metrics,
+    "prism": prism_metrics,
+    "pyramid": pyramid_metrics,
+}
 
 
 # --------------------------------------------------------------------------------------
@@ -147,7 +164,7 @@ def measure(
         if not cells:
             continue
         worst = max(len(cell) for cell in cells)
-        expected = {"tri": 3, "quad": 4, "tet": 4, "hex": 8}[kind]
+        expected = NODES_PER_CELL[kind]
         if worst != expected:
             raise ValueError(f"{kind} cells need {expected} nodes, got a cell with {worst}")
         for cell in cells:
@@ -296,6 +313,21 @@ DEFAULT_LIMITS: dict[str, tuple[MetricLimit, ...]] = {
     "hex": (
         MetricLimit("min_sicn", minimum=0.1),
         MetricLimit("scaled_jacobian", minimum=0.1),
+        MetricLimit("min_angle", minimum=10.0),
+    ),
+    # A boundary-layer prism is *meant* to be anisotropic, so ``edge_ratio`` is not gated
+    # (height vs base edge is the point of the layer); ``min_sicn`` catches the distortion
+    # that actually hurts the discretisation, and it is aspect sensitive.
+    "prism": (
+        MetricLimit("min_sicn", minimum=0.1, note="shape and anisotropy"),
+        MetricLimit("scaled_jacobian", minimum=0.1, note="shape only; ideal prism = 0.866"),
+        MetricLimit("min_angle", minimum=10.0, note="degrees"),
+    ),
+    # Ideal-pyramid skewness is 0.1968, not 0 (a square pyramid has no 60 deg apex angle),
+    # so skewness is not gated here; see docs/mesh_quality_prism_pyramid.md.
+    "pyramid": (
+        MetricLimit("min_sicn", minimum=0.1),
+        MetricLimit("scaled_jacobian", minimum=0.0),
         MetricLimit("min_angle", minimum=10.0),
     ),
 }
