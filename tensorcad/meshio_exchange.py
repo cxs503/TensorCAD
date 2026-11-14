@@ -784,11 +784,18 @@ def write_meshio(path: str | Path, mesh: Mesh | TetrahedralMesh, *, file_format:
     MeshioFormatError
         If the format cannot carry the mesh's topology.
     """
-    import meshio
-
     _check_topology_supported(mesh, file_format)
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
+    if file_format == "cgns":
+        # meshio's CGNS driver writes no SIDS metadata at all (no
+        # CGNSLibraryVersion, no ElementType, no node labels), so use the
+        # conforming exporter instead; it keeps the node names meshio reads.
+        from .mesh_cgns import write_cgns
+
+        return write_cgns(target, mesh)
+    import meshio
+
     mio = mesh_to_meshio(mesh)
     meshio.write(str(target), mio, file_format=file_format)
     return target
@@ -812,6 +819,15 @@ def read_meshio(
         raise MeshioFormatError(
             f"unknown format '{file_format}'; expected one of {FORMATS_ALL}"
         )
+    if file_format == "cgns":
+        # Prefer the spec reader: it understands both the SIDS layout and
+        # meshio's, and meshio's reader refuses anything but tetrahedra.
+        from .mesh_cgns import read_cgns
+
+        try:
+            return read_cgns(path, units=units, coordinate_frame=coordinate_frame)
+        except Exception:  # pragma: no cover - fall back to meshio's reader
+            pass
     mio = meshio.read(str(path), file_format=file_format)
     if file_format in FORMATS_VOLUME:
         return meshio_to_tetrahedral(mio, units=units, coordinate_frame=coordinate_frame)
@@ -844,8 +860,7 @@ def round_trip_meshio(
     ext = _EXT[file_format]
     with tempfile.TemporaryDirectory(dir=tmpdir) as td:
         path = Path(td) / f"roundtrip{ext}"
-        io = mesh_to_meshio(mesh)
-        meshio.write(str(path), io, file_format=file_format)
+        write_meshio(path, mesh, file_format=file_format)
         back = meshio.read(str(path), file_format=file_format)
         if file_format in FORMATS_VOLUME:
             return meshio_to_tetrahedral(
