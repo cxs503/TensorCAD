@@ -36,9 +36,15 @@ class ProbeCase(golden.GoldenCase):
     title = "synthetic probe (reference = 4/3·π·r³ with r = 1)"
     reference_source = "tests.test_golden_regression.ProbeCase.reference (closed form)"
 
-    def __init__(self, scale: float = 1.0, invariant_residual: float = 0.0) -> None:
+    def __init__(
+        self,
+        scale: float = 1.0,
+        invariant_residual: float = 0.0,
+        fingerprint: str = "probe-geometry-0",
+    ) -> None:
         self.scale = scale
         self.invariant_residual = invariant_residual
+        self.fingerprint = fingerprint
 
     def _truth(self) -> float:
         return 4.0 / 3.0 * math.pi * 1.0**3
@@ -55,6 +61,9 @@ class ProbeCase(golden.GoldenCase):
 
     def invariants(self, values: dict[str, float]) -> dict[str, tuple[float, float, str]]:
         return {"identity_probe": (self.invariant_residual, 1e-9, "probe identity")}
+
+    def geometry_sha256(self) -> str:
+        return self.fingerprint
 
 
 def _bless(tmp_path: Path, case: golden.GoldenCase) -> Path:
@@ -579,3 +588,112 @@ def test_format_table_reports_every_case(committed: golden.SuiteResult) -> None:
     for name in ("wigley", "series60", "sphere_ellipsoid", "dtmb5415"):
         assert name in table
     assert "known limitation" in table
+
+
+# --------------------------------------------------------------------------------------
+# geometry identity: the mesh itself is asserted, not only the numbers integrated on it
+# --------------------------------------------------------------------------------------
+def test_geometry_fingerprint_change_is_an_error(tmp_path: Path) -> None:
+    """A mesh that changed must fail even when every measured number is unchanged."""
+    path = _bless(tmp_path, ProbeCase())
+    moved = ProbeCase(fingerprint="probe-geometry-1")
+    result = golden.run_suite(baseline_path=path, cases=[moved])
+    codes = _codes(result)
+    assert "geometry_changed" in codes, codes
+    assert not result.passed
+    detail = next(f for f in result.errors if f.code == "geometry_changed").detail
+    assert "probe-geometry-0"[:16] in detail and "probe-geometry-1"[:16] in detail
+
+
+def test_case_without_fingerprint_is_reported_not_silent(tmp_path: Path) -> None:
+    """A case that cannot identify its mesh is a warning, and the reason is published."""
+    path = _bless(tmp_path, ProbeCase(fingerprint=""))
+    result = golden.run_suite(baseline_path=path, cases=[ProbeCase(fingerprint="")])
+    assert result.passed
+    codes = _codes(result)
+    assert "geometry_fingerprint_missing" in codes, codes
+
+
+def test_baseline_without_fingerprint_is_a_warning(tmp_path: Path) -> None:
+    path = _bless(tmp_path, ProbeCase())
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["cases"]["probe"]["geometry_sha256"] = ""
+    path.write_text(json.dumps(data), encoding="utf-8")
+    result = golden.run_suite(baseline_path=path, cases=[ProbeCase()])
+    assert result.passed
+    assert "geometry_fingerprint_not_blessed" in _codes(result)
+
+
+def test_every_golden_case_fingerprints_its_mesh(committed: golden.SuiteResult) -> None:
+    """The four required golden forms must all lock the mesh, not just the integrals.
+
+    Regression: ``--bless`` wrote ``geometry_sha256`` for every case, but only the Wigley
+    case computed one (the other three stored ``""``) and ``evaluate_case`` never read the
+    field back at all.
+    """
+    baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+    assert {case.name for case in committed.cases} == {
+        "wigley",
+        "series60",
+        "sphere_ellipsoid",
+        "dtmb5415",
+    }
+    for case in committed.cases:
+        fingerprint = case.geometry_sha256
+        assert len(fingerprint) == 64, (case.name, fingerprint)
+        int(fingerprint, 16)  # hex
+        assert fingerprint == baseline["cases"][case.name]["geometry_sha256"], case.name
+
+
+def test_vertex_relabelling_is_caught_only_by_the_fingerprint() -> None:
+    """Non-redundancy of the fingerprint: a relabelled mesh is numerically identical.
+
+    Renumbering the vertices does not move a single triangle in space, so every
+    integrated quantity -- and therefore every numeric metric of the suite -- is
+    unchanged. Only ``_mesh_sha256`` (vertex and face order included) can see it.
+    """
+    from tensorcad import mesh as meshlib
+    from tensorcad import wigley
+
+    mesh = wigley.generate_wigley(wigley.reference_parameters(nx=21, nz=9)).mesh
+    count = len(mesh.vertices)
+    order = [(7 * index + 3) % count for index in range(count)]  # a permutation of range(n)
+    assert len(set(order)) == count
+    inverse = {old: new for new, old in enumerate(order)}
+    relabelled = type(mesh)(
+        vertices=[mesh.vertices[order[new]] for new in range(count)],
+        faces=[tuple(inverse[index] for index in face) for face in mesh.faces],
+    )
+    assert golden._closed_surface_area(relabelled) == pytest.approx(
+        golden._closed_surface_area(mesh), rel=1e-15
+    )
+    assert meshlib.total_signed_volume(relabelled) == pytest.approx(
+        meshlib.total_signed_volume(mesh), rel=1e-15
+    )
+    assert golden._mesh_sha256(relabelled) != golden._mesh_sha256(mesh)
+
+
+def test_redteam_harness_kills_an_identity_mutant(tmp_path: Path) -> None:
+    """End-to-end: a real gate run against a deliberately broken tree must fail.
+
+    The mutant disables the winding repair in the marching-tetrahedra extractor, so the
+    sphere/ellipsoid meshes keep every number (area takes the norm, volume the absolute
+    value) and only the fingerprint moves.
+    """
+    harness = _load_redteam()
+    report = harness.run_redteam(quick=True, only=("identity-orientation-winding",))
+    assert report["control"]["passed"], report["control"]
+    (mutant,) = report["mutants"]
+    assert mutant["killed"], mutant
+    assert mutant["observed"] == ["geometry_changed"], mutant["observed"]
+
+
+def _load_redteam():
+    import importlib.util
+
+    path = ROOT / "tools" / "golden" / "mutation_redteam.py"
+    spec = importlib.util.spec_from_file_location("golden_mutation_redteam", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

@@ -103,3 +103,58 @@ not a drift lock. See `results.md` for every metric.
   exactly, while the measurements come from a station-sampled loft; the two-grid tolerance
   absorbs that gap, so a *systematic* bias smaller than the discretisation error would go
   unnoticed between grids. The drift lock is what catches it if it changes.
+
+## Geometry identity: the mesh is asserted, not only the integrals
+
+`--bless` has always written a per-case `geometry_sha256` (a quantised hash of the
+vertices, the faces and their order), but nothing read it back: three of the four cases
+stored `""` (only `wigley` computed one) and `evaluate_case` never compared it. A change
+that keeps every measured quantity bit-identical — re-triangulation, vertex renumbering,
+inverted winding, since the surface area takes the norm and the sphere/ellipsoid volume
+the absolute value — therefore passed the gate silently.
+
+Now:
+
+* all four golden forms fingerprint their fine mesh (`series60`, `sphere_ellipsoid` — both
+  bodies folded into one digest, `dtmb5415`, `wigley`);
+* `evaluate_case` compares the measured fingerprint with the blessed one and raises
+  `geometry_changed` (error) on a mismatch, `geometry_fingerprint_not_blessed` (warning)
+  when the baseline predates the fingerprint, and `geometry_fingerprint_missing`
+  (warning) when a case cannot identify its mesh at all;
+* the baseline was re-blessed: the diff is `geometry_sha256` only, every measurement is
+  unchanged (`dtmb5415` moved by 7.8e-13 relative, four orders below the 1e-9 drift lock).
+
+The hash is quantised to 1e-9 before hashing so that equal geometry hashes equal across
+machines, and a mismatch is never "skipped": it is an error that only a deliberate
+`--bless` clears.
+
+## Red-team: the gate must be able to fail
+
+`tools/golden/mutation_redteam.py` breaks one thing at a time in a **scratch copy** of the
+tree (nothing in the worktree is touched) and runs the real gate against it. A null
+control (the unmodified copy) must pass; every mutant must exit non-zero **and** report
+the finding code that mutation is supposed to trip.
+
+```
+python tools/golden/mutation_redteam.py                      # quick gate (default)
+python tools/golden/mutation_redteam.py --full                # full two-grid gate
+python tools/golden/mutation_redteam.py --only <mutant-id> --json out.json
+```
+
+Result on this tree (`docs/golden/redteam.md`, `docs/golden/redteam_quick.json`): null
+control PASS, **7/7 mutants killed**, ~97 s for eight gate runs. The three classes of
+mutant are represented deliberately:
+
+| class | mutant | killed by |
+|---|---|---|
+| reference | Wigley/Series-60 closed form perturbed by 1e-3 | `reference_not_reproducible` |
+| reference | a blessed reference edited by hand in the baseline (+0.4 %) | `reference_not_reproducible` |
+| numeric | fine grid silently coarsened (quick / full) | `geometry_changed` / `drift`+`geometry_changed` |
+| numeric | sphere radius changed in the case definition | `drift`+`geometry_changed`+`reference_not_reproducible` |
+| identity | winding repair disabled in marching tetrahedra | `geometry_changed` **only** |
+| structural | 5415 mirror axis swapped in the case declaration | `invariant_violated` **only** |
+
+The last two are the point of the exercise: they are killed by exactly one check, so the
+fingerprint assertion and the invariant identities are shown to be load-bearing rather
+than redundant decoration. `tests/test_golden_regression.py` keeps a fast unit-level
+version of each claim plus one end-to-end run of the harness.
