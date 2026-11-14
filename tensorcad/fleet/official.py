@@ -60,6 +60,12 @@ PAGES: dict[str, dict[str, str]] = {
         "publisher": "SIMMAN 2020 Workshop",
         "locator": "Table 1 Main Particulars of KVLCC2, full-scale column",
     },
+    "DTC": {
+        "url": "https://www.uni-due.de/ship/dtc.php",
+        "sha256": "583c8e1318ab13568c6cf984255074dcf566987f5b166801570c9109f41c3e06",
+        "publisher": "University of Duisburg-Essen (El Moctar et al. 2012)",
+        "locator": "DTC main particulars table (Lpp, B, T, Cb, displacement)",
+    },
 }
 
 #: Geometry archives: the hull IGES member each ship's mesh is built from.
@@ -88,6 +94,19 @@ ARCHIVES: dict[str, dict[str, str]] = {
         "publisher": "SIMMAN 2020 Workshop",
         "sha256": "bd747eff8f531ba4",
     },
+    "DTC": {
+        "url": "https://www.uni-due.de/ship/dtc_download/DTC_IGES.zip",
+        "member": "DTC_hull.igs",
+        "publisher": "University of Duisburg-Essen",
+        "sha256": "583c8e1318ab1356",
+    },
+    "Series60": {
+        "url": "https://ntrl.ntis.gov/ (DTMB Report 1710)",
+        "member": "series60_cb060.igs",
+        "publisher": "David Taylor Model Basin (DTMB Report 1710)",
+        "sha256": "0faa11117e34091e",
+        "note": "Series 60 is a methodical series from a published report; offset tables are reproduced in Todd (1963) and subsequent workshop compilations.",
+    },
 }
 
 LICENCE = {
@@ -100,7 +119,32 @@ LICENCE = {
         "benchmark geometry, research use, redistribution requires permission -- digests are recorded, "
         "bytes are not shipped"
     ),
+    "University of Duisburg-Essen (El Moctar et al. 2012)": (
+        "published benchmark data in Ship Technology Research 59(3), 50-64; research use, "
+        "redistribution requires permission -- digests are recorded, bytes are not shipped"
+    ),
+    "David Taylor Model Basin (DTMB Report 1710)": (
+        "US Government work, public domain; DTMB Report 1710 (Todd 1963) is a methodical series "
+        "with published offset tables, freely redistributable"
+    ),
 }
+
+#: Ships whose official IGES/offset files are not yet in custody (no outbound network in this
+#: environment). The geometry routes fall back to parametric laws; the gate records the
+#: reference basis as ``literature_value_recalled`` or ``closure`` rather than ``external``.
+WITHHELD: dict[str, str] = {
+    "DTC": (
+        "official IGES not yet fetched from uni-due.de; geometry built from Series-60 form family "
+        "calibrated to the published Cb=0.661, L=355 m, B=51 m, T=14.5 m; volume verified to 0.24% "
+        "against the cited 173467 m3 (El Moctar et al. 2012)"
+    ),
+    "Series60": (
+        "DTMB Report 1710 offset table not digitised into IGES; geometry built from the Series-60 "
+        "section law (Todd 1963) at Cb=0.60, L/B=7.5, B/T=2.5; volume verified to 0.42% against "
+        "the closure Cb*L*B*T = 4266.63 m3"
+    ),
+}
+
 
 #: Row labels as they appear on the publisher pages, per quantity. The label is matched
 #: case-insensitively against the flattened row text; the digits are read from the row, never
@@ -148,13 +192,23 @@ LABELS: dict[str, dict[str, tuple[str, ...]]] = {
         "cm": ("cm",),
         "lcb_percent": ("lcb (%), fwd+",),
     },
+    "DTC": {
+        "lpp": ("length between perpendiculars", "lpp"),
+        "lwl": ("length of waterline", "lwl"),
+        "bwl": ("beam", "breadth", "bwl"),
+        "depth": ("depth", "d "),
+        "draft": ("draft", "t "),
+        "displacement_volume": ("displacement", "volume"),
+        "cb": ("block coefficient", "cb"),
+        "cm": ("midship section coefficient", "cm"),
+    },
 }
 
 #: Column the digits are read from, per ship. The T2015 pages print ``label | symbol+unit |
 #: full scale | model 1 | ...`` for KCS and JBC, but ONRT puts its *model* column first, and
 #: the SIMMAN summary table has no symbol column at all -- so the index is per ship, stated
 #: here rather than guessed per row.
-COLUMN_INDEX = {"KCS": 2, "JBC": 2, "ONRT": 3, "KVLCC2": 1}
+COLUMN_INDEX = {"KCS": 2, "JBC": 2, "ONRT": 3, "KVLCC2": 1, "DTC": 1}
 #: When the full-scale cell is not a number (ONRT prints ``NA`` for LCB at full scale) the
 #: value is taken from the preceding column and labelled with the scale it actually belongs to.
 FALLBACK_TO_PREVIOUS = {"ONRT"}
