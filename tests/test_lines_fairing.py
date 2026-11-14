@@ -7,7 +7,9 @@ import pytest
 
 from tensorcad.lines_fairing import (
     FairingError,
+    buttock_coverage,
     buttock_curves,
+    buttock_levels,
     compare_to_reference,
     curvature_sign_flips,
     fair_offset_table,
@@ -26,6 +28,7 @@ from tensorcad.lines_fairing import (
     _Grid,
 )
 from tensorcad.offset_forms import offset_table
+from tensorcad.offset_loft import OffsetProvenance, ShipOffsetTable
 
 
 def _form(key: str = "wigley_iii", stations: int = 15, waterlines: int = 11):
@@ -323,3 +326,134 @@ def test_flips_helper_matches_the_operator_directions() -> None:
         "stations": 0,
         "buttocks": 0,
     }
+
+
+# ---------------------------------------------------------------------------
+# the third family: several branches, and levels chosen from the table
+# ---------------------------------------------------------------------------
+
+
+def _tumblehome_table(stations: int = 15, waterlines: int = 11) -> ShipOffsetTable:
+    """A hull whose half-breadth falls again above the maximum breadth.
+
+    Tumblehome is ordinary in the aft body of a real ship and it is exactly the case in
+    which a level ``y = const`` is crossed twice: once on the way up from the keel and
+    once above the maximum breadth.  The earlier contour treated a section as monotone in
+    ``z`` and returned nothing for such a level, so the third family quietly lost those
+    buttocks.
+    """
+    length, beam, draft = 10.0, 1.0, 0.65
+    xs = [length * i / (stations - 1) for i in range(stations)]
+    zs = [draft * j / (waterlines - 1) for j in range(waterlines)]
+
+    def shape(z: float) -> float:
+        zeta = z / draft
+        return (zeta / 0.65) ** 0.7 if zeta <= 0.65 else 1.0 - 0.55 * (zeta - 0.65) / 0.35
+
+    def plan(x: float) -> float:
+        return 0.5 * beam * (1.0 - (2.0 * x / length - 1.0) ** 6)
+
+    rows = tuple(tuple(max(0.0, plan(x) * shape(z)) for z in zs) for x in xs)
+    return ShipOffsetTable(
+        name="tumblehome test hull",
+        length=length,
+        stations=tuple(xs),
+        waterlines=tuple(zs),
+        half_breadths=rows,
+        design_draft=draft,
+        provenance=OffsetProvenance(
+            source="synthetic: half-breadth plan with tumblehome above z/T = 0.65",
+            method="y(x, z) = 0.5 B (1 - (2x/L - 1)^6) * shape(z/T) on a uniform grid",
+        ),
+    )
+
+
+@pytest.mark.parametrize("key", ["wigley_iii", "series60_cb060", "kvlcc2_class"])
+def test_buttock_levels_cover_the_third_family(key: str) -> None:
+    """Every level the metric is taken at has a branch worth counting.
+
+    The floor is a property of the table (a third of the stations), not a hard-coded
+    fraction of the peak ordinate, so the guarantee survives a change of grid: the
+    earlier fixed fractions (0.2 ... 0.8 of the global peak) left the near-keel and
+    near-deck part of the buttock plan unmeasured and on a coarse table dropped levels
+    entirely.
+    """
+    table = offset_table(key, n_stations=21, n_waterlines=17)
+    grid = _grid_of(table)
+    floor = max(5, round(0.3 * grid.n))
+    coverage = buttock_coverage(grid.eta, grid.xi, grid.zeta)
+    assert coverage["curves"] >= len(coverage["levels"]) == 5
+    for detail in coverage["detail"]:
+        assert detail["branches"] >= 1, detail
+        assert max(detail["samples"]) >= floor, detail
+        assert detail["level"] <= 0.95 * max(max(row) for row in grid.eta)
+    # the levels span the buttock plan instead of huddling around the midbreadth
+    assert coverage["levels"][0] <= 0.1 * max(max(row) for row in grid.eta)
+    assert coverage["levels"][-1] >= 0.8 * max(max(row) for row in grid.eta)
+    # and they are what the flip count is actually taken on
+    curves = buttock_curves(grid.eta, grid.xi, grid.zeta, levels=coverage["levels"])
+    assert len(curves) == coverage["curves"]
+
+
+def test_buttock_contour_keeps_both_branches_of_a_tumblehome_section() -> None:
+    xi = [i / 8 for i in range(9)]
+    zeta = [j / 10 for j in range(11)]
+    # rises to 0.5 at zeta = 0.6, then tumbles home to 0.15 at the deck
+    shape = [0.5 * min(1.0, (z / 0.6) ** 6.0) if z > 0.0 else 0.0 for z in zeta]
+    shape = [value if z <= 0.6 else 0.5 * (1.0 - 0.7 * (z - 0.6) / 0.4)
+             for value, z in zip(shape, zeta)]
+    eta = [[value for value in shape] for _ in xi]
+
+    level = 0.25  # crossed below and above the maximum breadth
+    curves = buttock_curves(eta, xi, zeta, levels=(level,))
+    assert len(curves) == 2
+    rising, falling = sorted(curve[0][1] for curve in curves)
+    assert 0.0 < rising < 0.6 < falling < 1.0
+    for curve in curves:
+        assert [point[0] for point in curve] == xi  # one sample per station
+        assert len({round(point[1], 12) for point in curve}) == 1  # a buttock is z = const
+    # the deck ordinate of this section is 0.15 < level, so the old endpoint test would
+    # have reported no buttock at all for this level
+    assert max(row[-1] for row in eta) < level
+
+
+def test_buttock_contour_splits_where_the_level_set_disappears() -> None:
+    """A level set that stops and starts again along the length is two buttocks."""
+    xi = [i / 10 for i in range(11)]
+    zeta = [j / 10 for j in range(11)]
+    # a "sponson": wide amidships only, narrow at the ends, so y = 0.4 exists over two
+    # separate stretches of x
+    widths = [0.6, 0.6, 0.6, 0.6, 0.2, 0.2, 0.2, 0.6, 0.6, 0.6, 0.6]
+    eta = [[width * z for z in zeta] for width in widths]
+    curves = buttock_curves(eta, xi, zeta, levels=(0.4,))
+    assert len(curves) == 2
+    assert [len(curve) for curve in curves] == [4, 4]
+    assert max(point[0] for point in curves[0]) < min(point[0] for point in curves[1])
+
+
+def test_fairing_a_tumblehome_table_reports_the_third_family() -> None:
+    """End to end on a hull the old contour could not measure.
+
+    The acceptance does not change (deviation inside the tolerance, flip count not
+    rising), but the third family now contributes: the level sets are branched, the
+    flips are non-zero before the fairing and the faired table keeps them from rising.
+    """
+    clean = _tumblehome_table()
+    half_beam = 0.5 * clean.beam
+    unfair = perturb_table(clean, amplitude=0.004 * half_beam, seed=3)
+    result = fair_offset_table(
+        unfair, tolerance=0.032 * half_beam, iterations=3, reference=clean
+    )
+    assert result.within_tolerance
+    assert result.monotone
+    assert result.flips_after <= result.flips_before
+
+    grid = _grid_of(unfair)
+    coverage = buttock_coverage(grid.eta, grid.xi, grid.zeta)
+    assert coverage["curves"] > len(coverage["levels"])  # tumblehome sections branch
+    buttocks = [
+        metric for metric in result.iterations[0].metrics if metric.direction == "buttocks"
+    ][0]
+    assert buttocks.curves > len(coverage["levels"])
+    assert buttocks.flips_before > 0  # the old contour reported zero here
+    assert buttocks.flips_after <= buttocks.flips_before
