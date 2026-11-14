@@ -73,16 +73,16 @@ ENTITY_CURVE_ON_SURFACE = 142
 ENTITY_BOUNDED_SURFACE = 143
 ENTITY_TRIMMED_SURFACE = 144
 
-#: The two surface entities a hull can be carried by.  ``BSplineSurface`` here
-#: decodes **type 128** (rational B-spline surface) only.  **Type 126** is the
-#: non-rational B-spline surface, and it is the form CATIA and the NMRI-2015
-#: archives write in bulk.  Measured on the durable asset store (2026-11-14):
-#: KCS 55x128 / 0x126 (fully decoded, fleet gate VERIFIED at +0.30 % volume),
-#: JBC 45x128 / 172x126, KVLCC2 19x128 / 304x126.  So a "hull with no waterline
-#: slices" is a *reader* gap, not a shape: the geometry was present and dropped.
-#: :meth:`IgesFile.surface_census` exists so that a caller integrating a volume
-#: can see the drop instead of inferring it from a downstream symptom.
-ENTITY_BSPLINE_SURFACE_POLYNOMIAL = 126
+#: Type 126 is the **rational B-spline curve**, not a surface: IGES 5.3 defines no
+#: non-rational surface entity, and every 126 record in the workshop archives
+#: (KCS 0, JBC 172, KVLCC2 304, ONRT 820) decodes here as a 1-D-parameter curve
+#: with a 3-D control net -- ``BSplineCurve.from_parameters`` has done so since the
+#: first reader revision.  An earlier revision of this module declared a constant
+#: ``ENTITY_BSPLINE_SURFACE_POLYNOMIAL = 126`` and reported these curves as
+#: "unreadable surfaces"; the name was wrong twice (126 is a curve, and it is
+#: decoded) and the numbers it produced were attributed to a reader gap.  See
+#: ``docs/baseline_fleet_type126_falsified.md`` for the measurement that settled it.
+ENTITY_BSPLINE_CURVE_ALIAS = ENTITY_BSPLINE_CURVE
 
 #: Section letters of an IGES 5.x file; column 73 (0-based index 72).
 _SECTIONS = "SGDPT"
@@ -189,7 +189,23 @@ class BSplineCurve:
 
     @classmethod
     def from_parameters(cls, params: Sequence[float]) -> "BSplineCurve":
-        """Build from the raw type-126 parameter list (entity type included)."""
+        """Build from the raw type-126 parameter list (entity type included).
+
+        Field order is IGES 5.3 section 4.24, and it is **knots, then weights, then
+        coordinates**::
+
+            126, K, M, PROP1, PROP2, PROP3, PROP4,
+            T(-M) .. T(K+1),          # K + M + 2 knots
+            W(0) .. W(K),             # K + 1 weights (absent when polynomial)
+            X(0), Y(0), Z(0), .. X(K), Y(K), Z(K)
+
+        Reading the tail as ``control .. knots`` (which this method did until the
+        KVLCC2/JBC audit in ``docs/baseline_fleet_type126_falsified.md``) put
+        coordinates into the knot vector: on JBC DE 8 the "knots" came out as
+        ``106.995, -3365.94, -0.0, …`` -- a non-monotone sequence of millimetres --
+        and the "control points" as ``0.462, 0.462, 0.538, 0.538``, i.e. the knot
+        vector itself.  The geometry never left the file; the reader indexed it wrong.
+        """
         values = list(params)
         if int(values[0]) != ENTITY_BSPLINE_CURVE:
             raise IgesError(f"not a type-126 curve: {values[0]}")
@@ -197,26 +213,32 @@ class BSplineCurve:
         degree = int(values[2])  # M
         rational = int(values[6]) == 0  # PROP3: 0 = rational, 1 = polynomial
         count = upper + 1
-        width = 4 if rational else 3
-        cursor = 10
+        knot_count = count + degree + 1
+        cursor = 7
+        knots = tuple(values[cursor:cursor + knot_count])
+        if len(knots) != knot_count:
+            raise IgesError("type-126 curve truncated in its knot vector")
+        cursor += knot_count
+        if rational:
+            weights = tuple(values[cursor:cursor + count])
+            if len(weights) != count:
+                raise IgesError("type-126 curve truncated in its weights")
+            cursor += count
+        else:
+            weights = tuple(1.0 for _ in range(count))
+        width = 3
         control = []
-        weights = []
         for _ in range(count):
             chunk = values[cursor:cursor + width]
             cursor += width
             if len(chunk) != width:
                 raise IgesError("type-126 curve truncated in its control points")
-            control.append(tuple(chunk[:3]))
-            weights.append(chunk[3] if rational else 1.0)
-        knot_count = count + degree + 1
-        knots = tuple(values[cursor:cursor + knot_count])
-        if len(knots) != knot_count:
-            raise IgesError("type-126 curve truncated in its knot vector")
+            control.append(tuple(chunk))
         return cls(
             degree=degree,
             knots=knots,
             control=tuple(control),
-            weights=tuple(weights),
+            weights=weights,
             dim=3,
         )
 
@@ -518,24 +540,45 @@ class Boundary:
 
 @dataclass
 class CurveOnSurface:
-    """Type-142 curve on a parametric surface (3D curve + basis surface)."""
+    """Type-142 curve on a parametric surface: model-space curve + (u, v) loop.
+
+    Field order per IGES 5.3 section 4.25 (type 142)::
+
+        142, CRV, SPTR, BPTR, CPTR, IT
+
+    ``SPTR`` is the basis surface, ``BPTR`` is the curve *in the parameter space of
+    that surface* (the trim loop), ``CRV`` is the model-space curve, ``CPTR`` names a
+    composite carrying the preferred representation of both, and ``IT`` selects that
+    representation.
+
+    This record was previously read one field to the right (``curve_3d`` = BPTR,
+    ``curve_uv`` = CPTR), which made every trim loop a *model-space* polyline.  The
+    measured decider is in ``IgesFile.trim_pointer_audit``: on the KVLCC2 archive the
+    BPTR composite lies inside the basis surface's knot domain on 17 of 19 patches
+    while the CPTR composite lies inside on none, so the loop is BPTR -- see
+    ``artifacts/baseline_fleet/t126_trim_audit.json``.
+    """
 
     surface: int
     curve_3d: int
     curve_uv: int | None
+    preferred: int | None = None
+    preferred_flag: int = 0
 
     @classmethod
     def from_parameters(cls, params: Sequence[float]) -> "CurveOnSurface":
-        """Field order per IGES 5.3 (type 142): ``142, CRV, SPTR, BPTR, CPTR, IT``.
-
-        The basis-surface pointer is parameter 3 (index 2); index 1 is the spare
-        ``CRV`` field and is written as ``0`` by every writer seen here, so
-        reading it made every curve-on-surface report "no basis surface".
-        """
         surface = int(params[2]) if len(params) > 2 else 0
-        curve_3d = int(params[3]) if len(params) > 3 else 0
-        curve_uv = int(params[4]) if len(params) > 4 else 0
-        return cls(surface=surface, curve_3d=curve_3d, curve_uv=curve_uv or None)
+        curve_3d = int(params[1]) if len(params) > 1 else 0
+        curve_uv = int(params[3]) if len(params) > 3 else 0
+        preferred = int(params[4]) if len(params) > 4 else 0
+        flag = int(params[5]) if len(params) > 5 else 0
+        return cls(
+            surface=surface,
+            curve_3d=curve_3d,
+            curve_uv=curve_uv or None,
+            preferred=preferred or None,
+            preferred_flag=flag,
+        )
 
 
 @dataclass
@@ -616,21 +659,176 @@ class IgesFile:
         ]
 
     def surface_census(self) -> dict[str, object]:
-        """Surface entities present in the file, split by whether they are decoded.
+        """What geometry the file carries, and how much of it the reader can bind.
 
-        Returns ``readable_type128``, ``unreadable_type126`` and the full
-        ``by_type`` histogram.  The census is a *fact about the file*, not a
-        verdict: a hull whose type-126 share is large has been read only in
-        residue, and any volume integrated from it describes that residue.
+        Entity identities are facts about IGES 5.3, not reader preferences:
+
+        * **128** rational B-spline *surface* -- decoded into :class:`BSplineSurface`;
+        * **126** rational B-spline *curve* -- decoded into :class:`BSplineCurve`;
+          in the hull archives these are the trim boundaries (JBC 172, KVLCC2 304,
+          ONRT 820), not dropped surfaces;
+        * **141 / 143 / 144** boundary and trimmed-bounded patch wrappers;
+        * **142** curve-on-surface, the parameter-space trim loop.
+
+        Keys:
+            ``surfaces_type128`` -- decodable basis surfaces;
+            ``curves_type126`` -- rational B-spline curves;
+            ``trimmed_patches_type143_144`` -- wrapper entities present;
+            ``boundaries_type141`` / ``curves_on_surface_type142`` -- trim carriers;
+            ``basis_surfaces_trimmed`` / ``basis_surfaces_untrimmed`` -- basis
+            surfaces a wrapper names / that no wrapper names;
+            ``by_type`` -- the full histogram.
+
+        The last pair is the one a volume integrator needs: a hull whose basis
+        surfaces are mostly *untrimmed* integrates over extra sheet, and that -- not
+        a mis-decoded entity type -- is what a wrong displacement describes.
         """
-        by_type: dict[int, int] = {}
+        by_type: dict[int, float] = {}
         for entry in self.entries.values():
             by_type[entry.entity_type] = by_type.get(entry.entity_type, 0) + 1
+        basis_total = by_type.get(ENTITY_BSPLINE_SURFACE, 0)
+        trimmed: set[int] = set()
+        for kind in (ENTITY_TRIMMED_SURFACE, ENTITY_BOUNDED_SURFACE):
+            for entry in self.of_type(kind):
+                wrapper = BoundedSurface.from_parameters(self.parameters(entry.sequence))
+                target = self.resolve(wrapper.surface) if wrapper.surface else None
+                if target is not None and target.entity_type == ENTITY_BSPLINE_SURFACE:
+                    trimmed.add(target.sequence)
         return {
-            "readable_type128": by_type.get(ENTITY_BSPLINE_SURFACE, 0),
-            "unreadable_type126": by_type.get(ENTITY_BSPLINE_SURFACE_POLYNOMIAL, 0),
+            "surfaces_type128": basis_total,
+            "curves_type126": by_type.get(ENTITY_BSPLINE_CURVE, 0),
+            "trimmed_patches_type143_144": by_type.get(ENTITY_BOUNDED_SURFACE, 0)
+            + by_type.get(ENTITY_TRIMMED_SURFACE, 0),
+            "boundaries_type141": by_type.get(ENTITY_BOUNDARY, 0),
+            "curves_on_surface_type142": by_type.get(ENTITY_CURVE_ON_SURFACE, 0),
+            "basis_surfaces_trimmed": len(trimmed),
+            "basis_surfaces_untrimmed": basis_total - len(trimmed),
             "by_type": dict(sorted(by_type.items())),
         }
+
+    def trim_pointer_audit(self, samples: int = 40) -> dict[str, object]:
+        """Decide, per trimmed patch, which curve-on-surface pointer lives in (u, v).
+
+        Type 142 carries two curve pointers (the model-space curve and the
+        parameter-space loop) plus the preferred-representation composite, and the
+        *field order alone has not been enough to tell them apart on real bytes*:
+        the shape of the record is identical either way, and the writer's directory
+        numbering (first vs second record) is itself ambiguous.  So the question is
+        answered by measurement instead of by assertion: a parameter-space loop must
+        lie inside the basis surface's knot domain, a model-space curve does not.
+
+        For every trimmed patch this samples both candidate composites, reports the
+        fraction of samples inside ``domain_u x domain_v``, and marks a patch
+        ``decided`` only when one candidate is inside on at least half its samples
+        and leads the other by more than 10 points.  Patches that are not decided are
+        reported, never defaulted -- a caller that meshes a trim loop has to know.
+
+        Keys: ``patches`` (row per wrapper), ``decided_field_crv`` (rows where the
+        ``curve_3d`` field won), ``decided_field_bptr`` (rows where ``curve_uv`` won),
+        ``undecided`` (rows neither candidate claims), ``samples_per_candidate``.
+        """
+        rows: list[dict[str, object]] = []
+        decided_3d = decided_uv = undecided = 0
+        for index, (wrapper, basis, curves) in enumerate(self.trimmed_surfaces()):
+            if basis is None or not curves:
+                rows.append(
+                    {
+                        "patch": index,
+                        "surface_de": wrapper.surface,
+                        "basis_bound": basis is not None,
+                        "curves": len(curves),
+                        "verdict": "no_basis_or_no_curve",
+                    }
+                )
+                undecided += 1
+                continue
+            u0, u1 = basis.domain_u
+            v0, v1 = basis.domain_v
+            fractions: dict[str, float | None] = {}
+            for label, pointer in (("field_crv", curves[0].curve_3d), ("field_bptr", curves[0].curve_uv)):
+                fractions[label] = self._inside_fraction(pointer, u0, u1, v0, v1, samples)
+            best = None
+            for label, value in fractions.items():
+                if value is None or value < 0.5:
+                    continue
+                if best is None or value > (fractions[best] or 0.0):
+                    best = label
+            margin = None
+            if best is not None:
+                other = "field_bptr" if best == "field_crv" else "field_crv"
+                margin = round((fractions[best] or 0.0) - (fractions[other] or 0.0), 3)
+                if margin <= 0.1:
+                    best, margin = None, margin
+            verdict = "decided" if best else "undecided"
+            if best == "field_crv":
+                decided_3d += 1
+            elif best == "field_bptr":
+                decided_uv += 1
+            else:
+                undecided += 1
+            rows.append(
+                {
+                    "patch": index,
+                    "surface_de": wrapper.surface,
+                    "basis_bound": True,
+                    "curves": len(curves),
+                    "domain": [[round(u0, 6), round(u1, 6)], [round(v0, 6), round(v1, 6)]],
+                    "inside_fraction": {
+                        key: (None if value is None else round(value, 3)) for key, value in fractions.items()
+                    },
+                    "winner_field": best,
+                    "margin": margin,
+                    "verdict": verdict,
+                }
+            )
+        return {
+            "patches": rows,
+            "patch_count": len(rows),
+            "decided_field_crv": decided_3d,
+            "decided_field_bptr": decided_uv,
+            "undecided": undecided,
+            "samples_per_candidate": samples,
+        }
+
+    def _inside_fraction(
+        self,
+        pointer: int | None,
+        u0: float,
+        u1: float,
+        v0: float,
+        v1: float,
+        samples: int = 40,
+    ) -> float | None:
+        """Fraction of a composite's samples that fall inside the (u, v) domain."""
+        if not pointer:
+            return None
+        points: list[tuple[float, ...]] = []
+        try:
+            entity = self.resolve(pointer)
+            if entity is None:
+                return None
+            if entity.entity_type == ENTITY_COMPOSITE_CURVE:
+                params = self.parameters(entity.sequence)
+                count = int(params[1])
+                for child in params[2:2 + count]:
+                    target = self.resolve(int(child))
+                    if target is None or target.entity_type != ENTITY_BSPLINE_CURVE:
+                        continue
+                    curve = BSplineCurve.from_parameters(self.parameters(target.sequence))
+                    points.extend(curve.sample(samples))
+            elif entity.entity_type == ENTITY_BSPLINE_CURVE:
+                curve = BSplineCurve.from_parameters(self.parameters(entity.sequence))
+                points.extend(curve.sample(samples))
+        except (IgesError, ValueError, IndexError):
+            return None
+        if not points:
+            return None
+        inside = 0
+        for point in points:
+            u, v = point[0], point[1]
+            if u0 - 1e-9 <= u <= u1 + 1e-9 and v0 - 1e-9 <= v <= v1 + 1e-9:
+                inside += 1
+        return inside / len(points)
 
     def resolve(self, pointer: int) -> DirectoryEntry | None:
         """Look up the entity a pointer carried by another entity refers to.
