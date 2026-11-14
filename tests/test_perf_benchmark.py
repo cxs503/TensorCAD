@@ -290,3 +290,53 @@ def test_cli_regression_gate(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert "Regression Gates" in result.stdout
     assert "All gates passed" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# Baseline file validation (GAP-CAD-D4-PERF-SCALE)
+# ---------------------------------------------------------------------------
+
+def test_baseline_file_exists_and_valid() -> None:
+    """Verify the committed baseline file exists and conforms to the schema."""
+    bl_path = ROOT / "runs" / "perf_baseline.json"
+    assert bl_path.exists(), f"Baseline file not found at {bl_path}"
+
+    data = json.loads(bl_path.read_text())
+    assert data["schema"] == BENCHMARK_SCHEMA
+    assert "results" in data
+    assert len(data["results"]) >= 4, "Baseline should have results for all 4 sub-tasks"
+
+    # Verify all 4 sub-tasks are represented
+    subtasks = {r["subtask"] for r in data["results"]}
+    assert "load" in subtasks
+    assert "point_locate" in subtasks
+    assert "voxelize" in subtasks
+    assert "volume" in subtasks
+
+    # Verify all results have required fields
+    required_fields = {"subtask", "nx", "nz", "triangles", "vertices",
+                       "grid_cells", "seconds", "status", "throughput"}
+    for r in data["results"]:
+        for field in required_fields:
+            assert field in r, f"Missing field '{field}' in result: {r}"
+        assert r["status"] in (MEASURED, NOT_RUN, FAILED)
+
+
+def test_baseline_regression_gate_passes() -> None:
+    """Verify that running the quick benchmark against the baseline passes all gates."""
+    bl_path = ROOT / "runs" / "perf_baseline.json"
+    if not bl_path.exists():
+        pytest.skip("Baseline file not available")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "tensorcad.perf_benchmark", "--quick",
+         "--n-queries", "500", "--max-triangles", "100000",
+         "--baseline", str(bl_path)],
+        cwd=str(ROOT),
+        env=_env(),
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    assert result.returncode == 0, f"Regression gates failed:\n{result.stdout}\n{result.stderr}"
+    assert "All gates passed" in result.stdout
