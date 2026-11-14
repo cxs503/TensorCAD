@@ -1,5 +1,5 @@
 {
-  "baseline": "/root/tp-agent/work/m18251/docs/golden/tensorcad_geometry_golden.json",
+  "baseline": "/root/tp-agent/work/m20111/docs/golden/tensorcad_geometry_golden.json",
   "cases": [
     {
       "findings": [],
@@ -122,7 +122,7 @@
         "wetted_surface_area_m2": 14.879063104957783
       },
       "reference_source": "tensorcad.wigley.wigley_analytic_hydrostatics (closed forms)",
-      "seconds": 2.906,
+      "seconds": 2.223,
       "title": "Wigley hull (L=10, B=1, T=0.625, n=m=2): lofted and capped surface"
     },
     {
@@ -240,7 +240,7 @@
         "waterplane_area_m2": 9.374999999999998
       },
       "reference_source": "tensorcad.series60.analytic_* over the exponents fitted from Cb",
-      "seconds": 2.197,
+      "seconds": 1.836,
       "title": "Series 60 hull (L=10, B=1.5, T=0.6, Cb=0.60): fitted exponent family"
     },
     {
@@ -386,7 +386,7 @@
         "sphere_volume_m3": 4.1887902047863905
       },
       "reference_source": "(4/3)\u03c0r\u00b3, 4\u03c0r\u00b2 and (4/3)\u03c0abc over the exact primitive fields",
-      "seconds": 11.688,
+      "seconds": 12.685,
       "title": "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra"
     },
     {
@@ -529,7 +529,7 @@
         "holdout_rms_m": 0.11738199454341851
       },
       "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]",
-      "seconds": 2.423,
+      "seconds": 2.323,
       "title": "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)"
     }
   ],
@@ -537,5 +537,5 @@
   "passed": true,
   "quick": false,
   "schema": "tensorcad.golden/1",
-  "seconds": 19.214
+  "seconds": 19.068
 }
