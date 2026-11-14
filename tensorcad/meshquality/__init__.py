@@ -36,7 +36,18 @@ run in this environment and why.
 from __future__ import annotations
 
 from .dialects import ASPECT_DIALECTS, aspect_dialects, conservative_limit, dialect_audit
-from .metrics import ELEMENT_KINDS, METRIC_NAMES, ElementQuality, hex_metrics, quad_metrics, tet_metrics, tri_metrics
+from .metrics import (
+    ELEMENT_KINDS,
+    METRIC_NAMES,
+    NODES_PER_CELL,
+    ElementQuality,
+    hex_metrics,
+    prism_metrics,
+    pyramid_metrics,
+    quad_metrics,
+    tet_metrics,
+    tri_metrics,
+)
 from .topology import (
     FaceNonOrthogonality,
     SurfaceTopology,
@@ -64,6 +75,7 @@ __all__ = [
     "ELEMENT_KINDS",
     "FaceNonOrthogonality",
     "METRIC_NAMES",
+    "NODES_PER_CELL",
     "Check",
     "ASPECT_DIALECTS",
     "aspect_dialects",
@@ -79,6 +91,8 @@ __all__ = [
     "gate_non_orthogonality",
     "gate_surface",
     "hex_metrics",
+    "prism_metrics",
+    "pyramid_metrics",
     "measure",
     "non_orthogonality",
     "quad_metrics",
