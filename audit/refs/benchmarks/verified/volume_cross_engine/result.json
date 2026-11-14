@@ -1,0 +1,351 @@
+{
+ "schema": "tensorcad.benchmark.volume_cross_engine/1.0",
+ "feature": "XVAL-GEOM-VOLCROSS",
+ "repro_cmd": "python benchmarks/verified/volume_cross_engine/run_benchmark.py",
+ "generated_at": "2026-11-14T14:20:46Z",
+ "environment": {
+  "python": "3.11.6",
+  "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+  "trimesh": "5.0.0",
+  "numpy_stl": "absent"
+ },
+ "tolerances": {
+  "acceptance": 0.003,
+  "engine_agreement": 1e-06,
+  "order_window": [
+   1.5,
+   2.6
+  ]
+ },
+ "live": {
+  "context": {
+   "hull": "Wigley (n=m=2, ITTC reference proportions)",
+   "principal_particulars": {
+    "length_m": 10.0,
+    "beam_m": 1.0,
+    "draft_m": 0.625
+   },
+   "reference_volume_m3": 2.7777777777777777,
+   "reference_kind": "analytic (exact)",
+   "reference_source": "V = 4 L B T / 9 evaluated by tensorcad.wigley.analytic_volume",
+   "sectional_volume_m3": 2.7777777777777772,
+   "sectional_vs_reference": -1.5987211554602254e-16,
+   "attribution": {
+    "status": "agrees",
+    "reason": "pipeline and engines agree to 0.032 %, inside the 0.3 % acceptance line",
+    "engine_spread": 7.430288009249435e-09,
+    "divergence_vs_engine_a": 5.1175507299519595e-15,
+    "pipeline_vs_engines": 0.0003210620807243459,
+    "deficit_absolute_m3": 0.0008918391131231829,
+    "observed_order": 2.020500631935433,
+    "acceptance": 0.003
+   },
+   "deficits": [
+    {
+     "h_m": 0.47619047619047616,
+     "deficit_m3": 0.05461273405459499
+    },
+    {
+     "h_m": 0.24390243902439024,
+     "deficit_m3": 0.014123738939313846
+    },
+    {
+     "h_m": 0.12345679012345678,
+     "deficit_m3": 0.0035600508780686546
+    },
+    {
+     "h_m": 0.062111801242236024,
+     "deficit_m3": 0.0008918287965924421
+    }
+   ]
+  },
+  "rows": [
+   {
+    "stations": 21,
+    "levels": 6,
+    "h_m": 0.47619047619047616,
+    "triangles": 438,
+    "watertight": true,
+    "closed_genus": 0,
+    "engine_a_trimesh_m3": 2.7231650437231827,
+    "engine_b_numpy_stl_m3": 2.7231649706612653,
+    "reference_analytic_m3": 2.7777777777777777,
+    "engine_a_vs_reference": -0.0196605842596542,
+    "engine_b_vs_reference": -0.01966061056194446,
+    "engine_spread": 2.682977940443835e-08
+   },
+   {
+    "stations": 41,
+    "levels": 11,
+    "h_m": 0.24390243902439024,
+    "triangles": 1678,
+    "watertight": true,
+    "closed_genus": 0,
+    "engine_a_trimesh_m3": 2.763654038838464,
+    "engine_b_numpy_stl_m3": 2.7636540035839343,
+    "reference_analytic_m3": 2.7777777777777777,
+    "engine_a_vs_reference": -0.005084546018152985,
+    "engine_b_vs_reference": -0.005084558709783611,
+    "engine_spread": 1.2756491594993997e-08
+   },
+   {
+    "stations": 81,
+    "levels": 21,
+    "h_m": 0.12345679012345678,
+    "triangles": 6558,
+    "watertight": true,
+    "closed_genus": 0,
+    "engine_a_trimesh_m3": 2.774217726899709,
+    "engine_b_numpy_stl_m3": 2.774217681435887,
+    "reference_analytic_m3": 2.7777777777777777,
+    "engine_a_vs_reference": -0.0012816183161047157,
+    "engine_b_vs_reference": -0.0012816346830806502,
+    "engine_spread": 1.6387979068683646e-08
+   },
+   {
+    "stations": 161,
+    "levels": 41,
+    "h_m": 0.062111801242236024,
+    "triangles": 25918,
+    "watertight": true,
+    "closed_genus": 0,
+    "engine_a_trimesh_m3": 2.7768859489811852,
+    "engine_b_numpy_stl_m3": 2.776885928348123,
+    "reference_analytic_m3": 2.7777777777777777,
+    "engine_a_vs_reference": -0.00032105836677327916,
+    "engine_b_vs_reference": -0.00032106579467573227,
+    "engine_spread": 7.430288009249435e-09
+   }
+  ]
+ },
+ "committed": {
+  "source": "artifacts/xval_geom_volcross/results.json",
+  "rows": [
+   {
+    "case": "wigley",
+    "name": "Wigley (ITTC reference proportions, n=m=2)",
+    "stations": 21,
+    "levels": 6,
+    "engine_a_trimesh_m3": 2.7231650437231827,
+    "engine_b_numpy_stl_m3": 2.7231649706612653,
+    "engine_spread": 2.682977940443835e-08,
+    "reference_volume_m3": 2.7777777777777777,
+    "reference_kind": "analytic (exact)",
+    "engine_a_vs_reference": -0.0196605842596542,
+    "pipeline_volume_m3": 2.723165043723183,
+    "pipeline_vs_reference": -0.019660584259654036,
+    "caveat": ""
+   },
+   {
+    "case": "wigley",
+    "name": "Wigley (ITTC reference proportions, n=m=2)",
+    "stations": 41,
+    "levels": 11,
+    "engine_a_trimesh_m3": 2.763654038838464,
+    "engine_b_numpy_stl_m3": 2.7636540035839343,
+    "engine_spread": 1.2756491594993997e-08,
+    "reference_volume_m3": 2.7777777777777777,
+    "reference_kind": "analytic (exact)",
+    "engine_a_vs_reference": -0.005084546018152985,
+    "pipeline_volume_m3": 2.7636540388384656,
+    "pipeline_vs_reference": -0.005084546018152345,
+    "caveat": ""
+   },
+   {
+    "case": "wigley",
+    "name": "Wigley (ITTC reference proportions, n=m=2)",
+    "stations": 81,
+    "levels": 21,
+    "engine_a_trimesh_m3": 2.774217726899709,
+    "engine_b_numpy_stl_m3": 2.774217681435887,
+    "engine_spread": 1.6387979068683646e-08,
+    "reference_volume_m3": 2.7777777777777777,
+    "reference_kind": "analytic (exact)",
+    "engine_a_vs_reference": -0.0012816183161047157,
+    "pipeline_volume_m3": 2.7742177268997086,
+    "pipeline_vs_reference": -0.0012816183161048756,
+    "caveat": ""
+   },
+   {
+    "case": "wigley",
+    "name": "Wigley (ITTC reference proportions, n=m=2)",
+    "stations": 161,
+    "levels": 41,
+    "engine_a_trimesh_m3": 2.7768859489811852,
+    "engine_b_numpy_stl_m3": 2.776885928348123,
+    "engine_spread": 7.430288009249435e-09,
+    "reference_volume_m3": 2.7777777777777777,
+    "reference_kind": "analytic (exact)",
+    "engine_a_vs_reference": -0.00032105836677327916,
+    "pipeline_volume_m3": 2.776885948981171,
+    "pipeline_vs_reference": -0.0003210583667783951,
+    "caveat": ""
+   },
+   {
+    "case": "kcs-fullscale",
+    "name": "KCS-dimensioned NURBS hull (full scale, Cb calibrated to 0.6505)",
+    "stations": 21,
+    "levels": 7,
+    "engine_a_trimesh_m3": 51223.00336158288,
+    "engine_b_numpy_stl_m3": 51223.004093178555,
+    "engine_spread": 1.4282561104366814e-08,
+    "reference_volume_m3": 52030.0,
+    "reference_kind": "published displacement volume",
+    "engine_a_vs_reference": -0.015510217920759567,
+    "pipeline_volume_m3": 51223.00336158287,
+    "pipeline_vs_reference": -0.015510217920759706,
+    "caveat": "the form is calibrated to the published Cb, so pipeline-vs-published is a calibration identity; the independent content of this row is the three-route agreement at realistic L/B/T and the tessellation attribution"
+   },
+   {
+    "case": "kcs-fullscale",
+    "name": "KCS-dimensioned NURBS hull (full scale, Cb calibrated to 0.6505)",
+    "stations": 41,
+    "levels": 12,
+    "engine_a_trimesh_m3": 51791.26728037171,
+    "engine_b_numpy_stl_m3": 51791.26836421314,
+    "engine_spread": 2.0927107751337038e-08,
+    "reference_volume_m3": 52030.0,
+    "reference_kind": "published displacement volume",
+    "engine_a_vs_reference": -0.004588366704368501,
+    "pipeline_volume_m3": 51791.26728037171,
+    "pipeline_vs_reference": -0.004588366704368501,
+    "caveat": "the form is calibrated to the published Cb, so pipeline-vs-published is a calibration identity; the independent content of this row is the three-route agreement at realistic L/B/T and the tessellation attribution"
+   },
+   {
+    "case": "kcs-fullscale",
+    "name": "KCS-dimensioned NURBS hull (full scale, Cb calibrated to 0.6505)",
+    "stations": 81,
+    "levels": 22,
+    "engine_a_trimesh_m3": 51986.6441476281,
+    "engine_b_numpy_stl_m3": 51986.64483821956,
+    "engine_spread": 1.3284016835486303e-08,
+    "reference_volume_m3": 52030.0,
+    "reference_kind": "published displacement volume",
+    "engine_a_vs_reference": -0.0008332856500460622,
+    "pipeline_volume_m3": 51986.64414762813,
+    "pipeline_vs_reference": -0.0008332856500455029,
+    "caveat": "the form is calibrated to the published Cb, so pipeline-vs-published is a calibration identity; the independent content of this row is the three-route agreement at realistic L/B/T and the tessellation attribution"
+   },
+   {
+    "case": "kcs-fullscale",
+    "name": "KCS-dimensioned NURBS hull (full scale, Cb calibrated to 0.6505)",
+    "stations": 161,
+    "levels": 42,
+    "engine_a_trimesh_m3": 52042.76317749706,
+    "engine_b_numpy_stl_m3": 52042.76397148236,
+    "engine_spread": 1.5256401729566345e-08,
+    "reference_volume_m3": 52030.0,
+    "reference_kind": "published displacement volume",
+    "engine_a_vs_reference": 0.0002453041994437395,
+    "pipeline_volume_m3": 52042.76317749709,
+    "pipeline_vs_reference": 0.0002453041994442989,
+    "caveat": "the form is calibrated to the published Cb, so pipeline-vs-published is a calibration identity; the independent content of this row is the three-route agreement at realistic L/B/T and the tessellation attribution"
+   },
+   {
+    "case": "kcs-modelscale",
+    "name": "KCS-dimensioned NURBS hull (model scale, Cb 0.555) -- IN383-CAD01 case",
+    "stations": 21,
+    "levels": 7,
+    "engine_a_trimesh_m3": 0.0983676305192196,
+    "engine_b_numpy_stl_m3": 0.09836763427150234,
+    "engine_spread": 3.8145503033852565e-08,
+    "reference_volume_m3": null,
+    "reference_kind": "none (WITHHELD)",
+    "engine_a_vs_reference": null,
+    "pipeline_volume_m3": 0.0983676305192196,
+    "pipeline_vs_reference": null,
+    "caveat": "reference-free by construction: the evidence produced here is cross-tool agreement, not agreement with an outside number"
+   },
+   {
+    "case": "kcs-modelscale",
+    "name": "KCS-dimensioned NURBS hull (model scale, Cb 0.555) -- IN383-CAD01 case",
+    "stations": 41,
+    "levels": 12,
+    "engine_a_trimesh_m3": 0.09945946209876494,
+    "engine_b_numpy_stl_m3": 0.09945946648322394,
+    "engine_spread": 4.408287468755953e-08,
+    "reference_volume_m3": null,
+    "reference_kind": "none (WITHHELD)",
+    "engine_a_vs_reference": null,
+    "pipeline_volume_m3": 0.09945946209876505,
+    "pipeline_vs_reference": null,
+    "caveat": "reference-free by construction: the evidence produced here is cross-tool agreement, not agreement with an outside number"
+   },
+   {
+    "case": "kcs-modelscale",
+    "name": "KCS-dimensioned NURBS hull (model scale, Cb 0.555) -- IN383-CAD01 case",
+    "stations": 81,
+    "levels": 22,
+    "engine_a_trimesh_m3": 0.09982944803574673,
+    "engine_b_numpy_stl_m3": 0.099829452139083,
+    "engine_spread": 4.110346544760682e-08,
+    "reference_volume_m3": null,
+    "reference_kind": "none (WITHHELD)",
+    "engine_a_vs_reference": null,
+    "pipeline_volume_m3": 0.09982944803574674,
+    "pipeline_vs_reference": null,
+    "caveat": "reference-free by construction: the evidence produced here is cross-tool agreement, not agreement with an outside number"
+   },
+   {
+    "case": "kcs-modelscale",
+    "name": "KCS-dimensioned NURBS hull (model scale, Cb 0.555) -- IN383-CAD01 case",
+    "stations": 161,
+    "levels": 42,
+    "engine_a_trimesh_m3": 0.09993547242227281,
+    "engine_b_numpy_stl_m3": 0.09993547702860911,
+    "engine_spread": 4.6093105749711044e-08,
+    "reference_volume_m3": null,
+    "reference_kind": "none (WITHHELD)",
+    "engine_a_vs_reference": null,
+    "pipeline_volume_m3": 0.09993547242227213,
+    "pipeline_vs_reference": null,
+    "caveat": "reference-free by construction: the evidence produced here is cross-tool agreement, not agreement with an outside number"
+   }
+  ],
+  "problems": []
+ },
+ "gates": [
+  {
+   "name": "G1_engine_agreement",
+   "value": 2.682977940443835e-08,
+   "limit": 1e-06,
+   "passed": true
+  },
+  {
+   "name": "G2_reference_at_finest_wigley",
+   "value": 0.00032105836677327916,
+   "limit": 0.003,
+   "passed": true
+  },
+  {
+   "name": "G3_quadrature_is_exact_for_the_reference_hull",
+   "value": 1.5987211554602254e-16,
+   "limit": 1e-09,
+   "passed": true
+  },
+  {
+   "name": "G4_measured_order",
+   "value": 2.020500631935433,
+   "limit": [
+    1.5,
+    2.6
+   ],
+   "passed": true
+  },
+  {
+   "name": "G5_committed_rows_hold",
+   "value": [],
+   "limit": [],
+   "passed": true
+  }
+ ],
+ "passed": true,
+ "figures": [
+  {
+   "name": "volume_cross_engine.png",
+   "path": "benchmarks/verified/volume_cross_engine/figures/volume_cross_engine.png",
+   "caption": "Left: the two independent engines' deficit against the analytic Wigley volume on a four-rung ladder, with the 0.3 % acceptance line; right: the engines' spread over the same ladder against the 1e-6 binary-STL float32 budget."
+  }
+ ],
+ "seconds": 6.953261598944664
+}
