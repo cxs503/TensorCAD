@@ -329,3 +329,85 @@ def test_case_row_records_the_reference_deviations():
 def test_tolerances_are_module_constants_not_caller_supplied():
     assert xv.ACCEPTANCE_TOLERANCE == pytest.approx(3e-3)
     assert xv.ENGINE_AGREEMENT_TOLERANCE == pytest.approx(1e-6)
+
+# ---------------------------------------------------------------------------
+# revolved solids (bodies of revolution: SUBOFF, bulbs, shafts, sonar domes)
+# ---------------------------------------------------------------------------
+def test_solid_of_revolution_closes_a_sphere_to_genus_zero():
+    """A revolved sphere is the primitive where the answer is known in closed form."""
+    a = 1.0
+    radius = lambda x: math.sqrt(max(0.0, a * a - (x - a) ** 2))  # noqa: E731
+    mesh = xv.solid_of_revolution(radius, length=2 * a, stations=201, segments=128)
+    topo = xv.topology_report(mesh)
+    assert topo["watertight"] and topo["closed_genus"] == 0 and topo["zero_area_faces"] == 0
+    volume = xv.volume_divergence(mesh)
+    exact = 4.0 / 3.0 * math.pi * a**3
+    # Inscribed polygon + inscribed meridian: the deficit must be negative and small.
+    assert -1e-3 < xv.relative_difference(volume, exact) < 0.0
+    assert abs(xv.relative_difference(xv.volume_trimesh(mesh), volume)) < 1e-9
+
+
+def test_revolution_sectional_quadrature_is_exact_for_a_cylinder():
+    """Simpson is exact for pi r^2 = const, so any error here is a quadrature bug."""
+    volume = xv.volume_revolution_sectional(lambda x: 0.5, length=3.0, samples=101)
+    assert abs(xv.relative_difference(volume, math.pi * 0.25 * 3.0)) < 1e-12
+
+
+def test_solid_of_revolution_refuses_unusable_input():
+    with pytest.raises(xv.VolumeXvalError):
+        xv.solid_of_revolution(lambda x: -0.1, length=1.0)
+    with pytest.raises(xv.VolumeXvalError):
+        xv.solid_of_revolution(lambda x: float("nan"), length=1.0)
+    with pytest.raises(xv.VolumeXvalError):
+        xv.solid_of_revolution(lambda x: 0.1, length=1.0, segments=4)
+    with pytest.raises(xv.VolumeXvalError):
+        xv.volume_revolution_sectional(lambda x: 0.1, length=1.0, samples=100)
+
+
+def test_half_breadth_loft_cannot_represent_a_body_of_revolution():
+    """The applicability limit that forced ``solid_of_revolution`` (negative knowledge).
+
+    A circular section that does not span the global level grid leaves repeated
+    centreline vertices in the ring, so the loft is not a valid solid.  This is
+    asserted rather than documented so that a future "fix" cannot silently start
+    accepting it with a wrong volume.
+    """
+    from tensorcad import suboff as so
+
+    length, r_max = so.SUBOFF_LENGTH_M, so.SUBOFF_RADIUS_M
+
+    def breadth(x: float, z: float) -> float:
+        r = r_max * so.suboff_radius_fraction(x / length)
+        return math.sqrt(max(0.0, r * r - (z - r_max) ** 2))
+
+    with pytest.raises(xv.VolumeXvalError):
+        xv.closed_solid_from_breadth(breadth, length=length, draft=2 * r_max, stations=21, levels=7)
+
+
+def test_revolved_suboff_solid_converges_to_the_published_offset_quadrature():
+    """SUBOFF has no published displacement volume; its *offsets* are published.
+
+    So the check is: the revolved solid, integrated by two independent engines,
+    converges onto the meridian quadrature of the published offset table at the
+    measured O(h^2), and the engines agree to the STL float32 budget.
+    """
+    from tensorcad import suboff as so
+
+    length, r_max = so.SUBOFF_LENGTH_M, so.SUBOFF_RADIUS_M
+
+    def radius(x: float) -> float:
+        return r_max * so.suboff_radius_fraction(x / length)
+
+    reference = so.suboff_reference_geometry()["volume"]
+    rows = []
+    for stations, segments in ((21, 42), (41, 82)):
+        mesh = xv.solid_of_revolution(radius, length=length, stations=stations, segments=segments)
+        topo = xv.topology_report(mesh)
+        assert topo["watertight"] and topo["closed_genus"] == 0
+        engine_a = xv.volume_trimesh(mesh)
+        engine_b = xv.volume_numpy_stl(mesh)
+        assert abs(xv.relative_difference(engine_b, engine_a)) < 1e-6
+        rows.append((length / (stations - 1), abs(xv.relative_difference(engine_a, reference))))
+    order = xv.fit_order(rows)
+    assert order is not None and 1.5 <= order <= 2.6, order
+    assert rows[-1][1] < 3e-3
