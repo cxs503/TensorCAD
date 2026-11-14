@@ -1,0 +1,131 @@
+{
+ "schema": "tensorcad.assetlib.growth_report.v1",
+ "anchor": "GAP-GEOM-ASSET-LIB",
+ "baseline": {
+  "label": "HEAD spec file (dead-pointer era)",
+  "store_managed_bytes": 0,
+  "store_assets": 0,
+  "resolvable_geometry_pointer_fraction": 0.0,
+  "dead_pointers": 8,
+  "withheld_pointers": 35,
+  "spec_ship_coverage": 0.0
+ },
+ "current": {
+  "label": "after asset-library repair",
+  "store_managed_bytes": 20165115,
+  "store_assets": 13,
+  "resolvable_geometry_pointer_fraction": 1.0,
+  "dead_pointers": 0,
+  "withheld_pointers": 0,
+  "spec_ship_coverage": 1.0
+ },
+ "delta": {
+  "store_managed_bytes": 20165115,
+  "store_assets": 13,
+  "resolvable_geometry_pointer_fraction": 1.0,
+  "dead_pointers": -8,
+  "withheld_pointers": -35,
+  "spec_ship_coverage": 1.0
+ },
+ "registry_snapshot": {
+  "assets": 13,
+  "bytes": 20165115,
+  "verified": 2,
+  "verified_fraction": 0.153846,
+  "spec_bindings": 4,
+  "spec_ships": 4,
+  "coverage": 1.0,
+  "by_hull": {
+   "JBC": {
+    "assets": 7,
+    "bytes": 8985926
+   },
+   "KCS": {
+    "assets": 3,
+    "bytes": 492374
+   },
+   "KP505": {
+    "assets": 1,
+    "bytes": 1042550
+   },
+   "KVLCC2": {
+    "assets": 1,
+    "bytes": 6270129
+   },
+   "ONRT": {
+    "assets": 1,
+    "bytes": 3374136
+   }
+  }
+ },
+ "history_lines": 3,
+ "snapshot_growth": {
+  "assets": 0,
+  "bytes": 0,
+  "verified": 0,
+  "spec_bindings": 0,
+  "coverage": 0.0
+ },
+ "physics": {
+  "KCS": {
+   "sha_match": true,
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "resolutions": {
+    "dx=0.5": {
+     "volume_rel_error_percent": 0.3537971722417642,
+     "verdict": "VERIFIED"
+    },
+    "dx=0.25": {
+     "volume_rel_error_percent": 0.2011366921777668,
+     "verdict": "VERIFIED"
+    },
+    "dx=0.125": {
+     "volume_rel_error_percent": 0.08702186851434625,
+     "verdict": "VERIFIED"
+    }
+   }
+  },
+  "KVLCC2": {
+   "sha_match": true,
+   "asset_id": "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "resolutions": {
+    "dx=0.5": {
+     "volume_rel_error_percent": null,
+     "verdict": null
+    },
+    "dx=0.25": {
+     "volume_rel_error_percent": null,
+     "verdict": null
+    }
+   }
+  },
+  "JBC": {
+   "sha_match": true,
+   "asset_id": "geometry/hulls/JBC/jbc.igs",
+   "resolutions": {
+    "dx=0.5": {
+     "volume_rel_error_percent": -99.99751229258568,
+     "verdict": "WITHHELD"
+    },
+    "dx=0.25": {
+     "volume_rel_error_percent": -99.99753864705865,
+     "verdict": "WITHHELD"
+    }
+   }
+  },
+  "ONRT": {
+   "sha_match": true,
+   "asset_id": "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "resolutions": {
+    "dx=0.5": {
+     "volume_rel_error_percent": -99.99993421705715,
+     "verdict": "WITHHELD"
+    },
+    "dx=0.25": {
+     "volume_rel_error_percent": -99.99993594364894,
+     "verdict": "WITHHELD"
+    }
+   }
+  }
+ }
+}

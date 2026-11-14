@@ -1,0 +1,57 @@
+{
+ "snapshot": {
+  "assets": 13,
+  "bytes": 20165115,
+  "verified": 2,
+  "verified_fraction": 0.153846,
+  "by_kind": {
+   "geometry": {
+    "assets": 13,
+    "bytes": 20165115,
+    "verified": 2
+   }
+  },
+  "by_hull": {
+   "JBC": {
+    "assets": 7,
+    "bytes": 8985926
+   },
+   "KCS": {
+    "assets": 3,
+    "bytes": 492374
+   },
+   "KP505": {
+    "assets": 1,
+    "bytes": 1042550
+   },
+   "KVLCC2": {
+    "assets": 1,
+    "bytes": 6270129
+   },
+   "ONRT": {
+    "assets": 1,
+    "bytes": 3374136
+   }
+  },
+  "spec_bindings": 4,
+  "spec_ships": 4,
+  "coverage": 1.0,
+  "asset_ids": [
+   "geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
+   "geometry/hulls/JBC/jbc-boss-cap.igs",
+   "geometry/hulls/JBC/jbc-boss.igs",
+   "geometry/hulls/JBC/jbc-propeller.igs",
+   "geometry/hulls/JBC/jbc-spacer.igs",
+   "geometry/hulls/JBC/jbc.igs",
+   "geometry/hulls/JBC/jbc_with_duct.igs",
+   "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "geometry/hulls/KCS/KCS_hull_SVA/KCS_hull_SVA.igs",
+   "geometry/hulls/KCS/KCS_hull_SVA/memo.txt",
+   "geometry/hulls/KP505/KP505_modelScale_250mm.igs",
+   "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs"
+  ],
+  "generated_at": "2026-11-14T14:03:25+00:00",
+  "problems": []
+ }
+}
