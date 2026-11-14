@@ -495,17 +495,25 @@ class DirectoryEntry:
 
 @dataclass
 class Boundary:
-    """Type-141 boundary: alternating model-space and parameter-space curves."""
+    """Type-141 boundary: alternating model-space and parameter-space curves.
+
+    Field order per IGES 5.3 (type 141): ``141, N, SPTR, N0, CTYPE(1..N)``.  The
+    ``N`` curve pointers therefore start at parameter 5 (index 4); parameters 2
+    and 3 carry the surface pointer and the parameter-space direction flag.  They
+    are kept here because a caller that considers orientation needs them.
+    """
 
     curves: tuple[int, ...]  # DE pointers, alternating (3D, (u,v), 3D, (u,v), ...)
+    surface: int = 0
+    parameter_flip: bool = False
 
     @classmethod
     def from_parameters(cls, params: Sequence[float]) -> "Boundary":
-        count = int(params[1])
-        pointers = [int(p) for p in params[2:2 + count]]
-        if 2 * (len(pointers) // 2) != len(pointers):
-            raise IgesError("type-141 boundary needs an even number of curve pointers")
-        return cls(curves=tuple(pointers))
+        count = int(params[1]) if len(params) > 1 else 0
+        surface = int(params[2]) if len(params) > 2 else 0
+        flip = bool(int(params[3])) if len(params) > 3 else False
+        pointers = [int(p) for p in params[4:4 + count]]
+        return cls(curves=tuple(pointers), surface=surface, parameter_flip=flip)
 
 
 @dataclass
@@ -518,7 +526,13 @@ class CurveOnSurface:
 
     @classmethod
     def from_parameters(cls, params: Sequence[float]) -> "CurveOnSurface":
-        surface = int(params[1])
+        """Field order per IGES 5.3 (type 142): ``142, CRV, SPTR, BPTR, CPTR, IT``.
+
+        The basis-surface pointer is parameter 3 (index 2); index 1 is the spare
+        ``CRV`` field and is written as ``0`` by every writer seen here, so
+        reading it made every curve-on-surface report "no basis surface".
+        """
+        surface = int(params[2]) if len(params) > 2 else 0
         curve_3d = int(params[3]) if len(params) > 3 else 0
         curve_uv = int(params[4]) if len(params) > 4 else 0
         return cls(surface=surface, curve_3d=curve_3d, curve_uv=curve_uv or None)
@@ -526,18 +540,36 @@ class CurveOnSurface:
 
 @dataclass
 class BoundedSurface:
-    """Type-143/144 wrapper: basis surface plus (at most) one boundary."""
+    """Type-143/144 wrapper: basis surface plus its trimming boundaries.
+
+    Field order follows IGES 5.3 section 4.26 (type 144): ``144, PTS, N1, N2,
+    PTO, PTI``.  ``PTO`` -- the outer boundary -- is parameter **5** (index 4),
+    and ``PTI`` -- the inner boundary -- is parameter 6 (index 5).  Reading the
+    boundary out of index 3 (which carries ``N2``, normally ``0``) silently drops
+    every trim loop, so a trimmed patch is then treated as its whole basis
+    surface: that is a reader defect, not a property of the hull.
+    """
 
     entity_type: int
     surface: int
     boundary: int | None
+    inner: tuple[int, ...] = ()
+    boundary_count: int = 0
 
     @classmethod
     def from_parameters(cls, params: Sequence[float]) -> "BoundedSurface":
         entity_type = int(params[0])
         surface = int(params[1])
-        boundary = int(params[3]) if len(params) > 3 else 0
-        return cls(entity_type=entity_type, surface=surface, boundary=boundary or None)
+        count = int(params[2]) if len(params) > 2 else 0
+        outer = int(params[4]) if len(params) > 4 else 0
+        inner = int(params[5]) if len(params) > 5 else 0
+        return cls(
+            entity_type=entity_type,
+            surface=surface,
+            boundary=outer or None,
+            inner=(inner,) if inner else (),
+            boundary_count=count,
+        )
 
 
 @dataclass
@@ -630,6 +662,31 @@ class IgesFile:
             raise IgesError(f"DE {sequence} is type {entity_type}, not a B-spline curve")
         return BSplineCurve.from_parameters(params)
 
+    def trim_polygon_uv(self, pointer: int, samples: int = 200) -> list[tuple[float, float]]:
+        """Sample a trim boundary into a closed polygon in the surface's (u, v) space.
+
+        ``pointer`` is a DE pointer to a type-126 curve (the loop directly) or to a
+        type-102 composite curve whose children are type-126 curves (a loop written
+        as several pieces).  Model-space curves are *not* valid here: a trim loop
+        has to be tested in the parameter space of the surface it trims.
+        """
+        entry = self.resolve(pointer)
+        if entry is None:
+            raise IgesError(f"trim boundary DE {pointer} missing")
+        if entry.entity_type == ENTITY_COMPOSITE_CURVE:
+            params = self.parameters(entry.sequence)
+            count = int(params[1])
+            polygon: list[tuple[float, float]] = []
+            for child in params[2:2 + count]:
+                polygon.extend(self.trim_polygon_uv(int(child), samples=max(8, samples // max(count, 1))))
+            return polygon
+        if entry.entity_type != ENTITY_BSPLINE_CURVE:
+            raise IgesError(
+                f"trim boundary DE {pointer} is type {entry.entity_type}, not a B-spline/composite curve"
+            )
+        curve = BSplineCurve.from_parameters(self.parameters(entry.sequence))
+        return [(point[0], point[1]) for point in curve.sample(samples)]
+
     def trimmed_surfaces(self) -> list[tuple[BoundedSurface, BSplineSurface | None, list["CurveOnSurface"]]]:
         """Return ``(wrapper, basis surface, boundary curves)`` for each trimmed patch."""
         result = []
@@ -645,15 +702,19 @@ class IgesFile:
                 if boundary_entry is None:
                     raise IgesError(f"boundary DE {wrapper.boundary} missing")
                 if boundary_entry.entity_type == ENTITY_BOUNDARY:
-                    boundary = Boundary.from_parameters(self.parameters(wrapper.boundary))
+                    boundary = Boundary.from_parameters(self.parameters(boundary_entry.sequence))
                     for pointer in boundary.curves:
                         target = self.resolve(pointer)
                         if target is not None and target.entity_type == ENTITY_CURVE_ON_SURFACE:
-                            curves.append(CurveOnSurface.from_parameters(self.parameters(pointer)))
+                            curves.append(CurveOnSurface.from_parameters(self.parameters(target.sequence)))
                 elif boundary_entry.entity_type == ENTITY_CURVE_ON_SURFACE:
                     curves.append(
-                        CurveOnSurface.from_parameters(self.parameters(wrapper.boundary))
+                        CurveOnSurface.from_parameters(self.parameters(boundary_entry.sequence))
                     )
+                for pointer in wrapper.inner:
+                    target = self.resolve(pointer)
+                    if target is not None and target.entity_type == ENTITY_CURVE_ON_SURFACE:
+                        curves.append(CurveOnSurface.from_parameters(self.parameters(target.sequence)))
             result.append((wrapper, basis, curves))
         return result
 
