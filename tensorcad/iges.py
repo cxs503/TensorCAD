@@ -73,6 +73,17 @@ ENTITY_CURVE_ON_SURFACE = 142
 ENTITY_BOUNDED_SURFACE = 143
 ENTITY_TRIMMED_SURFACE = 144
 
+#: The two surface entities a hull can be carried by.  ``BSplineSurface`` here
+#: decodes **type 128** (rational B-spline surface) only.  **Type 126** is the
+#: non-rational B-spline surface, and it is the form CATIA and the NMRI-2015
+#: archives write in bulk.  Measured on the durable asset store (2026-11-14):
+#: KCS 55x128 / 0x126 (fully decoded, fleet gate VERIFIED at +0.30 % volume),
+#: JBC 45x128 / 172x126, KVLCC2 19x128 / 304x126.  So a "hull with no waterline
+#: slices" is a *reader* gap, not a shape: the geometry was present and dropped.
+#: :meth:`IgesFile.surface_census` exists so that a caller integrating a volume
+#: can see the drop instead of inferring it from a downstream symptom.
+ENTITY_BSPLINE_SURFACE_POLYNOMIAL = 126
+
 #: Section letters of an IGES 5.x file; column 73 (0-based index 72).
 _SECTIONS = "SGDPT"
 
@@ -571,6 +582,23 @@ class IgesFile:
             BSplineSurface.from_parameters(self.parameters(entry.sequence))
             for entry in self.of_type(ENTITY_BSPLINE_SURFACE)
         ]
+
+    def surface_census(self) -> dict[str, object]:
+        """Surface entities present in the file, split by whether they are decoded.
+
+        Returns ``readable_type128``, ``unreadable_type126`` and the full
+        ``by_type`` histogram.  The census is a *fact about the file*, not a
+        verdict: a hull whose type-126 share is large has been read only in
+        residue, and any volume integrated from it describes that residue.
+        """
+        by_type: dict[int, int] = {}
+        for entry in self.entries.values():
+            by_type[entry.entity_type] = by_type.get(entry.entity_type, 0) + 1
+        return {
+            "readable_type128": by_type.get(ENTITY_BSPLINE_SURFACE, 0),
+            "unreadable_type126": by_type.get(ENTITY_BSPLINE_SURFACE_POLYNOMIAL, 0),
+            "by_type": dict(sorted(by_type.items())),
+        }
 
     def resolve(self, pointer: int) -> DirectoryEntry | None:
         """Look up the entity a pointer carried by another entity refers to.
