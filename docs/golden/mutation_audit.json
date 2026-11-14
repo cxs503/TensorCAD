@@ -1,0 +1,2122 @@
+{
+  "baseline": "/srv/tensor/agent/work/m20561/docs/golden/tensorcad_geometry_golden.json",
+  "blind_spots_ge_1pct": [
+    "series60/maximum_section_area_m2"
+  ],
+  "controls": [
+    {
+      "case": "series60",
+      "codes": [],
+      "detail": "sanity control: an unmutated library must still pass, otherwise a gate that fails everything would look maximally sensitive",
+      "detected": true,
+      "expected_codes": [],
+      "failed_cases": [],
+      "findings": [],
+      "layers": [],
+      "name": "no_mutation_control"
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "codes": [
+        "drift",
+        "reference_mismatch"
+      ],
+      "detail": "compute_hydrostatics returns 1 % too much displacement volume: a unit or integration-scale regression on the SDF path",
+      "detected": true,
+      "expected_codes": [
+        "reference_mismatch",
+        "drift"
+      ],
+      "failed_cases": [
+        "sphere_ellipsoid"
+      ],
+      "findings": [
+        "sphere_ellipsoid/reference_mismatch: ellipsoid_volume_m3 = 6.32307993 vs reference 6.28318531 = +0.635% (tolerance 0.546%; blessed tolerance 5.457e-03 (quick mode: two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.728e-03 = 5.457e-03))",
+        "sphere_ellipsoid/reference_mismatch: sphere_volume_m3 = 4.21538662 vs reference 4.1887902 = +0.635% (tolerance 0.546%; blessed tolerance 5.457e-03 (quick mode: two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.728e-03 = 5.457e-03))",
+        "sphere_ellipsoid/drift: coarse/ellipsoid_volume_m3 drifted from 6.260475176345201 to 6.323079928108653 (1.000e-02 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+        "sphere_ellipsoid/drift: coarse/sphere_volume_m3 drifted from 4.173650117563468 to 4.215386618739102 (1.000e-02 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor"
+      ],
+      "layers": [
+        "reference",
+        "accuracy",
+        "drift"
+      ],
+      "name": "sphere_volume_scaled_1.01"
+    },
+    {
+      "case": "series60",
+      "codes": [
+        "drift",
+        "reference_mismatch"
+      ],
+      "detail": "generate_series60 reports a waterplane area 0.2 % too large, i.e. a coefficient error far above the 2.06e-4 tolerance of that metric",
+      "detected": true,
+      "expected_codes": [
+        "reference_mismatch",
+        "drift"
+      ],
+      "failed_cases": [
+        "series60"
+      ],
+      "findings": [
+        "series60/reference_mismatch: waterplane_area_m2 = 9.39245685 vs reference 9.375 = +0.186% (tolerance 0.021%; blessed tolerance 2.063e-04 (quick mode: two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.031e-04 = 2.063e-04))",
+        "series60/drift: coarse/waterplane_area_m2 drifted from 9.373709434782853 to 9.39245685365242 (2.000e-03 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor"
+      ],
+      "layers": [
+        "reference",
+        "accuracy",
+        "drift"
+      ],
+      "name": "series60_waterplane_scaled_1.002"
+    },
+    {
+      "case": "wigley",
+      "codes": [
+        "drift",
+        "reference_mismatch"
+      ],
+      "detail": "generate_wigley loses 1 % of displacement volume: the closed-form Wigley reference cannot follow",
+      "detected": true,
+      "expected_codes": [
+        "reference_mismatch",
+        "drift"
+      ],
+      "failed_cases": [
+        "wigley"
+      ],
+      "findings": [
+        "wigley/reference_mismatch: displacement_volume_m3 = 2.74350993 vs reference 2.77777778 = -1.234% (tolerance 0.433%; blessed tolerance 4.329e-03 (quick mode: two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.165e-03 = 4.329e-03))",
+        "wigley/drift: coarse/displacement_volume_m3 drifted from 2.7712221498842595 to 2.743509928385417 (1.000e-02 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor"
+      ],
+      "layers": [
+        "reference",
+        "accuracy",
+        "drift"
+      ],
+      "name": "wigley_volume_scaled_0.99"
+    },
+    {
+      "case": "dtmb5415",
+      "codes": [
+        "drift",
+        "invariant_violated"
+      ],
+      "detail": "the 5415 block coefficient is decoupled from its own volume by 0.1 %; the volume itself has no published reference here, so only the Cb = V/(LBT) identity can see it",
+      "detected": true,
+      "expected_codes": [
+        "invariant_violated"
+      ],
+      "failed_cases": [
+        "dtmb5415"
+      ],
+      "findings": [
+        "dtmb5415/invariant_violated: identity_cb_equals_volume_over_lbt: residual 5.020e-04 > 1e-09 (Cb = \u2207 / (L\u00b7B\u00b7T) on the reported particulars)",
+        "dtmb5415/drift: coarse/block_coefficient drifted from 0.5019881926994797 to 0.5024901808917857 (1.000e-03 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor"
+      ],
+      "layers": [
+        "invariant",
+        "drift"
+      ],
+      "name": "dtmb5415_cb_scaled_1.001"
+    },
+    {
+      "case": "dtmb5415",
+      "codes": [
+        "drift",
+        "invariant_violated"
+      ],
+      "detail": "the shipped shell is scaled 1.001 in every axis; the mirror identity must notice that the mesh extent is no longer twice the half-cloud extent",
+      "detected": true,
+      "expected_codes": [
+        "invariant_violated"
+      ],
+      "failed_cases": [
+        "dtmb5415"
+      ],
+      "findings": [
+        "dtmb5415/invariant_violated: identity_mirror_doubles_y_extent: residual 2.054e-02 > 1e-09 (the full hull is the mirror of the half cloud about y)",
+        "dtmb5415/invariant_violated: identity_mirror_preserves_x_extent: residual 1.519e-01 > 1e-09 (mirroring about y leaves the x extent unchanged)",
+        "dtmb5415/invariant_violated: identity_mirror_preserves_z_extent: residual 1.920e-02 > 1e-09 (mirroring about y leaves the z extent unchanged)",
+        "dtmb5415/drift: coarse/mesh_extent_x_m drifted from 151.9004461 to 152.05234654609998 (1.000e-03 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+        "dtmb5415/drift: coarse/mesh_extent_y_m drifted from 20.539 to 20.559539 (1.000e-03 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+        "dtmb5415/drift: coarse/mesh_extent_z_m drifted from 19.195270999999998 to 19.214466271 (1.000e-03 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+        "dtmb5415/drift: coarse/signed_tetra_sum_open_shell_m3 drifted from -13658.368296262934 to -13699.384389915213 (3.003e-03 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor"
+      ],
+      "layers": [
+        "invariant",
+        "drift"
+      ],
+      "name": "dtmb5415_shell_scaled_1.001"
+    }
+  ],
+  "envelope": [
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.004329439290363918,
+        "caught_by": {
+          "0.004762383": [
+            "reference_mismatch"
+          ],
+          "0.006494159": [
+            "reference_mismatch"
+          ],
+          "0.008658879": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01298832": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.04329439": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00476238321940031,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0003,
+          0.0004329439,
+          0.0008658879,
+          0.001,
+          0.00216472,
+          0.003,
+          0.003896495,
+          0.004329439
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.0004329439,
+        0.0008658879,
+        0.001,
+        0.00216472,
+        0.003,
+        0.003896495,
+        0.004329439,
+        0.004762383,
+        0.006494159,
+        0.008658879,
+        0.01,
+        0.01298832,
+        0.03,
+        0.04329439,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.004329439290363918,
+        "detection_ceiling": 0.00476238321940031
+      },
+      "metric": "block_coefficient",
+      "reference_error": -0.00019530639648458747,
+      "tolerance": 0.004329439290363918
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.004329439290363908,
+        "caught_by": {
+          "0.004762383": [
+            "reference_mismatch"
+          ],
+          "0.006494159": [
+            "reference_mismatch"
+          ],
+          "0.008658879": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01298832": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.04329439": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.004762383219400299,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0003,
+          0.0004329439,
+          0.0008658879,
+          0.001,
+          0.00216472,
+          0.003,
+          0.003896495,
+          0.004329439
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.0004329439,
+        0.0008658879,
+        0.001,
+        0.00216472,
+        0.003,
+        0.003896495,
+        0.004329439,
+        0.004762383,
+        0.006494159,
+        0.008658879,
+        0.01,
+        0.01298832,
+        0.03,
+        0.04329439,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.004329439290363908,
+        "detection_ceiling": 0.004762383219400299
+      },
+      "metric": "displacement_volume_m3",
+      "reference_error": -0.0001953063964845825,
+      "tolerance": 0.004329439290363908
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "longitudinal_centre_buoyancy_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.0031597222222223384,
+        "caught_by": {
+          "0.003475694": [
+            "reference_mismatch"
+          ],
+          "0.004739583": [
+            "reference_mismatch"
+          ],
+          "0.006319444": [
+            "reference_mismatch"
+          ],
+          "0.009479167": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.03159722": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0034756944444445724,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0003,
+          0.0003159722,
+          0.0006319444,
+          0.001,
+          0.001579861,
+          0.00284375,
+          0.003,
+          0.003159722
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.0003159722,
+        0.0006319444,
+        0.001,
+        0.001579861,
+        0.00284375,
+        0.003,
+        0.003159722,
+        0.003475694,
+        0.004739583,
+        0.006319444,
+        0.009479167,
+        0.01,
+        0.03,
+        0.03159722,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0031597222222223384,
+        "detection_ceiling": 0.0034756944444445724
+      },
+      "metric": "maximum_section_area_m2",
+      "reference_error": -0.00015625000000025756,
+      "tolerance": 0.0031597222222223384
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.0011718749999992673,
+        "caught_by": {
+          "0.001289062": [
+            "reference_mismatch"
+          ],
+          "0.001757812": [
+            "reference_mismatch"
+          ],
+          "0.00234375": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.003515625": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01171875": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.001289062499999194,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0001171875,
+          0.000234375,
+          0.0003,
+          0.0005859375,
+          0.001,
+          0.001054687,
+          0.001171875
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0001171875,
+        0.000234375,
+        0.0003,
+        0.0005859375,
+        0.001,
+        0.001054687,
+        0.001171875,
+        0.001289062,
+        0.001757812,
+        0.00234375,
+        0.003,
+        0.003515625,
+        0.01,
+        0.01171875,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0011718749999992673,
+        "detection_ceiling": 0.001289062499999194
+      },
+      "metric": "prismatic_coefficient",
+      "reference_error": -3.906249999996447e-05,
+      "tolerance": 0.0011718749999992673
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.001055237344603673,
+        "caught_by": {
+          "0.001160761": [
+            "reference_mismatch"
+          ],
+          "0.001582856": [
+            "reference_mismatch"
+          ],
+          "0.002110475": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.003165712": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01055237": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0011607610790640404,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0001055237,
+          0.0002110475,
+          0.0003,
+          0.0005276187,
+          0.0009497136,
+          0.001,
+          0.001055237
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0001055237,
+        0.0002110475,
+        0.0003,
+        0.0005276187,
+        0.0009497136,
+        0.001,
+        0.001055237,
+        0.001160761,
+        0.001582856,
+        0.002110475,
+        0.003,
+        0.003165712,
+        0.01,
+        0.01055237,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.001055237344603673,
+        "detection_ceiling": 0.0011607610790640404
+      },
+      "metric": "vertical_centre_buoyancy_m",
+      "reference_error": -5.2091472625666786e-05,
+      "tolerance": 0.001055237344603673
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.001171875,
+        "caught_by": {
+          "0.001289063": [
+            "reference_mismatch"
+          ],
+          "0.001757812": [
+            "reference_mismatch"
+          ],
+          "0.00234375": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.003515625": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01171875": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0012890625,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0001171875,
+          0.000234375,
+          0.0003,
+          0.0005859375,
+          0.001,
+          0.001054688,
+          0.001171875
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0001171875,
+        0.000234375,
+        0.0003,
+        0.0005859375,
+        0.001,
+        0.001054688,
+        0.001171875,
+        0.001289063,
+        0.001757812,
+        0.00234375,
+        0.003,
+        0.003515625,
+        0.01,
+        0.01171875,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.001171875,
+        "detection_ceiling": 0.0012890625
+      },
+      "metric": "waterplane_area_m2",
+      "reference_error": -3.90625000000977e-05,
+      "tolerance": 0.001171875
+    },
+    {
+      "case": "wigley",
+      "coherent": {
+        "blind_spot_floor": 0.0003656984728703036,
+        "caught_by": {
+          "0.0004022683": [
+            "reference_mismatch"
+          ],
+          "0.0005485477": [
+            "reference_mismatch"
+          ],
+          "0.0007313969": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.001097095": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.003656985": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00040226832015733397,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          3.656985e-05,
+          7.313969e-05,
+          0.0001,
+          0.0001828492,
+          0.0003,
+          0.0003291286,
+          0.0003656985
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        3.656985e-05,
+        7.313969e-05,
+        0.0001,
+        0.0001828492,
+        0.0003,
+        0.0003291286,
+        0.0003656985,
+        0.0004022683,
+        0.0005485477,
+        0.0007313969,
+        0.001,
+        0.001097095,
+        0.003,
+        0.003656985,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0003656984728703036,
+        "detection_ceiling": 0.00040226832015733397
+      },
+      "metric": "wetted_surface_area_m2",
+      "reference_error": -1.800668072808373e-05,
+      "tolerance": 0.0003656984728703036
+    },
+    {
+      "case": "series60",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.001831181": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.003662363": [
+            "reference_mismatch"
+          ],
+          "0.009155907": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01648063": [
+            "reference_mismatch"
+          ],
+          "0.01831181": [
+            "reference_mismatch"
+          ],
+          "0.02014299": [
+            "reference_mismatch"
+          ],
+          "0.02746772": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.03662363": [
+            "reference_mismatch"
+          ],
+          "0.05493544": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ],
+          "0.1831181": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0003,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.001,
+        0.001831181,
+        0.003,
+        0.003662363,
+        0.009155907,
+        0.01,
+        0.01648063,
+        0.01831181,
+        0.02014299,
+        0.02746772,
+        0.03,
+        0.03662363,
+        0.05493544,
+        0.1,
+        0.1831181
+      ],
+      "incoherent": {
+        "blind_spot_floor": null,
+        "detection_ceiling": 1e-09
+      },
+      "metric": "block_coefficient",
+      "reference_error": -0.008590735297483998,
+      "tolerance": 0.018311813220118028
+    },
+    {
+      "case": "series60",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.001831181": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.003662363": [
+            "reference_mismatch"
+          ],
+          "0.009155907": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.01648063": [
+            "reference_mismatch"
+          ],
+          "0.01831181": [
+            "reference_mismatch"
+          ],
+          "0.02014299": [
+            "reference_mismatch"
+          ],
+          "0.02746772": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.03662363": [
+            "reference_mismatch"
+          ],
+          "0.05493544": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ],
+          "0.1831181": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0003,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.001,
+        0.001831181,
+        0.003,
+        0.003662363,
+        0.009155907,
+        0.01,
+        0.01648063,
+        0.01831181,
+        0.02014299,
+        0.02746772,
+        0.03,
+        0.03662363,
+        0.05493544,
+        0.1,
+        0.1831181
+      ],
+      "incoherent": {
+        "blind_spot_floor": null,
+        "detection_ceiling": 1e-09
+      },
+      "metric": "displacement_volume_m3",
+      "reference_error": -0.008590735297483979,
+      "tolerance": 0.018311813220117986
+    },
+    {
+      "case": "series60",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "longitudinal_centre_buoyancy_m",
+      "reference_error": -1.7763568394002506e-16,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "series60",
+      "coherent": {
+        "blind_spot_floor": 0.027164711898166622,
+        "caught_by": {
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.03621962": [
+            "reference_mismatch"
+          ],
+          "0.05432942": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ],
+          "0.1810981": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.03,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0003,
+          0.001,
+          0.001810981,
+          0.003,
+          0.003621962,
+          0.009054904,
+          0.01,
+          0.01629883,
+          0.01810981,
+          0.01992079,
+          0.02716471
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.001,
+        0.001810981,
+        0.003,
+        0.003621962,
+        0.009054904,
+        0.01,
+        0.01629883,
+        0.01810981,
+        0.01992079,
+        0.02716471,
+        0.03,
+        0.03621962,
+        0.05432942,
+        0.1,
+        0.1810981
+      ],
+      "incoherent": {
+        "blind_spot_floor": 1e-09,
+        "detection_ceiling": 1e-06
+      },
+      "metric": "maximum_section_area_m2",
+      "reference_error": -0.00855650204291377,
+      "tolerance": 0.01810980793211108
+    },
+    {
+      "case": "series60",
+      "coherent": {
+        "blind_spot_floor": 0.00022688949881768397,
+        "caught_by": {
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.0003093948": [
+            "reference_mismatch"
+          ],
+          "0.0004125264": [
+            "reference_mismatch"
+          ],
+          "0.0006187895": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.002062632": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0003,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2.062632e-05,
+          4.125264e-05,
+          0.0001,
+          0.0001031316,
+          0.0001856369,
+          0.0002062632,
+          0.0002268895
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2.062632e-05,
+        4.125264e-05,
+        0.0001,
+        0.0001031316,
+        0.0001856369,
+        0.0002062632,
+        0.0002268895,
+        0.0003,
+        0.0003093948,
+        0.0004125264,
+        0.0006187895,
+        0.001,
+        0.002062632,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 1e-09,
+        "detection_ceiling": 1e-06
+      },
+      "metric": "prismatic_coefficient",
+      "reference_error": -3.4528699457681e-05,
+      "tolerance": 0.00020626318074334904
+    },
+    {
+      "case": "series60",
+      "coherent": {
+        "blind_spot_floor": 0.00022688949881705873,
+        "caught_by": {
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.0003093948": [
+            "reference_mismatch"
+          ],
+          "0.0004125264": [
+            "reference_mismatch"
+          ],
+          "0.0006187895": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.002062632": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0003,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2.062632e-05,
+          4.125264e-05,
+          0.0001,
+          0.0001031316,
+          0.0001856369,
+          0.0002062632,
+          0.0002268895
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2.062632e-05,
+        4.125264e-05,
+        0.0001,
+        0.0001031316,
+        0.0001856369,
+        0.0002062632,
+        0.0002268895,
+        0.0003,
+        0.0003093948,
+        0.0004125264,
+        0.0006187895,
+        0.001,
+        0.002062632,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.00022688949881705873,
+        "detection_ceiling": 0.0003
+      },
+      "metric": "waterplane_area_m2",
+      "reference_error": -3.4528699457420476e-05,
+      "tolerance": 0.00020626318074278065
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "ellipsoid_extent_x_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 9e-05,
+        "caught_by": {
+          "0.0001": [
+            "reference_mismatch"
+          ],
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.0001,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 9e-05,
+        "detection_ceiling": 0.0001
+      },
+      "metric": "ellipsoid_extent_y_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "ellipsoid_extent_z_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0030532802303306792,
+        "caught_by": {
+          "0.004163564": [
+            "reference_mismatch"
+          ],
+          "0.005551419": [
+            "reference_mismatch"
+          ],
+          "0.008327128": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.02775709": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.004163563950450926,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0002775709,
+          0.0003,
+          0.0005551419,
+          0.001,
+          0.001387855,
+          0.002498138,
+          0.002775709,
+          0.003,
+          0.00305328
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0002775709,
+        0.0003,
+        0.0005551419,
+        0.001,
+        0.001387855,
+        0.002498138,
+        0.002775709,
+        0.003,
+        0.00305328,
+        0.004163564,
+        0.005551419,
+        0.008327128,
+        0.01,
+        0.02775709,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0030532802303306792,
+        "detection_ceiling": 0.004163563950450926
+      },
+      "metric": "ellipsoid_surface_area_m2",
+      "reference_error": -0.00045041358369444476,
+      "tolerance": 0.002775709300300617
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0060026454238680345,
+        "caught_by": {
+          "0.008185426": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.0109139": [
+            "reference_mismatch"
+          ],
+          "0.01637085": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.0545695": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.008185425578001865,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0003,
+          0.000545695,
+          0.001,
+          0.00109139,
+          0.002728475,
+          0.003,
+          0.004911255,
+          0.00545695,
+          0.006002645
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.000545695,
+        0.001,
+        0.00109139,
+        0.002728475,
+        0.003,
+        0.004911255,
+        0.00545695,
+        0.006002645,
+        0.008185426,
+        0.01,
+        0.0109139,
+        0.01637085,
+        0.03,
+        0.0545695,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0060026454238680345,
+        "detection_ceiling": 0.008185425578001865
+      },
+      "metric": "ellipsoid_volume_m3",
+      "reference_error": -0.0008859543878887721,
+      "tolerance": 0.005456950385334576
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "sphere_extent_x_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "sphere_extent_y_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "sphere_extent_z_m",
+      "reference_error": 0.0,
+      "tolerance": 0.0001
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.00309797942562413,
+        "caught_by": {
+          "0.004224517": [
+            "reference_mismatch"
+          ],
+          "0.00563269": [
+            "reference_mismatch"
+          ],
+          "0.008449035": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.02816345": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.004224517398578358,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0002816345,
+          0.0003,
+          0.000563269,
+          0.001,
+          0.001408172,
+          0.00253471,
+          0.002816345,
+          0.003,
+          0.003097979
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0002816345,
+        0.0003,
+        0.000563269,
+        0.001,
+        0.001408172,
+        0.00253471,
+        0.002816345,
+        0.003,
+        0.003097979,
+        0.004224517,
+        0.00563269,
+        0.008449035,
+        0.01,
+        0.02816345,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.00309797942562413,
+        "detection_ceiling": 0.004224517398578358
+      },
+      "metric": "sphere_surface_area_m2",
+      "reference_error": -0.00045622097776846463,
+      "tolerance": 0.0028163449323855725
+    },
+    {
+      "case": "sphere_ellipsoid",
+      "coherent": {
+        "blind_spot_floor": 0.006002645423867723,
+        "caught_by": {
+          "0.008185426": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.0109139": [
+            "reference_mismatch"
+          ],
+          "0.01637085": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.0545695": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00818542557800144,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          0.0001,
+          0.0003,
+          0.000545695,
+          0.001,
+          0.00109139,
+          0.002728475,
+          0.003,
+          0.004911255,
+          0.00545695,
+          0.006002645
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.0003,
+        0.000545695,
+        0.001,
+        0.00109139,
+        0.002728475,
+        0.003,
+        0.004911255,
+        0.00545695,
+        0.006002645,
+        0.008185426,
+        0.01,
+        0.0109139,
+        0.01637085,
+        0.03,
+        0.0545695,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.006002645423867723,
+        "detection_ceiling": 0.00818542557800144
+      },
+      "metric": "sphere_volume_m3",
+      "reference_error": -0.0008859543878887722,
+      "tolerance": 0.0054569503853342935
+    },
+    {
+      "case": "dtmb5415",
+      "coherent": {
+        "blind_spot_floor": 0.0001,
+        "caught_by": {
+          "0.00011": [
+            "reference_mismatch"
+          ],
+          "0.00015": [
+            "reference_mismatch"
+          ],
+          "0.0002": [
+            "reference_mismatch"
+          ],
+          "0.0003": [
+            "reference_mismatch"
+          ],
+          "0.001": [
+            "reference_mismatch"
+          ],
+          "0.003": [
+            "reference_mismatch"
+          ],
+          "0.01": [
+            "reference_mismatch"
+          ],
+          "0.03": [
+            "reference_mismatch"
+          ],
+          "0.1": [
+            "reference_mismatch"
+          ]
+        },
+        "detection_ceiling": 0.00011000000000000002,
+        "invariants_hold_at_every_delta": true,
+        "survives_a_bless": [
+          1e-09,
+          1e-06,
+          1e-05,
+          2e-05,
+          5e-05,
+          9e-05,
+          0.0001
+        ]
+      },
+      "deltas": [
+        1e-09,
+        1e-06,
+        1e-05,
+        2e-05,
+        5e-05,
+        9e-05,
+        0.0001,
+        0.00011,
+        0.00015,
+        0.0002,
+        0.0003,
+        0.0003,
+        0.001,
+        0.003,
+        0.01,
+        0.03,
+        0.1
+      ],
+      "incoherent": {
+        "blind_spot_floor": 0.0001,
+        "detection_ceiling": 0.00011000000000000002
+      },
+      "metric": "holdout_rms_m",
+      "reference_error": -2.6452345195857478e-08,
+      "tolerance": 0.0001
+    }
+  ],
+  "generated_by": "python tools/golden/mutation_audit.py",
+  "policy": {
+    "accuracy_lower_factor": 0.5,
+    "accuracy_upper_factor": 3.0,
+    "incoherent_ceiling": 0.001,
+    "ladder_factors": [
+      0.1,
+      0.2,
+      0.5,
+      0.9,
+      1.0,
+      1.1,
+      1.5,
+      2.0,
+      3.0,
+      10.0
+    ],
+    "perturbations": [
+      1e-09,
+      1e-06,
+      1e-05,
+      0.0001,
+      0.0003,
+      0.001,
+      0.003,
+      0.01,
+      0.03,
+      0.1
+    ]
+  },
+  "schema": "tensorcad.golden.mutation_audit/1",
+  "seconds": 33.6,
+  "summary": {
+    "controls_detected": 6,
+    "controls_total": 6,
+    "layers_exercised": [
+      "accuracy",
+      "drift",
+      "invariant",
+      "reference"
+    ],
+    "median_blind_spot": 0.00022688949881768397,
+    "median_threshold_over_tolerance": 1.0,
+    "metrics_caught_before_their_own_tolerance": 2,
+    "metrics_swept": 25,
+    "metrics_with_a_ge_1pct_blind_spot": 1,
+    "metrics_with_identity_early_warning": 4,
+    "worst_blind_spot": 0.027164711898166622
+  },
+  "violations": []
+}
