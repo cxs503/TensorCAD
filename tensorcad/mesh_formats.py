@@ -71,8 +71,24 @@ _ALIASES: Dict[str, str] = {
 
 #: SU2 v7 element type id for a 3-node triangle.
 SU2_TRIANGLE = 5
+#: SU2 element type id for a 4-node quad (VTK conventions, su2_type_to_numnodes).
+SU2_QUAD = 9
+#: SU2 element type id for a 2-node line.
+SU2_LINE = 3
+#: SU2 element types that carry *volume* cells; a surface reader must refuse them.
+SU2_VOLUME_TYPES = (10, 12, 13, 14)  # tetra, hexahedron, wedge, pyramid
+#: Nodes per SU2 element type (the block grammar fixes this, not the file).
+SU2_NNODE = {3: 2, 5: 3, 9: 4, 10: 4, 12: 8, 13: 6, 14: 5}
 #: Gmsh MSH 2.2 element type id for a 3-node triangle.
 GMSH_TRIANGLE = 2
+#: Gmsh MSH 2.2 element id for a 4-node quad.
+GMSH_QUAD = 3
+#: CGNS SIDS ElementType_t ids this module understands.
+CGNS_TRI_3 = 5
+CGNS_QUAD_4 = 7
+CGNS_BAR_2 = 3
+#: Nodes per CGNS surface element type.
+CGNS_NNODE = {3: 2, 5: 3, 7: 4}
 #: CGNS library version written into ``CGNSLibraryVersion_t`` (R4).
 CGNS_LIBRARY_VERSION = 4.3
 
@@ -477,38 +493,107 @@ def read_vtk(path) -> TriMesh:
     return TriMesh(body, np.array(faces, dtype=np.int64), "vtk")
 
 
-def read_su2(path) -> TriMesh:
-    lines = [ln for ln in Path(path).read_text(encoding="utf-8").splitlines() if not ln.lstrip().startswith("%")]
-    pts, faces = [], []
+def _fan(idx: List[int]) -> List[List[int]]:
+    """Fan-triangulate a polygon node ring from its first node, preserving winding.
+
+    Diagonal ``0-2`` is the same choice the meshio-facing importer
+    (:func:`tensorcad.meshio_exchange.meshio_to_mesh`) makes, so a quad cage
+    reads back identically through either path.
+    """
+    return [[idx[0], idx[k], idx[k + 1]] for k in range(1, len(idx) - 1)]
+
+
+def read_su2(path, notes: Optional[List[str]] = None) -> TriMesh:
+    """Read a SU2 ASCII mesh as a surface triangle mesh.
+
+    Foreign files are not the tidy ones this module writes, so the intake rules
+    are explicit:
+
+    * ``NDIME=2`` (planar) is legal SU2 and common for 2-D cases and for flat
+      patches; the missing coordinate is zero-filled, giving ``z = 0``.
+    * ``NELEM``/``MARKER_ELEMS`` may hold quads (type 9) as well as triangles
+      (type 5).  Quads are fan-triangulated; nothing is silently discarded.
+    * Lines (type 3) are not surface cells: they are counted into ``notes``
+      (when a list is passed) and otherwise raise, so they cannot vanish
+      without trace.
+    * Volume cell types (tetra/hex/wedge/pyramid) mean the caller reached for
+      the wrong reader and raise, quoting the offending type.
+    """
+    lines = [
+        ln
+        for ln in Path(path).read_text(encoding="utf-8").splitlines()
+        if not ln.lstrip().startswith("%")
+    ]
+    dim = 3
+    pts: List[List[float]] = []
+    faces: List[List[int]] = []
+    skipped: dict = {}
+
+    def add_cell(row: List[str], what: str) -> None:
+        etype = int(row[0])
+        if etype in SU2_VOLUME_TYPES:
+            raise ValueError(
+                f"SU2: {what} element type {etype} is a volume cell "
+                "(10 tetra/12 hexa/13 wedge/14 pyramid); read volume cells with "
+                "tensorcad.meshio_exchange, not with the surface reader"
+            )
+        if etype == SU2_LINE:
+            skipped["line"] = skipped.get("line", 0) + 1
+            return
+        if etype not in SU2_NNODE:
+            raise ValueError(f"SU2: {what} element type {etype} is not a surface element")
+        nn = SU2_NNODE[etype]
+        corner = [int(v) for v in row[1 : 1 + nn]]
+        if len(corner) != nn:
+            raise ValueError(f"SU2: {what} element type {etype} needs {nn} nodes, got {len(corner)}")
+        if etype == SU2_QUAD:
+            faces.extend(_fan(corner))
+        else:
+            faces.append(corner)
+
     i = 0
     while i < len(lines):
         line = lines[i].strip()
+        if line.startswith("NDIME="):
+            dim = int(line.split("=")[1])
+            if dim not in (2, 3):
+                raise ValueError(f"SU2: NDIME={dim} is not 2 or 3")
+            i += 1
+            continue
         if line.startswith("NPOIN="):
             npoin = int(line.split("=")[1])
-            pts = [[float(v) for v in lines[i + 1 + k].split()[:3]] for k in range(npoin)]
+            for k in range(npoin):
+                vals = [float(v) for v in lines[i + 1 + k].split()[:dim]]
+                if len(vals) < dim:
+                    raise ValueError(f"SU2: node {k} has {len(vals)} coordinates, NDIME={dim}")
+                pts.append(vals + [0.0] * (3 - dim))
             i += 1 + npoin
             continue
         if line.startswith("NELEM="):
             nelem = int(line.split("=")[1])
             for k in range(nelem):
-                row = lines[i + 1 + k].split()
-                if int(row[0]) != SU2_TRIANGLE:
-                    raise ValueError(f"SU2: element type {row[0]} is not a triangle")
-                faces.append([int(v) for v in row[1:4]])
+                add_cell(lines[i + 1 + k].split(), "NELEM")
             i += 1 + nelem
             continue
         if line.startswith("MARKER_ELEMS="):
             nmark = int(line.split("=")[1])
             for k in range(nmark):
-                row = lines[i + 1 + k].split()
-                if int(row[0]) != SU2_TRIANGLE:
-                    raise ValueError(f"SU2: marker element type {row[0]} is not a triangle")
-                faces.append([int(v) for v in row[1:4]])
+                add_cell(lines[i + 1 + k].split(), "MARKER_ELEMS")
             i += 1 + nmark
             continue
         i += 1
     if not pts:
         raise ValueError("SU2: NPOIN block missing")
+    for kind, count in sorted(skipped.items()):
+        detail = f"SU2: ignored {count} {kind} element(s) that are not surface cells"
+        if notes is None:
+            raise ValueError(detail + "; pass notes=[] to acknowledge them")
+        notes.append(detail)
+    if not faces:
+        raise ValueError(
+            "SU2: file carries no surface triangles or quads "
+            f"(NDIME={dim}, nodes={len(pts)}); nothing to read as a surface mesh"
+        )
     return TriMesh(np.array(pts, dtype=float), np.array(faces, dtype=np.int64), "su2")
 
 
@@ -516,7 +601,15 @@ def read_su2(path) -> TriMesh:
 _GMSH_NNODE = {1: 2, 2: 3, 3: 4, 15: 1}
 
 
-def read_gmsh(path) -> TriMesh:
+def read_gmsh(path, notes: Optional[List[str]] = None) -> TriMesh:
+    """Read MSH 2.2 as a surface triangle mesh, triangulating quad cages.
+
+    Element type 3 (4-node quad) is fan-triangulated instead of being dropped:
+    an earlier version kept only ``etype == 2`` and therefore returned a mesh
+    with **zero faces** from a quad cage, which then failed downstream with an
+    unrelated ``faces must be (m,3)`` message.  Lines and points are counted
+    into ``notes``; unknown element types are refused rather than ignored.
+    """
     tokens = Path(path).read_text(encoding="utf-8").split()
     if "$MeshFormat" not in tokens:
         raise ValueError("Gmsh: $MeshFormat missing")
@@ -527,13 +620,13 @@ def read_gmsh(path) -> TriMesh:
     nv = int(tokens[i + 1])
     block = tokens[i + 2 : i + 2 + 4 * nv]  # per node: tag x y z
     tags = [int(t) for t in block[0::4]]
-    coords = np.array([v for t in block[1::4] for v in (t,)] + block[2::4] + block[3::4], dtype=float)
     coords = np.array(block, dtype=float).reshape(nv, 4)[:, 1:]
     lookup = {tag: k for k, tag in enumerate(tags)}
     i = tokens.index("$Elements")
     ne = int(tokens[i + 1])
     j = i + 2
-    faces = []
+    faces: List[List[int]] = []
+    skipped: dict = {}
     for _ in range(ne):
         etype = int(tokens[j + 1])
         ntag = int(tokens[j + 2])
@@ -541,7 +634,23 @@ def read_gmsh(path) -> TriMesh:
         nodes = tokens[j + 3 + ntag : j + 3 + ntag + nn]
         if etype == GMSH_TRIANGLE:
             faces.append([lookup[int(t)] for t in nodes])
+        elif etype == GMSH_QUAD:
+            faces.extend(_fan([lookup[int(t)] for t in nodes]))
+        elif etype in (1, 15):
+            skipped["line/point"] = skipped.get("line/point", 0) + 1
+        else:
+            raise ValueError(f"Gmsh: element type {etype} is not a surface cell")
         j += 3 + ntag + nn
+    for kind, count in sorted(skipped.items()):
+        detail = f"Gmsh: ignored {count} {kind} element(s) that are not surface cells"
+        if notes is None:
+            raise ValueError(detail + "; pass notes=[] to acknowledge them")
+        notes.append(detail)
+    if not faces:
+        raise ValueError(
+            f"Gmsh: no triangles or quads among the {ne} element(s) "
+            f"({len(lookup)} nodes); nothing to read as a surface mesh"
+        )
     return TriMesh(coords, np.array(faces, dtype=np.int64), "gmsh")
 
 
@@ -676,33 +785,58 @@ def sids_violations(path) -> List[str]:
         if not els:
             out.append("Zone: Elements_t child missing")
             return out
-        el = els[0]
-        etype = _data(el)
-        etype = np.asarray(etype, dtype=np.int64).ravel() if etype is not None else np.zeros(0)
-        if etype.size != 2 or int(etype[0]) != SU2_TRIANGLE or int(etype[1]) != 0:
-            out.append(f"Elements: data {etype.tolist()} is not [TRI_3(=5), 0]")
-        kids = {g.name.rsplit("/", 1)[-1]: g for g in el.values() if hasattr(g, "values")}
-        if "ElementRange" not in kids:
-            out.append("Elements: ElementRange missing")
-        else:
+        seen: List[int] = []
+        for el in els:
+            where = f"Elements[{el.name.rsplit('/', 1)[-1]}]"
+            etype = _data(el)
+            etype = np.asarray(etype, dtype=np.int64).ravel() if etype is not None else np.zeros(0)
+            if etype.size != 2 or int(etype[0]) not in CGNS_NNODE or int(etype[1]) != 0:
+                out.append(
+                    f"{where}: data {etype.tolist()} is not [surface element type "
+                    f"in {sorted(CGNS_NNODE)}, 0]"
+                )
+                continue
+            kind, nn = int(etype[0]), CGNS_NNODE[int(etype[0])]
+            kids = {g.name.rsplit("/", 1)[-1]: g for g in el.values() if hasattr(g, "values")}
+            if "ElementRange" not in kids:
+                out.append(f"{where}: ElementRange missing")
+                continue
             rng = _data(kids["ElementRange"])
             rng = [int(v) for v in np.asarray(rng, dtype=np.int64).ravel()] if rng is not None else []
-            if rng != [1, ncell]:
-                out.append(f"Elements: ElementRange {rng} != [1, {ncell}]")
-        if "ElementConnectivity" not in kids:
-            out.append("Elements: ElementConnectivity missing")
-        else:
+            if len(rng) != 2 or rng[1] < rng[0]:
+                out.append(f"{where}: ElementRange {rng} is not an increasing [first, last] pair")
+                continue
+            if rng[0] < 1 or (seen and rng[0] != max(seen) + 1):
+                out.append(
+                    f"{where}: ElementRange {rng} does not continue the previous block at "
+                    f"{max(seen) if seen else 1}"
+                )
+            seen.extend(range(rng[0], rng[1] + 1))
+            nrange = rng[1] - rng[0] + 1
+            if "ElementConnectivity" not in kids:
+                out.append(f"{where}: ElementConnectivity missing")
+                continue
             raw = _data(kids["ElementConnectivity"])
             conn = np.asarray(raw, dtype=np.int64).ravel() if raw is not None else np.zeros(0)
-            if conn.size != 3 * ncell:
-                out.append(f"Elements: ElementConnectivity size {conn.size} != 3*ncell = {3 * ncell}")
+            if conn.size != nn * nrange:
+                out.append(
+                    f"{where}: ElementConnectivity size {conn.size} != "
+                    f"{nn}*{nrange} = {nn * nrange} for type {kind}"
+                )
             elif conn.size and (conn.min() < 1 or conn.max() > nv):
-                out.append(f"Elements: ElementConnectivity not 1-based within [1, {nv}]")
+                out.append(f"{where}: ElementConnectivity not 1-based within [1, {nv}]")
+        if seen and sorted(seen) != list(range(1, ncell + 1)):
+            out.append(f"Elements: ElementRange coverage {seen} does not tile [1, {ncell}]")
     return out
 
 
-def read_cgns(path) -> TriMesh:
-    """Read the SIDS dialect; a non-conformant file raises instead of being laundered."""
+def read_cgns(path, notes: Optional[List[str]] = None) -> TriMesh:
+    """Read the SIDS dialect; a non-conformant file raises instead of being laundered.
+
+    Every ``Elements_t`` block in the zone is consumed (a hull patch exported
+    from Salome or Pointwise routinely arrives as several blocks), ``TRI_3``
+    and ``QUAD_4`` are both accepted, and ``QUAD_4`` is fan-triangulated.
+    """
     violations = sids_violations(path)
     if violations:
         raise ValueError("CGNS: non-conformant file -> " + "; ".join(violations))
@@ -713,10 +847,31 @@ def read_cgns(path) -> TriMesh:
         gc = _named(zone, "GridCoordinates_t")[0]
         kids = {g.name.rsplit("/", 1)[-1]: g for g in gc.values() if hasattr(g, "values")}
         coords = [np.asarray(_data(kids[f"Coordinate{axis}"]), dtype=float).ravel() for axis in "XYZ"]
-        el = _named(zone, "Elements_t")[0]
-        ekids = {g.name.rsplit("/", 1)[-1]: g for g in el.values() if hasattr(g, "values")}
-        faces = np.asarray(_data(ekids["ElementConnectivity"]), dtype=np.int64).ravel().reshape(-1, 3) - 1
-    return TriMesh(np.stack(coords, axis=-1), faces, "cgns")
+        faces: List[List[int]] = []
+        for el in _named(zone, "Elements_t"):
+            etype = int(np.asarray(_data(el), dtype=np.int64).ravel()[0])
+            ekids = {g.name.rsplit("/", 1)[-1]: g for g in el.values() if hasattr(g, "values")}
+            rng = [int(v) for v in np.asarray(_data(ekids["ElementRange"]), dtype=np.int64).ravel()]
+            ncell = rng[1] - rng[0] + 1
+            conn = np.asarray(_data(ekids["ElementConnectivity"]), dtype=np.int64).ravel()
+            nn = CGNS_NNODE[etype]
+            ring = conn.reshape(-1, nn) - 1
+            if etype == CGNS_QUAD_4:
+                for quad in ring:
+                    faces.extend(_fan([int(v) for v in quad]))
+            elif etype == CGNS_TRI_3:
+                faces.extend([[int(v) for v in tri] for tri in ring])
+            else:  # pragma: no cover - sids_violations refuses these first
+                raise ValueError(f"CGNS: element type {etype} is not a surface cell")
+            if notes is not None:
+                notes.append(
+                    f"CGNS: block {el.name.rsplit('/', 1)[-1]} holds {ncell} type-{etype} cell(s)"
+                )
+        if nv <= 0:
+            raise ValueError("CGNS: zone declares no vertices")
+    if not faces:
+        raise ValueError("CGNS: no surface cells in any Elements_t block")
+    return TriMesh(np.stack(coords, axis=-1), np.array(faces, dtype=np.int64), "cgns")
 
 
 READERS = {
