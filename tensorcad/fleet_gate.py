@@ -56,7 +56,7 @@ REQUIRED_SOURCE_FIELDS: tuple[str, ...] = (
 #: platform's known placeholders sit at 304, real hull tessellations at >1e5.
 MIN_HULL_TRIANGLES = 2_000
 
-#: Volume acceptance against the source's published displacement.
+#: Volume acceptance against the source's own published displacement.
 VOLUME_TOLERANCE = 0.01
 
 VERIFIED = "VERIFIED"
@@ -251,6 +251,96 @@ def is_official(entry: Mapping[str, Any]) -> bool:
     return host in OFFICIAL_HOSTS and not validate_source(entry)
 
 
+def validate_source_hunt_record(
+    record: Mapping[str, Any] | str | Path,
+) -> dict[str, Any]:
+    """Validate a ``source_hunt.json`` record produced by ``hunt_sources.py``.
+
+    This is the integration point between the source-hunt tool and the fleet gate:
+    it translates the hunt record's field names into the gate's provenance schema,
+    checks every reachable source for digest integrity, and reports which sources
+    are official workshop publishers versus dead ends or third-party mirrors.
+
+    Parameters
+    ----------
+    record :
+        Either a dict (already parsed JSON) or a path to ``source_hunt.json``.
+
+    Returns
+    -------
+    dict with keys ``total``, ``valid``, ``invalid``, ``official``, ``dead_ends``,
+    ``third_party``, and ``entries`` (per-source detail).
+    """
+    if isinstance(record, (str, Path)):
+        record = json.loads(Path(record).read_text())
+
+    sources = record.get("sources", {})
+    entries: list[dict[str, Any]] = []
+    valid = 0
+    invalid = 0
+    official = 0
+    dead_ends = 0
+    third_party = 0
+
+    for key, entry in sources.items():
+        status = entry.get("http_status")
+        sha = entry.get("sha256")
+        url = entry.get("url", "")
+        publisher = entry.get("publisher", "")
+        licence = entry.get("licence", "")
+        kind = entry.get("kind", "")
+
+        # Map hunt_sources fields to fleet_gate provenance schema
+        mapped = {
+            "source_url": url,
+            "publisher": publisher,
+            "license": licence,
+            "sha256": sha if sha else "",
+            "retrieved_at": entry.get("checked_utc", ""),
+        }
+
+        problems = validate_source(mapped)
+
+        # Classify the source
+        if status in (404, 403, None):
+            classification = "dead_end"
+            dead_ends += 1
+        elif publisher == "GitHub third party":
+            classification = "third_party"
+            third_party += 1
+        elif not problems and status == 200:
+            classification = "official"
+            official += 1
+            valid += 1
+        elif sha and len(sha) == 64:
+            classification = "valid_digest"
+            valid += 1
+        else:
+            classification = "invalid"
+            invalid += 1
+
+        entries.append({
+            "key": key,
+            "url": url,
+            "publisher": publisher,
+            "http_status": status,
+            "sha256": sha,
+            "classification": classification,
+            "problems": problems,
+        })
+
+    return {
+        "total": len(sources),
+        "valid": valid,
+        "invalid": invalid,
+        "official": official,
+        "dead_ends": dead_ends,
+        "third_party": third_party,
+        "entries": entries,
+        "all_reachable_valid": invalid == 0,
+    }
+
+
 # --------------------------------------------------------------------------- #
 # fleet verdicts
 # --------------------------------------------------------------------------- #
@@ -319,10 +409,7 @@ def judge_mesh(
                 audit.as_dict(),
                 error,
             )
-        reasons.append(
-            f"volume {abs(audit.volume):.3f} m3 vs published {published_volume:.3f} m3 "
-            f"= {error * 100:.3f} % > {tolerance * 100:.0f} %"
-        )
+        reasons.append(f"volume error {error * 100:.3f} % exceeds {tolerance * 100:.1f} % tolerance")
         return ShipVerdict(ship, WITHHELD, reasons, audit.as_dict(), error)
     return ShipVerdict(ship, WITHHELD, reasons, audit.as_dict())
 
