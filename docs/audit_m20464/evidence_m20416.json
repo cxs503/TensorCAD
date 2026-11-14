@@ -1,0 +1,555 @@
+{
+ "mission": 20416,
+ "anchor": "XVAL-GEOM-VOLCROSS",
+ "audited_worktree": "/root/tp-agent/work/m20416",
+ "referee": {
+  "table_rows_total": 131,
+  "rows_for_anchor": 0,
+  "rows": [],
+  "referee_present": false
+ },
+ "mission_record": {
+  "declared_status": "succeeded",
+  "fail_stage": "budget_exhausted+forced_finish",
+  "accepted": true,
+  "agent_self_reported_checks": "\u5df2\u8dd1\uff1a`PYTHONPATH=. python -m pytest tests/test_volume_xval.py -q` = 13 passed / 19.78s\uff08\u8be5\u6b21\u7eff\u6d4b\u5728\u6700\u540e\u4e00\u6b21\u574f\u8865\u4e01\u4e4b\u524d\uff09\uff1b`PYTHONPATH=. python tools/volume_xval_study.py` \u6210\u529f\u4ea7\u51fa md/png/json\uff08\u540c\u6837\u5728\u574f\u8865\u4e01\u4e4b\u524d\uff09\uff1b\u5f15\u64ce\u4e92\u8bc1\u6570\u503c\u89c1 artifacts/volume_xval_study.json\u3002\u672a\u8dd1\uff1a\u574f\u8865\u4e01\u4e4b\u540e\u7684\u4efb\u4f55\u6d4b\u8bd5\uff08\u6587\u4ef6\u5f53\u524d IndentationError\uff0cpytest collection error\uff0c\u5982\u5b9e\u8bb0\u5f55\u4e3a FAIL\uff09\uff1b\u5e73\u53f0\u62a5\u544a POST \u672a\u53d1\u3002",
+  "head_commit": null,
+  "branch": null,
+  "server_quality_audit": {
+   "gate_valid": false,
+   "key_present": false,
+   "gate_missing_warning": true
+  },
+  "tool_calls": 60,
+  "on_disk_changes": [
+   "artifacts/volume_xval_study.json",
+   "docs/volume_cross_validation.md",
+   "docs/volume_cross_validation.png",
+   "tensorcad/volume_xval.py",
+   "tests/test_volume_xval.py",
+   "tools/volume_xval_study.py"
+  ]
+ },
+ "deliverables": {
+  "tensorcad/volume_xval.py": {
+   "exists": true,
+   "bytes": 42785
+  },
+  "tests/test_volume_xval.py": {
+   "exists": true,
+   "bytes": 11779
+  },
+  "tools/volume_xval_study.py": {
+   "exists": true,
+   "bytes": 14876
+  },
+  "docs/volume_cross_validation.md": {
+   "exists": true,
+   "bytes": 9002
+  },
+  "artifacts/volume_xval_study.json": {
+   "exists": true,
+   "bytes": 25787
+  },
+  "docs/volume_cross_validation.png": {
+   "exists": true,
+   "bytes": 179994
+  },
+  "git_status_porcelain": [
+   "?? artifacts/volume_xval_study.json",
+   "?? docs/volume_cross_validation.md",
+   "?? docs/volume_cross_validation.png",
+   "?? tensorcad/volume_xval.py",
+   "?? tests/test_volume_xval.py",
+   "?? tools/volume_xval_study.py"
+  ],
+  "untracked_deliverables": [
+   "artifacts/volume_xval_study.json",
+   "docs/volume_cross_validation.md",
+   "docs/volume_cross_validation.png",
+   "tensorcad/volume_xval.py",
+   "tests/test_volume_xval.py",
+   "tools/volume_xval_study.py"
+  ],
+  "in_repo_head": false
+ },
+ "compile": {
+  "impl_compiles": false,
+  "impl_error": [
+   "Sorry: IndentationError: unexpected indent (volume_xval.py, line 1053)"
+  ],
+  "entry_compiles": true,
+  "test_file_compiles": true,
+  "as_delivered_pytest_collect_rc": 2,
+  "as_delivered_pytest_collect_tail": [
+   "ERROR tests/test_volume_xval.py",
+   "!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!",
+   "no tests collected, 1 error in 0.64s"
+  ]
+ },
+ "numbers": {
+  "band": 0.003,
+  "ships": {
+   "Wigley": {
+    "reference": {
+     "engine": "Wigley closed form L B T n m/((n+1)(m+1))",
+     "volume_m3": 2.7777777777777777,
+     "evidence": "REAL"
+    },
+    "routes": [
+     {
+      "engine": "self-surface-sum (divergence)",
+      "role": "self",
+      "evidence": "REAL",
+      "volume_m3": 2.7712221498842573,
+      "rel_dev_vs_ref": -0.0023600260416673357,
+      "abs_err_pct": 0.23600260416673358
+     },
+     {
+      "engine": "trimesh (third-party, file round trip)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 2.7712221444840974,
+      "rel_dev_vs_ref": -0.002360027985724891,
+      "abs_err_pct": 0.23600279857248907
+     },
+     {
+      "engine": "ray-stabbing (this module, numpy)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 2.7700606691899576,
+      "rel_dev_vs_ref": -0.0027781590916152155,
+      "abs_err_pct": 0.27781590916152155
+     },
+     {
+      "engine": "B-rep solid (gmsh/OCP)",
+      "role": "external",
+      "evidence": "WITHHELD",
+      "volume_m3": null,
+      "rel_dev_vs_ref": null
+     }
+    ],
+    "engine_spread": 0.0004191807521528891,
+    "worst_deviation": 0.0027781590916152155,
+    "within_owner_15pct": true
+   },
+   "KCS": {
+    "reference": {
+     "engine": "fleet record reference",
+     "volume_m3": 52030.0,
+     "evidence": "WITHHELD"
+    },
+    "routes": [
+     {
+      "engine": "self-surface-sum (divergence)",
+      "role": "self",
+      "evidence": "REAL",
+      "volume_m3": 51610.33537793448,
+      "rel_dev_vs_ref": -0.008065820143484847,
+      "abs_err_pct": 0.8065820143484846
+     },
+     {
+      "engine": "trimesh (third-party, file round trip)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 51610.335387572624,
+      "rel_dev_vs_ref": -0.008065819958242853,
+      "abs_err_pct": 0.8065819958242854
+     },
+     {
+      "engine": "ray-stabbing (this module, numpy)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 51585.49836532665,
+      "rel_dev_vs_ref": -0.008543179601640331,
+      "abs_err_pct": 0.854317960164033
+     },
+     {
+      "engine": "B-rep solid (gmsh/OCP)",
+      "role": "external",
+      "evidence": "WITHHELD",
+      "volume_m3": null,
+      "rel_dev_vs_ref": null
+     }
+    ],
+    "engine_spread": 0.00048131845879436166,
+    "worst_deviation": 0.008543179601640331,
+    "within_owner_15pct": true
+   },
+   "JBC": {
+    "reference": {
+     "engine": "fleet record reference",
+     "volume_m3": 178369.9,
+     "evidence": "WITHHELD"
+    },
+    "routes": [
+     {
+      "engine": "self-surface-sum (divergence)",
+      "role": "self",
+      "evidence": "REAL",
+      "volume_m3": 176417.39012789517,
+      "rel_dev_vs_ref": -0.010946408963086412,
+      "abs_err_pct": 1.0946408963086411
+     },
+     {
+      "engine": "trimesh (third-party, file round trip)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 176417.3913637343,
+      "rel_dev_vs_ref": -0.010946402034568065,
+      "abs_err_pct": 1.0946402034568066
+     },
+     {
+      "engine": "ray-stabbing (this module, numpy)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 176369.00449133766,
+      "rel_dev_vs_ref": -0.011217674667431735,
+      "abs_err_pct": 1.1217674667431736
+     },
+     {
+      "engine": "B-rep solid (gmsh/OCP)",
+      "role": "external",
+      "evidence": "WITHHELD",
+      "volume_m3": null,
+      "rel_dev_vs_ref": null
+     }
+    ],
+    "engine_spread": 0.00027430003532620496,
+    "worst_deviation": 0.011217674667431735,
+    "within_owner_15pct": true
+   },
+   "Series60": {
+    "reference": {
+     "engine": "fleet record reference",
+     "volume_m3": 4266.6293334,
+     "evidence": "WITHHELD"
+    },
+    "routes": [
+     {
+      "engine": "self-surface-sum (divergence)",
+      "role": "self",
+      "evidence": "REAL",
+      "volume_m3": 4230.056908802113,
+      "rel_dev_vs_ref": -0.008571737017694788,
+      "abs_err_pct": 0.8571737017694788
+     },
+     {
+      "engine": "trimesh (third-party, file round trip)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 4230.056891357816,
+      "rel_dev_vs_ref": -0.008571741106237589,
+      "abs_err_pct": 0.8571741106237589
+     },
+     {
+      "engine": "ray-stabbing (this module, numpy)",
+      "role": "external",
+      "evidence": "REAL",
+      "volume_m3": 4227.971051666438,
+      "rel_dev_vs_ref": -0.009060614061535069,
+      "abs_err_pct": 0.9060614061535068
+     },
+     {
+      "engine": "B-rep solid (gmsh/OCP)",
+      "role": "external",
+      "evidence": "WITHHELD",
+      "volume_m3": null,
+      "rel_dev_vs_ref": null
+     }
+    ],
+    "engine_spread": 0.0004931848643906024,
+    "worst_deviation": 0.009060614061535069,
+    "within_owner_15pct": true
+   }
+  },
+  "sweeps": {
+   "KCS": {
+    "stations": {
+     "label": "KCS (nx varied, nz pinned)",
+     "rows": [
+      {
+       "nx": 61,
+       "nz": 97,
+       "faces": 23158,
+       "volume_m3": 51836.37282247914,
+       "relative_error_pct": -0.3721452575838148
+      },
+      {
+       "nx": 121,
+       "nz": 97,
+       "faces": 46318,
+       "volume_m3": 51847.32122054746,
+       "relative_error_pct": -0.35110278580153204
+      },
+      {
+       "nx": 241,
+       "nz": 97,
+       "faces": 92638,
+       "volume_m3": 51850.05799432861,
+       "relative_error_pct": -0.34584279391003925
+      },
+      {
+       "nx": 481,
+       "nz": 97,
+       "faces": 185278,
+       "volume_m3": 51850.742148050784,
+       "relative_error_pct": -0.3445278722837138
+      }
+     ],
+     "observed_order": 0.013693719827574335,
+     "spacing_used": "nx",
+     "richardson_volume_m3": 51922.695900747625
+    },
+    "levels": {
+     "label": "KCS (nz varied, nx pinned)",
+     "rows": [
+      {
+       "nx": 481,
+       "nz": 13,
+       "faces": 23998,
+       "volume_m3": 50121.49930647523,
+       "relative_error_pct": -3.6680774428690617
+      },
+      {
+       "nx": 481,
+       "nz": 25,
+       "faces": 47038,
+       "volume_m3": 51121.38472015873,
+       "relative_error_pct": -1.7463295787839193
+      },
+      {
+       "nx": 481,
+       "nz": 49,
+       "faces": 93118,
+       "volume_m3": 51611.01636855251,
+       "relative_error_pct": -0.8052731721074164
+      },
+      {
+       "nx": 481,
+       "nz": 97,
+       "faces": 185278,
+       "volume_m3": 51850.742148050784,
+       "relative_error_pct": -0.3445278722837138
+      }
+     ],
+     "observed_order": 1.1972329799883885,
+     "spacing_used": "nz",
+     "richardson_volume_m3": 52040.24717117237
+    }
+   },
+   "JBC": {
+    "stations": {
+     "label": "JBC (nx varied, nz pinned)",
+     "rows": [
+      {
+       "nx": 61,
+       "nz": 97,
+       "faces": 23158,
+       "volume_m3": 176480.6017912411,
+       "relative_error_pct": -1.0592023703320483
+      },
+      {
+       "nx": 121,
+       "nz": 97,
+       "faces": 46318,
+       "volume_m3": 177071.23919474872,
+       "relative_error_pct": -0.7280717235650604
+      },
+      {
+       "nx": 241,
+       "nz": 97,
+       "faces": 92638,
+       "volume_m3": 177315.88238061054,
+       "relative_error_pct": -0.5909167518675845
+      },
+      {
+       "nx": 481,
+       "nz": 97,
+       "faces": 185278,
+       "volume_m3": 177417.19067130936,
+       "relative_error_pct": -0.5341200105458551
+      }
+     ],
+     "observed_order": 0.2244260055994272,
+     "spacing_used": "nx",
+     "richardson_volume_m3": 178021.0504456523
+    },
+    "levels": {
+     "label": "JBC (nz varied, nx pinned)",
+     "rows": [
+      {
+       "nx": 481,
+       "nz": 13,
+       "faces": 23998,
+       "volume_m3": 171074.19237764485,
+       "relative_error_pct": -4.090212318533083
+      },
+      {
+       "nx": 481,
+       "nz": 25,
+       "faces": 47038,
+       "volume_m3": 174710.1732219688,
+       "relative_error_pct": -2.0517625328215026
+      },
+      {
+       "nx": 481,
+       "nz": 49,
+       "faces": 93118,
+       "volume_m3": 176518.18507081628,
+       "relative_error_pct": -1.0381319545414964
+      },
+      {
+       "nx": 481,
+       "nz": 97,
+       "faces": 185278,
+       "volume_m3": 177417.19067130936,
+       "relative_error_pct": -0.5341200105458551
+      }
+     ],
+     "observed_order": 0.9925756062967999,
+     "spacing_used": "nz",
+     "richardson_volume_m3": 178344.40145954306
+    }
+   }
+  },
+  "loft": {},
+  "attribution": {
+   "Wigley": {
+    "mechanism": "none (inside band)",
+    "engine_spread": 0.0004191807521528891,
+    "worst_deviation": 0.0027781590916152155
+   },
+   "KCS": {
+    "mechanism": "reference not external (cannot attribute)",
+    "engine_spread": 0.00048131845879436166,
+    "worst_deviation": 0.008543179601640331
+   },
+   "JBC": {
+    "mechanism": "reference not external (cannot attribute)",
+    "engine_spread": 0.00027430003532620496,
+    "worst_deviation": 0.011217674667431735
+   },
+   "Series60": {
+    "mechanism": "reference not external (cannot attribute)",
+    "engine_spread": 0.0004931848643906024,
+    "worst_deviation": 0.009060614061535069
+   }
+  },
+  "loft_convergence": {
+   "KCS": {
+    "label": "KCS",
+    "rows": [
+     {
+      "nx": 61,
+      "nz": 13,
+      "faces": 2998,
+      "volume_m3": 50107.60920361723,
+      "relative_error_pct": -3.6947737774029856
+     },
+     {
+      "nx": 121,
+      "nz": 25,
+      "faces": 11758,
+      "volume_m3": 51118.01191306351,
+      "relative_error_pct": -1.7528120064126338
+     },
+     {
+      "nx": 241,
+      "nz": 49,
+      "faces": 46558,
+      "volume_m3": 51610.33537793448,
+      "relative_error_pct": -0.8065820143484846
+     },
+     {
+      "nx": 481,
+      "nz": 97,
+      "faces": 185278,
+      "volume_m3": 51850.742148050784,
+      "relative_error_pct": -0.3445278722837138
+     }
+    ],
+    "observed_order": 1.1788022517508359,
+    "spacing_used": "nx",
+    "richardson_volume_m3": 52041.79107744449
+   },
+   "JBC": {
+    "label": "JBC",
+    "rows": [
+     {
+      "nx": 61,
+      "nz": 13,
+      "faces": 2998,
+      "volume_m3": 170171.0883117909,
+      "relative_error_pct": -4.596521996261195
+     },
+     {
+      "nx": 121,
+      "nz": 25,
+      "faces": 11758,
+      "volume_m3": 174369.5002456497,
+      "relative_error_pct": -2.242754945957982
+     },
+     {
+      "nx": 241,
+      "nz": 49,
+      "faces": 46558,
+      "volume_m3": 176417.39012789517,
+      "relative_error_pct": -1.0946408963086411
+     },
+     {
+      "nx": 481,
+      "nz": 97,
+      "faces": 185278,
+      "volume_m3": 177417.19067130936,
+      "relative_error_pct": -0.5341200105458551
+     }
+    ],
+    "observed_order": 1.0396804531098174,
+    "spacing_used": "nx",
+    "richardson_volume_m3": 178368.16973911147
+   }
+  }
+ },
+ "integration": {
+  "repo_callers_outside_deliverables": [],
+  "rest_api_callers": [],
+  "wired_into_platform": false
+ },
+ "probe": {
+  "repair_applied": true,
+  "repair_kind": "remove 1 stray token + 1 duplicated guard, dedent 20-line block by 4 (mechanical; no logic added or removed)",
+  "compiles_after_repair": true,
+  "pytest_after_repair": [
+   "13 passed, 1 warning in 22.18s"
+  ],
+  "pytest_rc": 0,
+  "study_rc": 0,
+  "study_tail": [
+   "}"
+  ]
+ },
+ "reproduction": {
+  "compared": true,
+  "numeric_leaves_compared": 179,
+  "string_leaves_compared": 381,
+  "numeric_differences": 0,
+  "differences": [
+   {
+    "leaf": "/attribution/KCS/evidence[0]",
+    "artifact": "the reference is a closure, so a deviation measures the loft against arithmetic rather tha",
+    "reproduced": "the reference is not an external validation (recalled literature with verified=false, or a"
+   },
+   {
+    "leaf": "/attribution/JBC/evidence[0]",
+    "artifact": "the reference is a closure, so a deviation measures the loft against arithmetic rather tha",
+    "reproduced": "the reference is not an external validation (recalled literature with verified=false, or a"
+   },
+   {
+    "leaf": "/attribution/Series60/evidence[0]",
+    "artifact": "the reference is a closure, so a deviation measures the loft against arithmetic rather tha",
+    "reproduced": "the reference is not an external validation (recalled literature with verified=false, or a"
+   }
+  ]
+ }
+}
