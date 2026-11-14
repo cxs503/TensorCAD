@@ -37,11 +37,18 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from tensorcad import mesh as meshlib
+from tensorcad.cb_sections import (
+    CalibratedHullParameters,
+    build_calibrated_hull,
+    realised_coefficients,
+    relative_errors,
+)
 from tensorcad.geometry import Mesh
 from tensorcad.hull import HullParameters, generate_hull
 from tensorcad.series60 import Series60Parameters, build_series60_mesh
 from tensorcad.wigley import WigleyParameters, generate_wigley
 from tensorcad.hydrostatics import compute_hydrostatics
+from tensorcad.shipd_population import correlation_sanity, nominal_performance_fields
 
 SCHEMA = "tensorcad.shipd_rebuild/1.0"
 
@@ -60,6 +67,18 @@ DIMENSION_TOLERANCE = 0.02    # 2% L/B/T agreement
 MIN_TRIANGLES = 1_000         # Not a placeholder
 DEFAULT_NX = 81               # Longitudinal stations
 DEFAULT_NZ = 21               # Vertical levels
+
+#: Block-coefficient window the coefficient-calibrated family claims.
+CALIBRATED_CB_WINDOW = (0.30, 0.95)
+#: Tolerance on the realised midship / waterplane coefficients (percent of the
+#: requested value). Looser than the 3 % volume gate because these two are read
+#: off the *sampled* station grid rather than integrated over the closed surface.
+COEFFICIENT_TOLERANCE = 0.05
+#: Seawater density [kg/m^3] and kinematic viscosity [m^2/s] used by the nominal
+#: performance block (ITTC fresh/seawater tables at 15 degC).
+SEAWATER_DENSITY = 1025.0
+SEAWATER_VISCOSITY = 1.1883e-6
+GRAVITY = 9.80665
 
 
 @dataclass(frozen=True)
@@ -98,6 +117,16 @@ class RebuildResult:
     triangle_count: int | None = None
     error_message: str | None = None
     rebuild_time_s: float | None = None
+    #: Coefficient agreement measured on the mesh (not assumed from the inputs).
+    realised_Cb: float | None = None
+    realised_Cm: float | None = None
+    realised_Cwp: float | None = None
+    coefficient_gates: list[GateResult] = field(default_factory=list)
+    wetted_surface_area: float | None = None
+    #: ``VERIFIED`` only when the eight canonical gates *and* the coefficient
+    #: agreement gates pass. :attr:`verdict` keeps the canonical eight so round-2
+    #: and round-3 pass rates stay directly comparable.
+    strict_verdict: str = "PENDING"
 
     @property
     def all_gates_passed(self) -> bool:
@@ -120,6 +149,12 @@ class RebuildResult:
             "gates": [g.as_dict() for g in self.gates],
             "error_message": self.error_message,
             "rebuild_time_s": self.rebuild_time_s,
+            "realised_Cb": self.realised_Cb,
+            "realised_Cm": self.realised_Cm,
+            "realised_Cwp": self.realised_Cwp,
+            "coefficient_gates": [g.as_dict() for g in self.coefficient_gates],
+            "wetted_surface_area": self.wetted_surface_area,
+            "strict_verdict": self.strict_verdict,
         }
 
 
@@ -141,8 +176,43 @@ def _euler_characteristic(mesh: Mesh) -> int:
     return len(mesh.vertices) - len(edge_set) + len(mesh.faces)
 
 
-def _select_method(cb: float, cm: float, cwp: float) -> tuple[str, str]:
-    """Select the best reconstruction method for a ship's parameters."""
+def _calibrated_feasible(cb: float, cm: float, cwp: float) -> tuple[bool, str]:
+    """Can the coefficient-calibrated family realise this parameter triple?
+
+    The family needs ``Cp = Cb/Cm <= Cwp`` (a waterplane cannot be finer than the
+    prismatic coefficient) and three coefficients strictly inside ``(0, 1)``.
+    """
+    if not all(math.isfinite(v) and 0.0 < v < 1.0 for v in (cb, cm, cwp)):
+        return False, f"coefficients outside (0,1): Cb={cb}, Cm={cm}, Cwp={cwp}"
+    low, high = CALIBRATED_CB_WINDOW
+    if not (low <= cb <= high):
+        return False, f"Cb={cb:.4f} outside the calibrated window [{low}, {high}]"
+    cp = cb / cm
+    if cp > cwp:
+        return False, f"Cp=Cb/Cm={cp:.4f} exceeds Cwp={cwp:.4f}"
+    return True, (
+        f"Cb={cb:.4f} calibrated family: Cp={cp:.4f} <= Cwp={cwp:.4f} "
+        f"(realises Cb, Cm, Cwp exactly)"
+    )
+
+
+def _select_method(
+    cb: float, cm: float, cwp: float, *, method_preference: str = "calibrated"
+) -> tuple[str, str]:
+    """Select the best reconstruction method for a ship's parameters.
+
+    ``method_preference="calibrated"`` (default) puts the coefficient-calibrated
+    family first: it is the only method that honours the requested ``Cb``, ``Cm``
+    and ``Cwp`` instead of producing whatever the fixed breadth law gives.
+    ``method_preference="legacy"`` reproduces the round-2 chain
+    (Series 60 -> parametric sections -> Wigley -> refused) unchanged, which is
+    what the round-2 evidence was collected with.
+    """
+    if method_preference == "calibrated":
+        feasible, reason = _calibrated_feasible(cb, cm, cwp)
+        if feasible:
+            return "cb_calibrated_sections", reason
+
     low_s60, high_s60 = SERIES60_CB_WINDOW
     low_param, high_param = PARAMETRIC_CB_WINDOW
     low_wig, high_wig = WIGLEY_CB_WINDOW
@@ -233,6 +303,40 @@ def _rebuild_parametric(ship: dict, nx: int, nz: int) -> RebuildResult:
         )
 
 
+def _rebuild_calibrated(ship: dict, nx: int, nz: int) -> RebuildResult:
+    """Rebuild with the coefficient-calibrated family (realises Cb, Cm, Cwp)."""
+    t0 = time.time()
+    try:
+        params = CalibratedHullParameters(
+            length=ship["L"], beam=ship["B"], draft=ship["T"],
+            block_coefficient=ship["Cb"],
+            midship_coefficient=ship.get("Cm", 0.98),
+            waterplane_coefficient=ship.get("Cwp", 0.80),
+            nx=nx, nz=nz,
+        )
+        problems = params.problems()
+        if problems:
+            return RebuildResult(
+                ship_id=ship["ship_id"], ship_type=ship["ship_type"],
+                method="cb_calibrated_sections",
+                method_reason="calibrated family selected but parameters rejected",
+                verdict="REFUSED", error_message="; ".join(problems),
+                rebuild_time_s=time.time() - t0,
+            )
+        hull = build_calibrated_hull(params)
+        elapsed = time.time() - t0
+        return _evaluate_gates(
+            ship, hull.mesh, "cb_calibrated_sections",
+            f"Cb={ship['Cb']:.4f}, Cp<=Cwp -> calibrated family", elapsed,
+        )
+    except Exception as e:  # pragma: no cover - defensive
+        return RebuildResult(
+            ship_id=ship["ship_id"], ship_type=ship["ship_type"],
+            method="cb_calibrated_sections", method_reason="calibrated family",
+            verdict="FAILED", error_message=str(e), rebuild_time_s=time.time() - t0,
+        )
+
+
 def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: float) -> RebuildResult:
     """Run all quality gates on a rebuilt mesh."""
     gates = []
@@ -297,6 +401,37 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
     all_passed = all(g.passed for g in gates)
     verdict = "VERIFIED" if all_passed else "FAILED"
 
+    # Coefficient agreement on the mesh itself. ``Cm`` is the largest sampled
+    # station area and ``Cwp`` the waterplane flux; both are measured, never
+    # copied from the request, so a surface that drifts off the parameter vector
+    # shows up here even when the volume happens to be right.
+    coefficient_gates: list[GateResult] = []
+    realised_cb = realised_cm = realised_cwp = None
+    wetted = None
+    try:
+        measured = realised_coefficients(
+            mesh, length=ship["L"], beam=ship["B"], draft=ship["T"]
+        )
+        realised_cb = measured["coefficients"]["Cb"]
+        realised_cm = measured["coefficients"]["Cm"]
+        realised_cwp = measured["coefficients"]["Cwp"]
+        wetted = measured["wetted_surface_m2"]
+        for name, got, want in (
+            ("G9_midship_coefficient", realised_cm, ship.get("Cm", 0.98)),
+            ("G10_waterplane_coefficient", realised_cwp, ship.get("Cwp", 0.80)),
+        ):
+            err = abs(got - want) / want if want else float("inf")
+            coefficient_gates.append(GateResult(
+                name, err < COEFFICIENT_TOLERANCE,
+                f"realised={got:.5f} requested={want:.5f} err={err:.4%}",
+                value=err, threshold=COEFFICIENT_TOLERANCE,
+            ))
+    except Exception as exc:  # pragma: no cover - defensive
+        coefficient_gates.append(GateResult(
+            "G9_midship_coefficient", False, f"measurement failed: {exc}",
+        ))
+
+    strict_ok = all_passed and all(g.passed for g in coefficient_gates)
     return RebuildResult(
         ship_id=ship["ship_id"], ship_type=ship["ship_type"],
         method=method, method_reason=reason,
@@ -305,12 +440,24 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
         volume_error=vol_error,
         realised_L=rL, realised_B=rB, realised_T=rT,
         triangle_count=tri_count, rebuild_time_s=elapsed,
+        realised_Cb=realised_cb, realised_Cm=realised_cm, realised_Cwp=realised_cwp,
+        coefficient_gates=coefficient_gates, wetted_surface_area=wetted,
+        strict_verdict="VERIFIED" if strict_ok else "FAILED",
     )
 
 
-def rebuild_ship(ship: dict, *, nx: int = DEFAULT_NX, nz: int = DEFAULT_NZ) -> RebuildResult:
+def rebuild_ship(
+    ship: dict,
+    *,
+    nx: int = DEFAULT_NX,
+    nz: int = DEFAULT_NZ,
+    method_preference: str = "calibrated",
+) -> RebuildResult:
     """Rebuild one ship from its parameter vector."""
-    method, reason = _select_method(ship["Cb"], ship.get("Cm", 0.98), ship.get("Cwp", 0.80))
+    method, reason = _select_method(
+        ship["Cb"], ship.get("Cm", 0.98), ship.get("Cwp", 0.80),
+        method_preference=method_preference,
+    )
 
     if method == "refused":
         return RebuildResult(
@@ -319,6 +466,8 @@ def rebuild_ship(ship: dict, *, nx: int = DEFAULT_NX, nz: int = DEFAULT_NZ) -> R
             verdict="REFUSED", error_message=reason,
         )
 
+    if method == "cb_calibrated_sections":
+        return _rebuild_calibrated(ship, nx, nz)
     if method == "series60_form":
         return _rebuild_series60(ship, nx, nz)
     elif method == "wigley_form":
@@ -339,8 +488,14 @@ def run_shipd_rebuild(
     nx: int = DEFAULT_NX,
     nz: int = DEFAULT_NZ,
     out_dir: str | Path = "runs/shipd_rebuild",
+    method_preference: str = "calibrated",
 ) -> dict[str, Any]:
-    """Run the full ShipD rebuild pipeline."""
+    """Run the full ShipD rebuild pipeline.
+
+    ``method_preference`` selects the reconstruction chain: ``"calibrated"``
+    (default) tries the coefficient-calibrated family first, ``"legacy"``
+    reproduces the round-2 Series 60 / parametric / Wigley chain.
+    """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -348,7 +503,7 @@ def run_shipd_rebuild(
     t_start = time.time()
 
     for ship in ships:
-        result = rebuild_ship(ship, nx=nx, nz=nz)
+        result = rebuild_ship(ship, nx=nx, nz=nz, method_preference=method_preference)
         results.append(result)
 
     total_time = time.time() - t_start
@@ -387,6 +542,43 @@ def run_shipd_rebuild(
                 failure_modes[key] = []
             failure_modes[key].append({"ship_id": r.ship_id, "ship_type": r.ship_type, "error": r.error_message})
 
+    n_strict = sum(1 for r in results if r.strict_verdict == "VERIFIED")
+    strict_pass_rate = n_strict / n_total if n_total > 0 else 0.0
+
+    # Realised-vs-requested coefficient errors, ship by ship.
+    coefficient_errors: dict[str, list[float]] = {"Cb": [], "Cm": [], "Cwp": []}
+    for ship, r in zip(ships, results):
+        if r.realised_Cb is None:
+            continue
+        for key, got in (("Cb", r.realised_Cb), ("Cm", r.realised_Cm), ("Cwp", r.realised_Cwp)):
+            want = ship[key]
+            if want:
+                coefficient_errors[key].append(abs(got - want) / want)
+
+    def _coefficient_summary(values: list[float]) -> dict[str, float]:
+        if not values:
+            return {"mean": float("nan"), "max": float("nan"), "n": 0}
+        ordered = sorted(values)
+        return {
+            "n": len(values),
+            "mean": sum(values) / len(values),
+            "median": ordered[len(ordered) // 2],
+            "max": ordered[-1],
+            "p95": ordered[int(0.95 * (len(ordered) - 1))],
+            "within_tolerance_fraction": sum(
+                1 for v in values if v < COEFFICIENT_TOLERANCE
+            ) / len(values),
+        }
+
+    nominal_fields = {
+        ship["ship_id"]: nominal_performance_fields(ship) for ship in ships
+    }
+    (out_dir / "nominal_fields.json").write_text(json.dumps(nominal_fields, indent=2))
+    (out_dir / "ship_database.json").write_text(json.dumps(list(ships), indent=2))
+
+    correlation = correlation_sanity(ships, results)
+    (out_dir / "correlation.json").write_text(json.dumps(correlation, indent=2))
+
     vol_errors = [r.volume_error for r in results if r.volume_error is not None and r.verdict == "VERIFIED"]
     vol_error_mean = sum(vol_errors) / len(vol_errors) if vol_errors else 0.0
     vol_error_max = max(vol_errors) if vol_errors else 0.0
@@ -400,6 +592,14 @@ def run_shipd_rebuild(
         "n_failed": n_failed,
         "n_refused": n_refused,
         "pass_rate": pass_rate,
+        "strict_pass_rate": strict_pass_rate,
+        "n_strict_verified": n_strict,
+        "method_preference": method_preference,
+        "coefficient_agreement": {
+            key: _coefficient_summary(values) for key, values in coefficient_errors.items()
+        },
+        "coefficient_tolerance": COEFFICIENT_TOLERANCE,
+        "correlation_sanity": correlation,
         "method_distribution": method_counts,
         "ship_type_distribution": type_counts,
         "gate_pass_rates": gate_pass_rates,
