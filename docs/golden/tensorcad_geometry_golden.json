@@ -178,14 +178,7 @@
     "sphere_ellipsoid": {
       "geometry_sha256": "",
       "invariants": {},
-      "known_limitations": [
-        {
-          "asserted": false,
-          "detail": "the ellipsoid surface area has no elementary closed form (elliptic integrals), so it is drift-locked but not asserted against a reference",
-          "id": "ellipsoid-area-not-asserted",
-          "measured_surface_area_m2": 22.066714649980803
-        }
-      ],
+      "known_limitations": [],
       "measurements": {
         "coarse": {
           "ellipsoid_extent_x_m": 4,
@@ -216,6 +209,7 @@
         "ellipsoid_extent_x_m": 4,
         "ellipsoid_extent_y_m": 3,
         "ellipsoid_extent_z_m": 1,
+        "ellipsoid_surface_area_m2": 22.076658276751232,
         "ellipsoid_volume_m3": 6.283185307179586,
         "sphere_extent_x_m": 2,
         "sphere_extent_y_m": 2,
@@ -223,7 +217,7 @@
         "sphere_surface_area_m2": 12.566370614359172,
         "sphere_volume_m3": 4.1887902047863905
       },
-      "reference_source": "(4/3)\u03c0r\u00b3, 4\u03c0r\u00b2 and (4/3)\u03c0abc over the exact primitive fields",
+      "reference_source": "(4/3)\u03c0r\u00b3 and (4/3)\u03c0abc over the exact primitive fields; the areas from the exact semi-axes: 4\u03c0r\u00b2 for the sphere and tensorcad.analytic_solids.ellipsoid_surface_area for the triaxial ellipsoid (converged Gauss-Legendre quadrature of the exact area element, cross-checked against the spheroid closed form)",
       "title": "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra",
       "tolerances": {
         "ellipsoid_extent_x_m": {
@@ -237,6 +231,10 @@
         "ellipsoid_extent_z_m": {
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "value": 0.0001
+        },
+        "ellipsoid_surface_area_m2": {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.388e-03 = 2.776e-03",
+          "value": 0.002775709300300617
         },
         "ellipsoid_volume_m3": {
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.728e-03 = 5.457e-03",
@@ -345,8 +343,8 @@
   },
   "provenance": {
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "5eaf140b1b704bd4316866023f5f9eabdb37668b0190e138a698798b16a2d927",
-    "git_commit": "17c09fa6c785c0bb7ed6a2b39a7428b8af2fea2a",
+    "geometry_fingerprint": "c9dbba58554d945e5a6a097b58cea57494c16ba9fb6d894edfe3408234b5a355",
+    "git_commit": "cab0daeb88f1880adc4e958f91d6f7f4a40b9a28",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },
