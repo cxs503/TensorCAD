@@ -194,10 +194,38 @@ class PerfBenchmarkResult:
     def passed(self) -> bool:
         return all(g.passed for g in self.gates)
 
+    @property
+    def gates_checked(self) -> int:
+        """Number of gates that actually produced a verdict.
+
+        A ``not_run`` gate carries ``passed=True`` for backwards compatibility,
+        so ``passed`` alone cannot tell "everything was checked and green" from
+        "nothing was checked".  This count can (see :attr:`verdict`).
+        """
+        return sum(1 for g in self.gates if g.status != NOT_RUN)
+
+    @property
+    def gates_not_run(self) -> int:
+        return sum(1 for g in self.gates if g.status == NOT_RUN)
+
+    @property
+    def verdict(self) -> str:
+        """``fail`` / ``pass`` / ``not_run`` - honest three-way verdict.
+
+        ``not_run`` means no gate could be evaluated (e.g. a ladder with fewer
+        than ``MIN_SCALING_POINTS`` rungs): that is *not* a pass.
+        """
+        if any(not g.passed for g in self.gates):
+            return "fail"
+        return "pass" if self.gates_checked else "not_run"
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema": BENCHMARK_SCHEMA,
             "passed": self.passed,
+            "verdict": self.verdict,
+            "gates_checked": self.gates_checked,
+            "gates_not_run": self.gates_not_run,
             "seconds": self.seconds,
             "command": self.command,
             "environment": self.environment,
@@ -1124,7 +1152,16 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  ✗ {name}")
         return 1
 
-    print("\nAll gates passed." if result.gates else "\nNo baseline for regression gates.")
+    if not result.gates:
+        print("\nNo baseline for regression gates.")
+    elif result.verdict == "pass":
+        extra = f" ({result.gates_not_run} not_run, not counted as a pass)" if result.gates_not_run else ""
+        print(f"\nAll gates passed.{extra}")
+    else:
+        print(
+            f"\nNo gate could be checked: all {result.gates_not_run} gate(s) not_run. "
+            f"This is NOT a pass."
+        )
     return 0
 
 
