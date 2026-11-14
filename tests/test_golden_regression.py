@@ -127,7 +127,7 @@ def test_dtmb5415_publishes_topology_instead_of_a_fake_displacement(
 def test_forcing_closed_on_the_open_5415_shell_is_visible() -> None:
     """``closed=True`` on an open shell is a caller error; the report must expose it."""
     from tensorcad import mesh as meshlib
-    from tensorcad.dtmb5415 import DTMB5415Space, WATERLINE_Z
+    from tensorcad.dtmb5415 import WATERLINE_Z, DTMB5415Space
     from tensorcad.hydrostatics import compute_hydrostatics
 
     space = DTMB5415Space()
@@ -208,6 +208,49 @@ def test_known_limitations_are_recorded_not_hidden(committed: golden.SuiteResult
     # The number that used to be published as a volume: it is the signed tetrahedron sum
     # of an open surface, and it is negative, which no displacement can be.
     assert limitation["signed_tetra_sum_open_shell_m3"] < 0.0
+
+
+def test_ellipsoid_area_is_asserted_against_an_exact_reference(
+    committed: golden.SuiteResult,
+) -> None:
+    """Regression for the lifted "ellipsoid-area-not-asserted" limitation.
+
+    A triaxial ellipsoid's area is an elliptic integral, so for a while it was only
+    drift-locked: a gate that notices a *changed* area but not a *wrong* one. It is now
+    asserted against converged quadrature of the exact area element, which shares no code
+    with the mesher under test.
+    """
+    from tensorcad.analytic_solids import ellipsoid_surface_area
+
+    case = {result.name: result for result in committed.cases}["sphere_ellipsoid"]
+    assert "ellipsoid-area-not-asserted" not in {entry["id"] for entry in case.known_limitations}
+    metric = next(m for m in case.metrics if m.name == "ellipsoid_surface_area_m2")
+    assert metric.kind == "analytic"
+    assert metric.reference == pytest.approx(ellipsoid_surface_area((2.0, 1.5, 0.5)), rel=1e-12)
+    assert metric.relative_error is not None and metric.tolerance is not None
+    assert metric.passed
+    assert abs(metric.relative_error) <= metric.tolerance
+
+
+def test_a_failing_case_reports_itself_as_failed(tmp_path: Path) -> None:
+    """Per-case ``passed`` must reflect that case's findings, not be vacuously true.
+
+    Regression: ``run_suite`` collected every finding into one suite-level list and left
+    ``CaseResult.findings`` empty, so ``case.passed`` was always True. The suite flag was
+    right (it read the shared list) while the report told a reader that a drifting case
+    passed. Measured with a case whose measurement is 50 % off its blessed value.
+    """
+    baseline = _bless(tmp_path, ProbeCase())
+    drifted = ProbeCase(scale=1.5)
+    result = golden.run_suite(baseline_path=baseline, cases=[drifted])
+
+    assert result.passed is False
+    (case_result,) = result.cases
+    assert case_result.passed is False
+    assert case_result.findings, "the failing case must carry its own findings"
+    assert all(finding.case == "probe" for finding in case_result.findings)
+    # one error, counted once: the suite list holds suite-level findings only
+    assert len(result.errors) == len({(f.case, f.code, f.detail) for f in result.errors})
 
 
 # --------------------------------------------------------------------------------------

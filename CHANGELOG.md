@@ -1,6 +1,34 @@
 
 ## Unreleased
 
+- **The golden library's last unasserted metric now has an exact reference: the triaxial
+  ellipsoid surface area** (`tensorcad/analytic_solids.py`, `docs/golden/analytic_reference.md`,
+  `tools/golden/ellipsoid_area_evidence.py`, `artifacts/golden_ellipsoid_area/`).
+  GAP-CAD-D2's suite asserted every metric of the four golden bodies except one: the
+  ellipsoid area was drift-locked, because the area is an elliptic integral and therefore
+  looked exempt from a closed form. Drift-locking catches a *changed* area, never a *wrong*
+  one. `ellipsoid_surface_area` now integrates the exact area element
+  `sin u * sqrt(a^2 b^2 cos^2 u + c^2 sin^2 u (b^2 cos^2 v + a^2 sin^2 v))` with a
+  tensor Gauss-Legendre rule, doubling the order until two passes agree to 1e-11 relative
+  and raising rather than returning an unconverged value; it shares no code with the mesher
+  under test. It agrees with the elementary spheroid closed forms (`atanh` oblate, `asin`
+  prolate) to ~1e-14 over aspect ratios 1.1-10, and with `4 pi r^2` to 1e-15. The
+  `sphere_ellipsoid` case asserts its mesh area against it: 22.0667 m^2 vs 22.0767 m^2,
+  **-0.045 %** inside a derived two-grid tolerance of 0.28 %, so the recorded
+  `ellipsoid-area-not-asserted` limitation is lifted and `docs/golden_regression.md` §6
+  records the applicability limit instead (order proportional to the axis ratio, cap 512,
+  explicit refusal beyond ~10:1). Evidence tables and the cross-check figure are generated,
+  not typed: `tools/golden/ellipsoid_area_evidence.py` reads the suite result back out of
+  `docs/golden/results.json`.
+- **Golden suite: a failing case now says so** (`tensorcad/golden.py`, `run_suite`).
+  Every finding was collected into one suite-level list and `CaseResult.findings` was left
+  empty, so `case.passed` was vacuously true: the suite gate was right (it read the shared
+  list) while each case's column in `docs/golden/results.json` said `passed: true` even for
+  a case that had failed. Findings are now attributed to the case that raised them, still
+  reported once by `SuiteResult.all_findings`. Regression:
+  `test_a_failing_case_reports_itself_as_failed` (a case 50 % off its blessed measurement
+  must carry its own errors and report `passed: false`).
+
 - **`tensorcad.midsurface`: the GAP-CAD-013 ledger is closed, and the evidence ships with it**
   (`docs/midsurface.md` §9, `examples/midsurface/`, `artifacts/midsurface/`, `tools/oss_inventory_cad/feature_points.json`).
   The capability (ray-cast mid-surface extraction + planar defeaturing) already landed
