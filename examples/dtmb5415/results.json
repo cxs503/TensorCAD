@@ -1,0 +1,41 @@
+{
+  "reference_hull": {
+    "design_vector": "zeros (reference)",
+    "n_vertices": 25802,
+    "n_faces": 50880,
+    "shell_volume_m3": 20692.6558,
+    "displacement_volume_m3": 8452.7578,
+    "waterplane_area_m2": 2100.3254,
+    "lcb_m": 70.387,
+    "cb": 0.502,
+    "cwp": 0.7679,
+    "min_angle_deg": 60.5,
+    "edge_median_m": 0.4549,
+    "edge_max_m": 2.357,
+    "half_breadth_raw_min_m": -0.0,
+    "half_breadth_min_m": 0.0,
+    "half_breadth_clamped_vertices": 92,
+    "volume_gradient_norm": 1711.4766
+  },
+  "gradient_parity": {
+    "max_relative_error": 3.07e-08,
+    "mean_relative_error": 2.7e-09,
+    "all_modes_pass_1pct": true
+  },
+  "quality_summary": {
+    "n_configs": 20,
+    "all_pass": true,
+    "min_angle_range": [
+      60.1,
+      61.7
+    ],
+    "max_clamped_vertices": 305
+  },
+  "model_accuracy": {
+    "n_holdout": 12,
+    "rms_mean_m": 0.2319,
+    "rms_median_m": 0.2229,
+    "rms_max_m": 0.4495,
+    "rms_pct_beam_mean": 1.13
+  }
+}
