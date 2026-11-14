@@ -89,6 +89,8 @@ class ShipRecord:
     transom_ratio: float = 0.0
     geometry_sha256: str | None = None
     geometry_path: str | None = None
+    #: Multi-source reference cells from ``fleet_specs.json`` (library cross-reference).
+    published_refs: dict[str, Any] | None = None
 
     # -- derived quantities -------------------------------------------------
     def closed_form_volume(self) -> float:
@@ -100,6 +102,26 @@ class ShipRecord:
         if self.displacement_volume is not None:
             return float(self.displacement_volume)
         return self.closed_form_volume()
+
+    def published_references(self) -> dict[str, Any]:
+        """Multi-source reference cells loaded from ``fleet_specs.json`` (may be empty)."""
+        return self.published_refs or {}
+
+    def published_provenance(self, quantity: str = "displacement_volume") -> dict[str, Any] | None:
+        """Where one reference value comes from: family values plus every source digest."""
+        row = self.published_references().get(quantity)
+        if not row:
+            return None
+        return {
+            "verdict": row.get("verdict"),
+            "disputed": bool(row.get("disputed")),
+            "values": row.get("values"),
+            "entries": [
+                {"source": entry.get("source"), "sha256": entry.get("sha256"),
+                 "family": entry.get("family"), "value": entry.get("value")}
+                for entry in row.get("entries", [])
+            ],
+        }
 
     def reference_basis(self) -> str:
         if self.displacement_volume is not None:
@@ -240,6 +262,7 @@ def record_from_dict(payload: Mapping[str, Any], *, where: str = "ship") -> Ship
         notes=str(payload.get("notes", "")),
         geometry_sha256=payload.get("geometry_sha256"),
         geometry_path=payload.get("geometry_path"),
+        published_refs=dict(payload.get("published_references") or {}),
     )
 
 

@@ -1,0 +1,64 @@
+{
+  "schema": "tensorcad.fleet_refs.digest_audit/1.0",
+  "sources": {
+    "t2015_kcs": {
+      "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+      "family": "NMRI-T2015",
+      "pinned": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+      "fetched": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+      "bytes": 12978,
+      "verdict": "match"
+    },
+    "t2015_jbc": {
+      "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+      "family": "NMRI-T2015",
+      "pinned": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+      "fetched": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+      "bytes": 13694,
+      "verdict": "match"
+    },
+    "t2015_onrt": {
+      "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+      "family": "NMRI-T2015",
+      "pinned": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+      "fetched": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+      "bytes": 8689,
+      "verdict": "match"
+    },
+    "simman2020_summary": {
+      "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+      "family": "SIMMAN-2020",
+      "pinned": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+      "fetched": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+      "bytes": 35030,
+      "verdict": "match"
+    },
+    "simman2014_kvlcc2": {
+      "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+      "family": "SIMMAN-2014",
+      "pinned": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+      "fetched": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+      "bytes": 66359,
+      "verdict": "match"
+    },
+    "simman2014_kcs": {
+      "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+      "family": "SIMMAN-2014",
+      "pinned": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+      "fetched": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+      "bytes": 68248,
+      "verdict": "match"
+    },
+    "ittc_benchmarks": {
+      "url": "https://ittc.info/media/11250/list-of-benchmarks-2.pdf",
+      "family": "ITTC",
+      "pinned": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+      "fetched": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+      "bytes": 121652,
+      "verdict": "match"
+    }
+  },
+  "pinned": 7,
+  "checked": 7,
+  "all_pinned_digests_match_fetched_bytes": true
+}
