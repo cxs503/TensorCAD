@@ -128,7 +128,7 @@ SOURCES: tuple[SourceSpec, ...] = (
         family="NMRI-T2015",
         url="https://www.t2015.nmri.go.jp/jbc_gc.html",
         kind="html",
-        sha256="fc2ce9058b8fd5c8d83ba5b2c1a0c78f2f0f57e2e1e5d1ec1b7bd8a0a6b6a3f1",
+        sha256="fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         licence="page copyright NMRI; digests + extracted cells only",
         column=2,
     ),
@@ -139,7 +139,7 @@ SOURCES: tuple[SourceSpec, ...] = (
         family="NMRI-T2015",
         url="https://www.t2015.nmri.go.jp/onrt_gc.html",
         kind="html",
-        sha256="5e134273ab3a51b0e6c4a1e0d1f0b3f57d3bbd0c9c0d8a2e5b0f6f0d9d1e2c3a",
+        sha256="5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         licence="page copyright NMRI; digests + extracted cells only",
         column=3,
     ),
@@ -150,7 +150,7 @@ SOURCES: tuple[SourceSpec, ...] = (
         family="SIMMAN-2020",
         url="https://simman2020.kr/contents/Ship_data_summary.php",
         kind="html",
-        sha256="",
+        sha256="c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         licence="page copyright SIMMAN2020; digests + extracted cells only",
     ),
     SourceSpec(
@@ -160,7 +160,7 @@ SOURCES: tuple[SourceSpec, ...] = (
         family="SIMMAN-2014",
         url="https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
         kind="html",
-        sha256="",
+        sha256="bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         licence="page copyright FORCE Technology; digests + extracted cells only",
     ),
     SourceSpec(
@@ -170,7 +170,7 @@ SOURCES: tuple[SourceSpec, ...] = (
         family="SIMMAN-2014",
         url="https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
         kind="html",
-        sha256="",
+        sha256="3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         licence="page copyright FORCE Technology; digests + extracted cells only",
     ),
     SourceSpec(
@@ -180,7 +180,7 @@ SOURCES: tuple[SourceSpec, ...] = (
         family="ITTC",
         url="https://ittc.info/media/11250/list-of-benchmarks-2.pdf",
         kind="pdf",
-        sha256="",
+        sha256="da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
         licence="ITTC publication; bibliographic endorsement of the hull set (no numerals read)",
     ),
 )
@@ -338,6 +338,13 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                     continue
             families: dict[str, list[float]] = {}
             for entry in entries:
+                # A cell read from a fallback column has an unknown scale: it stays in
+                # ``entries`` for the audit trail but never votes.  The original loop put the
+                # guard at the *end* of the collection loop, where it excluded nothing, so a
+                # neighbouring-column reading could outvote (or silently corroborate) the real
+                # full-scale value -- two tests had been failing on exactly that.
+                if entry["cell"]["unit_basis"].startswith("fallback_column"):
+                    continue
                 families.setdefault(entry["family"], []).append(entry["cell"]["value"])
             family_values = {fam: sum(vals) / len(vals) for fam, vals in sorted(families.items())}
             if len(family_values) >= 2:
@@ -347,8 +354,16 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
             else:
                 delta, rel = 0.0, 0.0
                 verdict = "SINGLE_SOURCE" if family_values else "MISSING"
+            ordered = [
+                {"family": fam, "value": value}
+                for fam, value in sorted(family_values.items())
+            ]
             per_quantity[quantity] = {
                 "verdict": verdict,
+                # A disagreement above the tolerance is *disputed*, not averaged: both
+                # family values stay in ``ordered`` so a consumer must choose explicitly.
+                "disputed": verdict == "CONFLICT",
+                "published_values": ordered,
                 "independent_families": len(family_values),
                 "family_values": family_values,
                 "range": delta,
@@ -370,6 +385,9 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
             "conflict": sum(1 for q in per_quantity.values() if q["verdict"] == "CONFLICT"),
             "missing": sum(1 for q in per_quantity.values() if q["verdict"] == "MISSING"),
             "corroborated_by_repeat_family": repeated,
+            "disputed_quantities": [
+                q for q in QUANTITIES if per_quantity[q]["verdict"] == "CONFLICT"
+            ],
         }
     return report
 
@@ -453,3 +471,117 @@ def coverage_summary(report: Mapping[str, Any]) -> dict[str, Any]:
             )
         ],
     }
+
+#: A pinned digest is a SHA-256 hex string, nothing else.  ``pin_audit`` exists because a
+#: digest that was typed rather than fetched still *looks* like a fingerprint: two of the
+#: seven source digests in the first version of this registry shared their leading eight
+#: hex digits with the real bytes and then diverged, which is what a hand-written
+#: continuation looks like.  The audit recomputes every digest from the bytes and says so.
+DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+
+
+def pin_audit(fetched: Mapping[str, bytes | str]) -> dict[str, dict[str, Any]]:
+    """Per source: is the pinned digest the digest of the bytes that were actually read?
+
+    ``fetched`` maps source key -> payload.  A key that is not in ``fetched`` is reported as
+    ``not_fetched``; it never counts as verified.  ``hand_written`` marks a pinned digest
+    that is not even 64 lowercase hex digits, and ``drift`` marks a fetch whose digest no
+    longer matches the pin -- a source change that must be re-read deliberately.
+    """
+    import hashlib
+
+    out: dict[str, dict[str, Any]] = {}
+    for spec in SOURCES:
+        payload = fetched.get(spec.key)
+        row: dict[str, Any] = {"url": spec.url, "family": spec.family}
+        if payload is None:
+            row["verdict"] = "not_fetched"
+            row["pinned"] = spec.sha256
+            out[spec.key] = row
+            continue
+        data = payload.encode("utf-8") if isinstance(payload, str) else payload
+        digest = hashlib.sha256(data).hexdigest()
+        row.update(pinned=spec.sha256, fetched=digest, bytes=len(data))
+        if not spec.sha256:
+            row["verdict"] = "unpinned"
+        elif not DIGEST_PATTERN.match(spec.sha256):
+            row["verdict"] = "hand_written"
+        elif spec.sha256 == digest:
+            row["verdict"] = "match"
+        else:
+            row["verdict"] = "drift"
+        out[spec.key] = row
+    return out
+
+
+@dataclass(frozen=True)
+class Reference:
+    """One published quantity, resolved to a single value *and* to its provenance."""
+
+    ship: str
+    quantity: str
+    value: float
+    disputed: bool
+    families: tuple[str, ...]
+    #: Every family value, so a disputed reference can be quoted both ways.
+    values: tuple[tuple[str, float], ...]
+    #: ``(source_key, sha256)`` for every entry that backs the value.
+    provenance: tuple[tuple[str, str], ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "ship": self.ship,
+            "quantity": self.quantity,
+            "value": self.value,
+            "disputed": self.disputed,
+            "families": list(self.families),
+            "values": [{"family": fam, "value": value} for fam, value in self.values],
+            "provenance": [{"source": key, "sha256": sha} for key, sha in self.provenance],
+        }
+
+
+def resolve_reference(
+    report: Mapping[str, Any],
+    ship: str,
+    quantity: str = "displacement_volume",
+    *,
+    preferred_family: str | None = None,
+) -> Reference | None:
+    """Resolve one published quantity to a value plus provenance, never to an average.
+
+    * agreed sources -> the agreed value;
+    * one family -> that family's value, ``disputed=False`` (honest single source);
+    * several families that disagree -> ``disputed=True`` with *all* values kept.  The
+      returned ``value`` is the preferred family's, else the family with the most entries
+      (ties broken alphabetically) -- a deterministic rule, not a mean, and the caller can
+      see from ``disputed`` that the number is one of two.
+    * nothing published -> ``None`` (the caller must fall back to a closure, visibly).
+    """
+    quantity_row = report[ship]["quantities"][quantity]
+    families = quantity_row["family_values"]
+    if not families:
+        return None
+    entries = quantity_row["entries"]
+    counts: dict[str, int] = {}
+    provenance: list[tuple[str, str]] = []
+    for entry in entries:
+        fam = entry["family"]
+        counts[fam] = counts.get(fam, 0) + 1
+        provenance.append((entry["cell"]["source"], entry["cell"]["sha256"]))
+    if preferred_family is not None:
+        if preferred_family not in families:
+            raise KeyError(f"{preferred_family!r} states no {quantity} for {ship}")
+        chosen = preferred_family
+    elif len(families) == 1:
+        chosen = next(iter(families))
+    else:
+        chosen = sorted(families, key=lambda fam: (-counts[fam], fam))[0]
+    return Reference(
+        ship=ship,
+        quantity=quantity,
+        value=families[chosen],
+        disputed=quantity_row["verdict"] == "CONFLICT",
+        families=tuple(sorted(families)),
+        values=tuple(sorted(families.items())),
+        provenance=tuple(sorted(set(provenance))),
+    )
