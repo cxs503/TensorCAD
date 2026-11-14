@@ -1,0 +1,241 @@
+{
+  "subject": "mission m20092 (predecessor m20002), TensorCAD, CASE-CAD-CURVATURE-SPHERE",
+  "subject_worktree": "/root/tp-agent/work/m20092",
+  "subject_git_head": "6e548208a4f103399556a399861e08e2dc9525c5",
+  "subject_branch": "agent/m20092",
+  "verdict_repo": "TensorCAD",
+  "verdict_scope": "m20092 CASE-CAD-CURVATURE-SPHERE",
+  "verdict_mission": 20148,
+  "claimed_level": 2,
+  "impl_files": [
+    "docs/board_audit/m20148/refs/benchmarks__verified__sphere_mean_curvature__run_benchmark.py",
+    "/root/tp-agent/work/m20092/benchmarks/verified/sphere_mean_curvature/run_benchmark.py",
+    "tensorcad/curvature.py"
+  ],
+  "impl_files_detail": [
+    "run_benchmark.py:20373 B, gates at :233 (G2 2 %), :247-280 (G3/G3b, G3 tolerance 0.60 at :271), :300-330 (G4 UV sphere + observed order), :350-360 (G5 multi-radius), :416 run(); sha256 see docs/board_audit/m20148/refs/MANIFEST.json",
+    "tensorcad/curvature.py:292 def vertex_mean_curvature - production cotangent-Laplacian estimator reused, no private fork; grep -iE 'mock|stub|TODO|np.random' over the case layer -> empty",
+    "C1: auditor re-ran the subject repro_cmd -> 20/20 gated rows identical, max rel diff 0 (23 numeric entries)"
+  ],
+  "entry": [
+    "docs/board_audit/m20148/refs/tools__run_sphere_curvature_benchmark.py",
+    "/root/tp-agent/work/m20092/tools/run_sphere_curvature_benchmark.py"
+  ],
+  "run_artifacts": [
+    "runs/m20148_sphere_rerun/result.json",
+    "runs/m20148_sphere_rerun/gates_verified.json",
+    "runs/m20148/audit_metrics.json",
+    "docs/figs/m20148_sphere_audit.png",
+    "/root/tp-agent/work/m20092/runs/case_cad_curvature_sphere/result.json",
+    "/root/tp-agent/work/m20092/runs/case_cad_curvature_sphere/gates_verified.json"
+  ],
+  "run_artifacts_detail": "auditor's own rerun (runs/m20148_sphere_rerun) is committed in this branch and is bit-identical to the subject artifact except timestamp/elapsed; the subject copy is ephemeral (untracked).",
+  "tests": [
+    "docs/board_audit/m20148/refs/tests__test_case_cad_curvature_sphere.py",
+    "pytest tests/test_case_cad_curvature_sphere.py -> 7 passed in 54.06 s (auditor re-ran); test_all_gates_hold, test_case_tolerance (asserts self-declared per-row tolerances, not the 2 % contract), test_g2_integral_convergence, test_g4_convergence_order, test_g6_integral_identity, test_schema, test_gates_verified_file"
+  ],
+  "integration_callers": [],
+  "integration_callers_detail": "grep -rn sphere_mean_curvature over the subject repo, minus the delivery's own dirs, returns no platform/solver caller (runs/m20148/audit_metrics.json -> C6_callers). tensor_case_pool.id=205 is demand-side dispatch, not code integration; the delivery is untracked so CI's pytest -q never sees it (0/8 files committed, HEAD 6e54820 = main; mission result branch=null head_commit=null; stale commit 4558ef6 with a different 831-line runner sits only on refs/heads/agent/m20002).",
+  "benchmark": {
+    "registered_referee_rows": 0,
+    "benchmark_table_total_rows": 125,
+    "case_pool": [
+      "205",
+      "CAD-CURVATURE-SPHERE",
+      "TensorCAD",
+      "解析 2/R",
+      "<2%",
+      "core",
+      "dispatched",
+      "20002"
+    ],
+    "case_tolerance_pct": 2.0,
+    "rows": [
+      {
+        "quantity": "marching-tet level 48, area-weighted S",
+        "ref": 2.0,
+        "got": 2.0002377872364367,
+        "rel_err_pct": 0.011889361821837419,
+        "tolerance_pct": 2.0,
+        "holds": true
+      },
+      {
+        "quantity": "sphere R=5.0, area-weighted S",
+        "ref": 0.4,
+        "got": 0.40010950167024484,
+        "rel_err_pct": 0.027375417561192883,
+        "tolerance_pct": 2.0,
+        "holds": true
+      },
+      {
+        "quantity": "integral of S dA (bending energy identity)",
+        "ref": 25.132741228718345,
+        "got": 25.113468572669397,
+        "rel_err_pct": -0.07668346191749276,
+        "tolerance_pct": 1.0,
+        "holds": true
+      },
+      {
+        "quantity": "pointwise median S (raw marching-tet)",
+        "ref": 2.0,
+        "got": 2.15672214387995,
+        "rel_err_pct": 7.836107193997499,
+        "declared_tolerance_pct": 60.0,
+        "holds_under_self_declared_tolerance": true,
+        "holds_under_case_criterion_2pct": false
+      },
+      {
+        "quantity": "pointwise median S (taubin+project)",
+        "ref": 2.0,
+        "got": 1.9999265659736252,
+        "rel_err_pct": -0.003671701318741505,
+        "tolerance_pct": 5.0,
+        "holds": true
+      },
+      {
+        "quantity": "raw marching-tet pointwise error (diagnostic, not gated)",
+        "median_abs_err_pct": 50.4493800765968,
+        "p95_abs_err_pct": 441.8302879641287,
+        "gated": false
+      }
+    ],
+    "worst_gated_error_pct": 7.836107193997499,
+    "rows_within_case_criterion": "19/20",
+    "referee_verdict": "no tensor_benchmark_cases row for this anchor -> no machine-verifiable pass channel; the 2 % criterion exists only in the subject's code (CASE_TOLERANCE) and in tensor_case_pool.id=205 tol_policy '<2%'"
+  },
+  "repro_cmd": "cd /root/tp-agent/work/m20092 && python benchmarks/verified/sphere_mean_curvature/run_benchmark.py --out /root/tp-agent/work/m20148/runs/m20148_sphere_rerun && python -m pytest tests/test_case_cad_curvature_sphere.py -q   [VERIFIED by auditor: 33.1 s, 20/20 gates, worst 7.8361 % (G3 self-declared 60 % tolerance), all numbers identical to the artifact; pytest 7 passed in 54.06 s]",
+  "external_anchor": "analytic closed form S = kappa1+kappa2 = 2/R (do Carmo 1976 Differential Geometry Sec 3-3 Ex 2; Meyer et al. VisMath 2003 Sec 3.3 convention |K|=2|H|) plus the independent integral identity int S dA = 8 pi R: measured 25.113469 vs 8pi = 25.132741 (-0.0767 %); in-repo second anchor benchmarks/verified/curvature_fairness gates the sphere 1/R field at 1e-6 (run_benchmark.py:72)",
+  "findings": {
+    "F1_benchmark_referee_absent": {
+      "query": "SELECT case_name,metric,tolerance FROM tensor_benchmark_cases WHERE anchor_slug='CASE-CAD-CURVATURE-SPHERE'",
+      "rows": 0,
+      "table_total_rows": 125,
+      "case_pool": [
+        "205",
+        "CAD-CURVATURE-SPHERE",
+        "TensorCAD",
+        "解析 2/R",
+        "<2%",
+        "core",
+        "dispatched",
+        "20002"
+      ],
+      "machine_verifiable_pass_channel": false
+    },
+    "F2_doc_vs_artifact": {
+      "cells_checked": 28,
+      "cells_inconsistent": 10,
+      "worst_rel_diff": 0.8695937852837232,
+      "criterion": "cell consistent if |doc - artifact| <= half a unit in the last printed digit",
+      "examples": [
+        {
+          "table": "G4",
+          "row": "8x16",
+          "cell": "S",
+          "doc": 1.987,
+          "artifact": 1.960884923866949,
+          "rel_diff": 0.013318005465385004
+        },
+        {
+          "table": "G4",
+          "row": "8x16",
+          "cell": "error_pct",
+          "doc": 0.65,
+          "artifact": 1.9557538066525493,
+          "rel_diff": 0.6676473297462046
+        },
+        {
+          "table": "G4",
+          "row": "16x32",
+          "cell": "S",
+          "doc": 1.997,
+          "artifact": 1.99033949823524,
+          "rel_diff": 0.0033464149059322258
+        },
+        {
+          "table": "G4",
+          "row": "16x32",
+          "cell": "error_pct",
+          "doc": 0.16,
+          "artifact": 0.4830250882379983,
+          "rel_diff": 0.6687542657801573
+        }
+      ],
+      "detail": "runs/m20148/audit_metrics.json -> C2_transcription (all 28 cells)"
+    },
+    "F3_delivery_not_landed": {
+      "files_committed": 0,
+      "files_total": 8,
+      "head": "6e548208a4f103399556a399861e08e2dc9525c5",
+      "stale_commit_refs": [
+        "4558ef6d3d18e91090d777ab05987528a85fe72e commit\trefs/heads/agent/m20002"
+      ],
+      "note": "two divergent runners exist (worktree 20373 B vs commit 4558ef6 34989 B) with different measured numbers (commit message: raw pointwise 50.1 %, UV 16x32 0.39 %); neither is on main"
+    },
+    "F4_overstated_claims": {
+      "mission_headline": "+0.0119 % (best row)",
+      "artifact_summary_worst_error_pct": 7.836107193997499,
+      "doc_claim_all_rows_under_2pct": false,
+      "machine_check": "19/20 gated rows within 2 %"
+    },
+    "F5_self_declared_tolerance": [
+      {
+        "gate": "G3",
+        "quantity": "pointwise median S (raw marching-tet)",
+        "measured_error_pct": 7.836107193997499,
+        "declared_tolerance_pct": 60.0
+      },
+      {
+        "gate": "G3b",
+        "quantity": "pointwise median S (taubin+project)",
+        "measured_error_pct": -0.003671701318741505,
+        "declared_tolerance_pct": 5.0
+      }
+    ],
+    "F6_no_integration_caller": {
+      "grep": "grep -rn sphere_mean_curvature --include='*.py' /root/tp-agent/work/m20092 (excluding the delivery dirs)",
+      "hits_outside_delivery": [],
+      "independent_caller_found": false,
+      "ci_runs_pytest": true,
+      "note": "the entry tools/run_sphere_curvature_benchmark.py is not referenced by any platform/module code; the only references are the delivery's own package entry and the case pool row tensor_case_pool.id=205 (demand side, not code)"
+    },
+    "F7_G1_is_analytic_field_path": "G1 gates a finite-difference Hessian of SphereField (absolute 1e-6 on values up to 20 1/m), not the discrete mesh estimator; the 1e-12 numbers must not be read as mesh-operator accuracy",
+    "F8_positive_determinism": {
+      "rows_compared": 20,
+      "rows_differing_rel_gt_1e-9": 0,
+      "max_rel_diff": 0.0,
+      "summary_subject": {
+        "total_gates": 20,
+        "passed": 20,
+        "failed": 0,
+        "worst_error_pct": 7.836107193997499
+      },
+      "summary_rerun": {
+        "total_gates": 20,
+        "passed": 20,
+        "failed": 0,
+        "worst_error_pct": 7.836107193997499
+      },
+      "bitwise_identical_except_timestamp": true
+    }
+  },
+  "level_rationale": "L2: real code, real inputs, deterministic outputs, analytic 2/R anchor, 7/7 tests, auditor re-ran bit-identically. Not L3: no independent caller, delivery untracked (0/8) so CI never sees it, mission result branch/head_commit are null. Not L4: tensor_benchmark_cases has 0/125 rows for the anchor (no machine-verifiable tolerance channel) and the report's number tables disagree with the shipped artifact in 10/28 cells (G6 error understated 8.7x). Not L5: standard verification case, no new numerical method, no experimental/literature error table, no paper. The numerical kernel (vertex_mean_curvature) is pre-existing, so the delivery adds a verification shell, not a new solver capability.",
+  "checks_not_run": [
+    "the stale 831-line runner in commit 4558ef6 was not executed (its 50.1 %/1.94 %/0.39 % numbers are unverified)",
+    "no independent re-implementation of the cotangent operator",
+    "no third mesh family (Delaunay/anisotropic/noisy) and no level 64+ extension",
+    "no cell-by-cell comparison against Meyer et al. 2003 error tables",
+    "GitHub-side branch/PR state (no network)",
+    "PNG pixel-vs-data equality (figures are illustrative only)",
+    "maturity_gate final ruling (gate_state pending at insert time)"
+  ],
+  "arbiter_check": "SELECT case_name,metric,tolerance FROM tensor_benchmark_cases WHERE anchor_slug='CASE-CAD-CURVATURE-SPHERE' -> 0 rows (table total 125); tensor_case_pool id=205 case_code=CAD-CURVATURE-SPHERE repo=TensorCAD ref_source='解析 2/R' tol_policy='<2%' tier=core status=dispatched mission_id=20002 -> tolerance registered in the pool, not in the sole judge",
+  "disposition": "request changes: confirm L2; remediation = (1) register the benchmark row, (2) commit the delivery and drop the superseded 831-line runner, (3) regenerate all report tables from result.json, (4) fix the 'all rows <2 %' statement and the 0.0119 % headline, (5) wire the entry into the case runner/CI, (6) reclassify G3's 60 % tolerance as diagnostic or justify it",
+  "audit_doc": "docs/board_audit/m20148/CASE-CAD-CURVATURE-SPHERE_AUDIT.md",
+  "audit_scripts": [
+    "runs/m20148/audit_sphere_case.py",
+    "runs/m20148/make_figs.py",
+    "docs/board_audit/m20148/build_evidence.py",
+    "docs/board_audit/m20148/insert_verdict.py"
+  ]
+}

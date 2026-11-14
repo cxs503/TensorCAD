@@ -1,0 +1,54 @@
+{
+  "anchor": "CASE-CAD-CURVATURE-SPHERE",
+  "subject_worktree": "/root/tp-agent/work/m20092",
+  "files": [
+    {
+      "subject_path": "/root/tp-agent/work/m20092/benchmarks/verified/sphere_mean_curvature/run_benchmark.py",
+      "audit_copy": "docs/board_audit/m20148/refs/benchmarks__verified__sphere_mean_curvature__run_benchmark.py",
+      "sha256": "d9fb428dd041e1b95b36418406e44d2bb51946f5ded9d4238c3e6f5bf0d449cf",
+      "bytes": 20373
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/benchmarks/verified/sphere_mean_curvature/make_figures.py",
+      "audit_copy": "docs/board_audit/m20148/refs/benchmarks__verified__sphere_mean_curvature__make_figures.py",
+      "sha256": "43377e5dd5182acc74470350ce01aa475fad4392f025ee0960ee8a50f0652872",
+      "bytes": 5415
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/tools/run_sphere_curvature_benchmark.py",
+      "audit_copy": "docs/board_audit/m20148/refs/tools__run_sphere_curvature_benchmark.py",
+      "sha256": "44478c7f6a42b4ca0d5ef03192c60052a1f09fd47d0001492c44a0d3ceac9bd2",
+      "bytes": 1434
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/tests/test_case_cad_curvature_sphere.py",
+      "audit_copy": "docs/board_audit/m20148/refs/tests__test_case_cad_curvature_sphere.py",
+      "sha256": "09c6acaebd785227dfa8093d76b60dedbfd33889fcacd950cd7633264f28b545",
+      "bytes": 3740
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/tensorcad/benchmarks/sphere_curvature/__main__.py",
+      "audit_copy": "docs/board_audit/m20148/refs/tensorcad__benchmarks__sphere_curvature____main__.py",
+      "sha256": "c2543e5af417c100665be92f6b78f6317a66d93ca50ac59115a6a2e9a25a1e5a",
+      "bytes": 711
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/docs/sphere_mean_curvature.md",
+      "audit_copy": "docs/board_audit/m20148/refs/docs__sphere_mean_curvature.md",
+      "sha256": "f4670b1594b7138a33c9c8423fdc57daef60b836d311a9de881b02e5c5287d35",
+      "bytes": 7069
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/runs/case_cad_curvature_sphere/result.json",
+      "audit_copy": "docs/board_audit/m20148/refs/runs__case_cad_curvature_sphere__result.json",
+      "sha256": "5d2f3e043be8b09990fcfd1e9dc35061b9b11baffc52879bd01c7a1cdb31872d",
+      "bytes": 22106
+    },
+    {
+      "subject_path": "/root/tp-agent/work/m20092/runs/case_cad_curvature_sphere/gates_verified.json",
+      "audit_copy": "docs/board_audit/m20148/refs/runs__case_cad_curvature_sphere__gates_verified.json",
+      "sha256": "5eb2c205fccdb255ef5c8bf6e1d9cc7c39cb4bb2d7ee8ea448d6e40a9e930937",
+      "bytes": 4904
+    }
+  ]
+}
