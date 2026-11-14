@@ -1,0 +1,346 @@
+{
+ "schema": "tensorcad.assetlib.registry.v1",
+ "store_root": "/root/tp-agent/assets",
+ "license_note": "Fingerprints and pointers only: the geometry bytes are publisher material without a redistribution grant and are NOT stored in this repository.",
+ "assets": [
+  {
+   "asset_id": "geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
+   "uri": "asset://geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "688e44c3e9eac8d9c9e064598faed8212161ee91e6c29404826215e74d0ea7d6",
+   "bytes": 305324,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/JBC/jbc-boss-cap.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc-boss-cap.igs",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "be704bf23687c253858452b23d9281adff290c3822509f8330db5b6deabab34d",
+   "bytes": 6232,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/JBC/jbc-boss.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc-boss.igs",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "15e89397bb013051c542979d346ebdf656e98667e43b7fd8a54e638b5bc6d61f",
+   "bytes": 10988,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/JBC/jbc-propeller.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc-propeller.igs",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "d44e40b189d8367e0411713d575f059bbc539e447196656c572ad47ac8e22e2a",
+   "bytes": 4578962,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/JBC/jbc-spacer.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc-spacer.igs",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "dcacdeeed8d11718b71e7235a6f7b21cc9808e8682285cec027d3f5d73b47c59",
+   "bytes": 91102,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/JBC/jbc.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc.igs",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+   "bytes": 1713554,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/JBC/jbc_with_duct.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc_with_duct.igs",
+   "kind": "geometry",
+   "hull": "JBC",
+   "sha256": "9fb6555fb63270e4fbe1b142c1635505309de9ce2205d28f3aea3e4b009cdf22",
+   "bytes": 2279764,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "duplicate_of": "",
+   "note": "IGES layout guard fired at -18.3%; WITHHELD honestly"
+  },
+  {
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "uri": "asset://geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "kind": "geometry",
+   "hull": "KCS",
+   "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "bytes": 246164,
+   "status": "verified",
+   "verified": true,
+   "source": "NMRI T2015 / SIMMAN2020 archive (KCS-Hull.zip)",
+   "duplicate_of": "",
+   "note": "volume +0.304% vs published 52030m3; watertight+manifold; Cb+0.17% LCB-1.48%; benchmarks/verified/baseline_fleet/result.json"
+  },
+  {
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA/KCS_hull_SVA.igs",
+   "uri": "asset://geometry/hulls/KCS/KCS_hull_SVA/KCS_hull_SVA.igs",
+   "kind": "geometry",
+   "hull": "KCS",
+   "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "bytes": 246164,
+   "status": "duplicate",
+   "verified": false,
+   "source": "NMRI T2015 / SIMMAN2020 archive (KCS-Hull.zip)",
+   "duplicate_of": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "note": "same bytes as geometry/hulls/KCS/KCS_hull_SVA.igs"
+  },
+  {
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA/memo.txt",
+   "uri": "asset://geometry/hulls/KCS/KCS_hull_SVA/memo.txt",
+   "kind": "geometry",
+   "hull": "KCS",
+   "sha256": "37a2c2662bd7c2d567ec221245b017e9d2d366f59163edeb60b3fe614f0b6675",
+   "bytes": 46,
+   "status": "verified",
+   "verified": true,
+   "source": "NMRI T2015 / SIMMAN2020 archive (KCS-Hull.zip)",
+   "duplicate_of": "",
+   "note": "volume +0.304% vs published 52030m3; watertight+manifold; Cb+0.17% LCB-1.48%; benchmarks/verified/baseline_fleet/result.json"
+  },
+  {
+   "asset_id": "geometry/hulls/KP505/KP505_modelScale_250mm.igs",
+   "uri": "asset://geometry/hulls/KP505/KP505_modelScale_250mm.igs",
+   "kind": "geometry",
+   "hull": "KP505",
+   "sha256": "0bb54ae7618e8d8b1b7c23de8d384e04b0465071e34fe32e1d606ddbb5df462f",
+   "bytes": 1042550,
+   "status": "pending",
+   "verified": false,
+   "source": "Kristersen KP505 fishing vessel (model scale 250mm)",
+   "duplicate_of": "",
+   "note": "not yet in fleet baseline"
+  },
+  {
+   "asset_id": "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "uri": "asset://geometry/hulls/KVLCC2/kvlcc2.igs",
+   "kind": "geometry",
+   "hull": "KVLCC2",
+   "sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+   "bytes": 6270129,
+   "status": "pending",
+   "verified": false,
+   "source": "NMRI T2015 / SIMMAN archive (KVLCC2-Hull.zip)",
+   "duplicate_of": "",
+   "note": "ref 312622m3 in fleet_specs not yet wired to runner; waterline-slice bug open"
+  },
+  {
+   "asset_id": "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "uri": "asset://geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "kind": "geometry",
+   "hull": "ONRT",
+   "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+   "bytes": 3374136,
+   "status": "pending",
+   "verified": false,
+   "source": "T2015 onrt_wo_gap geometry",
+   "duplicate_of": "",
+   "note": "model-scale coordinates; scale factor hunt open (SIMMAN2020 ship_data_summary)"
+  }
+ ],
+ "bindings": [
+  {
+   "ship": "JBC",
+   "asset_id": "geometry/hulls/JBC/jbc.igs",
+   "uri": "asset://geometry/hulls/JBC/jbc.igs",
+   "iges_sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+   "sha_match": true,
+   "benchmark_verdict": "WITHHELD",
+   "benchmark_rel_error_percent": -18.277103346724246
+  },
+  {
+   "ship": "KCS",
+   "asset_id": "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "uri": "asset://geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "iges_sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+   "sha_match": true,
+   "benchmark_verdict": "VERIFIED",
+   "benchmark_rel_error_percent": 0.3036308903807128
+  },
+  {
+   "ship": "KVLCC2",
+   "asset_id": "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "uri": "asset://geometry/hulls/KVLCC2/kvlcc2.igs",
+   "iges_sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
+   "sha_match": true,
+   "benchmark_verdict": "WITHHELD",
+   "benchmark_rel_error_percent": null
+  },
+  {
+   "ship": "ONRT",
+   "asset_id": "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "uri": "asset://geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+   "iges_sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+   "sha_match": true,
+   "benchmark_verdict": "WITHHELD",
+   "benchmark_rel_error_percent": -98.9065837684032
+  }
+ ],
+ "hulls": {
+  "JBC": {
+   "hull": "JBC",
+   "status": "pending",
+   "manifest": "/root/tp-agent/assets/geometry/hulls/JBC/MANIFEST.json",
+   "manifest_declared_status": "pending",
+   "declared_files": 7,
+   "files_on_disk": 7,
+   "verified": false,
+   "license": "publisher terms apply; platform-internal use; bytes NOT for public repo (TensorCAD is public)",
+   "provenance": "recovered from mission work tree m19493/m19265 (dead-pointer rescue 2026-11-14)",
+   "source": "NMRI T2015 (JBC_IGES.zip; full set incl duct/propeller/boss)",
+   "verification_note": "IGES layout guard fired at -18.3%; WITHHELD honestly",
+   "captured": "2026-11-14",
+   "ship_bound": true
+  },
+  "KCS": {
+   "hull": "KCS",
+   "status": "verified",
+   "manifest": "/root/tp-agent/assets/geometry/hulls/KCS/MANIFEST.json",
+   "manifest_declared_status": "verified",
+   "declared_files": 3,
+   "files_on_disk": 3,
+   "verified": true,
+   "license": "publisher terms apply; platform-internal use; bytes NOT for public repo (TensorCAD is public)",
+   "provenance": "recovered from mission work tree m19493/m19265 (dead-pointer rescue 2026-11-14)",
+   "source": "NMRI T2015 / SIMMAN2020 archive (KCS-Hull.zip)",
+   "verification_note": "volume +0.304% vs published 52030m3; watertight+manifold; Cb+0.17% LCB-1.48%; benchmarks/verified/baseline_fleet/result.json",
+   "captured": "2026-11-14",
+   "ship_bound": true
+  },
+  "KP505": {
+   "hull": "KP505",
+   "status": "pending",
+   "manifest": "/root/tp-agent/assets/geometry/hulls/KP505/MANIFEST.json",
+   "manifest_declared_status": "pending",
+   "declared_files": 1,
+   "files_on_disk": 1,
+   "verified": false,
+   "license": "publisher terms apply; platform-internal use; bytes NOT for public repo (TensorCAD is public)",
+   "provenance": "recovered from mission work tree m19493/m19265 (dead-pointer rescue 2026-11-14)",
+   "source": "Kristersen KP505 fishing vessel (model scale 250mm)",
+   "verification_note": "not yet in fleet baseline",
+   "captured": "2026-11-14",
+   "ship_bound": false
+  },
+  "KVLCC2": {
+   "hull": "KVLCC2",
+   "status": "pending",
+   "manifest": "/root/tp-agent/assets/geometry/hulls/KVLCC2/MANIFEST.json",
+   "manifest_declared_status": "pending",
+   "declared_files": 1,
+   "files_on_disk": 1,
+   "verified": false,
+   "license": "publisher terms apply; platform-internal use; bytes NOT for public repo (TensorCAD is public)",
+   "provenance": "recovered from mission work tree m19493/m19265 (dead-pointer rescue 2026-11-14)",
+   "source": "NMRI T2015 / SIMMAN archive (KVLCC2-Hull.zip)",
+   "verification_note": "ref 312622m3 in fleet_specs not yet wired to runner; waterline-slice bug open",
+   "captured": "2026-11-14",
+   "ship_bound": true
+  },
+  "ONRT": {
+   "hull": "ONRT",
+   "status": "pending",
+   "manifest": "/root/tp-agent/assets/geometry/hulls/ONRT/MANIFEST.json",
+   "manifest_declared_status": "pending",
+   "declared_files": 1,
+   "files_on_disk": 1,
+   "verified": false,
+   "license": "publisher terms apply; platform-internal use; bytes NOT for public repo (TensorCAD is public)",
+   "provenance": "recovered from mission work tree m19493/m19265 (dead-pointer rescue 2026-11-14)",
+   "source": "T2015 onrt_wo_gap geometry",
+   "verification_note": "model-scale coordinates; scale factor hunt open (SIMMAN2020 ship_data_summary)",
+   "captured": "2026-11-14",
+   "ship_bound": true
+  }
+ },
+ "snapshot": {
+  "assets": 13,
+  "bytes": 20165115,
+  "verified": 2,
+  "verified_fraction": 0.153846,
+  "by_kind": {
+   "geometry": {
+    "assets": 13,
+    "bytes": 20165115,
+    "verified": 2
+   }
+  },
+  "by_hull": {
+   "JBC": {
+    "assets": 7,
+    "bytes": 8985926
+   },
+   "KCS": {
+    "assets": 3,
+    "bytes": 492374
+   },
+   "KP505": {
+    "assets": 1,
+    "bytes": 1042550
+   },
+   "KVLCC2": {
+    "assets": 1,
+    "bytes": 6270129
+   },
+   "ONRT": {
+    "assets": 1,
+    "bytes": 3374136
+   }
+  },
+  "spec_bindings": 4,
+  "spec_ships": 4,
+  "coverage": 1.0,
+  "asset_ids": [
+   "geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
+   "geometry/hulls/JBC/jbc-boss-cap.igs",
+   "geometry/hulls/JBC/jbc-boss.igs",
+   "geometry/hulls/JBC/jbc-propeller.igs",
+   "geometry/hulls/JBC/jbc-spacer.igs",
+   "geometry/hulls/JBC/jbc.igs",
+   "geometry/hulls/JBC/jbc_with_duct.igs",
+   "geometry/hulls/KCS/KCS_hull_SVA.igs",
+   "geometry/hulls/KCS/KCS_hull_SVA/KCS_hull_SVA.igs",
+   "geometry/hulls/KCS/KCS_hull_SVA/memo.txt",
+   "geometry/hulls/KP505/KP505_modelScale_250mm.igs",
+   "geometry/hulls/KVLCC2/kvlcc2.igs",
+   "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs"
+  ],
+  "generated_at": "2026-11-14T14:03:25+00:00",
+  "problems": []
+ }
+}

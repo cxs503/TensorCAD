@@ -736,11 +736,28 @@ def write_binary_stl(mesh: Mesh, path: str | Path, name: str = "hull") -> dict[s
 # --------------------------------------------------------------------------- #
 # fleet driver
 # --------------------------------------------------------------------------- #
-def specs_from_json(path: str | Path) -> list[ShipSpec]:
+def specs_from_json(path: str | Path, *, asset_registry: object | None = None) -> list[ShipSpec]:
+    """Read a fleet spec file, resolving each geometry pointer through the asset library.
+
+    Spec files written before the durable store existed point at mission work trees
+    (``/root/tp-agent/work/m18488/...``); those paths die with the mission. Pointers are
+    therefore resolved by :func:`tensorcad.assetlib.consumer.resolve_pointer`, which
+    prefers an ``asset://`` URI, then the path itself, then the recorded SHA-256, so a
+    benchmark can be re-run from the store without editing the spec. A pointer that
+    resolves nowhere is passed through unchanged: the reader reports the absence, which
+    is more honest than failing here with a different message.
+    """
+    from tensorcad.assetlib.consumer import resolve_pointer
+
     payload = json.loads(Path(path).read_text())
     ships = payload["ships"] if isinstance(payload, dict) else payload
     specs = []
     for entry in ships:
+        iges_path = resolve_pointer(
+            entry["iges_path"],
+            entry.get("iges_sha256", ""),
+            registry=asset_registry,  # type: ignore[arg-type]
+        )
         specs.append(
             ShipSpec(
                 name=entry["name"],
@@ -755,7 +772,7 @@ def specs_from_json(path: str | Path) -> list[ShipSpec]:
                 publisher=entry.get("publisher", ""),
                 license=entry.get("license", ""),
                 iges_sha256=entry.get("iges_sha256", ""),
-                iges_path=entry["iges_path"],
+                iges_path=iges_path,
                 notes=entry.get("notes", ""),
             )
         )
