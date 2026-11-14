@@ -1,0 +1,85 @@
+{
+  "audit_mission": 20463,
+  "audited_mission": 20389,
+  "anchor": "REPRO-GEOM-FLEET-REFS",
+  "repo": "TensorCAD",
+  "commit_audited": "1f5763d1a6123691f1232904e8f0743c94ecdf18",
+  "branch_audited": "agent/m20389",
+  "worktree": "/root/tp-agent/work/m20389",
+  "level": 2,
+  "level_rationale": "L2: independent functional implementation (1142 lines core+tools, real HTML parsing -> lineage classification -> cross-verification -> closure check -> report rendering). Not L3: no solver/platform integration callers. Not L4: 2/14 tests fail (implementation bugs), only 1/6 ships (KCS) meets >=2 independent sources requirement, 3/6 ships benchmark WITHHELD.",
+  "verdict": "L2",
+  "gate_recommendation": "reopened",
+  "gate_reason": "Mission claimed 'succeeded' but: (1) 2/14 tests fail with implementation bugs unfixed; (2) only KCS (1/6 ships) meets the anchor requirement of >=2 independent sources per ship; (3) 3/6 ships have WITHHELD benchmark status. The implementation is real and honest about gaps, but the acceptance bar was not met.",
+  "three_pieces_verified": {
+    "run_artifacts": {
+      "exists": true,
+      "files": [
+        "benchmarks/verified/fleet_refs/crossref.json (1588 lines, schema=tensorcad.fleet_refs.crossref/1.0)",
+        "docs/fleet_refs_crossref.md (115 lines, 6-section report)",
+        "docs/figs/fleet_refs/closure_check.png",
+        "docs/figs/fleet_refs/coverage_matrix.png",
+        "docs/figs/fleet_refs/displacement_ref_vs_got.png"
+      ],
+      "notes": "All artifacts exist and are structurally complete"
+    },
+    "benchmark_ref_vs_got": {
+      "partial_pass": true,
+      "details": {
+        "KCS": {"ref_volume_m3": 52030.0, "got_volume_m3": 52188.0, "error_percent": 0.30, "within_tolerance": true, "ref_verdict": "CROSS_VERIFIED", "benchmark_verdict": "VERIFIED"},
+        "KVLCC2": {"ref_volume_m3": 312622.0, "got_volume_m3": null, "error_percent": null, "within_tolerance": null, "ref_verdict": "SINGLE_SOURCE", "benchmark_verdict": "WITHHELD"},
+        "JBC": {"ref_volume_m3": 178369.9, "got_volume_m3": 145769.0, "error_percent": -18.28, "within_tolerance": false, "ref_verdict": "SINGLE_SOURCE", "benchmark_verdict": "WITHHELD"},
+        "ONRT": {"ref_volume_m3": 8299.5, "got_volume_m3": 92.9, "error_percent": null, "within_tolerance": null, "ref_verdict": "CONFLICT", "benchmark_verdict": "WITHHELD"},
+        "DTC": {"ref_volume_m3": null, "got_volume_m3": null, "error_percent": null, "within_tolerance": null, "ref_verdict": "MISSING", "benchmark_verdict": "N/A"},
+        "Series60": {"ref_volume_m3": null, "got_volume_m3": null, "error_percent": null, "within_tolerance": null, "ref_verdict": "MISSING", "benchmark_verdict": "N/A"}
+      },
+      "notes": "Only KCS passes benchmark (0.30% < 1% tolerance, ref cross-verified by 2 independent sources). KVLCC2/JBC/ONRT WITHHELD. DTC/Series60 MISSING."
+    },
+    "repro_cmd": {
+      "documented": true,
+      "command": "python tools/baseline_fleet/crossref_refs.py fetch --out artifacts/fleet_refs && python tools/baseline_fleet/crossref_refs.py build --raw artifacts/fleet_refs/raw && python tools/baseline_fleet/crossref_report.py --library benchmarks/verified/fleet_refs/crossref.json --doc docs/fleet_refs_crossref.md",
+      "tests_result": "12 passed, 2 failed (0.46s)",
+      "test_failures": [
+        "test_fallback_column_is_flagged_and_does_not_vote: fallback column cells not excluded from cross_reference voting",
+        "test_conflict_is_reported_not_averaged: family_values keyed by source key instead of family name"
+      ],
+      "notes": "Repro command documented and crossref.json exists. But 2/14 tests fail = implementation bugs not fixed before declaring success."
+    }
+  },
+  "report_six_sections": {
+    "section_1_intro": true,
+    "section_2_method": true,
+    "section_3_results": true,
+    "section_4_figures": true,
+    "section_5_caveats": true,
+    "section_6_error_judgment": true,
+    "all_present": true
+  },
+  "coverage_summary": {
+    "total_cells": 42,
+    "cross_verified": 11,
+    "single_source": 13,
+    "conflict": 2,
+    "missing": 16,
+    "ships_fully_cross_verified": ["KCS"],
+    "ships_failing_min_two_sources": ["DTC", "JBC", "KVLCC2", "Series60"]
+  },
+  "positive_findings": [
+    "Real implementation: 454 lines core + 370 lines fetch + 318 lines report = 1142 lines of genuine code",
+    "Honest gap documentation: KVLCC2 Bwl=580 typo detected via Cb closure, ONRT mass/volume conflict flagged, DTC/Series60 no-source recorded",
+    "SHA256-pinned source bytes: every cell traceable to fetched publisher page digest",
+    "Lineage-aware independence: SIMMAN 2014/2020 correctly collapsed to one family",
+    "Cb closure self-consistency check: independent mathematical verification of published particulars",
+    "Report six sections complete with programmatic figure generation"
+  ],
+  "negative_findings": [
+    "2/14 tests FAIL: implementation bugs in fallback column voting and family_values keying",
+    "Only 1/6 ships (KCS) meets >=2 independent sources requirement",
+    "3/6 ships benchmark WITHHELD (KVLCC2/JBC/ONRT)",
+    "2/6 ships completely MISSING (DTC/Series60)",
+    "No solver/platform integration (L3 not reached)",
+    "Mission declared 'succeeded' despite not meeting anchor requirement"
+  ],
+  "report_id": 18622,
+  "verdict_sql": "docs/board_audit/m20463/insert_verdict.sql"
+}
