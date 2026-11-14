@@ -6,7 +6,9 @@ geometry operation become expensive, and when does it need a cluster?*
 Four sub-tasks are measured on the same mesh ladder:
 
 ``load``          Mesh construction from analytic parameters (hull generation).
-``point_locate``  Ray-casting / signed-distance queries (point-in-geometry).
+``point_locate``  Ray-casting / signed-distance queries, brute-force reference.
+``point_locate_accel``  Same queries through :class:`tensorcad.spatial_index.TriangleGrid`
+                  (uniform grid + DDA), the path that makes 10^6--10^7 practical.
 ``voxelize``      SDF sampling onto a regular grid (to_voxel_grid).
 ``volume``        Surface-integral volume by the divergence theorem.
 
@@ -45,6 +47,7 @@ import os
 import platform
 import sys
 import time
+from collections import OrderedDict
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
@@ -53,7 +56,7 @@ from typing import Any
 # Data contracts
 # ---------------------------------------------------------------------------
 
-BENCHMARK_SCHEMA = "tensorcad.perf_benchmark/1"
+BENCHMARK_SCHEMA = "tensorcad.perf_benchmark/2"
 
 #: Status tags for individual measurements.
 MEASURED = "measured"
@@ -62,15 +65,22 @@ FAILED = "failed"
 
 #: The mesh ladder: (nx, nz) pairs that produce increasing triangle counts.
 #: The default ladder goes from ~2k to ~10M triangles.
+#: Triangle count of a rung is ``4 * (nx - 1) * (nz - 1)`` (two 4-sided strips
+#: per grid cell); the comments below are the measured/estimated counts, not
+#: guesses, and the top rung lands at 1.0e7 triangles.
 DEFAULT_LADDER: tuple[tuple[int, int], ...] = (
-    (21, 9),      # ~2k triangles
-    (41, 13),     # ~8k triangles
-    (81, 21),     # ~30k triangles
-    (161, 41),    # ~120k triangles
-    (321, 81),    # ~480k triangles
-    (641, 161),   # ~1.9M triangles
-    (1281, 321),  # ~7.6M triangles
-    (2001, 501),  # ~18M triangles (upper bound, may be skipped)
+    (21, 9),      # 640 triangles
+    (41, 13),     # 1,920
+    (81, 21),     # 6,400
+    (161, 41),    # 25,600
+    (321, 81),    # 102,400
+    (641, 161),   # 409,600
+    (1281, 321),  # 1,638,400  -> 10^6 band
+    (2001, 501),  # 4,000,000  -> mid 10^6 band
+    (4001, 513),  # 8,192,000 -> top of the constructible ladder; HullParameters
+                  # caps nx at 4001 stations and nz at 513 levels, so 8.19e6 is
+                  # the largest parametric hull (a 10^7 rung needs an imported
+                  # mesh rather than generate_hull)
 )
 
 #: Quick ladder for CI / smoke tests.
@@ -107,6 +117,14 @@ class SubTaskResult:
     status: str = MEASURED
     throughput: float | None = None   # triangles/s, queries/s, or cells/s
     note: str = ""
+    #: Index build time for accelerated sub-tasks (spatial index construction).
+    build_seconds: float | None = None
+    #: Spatial-index size descriptors (0 for non-indexed sub-tasks).
+    index_cells: int = 0
+    index_entries: int = 0
+    index_bytes: int = 0
+    #: Peak resident set size of the process when this measurement finished.
+    peak_rss_mb: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -120,6 +138,11 @@ class SubTaskResult:
             "status": self.status,
             "throughput": self.throughput,
             "note": self.note,
+            "build_seconds": self.build_seconds,
+            "index_cells": self.index_cells,
+            "index_entries": self.index_entries,
+            "index_bytes": self.index_bytes,
+            "peak_rss_mb": self.peak_rss_mb,
         }
 
 
@@ -204,16 +227,80 @@ def _loadavg() -> dict[str, float]:
 
 
 # ---------------------------------------------------------------------------
+# Shared measurement helpers
+# ---------------------------------------------------------------------------
+
+def peak_rss_mb() -> float | None:
+    """Peak resident set size of this process in MiB (None if unavailable).
+
+    Recorded per measurement so the scale table answers "how much memory does
+    10^7 triangles need", not only "how many seconds".
+    """
+    try:
+        import resource
+
+        rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    except Exception:  # pragma: no cover - non-POSIX
+        return None
+    # Linux reports KiB, macOS reports bytes.
+    if sys.platform == "darwin":  # pragma: no cover
+        return rss / (1024.0 * 1024.0)
+    return rss / 1024.0
+
+
+#: Bound on retained meshes: one rung plus its predecessor.
+MESH_CACHE_SIZE = 2
+_MESH_CACHE: "OrderedDict[tuple[int, int], Any]" = OrderedDict()
+
+
+def _put_mesh(nx: int, nz: int, model: Any) -> None:
+    _MESH_CACHE[(nx, nz)] = model
+    _MESH_CACHE.move_to_end((nx, nz))
+    while len(_MESH_CACHE) > MESH_CACHE_SIZE:
+        _MESH_CACHE.popitem(last=False)
+
+
+def _cached_hull(nx: int, nz: int):
+    """Generate (and keep) one hull mesh per resolution.
+
+    The ladder regenerates the same mesh for every sub-task, which makes the
+    10^6--10^7 rungs spend all their wall clock in the generator and is simply
+    unaffordable once a single rung costs minutes.
+    """
+    key = (nx, nz)
+    model = _MESH_CACHE.get(key)
+    if model is None:
+        from tensorcad.hull import HullParameters, generate_hull
+
+        model = generate_hull(HullParameters(length=10.0, beam=2.0, draft=0.8, nx=nx, nz=nz))
+        _put_mesh(nx, nz, model)
+    else:
+        _MESH_CACHE.move_to_end(key)
+    return model
+
+
+def clear_mesh_cache() -> None:
+    """Drop cached meshes (tests and repeated benchmark runs)."""
+    _MESH_CACHE.clear()
+
+
+# ---------------------------------------------------------------------------
 # Sub-task implementations
 # ---------------------------------------------------------------------------
 
 def _run_load(nx: int, nz: int) -> SubTaskResult:
-    """Measure hull generation time."""
+    """Measure hull generation time (always a fresh generation).
+
+    The generated mesh is handed to the shared cache so the following
+    sub-tasks at the same rung do not regenerate it; the timing here covers
+    generation only.
+    """
     from tensorcad.hull import HullParameters, generate_hull
     params = HullParameters(length=10.0, beam=2.0, draft=0.8, nx=nx, nz=nz)
     t0 = time.perf_counter()
     model = generate_hull(params)
     elapsed = time.perf_counter() - t0
+    _put_mesh(nx, nz, model)
     tris = len(model.mesh.faces)
     verts = len(model.mesh.vertices)
     return SubTaskResult(
@@ -221,6 +308,7 @@ def _run_load(nx: int, nz: int) -> SubTaskResult:
         grid_cells=0,
         seconds=round(elapsed, 6),
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
+        peak_rss_mb=peak_rss_mb(),
     )
 
 
@@ -231,11 +319,9 @@ def _run_point_locate(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
     origin so rays in all directions that intersect the hull will return a
     radius.  We use a Fibonacci sphere for uniform directional coverage.
     """
-    from tensorcad.hull import HullParameters, generate_hull
     from tensorcad.benchmark import _RayCaster
 
-    params = HullParameters(length=10.0, beam=2.0, draft=0.8, nx=nx, nz=nz)
-    model = generate_hull(params)
+    model = _cached_hull(nx, nz)
     tris = len(model.mesh.faces)
     verts = len(model.mesh.vertices)
 
@@ -255,7 +341,53 @@ def _run_point_locate(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
         grid_cells=0,
         seconds=round(elapsed, 6),
         throughput=round(n_queries / elapsed, 1) if elapsed > 0 else None,
-        note=f"hits={hits}/{n_queries}",
+        note=f"hits={hits}/{n_queries}, brute-force reference (no index)",
+        peak_rss_mb=peak_rss_mb(),
+    )
+
+
+def _run_point_locate_accel(nx: int, nz: int, n_queries: int = 1000) -> SubTaskResult:
+    """Measure the indexed point-location path (uniform grid + DDA).
+
+    ``seconds`` is the query time only; ``build_seconds`` is reported
+    separately because index construction is a one-off cost.  The two numbers
+    answer different engineering questions ("can I afford one index build" vs
+    "what does a query cost").
+    """
+    from tensorcad.spatial_index import TriangleGrid
+
+    model = _cached_hull(nx, nz)
+    tris = len(model.mesh.faces)
+    verts = len(model.mesh.vertices)
+
+    t0 = time.perf_counter()
+    grid = TriangleGrid(model.mesh)
+    build = time.perf_counter() - t0
+
+    directions = _fibonacci_directions(n_queries)
+    t0 = time.perf_counter()
+    hits = 0
+    for direction in directions:
+        if grid.cast_ray((0.0, 0.0, 0.0), direction) is not None:
+            hits += 1
+    elapsed = time.perf_counter() - t0
+    stats = grid.stats()
+
+    return SubTaskResult(
+        subtask="point_locate_accel", nx=nx, nz=nz, triangles=tris, vertices=verts,
+        grid_cells=int(stats["cells"]),
+        seconds=round(elapsed, 6),
+        throughput=round(n_queries / elapsed, 1) if elapsed > 0 else None,
+        build_seconds=round(build, 6),
+        index_cells=int(stats["cells"]),
+        index_entries=int(stats["entries"]),
+        index_bytes=int(stats["index_bytes"]),
+        peak_rss_mb=peak_rss_mb(),
+        note=(
+            f"hits={hits}/{n_queries}, grid={tuple(stats['resolution'])}, "
+            f"entries/tri={stats['entries_per_triangle']:.2f}, "
+            f"build={build:.3f}s"
+        ),
     )
 
 
@@ -285,16 +417,15 @@ def _run_voxelize(grid_res: int) -> SubTaskResult:
         seconds=round(elapsed, 6),
         throughput=round(cells / elapsed, 1) if elapsed > 0 else None,
         note=f"grid={grid.shape}, cells={cells:,}",
+        peak_rss_mb=peak_rss_mb(),
     )
 
 
 def _run_volume(nx: int, nz: int) -> SubTaskResult:
     """Measure volume integration time."""
-    from tensorcad.hull import HullParameters, generate_hull
     from tensorcad import mesh as meshlib
 
-    params = HullParameters(length=10.0, beam=2.0, draft=0.8, nx=nx, nz=nz)
-    model = generate_hull(params)
+    model = _cached_hull(nx, nz)
     tris = len(model.mesh.faces)
     verts = len(model.mesh.vertices)
 
@@ -308,6 +439,7 @@ def _run_volume(nx: int, nz: int) -> SubTaskResult:
         seconds=round(elapsed, 6),
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
         note=f"volume={vol:.6f} m^3",
+        peak_rss_mb=peak_rss_mb(),
     )
 
 
@@ -337,16 +469,28 @@ def _fibonacci_directions(n: int) -> list[tuple[float, float, float]]:
 _SUBTASKS_MESH = {
     "load": _run_load,
     "point_locate": _run_point_locate,
+    "point_locate_accel": _run_point_locate_accel,
     "volume": _run_volume,
 }
+
+#: Which sub-tasks accept the ray-query count argument.
+_QUERY_SUBTASKS = ("point_locate", "point_locate_accel")
+
+#: Above this triangle count the brute-force reference is skipped instead of
+#: allowed to dominate the run (it is O(N) per ray: at 1M triangles a 10k-ray
+#: sweep would take hours).
+DEFAULT_MAX_NAIVE_TRIANGLES = 300_000
 
 
 def run_perf_benchmark(
     ladder: tuple[tuple[int, int], ...] = DEFAULT_LADDER,
     voxel_ladder: tuple[int, ...] = VOXEL_LADDER,
-    subtasks: tuple[str, ...] = ("load", "point_locate", "voxelize", "volume"),
+    subtasks: tuple[str, ...] = (
+        "load", "point_locate", "point_locate_accel", "voxelize", "volume",
+    ),
     max_triangles: int | None = None,
     n_queries: int = QUICK_N_QUERIES,
+    max_naive_triangles: int | None = DEFAULT_MAX_NAIVE_TRIANGLES,
 ) -> PerfBenchmarkResult:
     """Run the full performance benchmark ladder.
 
@@ -361,7 +505,11 @@ def run_perf_benchmark(
     max_triangles:
         Skip any step that would produce more than this many triangles.
     n_queries:
-        Number of ray queries for point_locate.
+        Number of ray queries for point_locate / point_locate_accel.
+    max_naive_triangles:
+        Skip the brute-force ``point_locate`` reference above this triangle
+        count (its cost grows as N x queries); ``point_locate_accel`` still
+        covers such rungs.
     """
     t_start = time.perf_counter()
     results: list[SubTaskResult] = []
@@ -378,8 +526,24 @@ def run_perf_benchmark(
             fn = _SUBTASKS_MESH.get(task_name)
             if fn is None:
                 continue
+            if (
+                task_name == "point_locate"
+                and max_naive_triangles is not None
+                and est_tris > max_naive_triangles
+            ):
+                results.append(SubTaskResult(
+                    subtask=task_name, nx=nx, nz=nz,
+                    triangles=est_tris, vertices=0, grid_cells=0,
+                    seconds=None, status=NOT_RUN,
+                    note=(
+                        f"brute-force reference skipped above "
+                        f"{max_naive_triangles:,} triangles (O(N) per ray); "
+                        f"use point_locate_accel"
+                    ),
+                ))
+                continue
             try:
-                if task_name == "point_locate":
+                if task_name in _QUERY_SUBTASKS:
                     result = fn(nx, nz, n_queries=n_queries)
                 else:
                     result = fn(nx, nz)
@@ -484,12 +648,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--quick", action="store_true", help="Use quick ladder (up to ~120k triangles)")
     parser.add_argument("--full", action="store_true", help="Use full ladder (up to ~18M triangles)")
     parser.add_argument("--ladder", type=str, help="Custom ladder as 'nx1,nz1;nx2,nz2;...'")
-    parser.add_argument("--subtasks", type=str, default="load,point_locate,voxelize,volume",
+    parser.add_argument("--subtasks", type=str,
+                        default="load,point_locate,point_locate_accel,voxelize,volume",
                         help="Comma-separated subtask names")
     parser.add_argument("--max-triangles", type=int, default=None,
                         help="Skip steps producing more than this many triangles")
     parser.add_argument("--n-queries", type=int, default=None,
                         help="Number of ray queries for point_locate")
+    parser.add_argument("--max-naive-triangles", type=int, default=DEFAULT_MAX_NAIVE_TRIANGLES,
+                        help="Skip the brute-force point_locate reference above this triangle count")
     parser.add_argument("--save-baseline", type=str, default=None,
                         help="Save results as baseline JSON at this path")
     parser.add_argument("--baseline", type=str, default=None,
@@ -529,6 +696,7 @@ def main(argv: list[str] | None = None) -> int:
         subtasks=subtasks,
         max_triangles=args.max_triangles,
         n_queries=n_queries,
+        max_naive_triangles=args.max_naive_triangles,
     )
 
     failed_gates = []
@@ -575,7 +743,7 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
     for r in result.results:
         by_task.setdefault(r.subtask, []).append(r)
 
-    for task_name in ("load", "point_locate", "voxelize", "volume"):
+    for task_name in ("load", "point_locate", "point_locate_accel", "voxelize", "volume"):
         entries = by_task.get(task_name, [])
         if not entries:
             continue
@@ -587,11 +755,13 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
                 sec = f"{r.seconds:.4f}" if r.seconds is not None else "N/A"
                 print(f"  {r.nx:>6} {r.grid_cells:>12,} {sec:>10} {tp:>14} {r.status:>10}")
         else:
-            print(f"  {'nx':>5} {'nz':>5} {'triangles':>10} {'vertices':>10} {'seconds':>10} {'throughput':>14} {'status':>10}")
+            print(f"  {'nx':>5} {'nz':>5} {'triangles':>10} {'vertices':>10} {'seconds':>10} {'throughput':>14} {'build':>8} {'rss_MB':>8} {'status':>10}")
             for r in entries:
                 tp = f"{r.throughput:,.0f}" if r.throughput else "N/A"
                 sec = f"{r.seconds:.4f}" if r.seconds is not None else "N/A"
-                print(f"  {r.nx:>5} {r.nz:>5} {r.triangles:>10,} {r.vertices:>10,} {sec:>10} {tp:>14} {r.status:>10}")
+                bld = f"{r.build_seconds:.3f}" if r.build_seconds is not None else "-"
+                rss = f"{r.peak_rss_mb:,.0f}" if r.peak_rss_mb is not None else "-"
+                print(f"  {r.nx:>5} {r.nz:>5} {r.triangles:>10,} {r.vertices:>10,} {sec:>10} {tp:>14} {bld:>8} {rss:>8} {r.status:>10}")
         print()
 
     if result.cluster_warnings:
