@@ -4,6 +4,7 @@ This is the CI entry point::
 
     python -m tensorcad.meshquality.cli --input mesh.json --json report.json
     python -m tensorcad.meshquality.cli --input hull.json --topology --max-genus 0
+    python -m tensorcad.meshquality.cli --polymesh case/constant/polyMesh --json report.json
 
 Exit status is 0 when every gated check passes, 1 when one fails, and 2 when the input
 cannot be read -- so a pipeline can tell "the mesh is bad" from "the tool is broken".
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -19,6 +21,7 @@ from typing import Sequence
 from .io import load_spec
 from .report import GateReport
 from .topology import gate_non_orthogonality, gate_surface, non_orthogonality, surface_topology
+from .polymesh import check_polymesh, read_polymesh
 from .report import DEFAULT_GATE, MetricLimit, QualityGate, measure
 
 
@@ -49,7 +52,15 @@ def build_parser() -> argparse.ArgumentParser:
         prog="python -m tensorcad.meshquality.cli",
         description="Compute element quality metrics and apply a gate (exit 1 on failure).",
     )
-    parser.add_argument("--input", required=True, help="mesh spec JSON (points + elements)")
+    parser.add_argument("--input", default=None, help="mesh spec JSON (points + elements)")
+    parser.add_argument(
+        "--polymesh",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help="an OpenFOAM case or constant/polyMesh directory; gates the checkMesh numbers "
+        "instead of element metrics",
+    )
     parser.add_argument("--json", type=Path, default=None, help="write the full report here")
     parser.add_argument(
         "--limit",
@@ -86,6 +97,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.polymesh is not None:
+        return _run_polymesh(args)
+    if args.input is None:
+        print("meshquality: one of --input or --polymesh is required", file=sys.stderr)
+        return 2
     try:
         spec = load_spec(args.input)
         quality = measure(spec.points, spec.elements)
@@ -126,6 +142,35 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.json.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if not args.quiet:
         print(json.dumps(payload["quality"], indent=2, sort_keys=True))
+        for check in report.checks:
+            print(f"[{'PASS' if check.passed else 'FAIL'}] {check.name}: {check.detail}")
+    if not args.no_gate and not report.passed:
+        print(f"meshquality: {len(report.failures)} check(s) failed", file=sys.stderr)
+        return 1
+    return 0
+
+
+def _run_polymesh(args: argparse.Namespace) -> int:
+    """Gate an OpenFOAM polyMesh: non-orthogonality, skewness and cell volume."""
+    try:
+        mesh = read_polymesh(args.polymesh)
+        quality = check_polymesh(mesh)
+    except (OSError, ValueError, KeyError) as error:
+        print(f"meshquality: cannot read {args.polymesh}: {error}", file=sys.stderr)
+        return 2
+    report = quality.gate()
+    payload: dict[str, object] = {
+        "polymesh": str(Path(args.polymesh)),
+        "mesh": mesh.to_dict(),
+        "statistics": quality.statistics(),
+        "total_volume": math.fsum(quality.volumes),
+        "gate": None if args.no_gate else report.to_dict(),
+    }
+    if args.json is not None:
+        args.json.parent.mkdir(parents=True, exist_ok=True)
+        args.json.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if not args.quiet:
+        print(json.dumps(payload["statistics"], indent=2, sort_keys=True))
         for check in report.checks:
             print(f"[{'PASS' if check.passed else 'FAIL'}] {check.name}: {check.detail}")
     if not args.no_gate and not report.passed:

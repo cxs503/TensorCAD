@@ -25,6 +25,10 @@ This package is the single library behind that question:
 * :mod:`tensorcad.meshquality.dialects` -- the three aspect-ratio dialects this tree
   speaks (``legacy``, ``edge_form``, ``verdict``), the exact algebra relating them, and
   the threshold transfer that keeps a gate at least as strict as the one it replaces;
+* :mod:`tensorcad.meshquality.polymesh` -- the solver's own container: reads an OpenFOAM
+  ``constant/polyMesh`` (points/faces/owner/neighbour/boundary), measures the three numbers
+  ``checkMesh`` prints (non-orthogonality, skewness, cell volume) with OpenFOAM's own
+  definitions, and gates them;
 * :mod:`tensorcad.meshquality.reference` -- second implementations and external oracles
   (Gmsh, trimesh, and the VTK/Verdict definitions meshmagick uses) that the benchmark
   compares against, so the library is never its own judge.
@@ -35,6 +39,19 @@ run in this environment and why.
 """
 from __future__ import annotations
 
+from .polymesh import (
+    DEFAULT_POLYMESH_LIMITS,
+    PolyMesh,
+    PolyMeshQuality,
+    cell_geometry,
+    check_polymesh,
+    face_geometry,
+    face_non_orthogonality,
+    face_skewness,
+    polymesh_from_hexes,
+    read_polymesh,
+    write_polymesh,
+)
 from .dialects import ASPECT_DIALECTS, aspect_dialects, conservative_limit, dialect_audit
 from .metrics import (
     ELEMENT_KINDS,
@@ -72,6 +89,17 @@ from .report import (
 __all__ = [
     "DEFAULT_GATE",
     "DEFAULT_LIMITS",
+    "DEFAULT_POLYMESH_LIMITS",
+    "PolyMesh",
+    "PolyMeshQuality",
+    "cell_geometry",
+    "check_polymesh",
+    "face_geometry",
+    "face_non_orthogonality",
+    "face_skewness",
+    "polymesh_from_hexes",
+    "read_polymesh",
+    "write_polymesh",
     "ELEMENT_KINDS",
     "FaceNonOrthogonality",
     "METRIC_NAMES",

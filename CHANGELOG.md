@@ -1,6 +1,31 @@
 
 ## Unreleased
 
+- **The mesh-quality gate can now judge the solver's own mesh: OpenFOAM `polyMesh` in, the
+  three `checkMesh` numbers out** (`tensorcad/meshquality/polymesh.py`,
+  `docs/mesh_quality_polymesh.md`, `examples/mesh_quality/run_polymesh_benchmark.py`,
+  `artifacts/mesh_quality_polymesh/`, `tests/test_meshquality_polymesh.py`). The library
+  already computed OpenFOAM's internal-face non-orthogonality, but only on this
+  repository's own `(points, hexes)` connectivity, so the one quantity the documentation
+  compared against `checkMesh` could not be measured on a case file, and the gate could
+  only judge meshes this tree had built itself. `read_polymesh`/`write_polymesh` close that
+  gap (ASCII, no third-party dependency, binary rejected with the conversion command), and
+  `check_polymesh` reports non-orthogonality, skewness and cell volume using OpenFOAM's own
+  definitions -- face centres from the triangle fan, cell centres from the pyramid
+  decomposition, skewness as `|Pi - Cf|/|d|` -- behind the existing `GateReport`, plus a
+  `--polymesh` mode for the CI CLI. Verified against closed forms (uniform shear
+  `atan(0.5)` = 26.565051177078022 deg, diff 3.2e-14; two stacked cells 45 deg and
+  `0.5/sqrt(2)`, skew diff 0) and against the independent hex route on affine meshes
+  (2.8e-14). On the repository's own hull volume mesh it answers the question that was
+  open: the coarse grid (nx17/nz9, 1 layer) is within `checkMesh`'s bands (max
+  non-orthogonality 48.38 deg, max skewness 1.93), while the fine grid (nx33/nz17, 3
+  layers, first_layer 0.05, growth 1.2) exceeds them (94.47 deg, 11.06) with no degenerate
+  cells -- a boundary-layer aspect-ratio limit, not a topology defect. The two cell-centre
+  definitions disagree by 21.19 deg on that mesh, which quantifies the vertex-average
+  approximation in `topology.non_orthogonality` rather than hiding it. Not run: a live
+  `checkMesh` comparison (no OpenFOAM or VTK binary on loongarch64); the command is in the
+  document.
+
 - **The golden library's last unasserted metric now has an exact reference: the triaxial
   ellipsoid surface area** (`tensorcad/analytic_solids.py`, `docs/golden/analytic_reference.md`,
   `tools/golden/ellipsoid_area_evidence.py`, `artifacts/golden_ellipsoid_area/`).
