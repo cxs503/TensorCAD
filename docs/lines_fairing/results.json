@@ -12,6 +12,64 @@
         "stations": 0,
         "waterlines": 0
       },
+      "buttock_coverage": {
+        "curves": 5,
+        "detail": [
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.05,
+            "level": 0.05,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.25999999999999995,
+            "level": 0.25999999999999995,
+            "samples": [
+              17
+            ],
+            "stations_straddling": 17
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.4699999999999999,
+            "level": 0.4699999999999999,
+            "samples": [
+              15
+            ],
+            "stations_straddling": 15
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.695,
+            "level": 0.695,
+            "samples": [
+              11
+            ],
+            "stations_straddling": 11
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.905,
+            "level": 0.905,
+            "samples": [
+              7
+            ],
+            "stations_straddling": 7
+          }
+        ],
+        "levels": [
+          0.05,
+          0.25999999999999995,
+          0.4699999999999999,
+          0.695,
+          0.905
+        ],
+        "stations_total": 21
+      },
       "form": "wigley_iii",
       "grid": {
         "draft_m": 0.625,
@@ -987,6 +1045,64 @@
         "stations": 0,
         "waterlines": 0
       },
+      "buttock_coverage": {
+        "curves": 5,
+        "detail": [
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.05,
+            "level": 0.05,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.245,
+            "level": 0.245,
+            "samples": [
+              17
+            ],
+            "stations_straddling": 17
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.43999999999999995,
+            "level": 0.43999999999999995,
+            "samples": [
+              13
+            ],
+            "stations_straddling": 15
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.6349999999999999,
+            "level": 0.6349999999999999,
+            "samples": [
+              11
+            ],
+            "stations_straddling": 11
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.83,
+            "level": 0.83,
+            "samples": [
+              7
+            ],
+            "stations_straddling": 7
+          }
+        ],
+        "levels": [
+          0.05,
+          0.245,
+          0.43999999999999995,
+          0.6349999999999999,
+          0.83
+        ],
+        "stations_total": 21
+      },
       "form": "series60_cb060",
       "grid": {
         "draft_m": 0.625,
@@ -1906,6 +2022,7 @@
     },
     {
       "accepted_at": [
+        0.008,
         0.016,
         0.032
       ],
@@ -1913,6 +2030,64 @@
         "buttocks": 0,
         "stations": 0,
         "waterlines": 0
+      },
+      "buttock_coverage": {
+        "curves": 5,
+        "detail": [
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.05,
+            "level": 0.05,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.27499999999999997,
+            "level": 0.27499999999999997,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.49999999999999994,
+            "level": 0.49999999999999994,
+            "samples": [
+              18
+            ],
+            "stations_straddling": 18
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.725,
+            "level": 0.725,
+            "samples": [
+              17
+            ],
+            "stations_straddling": 17
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.95,
+            "level": 0.95,
+            "samples": [
+              14
+            ],
+            "stations_straddling": 15
+          }
+        ],
+        "levels": [
+          0.05,
+          0.27499999999999997,
+          0.49999999999999994,
+          0.725,
+          0.95
+        ],
+        "stations_total": 21
       },
       "form": "kvlcc2_class",
       "grid": {
@@ -1935,19 +2110,19 @@
         {
           "accepted": false,
           "deviation_argmax": {
-            "station_index": 1,
-            "station_m": 16.0,
-            "waterline_index": 1,
-            "waterline_m": 1.3
+            "station_index": 18,
+            "station_m": 288.0,
+            "waterline_index": 3,
+            "waterline_m": 3.9000000000000004
           },
-          "deviation_fraction_of_half_beam": 0.0038555401272036788,
-          "deviation_max_m": 0.11181066368890669,
-          "flips_after": 302,
-          "flips_before": 302,
+          "deviation_fraction_of_half_beam": 6.125368411725002e-17,
+          "deviation_max_m": 1.7763568394002505e-15,
+          "flips_after": 299,
+          "flips_before": 298,
           "flips_by_direction": {
             "buttocks": {
-              "after": 40,
-              "before": 40
+              "after": 37,
+              "before": 36
             },
             "stations": {
               "after": 160,
@@ -1960,7 +2135,7 @@
           },
           "flips_reduced": false,
           "grid": {
-            "digest_after": "6c40576bc8b0f35645ba907aa20889598c70553beb20ec4c019489fd119080a6",
+            "digest_after": "1de008170a293d7920a5d8496cf08b72f729c5e2fcc5bf09b72e348eec6530c3",
             "digest_before": "b59755a608c0cde01c0d53b9520a3fcfbf96be08ae9d9b3dbef627fbeaf91136",
             "draft_m": 20.8,
             "half_beam_m": 29.0,
@@ -1970,36 +2145,36 @@
           },
           "hydrostatics": {
             "after": {
-              "block_coefficient": 0.7958742118002243,
-              "lcb": 149.43701545360577,
+              "block_coefficient": 0.796032503991707,
+              "lcb": 149.42158378196393,
               "method": "composite Simpson over waterlines, then over stations",
-              "midship_coefficient": 0.897510099056103,
-              "prismatic_coefficient": 0.8867579458295036,
+              "midship_coefficient": 0.8975604872025666,
+              "prismatic_coefficient": 0.8868845223709739,
               "section_areas": [
                 0.0,
-                1029.0717232208192,
-                1082.4690843552276,
-                1081.9453236955349,
-                1081.8111727398998,
-                1082.62518353113,
-                1082.7561835012827,
-                1082.380084354684,
-                1081.9535555357097,
-                1080.9728617897163,
-                1081.0191080854563,
-                1080.6280493664544,
-                1081.664027564732,
-                1076.03885648851,
-                1062.5211863503282,
-                1030.2787425457163,
-                967.8608542041441,
-                857.6292270591354,
-                677.0638041878975,
-                401.01019642282205,
+                1031.5503832001164,
+                1081.4791979651966,
+                1081.9390126072028,
+                1081.8721295445737,
+                1082.6975098000107,
+                1082.8169717611765,
+                1082.445164484392,
+                1082.0201787886906,
+                1081.0298960607154,
+                1081.0950413195378,
+                1080.66770067514,
+                1081.7520559830527,
+                1076.0923053947602,
+                1062.5908769390726,
+                1030.3277258393437,
+                967.9128341264097,
+                857.6868725948324,
+                677.1236327236684,
+                401.23616200172927,
                 0.0
               ],
-              "vcb": 11.04585655659502,
-              "volume": 307245.647717053,
+              "vcb": 11.045109714975371,
+              "volume": 307306.7561009905,
               "waterplane_area": 16473.28249365307,
               "waterplane_coefficient": 0.887569099873549
             },
@@ -2038,15 +2213,15 @@
               "waterplane_coefficient": 0.887569099873549
             },
             "relative_change": {
-              "lcb": 0.00010327605457825232,
-              "vcb": 6.76174016302901e-05,
-              "volume": -0.00019885141710787477,
+              "lcb": 0.0,
+              "vcb": 0.0,
+              "volume": 0.0,
               "waterplane_area": 0.0
             }
           },
           "iterations": [
             {
-              "accepted": true,
+              "accepted": false,
               "cg_iterations": 5,
               "contraction": 1.0,
               "deviation_max_m": 0.1118106636889068,
@@ -2077,9 +2252,9 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 0.9875121132571968,
-                  "flips_after": 40,
-                  "flips_before": 40,
-                  "flips_delta": 0
+                  "flips_after": 37,
+                  "flips_before": 36,
+                  "flips_delta": 1
                 }
               ],
               "iteration": 1,
@@ -2088,21 +2263,21 @@
                 "stations": 1.5468675358375511e-07,
                 "waterlines": 1.5468675358375511e-07
               },
-              "total_flips_after": 302,
-              "total_flips_before": 302
+              "total_flips_after": 299,
+              "total_flips_before": 298
             }
           ],
           "monotone": true,
           "reference": {
-            "max_after_m": 0.2129454550043235,
+            "max_after_m": 0.1159505649279744,
             "max_before_m": 0.1159505649279744,
-            "max_improvement": 0.5445082869959362,
+            "max_improvement": 1.0,
             "reference": "kvlcc2_class analytic ordinates (manual-fairing stand-in)",
-            "rms_after_m": 0.06142674619605417,
+            "rms_after_m": 0.059610138179842724,
             "rms_before_m": 0.05961013817984272,
-            "rms_improvement": 0.9704264326420053
+            "rms_improvement": 0.9999999999999999
           },
-          "rejected_steps": 0,
+          "rejected_steps": 1,
           "schema": "tensorcad.lines_fairing.report/1",
           "table": "kvlcc2_class (+-0.116 m ordinate jitter, seed 20261114)",
           "tolerance_fraction_of_half_beam": 0.004,
@@ -2110,34 +2285,34 @@
           "within_tolerance": true
         },
         {
-          "accepted": false,
+          "accepted": true,
           "deviation_argmax": {
             "station_index": 1,
             "station_m": 16.0,
             "waterline_index": 1,
             "waterline_m": 1.3
           },
-          "deviation_fraction_of_half_beam": 0.007564749122293741,
-          "deviation_max_m": 0.2193777245465185,
-          "flips_after": 302,
-          "flips_before": 302,
+          "deviation_fraction_of_half_beam": 0.0075589915869513375,
+          "deviation_max_m": 0.2192107560215888,
+          "flips_after": 297,
+          "flips_before": 298,
           "flips_by_direction": {
             "buttocks": {
-              "after": 40,
-              "before": 40
+              "after": 35,
+              "before": 35
             },
             "stations": {
               "after": 158,
-              "before": 162
+              "before": 158
             },
             "waterlines": {
               "after": 104,
-              "before": 100
+              "before": 104
             }
           },
-          "flips_reduced": false,
+          "flips_reduced": true,
           "grid": {
-            "digest_after": "85aa4b0993557842aeab4e727af28aee0ca954e469d72ef4b515b9a6c17c46a0",
+            "digest_after": "744cb9c22bd4e3ff3c8a7ad6be7dbf80c4cb976d327343fb719570b004459c60",
             "digest_before": "b59755a608c0cde01c0d53b9520a3fcfbf96be08ae9d9b3dbef627fbeaf91136",
             "draft_m": 20.8,
             "half_beam_m": 29.0,
@@ -2147,36 +2322,36 @@
           },
           "hydrostatics": {
             "after": {
-              "block_coefficient": 0.7957204085572399,
-              "lcb": 149.45194766803937,
+              "block_coefficient": 0.7957203239889012,
+              "lcb": 149.45195834726073,
               "method": "composite Simpson over waterlines, then over stations",
-              "midship_coefficient": 0.8980474301740801,
-              "prismatic_coefficient": 0.8860561055255123,
+              "midship_coefficient": 0.89805022446162,
+              "prismatic_coefficient": 0.8860532543889007,
               "section_areas": [
                 0.0,
-                1026.6644758151385,
-                1083.4044197620103,
-                1081.973145822666,
-                1081.7478847009013,
-                1082.5542984217745,
-                1082.6960732850905,
-                1082.316620408706,
-                1081.8882657715376,
-                1080.9164801724023,
-                1080.9457667566369,
-                1080.5878978841092,
-                1081.5789536764298,
-                1075.9857676284569,
-                1062.4535954015819,
-                1030.2304669198181,
-                967.8102044880321,
-                857.5732381167007,
-                677.0036346480045,
-                400.7897228169321,
+                1026.6634092420304,
+                1083.4077907904984,
+                1081.9709670143739,
+                1081.7479921763304,
+                1082.5543299378953,
+                1082.696064735553,
+                1082.31658938916,
+                1081.8882606574768,
+                1080.9165233233318,
+                1080.9457485657572,
+                1080.5879055701116,
+                1081.5789031780637,
+                1075.9857403612862,
+                1062.4536121844217,
+                1030.230464660029,
+                967.8102047196174,
+                857.5732592805011,
+                677.003784389841,
+                400.7896134256589,
                 0.0
               ],
-              "vcb": 11.046585406837343,
-              "volume": 307186.27228270535,
+              "vcb": 11.04658557762318,
+              "volume": 307186.23963526735,
               "waterplane_area": 16473.28249365307,
               "waterplane_coefficient": 0.887569099873549
             },
@@ -2215,9 +2390,9 @@
               "waterplane_coefficient": 0.887569099873549
             },
             "relative_change": {
-              "lcb": 0.000203209504991874,
-              "vcb": 0.0001336059034316867,
-              "volume": -0.00039206368195033274,
+              "lcb": 0.0002032809753985659,
+              "vcb": 0.0001336213660066575,
+              "volume": -0.00039216991924368843,
               "waterplane_area": 0.0
             }
           },
@@ -2254,9 +2429,9 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 0.9758692879095767,
-                  "flips_after": 40,
-                  "flips_before": 40,
-                  "flips_delta": 0
+                  "flips_after": 35,
+                  "flips_before": 36,
+                  "flips_delta": -1
                 }
               ],
               "iteration": 1,
@@ -2265,19 +2440,65 @@
                 "stations": 3.0780895465456744e-07,
                 "waterlines": 3.0780895465456744e-07
               },
-              "total_flips_after": 302,
-              "total_flips_before": 302
+              "total_flips_after": 297,
+              "total_flips_before": 298
+            },
+            {
+              "accepted": true,
+              "cg_iterations": 5,
+              "contraction": 1.0,
+              "deviation_max_m": 0.21921075602158713,
+              "directions": [
+                {
+                  "bending_energy_after": 91168.8351534262,
+                  "bending_energy_before": 91169.81803421686,
+                  "curves": 17,
+                  "direction": "waterlines",
+                  "energy_ratio": 0.9999892192305321,
+                  "flips_after": 104,
+                  "flips_before": 104,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 33516.37448421499,
+                  "bending_energy_before": 33516.327455981715,
+                  "curves": 21,
+                  "direction": "stations",
+                  "energy_ratio": 1.0000014031439852,
+                  "flips_after": 158,
+                  "flips_before": 158,
+                  "flips_delta": 0
+                },
+                {
+                  "bending_energy_after": 5293.092770739781,
+                  "bending_energy_before": 5292.90820655958,
+                  "curves": 5,
+                  "direction": "buttocks",
+                  "energy_ratio": 1.0000348700889943,
+                  "flips_after": 35,
+                  "flips_before": 35,
+                  "flips_delta": 0
+                }
+              ],
+              "iteration": 2,
+              "penalty": {
+                "buttocks": 3.0780895465456744e-07,
+                "stations": 3.0780895465456744e-07,
+                "waterlines": 3.0780895465456744e-07
+              },
+              "total_flips_after": 297,
+              "total_flips_before": 297
             }
           ],
           "monotone": true,
           "reference": {
-            "max_after_m": 0.3205125158619353,
+            "max_after_m": 0.3203455473370056,
             "max_before_m": 0.1159505649279744,
-            "max_improvement": 0.36176610643785756,
+            "max_improvement": 0.3619546639304265,
             "reference": "kvlcc2_class analytic ordinates (manual-fairing stand-in)",
-            "rms_after_m": 0.06649524714914604,
+            "rms_after_m": 0.06650107228001481,
             "rms_before_m": 0.05961013817984272,
-            "rms_improvement": 0.8964571264189708
+            "rms_improvement": 0.8963786016689089
           },
           "rejected_steps": 0,
           "schema": "tensorcad.lines_fairing.report/1",
@@ -2296,12 +2517,12 @@
           },
           "deviation_fraction_of_half_beam": 0.015202830337069246,
           "deviation_max_m": 0.44088207977500815,
-          "flips_after": 298,
-          "flips_before": 302,
+          "flips_after": 293,
+          "flips_before": 298,
           "flips_by_direction": {
             "buttocks": {
-              "after": 40,
-              "before": 40
+              "after": 35,
+              "before": 35
             },
             "stations": {
               "after": 154,
@@ -2431,9 +2652,9 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 0.9528900798966068,
-                  "flips_after": 40,
-                  "flips_before": 40,
-                  "flips_delta": 0
+                  "flips_after": 35,
+                  "flips_before": 36,
+                  "flips_delta": -1
                 }
               ],
               "iteration": 1,
@@ -2442,8 +2663,8 @@
                 "stations": 6.378043838892178e-07,
                 "waterlines": 6.378043838892178e-07
               },
-              "total_flips_after": 298,
-              "total_flips_before": 302
+              "total_flips_after": 293,
+              "total_flips_before": 298
             },
             {
               "accepted": true,
@@ -2477,8 +2698,8 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 1.000141763922376,
-                  "flips_after": 40,
-                  "flips_before": 40,
+                  "flips_after": 35,
+                  "flips_before": 35,
                   "flips_delta": 0
                 }
               ],
@@ -2488,8 +2709,8 @@
                 "stations": 6.378043838892178e-07,
                 "waterlines": 6.378043838892178e-07
               },
-              "total_flips_after": 298,
-              "total_flips_before": 298
+              "total_flips_after": 293,
+              "total_flips_before": 293
             }
           ],
           "monotone": true,
@@ -2519,12 +2740,12 @@
           },
           "deviation_fraction_of_half_beam": 0.030859779177317564,
           "deviation_max_m": 0.8949335961422094,
-          "flips_after": 294,
-          "flips_before": 302,
+          "flips_after": 291,
+          "flips_before": 298,
           "flips_by_direction": {
             "buttocks": {
-              "after": 40,
-              "before": 40
+              "after": 37,
+              "before": 37
             },
             "stations": {
               "after": 152,
@@ -2654,9 +2875,9 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 0.9096856608255166,
-                  "flips_after": 40,
-                  "flips_before": 40,
-                  "flips_delta": 0
+                  "flips_after": 37,
+                  "flips_before": 36,
+                  "flips_delta": 1
                 }
               ],
               "iteration": 1,
@@ -2665,8 +2886,8 @@
                 "stations": 1.3761693309076788e-06,
                 "waterlines": 1.3761693309076788e-06
               },
-              "total_flips_after": 296,
-              "total_flips_before": 302
+              "total_flips_after": 293,
+              "total_flips_before": 298
             },
             {
               "accepted": true,
@@ -2700,8 +2921,8 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 1.000575622795959,
-                  "flips_after": 40,
-                  "flips_before": 40,
+                  "flips_after": 37,
+                  "flips_before": 37,
                   "flips_delta": 0
                 }
               ],
@@ -2711,8 +2932,8 @@
                 "stations": 1.3761693309076788e-06,
                 "waterlines": 1.3761693309076788e-06
               },
-              "total_flips_after": 294,
-              "total_flips_before": 296
+              "total_flips_after": 291,
+              "total_flips_before": 293
             },
             {
               "accepted": true,
@@ -2746,8 +2967,8 @@
                   "curves": 5,
                   "direction": "buttocks",
                   "energy_ratio": 0.999996787780235,
-                  "flips_after": 40,
-                  "flips_before": 40,
+                  "flips_after": 37,
+                  "flips_before": 37,
                   "flips_delta": 0
                 }
               ],
@@ -2757,8 +2978,8 @@
                 "stations": 1.3761693309076788e-06,
                 "waterlines": 1.3761693309076788e-06
               },
-              "total_flips_after": 294,
-              "total_flips_before": 294
+              "total_flips_after": 291,
+              "total_flips_before": 291
             }
           ],
           "monotone": true,
@@ -2780,7 +3001,7 @@
         }
       ],
       "unfair_flips": {
-        "buttocks": 40,
+        "buttocks": 36,
         "stations": 162,
         "waterlines": 100
       }

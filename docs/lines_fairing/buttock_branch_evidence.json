@@ -1,0 +1,350 @@
+{
+  "forms": {
+    "kvlcc2_class": {
+      "coverage": {
+        "curves": 5,
+        "detail": [
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.05,
+            "level": 0.05,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.27499999999999997,
+            "level": 0.27499999999999997,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.49999999999999994,
+            "level": 0.49999999999999994,
+            "samples": [
+              18
+            ],
+            "stations_straddling": 18
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.725,
+            "level": 0.725,
+            "samples": [
+              17
+            ],
+            "stations_straddling": 17
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.95,
+            "level": 0.95,
+            "samples": [
+              14
+            ],
+            "stations_straddling": 15
+          }
+        ],
+        "levels": [
+          0.05,
+          0.27499999999999997,
+          0.49999999999999994,
+          0.725,
+          0.95
+        ],
+        "stations_total": 21
+      },
+      "fairing_accepted": true,
+      "fairing_deviation_m": 0.44088207977500815,
+      "fairing_tolerance_m": 0.464,
+      "new_curves": 5,
+      "new_flips_clean": 0,
+      "new_flips_faired": 35,
+      "new_flips_noisy": 36,
+      "new_levels_fraction_of_peak": [
+        0.05,
+        0.275,
+        0.5,
+        0.725,
+        0.95
+      ],
+      "new_samples": [
+        14,
+        17,
+        18,
+        19,
+        19
+      ],
+      "old_curves": 5,
+      "old_flips_clean": 0,
+      "old_flips_noisy": 40,
+      "old_levels_fraction_of_peak": [
+        0.2,
+        0.35,
+        0.5,
+        0.65,
+        0.8
+      ],
+      "old_samples": [
+        16,
+        17,
+        18,
+        19,
+        19
+      ],
+      "total_flips": [
+        298,
+        293
+      ]
+    },
+    "series60_cb060": {
+      "coverage": {
+        "curves": 5,
+        "detail": [
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.05,
+            "level": 0.05,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.245,
+            "level": 0.245,
+            "samples": [
+              17
+            ],
+            "stations_straddling": 17
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.43999999999999995,
+            "level": 0.43999999999999995,
+            "samples": [
+              13
+            ],
+            "stations_straddling": 15
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.6349999999999999,
+            "level": 0.6349999999999999,
+            "samples": [
+              11
+            ],
+            "stations_straddling": 11
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.83,
+            "level": 0.83,
+            "samples": [
+              7
+            ],
+            "stations_straddling": 7
+          }
+        ],
+        "levels": [
+          0.05,
+          0.245,
+          0.43999999999999995,
+          0.6349999999999999,
+          0.83
+        ],
+        "stations_total": 21
+      },
+      "fairing_accepted": true,
+      "fairing_deviation_m": 0.007781540585827085,
+      "fairing_tolerance_m": 0.008,
+      "new_curves": 5,
+      "new_flips_clean": 0,
+      "new_flips_faired": 0,
+      "new_flips_noisy": 0,
+      "new_levels_fraction_of_peak": [
+        0.05,
+        0.245,
+        0.44,
+        0.635,
+        0.83
+      ],
+      "new_samples": [
+        7,
+        11,
+        13,
+        17,
+        19
+      ],
+      "old_curves": 5,
+      "old_flips_clean": 0,
+      "old_flips_noisy": 0,
+      "old_levels_fraction_of_peak": [
+        0.2,
+        0.35,
+        0.5,
+        0.65,
+        0.8
+      ],
+      "old_samples": [
+        7,
+        11,
+        13,
+        15,
+        17
+      ],
+      "total_flips": [
+        180,
+        168
+      ]
+    },
+    "wigley_iii": {
+      "coverage": {
+        "curves": 5,
+        "detail": [
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.05,
+            "level": 0.05,
+            "samples": [
+              19
+            ],
+            "stations_straddling": 19
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.25999999999999995,
+            "level": 0.25999999999999995,
+            "samples": [
+              17
+            ],
+            "stations_straddling": 17
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.4699999999999999,
+            "level": 0.4699999999999999,
+            "samples": [
+              15
+            ],
+            "stations_straddling": 15
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.695,
+            "level": 0.695,
+            "samples": [
+              11
+            ],
+            "stations_straddling": 11
+          },
+          {
+            "branches": 1,
+            "fraction_of_peak": 0.905,
+            "level": 0.905,
+            "samples": [
+              7
+            ],
+            "stations_straddling": 7
+          }
+        ],
+        "levels": [
+          0.05,
+          0.25999999999999995,
+          0.4699999999999999,
+          0.695,
+          0.905
+        ],
+        "stations_total": 21
+      },
+      "fairing_accepted": true,
+      "fairing_deviation_m": 0.007834013664437922,
+      "fairing_tolerance_m": 0.008,
+      "new_curves": 5,
+      "new_flips_clean": 0,
+      "new_flips_faired": 0,
+      "new_flips_noisy": 6,
+      "new_levels_fraction_of_peak": [
+        0.05,
+        0.26,
+        0.47,
+        0.695,
+        0.905
+      ],
+      "new_samples": [
+        7,
+        11,
+        15,
+        17,
+        19
+      ],
+      "old_curves": 5,
+      "old_flips_clean": 0,
+      "old_flips_noisy": 6,
+      "old_levels_fraction_of_peak": [
+        0.2,
+        0.35,
+        0.5,
+        0.65,
+        0.8
+      ],
+      "old_samples": [
+        9,
+        11,
+        15,
+        17,
+        17
+      ],
+      "total_flips": [
+        140,
+        13
+      ]
+    }
+  },
+  "tumblehome": {
+    "buttock_flips": [
+      44,
+      26
+    ],
+    "deck_ordinate": 0.4625256810343353,
+    "fairing_accepted": true,
+    "fairing_deviation_m": 0.015109303350208908,
+    "fairing_tolerance_m": 0.01556670320207693,
+    "grid_waterline_of_level": [
+      [
+        0.25,
+        0.0625
+      ],
+      [
+        0.5,
+        0.1875
+      ],
+      [
+        0.75,
+        0.3125
+      ]
+    ],
+    "level": 0.5,
+    "new_curves": 2,
+    "new_flips_faired": 26,
+    "new_flips_noisy": 44,
+    "new_zetas": [
+      0.358793,
+      0.866817
+    ],
+    "old_curves": 0,
+    "old_flips_noisy": 14,
+    "old_samples": [],
+    "total_flips": [
+      244,
+      121
+    ],
+    "trace_probe_zeta": 0.3587930828148261
+  }
+}
