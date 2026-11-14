@@ -1,0 +1,162 @@
+{
+  "all_gates_pass": true,
+  "case": "CASE-CAD-CURVATURE-SPHERE",
+  "diagnostics": {
+    "G7: pointwise discrete mean curvature, median relative error, raw marching tets level 32": {
+      "criterion": "G7: pointwise discrete mean curvature, median relative error, raw marching tets level 32",
+      "error_percent": null,
+      "scope": "diagnostic only: the raw pointwise reading on a sliver-ridden mesh",
+      "tolerance": 0.02,
+      "verdict": "fail"
+    }
+  },
+  "environment": {
+    "git_commit": "1b8e9f139f563bb46b68f29aa5824cd98e4755ae",
+    "python": "3.11.6",
+    "repro_cmd": "python benchmarks/verified/sphere_mean_curvature/run_benchmark.py"
+  },
+  "failing": [],
+  "gates": {
+    "G1: discrete mean curvature, area-weighted integral, 1 m sphere, marching tets level 48": {
+      "criterion": "G1: discrete mean curvature, area-weighted integral, 1 m sphere, marching tets level 48",
+      "error_percent": 0.011889361821837419,
+      "measured": 2.0002377872364367,
+      "reference": 2.0,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G2: pointwise discrete mean curvature, median relative error, structured UV sphere 1 m, 16x32": {
+      "criterion": "G2: pointwise discrete mean curvature, median relative error, structured UV sphere 1 m, 16x32",
+      "error_percent": null,
+      "measured": 0.003938717571492001,
+      "reference": 0.0,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G3: observed order of the pointwise estimate on the structured sphere": {
+      "criterion": "G3: observed order of the pointwise estimate on the structured sphere",
+      "error_percent": -2.689789048346669,
+      "measured": 1.9462042190330666,
+      "reference": 2.0,
+      "tolerance": 0.5,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=0.1 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=0.1 m, 40 Fibonacci probes",
+      "error_percent": -2.396238651947158e-06,
+      "measured": 19.99999952075227,
+      "reference": 20.0,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=0.25 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=0.25 m, 40 Fibonacci probes",
+      "error_percent": -2.396236986612621e-06,
+      "measured": 7.999999808301041,
+      "reference": 8.0,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=0.5 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=0.5 m, 40 Fibonacci probes",
+      "error_percent": -2.396236986612621e-06,
+      "measured": 3.9999999041505205,
+      "reference": 4.0,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=1 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=1 m, 40 Fibonacci probes",
+      "error_percent": -2.396236986612621e-06,
+      "measured": 1.9999999520752603,
+      "reference": 2.0,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=10 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=10 m, 40 Fibonacci probes",
+      "error_percent": -2.3962406725530627e-06,
+      "measured": 0.19999999520751865,
+      "reference": 0.2,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=2 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=2 m, 40 Fibonacci probes",
+      "error_percent": -2.396236986612621e-06,
+      "measured": 0.9999999760376301,
+      "reference": 1.0,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G4: field-path kappa_1+kappa_2, sphere R=5 m, 40 Fibonacci probes": {
+      "criterion": "G4: field-path kappa_1+kappa_2, sphere R=5 m, 40 Fibonacci probes",
+      "error_percent": -2.3962406725530627e-06,
+      "measured": 0.3999999904150373,
+      "reference": 0.4,
+      "tolerance": 1e-06,
+      "verdict": "pass"
+    },
+    "G5: surface integral of kappa_1+kappa_2 over the mesh, level 48": {
+      "criterion": "G5: surface integral of kappa_1+kappa_2 over the mesh, level 48",
+      "error_percent": -0.03373816013158004,
+      "measured": 25.124261904237144,
+      "reference": 25.132741228718345,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G6: discrete mean curvature, area-weighted integral, sphere R=0.1 m, level 24": {
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=0.1 m, level 24",
+      "error_percent": 0.04898892860834003,
+      "measured": 20.00979778572167,
+      "reference": 20.0,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G6: discrete mean curvature, area-weighted integral, sphere R=0.5 m, level 24": {
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=0.5 m, level 24",
+      "error_percent": 0.04898892860831783,
+      "measured": 4.001959557144333,
+      "reference": 4.0,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G6: discrete mean curvature, area-weighted integral, sphere R=1 m, level 24": {
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=1 m, level 24",
+      "error_percent": 0.04898892860831783,
+      "measured": 2.0009797785721664,
+      "reference": 2.0,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G6: discrete mean curvature, area-weighted integral, sphere R=10 m, level 24": {
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=10 m, level 24",
+      "error_percent": 0.04898892860834003,
+      "measured": 0.2000979778572167,
+      "reference": 0.2,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    },
+    "G6: discrete mean curvature, area-weighted integral, sphere R=2 m, level 24": {
+      "criterion": "G6: discrete mean curvature, area-weighted integral, sphere R=2 m, level 24",
+      "error_percent": 0.04898892860831783,
+      "measured": 1.0004898892860832,
+      "reference": 1.0,
+      "tolerance": 0.02,
+      "verdict": "pass"
+    }
+  },
+  "headline": {
+    "measured": 2.0002377872364367,
+    "pointwise_median_relative_error_conditioned": 0.019394977383461576,
+    "pointwise_median_relative_error_raw": 0.5011773098888714,
+    "pointwise_within_2_percent_raw": false,
+    "quantity": "discrete mean curvature, kappa_1+kappa_2 (S = 2H), area-weighted integral",
+    "radius": 1.0,
+    "reference": 2.0,
+    "relative_error": 0.00011889361821837419,
+    "tolerance": 0.02,
+    "within_2_percent": true
+  },
+  "tolerance": 0.02
+}
