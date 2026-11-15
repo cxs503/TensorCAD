@@ -69,7 +69,22 @@ def test_real_iges_gate(name: str, path: Path):
     assert len(mesh.vertices) > 0, f"{name}: empty mesh"
     assert len(mesh.faces) > 0, f"{name}: no faces"
 
-    # Gate verdicts
+    # Gate verdicts.  The publisher files KCS/KVLCC2 are *half-breadth open* surface
+    # models: entity census {128: n}, y in [0, B/2], no centreplane and no deck cap,
+    # so a watertight verdict is unreachable by construction (measured in
+    # docs/gap_cad_t1_iges_pipe_round3.md).  Demanding it would only reward a
+    # pipeline that invents closure surface, so those files are judged on the gates
+    # that describe what they are (every face read, trims on their surface) and on
+    # the physical validation in tests/test_hull_surface_validation.py instead.
+    from tensorcad.geomquality.hull_surface import classify_model
+
+    shape = classify_model(list(mesh.vertices))
+    if shape["half_breadth"]:
+        assert report["gates"]["G1_all_faces_read"]["passed"], report["gates"]["G1_all_faces_read"]
+        assert report["gates"]["G2_trim_on_surface"]["passed"], report["gates"]["G2_trim_on_surface"]
+        assert report["after_repair"]["watertight"] is False
+        return
+
     failed = _gate_failures(report)
     if failed:
         # Print detailed failure info for debugging
