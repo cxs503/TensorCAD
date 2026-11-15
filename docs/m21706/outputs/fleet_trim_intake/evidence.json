@@ -1,0 +1,156 @@
+{
+ "schema": "tensorcad.fleet_trim_intake.evidence.v1",
+ "hulls": {
+  "KCS": {
+   "verdict": "VERIFIED",
+   "route": "untrimmed_patch_sheet",
+   "unit_gate": {
+    "verdict": "declared_consistent",
+    "factor": 1.0,
+    "relative_to_declared": 1.0,
+    "band": [
+     0.5,
+     2.0
+    ],
+    "extent_file_units": 243.844162,
+    "published_length_pp_m": 230.0,
+    "candidates": [
+     {
+      "name": "declared_global_section",
+      "factor": 1.0,
+      "implied_length_m": 243.844162,
+      "ratio_to_published_lpp": 1.0601920086956522,
+      "plausible": true
+     }
+    ],
+    "reason": "declared unit gives an implied length of 243.844 m, 1.060x the published L_PP 230.000 m"
+   },
+   "unit_flag": 6,
+   "unit_name": "M",
+   "frame_shift_z": 0.0,
+   "volume_m3": 52211.2848250093,
+   "published_volume_m3": 52030.0,
+   "volume_rel_error_percent": 0.3484236498352895,
+   "cb": 0.6527650856788951,
+   "cb_published": 0.6505,
+   "cm": 0.9854065510186323,
+   "cwp": 0.8217368072927034,
+   "mesh_vs_field_volume_percent": -0.021569721113740208,
+   "checks": {
+    "watertight": true,
+    "edge_manifold": true,
+    "positive_volume": true,
+    "volume_within_tolerance": true,
+    "scale_consistent_with_published_lpp": true,
+    "units_measured_plausible": true,
+    "extent_over_lpp": 1.0391304347826085,
+    "lwl_vs_lpp_percent": 1.0869565217391304
+   },
+   "mesh": {
+    "is_watertight": true,
+    "is_edge_manifold": true,
+    "triangle_count": 52320,
+    "zero_area_faces": 0,
+    "extent_m": [
+     238.99999999999997,
+     32.2411370664956,
+     10.8
+    ]
+   },
+   "trim_sampling_summary": {
+    "patches_total": null,
+    "patches_used": null,
+    "samples": null
+   },
+   "dz_refinement": null,
+   "reasons": []
+  },
+  "KVLCC2": {
+   "verdict": "VERIFIED",
+   "route": "trimmed_patch_loops",
+   "unit_gate": {
+    "verdict": "declared_contradicted_by_geometry",
+    "factor": 1.0,
+    "relative_to_declared": 1000.0,
+    "band": [
+     0.5,
+     2.0
+    ],
+    "extent_file_units": 333.58652357432004,
+    "published_length_pp_m": 320.0,
+    "candidates": [
+     {
+      "name": "declared_global_section",
+      "factor": 0.001,
+      "implied_length_m": 0.33358652357432006,
+      "ratio_to_published_lpp": 0.00104245788616975,
+      "plausible": false
+     },
+     {
+      "name": "one_file_unit_is_one_metre",
+      "factor": 1.0,
+      "implied_length_m": 333.58652357432004,
+      "ratio_to_published_lpp": 1.0424578861697502,
+      "plausible": true
+     }
+    ],
+    "reason": "the declared unit (0.001 m/file unit) implies a 0.334 m hull against the published L_PP 320.000 m (ratio 0.0010); the metre reading gives 333.587 m (1.042x) and is adopted -- the file's global section contradicts its own coordinates"
+   },
+   "unit_flag": 2,
+   "unit_name": "MM",
+   "frame_shift_z": 28.000242956049373,
+   "volume_m3": 312204.1330544006,
+   "published_volume_m3": 312622.0,
+   "volume_rel_error_percent": -0.1336652396822298,
+   "cb": 0.8087184315276873,
+   "cb_published": 0.8098,
+   "cm": 1.0014740202707266,
+   "cwp": 0.7850128349005553,
+   "mesh_vs_field_volume_percent": 0.07760117740706896,
+   "checks": {
+    "watertight": true,
+    "edge_manifold": true,
+    "positive_volume": true,
+    "volume_within_tolerance": true,
+    "scale_consistent_with_published_lpp": true,
+    "units_measured_plausible": true,
+    "extent_over_lpp": 1.0421875,
+    "lwl_vs_lpp_percent": -5.0
+   },
+   "mesh": {
+    "is_watertight": true,
+    "is_edge_manifold": true,
+    "triangle_count": 200160,
+    "zero_area_faces": 0,
+    "extent_m": [
+     333.5,
+     58.12852865787294,
+     20.8
+    ]
+   },
+   "trim_sampling_summary": {
+    "patches_total": 19,
+    "patches_used": 19,
+    "samples": 417632
+   },
+   "dz_refinement": {
+    "dz_m": [
+     0.1,
+     0.05
+    ],
+    "volume_m3": [
+     332917.98412801017,
+     312204.1330544006
+    ],
+    "relative_change_percent": -6.22190811585741,
+    "adopted": "finer (0.5 x dz)"
+   },
+   "reasons": []
+  }
+ },
+ "environment": {
+  "python": "3.11.6",
+  "ocp_available": false,
+  "note": "no OpenCASCADE/PyPI access: analytic B-rep STEP route stays NOT_SUPPORTED"
+ }
+}
