@@ -35,10 +35,13 @@ from typing import Any
 from .export import write_obj, write_stl
 from .gate import gate_mesh
 from .series60 import (
+    MEASURED_TO_ANALYTIC,
     PARENT_CB,
     Series60Parameters,
     analytic_series60_hydrostatics,
     generate_series60,
+    series60_analytic_relative_errors,
+    series60_measured_hydrostatics,
 )
 
 #: Predeclared bar for "measured mesh vs the module's own closed form".  The hull
@@ -50,27 +53,11 @@ DISCRETISATION_TOLERANCE = 0.02
 PUBLISHED_TOLERANCE = 0.03
 
 #: Measured-on-the-mesh quantity -> key of ``analytic_series60_hydrostatics``.
-#: ``None`` marks a coefficient that has to be assembled from two measurements
-#: (there is no single attribute for it on :class:`tensorcad.hydrostatics.Hydrostatics`).
-MEASURED_KEYS: tuple[tuple[str, str], ...] = (
-    ("displacement_volume", "displacement_volume"),
-    ("waterplane_area", "waterplane_area"),
-    ("wetted_surface_area", "wetted_surface_area"),
-    ("longitudinal_centre_buoyancy", "longitudinal_centre_buoyancy"),
-    ("longitudinal_centre_flotation", "longitudinal_centre_flotation"),
-    # The mesh integrates in the hull frame (z = 0 at the waterline, keel at
-    # z = -T); the analytic side carries both, so compare like with like.  Pairing
-    # the z-frame measurement with the above-keel closed form reports -193 % on
-    # every hull, which is a frame mismatch, not a discretisation error.
-    ("vertical_centre_buoyancy", "vertical_centre_buoyancy_z"),
-    ("block_coefficient", "block_coefficient"),
-    ("prismatic_coefficient", "prismatic_coefficient"),
-    ("maximum_section_area", "maximum_section_area"),
-    # Cm and Cwp are quotients of two measured quantities; the analytic side has
-    # them as first-class keys, so they are compared the same way.
-    ("midship_coefficient", "midship_coefficient"),
-    ("waterplane_coefficient", "waterplane_coefficient"),
-)
+#: The table lives in :mod:`tensorcad.series60` (``MEASURED_TO_ANALYTIC``) because
+#: it is the *content* of the library's comparison, not of this entry: a second
+#: copy here is exactly how the library's version drifted into pairing the
+#: waterline-frame VCB with the keel-frame closed form and reporting -193 %.
+MEASURED_KEYS: tuple[tuple[str, str], ...] = MEASURED_TO_ANALYTIC
 
 
 def _parameters(args: argparse.Namespace) -> Series60Parameters:
@@ -92,37 +79,17 @@ def _parameters(args: argparse.Namespace) -> Series60Parameters:
 
 
 def measured_hydrostatics(model: Any) -> dict[str, float]:
-    """The measured record, with the two coefficients that are quotients added."""
-    hydro = model.hydrostatics
-    p = model.parameters
-    values: dict[str, float] = {}
-    derived = ("midship_coefficient", "waterplane_coefficient")
-    for name, _ in MEASURED_KEYS:
-        if name in derived:
-            continue
-        values[name] = float(getattr(hydro, name))
-    values["midship_coefficient"] = (
-        hydro.maximum_section_area / (p.beam * p.draft) if p.beam * p.draft else float("nan")
-    )
-    values["waterplane_coefficient"] = (
-        hydro.waterplane_area / (p.length * p.beam) if p.length * p.beam else float("nan")
-    )
-    return values
+    """The measured record, with the two quotient coefficients derived."""
+    return series60_measured_hydrostatics(model.parameters, model.hydrostatics)
 
 
 def relative_errors(model: Any) -> dict[str, float | None]:
-    """Measured mesh against the module's analytic reference, per quantity."""
-    analytic = analytic_series60_hydrostatics(model.parameters)
-    measured = measured_hydrostatics(model)
-    errors: dict[str, float | None] = {}
-    for name, key in MEASURED_KEYS:
-        reference = analytic.get(key)
-        value = measured.get(name)
-        if reference is None or value is None or not math.isfinite(float(value)):
-            errors[name] = None
-            continue
-        errors[name] = (float(value) - float(reference)) / float(reference) if reference else None
-    return errors
+    """Measured mesh against the module's analytic reference, per quantity.
+
+    Delegates to the library so the exported document and an in-process caller
+    report the same numbers; ``None`` means "no closed form to compare against".
+    """
+    return series60_analytic_relative_errors(model.parameters, model.hydrostatics)
 
 
 def _write_offsets(model: Any, path: Path) -> Path:

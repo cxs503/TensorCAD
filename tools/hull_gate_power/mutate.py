@@ -56,6 +56,11 @@ SERIES_TESTS = ["tests/test_series60_bulb_transom.py", "tests/test_series60.py"]
 #: reference, that the gate refuses instead of writing, and that the published
 #: comparison labels a closure as a closure.
 SERIES_CLI_TESTS = ["tests/test_series60_cli.py"]
+#: The family-wide comparison table (frame pairing, derived coefficients) is
+#: guarded by the parameter-box sweep, not by any single-hull test: the defects
+#: it pins (a `-193 %` VCB frame mismatch, two `nan` coefficients) pass every
+#: test that only looks at one hull.
+SERIES_CONFORMANCE_TESTS = ["tests/test_series60_family_conformance.py"]
 
 MUTANTS: list[dict] = [
     {
@@ -303,12 +308,46 @@ MUTANTS: list[dict] = [
     {
         "id": "S60-16-entry-vcb-frame",
         "kind": "model",
-        "file": "cli",
+        "file": "series",
         "old": '    ("vertical_centre_buoyancy", "vertical_centre_buoyancy_z"),',
         "new": '    ("vertical_centre_buoyancy", "vertical_centre_buoyancy"),  # mutant S60-16',
         "claim": "the measured VCB is compared in the frame the closed form states "
                  "(mesh z-frame against z-frame), not against the above-keel value",
-        "tests": SERIES_CLI_TESTS,
+        "tests": SERIES_CONFORMANCE_TESTS + SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-19-derive-midship-coefficient",
+        "kind": "model",
+        "file": "series",
+        "old": "    values[\"midship_coefficient\"] = (\n"
+               "        hydro.maximum_section_area / (p.beam * p.draft) if p.beam * p.draft else float(\"nan\")\n"
+               "    )",
+        "new": "    values[\"midship_coefficient\"] = float(getattr(hydro, \"midship_coefficient\", float(\"nan\")))  # mutant S60-19",
+        "claim": "Cm is derived from two measured quantities, not read off a field "
+                 "Hydrostatics does not have (which silently yields nan)",
+        "tests": SERIES_CONFORMANCE_TESTS,
+    },
+    {
+        "id": "S60-20-derive-waterplane-coefficient",
+        "kind": "model",
+        "file": "series",
+        "old": "    values[\"waterplane_coefficient\"] = (\n"
+               "        hydro.waterplane_area / (p.length * p.beam) if p.length * p.beam else float(\"nan\")\n"
+               "    )",
+        "new": "    values[\"waterplane_coefficient\"] = float(getattr(hydro, \"waterplane_coefficient\", float(\"nan\")))  # mutant S60-20",
+        "claim": "Cwp is derived from the measured waterplane area over L*B, so it is "
+                 "defined for every hull instead of coming out nan",
+        "tests": SERIES_CONFORMANCE_TESTS,
+    },
+    {
+        "id": "S60-21-comparison-is-self-referential",
+        "kind": "model",
+        "file": "series",
+        "old": "    measured = series60_measured_hydrostatics(p, hydro)",
+        "new": "    measured = dict(ref)  # mutant S60-21 (measured replaced by the reference)",
+        "claim": "the comparison's measured side is the mesh, not the closed form it is "
+                 "compared against",
+        "tests": SERIES_CONFORMANCE_TESTS,
     },
     {
         "id": "S60-17-entry-self-referential-gate",
