@@ -31,6 +31,7 @@ from tensorcad.perf_benchmark import (
     build_fleet_mesh,
     clear_fleet_cache,
     clear_mesh_cache,
+    environment_compat,
     evaluate_gates,
     measurement_key,
     run_fleet_benchmark,
@@ -171,6 +172,81 @@ def test_gate_fails_when_exceeding_factor() -> None:
     assert updated.gates[0].ratio == pytest.approx(4.0)
 
     bl_path.unlink()
+
+
+def _baseline_with_env(env: dict, seconds: float = 0.05) -> dict:
+    return {
+        "schema": BENCHMARK_SCHEMA,
+        "environment": env,
+        "results": [
+            {"subtask": "load", "nx": 41, "nz": 13, "triangles": 1998,
+             "vertices": 1001, "grid_cells": 0, "seconds": seconds,
+             "status": "measured", "throughput": 39960.0, "note": "",
+             "copies": 1},
+        ],
+    }
+
+
+def test_environment_compat_hard_mismatch() -> None:
+    ok, reason = environment_compat({"machine": "loongarch64"}, {"machine": "x86_64"})
+    assert ok is False
+    assert "machine" in reason
+
+
+def test_environment_compat_missing_side_is_assumed_comparable() -> None:
+    assert environment_compat(None, {"machine": "x86_64"})[0] is True
+    assert environment_compat({"machine": "x86_64"}, None)[0] is True
+
+
+def test_environment_compat_soft_fields_are_annotated_only() -> None:
+    ok, reason = environment_compat(
+        {"machine": "loongarch64", "cpu_count": 128},
+        {"machine": "loongarch64", "cpu_count": 64},
+    )
+    assert ok is True
+    assert "cpu_count" in reason
+
+
+def test_cross_machine_baseline_refuses_comparison(tmp_path: Path) -> None:
+    """A wall-clock baseline from another architecture must not become RED/pass."""
+    result = PerfBenchmarkResult(
+        results=(
+            SubTaskResult("load", 41, 13, 1998, 1001, 0, 0.20, MEASURED, 9990.0),
+        ),
+        environment={"machine": "x86_64", "platform": "Linux-x86_64"},
+    )
+    bl_path = tmp_path / "bl.json"
+    bl_path.write_text(json.dumps(_baseline_with_env(
+        {"machine": "loongarch64", "platform": "Linux-loongarch64"})))
+
+    updated, failed = evaluate_gates(result, bl_path, regression_factor=2.0)
+    assert failed == []
+    assert [g.name for g in updated.gates] == ["regression_environment"]
+    gate = updated.gates[0]
+    assert gate.status == NOT_RUN          # not checked, never a silent pass
+    assert gate.passed is True             # NOT_RUN never fails the build
+    assert "not comparable" in gate.detail
+    # no green wall-clock gate was invented for this measurement
+    assert not any(g.name.startswith("regression_load") for g in updated.gates)
+
+
+def test_same_machine_baseline_still_gates(tmp_path: Path) -> None:
+    env = {"machine": "loongarch64", "platform": "Linux-loongarch64"}
+    result = PerfBenchmarkResult(
+        results=(
+            SubTaskResult("load", 41, 13, 1998, 1001, 0, 0.20, MEASURED, 9990.0),
+        ),
+        environment=dict(env),
+    )
+    bl_path = tmp_path / "bl.json"
+    bl_path.write_text(json.dumps(_baseline_with_env(env)))
+
+    updated, failed = evaluate_gates(result, bl_path, regression_factor=2.0)
+    assert failed == ["regression_load:41x13"]
+    gate = updated.gates[0]
+    assert gate.status == MEASURED
+    assert gate.passed is False
+    assert gate.ratio == pytest.approx(4.0)
 
 
 def test_no_gate_when_no_baseline() -> None:
