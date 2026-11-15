@@ -158,9 +158,45 @@ def criterion_five(specs: Mapping[str, Any], root: Path) -> dict[str, Any]:
     }
 
 
+def criterion_documents(library: Mapping[str, Any]) -> dict[str, Any]:
+    """Owner-literal tier: every ship states the four named quantities in >=2 documents.
+
+    ``≥2 独立来源`` names journal papers and workshop pages as sources, so a second *publisher*
+    counts even when its numeral reprints the first table.  That is the weaker tier and it is
+    labelled as such: every quantity it accepts is split into ``INDEPENDENT`` (>=2 lineages) and
+    ``LINEAGE_LIMITED`` (>=2 documents, one origin), so a transcription agreement is never
+    reported as a second measurement.
+    """
+    cells = library.get("documents", {}).get("cells", {})
+    per_ship: dict[str, Any] = {}
+    for ship, report in library["report"].items():
+        rows = cells.get(ship, {})
+        failing, passing, limited = [], [], []
+        for quantity in NAMED:
+            row = rows.get(quantity, {"documents": 0, "verdict": "MISSING"})
+            if row["documents"] >= 2:
+                passing.append(quantity)
+                if row["verdict"] != "INDEPENDENT":
+                    limited.append(quantity)
+            else:
+                failing.append(quantity)
+        per_ship[ship] = {
+            "pass": not failing,
+            "documents_passing": passing,
+            "lineage_limited": limited,
+            "failing": failing,
+        }
+    return {
+        "pass": bool(per_ship) and all(row["pass"] for row in per_ship.values()),
+        "tier": "B: >=2 independent documents (transcription corroboration labelled)",
+        "ships": per_ship,
+    }
+
+
 def evaluate(library: Mapping[str, Any], specs: Mapping[str, Any], root: Path) -> dict[str, Any]:
     criteria = {
         "one_two_independent_lineages": criterion_one(library),
+        "one_b_two_independent_documents": criterion_documents(library),
         "two_citation_and_digest": criterion_two(library),
         "three_disputed_marked_with_both_values": criterion_three(library),
         "four_specs_multi_source_arrays": criterion_four(library, specs),
@@ -258,6 +294,13 @@ def markdown(result: Mapping[str, Any], library: Mapping[str, Any], specs: Mappi
         + "; ".join(
             f"{ship}: {len(row['failing'])} of 4 quantities short"
             for ship, row in result["criteria"]["one_two_independent_lineages"]["ships"].items()
+        ) + " |",
+        f"| ①b ≥2 independent *documents* per ship on the four named quantities (tier B: a "
+        f"reprinted table counts, and is labelled) | "
+        f"**{'PASS' if result['criteria']['one_b_two_independent_documents']['pass'] else 'FAIL'}** | "
+        + "; ".join(
+            f"{ship}: {len(row['failing'])} short, {len(row['lineage_limited'])} lineage-limited"
+            for ship, row in result["criteria"]["one_b_two_independent_documents"]["ships"].items()
         ) + " |",
         f"| ② citation + source digest on every value | **{'PASS' if result['criteria']['two_citation_and_digest']['pass'] else 'FAIL'}** | "
         f"{result['criteria']['two_citation_and_digest']['cells_checked']} cells checked, "
