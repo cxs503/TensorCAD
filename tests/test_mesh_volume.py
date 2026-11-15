@@ -269,3 +269,39 @@ def test_cone_sphere_limit():
     r, h = 1.0, 0.001
     ref = mv.analytic_cone_volume(r, h)
     assert ref == pytest.approx(math.pi * r**2 * h / 3.0, rel=1e-10)
+
+
+# ---------------------------------------------------------------------------
+# torus: genus-1 body, Pappus's centroid theorem
+# ---------------------------------------------------------------------------
+def test_torus_volume_converges_at_second_order():
+    """Torus (R=1, r=0.3) volume error converges at O(h^2)."""
+    rows = mv.torus_convergence_study(1.0, 0.3, resolution_levels=(32, 64, 128, 256))
+    errors = [row.volume_error for row in rows]
+    # Torus mesh vertices lie ON the surface, so error can be negative (inscribed-like)
+    assert all(err < 0.0 for err in errors), "torus mesh volume is below analytic"
+    pairs = list(itertools.pairwise(errors))
+    assert all(abs(later) < abs(earlier) for earlier, later in pairs)
+    assert mv.observed_order(rows) == pytest.approx(2.0, abs=0.15)
+    assert abs(rows[-1].volume_error) <= mv.RELATIVE_TOLERANCE
+    for row in rows:
+        assert row.topologically_closed
+        assert row.euler_characteristic == 0, "torus is genus 1, χ=0"
+        assert row.route_difference <= mv.ROUTE_TOLERANCE
+
+
+def test_torus_reference_matches_pappus():
+    """Torus volume reference matches Pappus's centroid theorem: V = 2π²Rr²."""
+    R, r = 1.5, 0.4
+    ref = mv.analytic_torus_volume(R, r)
+    expected = 2.0 * math.pi**2 * R * r**2
+    assert ref == pytest.approx(expected, rel=1e-15)
+    area_ref = mv.analytic_torus_area(R, r)
+    expected_area = 4.0 * math.pi**2 * R * r
+    assert area_ref == pytest.approx(expected_area, rel=1e-15)
+
+
+def test_torus_euler_is_zero():
+    """A torus mesh has Euler characteristic 0 (genus 1)."""
+    mesh = mv.torus_mesh(1.0, 0.3, nu=64, nv=32)
+    assert mesh.euler() == 0
