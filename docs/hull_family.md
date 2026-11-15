@@ -1,9 +1,9 @@
 # The unified hull-family entry: Series 60 through `tensorcad.hull`
 
 **Scope**: `tensorcad/hull.py` (`family` dispatch) · **Family module**:
-`tensorcad.series60` · **Evidence**: `artifacts/hull_family/hull_family.json`
+`tensorcad.series60` · **Evidence**: `docs/hull_family/evidence.json`
 (regenerate with `python tools/hull_family/report.py`) · **Figure**:
-`docs/hull_family.png` · **Gate power**: `artifacts/hull_family/gate_power.json`
+`docs/hull_family.png` (`2325 x 720` px) · **Gate power**: `docs/hull_family/gate.json`
 
 ## 1. Case
 
@@ -148,12 +148,12 @@ numbers published rather than hidden.
 
 ## 7. Gate power of the new tests
 
-`python tools/hull_family/gen_doc_and_gate.py` → **4/5 = 80.0 % mutants killed**.
+`python tools/hull_family/gen_doc_and_gate.py` → **5/5 = 100.0 % mutants killed**.
 
 | mutant | defect it injects | documented claim | verdict |
 |---|---|---|---|
 | `HF-1-target-cb-ignored` | cb=0.60, | the unified entry must use the Cb it was given, not the first parent form | **KILLED** (6 test(s) red) |
-| `HF-2-offsets-half-breadth` | return mesh, tuple((x, half) for x, half in half_breadths) | HullModel.offsets is full girth width; the family module reports half-breadths | **SURVIVED** (0 test(s) red) |
+| `HF-2-offsets-half-breadth` | return tuple((x, half) for x, half in half_breadths) | HullModel.offsets is full girth width; the family module reports half-breadths | **KILLED** (2 test(s) red) |
 | `HF-3-family-branch-dead` | if False:
         return _generate_family_hull(p) | family='series60' must not silently fall back to the sine loft | **KILLED** (3 test(s) red) |
 | `HF-4-family-validation-dropped` | pass  # mutant: family errors dropped | a knob a family cannot honour must be refused, not ignored | **KILLED** (5 test(s) red) |
