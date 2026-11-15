@@ -111,14 +111,21 @@ class TestFleetBaselineGate:
             build_ship(KVLCC2_SPEC)
 
     def test_jbc_fleet_baseline_status(self):
-        """JBC: documents the layout/volume error (WITHHELD)."""
+        """JBC: the remaining refusal is a frame/units one, not a degenerate reader.
+
+        Before the knot-span fix (``tensorcad/iges.py::_find_span``, m21680) 5 343 of
+        the 7 605 samples decoded from JBC's 45 type-128 surfaces were the origin and
+        5 079 more fell outside their own control nets; the route then built a mesh
+        from that cloud and reported ``WITHHELD`` with a > 1 % volume error.  After
+        the fix the decoded cloud is sound (0 degenerate samples, 0 outside the
+        control nets) and the route refuses for a different, named reason: the file's
+        frame does not place the hull inside ``z in [0, T]``, so the half-breadth
+        field has fewer than two usable waterline slices.  Pinning the refusal keeps
+        the FAIL honest -- a WITHHELD mesh built from a broken reader would not.
+        """
         _skip_if_missing(JBC_SPEC)
-        mesh, report = build_ship(JBC_SPEC)
-        vol = report["derived"]["volume_m3"]
-        ref = JBC_SPEC.published_volume_m3
-        error_pct = abs(vol - ref) / ref * 100
-        assert error_pct > 1.0, f"JBC volume error {error_pct:.1f}% should exceed 1% tolerance"
-        assert report["verdict"] == "WITHHELD"
+        with pytest.raises(ValueError, match="fewer than two usable waterline slices"):
+            build_ship(JBC_SPEC)
 
 
 # --------------------------------------------------------------------------- #
