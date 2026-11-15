@@ -21,6 +21,10 @@ on:
       - "tests/test_golden_mutation.py"
       - "tools/golden/**"
       - "docs/golden/**"
+      # the shipped datasets the golden cases measure (and one of them is a reference
+      # source): a geometry change that arrives as a data edit touches no file under
+      # tensorcad/, so the path filter has to name the data too
+      - "docs/data/**"
       - ".githooks/**"
       - ".github/workflows/golden-geometry.yml"
   pull_request:
@@ -30,6 +34,10 @@ on:
       - "tests/test_golden_mutation.py"
       - "tools/golden/**"
       - "docs/golden/**"
+      # the shipped datasets the golden cases measure (and one of them is a reference
+      # source): a geometry change that arrives as a data edit touches no file under
+      # tensorcad/, so the path filter has to name the data too
+      - "docs/data/**"
       - ".githooks/**"
       - ".github/workflows/golden-geometry.yml"
   workflow_dispatch:
