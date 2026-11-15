@@ -876,19 +876,87 @@ def analytic_series60_hydrostatics(p: Series60Parameters) -> dict[str, float]:
     return reference
 
 
-def series60_analytic_relative_errors(p: Series60Parameters, hydro: Hydrostatics) -> dict[str, float]:
+#: Pairs a ``Hydrostatics`` field with the key of :func:`analytic_series60_hydrostatics`
+#: that states *the same quantity in the same frame*.  The pairing is the whole
+#: content of this table: ``vertical_centre_buoyancy`` is the one quantity the two
+#: sides express differently, because the mesh integrates ``z`` with ``z = 0`` at the
+#: design waterline while the closed form's headline key is measured up from the keel.
+#: Pairing the z-frame measurement with the above-keel closed form reports about
+#: -193 % on every Series 60 hull -- a frame mismatch, not a discretisation error --
+#: so the z-frame key ``vertical_centre_buoyancy_z`` is the comparable one.
+MEASURED_TO_ANALYTIC: tuple[tuple[str, str], ...] = (
+    ("displacement_volume", "displacement_volume"),
+    ("waterplane_area", "waterplane_area"),
+    ("wetted_surface_area", "wetted_surface_area"),
+    ("longitudinal_centre_buoyancy", "longitudinal_centre_buoyancy"),
+    ("longitudinal_centre_flotation", "longitudinal_centre_flotation"),
+    ("vertical_centre_buoyancy", "vertical_centre_buoyancy_z"),
+    ("block_coefficient", "block_coefficient"),
+    ("prismatic_coefficient", "prismatic_coefficient"),
+    ("maximum_section_area", "maximum_section_area"),
+    ("midship_coefficient", "midship_coefficient"),
+    ("waterplane_coefficient", "waterplane_coefficient"),
+)
+
+#: Coefficients a closed-surface integration does not report directly: they are
+#: quotients of two quantities the mesh *does* measure, so the measured side derives
+#: them instead of reading a missing attribute (which silently produced ``nan``).
+DERIVED_COEFFICIENTS: tuple[str, ...] = ("midship_coefficient", "waterplane_coefficient")
+
+#: Quantities in :data:`MEASURED_TO_ANALYTIC` with no closed form in the reference
+#: dict.  They are reported as ``None`` -- "no reference to compare against" -- rather
+#: than as ``nan``, which reads as a failed comparison.
+NO_CLOSED_FORM: tuple[str, ...] = ("wetted_surface_area",)
+
+
+def series60_measured_hydrostatics(p: Series60Parameters, hydro: Hydrostatics) -> dict[str, float]:
+    """The measured record, with the two quotient coefficients derived from it.
+
+    ``Cm = maximum_section_area / (B T)`` and ``Cwp = waterplane_area / (L B)`` are
+    quotients of quantities :class:`~tensorcad.hydrostatics.Hydrostatics` carries, so
+    they are defined for every hull -- including one with a bulb, where the flat FP
+    patch the bulb adds is part of the waterplane.
+    """
+    values: dict[str, float] = {}
+    for name, _key in MEASURED_TO_ANALYTIC:
+        if name not in DERIVED_COEFFICIENTS:
+            values[name] = float(getattr(hydro, name))
+    values["midship_coefficient"] = (
+        hydro.maximum_section_area / (p.beam * p.draft) if p.beam * p.draft else float("nan")
+    )
+    values["waterplane_coefficient"] = (
+        hydro.waterplane_area / (p.length * p.beam) if p.length * p.beam else float("nan")
+    )
+    return values
+
+
+def series60_analytic_relative_errors(p: Series60Parameters,
+                                     hydro: Hydrostatics) -> dict[str, float | None]:
+    """Signed ``(measured - analytic) / analytic`` per quantity, frame-consistent.
+
+    This is the single implementation of the comparison: the product entry
+    (``tensorcad-hull series60``) and the library import both call it, so the numbers
+    in the exported document and the numbers a caller gets cannot drift apart.
+
+    ``None`` means "no closed form to compare against" (:data:`NO_CLOSED_FORM`); a
+    finite float is always a real comparison.  A quantity that silently came out
+    ``nan`` was the defect this function was fixed for -- the old version paired the
+    waterline-frame measurement with the keel-frame closed form and read two
+    coefficients off attributes ``Hydrostatics`` does not have.
+    """
     ref = analytic_series60_hydrostatics(p)
-    errors: dict[str, float] = {}
-    for key in ("displacement_volume", "waterplane_area", "maximum_section_area",
-                "vertical_centre_buoyancy", "longitudinal_centre_buoyancy",
-                "longitudinal_centre_flotation", "block_coefficient",
-                "prismatic_coefficient", "midship_coefficient", "waterplane_coefficient"):
-        rv = ref.get(key)
-        mv = getattr(hydro, key, None) if hydro else None
-        if rv is not None and mv is not None and abs(rv) > 1e-15:
-            errors[key] = (mv - rv) / rv
-        else:
-            errors[key] = float("nan")
+    measured = series60_measured_hydrostatics(p, hydro)
+    errors: dict[str, float | None] = {}
+    for name, key in MEASURED_TO_ANALYTIC:
+        if name in NO_CLOSED_FORM or key not in ref:
+            errors[name] = None
+            continue
+        reference = ref[key]
+        value = measured.get(name)
+        if value is None or not math.isfinite(value) or abs(reference) <= 1e-15:
+            errors[name] = None
+            continue
+        errors[name] = (value - reference) / reference
     return errors
 
 
