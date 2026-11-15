@@ -845,7 +845,13 @@ def test_perf_benchmark_doc_tables_match_sources(tmp_path: Path) -> None:
     # A hand-edited number inside a marked table must be a failure, not a silent
     # claim: replace one rendered digit and expect drift to be reported.
     body_start = doc.index("<!-- perf-evidence:baseline-gate-table begin -->")
-    edited = doc[:body_start] + doc[body_start:].replace("0.0230", "0.0199", 1)
+    # Extract a baseline seconds value from the document table (dynamic, not hardcoded)
+    import re as _re
+    _m = _re.search(r'\| `load:21x9`.*?\| ([0-9.]+) \|', doc[body_start:])
+    assert _m, 'Could not find load:21x9 baseline value in document table'
+    _old_val = _m.group(1)
+    _new_val = f"{float(_old_val) * 0.85:.4f}"  # 15% lower = detectable drift
+    edited = doc[:body_start] + doc[body_start:].replace(_old_val, _new_val, 1)
     assert edited != doc
     problems = check_document(edited, artifacts, names=BENCHMARK_DOC_TABLE_NAMES)
     assert problems and "baseline-gate-table" in problems[0]
