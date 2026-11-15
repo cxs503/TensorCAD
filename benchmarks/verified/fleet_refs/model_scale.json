@@ -1,0 +1,171 @@
+{
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "comparisons": {
+  "JBC": {
+   "benchmark": {
+    "error_at_derived_scale_percent": -18.277103346724243,
+    "error_at_published_scale_percent": -16.590147496342666,
+    "got_volume_at_derived_scale_m3": 145769.0490375513,
+    "got_volume_at_published_scale_m3": 148778.07050092108,
+    "points_explained_by_scale": 1.686955850381576,
+    "ref_volume_m3": 178369.9,
+    "residual_is_geometric": true,
+    "verdict_unchanged": "WITHHELD"
+   },
+   "claims": {
+    "beam": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "full-scale B (m)",
+     "page": 8,
+     "quote": "Parameter Full Scale Model Scale Unit Length, Lpp 280.0 7.00 m Breadth, B 45.0 1.125 m Depth, H 25.0 0.625 m Draft, T 16.50 0.4125 m Displacement,\uf0d1 178369.9 2.7872 m3 Wetted Surface,",
+     "raw": "45.0",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "beam",
+     "unit": "m",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 45.0
+    },
+    "cb": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "Cb",
+     "page": 8,
+     "quote": "m Draft, T 16.50 0.4125 m Displacement,\uf0d1 178369.9 2.7872 m3 Wetted Surface, S 19556.1 12.201 m2 Block coefficient, Cb 0.858 0.858 Design Speed, V 7.459 1.179 m/s The hull was analysed constraining four degrees of freedom and",
+     "raw": "0.858",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "cb",
+     "unit": "-",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 0.858
+    },
+    "declared_scale_ratio": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "declared scale ratio \u03bb",
+     "page": 7,
+     "quote": ", is also another benchmark bulk carrier with a full-scale design length of 280 m and the model scale 7.00 m with a scale ratio of 40. The geometry file for the JBC hull was obtained from the T2015 workshop website. The model tests CFD analys",
+     "raw": "40",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "declared_scale_ratio",
+     "unit": "-",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 40.0
+    },
+    "displacement_volume": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "full-scale \u2207 (m\u00b3)",
+     "page": 8,
+     "quote": "ength, Lpp 280.0 7.00 m Breadth, B 45.0 1.125 m Depth, H 25.0 0.625 m Draft, T 16.50 0.4125 m Displacement,\uf0d1 178369.9 2.7872 m3 Wetted Surface, S 19556.1 12.201 m2 Block coefficient, Cb 0.858 0.858 Design Speed, V 7.459 1.179",
+     "raw": "178369.9",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "displacement_volume",
+     "unit": "m3",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 178369.9
+    },
+    "draft": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "full-scale T (m)",
+     "page": 8,
+     "quote": "Scale Model Scale Unit Length, Lpp 280.0 7.00 m Breadth, B 45.0 1.125 m Depth, H 25.0 0.625 m Draft, T 16.50 0.4125 m Displacement,\uf0d1 178369.9 2.7872 m3 Wetted Surface, S 19556.1 12.201 m2 Block coefficient, Cb 0.858",
+     "raw": "16.50",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "draft",
+     "unit": "m",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 16.5
+    },
+    "full_length_pp": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "full-scale Lpp (m)",
+     "page": 8,
+     "quote": "Parameter Full Scale Model Scale Unit Length, Lpp 280.0 7.00 m Breadth, B 45.0 1.125 m Depth, H 25.0 0.625 m Draft, T 16.50 0.4125 m Displacement,\uf0d1 178369.9",
+     "raw": "280.0",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "full_length_pp",
+     "unit": "m",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 280.0
+    },
+    "model_length_pp": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "model Lpp (m)",
+     "page": 8,
+     "quote": "Parameter Full Scale Model Scale Unit Length, Lpp 280.0 7.00 m Breadth, B 45.0 1.125 m Depth, H 25.0 0.625 m Draft, T 16.50 0.4125 m Displacement,\uf0d1 178369.9",
+     "raw": "7.00",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "model_length_pp",
+     "unit": "m",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 7.0
+    },
+    "model_length_statement": {
+     "doi": "10.21203/rs.3.rs-7594251/v1",
+     "label": "model length from the same sentence (m)",
+     "page": 7,
+     "quote": ", is also another benchmark bulk carrier with a full-scale design length of 280 m and the model scale 7.00 m with a scale ratio of 40. The geometry file for the JBC hull was obtained from the T2015 workshop website. The model tests CFD",
+     "raw": "7.00",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "source": "jbc_scale_pr",
+     "source_claim": "model_length_statement",
+     "unit": "m",
+     "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf",
+     "value": 7.0
+    }
+   },
+   "delta_percent": 0.6833986681290538,
+   "delta_relative": 0.006833986681290538,
+   "derived_scale": 39.72849598755336,
+   "derived_scale_basis": "model scale derived from the publisher CAD (no scale row is published): B=45 m / D=25 m over the measured model spans, half-spread 0.18%; record artifacts/baseline_fleet/jbc_model_scale.json (page sha256 fc2ce9054a8b7842\u2026, archive sha256 e19800ee954f4960\u2026)",
+   "published_scale_basis": "sentence \u03bb=40 and Table 3 280 m / 7 m = 40 agree to 0.000 %",
+   "published_scale_ratio": 40.0,
+   "ship": "JBC",
+   "status": "cross_checked",
+   "tolerance_percent": 1.0,
+   "volume_factor_published_over_derived": 1.0206423893359875
+  }
+ },
+ "documents": {
+  "jbc_scale_pr": {
+   "bytes": 1816089,
+   "claims_read": [
+    "beam",
+    "cb",
+    "declared_scale_ratio",
+    "displacement_volume",
+    "draft",
+    "full_length_pp",
+    "model_length_pp",
+    "model_length_statement"
+   ],
+   "claims_requested": [
+    "model_length_pp",
+    "full_length_pp",
+    "declared_scale_ratio",
+    "model_length_statement",
+    "beam",
+    "draft",
+    "displacement_volume",
+    "cb"
+   ],
+   "digest_matches_registry": true,
+   "doi": "10.21203/rs.3.rs-7594251/v1",
+   "licence": "CC BY 4.0 (stated on page 1 of the document)",
+   "note": "the full-scale column of Table 3 reproduces the Tokyo 2015 JBC table (same digits), so it is corroboration of transcription only; the *model* column and the scale-ratio sentence in section 3.2 are the reason this document is cited",
+   "pages": 24,
+   "publisher": "Research Square preprint (Tarafder, Hasanat, Hasan, Sayeed, Hannan), posted 2025-09-30, 'Scale Effects on Bare-Hull Resistance of KCS and JBC: A RANS-Based Investigation with Verification and Validation', Table 3 and section 3.2",
+   "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+   "status": "read",
+   "url": "https://www.researchsquare.com/article/rs-7594251/latest.pdf"
+  }
+ },
+ "generated_utc": "2026-11-15T04:25:23+00:00",
+ "schema": "tensorcad.fleet_refs.model_scale/1.0",
+ "scope": "published model-scale statements vs the derived geometry_scale of the baseline fleet; the comparison is quoted in relative displacement volume because that is the quantity the benchmark compares",
+ "tolerance_percent": 1.0
+}
