@@ -1,9 +1,16 @@
 {
-  "baseline": "/srv/tensor/agent/work/m20527/docs/golden/tensorcad_geometry_golden.json",
+  "baseline": "/srv/tensor/agent/work/m22531/docs/golden/tensorcad_geometry_golden.json",
   "cases": [
     {
-      "findings": [],
-      "geometry_sha256": "0ef07ca68299b6216ab5ef817f324e38eb17d8e79d4c319ff9116200106986eb",
+      "findings": [
+        {
+          "case": "wigley",
+          "code": "richardson_unavailable",
+          "detail": "no grid-convergence estimate for ['longitudinal_centre_buoyancy_m']: those metrics do not move consistently between the three levels (exactly integrated, or moving the wrong way), so their two-grid band is the only criterion in force",
+          "severity": "warning"
+        }
+      ],
+      "geometry_sha256": "a06f04cb8a1af6bee75946cd59ade7b5e4ac2e9a439e9b691239d91682072780",
       "known_limitations": [],
       "measurements": {
         "coarse": {
@@ -25,6 +32,16 @@
           "vertical_centre_buoyancy_m": -0.23436279106110336,
           "waterplane_area_m2": 6.66640625,
           "wetted_surface_area_m2": 14.87879518241892
+        },
+        "finer": {
+          "block_coefficient": 0.4444227432250974,
+          "displacement_volume_m3": 2.7776421451568587,
+          "longitudinal_centre_buoyancy_m": 5,
+          "maximum_section_area_m2": 0.41665039062500003,
+          "prismatic_coefficient": 0.6666601562499996,
+          "vertical_centre_buoyancy_m": -0.23437194812297352,
+          "waterplane_area_m2": 6.6666015625,
+          "wetted_surface_area_m2": 14.878996125883496
         }
       },
       "metrics": [
@@ -32,6 +49,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.165e-03 = 4.329e-03",
           "kind": "analytic",
           "name": "block_coefficient",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.4444444444444444,
           "relative_error": -0.00019530639648458747,
@@ -42,6 +60,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.165e-03 = 4.329e-03",
           "kind": "analytic",
           "name": "displacement_volume_m3",
+          "origin": "two-grid",
           "passed": true,
           "reference": 2.7777777777777777,
           "relative_error": -0.0001953063964845825,
@@ -52,6 +71,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "longitudinal_centre_buoyancy_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 5,
           "relative_error": 0,
@@ -62,6 +82,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.580e-03 = 3.160e-03",
           "kind": "analytic",
           "name": "maximum_section_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.4166666666666667,
           "relative_error": -0.00015625000000025756,
@@ -72,6 +93,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 5.859e-04 = 1.172e-03",
           "kind": "analytic",
           "name": "prismatic_coefficient",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.6666666666666666,
           "relative_error": -3.906249999996447e-05,
@@ -82,6 +104,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 5.276e-04 = 1.055e-03",
           "kind": "analytic",
           "name": "vertical_centre_buoyancy_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": -0.234375,
           "relative_error": -5.2091472625666786e-05,
@@ -92,6 +115,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 5.859e-04 = 1.172e-03",
           "kind": "analytic",
           "name": "waterplane_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 6.666666666666667,
           "relative_error": -3.90625000000977e-05,
@@ -102,11 +126,89 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.828e-04 = 3.657e-04",
           "kind": "analytic",
           "name": "wetted_surface_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 14.879063104957783,
           "relative_error": -1.800668072808373e-05,
           "tolerance": 0.0003656984728703036,
           "value": 14.87879518241892
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.930e-04 (remaining 4.521e-05; observed order p = 2.08 over r = 3.3333, 2.0000: 0.444272444 then 0.444402648)",
+          "kind": "richardson",
+          "name": "block_coefficient",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 0.4444444444444444,
+          "relative_error": -9.404260800369157e-05,
+          "tolerance": 0.00036619663238444955,
+          "value": 0.4444026477297761
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.930e-04 (remaining 4.521e-05; observed order p = 2.08 over r = 3.3333, 2.0000: 2.77670278 then 2.77751655)",
+          "kind": "richardson",
+          "name": "displacement_volume_m3",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 2.7777777777777777,
+          "relative_error": -9.40426080036616e-05,
+          "tolerance": 0.00036619663238437463,
+          "value": 2.777516548311101
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.344e-04 (remaining 3.906e-05; observed order p = 2.00 over r = 3.3333, 2.0000: 0.416536458 then 0.416634115)",
+          "kind": "richardson",
+          "name": "maximum_section_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 0.4166666666666667,
+          "relative_error": -7.81250000001954e-05,
+          "tolerance": 0.00029296875000073275,
+          "value": 0.41663411458333327
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.859e-05 (remaining 7.099e-06; observed order p = 2.36 over r = 3.3333, 2.0000: 0.666616361 then 0.666655423)",
+          "kind": "richardson",
+          "name": "prismatic_coefficient",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 0.6666666666666666,
+          "relative_error": -1.6864931392079896e-05,
+          "tolerance": 0.0001,
+          "value": 0.6666554233790719
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 7.814e-05 (remaining 1.300e-05; observed order p = 2.00 over r = 3.3333, 2.0000: -0.234350586 then -0.2343689)",
+          "kind": "richardson",
+          "name": "vertical_centre_buoyancy_m",
+          "origin": "richardson",
+          "passed": true,
+          "reference": -0.234375,
+          "relative_error": -2.6026014682993073e-05,
+          "tolerance": 0.0001,
+          "value": -0.23436890015280867
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.859e-05 (remaining 7.099e-06; observed order p = 2.36 over r = 3.3333, 2.0000: 6.66616361 then 6.66655423)",
+          "kind": "richardson",
+          "name": "waterplane_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 6.666666666666667,
+          "relative_error": -1.6864931391813443e-05,
+          "tolerance": 0.0001,
+          "value": 6.6665542337907215
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.701e-05 (remaining 4.485e-06; observed order p = 2.00 over r = 3.3333, 2.0000: 14.8785275 then 14.8789294)",
+          "kind": "richardson",
+          "name": "wetted_surface_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 14.879063104957783,
+          "relative_error": -8.987015855635622e-06,
+          "tolerance": 0.0001,
+          "value": 14.878929386581742
         }
       ],
       "name": "wigley",
@@ -122,12 +224,12 @@
         "wetted_surface_area_m2": 14.879063104957783
       },
       "reference_source": "tensorcad.wigley.wigley_analytic_hydrostatics (closed forms)",
-      "seconds": 2.207,
+      "seconds": 7.961,
       "title": "Wigley hull (L=10, B=1, T=0.625, n=m=2): lofted and capped surface"
     },
     {
       "findings": [],
-      "geometry_sha256": "",
+      "geometry_sha256": "a85fba6697f3da04724118fea74fd1fd7b63082880c3be94f7991ef234d0ac9b",
       "known_limitations": [],
       "measurements": {
         "coarse": {
@@ -145,6 +247,14 @@
           "maximum_section_area_m2": 0.8566071822349225,
           "prismatic_coefficient": 0.624978419562839,
           "waterplane_area_m2": 9.374676293442585
+        },
+        "finer": {
+          "block_coefficient": 0.5975007349542327,
+          "displacement_volume_m3": 5.3775066145880945,
+          "longitudinal_centre_buoyancy_m": 5,
+          "maximum_section_area_m2": 0.8604085009327792,
+          "prismatic_coefficient": 0.6249945937026744,
+          "waterplane_area_m2": 9.374918905540113
         }
       },
       "metrics": [
@@ -152,6 +262,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 9.156e-03 = 1.831e-02",
           "kind": "analytic",
           "name": "block_coefficient",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.6,
           "relative_error": -0.008590735297483998,
@@ -162,6 +273,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 9.156e-03 = 1.831e-02",
           "kind": "analytic",
           "name": "displacement_volume_m3",
+          "origin": "two-grid",
           "passed": true,
           "reference": 5.3999999999999995,
           "relative_error": -0.008590735297483979,
@@ -172,6 +284,7 @@
           "basis": "two-grid change 3.553e-16 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "longitudinal_centre_buoyancy_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 5,
           "relative_error": -1.7763568394002506e-16,
@@ -182,6 +295,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 9.055e-03 = 1.811e-02",
           "kind": "analytic",
           "name": "maximum_section_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.864,
           "relative_error": -0.00855650204291377,
@@ -192,6 +306,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.031e-04 = 2.063e-04",
           "kind": "analytic",
           "name": "prismatic_coefficient",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.625,
           "relative_error": -3.4528699457681e-05,
@@ -202,6 +317,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.031e-04 = 2.063e-04",
           "kind": "analytic",
           "name": "waterplane_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 9.374999999999998,
           "relative_error": -3.4528699457420476e-05,
@@ -209,9 +325,76 @@
           "value": 9.374676293442585
         },
         {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 8.851e-03 (remaining 4.140e-03; observed order p = 1.05 over r = 2.0000, 2.0000: 0.589706575 then 0.595016927)",
+          "kind": "richardson",
+          "name": "block_coefficient",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 0.6,
+          "relative_error": -0.008305121487199307,
+          "tolerance": 0.011063233886346446,
+          "value": 0.5950169271076804
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 8.851e-03 (remaining 4.140e-03; observed order p = 1.05 over r = 2.0000, 2.0000: 5.30735917 then 5.35515234)",
+          "kind": "richardson",
+          "name": "displacement_volume_m3",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 5.3999999999999995,
+          "relative_error": -0.00830512148719937,
+          "tolerance": 0.01106323388634655,
+          "value": 5.355152343969123
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 3.553e-16 (remaining 1.776e-16; observed order p = 1.00 over r = 2.0000, 2.0000: 5 then 5)",
+          "kind": "richardson",
+          "name": "longitudinal_centre_buoyancy_m",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 5,
+          "relative_error": -1.7763568394002506e-16,
+          "tolerance": 0.0001,
+          "value": 4.999999999999999
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 8.799e-03 (remaining 4.158e-03; observed order p = 1.04 over r = 2.0000, 2.0000: 0.849213223 then 0.856815861)",
+          "kind": "richardson",
+          "name": "maximum_section_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 0.864,
+          "relative_error": -0.008314975959244754,
+          "tolerance": 0.010999186047039106,
+          "value": 0.8568158607712125
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.176e-05 (remaining 8.669e-06; observed order p = 1.99 over r = 2.0000, 2.0000: 0.624956827 then 0.624989176)",
+          "kind": "richardson",
+          "name": "prismatic_coefficient",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 0.625,
+          "relative_error": -1.731903946016189e-05,
+          "tolerance": 0.0001,
+          "value": 0.6249891756003374
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.176e-05 (remaining 8.669e-06; observed order p = 1.99 over r = 2.0000, 2.0000: 9.37435241 then 9.37483763)",
+          "kind": "richardson",
+          "name": "waterplane_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 9.374999999999998,
+          "relative_error": -1.731903946013821e-05,
+          "tolerance": 0.0001,
+          "value": 9.37483763400506
+        },
+        {
           "basis": "Cb = Cp\u00b7Cm with Cm = A_midship / (B\u00b7T)",
           "kind": "invariant",
           "name": "identity_cb_equals_cp_times_cm",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -222,6 +405,7 @@
           "basis": "V = \u222bdV must equal Cb\u00b7L\u00b7B\u00b7T on the same mesh",
           "kind": "invariant",
           "name": "identity_volume_equals_cb_lbt",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 8.881784197001252e-16,
@@ -240,12 +424,19 @@
         "waterplane_area_m2": 9.374999999999998
       },
       "reference_source": "tensorcad.series60.analytic_* over the exponents fitted from Cb",
-      "seconds": 1.518,
+      "seconds": 10.488,
       "title": "Series 60 hull (L=10, B=1.5, T=0.6, Cb=0.60): fitted exponent family"
     },
     {
-      "findings": [],
-      "geometry_sha256": "",
+      "findings": [
+        {
+          "case": "sphere_ellipsoid",
+          "code": "richardson_unavailable",
+          "detail": "no grid-convergence estimate for ['ellipsoid_extent_x_m', 'ellipsoid_extent_y_m', 'ellipsoid_extent_z_m', 'sphere_extent_x_m', 'sphere_extent_y_m', 'sphere_extent_z_m']: those metrics do not move consistently between the three levels (exactly integrated, or moving the wrong way), so their two-grid band is the only criterion in force",
+          "severity": "warning"
+        }
+      ],
+      "geometry_sha256": "f6ded09395f752148a916d9da9150e3faea6375667030258a6045de5ee452219",
       "known_limitations": [],
       "measurements": {
         "coarse": {
@@ -271,6 +462,18 @@
           "sphere_extent_z_m": 2,
           "sphere_surface_area_m2": 12.560637572470489,
           "sphere_volume_m3": 4.1850791277245145
+        },
+        "finer": {
+          "ellipsoid_extent_x_m": 4,
+          "ellipsoid_extent_y_m": 3,
+          "ellipsoid_extent_z_m": 1,
+          "ellipsoid_surface_area_m2": 22.074198708742284,
+          "ellipsoid_volume_m3": 6.281807381941161,
+          "sphere_extent_x_m": 2,
+          "sphere_extent_y_m": 2,
+          "sphere_extent_z_m": 2,
+          "sphere_surface_area_m2": 12.56495351031314,
+          "sphere_volume_m3": 4.187871587960774
         }
       },
       "metrics": [
@@ -278,6 +481,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "ellipsoid_extent_x_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 4,
           "relative_error": 0,
@@ -288,6 +492,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "ellipsoid_extent_y_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 3,
           "relative_error": 0,
@@ -298,6 +503,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "ellipsoid_extent_z_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 1,
           "relative_error": 0,
@@ -308,6 +514,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.388e-03 = 2.776e-03",
           "kind": "analytic",
           "name": "ellipsoid_surface_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 22.076658276751232,
           "relative_error": -0.00045041358369444476,
@@ -318,6 +525,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.728e-03 = 5.457e-03",
           "kind": "analytic",
           "name": "ellipsoid_volume_m3",
+          "origin": "two-grid",
           "passed": true,
           "reference": 6.283185307179586,
           "relative_error": -0.0008859543878887721,
@@ -328,6 +536,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "sphere_extent_x_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 2,
           "relative_error": 0,
@@ -338,6 +547,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "sphere_extent_y_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 2,
           "relative_error": 0,
@@ -348,6 +558,7 @@
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "sphere_extent_z_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 2,
           "relative_error": 0,
@@ -358,6 +569,7 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.408e-03 = 2.816e-03",
           "kind": "analytic",
           "name": "sphere_surface_area_m2",
+          "origin": "two-grid",
           "passed": true,
           "reference": 12.566370614359172,
           "relative_error": -0.00045622097776846463,
@@ -368,11 +580,56 @@
           "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.728e-03 = 5.457e-03",
           "kind": "analytic",
           "name": "sphere_volume_m3",
+          "origin": "two-grid",
           "passed": true,
           "reference": 4.1887902047863905,
           "relative_error": -0.0008859543878887722,
           "tolerance": 0.0054569503853342935,
           "value": 4.1850791277245145
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 6.780e-04 (remaining 1.096e-04; observed order p = 2.03 over r = 2.0000, 2.0000: 22.0568116 then 22.0717798)",
+          "kind": "richardson",
+          "name": "ellipsoid_surface_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 22.076658276751232,
+          "relative_error": -0.00022098086503193678,
+          "tolerance": 0.0008475081087523838,
+          "value": 22.07177975770822
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 1.333e-03 (remaining 2.155e-04; observed order p = 2.03 over r = 2.0000, 2.0000: 6.27207567 then 6.28045305)",
+          "kind": "richardson",
+          "name": "ellipsoid_volume_m3",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 6.283185307179586,
+          "relative_error": -0.0004348521591224339,
+          "tolerance": 0.0016666269374558194,
+          "value": 6.280453050482593
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 6.869e-04 (remaining 1.108e-04; observed order p = 2.04 over r = 2.0000, 2.0000: 12.5549294 then 12.5635613)",
+          "kind": "richardson",
+          "name": "sphere_surface_area_m2",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 12.566370614359172,
+          "relative_error": -0.0002235580859845325,
+          "tolerance": 0.0008586285521692176,
+          "value": 12.563561300596854
+        },
+        {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 1.333e-03 (remaining 2.155e-04; observed order p = 2.03 over r = 2.0000, 2.0000: 4.18138378 then 4.1869687)",
+          "kind": "richardson",
+          "name": "sphere_volume_m3",
+          "origin": "richardson",
+          "passed": true,
+          "reference": 4.1887902047863905,
+          "relative_error": -0.00043485215912250456,
+          "tolerance": 0.0016666269374558196,
+          "value": 4.186968700321728
         }
       ],
       "name": "sphere_ellipsoid",
@@ -390,18 +647,18 @@
         "sphere_volume_m3": 4.1887902047863905
       },
       "reference_source": "(4/3)\u03c0r\u00b3 and (4/3)\u03c0abc over the exact primitive fields; the areas from the exact semi-axes: 4\u03c0r\u00b2 for the sphere and tensorcad.analytic_solids.ellipsoid_surface_area for the triaxial ellipsoid (converged Gauss-Legendre quadrature of the exact area element, cross-checked against the spheroid closed form)",
-      "seconds": 8.419,
+      "seconds": 33.969,
       "title": "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra"
     },
     {
       "findings": [],
-      "geometry_sha256": "",
+      "geometry_sha256": "30c05a782971768c7a8b6c0e4e9a30938d14878f6ad9f218b112fc7ee6ccc2bc",
       "known_limitations": [
         {
           "asserted": false,
           "boundary_component_count": 1,
           "boundary_edge_count": 722,
-          "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld and only the dataset/station-area displacement is reported. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
+          "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld: the displacement asserted on this case is the dataset/station-area one, cross-checked against the README particulars table (see reference), not an integral over this shell. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
           "displacement_volume_m3": 8452.757810023813,
           "id": "displacement-withheld-open-shell",
           "signed_tetra_sum_open_shell_m3": -13658.368296262934
@@ -457,9 +714,32 @@
       },
       "metrics": [
         {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; Cb over the published L.B.T vs Cb over the measured station span/WL beam/moulded draft; draft_m (= 6.1566 m) is an input and is not asserted",
+          "kind": "analytic",
+          "name": "block_coefficient",
+          "origin": "declared",
+          "passed": true,
+          "reference": 0.509991541742904,
+          "relative_error": -0.015693101529616955,
+          "tolerance": 0.03,
+          "value": 0.5019881926990867
+        },
+        {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; displacement volume at the design waterline; draft_m (= 6.1566 m) is an input and is not asserted",
+          "kind": "analytic",
+          "name": "displacement_volume_m3",
+          "origin": "declared",
+          "passed": true,
+          "reference": 8412.037925248767,
+          "relative_error": 0.004840668234842963,
+          "tolerance": 0.03,
+          "value": 8452.757810023813
+        },
+        {
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "kind": "analytic",
           "name": "holdout_rms_m",
+          "origin": "two-grid",
           "passed": true,
           "reference": 0.11738199454341851,
           "relative_error": -2.6452345195857478e-08,
@@ -467,9 +747,32 @@
           "value": 0.11738199143838947
         },
         {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; station span vs published Lpp: the mesh spans the station grid, which runs ~0.9 % past Lpp; draft_m (= 6.1566 m) is an input and is not asserted",
+          "kind": "analytic",
+          "name": "length_stations_m",
+          "origin": "declared",
+          "passed": true,
+          "reference": 142,
+          "relative_error": 0.00890807533802809,
+          "tolerance": 0.03,
+          "value": 143.264946698
+        },
+        {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; beam at the design waterline vs published moulded B_max: the two differ by the flare above the WL; draft_m (= 6.1566 m) is an input and is not asserted",
+          "kind": "analytic",
+          "name": "waterline_beam_m",
+          "origin": "declared",
+          "passed": true,
+          "reference": 18.86713286713287,
+          "relative_error": 0.01184753180034215,
+          "tolerance": 0.03,
+          "value": 19.090661823757507
+        },
+        {
           "basis": "Cb = \u2207 / (L\u00b7B\u00b7T) on the reported particulars",
           "kind": "invariant",
           "name": "identity_cb_equals_volume_over_lbt",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -480,6 +783,7 @@
           "basis": "the full hull is the mirror of the half cloud about y",
           "kind": "invariant",
           "name": "identity_mirror_doubles_y_extent",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -490,6 +794,7 @@
           "basis": "mirroring about y leaves the x extent unchanged",
           "kind": "invariant",
           "name": "identity_mirror_preserves_x_extent",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -500,6 +805,7 @@
           "basis": "mirroring about y leaves the z extent unchanged",
           "kind": "invariant",
           "name": "identity_mirror_preserves_z_extent",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -510,6 +816,7 @@
           "basis": "the shipped 5415 mesh is an open hull sheet, so no closed-surface volume exists",
           "kind": "invariant",
           "name": "identity_open_shell_is_not_a_solid",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -520,6 +827,7 @@
           "basis": "the open sheet carries a single boundary loop (deck edge + stem seam)",
           "kind": "invariant",
           "name": "identity_open_shell_has_one_boundary_component",
+          "origin": "invariant",
           "passed": true,
           "reference": 0,
           "relative_error": 0,
@@ -530,16 +838,27 @@
       "name": "dtmb5415",
       "passed": true,
       "reference": {
-        "holdout_rms_m": 0.11738199454341851
+        "block_coefficient": 0.509991541742904,
+        "displacement_volume_m3": 8412.037925248767,
+        "holdout_rms_m": 0.11738199454341851,
+        "length_stations_m": 142,
+        "waterline_beam_m": 18.86713286713287
       },
-      "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]",
-      "seconds": 1.637,
+      "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]; principal particulars from tensorcad.dtmb5415.readme_reference() (dataset README model-scale table x lambda)",
+      "seconds": 2.083,
       "title": "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)"
     }
   ],
-  "findings": [],
+  "findings": [
+    {
+      "case": "*",
+      "code": "forced_bless_recorded",
+      "detail": "this baseline was written by 1 forced bless(es) overriding ['extrapolation_not_blessed'] at 9778a1050bb0: a forced bless is a reviewed decision and stays visible in every run",
+      "severity": "warning"
+    }
+  ],
   "passed": true,
   "quick": false,
   "schema": "tensorcad.golden/1",
-  "seconds": 13.781
+  "seconds": 54.502
 }
