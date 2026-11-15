@@ -29,6 +29,20 @@ if ! "$python_bin" -c "import tensorcad.golden" >/dev/null 2>&1; then
 fi
 
 if [ -n "${TENSORCAD_GOLDEN_STAGED_FILE:-}" ]; then
-    exec "$python_bin" -m tensorcad.golden --staged "$TENSORCAD_GOLDEN_STAGED_FILE" --quick
+    "$python_bin" -m tensorcad.golden --staged "$TENSORCAD_GOLDEN_STAGED_FILE" --quick
+else
+    "$python_bin" -m tensorcad.golden --staged --quick
 fi
-exec "$python_bin" -m tensorcad.golden --staged --quick
+
+# Second, independent arm: the dual-derived golden suite authored in TensorPapers
+# (GAP-CAD-D2-GOLDEN-REGRESSION). -- the check above compares the repository against its
+# own committed baseline; this one compares it against a reference suite that does not
+# live here, so a change cannot be blessed into agreement with itself. Chained rather
+# than executed so that a failure here still blocks the commit. Set GOLDEN_DIR to point
+# at papers/gap-cad-d2-golden-regression; see docs/gap-cad-d2-geometry-golden-gate.md.
+geometry_golden_hook=$(dirname "$0")/pre-commit-geometry-golden.sh
+if [ -x "$geometry_golden_hook" ]; then
+    "$geometry_golden_hook"
+else
+    echo "golden: dual-derived arm not executable at $geometry_golden_hook, not run (CI still enforces it)" >&2
+fi
