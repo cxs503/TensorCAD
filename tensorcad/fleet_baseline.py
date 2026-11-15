@@ -848,6 +848,11 @@ def build_ship(
     dz: float = DEFAULT_DZ,
     ring_points: int = DEFAULT_RING_POINTS,
     samples_per_metre: float = DEFAULT_SAMPLES_PER_METRE,
+    #: ``False`` reproduces the pre-2026-11-15 density defect (spacing taken from the
+    #: *declared* unit reading) and exists so the before/after of that defect is a
+    #: one-command repro instead of a claim.  See
+    #: ``docs/gap_cad_t1_iges_pipe_kvlcc2_density.md``.
+    density_follows_adopted_factor: bool = True,
 ) -> tuple[Mesh, dict[str, Any]]:
     """Run the whole IGES -> mesh -> hydrostatics chain for one hull."""
     model = read_iges(spec.iges_path)
@@ -909,6 +914,32 @@ def build_ship(
         metre_factor=model.model_scale * geometry_scale,
     )
     factor = unit_gate["factor"]
+    # The sample density is a *physical* quantity, so the spacing that walks the
+    # parametric grid must be divided by the factor that actually turns file units into
+    # metres -- and that factor is decided by measurement above, not by the header.  On
+    # ``KVLCC2/kvlcc2.igs`` the global section declares millimetres over metre
+    # coordinates: using the declared reading gave a 125 file-unit spacing, i.e. a 4x4
+    # grid per patch (kept 4..9 of 16 samples), a half-breadth field covering a quarter
+    # of the sheet and a displacement of 10 876 m3 against the published 312 622 m3
+    # (-96.52 %, WITHHELD).  The unit gate had already measured the contradiction; the
+    # resampling it implies was simply never done.
+    adopted_differs = (
+        abs(factor - metres_per_unit) > 1e-12 * max(abs(factor), abs(metres_per_unit))
+        if (factor > 0.0 and metres_per_unit > 0.0) else False
+    )
+    if density_follows_adopted_factor and adopted_differs:
+        corrected_spacing = physical_spacing_m / factor
+        if corrected_spacing > 0.0 and abs(corrected_spacing - spacing) > 1e-12 * max(abs(spacing), 1e-300):
+            previous_spacing = spacing
+            spacing = corrected_spacing
+            raw_points = list(sample_patches(usable, spacing=spacing))
+            unit_gate["density_resampled_for_adopted_factor"] = {
+                "declared_spacing_file_units": previous_spacing,
+                "adopted_spacing_file_units": corrected_spacing,
+                "samples": len(raw_points),
+                "reason": ("the declared unit reading was contradicted by the geometry; "
+                           "the density follows the factor the gate adopted"),
+            }
     route = "untrimmed_patch_sheet"
     trim_record: dict[str, Any] | None = None
     # A patch set in which *every* basis surface is bound to a trimmed patch is not

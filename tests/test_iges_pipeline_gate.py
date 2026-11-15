@@ -9,9 +9,11 @@ Acceptance criteria (from feature_ledger):
 This test verifies the current state of the pipeline against the publisher's own
 IGES files (KCS, KVLCC2, JBC) and documents which gates pass/fail with evidence.
 
-Status (2026-11-14):
+Status (2026-11-15, after the density/unit-factor fix in ``fleet_baseline.build_ship``):
 - KCS: G1/G2/G5 PASS; G3/G4/G6/G7 FAIL (real IGES has seam gaps that repair cannot close)
-- KVLCC2: unit gate detects mm-vs-m contradiction; volume -45.8% → WITHHELD (known defect)
+- KVLCC2: unit gate detects the mm-vs-m contradiction **and the sample density now follows
+  the factor the gate adopts**; volume 312 568 m3 vs published 312 622 m3 = -0.017 %,
+  Cb 0.8097 vs 0.8098, watertight + edge-manifold, verdict VERIFIED
 - JBC: refused for frame/units mismatch (fewer than two usable waterline slices)
 """
 from __future__ import annotations
@@ -51,11 +53,11 @@ KCS_SPEC = ShipSpec(
 
 KVLCC2_SPEC = ShipSpec(
     name="KVLCC2",
-    draft=10.8,
+    draft=20.8,
     length_pp=320.0,
     beam=58.0,
     published_volume_m3=312622.0,
-    published_cb=0.8495,
+    published_cb=0.8098,
     published_lcb_percent=-1.45,
     geometry_scale=1.0,
     scale_basis="full scale",
@@ -65,7 +67,8 @@ KVLCC2_SPEC = ShipSpec(
     license="publisher terms apply",
     iges_sha256="ed06c287c7a858a182494cb101e1c322bb2c407994c646a95d9e9f811638e2f9",
     iges_path=str(ASSET_ROOT / "KVLCC2/kvlcc2.igs"),
-    notes="WITHHELD: volume -45.8% (trimmed patch integration defect)",
+    notes="published particulars (SIMMAN 2020): Lpp 320 m, B 58 m, T 20.8 m, "
+          "displacement 312 622 m3, Cb 0.8098",
 )
 
 JBC_SPEC = ShipSpec(
@@ -110,13 +113,16 @@ class TestFleetBaselineGate:
         assert error_pct < 1.0, f"KCS volume {vol} vs ref {ref}: {error_pct:.2f}%"
 
     def test_kvlcc2_fleet_baseline_status(self):
-        """KVLCC2: unit gate detects mm-vs-m contradiction; volume -45.8% → WITHHELD.
+        """KVLCC2: mm-vs-m contradiction detected, and the volume now matches the publisher.
 
-        The file declares millimetres but the coordinates are in metres. The unit gate
-        correctly detects this contradiction and adopts the metre reading. However, the
-        trimmed patch integration produces a volume 45.8% below the published value,
-        indicating a defect in how the trimmed surfaces are being sampled or integrated.
-        See docs/baseline_fleet_trim_intake.md for the intake analysis.
+        The file declares millimetres but the coordinates are in metres.  The unit gate
+        detects this and adopts the metre reading; what was still broken afterwards was the
+        *sample density*: ``build_ship`` divided the physical spacing (0.125 m) by the
+        **declared** factor (1e-3), giving a 125 file-unit spacing, a 4x4 grid per trimmed
+        patch (kept 4..9 of 16 samples) and 10 876 m3 against the published 312 622 m3
+        (-96.52 %).  ``fleet_baseline.build_ship`` now resamples with the factor the gate
+        adopted; measured 312 568 m3 (-0.017 %), Cb 0.8097 vs 0.8098, watertight.
+        See docs/gap_cad_t1_iges_pipe_kvlcc2_density.md.
         """
         _skip_if_missing(KVLCC2_SPEC)
         _, report = build_ship(KVLCC2_SPEC, dx=1.0, dz=0.1)
@@ -124,9 +130,12 @@ class TestFleetBaselineGate:
         assert report["source"]["route"] == "trimmed_patch_loops"
         assert report["checks"]["watertight"] is True
         assert report["checks"]["edge_manifold"] is True
-        # Volume is significantly off — honest WITHHELD
-        assert report["verdict"] == "WITHHELD"
-        assert "volume" in str(report.get("reasons", [])).lower()
+        resample = report["source"]["unit_gate"]["density_resampled_for_adopted_factor"]
+        assert resample["declared_spacing_file_units"] == 125.0
+        assert resample["adopted_spacing_file_units"] == 0.125
+        error = report["derived"]["published_volume_rel_error_percent"]
+        assert abs(error) < 1.0, f"volume off by {error:+.3f}% against the published displacement"
+        assert report["verdict"] == "VERIFIED"
 
     def test_jbc_fleet_baseline_status(self):
         """JBC: the remaining refusal is a frame/units one, not a degenerate reader.
