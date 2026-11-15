@@ -2,8 +2,11 @@
 
 **Repository** TensorCAD · **Branch** `agent/m19948` · **Anchor** GAP-CAD-T1-BASELINE-FLEET
 **New code** `tensorcad/fleet/acquire.py` · `tensorcad/fleet/data/acquisition_plan.json`
-**Tests** `tests/test_fleet_acquire.py` (20 passed) · **Evidence** `runs/m19948_acquire/acquisition_evidence.json`
+**Tests** `tests/test_fleet_acquire.py` (24 passed) · **Evidence** `runs/m19948_acquire/acquisition_evidence.json`
 **Reproduce** `python -m tensorcad.fleet.acquire --out-dir runs/m19948_acquire --selftest`
+**Re-measured 2026-11-15 on main** (sections 8–10, evidence `runs/m21978_acquire/acquisition_evidence.json`,
+pin re-check `runs/m21978_pin_reverify/pin_reverification.json`): 2 of 6 hulls are now admitted,
+KCS 227 → 230 m).**
 
 ## 1. What this closes
 
@@ -29,6 +32,10 @@ archive digest pins the transport, the member digest pins the mesh). Admitted by
 **same** route and the **same** ten gates as a generated hull.
 
 ## 2. Result on the real fleet
+
+> *Superseded for KCS/KVLCC2 by section 9 (re-measured 2026-11-15): both are admitted, and the
+> KCS length below was measured again at 230.000 m after the x-origin defect of section 9.1 was
+> fixed. The table is kept as the record of what m19948 measured.*
 
 | ship | order | status | reason | provenance |
 |---|---|---|---|---|
@@ -117,3 +124,118 @@ exactly which URL and which digest is missing.
   `--custodian KVLCC2=<path>` regenerates the block, and the digest in `acquisition_evidence.json` is
   what a reader must check.
 * Appendages (rudder, propeller, duct) are deliberately outside the single-closed-shell gate.
+
+
+## 8. Pin re-verification: turning trust-on-first-use into a measured property
+
+Section 7 named the kit's weakest link: the pinned digests are the digests of the bytes as served
+on one day, so they prove identity only against themselves. The kit *claimed* that "a repeat
+retrieval returns the same file" — and nothing in the package ever tested that claim. It was
+prose, and prose about reproducibility is exactly what this anchor exists to stop accepting.
+
+`verify_pins` / `python -m tensorcad.fleet.acquire --verify-pins` is that test. It re-fetches every
+pinned plan entry, builds no geometry (bytes, not minutes), and puts each entry in one of five
+states — `reproduced`, `mismatch`, `unavailable`, `unpinned`, `no_source` — with `mismatch` failing
+the command (exit 1) rather than decorating a healthy-looking summary. Transport failures are
+recorded, not raised, because a re-check that dies on the first dead link cannot report on the
+other five hulls.
+
+Run against the packaged plan on 2026-11-15 (`runs/m21978_pin_reverify/pin_reverification.json`):
+
+| ship | pin | re-fetch | bytes | ETag / Last-Modified | verdict |
+|---|---|---|---|---|---|
+| KCS | `b50adace…f88c` | HTTP 200 | 73 295 (archive) → `KCS_hull_SVA.igs` 246 164 B | `"5cb08c74-11e4f"` / Fri, 12 Apr 2019 13:02:44 GMT | **reproduced** |
+| KVLCC2 | `dc032647…d548` | HTTP 200 | 1 345 336 (archive) → `kvlcc2.igs` 6 270 129 B | `"5cb08c74-148738"` / Fri, 12 Apr 2019 13:02:44 GMT | **reproduced** |
+| ONRT, JBC, DTC, Series60 | — | — | — | — | `unpinned` (nothing pinned, nothing to check) |
+
+Both pins reproduce a day after they were taken, with the publisher's `ETag` unchanged, so the
+pins are not artefacts of a single corrupted transfer. They are **still** not workshop-published
+checksums, and the tool says so in its own summary rather than in this paragraph: what has been
+upgraded is reproducibility, not authenticity. The four unpinned hulls stay `unpinned` — a state
+that is not a pass and not a failure, but a to-do list with a reason.
+
+## 9. Re-measured on main, 2026-11-15: two hulls admitted, and a real defect behind KCS
+
+Re-running the intake with the CLI settings (`dx` 1.0 m, `dz` 0.2 m, 3 samples/m, 200 ring points)
+against the packaged plan gave 2 of 6 admitted — but the *first* run of the day gave 1 of 6, with
+KCS refused. That refusal was not noise; it was the second real defect this kit has found in the
+admission path.
+
+### 9.1 The x-origin decision translated an AP-origin file
+
+The published KCS IGES is authored with `x = 0` **at the aft perpendicular**: the model runs from
+−6.0 m (transom overhang) to +237.84 m (bulb ahead of the FP), a 243.8 m extent around the Lpp
+window it belongs to. `frames.normalise`'s `x_origin: auto` policy translated the aft-most point to
+0 unconditionally, i.e. by +6.0 m. The half-breadth field window is `0 … Lpp`, so after that shift
+the window started 6 m *inside* the hull and cut the forebody off:
+
+| | before the fix | after the fix |
+|---|---|---|
+| applied `x` shift | +6.000 m | 0.000 m |
+| measured length | 227.0 m (−1.30 % vs 230 m) | 230.000 m (0.00 %) |
+| G8 verdict | **refused** | pass |
+| displacement volume | 51 628.6 m³ (−0.77 %, would have passed G7) | 52 193.5 m³ (**+0.31 %**) |
+
+The decision now *measures* where the file's own origin sits instead of assuming it. The share of
+the model's extent that lies aft of `x = 0` separates the two published exports without a special
+case: KCS keeps 2.5 % aft of its origin (the origin **is** the AP), KVLCC2 keeps 98.3 % (the origin
+is at the bow, so the stern-negative export must be translated). The applied shift, the measured
+fraction and the reason are written into `details["frame_normalisation"]["x_origin_reason"]`, so a
+reader can re-check the decision from the evidence instead of trusting it.
+
+### 9.2 Result
+
+| ship | status | V_mesh | V_ref | ΔV | L | B | T | topology |
+|---|---|---|---|---|---|---|---|---|
+| KCS | **admitted** | 52 193.5 m³ | 52 030 m³ | **+0.314 %** | 230.000 (0.000 %) | 32.2365 (+0.113 %) | 10.800 (0.000 %) | 22 000 tris, 0 boundary, χ = 2 |
+| KVLCC2 | **admitted** | 312 066.5 m³ | 312 622 m³ | **−0.178 %** | 320.000 (0.000 %) | 58.1285 (+0.222 %) | 20.800 (0.000 %) | 42 000 tris, 0 boundary, χ = 2 |
+| ONRT, JBC, DTC, Series60 | withheld | — | — | — | — | — | — | `plan_incomplete` (no portal URL located; the plan names which URL and digest is missing) |
+
+KVLCC2's intake, reported as an honest FAIL in section 4, now completes: the frame flip
+(`z`-down, stern-negative) plus the trimmed-patch sampling that later work added let the field
+route read the 6.27 MB file, and the mesh matches the published particulars to 0.22 % worst case.
+This is the first time **two** hulls in the fleet carry official geometry behind their volume
+comparison instead of a closure value (`Cb·L·B·T`) or a surrogate.
+
+Figures (`runs/m21978_acquire/figures/`, generated by `runs/m21978_acquire/make_figures.py` from
+the evidence and the delivered meshes, no hand-copied numbers):
+
+* `fig1_half_breadth_fields.png` — the half-breadth field `b(x,z) = max|y|` rebuilt from each
+  admitted mesh: KCS `0 … 230 m` and KVLCC2 `0 … 320 m`, both with the measured beam/draft extents;
+* `fig2_errors_vs_reference.png` — V, L, B, T of both hulls against the published particulars,
+  every bar labelled with its own number, with the 1 % and 3 % bands drawn.
+
+### 9.3 Grid sensitivity (a caveat that is measured, not assumed)
+
+Refining the field grid does **not** converge the volume to the reference from one side
+(`runs/m21978_acquire/route_sensitivity.json`):
+
+| ship | settings (dx, dz, samples/m, ring) | cover | ΔV |
+|---|---|---|---|
+| KCS | 1.0, 0.2, 3, 200 | 77.1 % | +0.314 % |
+| KCS | 0.5, 0.1, 8, 240 | 88.8 % | **+0.033 %** |
+| KVLCC2 | 1.0, 0.2, 3, 200 | 95.7 % | −0.178 % |
+| KVLCC2 | 0.5, 0.1, 8, 240 | 72.6 % | **−0.633 %** |
+
+The residual tracks `max|y|` binning (outward bias, O(cell²/radius)) against the trimmed-patch
+sampling (inward bias where a patch is under-sampled), and the two do not cancel in a way that can
+be predicted without measuring both files. Both settings pass the 1 % gate on both hulls, so the
+admission decision is robust to the grid; the *last* digit of the volume is not.
+
+## 10. Error judgement (re-measured, explicit)
+
+| quantity | measured | reference | error | criterion | verdict |
+|---|---|---|---|---|---|
+| KCS displacement volume | 52 193.5 m³ | 52 030 m³ | **+0.314 %** | < 3 % | **PASS** |
+| KVLCC2 displacement volume | 312 066.5 m³ | 312 622 m³ | **−0.178 %** | < 3 % | **PASS** |
+| KCS L / B / T | 230.000 / 32.2365 / 10.800 | 230 / 32.2 / 10.8 | 0.000 / +0.113 / 0.000 % | < 1 % | **PASS** |
+| KVLCC2 L / B / T | 320.000 / 58.1285 / 20.800 | 320 / 58 / 20.8 | 0.000 / +0.222 / 0.000 % | < 1 % | **PASS** |
+| topology, both ships | 0 boundary edges, χ = 2, 0 non-manifold | exact | — | exact | **PASS** |
+| pins reproducible (KCS, KVLCC2) | 2 / 2 | 2 / 2 | — | all | **PASS** |
+| hulls admitted from official geometry | **2 / 6** | 6 / 6 | — | 6 / 6 | **NOT MET** |
+
+Is the key quantity within 3 %? **Yes** — worst case is 0.314 % (KCS volume), five times inside
+the 3 % criterion and inside the 1 % band this anchor demands. The anchor as a whole is still
+**not** satisfied: two of six hulls have official geometry, four are withheld with a named missing
+URL. What changed on 2026-11-15 is that the count moved 1 → 2 for a measured reason, and that the
+number a reader is asked to trust (the pin) is now re-checked by a command instead of a sentence.

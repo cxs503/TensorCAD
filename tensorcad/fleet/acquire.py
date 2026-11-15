@@ -35,6 +35,13 @@ Entry point::
 
     python -m tensorcad.fleet.acquire --out-dir runs/m19948_acquire
     python -m tensorcad.fleet.acquire --custodian KCS=/data/kcs.igs --pin KCS=<sha256>
+    python -m tensorcad.fleet.acquire --verify-pins --out-dir runs/pin_reverify
+
+``--verify-pins`` is the check a *reader* of the evidence must be able to run: it refetches
+every pinned entry and says whether the pin still describes the bytes the publisher serves
+(:func:`verify_pins`). A pin recorded from one retrieval is trust-on-first-use; a pin that
+reproduces on a second retrieval is at least not an artefact of that one transfer, and a pin
+that no longer reproduces is a live alarm about the source.
 
 The ``--custodian``/``--url``/``--pin`` overrides are the "one command" property: when
 the official file finally lands, nothing needs editing — the plan stays honest
@@ -69,6 +76,7 @@ from tensorcad.fleet.sources import SourceRegistry, load_registry
 
 PLAN_SCHEMA = "tensorcad.fleet.acquisition_plan.v1"
 EVIDENCE_SCHEMA = "tensorcad.fleet.acquisition.v1"
+PIN_VERIFICATION_SCHEMA = "tensorcad.fleet.acquisition.pins.v1"
 PLAN_PATH = Path(__file__).with_name("data") / "acquisition_plan.json"
 
 #: Formats a plan entry may name, and the geometry route that consumes each one.
@@ -591,6 +599,140 @@ def self_audit(evidence: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def verify_pins(
+    *,
+    plan_path: str | Path | None = None,
+    timeout: float = DEFAULT_TIMEOUT,
+    urls: Sequence[str] | None = None,
+    pins: Sequence[str] | None = None,
+    custodians: Sequence[str] | None = None,
+) -> dict[str, Any]:
+    """Re-fetch every pinned plan entry and report whether the pin still holds.
+
+    A digest pinned from a single retrieval is trust-on-first-use: it says "the bytes I read
+    hashed to this", not "this is the benchmark hull". The one part of that claim a machine
+    *can* test later is reproducibility, and until this function existed nothing in the
+    package tested it — the caveat was prose. Each entry lands in exactly one state:
+
+    * ``reproduced`` — the bytes served now hash to the pinned digest (the pin is not a typo
+      and not an artefact of a single corrupted transfer);
+    * ``mismatch`` — the source serves different bytes than the pin describes. This is an
+      alarm about the source or the pin, never something to average away;
+    * ``unavailable`` — transport failed, so nothing was judged (not a pin failure);
+    * ``unpinned`` — the plan pins no digest, so there is nothing to re-check;
+    * ``no_source`` — a digest is pinned but no URL or custodian file is named.
+
+    Network and file access are the only side effects; the geometry routes are not run, so a
+    re-check costs bytes, not minutes. No exception escapes for transport or identity
+    failures — they are recorded, because a re-check that raises on the first dead link
+    cannot report on the other five hulls.
+    """
+    plan = load_plan(plan_path)
+    url_overrides = _split_overrides(urls, "url")
+    pin_overrides = _split_overrides(pins, "pin")
+    custodian_overrides = _split_overrides(custodians, "custodian")
+    unknown = (set(url_overrides) | set(pin_overrides) | set(custodian_overrides)) - set(plan.ships)
+    if unknown:
+        raise PlanError(f"overrides name ships that are not in the plan: {sorted(unknown)}")
+
+    checks: list[dict[str, Any]] = []
+    for entry in plan.entries:
+        target_url = url_overrides.get(entry.ship) or entry.url
+        pin = pin_overrides.get(entry.ship) or entry.sha256
+        custodian = custodian_overrides.get(entry.ship)
+        base: dict[str, Any] = {
+            "ship": entry.ship,
+            "anchor_id": entry.anchor_id,
+            "url": target_url,
+            "custodian": custodian,
+            "pinned_sha256": pin,
+            "pin_source": (
+                "command_line" if pin_overrides.get(entry.ship)
+                else ("plan" if entry.sha256 else None)
+            ),
+            "checked_at": _utc_now(),
+        }
+        if not pin:
+            checks.append({**base, "status": "unpinned", "reason": "no_digest_pinned",
+                           "reason_detail": "the plan pins no digest for this ship, so a re-check has "
+                                            "nothing to compare against"})
+            continue
+        if not target_url and not custodian:
+            checks.append({**base, "status": "no_source", "reason": "no_source_named",
+                           "reason_detail": "a digest is pinned but neither a URL nor a custodian file "
+                                            "is named; the pin cannot be re-checked from here"})
+            continue
+        try:
+            fetched = (
+                read_custodian(custodian, expected_sha256=pin, max_bytes=entry.max_bytes)
+                if custodian
+                else fetch(target_url, expected_sha256=pin, max_bytes=entry.max_bytes, timeout=timeout)
+            )
+        except DigestMismatch as exc:
+            checks.append({**base, "status": "mismatch", "reason": exc.reason,
+                           "reason_detail": str(exc), "expected_sha256": exc.expected,
+                           "observed_sha256": exc.observed})
+            continue
+        except AcquisitionError as exc:
+            checks.append({**base, "status": "unavailable", "reason": exc.reason,
+                           "reason_detail": str(exc)})
+            continue
+        payload_detail: dict[str, Any] = {"archive": None}
+        try:
+            _, payload_detail = _materialise(fetched.payload, fmt=entry.file_format, source=target_url or str(custodian))
+        except AcquisitionError as exc:
+            payload_detail = {"archive": None, "materialise_error": str(exc)}
+        checks.append({
+            **base,
+            "status": "reproduced",
+            "reason": None,
+            "observed_sha256": fetched.sha256,
+            "bytes": fetched.provenance.get("bytes"),
+            "transport": fetched.provenance,
+            "payload": payload_detail,
+        })
+
+    reproduced = [c["ship"] for c in checks if c["status"] == "reproduced"]
+    mismatched = [c["ship"] for c in checks if c["status"] == "mismatch"]
+    unavailable = [c["ship"] for c in checks if c["status"] == "unavailable"]
+    unpinned = [c["ship"] for c in checks if c["status"] == "unpinned"]
+    no_source = [c["ship"] for c in checks if c["status"] == "no_source"]
+    return {
+        "schema": PIN_VERIFICATION_SCHEMA,
+        "anchor": "GAP-CAD-T1-BASELINE-FLEET",
+        "settings": {
+            "plan_path": None if plan.path is None else str(plan.path),
+            "plan_sha256": plan.sha256,
+            "timeout": timeout,
+            "overrides": {"url": url_overrides, "pin": pin_overrides,
+                          "custodian": {k: str(v) for k, v in custodian_overrides.items()}},
+        },
+        "checks": checks,
+        "summary": {
+            "entries": len(checks),
+            "pins_checked": len(reproduced) + len(mismatched),
+            "pins_reproduced": len(reproduced),
+            "pins_mismatched": len(mismatched),
+            "pins_unavailable": len(unavailable),
+            "pins_unpinned": len(unpinned),
+            "pins_without_source": len(no_source),
+            "reproduced": reproduced,
+            "mismatched": mismatched,
+            "unavailable": unavailable,
+            "ok": not mismatched,
+            "honest_statement": (
+                "reproduced means a second retrieval today returned exactly the pinned bytes: the pin "
+                "is reproducible, which is what trust-on-first-use can be upgraded to. It does NOT "
+                "establish that the file is the genuine benchmark hull, because the pin is still the "
+                "digest of first retrieval, not a checksum published by the workshop. mismatch means "
+                "the source serves different bytes: the pin (or the source) must be re-examined, and "
+                "no ship may be admitted on the old pin until that is resolved. unavailable is a "
+                "transport fact and is not counted either way."
+            ),
+        },
+    }
+
+
 def acquire_fleet(
     *,
     plan_path: str | Path | None = None,
@@ -884,6 +1026,9 @@ def build_parser():  # pragma: no cover - argparse wiring
     parser.add_argument("--samples-per-metre", type=float, default=3.0,
                         help="patch sampling density for the IGES route [1/m]")
     parser.add_argument("--ring-points", type=int, default=200, help="waterline ring resolution")
+    parser.add_argument("--verify-pins", action="store_true",
+                        help="re-fetch every pinned plan entry and report whether the pin still holds "
+                             "(no geometry is built; exit 1 on any mismatch)")
     parser.add_argument("--selftest", action="store_true",
                         help="run the offline intake-pipeline controls (surrogate STL, not official geometry)")
     parser.add_argument("--no-plot", action="store_true")
@@ -893,6 +1038,23 @@ def build_parser():  # pragma: no cover - argparse wiring
 def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover - thin wrapper
     args = build_parser().parse_args(list(argv) if argv is not None else None)
     root = Path(args.out_dir)
+    if args.verify_pins:
+        try:
+            report = verify_pins(
+                plan_path=args.plan,
+                timeout=args.timeout,
+                urls=args.url,
+                pins=args.pin,
+                custodians=args.custodian,
+            )
+        except PlanError as exc:
+            print(f"plan error: {exc}", file=sys.stderr)
+            return 2
+        root.mkdir(parents=True, exist_ok=True)
+        (root / "pin_reverification.json").write_text(json.dumps(report, indent=2, default=str))
+        print(json.dumps(report["summary"], indent=2))
+        print(f"artefacts: {root / 'pin_reverification.json'}")
+        return 0 if report["summary"]["ok"] else 1
     build_kwargs = {
         "dx": args.iges_dx,
         "dz": args.iges_dz,
