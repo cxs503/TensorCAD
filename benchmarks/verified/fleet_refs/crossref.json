@@ -2158,7 +2158,15 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
+        "note": "",
+        "closure_defect": {
+         "quantity": "beam",
+         "printed": 580.0,
+         "divide_by": 10.0,
+         "corrected": 58.0,
+         "corrected_residual": -1.0543083980296686e-06,
+         "origin": "dissent"
+        }
        }
       },
       {
@@ -2173,7 +2181,15 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
+        "note": "",
+        "closure_defect": {
+         "quantity": "beam",
+         "printed": 580.0,
+         "divide_by": 10.0,
+         "corrected": 58.0,
+         "corrected_residual": -1.0543083980296686e-06,
+         "origin": "dissent"
+        }
        }
       }
      ]
@@ -2769,13 +2785,34 @@
    0.01
   ],
   "ships": {
+   "DTC": {
+    "closure": {
+     "DTC-PRIMARY": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 173527.3725,
+      "published_volume_m3": 173467.5,
+      "rel_error": 0.0003451511089973547,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     },
+     "JSR-2017": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 173527.3725,
+      "published_volume_m3": 173468.0,
+      "rel_error": 0.00034226773814194367,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     }
+    },
+    "conflicts": {}
+   },
    "JBC": {
     "closure": {
      "NMRI-T2015": {
       "length_basis": "length_pp",
       "implied_volume_m3": 178378.2,
-      "published_volume_m3": 178369.9,
-      "rel_error": 4.653251473496489e-05,
+      "published_volume_m3": 178369.92500000002,
+      "rel_error": 4.6392350055546316e-05,
       "consistent": true,
       "explained_by_scale_slip": null
      }
@@ -2805,20 +2842,21 @@
    },
    "KVLCC2": {
     "closure": {
+     "JSR-2017": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 312621.6704,
+      "published_volume_m3": 312622.439,
+      "rel_error": -2.458556725759564e-06,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     },
      "SIMMAN-SERIES": {
       "length_basis": "length_pp",
-      "implied_volume_m3": 3126216.7039999994,
+      "implied_volume_m3": 312621.6704,
       "published_volume_m3": 312622.0,
-      "rel_error": 8.999989456916019,
-      "consistent": false,
-      "explained_by_scale_slip": {
-       "quantity": "beam",
-       "printed": 580.0,
-       "divide_by": 10.0,
-       "corrected": 58.0,
-       "raw_residual": 8.999989456916019,
-       "corrected_residual": -1.0543083980296686e-06
-      }
+      "rel_error": -1.0543083980296686e-06,
+      "consistent": true,
+      "explained_by_scale_slip": null
      }
     },
     "conflicts": {}
@@ -2864,12 +2902,18 @@
       "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
      }
     }
+   },
+   "Series60": {
+    "closure": {},
+    "conflicts": {}
    }
   },
   "scale_typos": [
    {
     "ship": "KVLCC2",
     "family": "SIMMAN-SERIES",
+    "origin": "dissent",
+    "family_value": 58.0,
     "quantity": "beam",
     "printed": 580.0,
     "divide_by": 10.0,
@@ -2967,14 +3011,29 @@
   }
  },
  "closure": {
-  "DTC": {},
+  "DTC": {
+   "DTC-PRIMARY": {
+    "cb_lpp_bwl_t_m3": 173527.3725,
+    "published_volume_m3": 173467.5,
+    "rel_error": 0.0003451511089973492,
+    "consistent": true,
+    "implied_beam_m": 50.98240336693855
+   },
+   "JSR-2017": {
+    "cb_lpp_bwl_t_m3": 173527.3725,
+    "published_volume_m3": 173468.0,
+    "rel_error": 0.00034226773814189173,
+    "consistent": true,
+    "implied_beam_m": 50.98255031781802
+   }
+  },
   "JBC": {
    "NMRI-T2015": {
     "cb_lpp_bwl_t_m3": 178378.2,
-    "published_volume_m3": 178369.9,
-    "rel_error": 4.653251473492704e-05,
+    "published_volume_m3": 178369.92500000002,
+    "rel_error": 4.6392350055617155e-05,
     "consistent": true,
-    "implied_beam_m": 44.99790613426977
+    "implied_beam_m": 44.997912441094265
    }
   },
   "KCS": {
@@ -2994,11 +3053,18 @@
    }
   },
   "KVLCC2": {
+   "JSR-2017": {
+    "cb_lpp_bwl_t_m3": 312621.6704,
+    "published_volume_m3": 312622.439,
+    "rel_error": -2.458556725706876e-06,
+    "consistent": true,
+    "implied_beam_m": 58.000142596640686
+   },
    "SIMMAN-SERIES": {
-    "cb_lpp_bwl_t_m3": 3126216.7039999994,
+    "cb_lpp_bwl_t_m3": 312621.6704,
     "published_volume_m3": 312622.0,
-    "rel_error": 8.999989456916019,
-    "consistent": false,
+    "rel_error": -1.054308397992781e-06,
+    "consistent": true,
     "implied_beam_m": 58.00006114995156
    }
   },
