@@ -18,7 +18,9 @@ equiangle skewness that commercial solvers gate on was absent everywhere.
 `meshquality.topology` adds exactly those: `surface_topology()` (closure,
 edge/vertex manifoldness, duplicate faces, winding, outward orientation, Euler
 characteristic, shells, genus, signed volume) and `non_orthogonality()` (the
-OpenFOAM internal-face quantity for `hex`/`tet` meshes), plus the `skewness` metric
+OpenFOAM internal-face quantity for `hex`/`tet`/`prism`/`pyramid` meshes — one code
+path over the `CELL_FACES` table, no per-kind branch, see
+`docs/mesh_quality_prism_pyramid.md` §5a for the two wedge-shaped kinds), plus the `skewness` metric
 in all four element kinds and `--topology` / `--max-non-orth` / `--max-genus` on
 the CLI, which exit 1 on a failed gate.
 

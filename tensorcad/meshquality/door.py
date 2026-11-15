@@ -51,8 +51,11 @@ __all__ = ["CELL_KINDS_WITH_INTERNAL_FACES", "DoorVerdict", "admit"]
 
 Vec3 = tuple[float, float, float]
 
-#: Cell kinds whose interior faces the non-orthogonality measure supports.
-CELL_KINDS_WITH_INTERNAL_FACES = ("tet", "hex")
+#: Cell kinds whose interior faces the non-orthogonality measure supports. Prisms and
+#: pyramids are in the list because a boundary-layer prism column and a hex/tet transition
+#: pyramid both have interior faces the solver cares about; leaving them out made ``admit``
+#: skip the measure for those meshes, which reads as a PASS in the verdict.
+CELL_KINDS_WITH_INTERNAL_FACES = ("tet", "hex", "prism", "pyramid")
 
 
 @dataclass(frozen=True)
