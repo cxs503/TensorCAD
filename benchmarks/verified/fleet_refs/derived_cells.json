@@ -1,0 +1,37 @@
+{
+  "schema": "tensorcad.fleet_refs.derived/1.0",
+  "anchor": "REPRO-GEOM-FLEET-REFS",
+  "documents_read": [
+    "t2015_kcs",
+    "t2015_jbc",
+    "t2015_onrt",
+    "simman2020_summary",
+    "simman2014_kvlcc2",
+    "simman2014_kcs"
+  ],
+  "documents_not_cached": [],
+  "non_voting_cells": [
+    {
+      "ship": "ONRT",
+      "quantity": "lcb_percent",
+      "family": "NMRI-T2015",
+      "value": -1.6365,
+      "unit_basis": "derived_length_aft_fp",
+      "derivation": "LCB = (L/2 - x_aft_FP)/L * 100 with L = Lwl = 154 m, x_aft_FP = 1.625 m * 48.9355 = 79.52 m",
+      "note": "1.625 m aft of FP at model scale -> 79.52 m full scale (48.9355) -> -1.6365 % of Lwl = 154 m, midship at L/2",
+      "voters": {
+        "SIMMAN-SERIES": -1.68
+      },
+      "delta_vs_voter": 0.0435,
+      "relative_to_voter": 0.02589,
+      "tolerance": 0.02,
+      "within_tolerance": false
+    }
+  ],
+  "counts": {
+    "non_voting": 1,
+    "agreeing_with_a_voter": 0,
+    "disagreeing_with_a_voter": 1,
+    "no_voter": 0
+  }
+}

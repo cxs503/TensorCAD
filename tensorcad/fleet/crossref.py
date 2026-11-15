@@ -414,6 +414,9 @@ class Cell:
     column: int
     unit_basis: str = "volume"
     note: str = ""
+    #: Non-empty only when the numeral was *not* transcribed from the full-scale column:
+    #: it records the arithmetic (and the numerals it used) that produced ``value``.
+    derivation: str = ""
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -474,6 +477,108 @@ def _pick(cells: Sequence[str], column: int | None) -> tuple[float, str, int, st
     return None
 
 
+#: Quantities measured in metres, i.e. the ones a published scale ratio applies to.
+LENGTH_LIKE: tuple[str, ...] = ("length_pp", "lwl", "beam", "draft")
+
+#: A cell whose ``unit_basis`` starts with this prefix was *computed*, never transcribed: it
+#: never votes in :func:`cross_reference`.  The value stays in the library because dropping it
+#: would hide a numeral the publisher does print.
+DERIVED_BASIS = "derived"
+
+#: Row label that marks an LCB given as a distance from the forward perpendicular rather than
+#: as a percentage of Lpp: the numeral is a length and must not be read as a percentage.
+_LCB_AS_LENGTH = re.compile(
+    r"(?i)\(\s*m\s*\)|aft of (?:the )?fp|(?:from|aft of) (?:the )?f\.?p\.?|forward of (?:the )?fp"
+)
+
+
+def _alt_numeric(cells: Sequence[str], chosen: int) -> tuple[float, int] | None:
+    """The first numeric cell at an index other than ``chosen`` (the parallel column)."""
+    for index, text in enumerate(cells):
+        if index == chosen or index == 0:
+            continue
+        match = _NUMBER.search(text.replace(",", ""))
+        if match is None:
+            continue
+        return float(match.group(0)), index
+    return None
+
+
+def derive_cells(
+    cells: dict[str, Cell], pairs: Mapping[str, tuple[float, int, tuple[float, int] | None]], spec: SourceSpec
+) -> None:
+    """Scale the numerals the document prints *only* in its model column.
+
+    A workshop table prints "Model scale | Full scale".  When the full-scale cell says ``NA``
+    (or is blank) and the model cell holds a number, :func:`_pick` falls back to the model
+    column and the cell is flagged ``fallback_column`` -- correct, because an unscaled model
+    numeral must never be read as a full-scale one, but it also *loses* a published fact.  The
+    same table nearly always prints a length in both columns (Lwl, Bwl, T), which pins the
+    document's own ratio; multiplying by that ratio recovers the full-scale numeral with the
+    document as its only witness.  The arithmetic is written into ``Cell.derivation`` and the
+    basis becomes ``derived_*``, so the cell is auditable and never votes as if transcribed.
+    """
+    ratios: list[tuple[float, str]] = []
+    for quantity in LENGTH_LIKE:
+        pair = pairs.get(quantity)
+        if pair is None:
+            continue
+        chosen, index, alt = pair
+        if alt is None or index != (spec.column if spec.column is not None else index):
+            continue
+        if alt[0] <= 0 or chosen / alt[0] < 1.2:
+            continue  # full/model must be a real enlargement, not column noise
+        ratios.append((chosen / alt[0], quantity))
+    if not ratios:
+        return
+    ratios.sort()
+    ratio, witness = ratios[len(ratios) // 2]
+    witness_value = pairs[witness]
+
+    for quantity, cell in list(cells.items()):
+        if not cell.unit_basis.startswith("fallback_column"):
+            continue
+        model_value = cell.value
+        if quantity in LENGTH_LIKE:
+            cell.value = round(model_value * ratio, 4)
+            cell.unit_basis = f"{DERIVED_BASIS}_model_column_scaled"
+            cell.note = (
+                f"model-scale {cell.raw} x {ratio:.6g} "
+                f"({witness} {witness_value[0]:g}/{witness_value[2][0]:g} in the same table)"
+            )
+            cell.derivation = (
+                f"full-scale = model {model_value:g} m * ({witness_value[0]:g} m / "
+                f"{witness_value[2][0]:g} m) = {cell.value:g} m"
+            )
+            continue
+        if quantity == "lcb_percent":
+            # A distance from the forward perpendicular is a length; converting it to a
+            # percentage needs a reference length, which the page may not publish.
+            length, basis_name = None, ""
+            if "length_pp" in cells and not cells["length_pp"].unit_basis.startswith(
+                ("fallback", DERIVED_BASIS)
+            ):
+                length, basis_name = cells["length_pp"].value, "Lpp"
+            elif "lwl" in cells:
+                length, basis_name = cells["lwl"].value, "Lwl"
+            metres = model_value * ratio
+            if length:
+                cell.value = round((length / 2.0 - metres) / length * 100.0, 4)
+                cell.unit_basis = f"{DERIVED_BASIS}_length_aft_fp"
+                cell.note = (
+                    f"{cell.raw} m aft of FP at model scale -> {metres:.4g} m full scale "
+                    f"({ratio:.6g}) -> {cell.value:g} % of {basis_name} = {length:g} m, "
+                    "midship at L/2"
+                )
+                cell.derivation = (
+                    f"LCB = (L/2 - x_aft_FP)/L * 100 with L = {basis_name} = {length:g} m, "
+                    f"x_aft_FP = {model_value:g} m * {ratio:.6g} = {metres:.4g} m"
+                )
+            else:
+                cell.unit_basis = f"{DERIVED_BASIS}_length_no_reference_length"
+                cell.note = f"{cell.raw} m aft of FP, model scale; no reference length published"
+
+
 def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
     """Read the tracked quantities of ``spec.ship`` out of a fetched document."""
     if spec.kind != "html":
@@ -481,6 +586,9 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
     markup = payload.decode("utf-8", "replace") if isinstance(payload, bytes) else payload
     block = _split_section(markup, spec)
     out: dict[str, Cell] = {}
+    #: ``quantity -> (chosen value, chosen column, parallel-column value)`` for the length-like
+    #: rows, the raw material of :func:`derive_cells`.
+    pairs: dict[str, tuple[float, int, tuple[float, int] | None]] = {}
     for row in table_rows(block):
         if not row:
             continue
@@ -501,6 +609,8 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
         if picked is None:
             continue
         value, raw, index, basis = picked
+        if quantity in LENGTH_LIKE or quantity == "lcb_percent":
+            pairs[quantity] = (value, index, _alt_numeric(row, index))
         if spec.column is not None and index != spec.column:
             # The configured full-scale column was empty, so a neighbour was read.  Its scale
             # is unknown: keep it for the audit trail, never let it vote.
@@ -516,6 +626,7 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
             column=index,
             unit_basis=basis,
         )
+    derive_cells(out, pairs, spec)
     if "displacement_volume" in out:
         cell = out["displacement_volume"]
         if cell.unit_basis == "mass":
@@ -624,6 +735,17 @@ def _family_value(values: Sequence[float], tolerance: float) -> tuple[float, dic
     }
 
 
+def votes(cell: "Cell") -> bool:
+    """Does this cell count as a *published* statement of the quantity?
+
+    Only a numeral the publisher prints in a usable column does.  A cell read from a
+    neighbouring (model-scale) column with an unknown scale, and a cell this library
+    *derived* from such a column, are kept for the audit trail but do not vote: letting
+    either vote would turn arithmetic into a second opinion.
+    """
+    return not cell.unit_basis.startswith(("fallback_column", DERIVED_BASIS))
+
+
 def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]]) -> dict[str, Any]:
     """Per ship, per quantity: the independent families that state it and whether they agree.
 
@@ -639,9 +761,9 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                 if cell is None:
                     continue
                 family = LINEAGE.get(source_key, FAMILIES.get(source_key, source_key))
-                entries.append({"family": family, "cell": cell.as_dict()})
-                if cell.unit_basis.startswith("fallback_column"):
-                    continue
+                entries.append(
+                    {"family": family, "cell": cell.as_dict(), "votes": votes(cell)}
+                )
             families: dict[str, list[float]] = {}
             for entry in entries:
                 # A cell read from a fallback column has an unknown scale: it stays in
@@ -649,7 +771,7 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                 # guard at the *end* of the collection loop, where it excluded nothing, so a
                 # neighbouring-column reading could outvote (or silently corroborate) the real
                 # full-scale value -- two tests had been failing on exactly that.
-                if entry["cell"]["unit_basis"].startswith("fallback_column"):
+                if not entry["votes"]:
                     continue
                 families.setdefault(entry["family"], []).append(entry["cell"]["value"])
             family_values: dict[str, float] = {}
@@ -670,6 +792,29 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                 {"family": fam, "value": value}
                 for fam, value in sorted(family_values.items())
             ]
+            derived = [
+                {
+                    "family": entry["family"],
+                    "value": entry["cell"]["value"],
+                    "unit_basis": entry["cell"]["unit_basis"],
+                    "derivation": entry["cell"].get("derivation", ""),
+                    "note": entry["cell"].get("note", ""),
+                }
+                for entry in entries
+                if not entry["votes"]
+            ]
+            if derived:
+                # What the non-voting readings say, and how far they sit from the voters: a
+                # derived numeral that *agrees* is corroboration of transcription; one that
+                # disagrees is a definition question to settle, never an averaged value.
+                disagreement = None
+                if family_values:
+                    reference = sorted(family_values.values())[len(family_values) // 2]
+                    disagreement = {
+                        "reference": reference,
+                        "deltas": [round(d["value"] - reference, 6) for d in derived],
+                    }
+                _derived_block = {"cells": derived, "vs_voters": disagreement}
             per_quantity[quantity] = {
                 "verdict": verdict,
                 # A disagreement above the tolerance is *disputed*, not averaged: both
@@ -686,6 +831,8 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                 "tolerance": TOLERANCE[quantity],
                 "entries": entries,
             }
+            if derived:
+                per_quantity[quantity]["derived"] = _derived_block
         # Same-family repeats are counted separately: they are corroboration, not independence.
         repeated = sum(
             1
