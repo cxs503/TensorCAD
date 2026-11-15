@@ -1,0 +1,128 @@
+{
+ "schema": "tensorcad.fleet_refs.round8/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "generated_utc": "2026-11-15T18:29:07+00:00",
+ "rule": "an arithmetic corroboration is a cross-check of one published number; it is never a second publisher and never changes a verdict",
+ "lcb_corroboration": {
+  "ship": "ONRT",
+  "quantity": "lcb_percent",
+  "library_verdict_before": "SINGLE_SOURCE",
+  "library_verdict_after": "SINGLE_SOURCE",
+  "measurement": {
+   "document": "onrt_iihr",
+   "publisher": "University of Iowa (IIHR) thesis 2016, Bottiglieri - Table 2.1 main particulars",
+   "sha256": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+   "digest_matches_pin": true,
+   "quote": "LCB LCB (m) aft of FP 1.625 NA",
+   "model_length_aft_fp_m": 1.625,
+   "scale": 49.0,
+   "note": "the document's full-scale column reads NA; the conversion below is this tool's arithmetic and is labelled as such"
+  },
+  "published": {
+   "source": "simman2020_summary",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "family": "SIMMAN-SERIES",
+   "percent_fwd_positive": -1.68,
+   "lpp_m": 154.0,
+   "lpp_source": "simman2020_summary",
+   "lpp_quantity": "lwl"
+  },
+  "conversion": {
+   "ship": "ONRT",
+   "model_length_aft_fp_m": 1.625,
+   "scale": 49.0,
+   "full_scale_aft_fp_m": 79.625,
+   "lpp_m": 154.0,
+   "published_percent_fwd_positive": -1.68,
+   "published_aft_fp_m": 79.5872,
+   "residual_m": 0.0378,
+   "residual_relative": 0.0004749507458486324,
+   "tolerance": 0.005,
+   "verdict": "CORROBORATES",
+   "votes": false
+  },
+  "tolerance": 0.005
+ },
+ "gap_probes": [
+  {
+   "target": [
+    "KVLCC2/lcb_percent",
+    "KVLCC2/lwl",
+    "DTC/lcb_percent",
+    "DTC/lwl"
+   ],
+   "document": "kvlcc2_ugent",
+   "title": "Journal of Ship Research 61(3) 2017, Table 1 'Main particulars and loading conditions for the KVLCC2 and DTC'",
+   "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+   "outcome": "no row states LCB or Lwl; the table's rows are Lpp, B, CB, TFP/TAP, volume displacement, LCG, VCG, GMT, rxx, ryy, rzz",
+   "quotes": [
+    "Table 1 Main particulars and loading conditions for the KVLCC2 and DTC",
+    "Lpp (m) 320.0 355.0",
+    "CB [-] 0.8098 0.661",
+    "LCG (m) 171.1 169.0 174.059 170.460"
+   ]
+  },
+  {
+   "target": [
+    "JBC/lcb_percent"
+   ],
+   "document": "jbc_memorial",
+   "title": "Memorial University thesis 2025, Table 3 'JBC hull data and geometry'",
+   "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+   "outcome": "seven rows (LOA, B, LPP, LWL, draught, displacement, WSA); LCB is absent, so the single JBC LCB document is not corroborated",
+   "quotes": [
+    "Table 3 JBC hull data and geometry No. Main Particulars Value Units",
+    "1. LOA 291 m 2. Beam, B 45 m 3. LPP 280 m 4. LWL 285 m",
+    "5. Draught 16.5 m 6. Displacement 178370 m3 7. WSA 19556.1 m2"
+   ]
+  },
+  {
+   "target": [
+    "DTC/lcb_percent",
+    "DTC/lwl"
+   ],
+   "document": "dtc_strath",
+   "title": "ISNAM 2018 (Strathclyde repository), Table 1 main particulars of the DTC hull",
+   "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+   "outcome": "the text layer contains no LCB / longitudinal-centre-of-buoyancy / waterline-length row (zero matches); the document states Lpp, Bwl, T, volume, CB only",
+   "zero_match": "(?i)lcb|longitudinal cent(?:er|re) of buoyancy|waterline length",
+   "quotes": []
+  }
+ ],
+ "searches": [
+  {
+   "query": "Duisburg Test Case container ship (OpenAlex, open-access filter)",
+   "candidates": "UGent 8516555 'open model test data' (item page, no PDF link answered); Strathclyde 67912 (already pinned as dtc_strath)",
+   "why_not_closed": "no candidate answers with a full text that prints both LCB and Lwl for the DTC"
+  },
+  {
+   "query": "Japan Bulk Carrier JBC main particulars LCB block coefficient",
+   "candidates": "Memorial 2025 thesis (already pinned), Sciendo 10.2478/pomr-2023-0002 (L/B ratio study, no JBC table hit)",
+   "why_not_closed": "the only JBC table reachable restates the NMRI rows and has no LCB"
+  },
+  {
+   "query": "Series 60 Todd parent hull principal particulars LCB",
+   "candidates": "Todd 1963 'Methodical experiments with models of single-screw merchant ships', Biodiversity Heritage Library item 102062",
+   "why_not_closed": "the BHL item-PDF endpoint answered 403 to this egress and the catalogue PDF is a page scan without a text layer; Series 60 therefore still has zero documents and stays an open gap"
+  }
+ ],
+ "remaining_gaps": {
+  "DTC": [
+   "lcb_percent",
+   "lwl"
+  ],
+  "JBC": [
+   "lcb_percent"
+  ],
+  "ONRT": [
+   "lcb_percent (single publisher; arithmetic corroboration recorded above)"
+  ],
+  "Series60": [
+   "displacement_volume",
+   "cb",
+   "lcb_percent",
+   "lwl"
+  ]
+ },
+ "figure": "docs/figs/fleet_refs_round8_lcb_corroboration.png"
+}
