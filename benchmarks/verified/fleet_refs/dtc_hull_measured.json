@@ -1,0 +1,158 @@
+{
+ "anchor": "GAP-CAD-T1-SOURCE-HUNT",
+ "measured": {
+  "checks": {
+   "beam": {
+    "measured_m": 51.00217002106366,
+    "published_m": 51.0,
+    "rel_error_percent": 0.0042549432620830885,
+    "tolerance_percent": 0.5,
+    "within_tolerance": true
+   },
+   "block_coefficient": {
+    "measured": 0.6607395114914105,
+    "published": 0.661,
+    "rel_error_percent": -0.03940824638267882,
+    "tolerance_percent": 1.0,
+    "within_tolerance": true
+   },
+   "displacement_volume": {
+    "measured_m3": 173458.98840550383,
+    "published_m3": 173467.0,
+    "rel_error_percent": -0.004618512164372831,
+    "tolerance_percent": 1.0,
+    "within_tolerance": true
+   }
+  },
+  "rows": [
+   {
+    "cb": 0.660029759652254,
+    "field_dx_m": 0.5,
+    "field_dz_m": 0.1,
+    "field_filled_nodes": 16316,
+    "field_interpolated_nodes": 84312,
+    "half_breadth_max_m": 25.50017437744,
+    "lcb_x_m": 174.08446586287857,
+    "point_cloud": {
+     "bbox_max": [
+      366.07180790000007,
+      25.500237682250415,
+      31.750000000000004
+     ],
+     "bbox_min": [
+      -6.7429238588,
+      -25.500237682250418,
+      -0.0008207842219195086
+     ],
+     "distinct": 88448,
+     "extent": [
+      372.81473175880006,
+      51.00047536450083,
+      31.750820784221922
+     ],
+     "samples": 105359
+    },
+    "sample_spacing_m": 1.0,
+    "surfaces_quarantined": 0,
+    "surfaces_read": 1345,
+    "volume_m3": 173272.66257830884,
+    "volume_rel_error_percent": -0.11203134987701498,
+    "waterplane_area_m2": 15257.733483266182
+   },
+   {
+    "cb": 0.6607395114914105,
+    "field_dx_m": 0.5,
+    "field_dz_m": 0.1,
+    "field_filled_nodes": 43383,
+    "field_interpolated_nodes": 58088,
+    "half_breadth_max_m": 25.501085010531835,
+    "lcb_x_m": 174.0730280140073,
+    "point_cloud": {
+     "bbox_max": [
+      366.07180790000007,
+      25.50108501053183,
+      31.750000000000004
+     ],
+     "bbox_min": [
+      -6.742923879336076,
+      -25.501085010531835,
+      -0.0008207842219195086
+     ],
+     "distinct": 288135,
+     "extent": [
+      372.81473177933617,
+      51.00217002106366,
+      31.750820784221922
+     ],
+     "samples": 315616
+    },
+    "sample_spacing_m": 0.5,
+    "surfaces_quarantined": 0,
+    "surfaces_read": 1345,
+    "volume_m3": 173458.98840550383,
+    "volume_rel_error_percent": -0.004618512164372831,
+    "waterplane_area_m2": 15304.874900178647
+   }
+  ],
+  "surface_count": 1345,
+  "unit": {
+   "metres_per_unit": 1.0,
+   "model_scale": 1.0,
+   "unit_flag": 6,
+   "unit_name": "M"
+  }
+ },
+ "published_reference": {
+  "beam": 51.0,
+  "cb": 0.661,
+  "crossref_verdicts": {
+   "beam": "CROSS_VERIFIED",
+   "cb": "CROSS_VERIFIED",
+   "displacement_volume": "CROSS_VERIFIED",
+   "draft": "CROSS_VERIFIED",
+   "lcb_percent": "MISSING",
+   "length_pp": "CROSS_VERIFIED",
+   "lwl": "MISSING"
+  },
+  "displacement_volume_m3": 173467.0,
+  "draft": 14.5,
+  "length_pp": 355.0,
+  "manifest_notes": "El Moctar, Shigunov & Zorn (2012) main particulars: Lpp 355.0 m, B 51.0 m, T 14.5 m, Cb 0.661, grad 173467 m^3. CORRECTED 2026-11-13 (round 2): this record previously carried B = 45.8 m with no cited displacement, so its reference was the closure Cb*L*B*T = 155834 m^3 and the error could not be seen. The cited volume 173467 m^3 (El Moctar et al. 2012) is reproduced to 0.0005 % by (L 355.0, B 51.0, T 14.5, Cb 0.661) and missed by 11.3 % by the old beam; L/B = 6.96 and B/T = 3.52 fit a post-Panamax container ship. G6b_reference_consistency now rejects the old quadruple (negative control mis_transcribed_particulars).",
+  "manifest_provenance": {
+   "license": "published benchmark data, research use",
+   "retrieval": "offline_recollection",
+   "source": "El Moctar, Shigunov, Zorn (2012) Duisburg Test Case: Post-Panamax Container Ship for Benchmarking. Ship Technology Research 59(3), 50-64",
+   "url": "https://www.uni-due.de/ship/dtc.php",
+   "verified": false
+  }
+ },
+ "schema": "tensorcad.fleet_refs.dtc_hull_measured/1.0",
+ "ship": "DTC",
+ "source": {
+  "archive_bytes": 2343841,
+  "archive_defect": "central-directory member paths use backslashes (dtc-2012-01-10\\DTC_hull.igs) while the local headers use forward slashes, so ZipFile.read raises BadZipFile; the central directory spelling is wrong and the header is authoritative",
+  "archive_path_in_cache": "/root/.cache/hull_sources/dtc_igs_ordner.zip",
+  "archive_sha256": "7b18e40d783b670f226a55a7d3f0ccf13c0978e3d80a13a78eced65a7a852541",
+  "archive_url": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip",
+  "hull_member": "DTC_hull.igs",
+  "hull_sha256": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+  "license": "publisher states no licence; the workshop publishes the IGES set for benchmarking. Bytes are digested here, never redistributed.",
+  "member_bytes": {
+   "DTC_bilgekeel.igs": 1099948,
+   "DTC_hull.igs": 2309858,
+   "DTC_propeller.igs": 4858172,
+   "DTC_propeller_hull_conection.igs": 16892,
+   "DTC_rudder_skeg.igs": 516354
+  },
+  "member_sha256": {
+   "DTC_bilgekeel.igs": "17ec321702f738f1ec9d9f9fd5f05c2a80304f14199139bafccac0f1fc8a1fc4",
+   "DTC_hull.igs": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+   "DTC_propeller.igs": "8e3cf3fc8e3cd8b22606a85f25a1cd2a669da2abfe042a72b44c5afeb5138fac",
+   "DTC_propeller_hull_conection.igs": "fdd3939835d8abbe989db1a9bc76f2d83636468e47e77dd6b04cb1907cf0244e",
+   "DTC_rudder_skeg.igs": "af257520b304c0f5dbf609ed9456121db49fdca555fd6e123ffbd57978de065a"
+  },
+  "publisher_page": "https://www.uni-due.de/ship/dtc.php"
+ },
+ "verdict": "VERIFIED",
+ "verdict_reason": "every geometric check is inside its tolerance"
+}
