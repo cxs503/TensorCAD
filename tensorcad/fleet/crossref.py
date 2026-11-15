@@ -446,6 +446,204 @@ def closure_check(report: Mapping[str, Any], ships: Sequence[str] | None = None)
     return out
 
 
+#: Closure identity tolerance.  The identity ``∇ = Cb·Lpp·Bwl·T`` is exact for a
+#: wall-sided hull and holds to the printed rounding of a publisher table; 1 % is far
+#: tighter than the 2.4 % error the ONRT cell shows when its mass/volume basis is wrong,
+#: and far looser than the 0.08 % left by rounding.
+CLOSURE_TOLERANCE = 0.01
+
+#: Power-of-ten slips seen in printed tables (KVLCC2 ``Bwl 580`` for 58.0 m).  The scan
+#: divides the printed number by each factor and asks whether the identity then closes.
+SCALE_FACTORS: tuple[float, ...] = (10.0, 100.0, 0.1, 0.01)
+
+#: The quantities the identity can attribute a slip to, in the order the scan tries them.
+_SCALE_SCAN_ORDER: tuple[str, ...] = ("beam", "draft", "length_pp", "cb", "displacement_volume")
+
+
+def _family_tables(report: Mapping[str, Any], ship: str) -> dict[str, dict[str, float]]:
+    """``quantity -> {family: value}`` for one ship (the voting values only)."""
+    return {q: dict(report[ship]["quantities"][q]["family_values"]) for q in QUANTITIES}
+
+
+def _identity_residual(
+    volume: float, cb: float, lpp: float, beam: float, draft: float
+) -> float:
+    """``Cb·Lpp·Bwl·T / ∇ - 1``; ``inf`` when a factor is missing or ∇ is zero."""
+    product = cb * lpp * beam * draft
+    if not volume:
+        return float("inf")
+    return product / volume - 1.0
+
+
+def _scale_slip(
+    tables: Mapping[str, dict[str, float]], family: str, raw_residual: float
+) -> dict[str, Any] | None:
+    """Find a single power-of-ten slip that makes the publication close on itself.
+
+    The scan is deliberately narrow: exactly *one* quantity of *one* publisher is divided
+    by 10, 100, 0.1 or 0.01, the cheapest factor first (10 before 100).  A table that needs
+    two simultaneous corrections is not a digit slip and is left alone.  The printed number
+    is never rewritten -- the caller records the factor next to it.
+    """
+    if abs(raw_residual) <= CLOSURE_TOLERANCE:
+        return None
+    for quantity in _SCALE_SCAN_ORDER:
+        table = tables[quantity]
+        if family not in table:
+            continue
+        printed = table[family]
+        if not printed:
+            continue
+        for factor in SCALE_FACTORS:
+            corrected = printed / factor
+            trial = {q: dict(step) for q, step in tables.items()}
+            trial[quantity][family] = corrected
+            basis = next(
+                (q for q in ("length_pp", "lwl") if family in trial[q]), None
+            )
+            if basis is None:
+                continue
+            residual = _identity_residual(
+                trial["displacement_volume"][family],
+                trial["cb"][family],
+                trial[basis][family],
+                trial["beam"][family],
+                trial["draft"][family],
+            )
+            if abs(residual) <= CLOSURE_TOLERANCE:
+                return {
+                    "quantity": quantity,
+                    "printed": printed,
+                    "divide_by": factor,
+                    "corrected": corrected,
+                    "raw_residual": raw_residual,
+                    "corrected_residual": residual,
+                }
+    return None
+
+
+def adjudicate(report: Mapping[str, Any]) -> dict[str, Any]:
+    """Decide *between* disagreeing publishers using only their own numbers.
+
+    Two questions, both answered without an external reference value:
+
+    **Is a published table internally consistent?**  Every publisher that states ∇ together
+    with Cb, Lpp, Bwl and T implies a displacement of its own.  A family whose implied ∇
+    misses its printed ∇ by more than :data:`CLOSURE_TOLERANCE` has a defect *in the table*,
+    whatever the reconstruction does.
+
+    **Which side of a dispute survives that test?**  For every ``CONFLICT`` cell the closure
+    residual of each involved family is reported; when exactly one family closes, it is named
+    as the ``preferred_family`` and the conflict is marked ``resolved_by_closure``.  When
+    both close (a genuine difference of definition, e.g. LCB on different references) or
+    neither does, the conflict stays ``unresolved`` and no value is picked: a library that
+    guesses is worse than a library that shows both numbers.
+
+    A failed closure is also scanned for a single power-of-ten slip (:func:`_scale_slip`),
+    which is how the KVLCC2 ``Bwl 580`` cell is attributed to a printed typo rather than to a
+    hull 10× as wide.  The slip is recorded on the cell itself
+    (``cell['closure_defect']``) so a consumer can see why a family did not vote.
+    """
+    ships: dict[str, Any] = {}
+    scale_typos: list[dict[str, Any]] = []
+    conflicts: dict[str, dict[str, Any]] = {}
+    for ship in sorted(report):
+        tables = _family_tables(report, ship)
+        volume = tables["displacement_volume"]
+        rows: dict[str, Any] = {}
+        for family in sorted(volume):
+            needed = ("cb", "beam", "draft")
+            if any(family not in tables[q] for q in needed):
+                continue
+            # Publishers define Cb on either length and print only one of them: NMRI's ONRT
+            # row states ``CB = ∇/(Lwl·Bwl·T)`` and no Lpp.  Use Lpp when the table states
+            # it and fall back to Lwl, recording which basis closed the identity.
+            basis = next(
+                (q for q in ("length_pp", "lwl") if family in tables[q]), None
+            )
+            if basis is None:
+                continue
+            length = tables[basis][family]
+            product = (
+                tables["cb"][family] * length * tables["beam"][family] * tables["draft"][family]
+            )
+            residual = _identity_residual(
+                volume[family],
+                tables["cb"][family],
+                length,
+                tables["beam"][family],
+                tables["draft"][family],
+            )
+            slip = _scale_slip(tables, family, residual)
+            rows[family] = {
+                "length_basis": basis,
+                "implied_volume_m3": product,
+                "published_volume_m3": volume[family],
+                "rel_error": residual,
+                "consistent": abs(residual) <= CLOSURE_TOLERANCE,
+                "explained_by_scale_slip": slip,
+            }
+            if slip is not None:
+                scale_typos.append({"ship": ship, "family": family, **slip})
+                # Bind the finding to the votes it came from: the entry keeps its printed
+                # value and gains the reason it is not corroboration.
+                for entry in report[ship]["quantities"][slip["quantity"]]["entries"]:
+                    cell = entry["cell"]
+                    if entry["family"] == family and cell["value"] == slip["printed"]:
+                        cell["closure_defect"] = {
+                            "quantity": slip["quantity"],
+                            "printed": slip["printed"],
+                            "divide_by": slip["divide_by"],
+                            "corrected": slip["corrected"],
+                            "corrected_residual": slip["corrected_residual"],
+                        }
+        ship_conflicts: dict[str, Any] = {}
+        for quantity in QUANTITIES:
+            row = report[ship]["quantities"][quantity]
+            if row["verdict"] != "CONFLICT":
+                continue
+            involved = sorted(row["family_values"])
+            residuals = {
+                family: (rows[family]["rel_error"] if family in rows else None)
+                for family in involved
+            }
+            consistent = [
+                family
+                for family in involved
+                if residuals[family] is not None and abs(residuals[family]) <= CLOSURE_TOLERANCE
+            ]
+            preferred = consistent[0] if len(consistent) == 1 else None
+            ship_conflicts[quantity] = {
+                "families": involved,
+                "family_values": dict(row["family_values"]),
+                "closure_residual_by_family": residuals,
+                "consistent_families": consistent,
+                "preferred_family": preferred,
+                "resolution": "resolved_by_closure" if preferred else "unresolved",
+                "basis": (
+                    f"{preferred} closes on its own Cb·Lpp·Bwl·T within "
+                    f"{CLOSURE_TOLERANCE:.0%}; the other family does not"
+                    if preferred
+                    else "closure cannot separate the two readings (both close, or neither does)"
+                ),
+            }
+        ships[ship] = {"closure": rows, "conflicts": ship_conflicts}
+        conflicts.update({f"{ship}/{q}": row for q, row in ship_conflicts.items()})
+    return {
+        "closure_tolerance": CLOSURE_TOLERANCE,
+        "scale_factors": list(SCALE_FACTORS),
+        "ships": ships,
+        "scale_typos": scale_typos,
+        "conflicts": conflicts,
+        "conflicts_resolved": sum(
+            1 for row in conflicts.values() if row["resolution"] == "resolved_by_closure"
+        ),
+        "conflicts_unresolved": sum(
+            1 for row in conflicts.values() if row["resolution"] == "unresolved"
+        ),
+    }
+
+
 def coverage_summary(report: Mapping[str, Any]) -> dict[str, Any]:
     """Fleet-level tallies used by the gate and by the report."""
     ships = sorted(report)

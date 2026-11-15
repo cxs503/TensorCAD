@@ -35,6 +35,7 @@ if __package__ in (None, ""):  # allow ``python tools/baseline_fleet/crossref_re
 
 from tensorcad.fleet.crossref import (  # noqa: E402
     QUANTITIES,
+    adjudicate,
     QUANTITY_LABELS,
     SOURCES,
     Cell,
@@ -80,6 +81,35 @@ PROBES: tuple[dict[str, str], ...] = (
         "want": "SIMMAN 2008 archive (KVLCC2 page, original FORCE edition)",
         "url": "https://www.simman2008.dk/",
         "outcome": "domain no longer serves the workshop; archived copies unreachable (web.archive.org egress blocked)",
+    },
+    {
+        "want": "DTC particulars (Korean Society of Ocean Engineers, IJOSE 2013)",
+        "url": "https://koreascience.kr/article/JAKO201319850774702.pdf",
+        "outcome": "TCP reset (RemoteDisconnected) on this egress; the host answers HTML headers "
+        "only for browsers, so the numerals cannot be read programmatically",
+    },
+    {
+        "want": "Series 60 primary tables (Todd, DTMB, Biodiversity Heritage Library mirror)",
+        "url": "https://www.biodiversitylibrary.org/itempdf/102062",
+        "outcome": "HTTP 403 for programmatic clients (same as the 2026-11-14 round)",
+    },
+    {
+        "want": "Series 60 seakeeping tables (Procedia Engineering 2017, ScienceDirect)",
+        "url": "https://www.sciencedirect.com/science/article/pii/S1877705817332848/pdf",
+        "outcome": "HTTP 403 — publisher blocks non-browser fetches",
+    },
+    {
+        "want": "DTC / JBC particulars via repository search (TU Delft, NTNU Open, J-STAGE)",
+        "url": "https://repository.tudelft.nl/search?q=Duisburg%20Test%20Case",
+        "outcome": "search pages are client-rendered JavaScript apps: the HTML carries no result "
+        "list, and no public search API is reachable from here (DuckDuckGo/Bing blocked, "
+        "OpenAlex has metadata only)",
+    },
+    {
+        "want": "KVLCC2 particulars from the NMRI Tokyo 2015 geometry page",
+        "url": "https://www.t2015.nmri.go.jp/kvlcc2.html",
+        "outcome": "HTTP 404 — the workshop index still links the page but the file is gone "
+        "(the KCS/JBC/ONRT siblings are intact and re-fetch with matching digests)",
     },
     {
         "want": "Wageningen 2022 workshop (KCS data)",
@@ -239,12 +269,18 @@ def cmd_build(args: argparse.Namespace) -> int:
         sources[spec.key] = record
 
     report = cross_reference(extractions)
+    # Who is internally consistent, and does a published table close on itself?  This is the
+    # only adjudication this library allows: it uses each publisher's own numbers, never an
+    # external "truth", and it never rewrites a printed cell.
+    adjudication = adjudicate(report)
     for ship in ("KCS", "KVLCC2", "JBC", "ONRT", "DTC", "Series60"):
         if ship not in report:
             report[ship] = {
                 "quantities": {
                     q: {
                         "verdict": "MISSING",
+                        "disputed": False,
+                        "published_values": [],
                         "independent_families": 0,
                         "family_values": {},
                         "range": 0.0,
@@ -272,6 +308,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         "sources": sources,
         "report": report,
         "coverage": coverage_summary(report),
+        "adjudication": adjudication,
         "comparisons": comparisons,
         "closure": closure_check(report),
         "probes": registry.get("probes", []),
