@@ -48,6 +48,14 @@ def parse_base(text: str) -> tuple[int, int]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="10^7-band fleet perf run (GAP-CAD-D4-PERF-SCALE)")
     parser.add_argument("--base", default="2001:501", help="base rung nx:nz (default 2001:501 = 4.0e6 tri)")
+    parser.add_argument(
+        "--bases", default=None,
+        help="comma-separated base rungs nx:nz, e.g. '641:161,1281:321,2001:501'. "
+             "Needed for a *measurable* complexity exponent at the 10^6-10^7 band: "
+             "the exponent is fitted inside one (sub-task, body-count) group, so a "
+             "single base gives one size point per group and every scaling gate "
+             "comes out not_run (GAP-CAD-D4-PERF-SCALE debt). Overrides --base.",
+    )
     parser.add_argument("--copies", default="2,3", help="comma-separated body counts (default 2,3)")
     parser.add_argument("--n-queries", type=int, default=2000, help="ray queries for point_locate_accel")
     parser.add_argument("--subtasks", default="load,fleet_assemble,point_locate_accel,volume")
@@ -60,18 +68,22 @@ def main(argv: list[str] | None = None) -> int:
                         help="also emit the raw result JSON on stdout (noisy; payload is canonical)")
     args = parser.parse_args(argv)
 
-    nx, nz = parse_base(args.base)
+    if args.bases:
+        base_ladder = tuple(parse_base(item) for item in args.bases.split(",") if item.strip())
+    else:
+        base_ladder = (parse_base(args.base),)
+    nx, nz = base_ladder[0]
     copies = tuple(int(c) for c in args.copies.split(",") if c.strip())
     subtasks = tuple(s.strip() for s in args.subtasks.split(",") if s.strip())
 
-    print(f"[perf10m] base={nx}x{nz} copies={list(copies)} n_queries={args.n_queries} "
-          f"subtasks={list(subtasks)}", flush=True)
+    print(f"[perf10m] bases={[f'{a}x{b}' for a, b in base_ladder]} copies={list(copies)} "
+          f"n_queries={args.n_queries} subtasks={list(subtasks)}", flush=True)
     print(f"[perf10m] loadavg={pb._loadavg()} cpus={pb._environment().get('cpu_count')}", flush=True)
 
     t0 = time.perf_counter()
     try:
         result = pb.run_fleet_benchmark(
-            base_ladder=((nx, nz),),
+            base_ladder=base_ladder,
             copies_ladder=copies,
             subtasks=subtasks,
             n_queries=args.n_queries,

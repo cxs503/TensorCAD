@@ -1,6 +1,29 @@
 
 ## Unreleased
 
+- **The 10^6-10^7 complexity gate can now be measured instead of `not_run`, and rung memory is
+  reported in three distinct dimensions** (`tensorcad/perf_benchmark.py`,
+  `scripts/perf_scale_10m.py`, `scripts/perf_3pt_report.py`, `scripts/gen_perf_3pt_figures.py`,
+  `benchmarks/perf_scale/ladder_3pt_mechanism_smoke.json`, `docs/perf_scale_10m.md` section 9).
+  The exponent gate fits log(seconds) vs log(size) inside one (sub-task, body-count) group, so
+  the committed 10^7 ladder -- one base rung times two body counts -- gave every group a single
+  size point and every gate came out `not_run`: the band had a gate mechanism, no verdict.
+  `--bases` now takes several base rungs (three sizes per group), and `FLEET_SUBTASKS` states
+  which sub-tasks a multi-body rung can answer at all: `point_locate` (a star-shaped single-body
+  reference) and `voxelize` (a grid-resolution ladder) are recorded once per rung as `not_run`
+  with a reason instead of being attempted and reported `failed`, which read as a measurement
+  accident. Verified on a local three-base ladder: 4 gates measured, `gates_not_run=0`; the
+  indices there come from 10^3-10^4-triangle meshes dominated by interpreter overhead and carry
+  no performance claim. Memory: `peak_rss_mb` is `ru_maxrss`, a process-wide high-water mark that
+  cannot be reset per rung -- which is why the old x2/x3 rows repeated the load row's 5770 MiB,
+  and the earlier "loongarch reporting granularity" suspicion is withdrawn (a 300 MB allocation
+  moves the field 20.6 -> 315.4 MiB, matching `VmHWM`). Two fields are added: `rss_mb` (live
+  `VmRSS` at rung end) and `mesh_mb` (sampled `sys.getsizeof` extrapolation of the mesh
+  containers, load-independent). Not obtained this session: the 10^6-10^7 re-measurement itself
+  (`cj3514` was still queued after 28 min on a 50-job-deep queue), so the 10^7 exponent gates
+  remain an open debt and no 10^7 memory conclusion is drawn here.
+
+
 - **The mesh-quality gate can now judge the solver's own mesh: OpenFOAM `polyMesh` in, the
   three `checkMesh` numbers out** (`tensorcad/meshquality/polymesh.py`,
   `docs/mesh_quality_polymesh.md`, `examples/mesh_quality/run_polymesh_benchmark.py`,
