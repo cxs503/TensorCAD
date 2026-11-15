@@ -119,13 +119,26 @@ class _Slabs:
         return self.buckets[bucket]
 
 
-def envelope_breadth(slabs: _Slabs, station: float, height: float) -> float:
-    """Moulded breadth (``max |y|``) of the surface at ``x = station, z = height``.
+def envelope_breadth(slabs: _Slabs, station: float, height: float, *,
+                     full: bool = False) -> float:
+    """Breadth of the surface at ``x = station, z = height``.
+
+    ``full=False`` (default) returns the moulded **half**-breadth ``max |y|``: the
+    one-sided sheet that the publisher half-breadth models carry, which the caller
+    doubles with ``symmetry_factor``.
+
+    ``full=True`` returns the **full** breadth ``y_max - y_min`` of the hits, which is
+    what a model carrying both sides needs.  Reporting ``max |y|`` there is exactly half
+    the breadth, and it halves A(x), the displacement and the beam while leaving Cb
+    untouched (both its numerator and its denominator shrink by two) -- see
+    ``docs/gap_cad_t1_full_model_halving.md``.
 
     Zero when the station/height lies outside the model or the surface has a hole
     there -- "no surface here", never an interpolated guess.
     """
     best = 0.0
+    best_hi = float("-inf")
+    best_lo = float("inf")
     for index in slabs.near(station):
         a, b, c = slabs.triangles[index]
         det = ((b[0] - a[0]) * (c[2] - a[2]) - (c[0] - a[0]) * (b[2] - a[2]))
@@ -140,19 +153,30 @@ def envelope_breadth(slabs: _Slabs, station: float, height: float) -> float:
         y = a[1] + u * (b[1] - a[1]) + v * (c[1] - a[1])
         if abs(y) > best:
             best = abs(y)
+        if y > best_hi:
+            best_hi = y
+        if y < best_lo:
+            best_lo = y
+    if full:
+        return (best_hi - best_lo) if best_hi >= best_lo else 0.0
     return best
 
 
 def sectional_area(slabs: _Slabs, station: float, waterline: float,
-                   levels: int = 48) -> float:
-    """Area of the immersed part of the section at ``station`` (one side only)."""
+                   levels: int = 48, *, full: bool = False) -> float:
+    """Area of the immersed part of the section at ``station``.
+
+    ``full=False`` integrates the one-sided (half-breadth) breadth, so the result still
+    has to be doubled by ``symmetry_factor``; ``full=True`` integrates ``y_max - y_min``
+    and is the whole section area of a both-sides model.
+    """
     if levels < 1:
         raise ValueError("levels must be >= 1")
     step = waterline / levels
     total = 0.0
-    previous = envelope_breadth(slabs, station, 0.0)
+    previous = envelope_breadth(slabs, station, 0.0, full=full)
     for index in range(1, levels + 1):
-        current = envelope_breadth(slabs, station, index * step)
+        current = envelope_breadth(slabs, station, index * step, full=full)
         total += 0.5 * (previous + current) * step
         previous = current
     return total
@@ -448,30 +472,40 @@ class HullCharacteristics:
 
 def hull_characteristics(vertices: Sequence[Vec3], faces: Sequence[Sequence[int]], *,
                          waterline: float, stations: int = 61, levels: int = 48,
-                         slab_count: int = 256, dedup: bool = True) -> HullCharacteristics:
+                         slab_count: int = 256, dedup: bool = True,
+                         full_breadth: bool | None = None) -> HullCharacteristics:
     """Displacement volume, ``Cb``/``Cm``, ``Lwl``, beam and wetted area.
 
     Every quantity is measured on the surface as imported: no closure surface is
     invented, so this works on the open half-breadth workshop files.  ``dedup``
     passes through to :func:`wetted_area`; the raw sum is reported alongside in
     ``s_wetted_naive`` so the effect of the de-duplication is always visible.
+
+    ``full_breadth`` selects how a section's breadth is read: ``None`` (default) infers
+    it from :func:`classify_model` -- one-sided ``max |y|`` for a half-breadth sheet,
+    ``y_max - y_min`` for a model carrying both sides.  Forcing ``False`` on a
+    both-sides model reproduces the pre-fix behaviour (displacement and beam exactly
+    halved, Cb unchanged); see ``docs/gap_cad_t1_full_model_halving.md``.
     """
     if waterline <= 0.0:
         raise ValueError("waterline must be positive")
     slabs = _Slabs.build(vertices, faces, slab_count)
     if not slabs.triangles:
         raise ValueError("mesh has no triangles")
+    characteristics = classify_model(vertices)
+    if full_breadth is None:
+        full_breadth = not characteristics["half_breadth"]
     xs = [min(p[0] for p in tri) for tri in slabs.triangles]
     x_lo, x_hi = min(xs), max(max(p[0] for p in tri) for tri in slabs.triangles)
     if x_hi <= x_lo:
         raise ValueError("mesh has zero x extent")
     grid = [x_lo + (x_hi - x_lo) * (index + 0.5) / stations for index in range(stations)]
-    areas = [sectional_area(slabs, station, waterline, levels) for station in grid]
+    areas = [sectional_area(slabs, station, waterline, levels, full=full_breadth)
+             for station in grid]
     # Midpoint rule over the full x extent: each cell contributes its centre
     # station's area times the cell width, so a constant-area body integrates exactly.
     step = (x_hi - x_lo) / stations
     half_volume = sum(areas) * step
-    characteristics = classify_model(vertices)
     factor = characteristics["symmetry_factor"]
 
     # A face lying in the centreplane is a cut through the interior, not wetted
@@ -485,7 +519,8 @@ def hull_characteristics(vertices: Sequence[Vec3], faces: Sequence[Sequence[int]
     beam = 0.0
     for station in grid:
         for level in range(1, levels + 1):
-            beam = max(beam, envelope_breadth(slabs, station, waterline * level / levels))
+            beam = max(beam, envelope_breadth(slabs, station, waterline * level / levels,
+                                              full=full_breadth))
     # Half-breadth model: the printed breadth is already the full beam.
     beam = 2.0 * beam if characteristics["half_breadth"] else beam
 
