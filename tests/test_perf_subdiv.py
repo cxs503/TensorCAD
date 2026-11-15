@@ -142,3 +142,96 @@ def test_committed_document_matches_committed_artifact():
     text = DOC.read_text(encoding="utf-8")
     problems = check_document(text, artifacts, names=SINGLE10M_TABLE_NAMES)
     assert problems == []
+
+#: Acceptance item 1 of ``GAP-CAD-D4-PERF-SCALE`` is the 10^6--10^7 band on a
+#: *single connected body*.  v2 of this document shipped with
+#: ``single_body_10m_reached = false`` because the cluster job that produced the
+#: 10^7 rung was still queued; the artifact has since been landed from job
+#: ``cj3805``.  These tests keep that claim bound to the committed numbers
+#: instead of to the prose, so the document cannot silently regress to "we did
+#: not measure it" (or, worse, claim 10^7 without a 10^7 row).
+@pytest.mark.skipif(not ARTIFACT.exists(), reason="10^6-10^7 single-body artifact not committed")
+def test_committed_artifact_measures_a_single_body_at_10m():
+    from tensorcad.perf_evidence import load_artifact
+
+    artifact = load_artifact(ARTIFACT)
+    summary = artifact["summary"]
+    assert summary["single_body_10m_reached"] is True
+    assert summary["max_triangles"] >= 10_000_000
+    assert summary["invariants_ok"] is True
+
+    measured = [r for r in artifact["results"] if r.get("status") == "measured"]
+    big = [r for r in measured if (r.get("triangles") or 0) >= 10_000_000]
+    assert big, "no measured rung reaches 10^7 triangles"
+
+    # Two independent parent bases must reach the 10^7 band; a single lucky grid
+    # could be a cropping artefact rather than a measurement.
+    bases = {(r["nx"], r["nz"]) for r in big}
+    assert len(bases) >= 2, f"only one parent base reached 10^7: {bases}"
+
+    # Every sub-task except the deliberately capped one must have run there.
+    subtasks = {r["subtask"] for r in big}
+    assert {"subdivide", "volume", "point_locate_accel"} <= subtasks
+
+
+@pytest.mark.skipif(not ARTIFACT.exists(), reason="10^6-10^7 single-body artifact not committed")
+def test_10m_rung_is_a_closed_triangle_mesh():
+    """``V = F/2 + 2`` must hold exactly at 10^7: subdivision welds by index.
+
+    If the midpoint de-duplication were tolerance-based, the 10^7 rung would pick
+    up a handful of duplicated vertices per level and this identity would drift;
+    it is an exact integer check, not an error bar.
+    """
+    from tensorcad.perf_evidence import load_artifact
+
+    artifact = load_artifact(ARTIFACT)
+    checks = [c for c in artifact["checks"] if c.get("triangles", 0) >= 10_000_000]
+    assert checks, "no invariant record at 10^7"
+    for c in checks:
+        assert c["watertight"] is True and c["edge_manifold"] is True
+        assert c["euler_characteristic"] == 2
+        assert c["connected_bodies"] == 1
+        assert c["vertices"] == c["triangles"] // 2 + 2
+        assert abs(c["volume_rel_drift_vs_base"] or 0.0) <= 1e-12
+        assert abs(c["surface_area_rel_drift"] or 0.0) <= 1e-12
+
+
+@pytest.mark.skipif(not ARTIFACT.exists(), reason="10^6-10^7 single-body artifact not loaded")
+def test_capacity_table_is_rate_times_budget():
+    """Acceptance item 3: the cluster boundary must be re-derivable by arithmetic.
+
+    Each row's first budget column has to equal the printed rate times that
+    budget (within rounding of the printed rate), so nobody has to trust a
+    fitted parameter or a hand-set threshold.
+    """
+    from tensorcad.perf_evidence import load_artifact, render_single10m_capacity
+
+    artifact = load_artifact(ARTIFACT)
+    budgets = (60.0, 600.0, 3600.0)
+    table = render_single10m_capacity(artifact, budget_seconds=budgets, ram_budget_gib=16.0)
+    rows = [
+        ln for ln in table.splitlines()
+        if ln.startswith("| ") and (" tri/s " in ln or " query/s " in ln)
+    ]
+    assert rows, table
+    for line in rows:
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        rate_text = cells[3].split()[0].replace(",", "")
+        rate = float(rate_text)
+        reach = [float(x.replace(",", "").split()[0]) for x in cells[4].split("/")]
+        assert len(reach) == len(budgets)
+        for got, budget in zip(reach, budgets):
+            assert got == pytest.approx(rate * budget, rel=0.01), (line, budget)
+        assert float(cells[5].replace(",", "")) > 0
+
+
+@pytest.mark.skipif(not ARTIFACT.exists(), reason="10^6-10^7 single-body artifact not committed")
+def test_capacity_block_is_embedded_in_committed_document():
+    """The rendered capacity table must be in the doc (drift = test failure)."""
+    from tensorcad.perf_evidence import load_artifact
+
+    artifacts = {"single10m": load_artifact(ARTIFACT)}
+    text = DOC.read_text(encoding="utf-8")
+    assert extract_block(text, "single10m-capacity") == render_block(
+        "single10m-capacity", artifacts
+    )
