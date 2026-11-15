@@ -127,6 +127,282 @@ def sample_patches(
     return points
 
 
+#: A unit interpretation is accepted only when the hull length it implies lands inside
+#: this band around the publisher's ``L_PP``.  The band is deliberately wide: it is there
+#: to catch decade errors (a millimetre archive read as metres or the other way round),
+#: not to adjudicate drafting differences of a few percent.
+UNIT_BAND = (0.5, 2.0)
+
+
+def measured_unit_factor(
+    extent_units: float,
+    declared_factor: float,
+    length_pp: float,
+    *,
+    metre_factor: float | None = None,
+    band: tuple[float, float] = UNIT_BAND,
+) -> dict[str, Any]:
+    """Pick the file-unit -> metre factor by measuring the archive, not its header.
+
+    The IGES global section declares a unit flag, and on archive files it can contradict
+    the coordinates: ``KVLCC2/kvlcc2.igs`` carries flag 2 (millimetres) while its
+    geometry is in metres, so the declared factor makes a 0.334 m hull out of a 320 m
+    ship.  A silent 1000x error is worse than a refusal, because it still produces a
+    watertight mesh -- of the wrong object.
+
+    So both readings are evaluated against the publisher's own principal dimension.  The
+    declared reading is kept when its implied length is plausible; else the
+    one-file-unit-per-metre reading is adopted *with the contradiction recorded*; if
+    neither is plausible the declared reading is kept and the verdict says so, which lets
+    the downstream scale guard refuse instead of guessing.
+    """
+    candidates: list[dict[str, Any]] = [
+        {"name": "declared_global_section", "factor": float(declared_factor)}
+    ]
+    if metre_factor is not None and abs(metre_factor - declared_factor) > 1e-12:
+        candidates.append({"name": "one_file_unit_is_one_metre", "factor": float(metre_factor)})
+    rows: list[dict[str, Any]] = []
+    for candidate in candidates:
+        implied = float(extent_units) * candidate["factor"]
+        ratio = implied / length_pp if length_pp else float("nan")
+        plausible = bool(length_pp) and band[0] <= ratio <= band[1]
+        rows.append(
+            {
+                "name": candidate["name"],
+                "factor": candidate["factor"],
+                "implied_length_m": implied,
+                "ratio_to_published_lpp": ratio,
+                "plausible": bool(plausible),
+            }
+        )
+    chosen = next((row for row in rows if row["plausible"]), None)
+    if chosen is None:
+        chosen = rows[0]
+        verdict = "no_plausible_unit"
+        reason = (
+            f"neither the declared unit ({rows[0]['factor']:.6g} m/file unit, implied length "
+            f"{rows[0]['implied_length_m']:.3f} m) nor a metre archive implies a hull within "
+            f"{band[0]}-{band[1]}x the published L_PP {length_pp:.3f} m; the declared reading is "
+            "kept and the scale guard must decide"
+            if length_pp
+            else "no published L_PP to measure the units against"
+        )
+    elif chosen["name"] == rows[0]["name"]:
+        verdict = "declared_consistent"
+        reason = (
+            f"declared unit gives an implied length of {chosen['implied_length_m']:.3f} m, "
+            f"{chosen['ratio_to_published_lpp']:.3f}x the published L_PP {length_pp:.3f} m"
+        )
+    else:
+        verdict = "declared_contradicted_by_geometry"
+        reason = (
+            f"the declared unit ({rows[0]['factor']:.6g} m/file unit) implies a "
+            f"{rows[0]['implied_length_m']:.3f} m hull against the published L_PP "
+            f"{length_pp:.3f} m (ratio {rows[0]['ratio_to_published_lpp']:.4f}); the metre "
+            f"reading gives {chosen['implied_length_m']:.3f} m "
+            f"({chosen['ratio_to_published_lpp']:.3f}x) and is adopted -- the file's global "
+            "section contradicts its own coordinates"
+        )
+    return {
+        "verdict": verdict,
+        "factor": chosen["factor"],
+        "relative_to_declared": chosen["factor"] / float(declared_factor)
+        if declared_factor
+        else float("nan"),
+        "band": list(band),
+        "extent_file_units": float(extent_units),
+        "published_length_pp_m": length_pp,
+        "candidates": rows,
+        "reason": reason,
+    }
+
+
+def point_in_polygon(point: tuple[float, float], polygon: Sequence[tuple[float, float]]) -> bool:
+    """Even-odd ray cast in the patch's own ``(u, v)`` plane."""
+    x, y = point
+    inside = False
+    count = len(polygon)
+    for index in range(count):
+        x1, y1 = polygon[index]
+        x2, y2 = polygon[(index + 1) % count]
+        if (y1 > y) != (y2 > y):
+            crossing = x1 + (y - y1) * (x2 - x1) / (y2 - y1)
+            if crossing > x:
+                inside = not inside
+    return inside
+
+
+def _inside_domain(polygon: Sequence[tuple[float, float]], domain: tuple[float, float, float, float]) -> float:
+    """Share of ``polygon`` vertices that lie inside ``(u0, u1, v0, v1)``."""
+    if not polygon:
+        return 0.0
+    u0, u1, v0, v1 = domain
+    inside = sum(
+        1 for point in polygon if u0 - 1e-9 <= point[0] <= u1 + 1e-9 and v0 - 1e-9 <= point[1] <= v1 + 1e-9
+    )
+    return inside / len(polygon)
+
+
+def trim_loops_uv(model: Any, basis: BSplineSurface, curves: Sequence[Any], *, samples: int = 96) -> dict[str, Any]:
+    """Parameter-space trim loops of one patch, chosen by measurement.
+
+    Entity 142 carries both a model-space curve and the parameter-space loop, and which
+    field is which differs between exporters, so the choice is made by measuring: a
+    parameter-space loop lies inside the basis surface's knot domain, a model-space curve
+    does not.  A curve whose samples are degenerate (one repeated point) is *not* allowed
+    to win on that test -- it would score a perfect inside-fraction by sitting in a corner
+    of the domain -- which is why the polygon spread is checked as well.
+    """
+    u0, u1 = basis.domain_u
+    v0, v1 = basis.domain_v
+    domain = (u0, u1, v0, v1)
+    span = max(abs(u1 - u0), abs(v1 - v0), 1e-12)
+    loops: list[list[tuple[float, float]]] = []
+    rows: list[dict[str, Any]] = []
+    for curve in curves:
+        scored: list[dict[str, Any]] = []
+        for label, pointer in (("curve_uv", curve.curve_uv), ("curve_3d", curve.curve_3d)):
+            if not pointer:
+                continue
+            try:
+                polygon = model.trim_polygon_uv(pointer, samples=samples)
+            except Exception as error:  # noqa: BLE001 - recorded, never guessed
+                scored.append({"field": label, "pointer": pointer, "error": f"{type(error).__name__}: {error}"})
+                continue
+            spread = 0.0
+            if polygon:
+                us = [point[0] for point in polygon]
+                vs = [point[1] for point in polygon]
+                spread = max(max(us) - min(us), max(vs) - min(vs)) / span
+            fraction = _inside_domain(polygon, domain)
+            scored.append(
+                {
+                    "field": label,
+                    "pointer": pointer,
+                    "points": len(polygon),
+                    "inside_fraction": fraction,
+                    "spread_over_domain": spread,
+                    "degenerate": spread < 1e-6,
+                }
+            )
+        winner = None
+        for row in scored:
+            if row.get("degenerate", True) or row.get("inside_fraction", 0.0) < 0.5:
+                continue
+            if winner is None or row["inside_fraction"] > winner["inside_fraction"]:
+                winner = row
+        if winner is None:
+            rows.append({"candidates": scored, "verdict": "undecided"})
+            continue
+        try:
+            loops.append([tuple(p) for p in model.trim_polygon_uv(winner["pointer"], samples=samples)])
+        except Exception as error:  # noqa: BLE001
+            rows.append({"candidates": scored, "verdict": f"unreadable: {error}"})
+            continue
+        rows.append({"candidates": scored, "verdict": "decided", "field": winner["field"]})
+    return {"loops": loops, "curves": rows}
+
+
+def sample_trimmed_patches(
+    model: Any,
+    spacing: float = 1.0 / DEFAULT_SAMPLES_PER_METRE,
+    max_axis: int = 400,
+) -> tuple[list[tuple[float, float, float]], dict[str, Any]]:
+    """Sample each trimmed patch *inside its own trim loops*.
+
+    Why this route exists: a workshop hull set can arrive with **every** basis surface
+    bound to a trimmed patch (KVLCC2: 19/19), and then an untrimmed sample grid describes
+    sheet the hull does not have -- the domains of that file are up to 6x larger than the
+    trimmed region and reach 7 m below the keel.  The half-breadth field is built from
+    ``max |y|`` per ``(x, z)`` cell, so that stray sheet is not averaged away, it *sets*
+    the breadth.  Sampling inside the loops removes it at the source.
+
+    Coverage is reported per patch (``kept``, ``grid``, ``domain_area_fraction``) so a
+    patch that lost its samples is visible instead of silently thin.
+    """
+    points: list[tuple[float, float, float]] = []
+    rows: list[dict[str, Any]] = []
+    for index, (wrapper, basis, curves) in enumerate(model.trimmed_surfaces()):
+        row: dict[str, Any] = {"patch": index, "surface_de": getattr(wrapper, "surface", None)}
+        if basis is None or not curves:
+            rows.append({**row, "verdict": "no_basis_or_no_curve", "kept": 0})
+            continue
+        decided = trim_loops_uv(model, basis, curves)
+        loops = decided["loops"]
+        if not loops:
+            rows.append({**row, "verdict": "undecided_trim_curves", "kept": 0, "curves": decided["curves"]})
+            continue
+        u0, u1 = basis.domain_u
+        v0, v1 = basis.domain_v
+        corner = basis.evaluate(u0, v0)
+        length_u = math.dist(corner, basis.evaluate(u1, v0))
+        length_v = math.dist(corner, basis.evaluate(u0, v1))
+        count_u = max(4, min(max_axis, int(math.ceil(length_u / max(spacing, 1e-9))) + 1))
+        count_v = max(4, min(max_axis, int(math.ceil(length_v / max(spacing, 1e-9))) + 1))
+        kept = 0
+        for i in range(count_u):
+            u = u0 + (u1 - u0) * i / (count_u - 1) if count_u > 1 else u0
+            for j in range(count_v):
+                v = v0 + (v1 - v0) * j / (count_v - 1) if count_v > 1 else v0
+                hits = sum(1 for loop in loops if point_in_polygon((u, v), loop))
+                if hits % 2 == 1:  # even-odd: inner loops are holes
+                    points.append(basis.evaluate(u, v))
+                    kept += 1
+        rows.append(
+            {
+                **row,
+                "verdict": "trimmed",
+                "loops": len(loops),
+                "grid": [count_u, count_v],
+                "kept": kept,
+                "domain_area_fraction": kept / float(count_u * count_v),
+            }
+        )
+    record = {
+        "schema": "tensorcad.fleet_baseline.trim_sampling.v1",
+        "patches": rows,
+        "patches_total": len(rows),
+        "patches_used": sum(1 for row in rows if row["verdict"] == "trimmed" and row["kept"]),
+        "samples": len(points),
+        "sampling_spacing_file_units": spacing,
+    }
+    return points, record
+
+
+def solid_from_points(
+    raw_points: Sequence[tuple[float, float, float]],
+    factor: float,
+    draft: float,
+    *,
+    dx: float = DEFAULT_DX,
+    dz: float = DEFAULT_DZ,
+    ring_points: int = DEFAULT_RING_POINTS,
+) -> dict[str, Any]:
+    """Scale, place, bin and mesh a point cloud of hull-sheet samples."""
+    points = [(x * factor, y * factor, z * factor) for x, y, z in raw_points]
+    z_min = min(z for _, _, z in points)
+    z_max = max(z for _, _, z in points)
+    frame_shift_z = 0.0
+    if z_min < -0.5 * draft and -0.05 * draft <= z_max <= 0.05 * draft:
+        # Waterline-at-origin file: the hull hangs below a plane at z = 0, so the *deepest*
+        # point is the keel and the shift that puts it at z = 0 is -z_min.  (Shifting by
+        # -z_max moved nothing: z_max is the waterline itself.)
+        frame_shift_z = -z_min
+        points = [(x, y, z + frame_shift_z) for x, y, z in points]
+    field = field_from_points(points, draft, dx=dx, dz=dz)
+    mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=draft)
+    return {
+        "points": points,
+        "field": field,
+        "mesh": mesh,
+        "mesh_info": mesh_info,
+        "frame_shift_z": frame_shift_z,
+        "volume_m3": measure_mesh(mesh, draft)["volume_m3"],
+        "dz": dz,
+        "dx": dx,
+    }
+
+
 # --------------------------------------------------------------------------- #
 # half-breadth field
 # --------------------------------------------------------------------------- #
@@ -568,13 +844,12 @@ def build_ship(
     # millimetres, ...) times the model-space scale.  The read of the flag is now
     # Hollerith-positional (see iges.hollerith_fields); the previous content scan read
     # the JBC file -- millimetres throughout -- as metres, i.e. a 1000x hull.
-    factor = unit_scale(model.unit_flag) * model.model_scale
+    declared_factor = unit_scale(model.unit_flag) * model.model_scale
     usable, quarantined = partition_surfaces(surfaces)
     if not usable:
         raise ValueError(f"{spec.name}: every surface was quarantined")
-    raw_points = list(
-        sample_patches(usable, spacing=1.0 / max(samples_per_metre, 1e-6))
-    )
+    spacing = 1.0 / max(samples_per_metre, 1e-6)
+    raw_points = list(sample_patches(usable, spacing=spacing))
     geometry_scale = spec.geometry_scale
     scale_basis = spec.scale_basis or "geometry file is full scale"
     if geometry_scale is None:
@@ -583,7 +858,7 @@ def build_ship(
         # volume gate below degrades to a block-coefficient (shape) gate because
         # one length has been fitted.
         xs_raw = [point[0] for point in raw_points]
-        extent_raw = (max(xs_raw) - min(xs_raw)) * factor if xs_raw else float("nan")
+        extent_raw = (max(xs_raw) - min(xs_raw)) * declared_factor if xs_raw else float("nan")
         if not (extent_raw and extent_raw == extent_raw and extent_raw > 0.0):
             raise ValueError(f"{spec.name}: cannot infer a scale from an empty point cloud")
         geometry_scale = spec.length_pp / extent_raw
@@ -591,40 +866,110 @@ def build_ship(
             f"inferred (no published model scale): published L_PP {spec.length_pp:.3f} m / "
             f"geometric x-extent {extent_raw:.4f} m = {geometry_scale:.5f}"
         )
-    factor = factor * geometry_scale
-    points = [(x * factor, y * factor, z * factor) for x, y, z in raw_points]
-    # Frame guard.  Workshop files do not share one origin: KCS/KVLCC2/JBC put the
-    # keel at z=0, but the KVLCC2 patch set has the *waterline* at z=0 (keel at
-    # z=-20.8 m).  Detect that layout from the data (every point at or below a plane
-    # that sits within one draft of the deepest point) and shift the hull up so the
-    # keel is z=0, which is the frame the waterline cut expects.  A translation does
-    # not change the volume, only the placement of the cut.
-    z_min = min(z for _, _, z in points)
-    z_max = max(z for _, _, z in points)
-    frame_shift_z = 0.0
-    if z_min < -0.5 * spec.draft and -0.05 * spec.draft <= z_max <= 0.05 * spec.draft:
-        frame_shift_z = -z_max
-        points = [(x, y, z + frame_shift_z) for x, y, z in points]
+    # Unit gate: measure the archive against the publisher's L_PP instead of trusting the
+    # global section, which on KVLCC2 declares millimetres over metre coordinates.
+    xs_raw = [point[0] for point in raw_points]
+    unit_gate = measured_unit_factor(
+        (max(xs_raw) - min(xs_raw)) if xs_raw else 0.0,
+        declared_factor * geometry_scale,
+        spec.length_pp,
+        metre_factor=model.model_scale * geometry_scale,
+    )
+    factor = unit_gate["factor"]
+    route = "untrimmed_patch_sheet"
+    trim_record: dict[str, Any] | None = None
+    # A patch set in which *every* basis surface is bound to a trimmed patch is not
+    # described by its untrimmed domains at all (KVLCC2: 19/19 trimmed, untrimmed domains
+    # up to 6x the trimmed region and 7 m below the keel).  The trim loops are then the
+    # authoritative sheet, so that route runs first; the untrimmed cloud stays the entry
+    # point for the sets that carry untrimmed patches (KCS: 0/55 trimmed).
+    fully_trimmed = (
+        census["surfaces_type128"] > 0
+        and census["basis_surfaces_trimmed"] > 0
+        and census["basis_surfaces_untrimmed"] == 0
+    )
     try:
-        field = field_from_points(points, spec.draft, dx=dx, dz=dz)
-        mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
+        if fully_trimmed:
+            trim_points, trim_record = sample_trimmed_patches(model, spacing=spacing)
+            if not trim_points:
+                raise ValueError(
+                    f"every one of the {census['surfaces_type128']} basis surfaces is trimmed "
+                    f"but the trim loops carried no usable sheet "
+                    f"({trim_record['patches_used']}/{trim_record['patches_total']} patches)"
+                )
+            ingest = solid_from_points(
+                trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points
+            )
+            route = "trimmed_patch_loops"
+        else:
+            ingest = solid_from_points(
+                raw_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points
+            )
     except ValueError as exc:
-        # Attribute the refusal to what was measured, not to a hypothesis about it.
-        # The verdict used to say "the file carries N type-126 B-spline surfaces and
-        # this reader decodes type 128 only"; type 126 is the rational B-spline
-        # *curve* and it is decoded (docs/baseline_fleet_type126_falsified.md).  What
-        # the bytes do show is how much of the basis surface set is trimmed: a patch
-        # integrated without its trim loop describes sheet the hull does not have.
-        raise ValueError(
-            f"{spec.name}: {exc} -- the source binds "
-            f"{census['basis_surfaces_trimmed']}/{census['surfaces_type128']} type-128 "
-            f"basis surfaces to a trimmed patch and leaves "
-            f"{census['basis_surfaces_untrimmed']} untrimmed "
-            f"({census['curves_type126']} type-126 trim curves, "
-            f"{census['boundaries_type141']} type-141 boundaries, "
-            f"{census['curves_on_surface_type142']} type-142 curves-on-surface), so the "
-            "refusal describes the patch set that arrived, not the shape"
-        ) from exc
+        # The untrimmed sheet could not carry the hull.  If the patch set is trimmed, the
+        # trim loops are the authoritative description of the sheet the model has, so
+        # resample inside them before refusing.  Both the refusal and the recovery are
+        # measured and reported; nothing is inferred from the file's entity counts.
+        trim_points, trim_record = sample_trimmed_patches(model, spacing=spacing)
+        if not trim_points:
+            raise ValueError(
+                f"{spec.name}: {exc} -- the source binds "
+                f"{census['basis_surfaces_trimmed']}/{census['surfaces_type128']} type-128 "
+                f"basis surfaces to a trimmed patch and leaves "
+                f"{census['basis_surfaces_untrimmed']} untrimmed "
+                f"({census['curves_type126']} type-126 trim curves, "
+                f"{census['boundaries_type141']} type-141 boundaries, "
+                f"{census['curves_on_surface_type142']} type-142 curves-on-surface), and the "
+                f"trim loops carried no usable sheet "
+                f"({trim_record['patches_used']}/{trim_record['patches_total']} patches), so the "
+                "refusal describes the patch set that arrived, not the shape"
+            ) from exc
+        coarse = ingest if route == "trimmed_patch_loops" else solid_from_points(
+            trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points
+        )
+        fine = solid_from_points(
+            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points
+        )
+        # The keel-to-deck extent of a trimmed hull set can exceed the draft by half again
+        # (KVLCC2: 28 m deep, 20.8 m draft), so the default dz is refined once and the
+        # change is reported rather than hidden in the uncertainty.
+        trim_record["dz_refinement"] = {
+            "dz_m": [dz, 0.5 * dz],
+            "volume_m3": [coarse["volume_m3"], fine["volume_m3"]],
+            "relative_change_percent": (
+                (fine["volume_m3"] - coarse["volume_m3"]) / coarse["volume_m3"] * 100.0
+                if coarse["volume_m3"]
+                else float("nan")
+            ),
+            "adopted": "finer (0.5 x dz)",
+            "coarse_route": route,
+        }
+        ingest = fine
+        route = "trimmed_patch_loops"
+    if route == "trimmed_patch_loops" and "dz_refinement" not in (trim_record or {}):
+        # The keel-to-deck extent of a trimmed hull set can exceed the draft by half again
+        # (KVLCC2: 28 m deep, 20.8 m draft), and at the default dz the reconstruction of that
+        # deep set is off by several percent.  Refine once and report the change instead of
+        # hiding it in the uncertainty.
+        fine = solid_from_points(
+            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points
+        )
+        trim_record["dz_refinement"] = {
+            "dz_m": [dz, 0.5 * dz],
+            "volume_m3": [ingest["volume_m3"], fine["volume_m3"]],
+            "relative_change_percent": (
+                (fine["volume_m3"] - ingest["volume_m3"]) / ingest["volume_m3"] * 100.0
+                if ingest["volume_m3"]
+                else float("nan")
+            ),
+            "adopted": "finer (0.5 x dz)",
+        }
+        ingest = fine
+    field = ingest["field"]
+    mesh = ingest["mesh"]
+    mesh_info = ingest["mesh_info"]
+    points = ingest["points"]
+    frame_shift_z = ingest["frame_shift_z"]
     mesh_stats = measure_mesh(mesh, spec.draft)
     integrals = field_integrals(field)
 
@@ -725,6 +1070,9 @@ def build_ship(
             "geometry_scale_to_full": geometry_scale,
             "scale_basis": scale_basis,
             "scale_inferred": spec.geometry_scale is None,
+            "route": route,
+            "unit_gate": unit_gate,
+            "trim_sampling": trim_record,
             "frame_shift_z": frame_shift_z,
             "unit_scale_to_metres": factor,
             "unit_warnings": list(model.unit_warnings),
@@ -763,6 +1111,7 @@ def build_ship(
             "positive_volume": volume > 0.0,
             "volume_within_tolerance": volume_ok,
             "scale_consistent_with_published_lpp": scale_consistent,
+            "units_measured_plausible": unit_gate["verdict"] != "no_plausible_unit",
             "extent_over_lpp": scale_ratio if scale_ratio == scale_ratio else None,
             "lwl_vs_lpp_percent": (
                 (length_wl - spec.length_pp) / spec.length_pp * 100.0
