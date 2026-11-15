@@ -63,6 +63,15 @@ TOLERANCE_FLOOR = 1e-4
 DRIFT_TOLERANCE = 1e-9
 #: Relative tolerance for "the stored reference equals what its source computes now".
 REFERENCE_TOLERANCE = 1e-9
+#: Hard ceiling on a tolerance a case may *declare* instead of deriving it from the two-grid
+#: change.  When a reference is a published table rather than a closed form, the measured
+#: value has no discretisation signal to bound it: the band has to be quoted from the
+#: contract that owns the reference (the dataset's own 3 % particulars standard, say).  The
+#: ceiling is what keeps that escape hatch from becoming "declare 40 % and pass": it sits
+#: well below the platform's 15 % reject threshold, where an error is no longer a tolerance
+#: question, and above the few-percent band a four-significant-figure reference table and a
+#: reconstructed hull can honestly support.
+DECLARED_TOLERANCE_CAP = 0.05
 
 ERROR, WARNING, NOTICE = "error", "warning", "notice"
 LEVELS: tuple[str, ...] = ("coarse", "fine")
@@ -102,6 +111,10 @@ class MetricCheck:
     relative_error: float | None = None
     tolerance: float | None = None
     basis: str = ""
+    #: Where the tolerance came from: "two-grid" (derived from the coarse-to-fine change on
+    #: this run), "declared" (quoted from the contract that owns the reference, see
+    #: :data:`DECLARED_TOLERANCE_CAP`) or "invariant" (written by the case).
+    origin: str = "two-grid"
 
     @property
     def passed(self) -> bool:
@@ -116,6 +129,7 @@ class MetricCheck:
             "name": self.name,
             "value": _number(self.value),
             "kind": self.kind,
+            "origin": self.origin,
             "passed": self.passed,
         }
         for key, value in (
@@ -217,6 +231,23 @@ class GoldenCase:
 
     def invariants(self, values: Mapping[str, float]) -> dict[str, tuple[float, float, str]]:
         """Identities over the measurements: name -> (residual, tolerance, basis)."""
+        return {}
+
+    def reference_tolerance(
+        self, values: Mapping[str, float], reference: Mapping[str, float]
+    ) -> dict[str, tuple[float, str]]:
+        """Declared acceptance band for reference metrics that carry no two-grid signal.
+
+        A reference metric is bounded by ``2 x |fine - coarse|`` when refining a grid is what
+        moves it.  A metric that is *not* refreshed by a finer grid -- because the reference
+        is a published table and the measurement is the same reconstruction at both levels --
+        has no such signal, so the derived bound collapses to the 1e-4 floor and would reject
+        the reference's own precision.  A case that owns such a metric declares the band it
+        is held to instead, as ``metric -> (tolerance, basis)``, where ``basis`` must name
+        the contract the band is quoted from.  The engine refuses an unjustified or too-loose
+        declaration (:data:`DECLARED_TOLERANCE_CAP`); everything not declared here keeps the
+        derived two-grid bound.
+        """
         return {}
 
     def known_limitations(self, values: Mapping[str, float]) -> list[dict[str, Any]]:
@@ -433,7 +464,23 @@ class DTMB5415Golden(GoldenCase):
 
     name = "dtmb5415"
     title = "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)"
-    reference_source = "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]"
+    #: Metric -> (measured key, published key, what the comparison is worth).
+    #: Each published key is derived by :func:`tensorcad.dtmb5415.readme_reference` from the
+    #: dataset README's model-scale table, never typed here.
+    PARTICULARS: ClassVar[dict[str, tuple[str, str]]] = {
+        "length_stations_m": ("Lpp_m", "station span vs published Lpp: the mesh spans the "
+                                       "station grid, which runs ~0.9 % past Lpp"),
+        "waterline_beam_m": ("beam_m", "beam at the design waterline vs published moulded "
+                                       "B_max: the two differ by the flare above the WL"),
+        "displacement_volume_m3": ("displacement_volume_m3", "displacement volume at the "
+                                                            "design waterline"),
+        "block_coefficient": ("cb", "Cb over the published L.B.T vs Cb over the measured "
+                                    "station span/WL beam/moulded draft"),
+    }
+    reference_source = (
+        "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]; principal particulars "
+        "from tensorcad.dtmb5415.readme_reference() (dataset README model-scale table x lambda)"
+    )
     CONFIG = 0
     MIRROR_AXIS = 1
 
@@ -491,8 +538,38 @@ class DTMB5415Golden(GoldenCase):
         return values
 
     def reference(self) -> dict[str, float]:
+        from .dtmb5415 import readme_reference
+
         fixture = self._fixture()
-        return {"holdout_rms_m": float(fixture["per_config_rms_m"][self.CONFIG])}
+        published = readme_reference()
+        reference = {"holdout_rms_m": float(fixture["per_config_rms_m"][self.CONFIG])}
+        for measured, (published_key, _) in self.PARTICULARS.items():
+            reference[measured] = float(published[published_key])
+        return reference
+
+    def reference_tolerance(
+        self, values: Mapping[str, float], reference: Mapping[str, float]
+    ) -> dict[str, tuple[float, str]]:
+        """The dataset's own particulars band, quoted rather than re-derived.
+
+        ``draft_m`` is deliberately absent: it is an *input* of the hydrostatics (the
+        waterline the hull is cut at), so asserting it against the README draft would be a
+        constant compared with itself -- no independent information.  It stays drift-locked
+        like every other measurement.
+        """
+        from .dtmb5415 import README_PARTICULARS_TOLERANCE, DRAFT_M
+
+        band = README_PARTICULARS_TOLERANCE
+        declared: dict[str, tuple[float, str]] = {}
+        for measured, (_, caveat) in self.PARTICULARS.items():
+            declared[measured] = (
+                band,
+                f"{band:.0%} band of the hull's own pre-declared geometry contract "
+                f"(tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), "
+                f"reference = dataset README table x lambda; {caveat}; draft_m "
+                f"(= {DRAFT_M:.4f} m) is an input and is not asserted",
+            )
+        return declared
 
     def invariants(self, values: Mapping[str, float]) -> dict[str, tuple[float, float, str]]:
         axis = "xyz"[self.MIRROR_AXIS]
@@ -541,8 +618,10 @@ class DTMB5415Golden(GoldenCase):
                 "detail": (
                     "the shipped 5415 shell is an open sheet, not a solid: one boundary loop "
                     f"of {int(values['boundary_edge_count'])} edges (deck edge plus the stem "
-                    "seam). Surface-integral displacement is therefore withheld and only the "
-                    "dataset/station-area displacement is reported. Passing closed=True to "
+                    "seam). Surface-integral displacement is therefore withheld: the "
+                    "displacement asserted on this case is the dataset/station-area one, "
+                    "cross-checked against the README particulars table (see reference), not "
+                    "an integral over this shell. Passing closed=True to "
                     "compute_hydrostatics on this shell returns the signed tetrahedron sum of "
                     "an open surface (negative here), which is not a volume; the previous "
                     "'relative_discrepancy' of 2.6 was measuring that artifact, not an "
@@ -724,6 +803,63 @@ def _tolerance(
     )
 
 
+def _checked_declarations(
+    case: GoldenCase,
+    values: Mapping[str, float],
+    reference: Mapping[str, float],
+    findings: list[Finding],
+) -> dict[str, tuple[float, str]]:
+    """Validate the bands a case declares; an unjustified declaration is an error.
+
+    Three ways a declaration can be worthless, all fail closed: it names a metric no
+    reference asserts, it carries no basis, or it is so wide that the metric is not being
+    held to anything (:data:`DECLARED_TOLERANCE_CAP`).
+    """
+    declared: dict[str, tuple[float, str]] = {}
+    for key, entry in case.reference_tolerance(values, reference).items():
+        tolerance, basis = entry
+        tolerance = float(tolerance)
+        basis = str(basis).strip()
+        if key not in reference:
+            findings.append(
+                Finding(
+                    ERROR,
+                    "declared_tolerance_unknown_metric",
+                    case.name,
+                    f"a tolerance is declared for '{key}', which no reference asserts",
+                    metric=key,
+                )
+            )
+            continue
+        if not basis:
+            findings.append(
+                Finding(
+                    ERROR,
+                    "declared_tolerance_without_basis",
+                    case.name,
+                    f"'{key}' declares tolerance {tolerance:g} without naming the contract "
+                    "it is quoted from; an unjustified band is a chosen one",
+                    metric=key,
+                )
+            )
+            continue
+        if not (0.0 < tolerance <= DECLARED_TOLERANCE_CAP):
+            findings.append(
+                Finding(
+                    ERROR,
+                    "declared_tolerance_too_loose",
+                    case.name,
+                    f"'{key}' declares tolerance {tolerance:g}, outside (0, "
+                    f"{DECLARED_TOLERANCE_CAP:g}]: a band that wide cannot tell a "
+                    "regression from the reference's own precision",
+                    metric=key,
+                )
+            )
+            continue
+        declared[key] = (tolerance, basis)
+    return declared
+
+
 def evaluate_case(
     case: GoldenCase,
     blessed: Mapping[str, Any] | None,
@@ -754,6 +890,7 @@ def evaluate_case(
     coarsest = result.measurements[levels[0]] if len(levels) > 1 else None
     result.invariants = case.invariants(finest)
     result.known_limitations = case.known_limitations(finest)
+    declared_tolerances = _checked_declarations(case, finest, reference, findings)
 
     blessed = dict(blessed or {})
     if not blessed and not baseline_optional:
@@ -815,6 +952,7 @@ def evaluate_case(
     for key in sorted(reference):
         expected = reference[key]
         blessed_tolerance = (blessed.get("tolerances") or {}).get(key) or {}
+        origin = "two-grid"
         if coarsest is None and blessed_tolerance.get("value") is not None:
             # quick mode has no coarse level to re-derive the bound from, so it runs on
             # the tolerance the baseline recorded: same criterion, one measurement.
@@ -823,10 +961,26 @@ def evaluate_case(
                 f"blessed tolerance {tolerance:.3e} (quick mode: "
                 f"{blessed_tolerance.get('basis', 'derived at bless time')})"
             )
+            if str(blessed_tolerance.get("basis", "")).startswith("declared contract"):
+                origin = "declared"
+        elif key in declared_tolerances:
+            tolerance, declared_basis = declared_tolerances[key]
+            basis = f"declared contract: {declared_basis}"
+            origin = "declared"
         else:
             tolerance, basis = _tolerance(
                 expected, coarsest.get(key) if coarsest else None, finest[key]
             )
+            origin = "two-grid"
+        if key in declared_tolerances and coarsest is None and blessed_tolerance.get("value"):
+            # quick mode runs on the blessed band; keep its recorded provenance, not a
+            # re-declaration, so a blessed run and a quick run cannot disagree.
+            tolerance = float(blessed_tolerance["value"])
+            basis = (
+                f"blessed tolerance {tolerance:.3e} (quick mode: "
+                f"{blessed_tolerance.get('basis', 'declared at bless time')})"
+            )
+            origin = "declared"
         error = (finest[key] - expected) / expected if expected else finest[key] - expected
         metric = MetricCheck(
             name=key,
@@ -836,6 +990,7 @@ def evaluate_case(
             relative_error=error,
             tolerance=tolerance,
             basis=basis,
+            origin=origin,
         )
         result.metrics.append(metric)
         if not metric.passed:
@@ -863,6 +1018,7 @@ def evaluate_case(
                 relative_error=abs(residual),
                 tolerance=tolerance,
                 basis=basis,
+                origin="invariant",
             )
         )
         if abs(residual) > tolerance:
