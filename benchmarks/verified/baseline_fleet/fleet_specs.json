@@ -638,7 +638,208 @@
         }
       },
       "published_disputed": [],
-      "published_reference_unresolved": []
+      "published_reference_unresolved": [],
+      "published_cross_refs": {
+        "displacement_volume": [
+          {
+            "source": "kvlcc2_hrcak",
+            "family": "SIMMAN-SERIES",
+            "lineage": "SIMMAN-SERIES",
+            "value": 312622.0,
+            "unit": "m3",
+            "url": "https://hrcak.srce.hr/file/274163",
+            "sha256": "",
+            "quote": "312622"
+          },
+          {
+            "source": "kvlcc2_ugent",
+            "family": "JSR-2017",
+            "lineage": "JSR-2017",
+            "value": 312622.439,
+            "unit": "m3",
+            "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+            "sha256": "",
+            "quote": "320,438"
+          }
+        ],
+        "cb": [
+          {
+            "source": "kvlcc2_hrcak",
+            "family": "SIMMAN-SERIES",
+            "lineage": "SIMMAN-SERIES",
+            "value": 0.8098,
+            "unit": "-",
+            "url": "https://hrcak.srce.hr/file/274163",
+            "sha256": "",
+            "quote": "0.8098"
+          },
+          {
+            "source": "kvlcc2_ugent",
+            "family": "JSR-2017",
+            "lineage": "JSR-2017",
+            "value": 0.8098,
+            "unit": "-",
+            "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+            "sha256": "",
+            "quote": "0.8098"
+          }
+        ],
+        "length_pp": [
+          {
+            "source": "kvlcc2_hrcak",
+            "family": "SIMMAN-SERIES",
+            "lineage": "SIMMAN-SERIES",
+            "value": 320.0,
+            "unit": "-",
+            "url": "https://hrcak.srce.hr/file/274163",
+            "sha256": "",
+            "quote": "320.0"
+          },
+          {
+            "source": "kvlcc2_jstage",
+            "family": "JASNAOE-2016",
+            "lineage": "JASNAOE-2016",
+            "value": 320.0,
+            "unit": "-",
+            "url": "https://www.jstage.jst.go.jp/article/jjasnaoe/23/0/23_1/_pdf",
+            "sha256": "",
+            "quote": "320"
+          },
+          {
+            "source": "kvlcc2_ugent",
+            "family": "JSR-2017",
+            "lineage": "JSR-2017",
+            "value": 320.0,
+            "unit": "-",
+            "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+            "sha256": "",
+            "quote": "320.0"
+          }
+        ],
+        "beam": [
+          {
+            "source": "kvlcc2_hrcak",
+            "family": "SIMMAN-SERIES",
+            "lineage": "SIMMAN-SERIES",
+            "value": 58.0,
+            "unit": "-",
+            "url": "https://hrcak.srce.hr/file/274163",
+            "sha256": "",
+            "quote": "58.0"
+          },
+          {
+            "source": "kvlcc2_ugent",
+            "family": "JSR-2017",
+            "lineage": "JSR-2017",
+            "value": 58.0,
+            "unit": "-",
+            "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+            "sha256": "",
+            "quote": "58.0"
+          }
+        ],
+        "draft": [
+          {
+            "source": "kvlcc2_hrcak",
+            "family": "SIMMAN-SERIES",
+            "lineage": "SIMMAN-SERIES",
+            "value": 20.8,
+            "unit": "-",
+            "url": "https://hrcak.srce.hr/file/274163",
+            "sha256": "",
+            "quote": "20.8"
+          },
+          {
+            "source": "kvlcc2_jstage",
+            "family": "JASNAOE-2016",
+            "lineage": "JASNAOE-2016",
+            "value": 20.8,
+            "unit": "-",
+            "url": "https://www.jstage.jst.go.jp/article/jjasnaoe/23/0/23_1/_pdf",
+            "sha256": "",
+            "quote": "20.8"
+          },
+          {
+            "source": "kvlcc2_ugent",
+            "family": "JSR-2017",
+            "lineage": "JSR-2017",
+            "value": 20.8,
+            "unit": "-",
+            "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+            "sha256": "",
+            "quote": "20.8"
+          }
+        ]
+      },
+      "published_cross_refs_status": {
+        "quantities": {
+          "displacement_volume": {
+            "verdict": "CROSS_VERIFIED_LINEAGE",
+            "families": [
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "lineages": [
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "disputed": false
+          },
+          "cb": {
+            "verdict": "CROSS_VERIFIED_LINEAGE",
+            "families": [
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "lineages": [
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "disputed": false
+          },
+          "length_pp": {
+            "verdict": "CROSS_VERIFIED_LINEAGE",
+            "families": [
+              "JASNAOE-2016",
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "lineages": [
+              "JASNAOE-2016",
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "disputed": false
+          },
+          "beam": {
+            "verdict": "CROSS_VERIFIED_LINEAGE",
+            "families": [
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "lineages": [
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "disputed": false
+          },
+          "draft": {
+            "verdict": "CROSS_VERIFIED_LINEAGE",
+            "families": [
+              "JASNAOE-2016",
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "lineages": [
+              "JASNAOE-2016",
+              "JSR-2017",
+              "SIMMAN-SERIES"
+            ],
+            "disputed": false
+          }
+        },
+        "library": "benchmarks/verified/fleet_refs/crossref.json"
+      }
     },
     {
       "name": "JBC",
@@ -814,7 +1015,278 @@
         }
       },
       "published_disputed": [],
-      "published_reference_unresolved": []
+      "published_reference_unresolved": [],
+      "published_cross_refs": {
+        "displacement_volume": [
+          {
+            "source": "jbc_cfdletters",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 178369.9,
+            "unit": "m3",
+            "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+            "sha256": "",
+            "quote": "178369.9"
+          },
+          {
+            "source": "jbc_memorial",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 178370.0,
+            "unit": "m3",
+            "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+            "sha256": "",
+            "quote": "178370"
+          },
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 178369.9,
+            "unit": "m3",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "178369.9"
+          }
+        ],
+        "cb": [
+          {
+            "source": "jbc_cfdletters",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 0.858,
+            "unit": "-",
+            "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+            "sha256": "",
+            "quote": "0.858"
+          },
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 0.858,
+            "unit": "-",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "0.858"
+          }
+        ],
+        "lcb_percent": [
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 2.5475,
+            "unit": "-",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "2.5475"
+          }
+        ],
+        "lwl": [
+          {
+            "source": "jbc_cfdletters",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 285.0,
+            "unit": "-",
+            "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+            "sha256": "",
+            "quote": "285"
+          },
+          {
+            "source": "jbc_memorial",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 285.0,
+            "unit": "-",
+            "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+            "sha256": "",
+            "quote": "285"
+          },
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 285.0,
+            "unit": "-",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "285"
+          }
+        ],
+        "length_pp": [
+          {
+            "source": "jbc_cfdletters",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 280.0,
+            "unit": "-",
+            "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+            "sha256": "",
+            "quote": "280"
+          },
+          {
+            "source": "jbc_memorial",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 280.0,
+            "unit": "-",
+            "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+            "sha256": "",
+            "quote": "280"
+          },
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 280.0,
+            "unit": "-",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "280"
+          }
+        ],
+        "beam": [
+          {
+            "source": "jbc_cfdletters",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 45.0,
+            "unit": "-",
+            "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+            "sha256": "",
+            "quote": "45"
+          },
+          {
+            "source": "jbc_memorial",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 45.0,
+            "unit": "-",
+            "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+            "sha256": "",
+            "quote": "45"
+          },
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 45.0,
+            "unit": "-",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "45"
+          }
+        ],
+        "draft": [
+          {
+            "source": "jbc_cfdletters",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 16.5,
+            "unit": "-",
+            "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+            "sha256": "",
+            "quote": "16.5"
+          },
+          {
+            "source": "jbc_memorial",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 16.5,
+            "unit": "-",
+            "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+            "sha256": "",
+            "quote": "16.5"
+          },
+          {
+            "source": "jbc_scse",
+            "family": "NMRI-T2015",
+            "lineage": "NMRI-T2015",
+            "value": 16.5,
+            "unit": "-",
+            "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+            "sha256": "",
+            "quote": "16.5"
+          }
+        ]
+      },
+      "published_cross_refs_status": {
+        "quantities": {
+          "displacement_volume": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          },
+          "cb": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          },
+          "lcb_percent": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          },
+          "lwl": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          },
+          "length_pp": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          },
+          "beam": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          },
+          "draft": {
+            "verdict": "SINGLE_SOURCE",
+            "families": [
+              "NMRI-T2015"
+            ],
+            "lineages": [
+              "NMRI-T2015"
+            ],
+            "disputed": false
+          }
+        },
+        "library": "benchmarks/verified/fleet_refs/crossref.json"
+      }
     },
     {
       "name": "ONRT",
