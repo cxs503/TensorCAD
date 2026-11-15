@@ -38,6 +38,7 @@ AXIS_LABEL = {
     "volume": ("三角面", "tri/s"),
     "voxelize": ("体素", "cell/s"),
     "fleet_assemble": ("三角面", "tri/s"),
+    "subdivide": ("三角面", "tri/s"),
 }
 
 DASH = "—"
@@ -755,6 +756,135 @@ def render_single10m_exponents(artifact: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def render_single10m_capacity(
+    artifact: Mapping[str, Any],
+    budget_seconds: Sequence[float] = (60.0, 600.0, 3600.0),
+    ram_budget_gib: float = 16.0,
+) -> str:
+    """Turn the largest measured 10^6--10^7 rung into a capacity statement.
+
+    Acceptance item 3 of ``GAP-CAD-D4-PERF-SCALE`` asks *at what scale a cluster
+    is needed*.  The answer must be re-derivable, so every number here is either
+    a measurement at the largest rung or that measurement multiplied by a stated
+    budget -- no fitted parameters, no hand-set thresholds.  Two ceilings are
+    printed side by side because they bind at different scales:
+
+    * **time** -- measured rate x wall-clock budget;
+    * **memory** -- ``ram_budget_gib`` / (measured resident bytes per triangle).
+
+    ``point_locate_accel`` appears twice on purpose: query throughput (rays/s)
+    and one-off index-build throughput (triangles/s) have different budgets, and
+    at 10^7 the build, not the queries, is the larger cost.
+    """
+    measured = [
+        r for r in _measured(artifact)
+        if r.get("triangles") and r.get("seconds")
+    ]
+    if not measured:
+        raise ValueError("artifact has no measured row with triangles and seconds")
+
+    def largest(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
+        return max(rows, key=lambda r: (r.get("triangles") or 0, r.get("seconds") or 0.0))
+
+    ram_bytes = float(ram_budget_gib) * 1024.0 ** 3
+    budgets = ", ".join(f"{b:,.0f} s" for b in budget_seconds)
+    lines = [
+        "| 子任务 | 实测最大档 (三角面) | 该档秒 | 实测速率 | 时间上限：" + budgets +
+        f" | 内存上限（{ram_budget_gib:g} GiB / 实测 B/tri） |",
+        "|---|---:|---:|---:|---|---:|",
+    ]
+    plans: list[tuple[str, str, Sequence[dict[str, Any]]]] = [
+        (name, name, [r for r in measured if r.get("subtask") == name])
+        for name in SINGLE10M_ORDER
+    ]
+    plans.append((
+        "point_locate_accel(建索引)",
+        "index_build",
+        [r for r in measured
+         if r.get("subtask") == "point_locate_accel" and r.get("build_seconds")],
+    ))
+    for label, kind, rows in plans:
+        if not rows:
+            continue
+        r = largest(rows)
+        tri = float(r.get("triangles") or 0)
+        if kind == "index_build":
+            seconds = float(r["build_seconds"])
+            rate = tri / seconds
+            unit = "tri/s"
+        else:
+            seconds = float(r["seconds"])
+            rate = float(r.get("throughput") or 0.0)
+            _, unit = AXIS_LABEL.get(r.get("subtask"), ("", ""))
+        rss_bytes = float(r.get("rss_mb") or 0.0) * 1024.0 * 1024.0
+        bits = [label, _int(tri), _num(seconds, ".3f"),
+                f"{_num(rate, ',.0f')} {unit}".strip()]
+        noun = unit.split("/")[0] if "/" in unit else "项"
+        bits.append(" / ".join(f"{_int(rate * b)} {noun}" for b in budget_seconds))
+        bits.append(_int(ram_bytes / (rss_bytes / tri)) if rss_bytes and tri else DASH)
+        lines.append("| " + " | ".join(bits) + " |")
+
+    # ---- where the memory per triangle actually goes -------------------------
+    mem_lines = [
+        "| 基座 nx×nz | 级别 | 三角面 | 活 RSS MiB | 索引 MiB | 活 RSS B/tri | 索引 B/tri |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    rss_per_tri: list[float] = []
+    idx_per_tri: list[float] = []
+    for r in sorted(measured, key=lambda r: (r.get("triangles") or 0)):
+        tri = float(r.get("triangles") or 0)
+        if tri < 1_000_000 or r.get("subtask") != "point_locate_accel":
+            continue
+        rss_bytes = float(r.get("rss_mb") or 0.0) * 1024.0 * 1024.0
+        idx_bytes = float(r.get("index_bytes") or 0.0)
+        rss_b = rss_bytes / tri
+        idx_b = idx_bytes / tri if idx_bytes else None
+        if rss_b:
+            rss_per_tri.append(rss_b)
+        if idx_b:
+            idx_per_tri.append(idx_b)
+        mem_lines.append(
+            "| "
+            + " | ".join([
+                f"{r.get('nx')}x{r.get('nz')}",
+                str(r.get("levels") or 0),
+                _int(tri),
+                _num(r.get("rss_mb"), ",.0f"),
+                _num((idx_bytes / 1024.0 ** 2) if idx_bytes else None, ",.1f"),
+                _num(rss_b, ",.0f"),
+                _num(idx_b, ",.1f"),
+            ])
+            + " |"
+        )
+    if idx_per_tri:
+        def _b_per_tri(pred) -> list[float]:
+            return [
+                (float(r.get("rss_mb") or 0.0) * 1024.0 * 1024.0) / float(r["triangles"])
+                for r in measured
+                if (r.get("triangles") or 0) >= 1_000_000
+                and r.get("rss_mb")
+                and pred(r)
+            ]
+
+        with_index = _b_per_tri(lambda r: r.get("subtask") == "point_locate_accel"
+                                and (r.get("levels") or 0) > 0)
+        without_index = _b_per_tri(lambda r: r.get("subtask") == "subdivide"
+                                   and (r.get("levels") or 0) > 0)
+        generated = _b_per_tri(lambda r: r.get("subtask") == "load")
+        mem_lines.append("")
+        mem_lines.append(
+            "索引 {:.1f}–{:.1f} B/tri（{} 档 ≥10⁶ 一致，与来源无关）；细分档在索引前 {:.0f} B/tri、"
+            "建索引后 {:.0f} B/tri（差额即索引本身）；生成档 {:.0f} B/tri——多出的是生成器参数网格常驻，"
+            "不是三角面本身。".format(
+                min(idx_per_tri), max(idx_per_tri), len(idx_per_tri),
+                min(without_index) if without_index else 0.0,
+                min(with_index) if with_index else 0.0,
+                max(generated) if generated else 0.0,
+            )
+        )
+    return "\n".join(lines + [""] + mem_lines)
+
+
 #: Tables of ``docs/perf_scale_single_body_10m.md``.  A separate registry for the
 #: same reason as ``BENCHMARK_DOC_SPECS``: an absent marker counts as drift, so a
 #: document must not be required to embed tables it does not carry.
@@ -762,6 +892,7 @@ SINGLE10M_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     "single10m-table": (("single10m",), render_single10m_table),
     "single10m-invariants": (("single10m",), render_single10m_invariants),
     "single10m-exponents": (("single10m",), render_single10m_exponents),
+    "single10m-capacity": (("single10m",), render_single10m_capacity),
 }
 
 #: Table names ``docs/perf_scale_single_body_10m.md`` must embed, in display order.
