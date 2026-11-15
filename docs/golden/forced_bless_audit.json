@@ -1,0 +1,91 @@
+{
+  "blessed_fine_value_after": 4.852927499424498,
+  "blessed_fine_value_before": 4.192141236950219,
+  "checks": {
+    "a tree never forced has no record": true,
+    "full mode announces it": true,
+    "override exceeded the drift lock": true,
+    "quick mode announces it": true,
+    "the announcement is a warning": true,
+    "the gate stays green after a reviewed override": true,
+    "the override is recorded": true,
+    "the record names the findings overridden": true,
+    "the record survives a later clean bless": true
+  },
+  "clean_bless_passed": true,
+  "drift_lock": 1e-09,
+  "drift_lock_exceeded_by": 157625000.00000027,
+  "forced_bless_record": [
+    {
+      "details": [
+        "[moving/tolerance_not_derived] 'value' records tolerance 0.0044 but its own derivation gives 0.00380089 (relative difference 1.576e-01; two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.900e-03 = 3.801e-03). The recorded band is not the one the checker derives, so a hand-edited criterion would decide the gate; a criterion may not be chosen",
+        "[moving/reference_not_reproducible] reference 'value' stored as 4.1887902047863905 but tools.golden.forced_bless_audit.MovingGeometry.reference (closed form) now yields 4.849048260815846 (relative difference 1.362e-01); a reference may not be hand-edited",
+        "[moving/drift] coarse/value drifted from 4.201356575400749 to 4.863595405598293 (1.576e-01 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+        "[moving/drift] fine/value drifted from 4.192141236950219 to 4.852927499424498 (1.576e-01 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+        "[moving/geometry_changed] geometry fingerprint moving-geometry-... -> moving-geometry-... (the mesh changed; blessing the new mesh is a deliberate act, not a side effect of a refactor)"
+      ],
+      "exceeded": [
+        "drift",
+        "geometry_changed",
+        "reference_not_reproducible",
+        "tolerance_not_derived"
+      ],
+      "git_commit": "b25ac21dba070a29f99bcfe3d707f49cf17b129c",
+      "python": "3.11.6"
+    }
+  ],
+  "fresh_bless_has_record": false,
+  "full_mode_passed": true,
+  "full_mode_visibility": [
+    "forced_bless_recorded"
+  ],
+  "gate_mode": "full + quick",
+  "passed": true,
+  "quick_mode_passed": true,
+  "quick_mode_visibility": [
+    "forced_bless_recorded"
+  ],
+  "record_entries_after_clean_bless": 1,
+  "record_survives_clean_bless": true,
+  "refusal_findings_at_force_time": [
+    {
+      "case": "moving",
+      "code": "tolerance_not_derived",
+      "detail": "'value' records tolerance 0.0044 but its own derivation gives 0.00380089 (relative difference 1.576e-01; two-grid: 2 x |fine - coarse| / |reference| = 2 x 1.900e-03 = 3.801e-03). The recorded band is not the one the checker derives, so a hand-edited criterion would decide the gate; a criterion may not be chosen",
+      "metric": "value",
+      "severity": "error"
+    },
+    {
+      "case": "moving",
+      "code": "reference_not_reproducible",
+      "detail": "reference 'value' stored as 4.1887902047863905 but tools.golden.forced_bless_audit.MovingGeometry.reference (closed form) now yields 4.849048260815846 (relative difference 1.362e-01); a reference may not be hand-edited",
+      "metric": "value",
+      "severity": "error"
+    },
+    {
+      "case": "moving",
+      "code": "drift",
+      "detail": "coarse/value drifted from 4.201356575400749 to 4.863595405598293 (1.576e-01 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+      "metric": "value",
+      "severity": "error"
+    },
+    {
+      "case": "moving",
+      "code": "drift",
+      "detail": "fine/value drifted from 4.192141236950219 to 4.852927499424498 (1.576e-01 > 1e-09); blessing the new value is a deliberate act, not a side effect of a refactor",
+      "metric": "value",
+      "severity": "error"
+    },
+    {
+      "case": "moving",
+      "code": "geometry_changed",
+      "detail": "geometry fingerprint moving-geometry-... -> moving-geometry-... (the mesh changed; blessing the new mesh is a deliberate act, not a side effect of a refactor)",
+      "severity": "error"
+    }
+  ],
+  "relative_drift_of_blessed_value": 0.1576250000000003,
+  "schema": "tensorcad.golden.forced_bless_audit/1",
+  "visibility_severity": [
+    "warning"
+  ]
+}
