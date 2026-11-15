@@ -124,6 +124,41 @@ def _facet_aspect(mesh: Mesh) -> float:
     return worst
 
 
+def _canonical_scalars(mesh: Mesh) -> dict[str, float]:
+    """Worst value of each canonical metric, from :mod:`tensorcad.meshquality.bridge`.
+
+    Imported lazily so ``tensorcad.gate`` stays importable when the optional mesh-quality
+    package is not wanted, and so the core import graph keeps its single direction.
+    """
+    if not mesh.faces:
+        return {}
+    from .meshquality.bridge import canonical_stats
+
+    return canonical_stats(mesh)
+
+
+def canonical_limits_from_legacy(*, max_aspect: float | None = None) -> dict[str, float]:
+    """Translate the legacy ``l_max**2`` * ``A`` limit into canonical-dialect limits.
+
+    ``max_aspect`` is in this module's dialect (``l_max**2 / A``, the number
+    :func:`_facet_aspect` maximises and :func:`gate_mesh` compares against ``max_aspect``).
+    The result is a mapping of :func:`gate_mesh` keyword arguments, so an existing call
+    site can be made canonical-aware without choosing a new threshold by hand::
+
+        gate_mesh(mesh, max_aspect=25.0, **canonical_limits_from_legacy(max_aspect=25.0))
+
+    The translation is the *conservative* one (``tensorcad.meshquality.dialects``): the
+    canonical limit can never admit a mesh the legacy limit rejects, so adding it cannot
+    turn a passing pipeline red for a mesh it used to reject -- it can only be stricter,
+    which is the only direction a gate may move on its own.
+    """
+    if max_aspect is None:
+        return {}
+    from .meshquality.bridge import gate_to_canonical_limit
+
+    return {"max_canonical_aspect": gate_to_canonical_limit(max_aspect)}
+
+
 def measure_gated(mesh: Mesh) -> dict[str, Any]:
     """Everything the gate compares against, in one JSON-safe record."""
     counts = meshlib.edge_face_counts(mesh)
@@ -145,6 +180,12 @@ def measure_gated(mesh: Mesh) -> dict[str, Any]:
         "surface_area": meshlib.surface_area(mesh),
         "max_edge_length": max(lengths.values()) if lengths else 0.0,
         "max_facet_aspect": _facet_aspect(mesh),
+        # The canonical library's view of the same facets (tensorcad.meshquality). The
+        # number above stays in this module's own dialect for backwards compatibility;
+        # these are the Verdict/Gmsh-comparable ones a mesher or solver preprocessor
+        # would report, and `canonical_limits_from_legacy` translates a legacy limit
+        # into them without weakening it.
+        "canonical": _canonical_scalars(mesh),
     }
     if mesh.vertices:
         box = mesh.bounding_box()
@@ -166,6 +207,10 @@ def gate_mesh(
     min_faces: int | None = None,
     max_aspect: float | None = None,
     max_relative_edge_length: float | None = None,
+    max_canonical_aspect: float | None = None,
+    min_canonical_angle: float | None = None,
+    min_canonical_sicn: float | None = None,
+    max_canonical_skewness: float | None = None,
 ) -> MeshGateReport:
     """Run every machine check and return the evidence, without raising.
 
@@ -263,7 +308,62 @@ def gate_mesh(
             )
         )
 
+    canonical_parameters = {
+        "max_canonical_aspect": max_canonical_aspect,
+        "min_canonical_angle": min_canonical_angle,
+        "min_canonical_sicn": min_canonical_sicn,
+        "max_canonical_skewness": max_canonical_skewness,
+    }
+    if any(value is not None for value in canonical_parameters.values()):
+        checks.extend(_canonical_checks(mesh, canonical_parameters))
+
     return MeshGateReport(checks=tuple(checks), measurements=measurements)
+
+
+def _canonical_checks(mesh: Mesh, limits: dict[str, float | None]) -> list[Check]:
+    """Thresholds on the canonical (Verdict/Gmsh-comparable) metrics, with the worst facet named.
+
+    Each failing check carries the index and centroid of the offending facet, because a
+    gate that only reports an extremum leaves the reader to find the triangle themselves.
+    """
+    from .meshquality.bridge import qualify
+
+    quality = qualify(mesh)
+    checks: list[Check] = []
+
+    def upper(name: str, metric: str, limit: float, unit: str = "") -> None:
+        worst = quality.worst(metric)
+        value = float(worst["value"])
+        located = "" if worst["index"] is None else f" at face {worst['index']} centroid {worst['centroid']}"
+        checks.append(
+            Check(
+                name,
+                value <= limit,
+                f"worst facet has {metric} = {value:.6g}{unit}{located}, limit <= {limit:g}",
+            )
+        )
+
+    def lower(name: str, metric: str, limit: float, unit: str = "") -> None:
+        worst = quality.worst(metric, maximum=False)
+        value = float(worst["value"])
+        located = "" if worst["index"] is None else f" at face {worst['index']} centroid {worst['centroid']}"
+        checks.append(
+            Check(
+                name,
+                value >= limit,
+                f"worst facet has {metric} = {value:.6g}{unit}{located}, limit >= {limit:g}",
+            )
+        )
+
+    if limits["max_canonical_aspect"] is not None:
+        upper("canonical_aspect", "aspect_ratio", float(limits["max_canonical_aspect"]), " (Verdict R/2r)")
+    if limits["min_canonical_angle"] is not None:
+        lower("canonical_min_angle", "min_angle", float(limits["min_canonical_angle"]), " deg")
+    if limits["min_canonical_sicn"] is not None:
+        lower("canonical_min_sicn", "min_sicn", float(limits["min_canonical_sicn"]))
+    if limits["max_canonical_skewness"] is not None:
+        upper("canonical_skewness", "skewness", float(limits["max_canonical_skewness"]))
+    return checks
 
 
 def enforce_gate(mesh: Mesh, *, label: str = "mesh", **kwargs: Any) -> MeshGateReport:
