@@ -2,7 +2,7 @@
 
 Produces, from the public API only:
 
-* ``artifacts/hull_family/hull_family.json`` -- five Series 60 parent forms through
+* ``docs/hull_family/evidence.json`` -- five Series 60 parent forms through
   the unified entry, each against its own closed form and against the family
   module's own generator (bit-for-bit), the grid ladder, the transom and bulb
   pass-throughs, and the refusal matrix.
@@ -15,8 +15,10 @@ transcribed.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import struct
 import sys
 from pathlib import Path
 
@@ -33,7 +35,9 @@ from tensorcad.series60 import (  # noqa: E402
 PARENTS = (0.60, 0.65, 0.70, 0.75, 0.80)
 GRIDS = ((41, 13), (81, 21), (161, 41))
 MAIN = dict(length=10.0, beam=1.5, draft=0.6, water_density=1000.0)
-OUT_JSON = ROOT / "artifacts" / "hull_family" / "hull_family.json"
+# The evidence lives next to the page it renders: ``artifacts/`` is scratch, and a
+# merge drops it, which is how the page ended up citing JSON that was not in the tree.
+OUT_JSON = ROOT / "docs" / "hull_family" / "evidence.json"
 OUT_PNG = ROOT / "docs" / "hull_family.png"
 
 
@@ -227,7 +231,14 @@ def figure(evidence: dict) -> None:
     fig.tight_layout()
     OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT_PNG, dpi=150)
-    print(f"wrote {OUT_PNG.relative_to(ROOT)}")
+    png = OUT_PNG.read_bytes()
+    assert png[:8] == b"\x89PNG\r\n\x1a\n", "savefig did not write a PNG"
+    width, height = struct.unpack(">II", png[16:24])  # IHDR, the file's own pixel size
+    print(f"wrote {OUT_PNG.relative_to(ROOT)} ({width} x {height} px)")
+    return {"png": str(OUT_PNG.relative_to(ROOT)), "dpi": 150,
+            "pixels": [width, height],
+            "sha256": hashlib.sha256(png).hexdigest(),
+            "matplotlib": matplotlib.__version__}
 
 
 if __name__ == "__main__":
@@ -242,4 +253,5 @@ if __name__ == "__main__":
         row["identical_to_family_module"]
         for parent in data["parents"].values() for row in parent["grids"]
     ))
-    figure(data)
+    data["figure"] = figure(data)
+    OUT_JSON.write_text(json.dumps(data, indent=2, sort_keys=True))
