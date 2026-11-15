@@ -11,6 +11,9 @@ Four sub-tasks are measured on the same mesh ladder:
                   (uniform grid + DDA), the path that makes 10^6--10^7 practical.
 ``voxelize``      SDF sampling onto a regular grid (to_voxel_grid).
 ``volume``        Surface-integral volume by the divergence theorem.
+``obj_write``     Serialising the rung's mesh to Wavefront OBJ text (file export).
+``obj_read``      Parsing that OBJ file back into a mesh (file import), with an
+                  as-imported volume check against the analytic reference.
 
 Each sub-task is run at several mesh sizes (triangle counts).  The benchmark
 records wall-clock seconds, triangle count, and a derived throughput metric
@@ -51,7 +54,9 @@ import json
 import math
 import os
 import platform
+import shutil
 import sys
+import tempfile
 import time
 from collections import OrderedDict
 from dataclasses import dataclass, field, replace
@@ -154,6 +159,16 @@ class SubTaskResult:
     #: because ``HullParameters`` caps one body at 8.19e6 triangles and the
     #: 10^7 band is otherwise unreachable (see :func:`build_fleet_mesh`).
     copies: int = 1
+    #: Size of the OBJ file the import sub-tasks wrote/read (0 elsewhere).  A
+    #: structured field rather than text in ``note`` so the published table can
+    #: be rendered from the artifact instead of re-typing numbers.
+    file_bytes: int = 0
+    #: File throughput of ``obj_write``/``obj_read`` (MiB/s).
+    file_mb_per_s: float | None = None
+    #: Signed-volume error of the *as-imported* mesh against the analytic
+    #: reference (``obj_read``); the parse is only a measurement if the geometry
+    #: that came back is still the geometry that went in.
+    volume_rel_err: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -175,6 +190,9 @@ class SubTaskResult:
             "peak_rss_mb": self.peak_rss_mb,
             "rss_mb": self.rss_mb,
             "mesh_mb": self.mesh_mb,
+            "file_bytes": self.file_bytes,
+            "file_mb_per_s": self.file_mb_per_s,
+            "volume_rel_err": self.volume_rel_err,
         }
 
 
@@ -738,6 +756,177 @@ def _run_fleet_assemble(nx: int, nz: int, copies: int) -> SubTaskResult:
 
 
 # ---------------------------------------------------------------------------
+# File import / export sub-tasks (OBJ at scale)
+# ---------------------------------------------------------------------------
+
+#: Directory the import sub-tasks write their OBJ file to.  Under the system
+#: temp dir on purpose: one rung at 10^7 triangles is a ~1 GiB text file and it
+#: must never land inside the repository.
+IMPORT_DIR = Path(tempfile.gettempdir()) / "tensorcad-perf-import"
+
+#: Bytes-per-triangle estimate of the OBJ layout written by ``write_obj`` (one
+#: ``v`` line per vertex, one ``f`` line per face, ~1:1 vertices:faces on the
+#: hull).  Only used for the free-space guard; the measured file size is always
+#: what gets reported.
+OBJ_BYTES_PER_TRIANGLE = 120
+
+#: Free space is demanded as a multiple of the estimate so a write cannot fill
+#: the filesystem up to the last byte.
+OBJ_FREE_SPACE_FACTOR = 4.0
+
+
+def import_obj_path(nx: int, nz: int, copies: int = 1) -> Path:
+    """Path of the OBJ file the import sub-tasks share at one rung."""
+    return IMPORT_DIR / f"hull_{nx}x{nz}_b{copies}.obj"
+
+
+def clear_import_files() -> list[str]:
+    """Delete every OBJ file written by the import sub-tasks."""
+    removed: list[str] = []
+    if IMPORT_DIR.is_dir():
+        for path in sorted(IMPORT_DIR.glob("hull_*x*_b*.obj")):
+            removed.append(path.name)
+            path.unlink(missing_ok=True)
+    return removed
+
+
+def _prune_import_files(keep: Path) -> None:
+    """Keep only ``keep`` so a ladder does not leave every rung on disk."""
+    if not IMPORT_DIR.is_dir():
+        return
+    for path in IMPORT_DIR.glob("hull_*x*_b*.obj"):
+        if path != keep:
+            path.unlink(missing_ok=True)
+
+
+def _free_mb(path: Path) -> float:
+    probe = path
+    while not probe.exists() and probe != probe.parent:
+        probe = probe.parent
+    return shutil.disk_usage(probe).free / (1024 * 1024)
+
+
+def _obj_space_guard(tris: int) -> str | None:
+    """Reason string when there is not enough free space to write the file."""
+    needed_mb = tris * OBJ_BYTES_PER_TRIANGLE / (1024 * 1024)
+    free_mb = _free_mb(IMPORT_DIR)
+    if free_mb < OBJ_FREE_SPACE_FACTOR * needed_mb:
+        return (
+            f"not enough free space under {IMPORT_DIR}: {free_mb:,.0f} MiB free, "
+            f"~{needed_mb:,.0f} MiB needed for {tris:,} triangles"
+        )
+    return None
+
+
+def _run_obj_write(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
+    """Measure writing the rung's mesh as OBJ text (serialisation cost).
+
+    Deliberately split from :func:`_run_obj_read`: "importing this hull takes
+    eight minutes" is not actionable, "writing costs X, parsing costs Y" is.
+    The file is left on disk so the ``obj_read`` rung at the same size measures
+    parsing only.
+    """
+    from tensorcad.export import write_obj
+
+    mesh = _mesh_for(nx, nz, copies)
+    tris = len(mesh.faces)
+    path = import_obj_path(nx, nz, copies)
+    reason = _obj_space_guard(tris)
+    if reason is not None:
+        return SubTaskResult(
+            subtask="obj_write", nx=nx, nz=nz, triangles=tris,
+            vertices=len(mesh.vertices), grid_cells=0, seconds=None,
+            status=NOT_RUN, copies=copies, note=reason,
+        )
+    _prune_import_files(path)
+    t0 = time.perf_counter()
+    write_obj(mesh, path)
+    elapsed = time.perf_counter() - t0
+    size_mb = path.stat().st_size / (1024 * 1024)
+    return SubTaskResult(
+        subtask="obj_write", nx=nx, nz=nz, triangles=tris,
+        vertices=len(mesh.vertices), grid_cells=0, copies=copies,
+        seconds=round(elapsed, 6),
+        throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
+        note=(
+            f"file={size_mb:,.1f} MiB ({size_mb / elapsed:,.1f} MiB/s), "
+            f"{size_mb * 1024 * 1024 / tris:.1f} B/tri, bodies={copies}"
+        ),
+        file_bytes=path.stat().st_size,
+        file_mb_per_s=round(size_mb / elapsed, 3) if elapsed > 0 else None,
+        peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+        mesh_mb=mesh_footprint_mb(mesh),
+    )
+
+
+def _run_obj_read(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
+    """Measure parsing an OBJ file back into a mesh, and check what came back.
+
+    If the file is not on disk the sub-task prepares it first and records that
+    preparation time in the note (untimed), so it can be run on its own.  The
+    parsed mesh is checked against the mesh it came from -- vertex/face counts
+    and the signed volume against the analytic reference -- because a fast parse
+    that silently drops or duplicates triangles is a defect, not a measurement.
+    """
+    from tensorcad.export import read_obj, write_obj
+    from tensorcad.hull import analytic_volume
+    from tensorcad.mesh import total_signed_volume
+
+    mesh = _mesh_for(nx, nz, copies)
+    tris = len(mesh.faces)
+    path = import_obj_path(nx, nz, copies)
+    prepared = 0.0
+    if not path.exists():
+        reason = _obj_space_guard(tris)
+        if reason is not None:
+            return SubTaskResult(
+                subtask="obj_read", nx=nx, nz=nz, triangles=tris,
+                vertices=len(mesh.vertices), grid_cells=0, seconds=None,
+                status=NOT_RUN, copies=copies,
+                note=f"needs the OBJ file first; {reason}",
+            )
+        _prune_import_files(path)
+        t_prep = time.perf_counter()
+        write_obj(mesh, path)
+        prepared = time.perf_counter() - t_prep
+
+    t0 = time.perf_counter()
+    parsed = read_obj(path)
+    elapsed = time.perf_counter() - t0
+
+    if len(parsed.vertices) != len(mesh.vertices) or len(parsed.faces) != tris:
+        raise ValueError(
+            f"OBJ round trip lost geometry: parsed {len(parsed.vertices)} vertices/"
+            f"{len(parsed.faces)} faces, expected {len(mesh.vertices)}/{tris}"
+        )
+
+    volume = total_signed_volume(parsed)
+    reference = copies * analytic_volume(10.0, 2.0, 0.8)
+    rel_err = (volume - reference) / reference if reference else float("nan")
+    size_mb = path.stat().st_size / (1024 * 1024)
+    note = (
+        f"file={size_mb:,.1f} MiB ({size_mb / elapsed:,.1f} MiB/s), "
+        f"volume={volume:.6f} m^3, analytic={reference:.6f} m^3, "
+        f"rel_err={rel_err:+.3e}, bodies={copies}"
+    )
+    if prepared:
+        note += f", file prepared in {prepared:.3f}s (not counted)"
+    return SubTaskResult(
+        subtask="obj_read", nx=nx, nz=nz, triangles=len(parsed.faces),
+        vertices=len(parsed.vertices), grid_cells=0, copies=copies,
+        seconds=round(elapsed, 6),
+        throughput=round(len(parsed.faces) / elapsed, 1) if elapsed > 0 else None,
+        note=note,
+        file_bytes=path.stat().st_size,
+        file_mb_per_s=round(size_mb / elapsed, 3) if elapsed > 0 else None,
+        volume_rel_err=rel_err,
+        peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Fibonacci directions
 # ---------------------------------------------------------------------------
 
@@ -765,6 +954,8 @@ _SUBTASKS_MESH = {
     "point_locate": _run_point_locate,
     "point_locate_accel": _run_point_locate_accel,
     "volume": _run_volume,
+    "obj_write": _run_obj_write,
+    "obj_read": _run_obj_read,
 }
 
 #: Which sub-tasks accept the ray-query count argument.
@@ -902,7 +1093,9 @@ FLEET_COPIES_LADDER: tuple[int, ...] = (2, 3)
 #: put rows in the table and JSON whose status is ``failed``, which reads as a
 #: measurement error rather than "does not apply".  They are recorded once per
 #: base rung with ``status=not_run`` and a reason instead.
-FLEET_SUBTASKS: tuple[str, ...] = ("point_locate_accel", "volume")
+FLEET_SUBTASKS: tuple[str, ...] = (
+    "point_locate_accel", "volume", "obj_write", "obj_read",
+)
 
 
 def run_fleet_benchmark(
@@ -1020,6 +1213,8 @@ SCALING_LIMITS: dict[str, float] = {
     "point_locate_accel": 0.8,
     "volume": 1.5,
     "voxelize": 1.5,
+    "obj_write": 1.5,
+    "obj_read": 1.5,
 }
 
 #: Fewest distinct sizes needed before an exponent is gated at all.
@@ -1243,7 +1438,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ladder", type=str, help="Custom ladder as 'nx1,nz1;nx2,nz2;...'")
     parser.add_argument("--subtasks", type=str,
                         default="load,point_locate,point_locate_accel,voxelize,volume",
-                        help="Comma-separated subtask names")
+                        help="Comma-separated subtask names "
+                             "(load,point_locate,point_locate_accel,voxelize,volume,obj_write,obj_read)")
     parser.add_argument("--max-triangles", type=int, default=None,
                         help="Skip steps producing more than this many triangles")
     parser.add_argument("--n-queries", type=int, default=None,

@@ -100,8 +100,16 @@ RED 阈值列用模块的 `DEFAULT_GATE_FACTOR`，不是手写的 `2`。
 | `voxelize:48x0` | 体素 110,592 | 0.6639 | 1.3279 | 166,569 cell/s |
 | `voxelize:64x0` | 体素 262,144 | 1.7893 | 3.5787 | 146,504 cell/s |
 | `voxelize:96x0` | 体素 884,736 | 6.1233 | 12.2466 | 144,487 cell/s |
+| `obj_read:21x9` | 规模 678 | 0.0063 | 0.0125 | 108,105 |
+| `obj_write:21x9` | 规模 678 | 0.0024 | 0.0047 | 286,915 |
+| `obj_read:41x13` | 规模 1,998 | 0.0145 | 0.0290 | 137,939 |
+| `obj_write:41x13` | 规模 1,998 | 0.0087 | 0.0174 | 229,611 |
+| `obj_read:81x21` | 规模 6,558 | 0.0543 | 0.1087 | 120,703 |
+| `obj_write:81x21` | 规模 6,558 | 0.0323 | 0.0646 | 203,147 |
+| `obj_read:161x41` | 规模 25,918 | 0.1493 | 0.2985 | 173,636 |
+| `obj_write:161x41` | 规模 25,918 | 0.0953 | 0.1907 | 271,888 |
 
-基线记录 20 条；环境 `machine=loongarch64`、`cpu_count=128`、`python=3.11.6`；口径：max of 3 runs per (subtask, nx, nz) key - tolerant of load noise on a shared machine
+基线记录 28 条；环境 `machine=loongarch64`、`cpu_count=128`、`python=3.11.6`；口径：max of 3 runs per (subtask, nx, nz) key - tolerant of load noise on a shared machine; --merge kept 20 key(s) recorded by an earlier run
 <!-- perf-evidence:baseline-gate-table end -->
 
 **读法**：一份实测取值 `s`，与同键基线秒 `b` 比较，`s/b > factor` 即 RED。环境
@@ -128,7 +136,7 @@ detail，不影响判定）。
 | `DEFAULT_LADDER` | 21×9 → 41×13 → 81×21 → 161×41 → 321×81 → 641×161 → 1281×321 → 2001×501 → 4001×513 | full 阶梯（顶端受 `HullParameters` 上限约束） |
 | `QUICK_LADDER` | 21×9 → 41×13 → 81×21 → 161×41 | quick 阶梯，即 CI 基线覆盖的范围 |
 | `VOXEL_LADDER` | 32³ → 48³ → 64³ → 96³ → 128³ → 192³ → 256³ → 384³ | 体素阶梯 |
-| `SCALING_LIMITS` | `fleet_assemble`≤1.5; `load`≤1.5; `point_locate`≤1.5; `point_locate_accel`≤0.8; `volume`≤1.5; `voxelize`≤1.5 | 指数门上限（log(秒) vs log(规模) 最小二乘斜率） |
+| `SCALING_LIMITS` | `fleet_assemble`≤1.5; `load`≤1.5; `obj_read`≤1.5; `obj_write`≤1.5; `point_locate`≤1.5; `point_locate_accel`≤0.8; `volume`≤1.5; `voxelize`≤1.5 | 指数门上限（log(秒) vs log(规模) 最小二乘斜率） |
 <!-- perf-evidence:code-facts-table end -->
 
 ## 5. v0.2.0 勘误（本版新增）
