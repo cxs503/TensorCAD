@@ -4,9 +4,9 @@
 **实测节点**: LoongArch64, 128 核, Python 3.11.6, TensorCAD 0.23.0
 **作业**: `cj2652`（网格阶梯）、`cj2653`（体素阶梯）、`cj2669`（超限档探针，干净失败）、`cj3081`（10⁷ 多体带）、
 本版重算 `cj3563`（网格阶梯）/ `cj3564`（体素阶梯）
-**工件（受版本控制、可直接复核）**: `benchmarks/perf_scale/artifacts/{ladder_mesh.json,ladder_voxel.json}`、
-`benchmarks/perf_scale/{baseline.json,ladder_fleet_10m.json,ladder_3pt_mechanism_smoke.json}`；
-图 `benchmarks/perf_scale/figures/*.png`；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
+**工件（受版本控制、可直接复核）**: `benchmarks/perf_scale/artifacts/{ladder_mesh.json,ladder_voxel.json,ladder_import.json,ladder_single_10m.json}`、
+`benchmarks/perf_scale/{baseline.json,ladder_fleet_10m_3pt.json,ladder_3pt_mechanism_smoke.json}`；
+图 `benchmarks/perf_scale/figures/*.png`（12 张）；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
 
 本篇取代 `docs/perf_benchmark.md` 的 0.2.0 数据（那版最高只测到 103k 三角）——**本版第一次真正测到 10⁶ 带**。
 
@@ -121,11 +121,79 @@
 
 ### 3.3 图
 
-`benchmarks/perf_scale/figures/scaling.png`（墙钟 vs 规模 log-log）、`point_locate.png`（两条点定位路径吞吐对比）、`index_cost.png`（建索引时间/索引体积）、`voxelize.png`（体素化缩放）；10⁶–10⁷ 带另有两张：`fig3pt_scaling.png`（每个子任务的拟合指数与门限，§9.4）与 `fig3pt_memory.png`（网格占用/索引/活内存 vs 规模）。
+**基础阶梯图**（`ladder_mesh.json` + `ladder_voxel.json`）：
+- `scaling.png`：墙钟 vs 规模 log-log（4 子任务，678 → 8.2M 三角）
+- `point_locate.png`：暴力 vs 索引点定位吞吐对比
+- `index_cost.png`：建索引时间/索引体积 vs 三角面
+- `voxelize.png`：体素化缩放（32³ → 384³）
+
+**10⁶–10⁷ 三点阶梯图**（`ladder_fleet_10m_3pt.json`）：
+- `fig3pt_scaling.png`：每个子任务的拟合指数与门限（§8.2）
+- `fig3pt_memory.png`：网格占用/索引/活内存 vs 规模
+
+**OBJ 导入/导出阶梯图**（`ladder_import.json`）：
+- `import_scaling.png`：load/obj_write/obj_read/volume 墙钟 vs 规模
+- `import_throughput.png`：各子任务吞吐 vs 规模
+- `import_volume_accuracy.png`：OBJ 往返体积精度（as-imported vs 解析）
+
+**单体 10⁷ 细分阶梯图**（`ladder_single_10m.json`）：
+- `single10m_scaling.png`：load/subdivide/volume/point_locate_accel 墙钟 vs 规模
+- `single10m_memory.png`：网格/索引/RSS 内存 vs 规模
+- `single10m_volume_accuracy.png`：细分体积精度（机器精度级守恒）
+
+### 3.4 OBJ 导入/导出阶梯
+
+由 `benchmarks/perf_scale/artifacts/ladder_import.json` 渲染。4 档（25,918 → 4,003,998 三角），
+4 个子任务：load → obj_write → obj_read → volume 完整往返。
+
+| 子任务 | 三角面 | 秒 | 吞吐 | 文件大小 | 文件吞吐 | 体积误差 |
+|---|---:|---:|---:|---:|---:|---:|
+| load | 25,918 | 0.751 | 34,492 tri/s | — | — | — |
+| obj_write | 25,918 | 0.057 | 454,683 tri/s | 1.0 MiB | 18.0 MiB/s | — |
+| obj_read | 25,918 | 0.093 | 278,628 tri/s | 1.0 MiB | 11.0 MiB/s | −0.136% |
+| volume | 25,918 | 0.010 | 2,520,007 tri/s | — | — | −0.136% |
+| load | 410,878 | 15.406 | 26,671 tri/s | — | — | — |
+| obj_write | 410,878 | 1.187 | 346,078 tri/s | 18.2 MiB | 15.3 MiB/s | — |
+| obj_read | 410,878 | 1.676 | 245,172 tri/s | 18.2 MiB | 10.9 MiB/s | −0.017% |
+| volume | 410,878 | 0.176 | 2,340,416 tri/s | — | — | −0.017% |
+| load | 1,640,958 | 110.528 | 14,847 tri/s | — | — | — |
+| obj_write | 1,640,958 | 5.372 | 305,477 tri/s | 75.4 MiB | 14.0 MiB/s | — |
+| obj_read | 1,640,958 | 7.586 | 216,328 tri/s | 75.4 MiB | 9.9 MiB/s | −0.006% |
+| volume | 1,640,958 | 0.751 | 2,185,953 tri/s | — | — | −0.006% |
+| load | 4,003,998 | 283.716 | 14,113 tri/s | — | — | — |
+| obj_write | 4,003,998 | 11.013 | 363,585 tri/s | 206.3 MiB | 18.7 MiB/s | — |
+| obj_read | 4,003,998 | 17.095 | 234,217 tri/s | 206.3 MiB | 12.1 MiB/s | −0.003% |
+| volume | 4,003,998 | 1.877 | 2,133,446 tri/s | — | — | −0.003% |
+
+**复杂度指数**（4 点拟合）：load 1.19、obj_write 1.06、obj_read 1.04、volume 1.03 —— 全部 ≤1.50 限值，无退化。
+
+**OBJ 往返精度**：as-imported 体积 vs 解析基准，最大误差 −0.136%（25,918 档），4.0M 档仅 −0.003%。
+OBJ 文本格式在 4.0M 三角面时文件 206 MiB，写入 18.7 MiB/s、读取 12.1 MiB/s。
+
+### 3.5 单体 10⁷ 细分阶梯
+
+由 `benchmarks/perf_scale/artifacts/ladder_single_10m.json` 渲染。
+以 1→4 中点细分为几何源，单个**连通**闭合体直接做到 13.1M 三角面（非 fleet 多体装配）。
+
+| 子任务 | 三角面 | 秒 | 吞吐 | 建索引 s | 索引 MiB | 活 RSS MiB |
+|---|---:|---:|---:|---:|---:|---:|
+| load (401×129) | 205,598 | 7.268 | 28,287 tri/s | — | — | 106 |
+| subdivide → 822k | 822,392 | 0.874 | 941,178 tri/s | — | — | 242 |
+| subdivide → 3.3M | 3,289,568 | 3.852 | 854,025 tri/s | — | — | 754 |
+| subdivide → 13.2M | 13,158,272 | 17.531 | 750,587 tri/s | — | — | 2,530 |
+| load (1601×513) | 3,279,998 | 186.747 | 17,564 tri/s | — | — | 2,953 |
+| subdivide → 13.1M | 13,119,992 | 16.890 | 776,773 tri/s | — | — | 2,530 |
+| point_locate_accel @13.2M | 13,158,272 | 1.549 | 1,291 query/s | 98.0 | 998 | 3,568 |
+| volume @13.2M | 13,158,272 | 5.861 | 2,245,011 tri/s | — | — | 2,530 |
+
+**体积精度**：细分不改变几何，体积误差继承自父网格（401×129 档 −0.0246%，1601×513 档 −0.0030%），
+细分后各档体积漂移 ≤4.6×10⁻¹³（机器精度级），水密/流形/Euler 特征全部保持。
+
+**内存**：13.2M 三角面网格对象 2.86 GB，空间索引 998 MiB，活 RSS 3.57 GB。
 
 ---
 
-## 4. 误差判定（关键量 vs 基准）
+## 4. 误差判定（关键量 vs 基准）（关键量 vs 基准）
 
 | 量 | 基准 | 实测 | 相对误差 | <3%? |
 |---|---|---|---|---|
@@ -134,6 +202,11 @@
 | 体积 @4,003,998 tri | 7.512698 m³ | 7.512474 | −0.0030% | 是 |
 | 体积 @8,199,998 tri（单体生成上限） | 7.512698 m³ | 7.512493 | −0.0027% | 是 |
 | 体积 @12,011,994 tri（3 体 fleet） | 22.538095 m³ | 22.537421 | −0.0030% | 是 |
+| OBJ as-imported @25,918 tri | 7.512698 m³ | 7.502488 | −0.136% | 是 |
+| OBJ as-imported @4,003,998 tri | 7.512698 m³ | 7.512474 | −0.003% | 是 |
+| 细分体积 @13,158,272 tri（401×129 父） | 7.512698 m³ | 7.510847 | −0.0246% | 是 |
+| 细分体积 @13,119,992 tri（1601×513 父） | 7.512698 m³ | 7.512473 | −0.0030% | 是 |
+| 细分体积漂移（机器精度） | 0 | ≤4.6×10⁻¹³ | — | 是 |
 | `cast_ray` 交点距离 | 暴力 Möller–Trumbore（同网格） | 一致 | ≤1e-9 相对 | 是 |
 | `contains` 内外判定 | 闭网格几何（Cb/体积符号） | 全对 | 0 错判 | 是 |
 | 命中数（accel vs 暴力，2000 射线） | 154/185/218/253/286/317（7 个双路径档） | 逐档完全一致 | 0 | 是 |
@@ -182,8 +255,11 @@
 | 表格渲染/漂移校验 | `tensorcad/perf_evidence.py`、`scripts/perf_scale_doc.py` |
 | 证据包测试 | `tests/test_perf_scale_evidence.py` |
 | 10⁶–10⁷ 三点阶梯驱动 / 表格 / 作图 | `scripts/perf_scale_10m.py`、`scripts/perf_3pt_report.py`、`scripts/gen_perf_3pt_figures.py` |
-| 图 | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
-| 作图脚本 | `scripts/gen_perf_scale_figures.py` |
+| 图（基础阶梯） | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
+| 图（10⁶–10⁷ 三点） | `benchmarks/perf_scale/figures/{fig3pt_scaling,fig3pt_memory}.png` |
+| 图（OBJ 导入/导出） | `benchmarks/perf_scale/figures/{import_scaling,import_throughput,import_volume_accuracy}.png` |
+| 图（单体 10⁷ 细分） | `benchmarks/perf_scale/figures/{single10m_scaling,single10m_memory,single10m_volume_accuracy}.png` |
+| 作图脚本 | `scripts/gen_perf_scale_figures.py`、`scripts/gen_perf_3pt_figures.py`、`scripts/gen_perf_import_figures.py`、`scripts/gen_perf_single10m_figures.py` |
 
 ---
 
