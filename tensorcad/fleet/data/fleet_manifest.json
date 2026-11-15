@@ -30,7 +30,9 @@
       },
       "notes": "Lpp/B/T/Cb triple is the workshop-standard one; closed-form Cb*L*B*T = 52140 m^3 agrees with the recalled 52030 m^3 to 0.2%. Cm = 0.971 (literature-recalled, same offline caveat as the other particulars).",
       "midship_coefficient": 0.971,
-      "transom_ratio": 0.0
+      "transom_ratio": 0.0,
+      "geometry_sha256": "09d11582ff880d45f25d3b5a455d1771b6ee88a068d7b9352c7670c2e3dac1d8",
+      "geometry_path": "artifacts/baseline_fleet/manifests/KCS.stl"
     },
     {
       "name": "KVLCC2",
@@ -52,7 +54,9 @@
       },
       "notes": "Cb*L*B*T = 312622 m^3 reproduces the recalled displacement volume exactly because the recalled Cb was rounded from the same triple. Cm = 0.9956 (literature-recalled, same offline caveat as the other particulars).",
       "midship_coefficient": 0.9956,
-      "transom_ratio": 0.0
+      "transom_ratio": 0.0,
+      "geometry_sha256": "d55e1d84247046d55dc72e61a45db97c7d47c2ca4410dc1e2feff8e6473c06f0",
+      "geometry_path": "artifacts/baseline_fleet/manifests/KVLCC2.stl"
     },
     {
       "name": "ONRT",
@@ -74,7 +78,9 @@
       },
       "notes": "Cb = 0.535 lies below the Series-60 form family's validated window [0.55, 0.85]; the route refuses it rather than clipping Cb, which is recorded as an honest per-ship failure. Cm = 0.75 (literature-recalled, same offline caveat as the other particulars).",
       "midship_coefficient": 0.75,
-      "transom_ratio": 0.0
+      "transom_ratio": 0.0,
+      "geometry_sha256": "099ddd16a52d6a59e1f7b3cccfa15f01d1818b8c91a27c556b2fa3b78d753db4",
+      "geometry_path": "artifacts/baseline_fleet/manifests/ONRT.stl"
     },
     {
       "name": "JBC",
@@ -96,7 +102,9 @@
       },
       "notes": "Cb*L*B*T = 178378.2 m^3 agrees with the cited 178369.9 m^3 to 0.005 %, and the cited value is the one this repository already recorded from a page fetch in benchmarks/verified/baseline_fleet/result.json before egress was closed.",
       "midship_coefficient": 0.992,
-      "transom_ratio": 0.0
+      "transom_ratio": 0.0,
+      "geometry_sha256": "ab931049da53c7587ec860a3e0ed23846e7f47a1c73a1f08b1f67427f4905132",
+      "geometry_path": "artifacts/baseline_fleet/manifests/JBC.stl"
     },
     {
       "name": "DTC",
@@ -118,7 +126,9 @@
       },
       "notes": "El Moctar, Shigunov & Zorn (2012) main particulars: Lpp 355.0 m, B 51.0 m, T 14.5 m, Cb 0.661, grad 173467 m^3. CORRECTED 2026-11-13 (round 2): this record previously carried B = 45.8 m with no cited displacement, so its reference was the closure Cb*L*B*T = 155834 m^3 and the error could not be seen. The cited volume 173467 m^3 (El Moctar et al. 2012) is reproduced to 0.0005 % by (L 355.0, B 51.0, T 14.5, Cb 0.661) and missed by 11.3 % by the old beam; L/B = 6.96 and B/T = 3.52 fit a post-Panamax container ship. G6b_reference_consistency now rejects the old quadruple (negative control mis_transcribed_particulars).",
       "midship_coefficient": 0.972,
-      "transom_ratio": 0.0
+      "transom_ratio": 0.0,
+      "geometry_sha256": "fd4783b2d13e49917609584db93d3209f1a7e6ff5663c2f861fa642dd25ba72f",
+      "geometry_path": "artifacts/baseline_fleet/manifests/DTC.stl"
     },
     {
       "name": "Series60",
@@ -140,7 +150,9 @@
       },
       "notes": "Parent-form parameters are the published series ratios, so the form family itself is the validated object here; the Cb=0.60 parent is reproduced by construction. Cm = 0.96 (literature-recalled, same offline caveat as the other particulars).",
       "midship_coefficient": 0.96,
-      "transom_ratio": 0.0
+      "transom_ratio": 0.0,
+      "geometry_sha256": "743c6ec8b1f221d25e7ba03e74ab40c2681321ba570dc7ea6a2acd9520da2503",
+      "geometry_path": "artifacts/baseline_fleet/manifests/Series60.stl"
     }
   ]
 }
