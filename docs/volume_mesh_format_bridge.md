@@ -200,3 +200,125 @@ Four independent checks, kept separate:
 python -m pytest tests/test_volume_mesh_su2_markers.py -q   # the marker contract
 python examples/meshio_volume_bridge/run_example.py         # table + JSON + 4-panel figure
 ```
+
+## 7. Third pass: gmsh 2.2, the format the solver stack actually reads
+
+**Date**: 2026-11-15 (m22246, re-open of TensorCAD#577, round 3)
+
+### 7.1 The residual gap, measured
+
+Sections 2 and 6 delivered the cells and the marked boundary for **SU2**. The other half of
+the open-source stack -- `gmsh` itself, `dolfin-convert`, `gmshio`/FEniCS, CalculiX,
+code_aster -- reads **gmsh msh**, and there the package had a hole with two edges:
+
+1. `FORMATS_SURFACE` classifies `gmsh` as a *surface* format, so
+   `write_meshio(path, tetrahedral_mesh, file_format="gmsh")` raised
+   `"format 'gmsh' is a surface format and only supports triangle cells"`. A body grid could
+   not leave the package in gmsh at all.
+2. Even if it could, the boundary would arrive unnamed. `meshio`'s gmsh 4.1 writer refuses a
+   multi-cell-type mesh without `gmsh:dim_tags` (`meshio._exceptions.WriteError: Specify
+   entity information ... to deal with more than one cell type`), and its 2.2 writer carries
+   physical tags only if the caller has already assembled them. So the `hull` / `bottom` /
+   `symmetry` names that §6 for SU2 would be lost, and `gmshio` would hand a solver one
+   unmarked surface.
+
+The temptation was to add `"gmsh"` to `FORMATS_VOLUME`. It was refused: that tuple *is* the
+classification the 18-combination matrix (`tests/test_meshio_format_matrix.py`,
+`scripts/meshio_matrix18.py`) is defined against, and reclassifying a format would silently
+change what an existing gate measures. A volume grid leaves through its own entry point
+instead.
+
+### 7.2 What was added
+
+`tensorcad.meshio_exchange` (2 functions, no new dependency -- the writer is ~90 lines of
+ASCII, the reader ~120):
+
+* `write_gmsh_volume_mesh(path, volume_mesh, *, patches=None, solid_name="solid")` -- writes
+  gmsh **2.2 ASCII** with one `$PhysicalNames` entry per patch at dimension 2 plus the volume
+  group `solid` at dimension 3 (tag 1, patches from tag 2). Points are `repr`-formatted, so a
+  read returns the *same doubles* the grid builder produced; each element carries the two
+  mandatory tags (physical, elementary) set to the physical tag, because gmsh's reader wants
+  the elementary entity to exist while several other tools only read the first tag.
+* `read_gmsh_volume_groups(path) -> VolumePatches` -- an independent parser (not a call into
+  meshio) that reconstructs vertices, tetrahedra and the *named* boundary patches, and refuses
+  what it cannot represent honestly: a non-2.x file, a binary file, an element without a
+  physical tag, a boundary quad, a file with no tetrahedra. `merged_points` and
+  `cancelled_faces` come back **zero** -- they describe the hex-grid conversion, which a
+  reader cannot reconstruct, and reporting a number there would be inventing one.
+
+### 7.3 Measured results
+
+`python examples/meshio_volume_bridge/run_example.py` →
+`runs/m19950_volume_bridge/{box,hull}_volume.msh` and `bridge_matrix.json`; the tables below
+are rendered from that JSON by `work/m22246_numbers.py`, not transcribed.
+
+<!-- BEGIN m22246 numbers -->
+| body | groups | verts | tets | boundary tri | V file [m³] | V tets [m³] | rel | watertight |
+|---|---|---|---|---|---|---|---|---|
+| box 2x1x0.6 | bottom top fore aft hull | 140 | 432 | 216 | 1.200000000000 | 1.200000000000 | 0 | yes |
+| Wigley body L10xB1xT0.625 | bottom hull | 1696 | 8280 | 1134 | 2.762123390480 | 2.762123390480 | 0 | yes |
+
+Readers of the same file (each an independent implementation):
+
+| body | this module | meshio | FEM handoff (`solver_interface`) | cells seen by handoff |
+|---|---|---|---|---|
+| box 2x1x0.6 | 0 | 0 | 0 | 432 tet / 216 tri |
+| Wigley body L10xB1xT0.625 | 0 | 0 | 0 | 8280 tet / 1134 tri |
+
+Physical-group areas against the closed-form / quadrature anchors:
+
+| body | patch | area [m²] | anchor [m²] | rel |
+|---|---|---|---|---|
+| box 2x1x0.6 | `bottom` | 2.000000000 | 2.000000000 | 8.882e-16 |
+| box 2x1x0.6 | `top` | 2.000000000 | 2.000000000 | 8.882e-16 |
+| box 2x1x0.6 | `fore` | 0.600000000 | 0.600000000 | 1.850e-16 |
+| box 2x1x0.6 | `aft` | 0.600000000 | 0.600000000 | 1.850e-16 |
+| box 2x1x0.6 | `hull` | 2.400000000 | 2.400000000 | 1.850e-16 |
+| Wigley body L10xB1xT0.625 | `bottom` | 6.655092593 | 6.666666667 | 1.736e-03 |
+| Wigley body L10xB1xT0.625 | `hull` | 14.839761791 | 14.879052246 | 2.641e-03 |
+
+`all_pass` of the run that produced these numbers: **True** (criteria in the JSON: `gmsh_volume_rel` < 1e-12, `gmsh_area_rel` < 0.01).
+<!-- END m22246 numbers -->
+
+What the three readers establish, kept separate:
+
+1. **Exactness, not tolerance.** Box and Wigley file volumes equal the source tetrahedra to
+   `0` (the doubles are the same doubles); the file's own skin reproduces the file's own
+   tetrahedra to round-off, and it is watertight -- a slit face from a collapsed column used
+   in one direction only would fail both.
+2. **A closed-form anchor.** A box has closed-form sides (`bottom = top = L·B`, `fore = aft =
+   B·H`, `hull = 2·L·H`), so the physical-group areas are a zero-error control for the naming
+   and the tag mapping.
+3. **Two foreign readers.** meshio's gmsh reader recovers the volume, both cell blocks and
+   the physical-name table; `tensorcad.solver_interface.read_gmsh_volume` -- the reader the
+   package's FEM handoff already uses -- recovers the same 8280 tetrahedra and the same 1134
+   boundary triangles. The Wigley `hull` area is 0.26 % below the wetted-surface quadrature,
+   which is the body's own piecewise-linear discretisation (25×9 → 49×17 → 97×25 closes it
+   0.264 % → 0.066 % → 0.023 %), not an error of the export; the box anchors are exact.
+
+### 7.4 What is still withheld
+
+* **A solver actually running the file is WITHHELD**, unchanged from §6.4: no `SU2_CFD`, and
+  no `gmsh`/`dolfin-convert` binary on this host (checked). What is claimed and tested is the
+  file *layout* (2.2 ASCII, element types 2 and 4, 1-based node indices, two tags per element,
+  `$PhysicalNames` ids matching the element tags) and that three independent readers agree.
+* **gmsh 4.x is not written.** It is the format gmsh now emits by default, but its entity
+  block needs per-point `dim_tags` that meshio itself refuses to derive, and 2.2 is what
+  every consumer named above still reads. Writing 4.x is a separate decision with its own
+  round-trip gate; refusing it loudly (`"re-export with gmsh -format msh2"`) beats writing a
+  file with invented entities.
+* **Quad and polygon boundary faces are refused** by the reader rather than triangulated. The
+  patches this module produces are triangles by construction; silently fanning a foreign quad
+  would change a patch's triangle count and its area in a way the caller never asked for.
+* `VolumeMesh` carries no units field, so the export declares metres and the ship frame (the
+  defaults of `volume_mesh_to_tetrahedral`) instead of inventing a unit. Both land in
+  `$Comments` and read back.
+* The CGNS metadata (§5.1) and VTK (§5.3) limitations are unchanged.
+
+### 7.5 Reproduce
+
+```bash
+python -m pytest tests/test_gmsh_volume_patches.py -q     # 16 passed: exactness, anchors, readers, refusals
+python examples/meshio_volume_bridge/run_example.py       # both tables above + 2 figures
+python work/m22246_numbers.py                             # rewrite the tables from the JSON
+```
