@@ -76,6 +76,13 @@ DECLARED_TOLERANCE_CAP = 0.05
 #: marker the checker reads to know which derivation a recorded band came from.
 DECLARED_BASIS_PREFIX = "declared contract"
 
+#: Safety factor of the grid-convergence index (GCI).  Roache's three-grid recommendation
+#: (Verification and Validation in Computational Fluid Dynamics, 1998/2002): with an
+#: observed order fitted from three levels a factor of 1.25 covers the order uncertainty.
+#: The band it produces is a *derived* criterion -- the extrapolated measurement must agree
+#: with the analytic reference within the band that the measurements' own convergence
+#: justifies -- so it is not a chosen number.
+GCI_SAFETY_FACTOR = 1.25
 ERROR, WARNING, NOTICE = "error", "warning", "notice"
 LEVELS: tuple[str, ...] = ("coarse", "fine")
 
@@ -272,6 +279,25 @@ class GoldenCase:
         """
         return ()
 
+    def levels(self) -> tuple[str, ...]:
+        """The measurement ladder; the last level is the acceptance level.
+
+        Two levels (``coarse``/``fine``) is the base discipline: the acceptance band is
+        twice the *last* coarse-to-fine change.  A case whose two-grid band is too loose to
+        see a small coherent regression declares a third level here; that level does not
+        widen the acceptance band (which stays a last-step two-grid bound), it is what the
+        grid-convergence assertion is extrapolated over.
+        """
+        return LEVELS
+
+    def refinement_factor(self, coarse_level: str, fine_level: str) -> float | None:
+        """Cell-size ratio ``h(coarse) / h(fine)``, or ``None`` when not declared.
+
+        This is the ratio the extrapolation is raised to, so it is computed from the
+        ladder, never typed: an invented ratio would silently rescale every band.
+        """
+        return None
+
 
 class WigleyGolden(GoldenCase):
     """Classic Wigley hull: every hydrostatic quantity has a closed form."""
@@ -290,10 +316,20 @@ class WigleyGolden(GoldenCase):
         "maximum_section_area_m2": "maximum_section_area",
     }
 
+    #: Ladder of grids.  The third level exists because the two-grid band on the analytic
+    #: metrics was 4.3e-3 while the extrapolated value reproduces the closed forms to ~6e-6
+    #: (tools/golden/convergence_study.py): the measured error was discretisation, not model
+    #: error, and only a third level can say so.
+    GRIDS: ClassVar[dict[str, tuple[int, int]]] = {
+        "coarse": (41, 13),
+        "fine": (161, 41),
+        "finer": (321, 81),
+    }
+
     def _parameters(self, level: str) -> Any:
         from . import wigley
 
-        nx, nz = {"coarse": (41, 13), "fine": (161, 41)}[level]
+        nx, nz = self.GRIDS[level]
         return wigley.reference_parameters(nx=nx, nz=nz)
 
     def measure(self, level: str) -> dict[str, float]:
@@ -310,9 +346,18 @@ class WigleyGolden(GoldenCase):
         return {key: float(analytic[key]) for key in self.METRICS}
 
     def geometry_sha256(self) -> str:
+        """Fingerprint of the acceptance grid the measurements are taken on."""
         from . import wigley
 
-        return _mesh_sha256(wigley.generate_wigley(self._parameters("fine")).mesh)
+        return _mesh_sha256(wigley.generate_wigley(self._parameters(self.levels()[-1])).mesh)
+
+    def levels(self) -> tuple[str, ...]:
+        return ("coarse", "fine", "finer")
+
+    def refinement_factor(self, coarse_level: str, fine_level: str) -> float:
+        coarse = self.GRIDS[coarse_level][1] - 1
+        fine = self.GRIDS[fine_level][1] - 1
+        return fine / coarse
 
 
 class Series60Golden(GoldenCase):
@@ -330,10 +375,21 @@ class Series60Golden(GoldenCase):
         "longitudinal_centre_buoyancy_m": "longitudinal_centre_buoyancy",
     }
 
+    #: Ladder of grids.  This case carries the one documented blind spot of the two-grid
+    #: criterion (``maximum_section_area_m2`` at 2.72e-2, docs/golden/mutation_audit.md):
+    #: volume / Cb / mid-section converge at order ~1.1 (the keel exponent singularity of
+    #: the section law), so a third level plus the extrapolation is the only way to hold
+    #: them below 1 % without paying for a fourth grid.
+    GRIDS: ClassVar[dict[str, tuple[int, int]]] = {
+        "coarse": (81, 25),
+        "fine": (161, 49),
+        "finer": (321, 97),
+    }
+
     def _parameters(self, level: str) -> Any:
         from . import series60
 
-        nx, nz = {"coarse": (81, 25), "fine": (161, 49)}[level]
+        nx, nz = self.GRIDS[level]
         return series60.Series60Parameters(nx=nx, nz=nz)
 
     def _exponents(self) -> tuple[float, float]:
@@ -390,10 +446,18 @@ class Series60Golden(GoldenCase):
         }
 
     def geometry_sha256(self) -> str:
-        """Fingerprint of the fine grid the measurements were taken on."""
+        """Fingerprint of the acceptance grid the measurements are taken on."""
         from . import series60
 
-        return _mesh_sha256(series60.generate_series60(self._parameters("fine")).mesh)
+        return _mesh_sha256(series60.generate_series60(self._parameters(self.levels()[-1])).mesh)
+
+    def levels(self) -> tuple[str, ...]:
+        return ("coarse", "fine", "finer")
+
+    def refinement_factor(self, coarse_level: str, fine_level: str) -> float:
+        coarse = self.GRIDS[coarse_level][1] - 1
+        fine = self.GRIDS[fine_level][1] - 1
+        return fine / coarse
 
 
 class SphereEllipsoidGolden(GoldenCase):
@@ -866,6 +930,202 @@ def _tolerance(
     )
 
 
+def _observed_order(change1: float, change2: float, r1: float, r2: float) -> float | None:
+    """Solve ``(r1^p - 1) / (1 - r2^-p) = |change1| / |change2|`` for the order ``p``.
+
+    The two refinement ratios are not assumed equal (the ladders are declared per case), so
+    the order is solved rather than read off a ratio of logs.  ``None`` means the two
+    consecutive changes cannot be explained by any positive order -- a metric that does not
+    move, or moves the wrong way -- and no extrapolation is claimed for it.
+    """
+    if abs(change1) <= 0.0 or abs(change2) <= 0.0:
+        return None
+    target = abs(change1) / abs(change2)
+
+    def residual(p: float) -> float:
+        return (r1**p - 1.0) / (1.0 - r2 ** (-p)) - target
+
+    low, high = 1e-3, 12.0
+    if not (residual(low) < 0.0 < residual(high)):
+        return None
+    for _ in range(200):
+        mid = 0.5 * (low + high)
+        if residual(mid) < 0.0:
+            low = mid
+        else:
+            high = mid
+    return 0.5 * (low + high)
+
+
+def _gci_estimates(
+    case: "GoldenCase",
+    levels: tuple[str, ...],
+    measurements: Mapping[str, Mapping[str, float]],
+    reference: Mapping[str, float],
+    findings: list["Finding"],
+) -> dict[str, tuple[float, float, str]]:
+    """Richardson extrapolant and its grid-convergence band, per reference metric.
+
+    With three levels ``v1, v2, v3`` and refinement ratios ``r1, r2`` the observed order
+    ``p`` makes two extrapolants: ``X12`` from the coarse pair and ``X23`` from the fine
+    pair.  The asserted value is ``X23`` (the one built on the finest information) and the
+    band is Roache's three-grid index ``Fs * |X23 - v3| / |reference|``: the extrapolated
+    value must agree with the analytic reference at least as well as the finest measurement
+    is estimated to be converged.  Both quantities are functions of the measurements, so
+    the criterion cannot be hand-picked -- and it is checked against its own derivation on
+    every run (:func:`_check_recorded_extrapolation`).
+    """
+    ladder = levels[-3:]
+    r1 = case.refinement_factor(ladder[0], ladder[1])
+    r2 = case.refinement_factor(ladder[1], ladder[2])
+    if r1 is None or r2 is None or r1 <= 1.0 or r2 <= 1.0:
+        findings.append(
+            Finding(
+                ERROR,
+                "richardson_ratio_missing",
+                case.name,
+                f"the ladder {ladder} has no declared refinement factor, so no "
+                "grid-convergence estimate can be taken over it",
+            )
+        )
+        return {}
+    estimates: dict[str, tuple[float, float, str]] = {}
+    skipped: list[str] = []
+    for key in sorted(reference):
+        try:
+            v1 = float(measurements[ladder[0]][key])
+            v2 = float(measurements[ladder[1]][key])
+            v3 = float(measurements[ladder[2]][key])
+        except KeyError:
+            skipped.append(key)
+            continue
+        p = _observed_order(v2 - v1, v3 - v2, r1, r2)
+        if p is None:
+            skipped.append(key)
+            continue
+        x12 = v2 - (v2 - v1) / (r1**p - 1.0)
+        x23 = v3 - (v3 - v2) / (r2**p - 1.0)
+        scale = abs(reference[key]) if reference[key] else 1.0
+        # Two independent error terms, both functions of the measurements: the estimated
+        # remaining discretisation error of the finest level (|X23 - v3|) and the observed
+        # instability of the extrapolant between the two refinement steps (|X23 - X12|).
+        # The second is what stops a non-asymptotic sequence from claiming convergence it
+        # does not have: when the order is drifting, the two extrapolants disagree and the
+        # band widens until it is honest again.
+        remaining = abs(x23 - v3)
+        instability = max(remaining, abs(x23 - x12))
+        band = max(GCI_SAFETY_FACTOR * instability / scale, TOLERANCE_FLOOR)
+        basis = (
+            f"GCI: {GCI_SAFETY_FACTOR:g} x max(|extrapolated - {ladder[2]}|, "
+            f"|X23 - X12|) / |reference| = {GCI_SAFETY_FACTOR:g} x "
+            f"{instability / scale:.3e} (remaining {remaining / scale:.3e}; observed order "
+            f"p = {p:.2f} over r = {r1:.4f}, {r2:.4f}: {x12:.9g} then {x23:.9g})"
+        )
+        estimates[key] = (x23, band, basis)
+    if skipped:
+        findings.append(
+            Finding(
+                WARNING,
+                "richardson_unavailable",
+                case.name,
+                f"no grid-convergence estimate for {sorted(skipped)}: those metrics do not "
+                "move consistently between the three levels (exactly integrated, or moving "
+                "the wrong way), so their two-grid band is the only criterion in force",
+            )
+        )
+    return estimates
+
+
+def _check_recorded_extrapolation(
+    case: "GoldenCase",
+    blessed: Mapping[str, Any],
+    reference: Mapping[str, float],
+    findings: list["Finding"],
+) -> None:
+    """The recorded grid-convergence bands must be the ones this code derives.
+
+    Same discipline as :func:`_check_recorded_criterion`: the baseline stores the bands a
+    ``--bless`` derived, and every run -- quick included, since the derivation only needs
+    the blessed measurements -- recomputes them.  A hand-widened GCI band is refused.
+    """
+    levels = case.levels()
+    recorded = blessed.get("extrapolated") or {}
+    if len(levels) < 3:
+        if recorded:
+            findings.append(
+                Finding(
+                    ERROR,
+                    "extrapolation_unknown_criterion",
+                    case.name,
+                    "the baseline records grid-convergence bands for a case whose ladder has "
+                    "no third level",
+                )
+            )
+        return
+    if not blessed:
+        return
+    if not isinstance(recorded, Mapping) or not recorded:
+        findings.append(
+            Finding(
+                ERROR,
+                "extrapolation_not_blessed",
+                case.name,
+                f"the ladder {levels} supports a grid-convergence assertion but the baseline "
+                "records none for this case; re-run '--bless' so the band is recorded",
+            )
+        )
+        return
+    measurements = blessed.get("measurements") or {}
+    if not isinstance(measurements, Mapping):
+        measurements = {}
+    derived = _gci_estimates(case, levels, measurements, reference, [])
+    if set(recorded) != set(derived):
+        findings.append(
+            Finding(
+                ERROR,
+                "extrapolation_not_derived",
+                case.name,
+                f"the baseline records grid-convergence bands for {sorted(recorded)} but the "
+                f"measurements derive them for {sorted(derived)}",
+            )
+        )
+    for key in sorted(set(recorded) & set(derived)):
+        entry = recorded[key] if isinstance(recorded[key], Mapping) else {}
+        value, band, basis = derived[key]
+        for field, expected in (("value", value), ("tolerance", band)):
+            stored = entry.get(field)
+            if not isinstance(stored, (int, float)) or isinstance(stored, bool):
+                findings.append(
+                    Finding(
+                        ERROR,
+                        "extrapolation_not_derived",
+                        case.name,
+                        f"'{key}' records {field} {stored!r}, which is not a number",
+                        metric=key,
+                    )
+                )
+                continue
+            difference = _relative(float(stored) - float(expected), float(expected))
+            if abs(difference) > REFERENCE_TOLERANCE:
+                findings.append(
+                    Finding(
+                        ERROR,
+                        "extrapolation_not_derived",
+                        case.name,
+                        (
+                            f"'{key}' records {field} {float(stored):.6g} but its own "
+                            f"derivation gives {float(expected):.6g} (relative difference "
+                            f"{difference:.3e}; {basis}). The recorded grid-convergence band "
+                            "is not the one the checker derives; a criterion may not be chosen"
+                        ),
+                        metric=key,
+                    )
+                )
+    if not findings and isinstance(recorded, Mapping):
+        # provenance only: the derivation is reproduced, so nothing to report
+        pass
+
+
 def _check_recorded_criterion(
     case: "GoldenCase",
     blessed: Mapping[str, Any],
@@ -890,8 +1150,13 @@ def _check_recorded_criterion(
     measurements = blessed.get("measurements") or {}
     if not isinstance(measurements, Mapping):
         measurements = {}
-    coarse = measurements.get("coarse") or {}
-    fine = measurements.get("fine") or {}
+    ladder = case.levels()
+    if len(ladder) >= 3:
+        acceptance, partner = ladder[-2], ladder[-3]
+    else:
+        acceptance, partner = ladder[-1], (ladder[0] if len(ladder) > 1 else None)
+    coarse = (measurements.get(partner) if partner is not None else None) or {}
+    fine = measurements.get(acceptance) or {}
     if not isinstance(coarse, Mapping) or not isinstance(fine, Mapping):
         coarse, fine = {}, {}
 
@@ -1046,7 +1311,8 @@ def evaluate_case(
 ) -> CaseResult:
     started = time.perf_counter()
     result = CaseResult(name=case.name, title=case.title, reference_source=case.reference_source)
-    levels = LEVELS[:1] if quick else LEVELS
+    ladder = case.levels()
+    levels = ladder[:1] if quick else ladder
     try:
         for level in levels:
             result.measurements[level] = {
@@ -1062,14 +1328,24 @@ def evaluate_case(
         return result
 
     reference = result.reference
-    finest = result.measurements[levels[-1]]
-    coarsest = result.measurements[levels[0]] if len(levels) > 1 else None
+    # The acceptance level and its two-grid partner.  A third level in the ladder does not
+    # move the acceptance level: it is the extra information the grid-convergence assertion
+    # is extrapolated over.  Moving acceptance to the third level would make the cheap hook
+    # (coarse measurement only) assert a band its own grid cannot meet, which is how a gate
+    # starts lying in the other direction.
+    if len(levels) >= 3:
+        acceptance, partner = levels[-2], levels[-3]
+    else:
+        acceptance, partner = levels[-1], (levels[0] if len(levels) > 1 else None)
+    finest = result.measurements[acceptance]
+    coarsest = result.measurements[partner] if partner is not None else None
     result.invariants = case.invariants(finest)
     result.known_limitations = case.known_limitations(finest)
     declared_tolerances = _checked_declarations(case, finest, reference, findings)
 
     blessed = dict(blessed or {})
     _check_recorded_criterion(case, blessed, reference, declared_tolerances, findings)
+    _check_recorded_extrapolation(case, blessed, reference, findings)
     if not blessed and not baseline_optional:
         findings.append(
             Finding(
@@ -1183,6 +1459,40 @@ def evaluate_case(
                     metric=key,
                 )
             )
+
+    # ---- grid convergence: the extrapolated value against the same reference ----------
+    if not quick and len(levels) >= 3:
+        for key, (value, band, basis) in _gci_estimates(
+            case, levels, result.measurements, reference, findings
+        ).items():
+            error = (value - reference[key]) / reference[key] if reference[key] else value - reference[key]
+            metric = MetricCheck(
+                name=key,
+                value=value,
+                kind="richardson",
+                reference=reference[key],
+                relative_error=error,
+                tolerance=band,
+                basis=basis,
+                origin="richardson",
+            )
+            result.metrics.append(metric)
+            if not metric.passed:
+                findings.append(
+                    Finding(
+                        ERROR,
+                        "richardson_mismatch",
+                        case.name,
+                        (
+                            f"{key} extrapolated to {value:.9g} vs reference "
+                            f"{reference[key]:.9g} = {error:+.3%}, outside the "
+                            f"grid-convergence band {band:.3%} ({basis}): the three levels "
+                            "converge consistently but not to the analytic value, so a "
+                            "discretisation error does not explain the gap"
+                        ),
+                        metric=key,
+                    )
+                )
 
     # ---- invariants: identities over the measured numbers -----------------------------
     for key, (residual, tolerance, basis) in result.invariants.items():
@@ -1470,6 +1780,15 @@ def bless(
                 for metric in case.metrics
                 if metric.kind == "analytic"
             },
+            "extrapolated": {
+                metric.name: {
+                    "value": _number(metric.value),
+                    "tolerance": _number(metric.tolerance) if metric.tolerance is not None else None,
+                    "basis": metric.basis,
+                }
+                for metric in case.metrics
+                if metric.kind == "richardson"
+            },
             "invariants": {
                 key: {
                     "residual": _number(residual),
@@ -1493,6 +1812,12 @@ def bless(
             "acceptance_tolerance": (
                 "two-grid: 2 x |fine - coarse| / |reference|, floor "
                 f"{TOLERANCE_FLOOR:g} (relative)"
+            ),
+            "richardson_tolerance": (
+                f"GCI: {GCI_SAFETY_FACTOR:g} x |extrapolated - finest| / |reference|, floor "
+                f"{TOLERANCE_FLOOR:g} (relative): on a three-level ladder the extrapolated "
+                "value must agree with the analytic reference within the band the "
+                "measurements' own convergence justifies"
             ),
             "drift_tolerance": f"{DRIFT_TOLERANCE:g} (relative, vs the blessed measurement)",
             "reference_tolerance": (
@@ -1524,8 +1849,9 @@ def format_table(result: SuiteResult) -> str:
             tolerance = "" if metric.tolerance is None else f"{metric.tolerance:.2e}"
             reference = "" if metric.reference is None else f"{metric.reference:.9g}"
             flag = "" if metric.passed else "  <-- FAIL"
+            label = f"{metric.name} [GCI]" if metric.kind == "richardson" else metric.name
             lines.append(
-                f"{case.name:<17}{metric.name:<40}{metric.value:>16.9g}{reference:>16}"
+                f"{case.name:<17}{label:<40}{metric.value:>16.9g}{reference:>16}"
                 f"{error:>11}{tolerance:>10}{flag}"
             )
     for limitation in (entry for case in result.cases for entry in case.known_limitations):
