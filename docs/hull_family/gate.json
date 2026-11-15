@@ -1,0 +1,68 @@
+{
+  "file": "tensorcad/hull.py",
+  "sha256_before": "034d63f79b4ffaffa246bd6616c499e451dd07cbac5146bfbea10adbdd465813",
+  "sha256_after": "034d63f79b4ffaffa246bd6616c499e451dd07cbac5146bfbea10adbdd465813",
+  "killed": 5,
+  "total": 5,
+  "mutants": [
+    {
+      "name": "HF-1-target-cb-ignored",
+      "defect": "cb=0.60,",
+      "claim": "the unified entry must use the Cb it was given, not the first parent form",
+      "verdict": "KILLED",
+      "failed_tests": 6,
+      "failed_examples": [
+        "FAILED tests/test_hull_family.py::TestSeries60Dispatch::test_mesh_is_identical_to_the_family_module",
+        "FAILED tests/test_hull_family.py::TestSeries60Dispatch::test_offsets_keep_the_full_girth_convention",
+        "FAILED tests/test_hull_family.py::TestSeries60Dispatch::test_five_parent_forms_track_their_closed_forms",
+        "FAILED tests/test_hull_family.py::TestSeries60Dispatch::test_measured_block_coefficient_matches_the_target"
+      ]
+    },
+    {
+      "name": "HF-2-offsets-half-breadth",
+      "defect": "return tuple((x, half) for x, half in half_breadths)",
+      "claim": "HullModel.offsets is full girth width; the family module reports half-breadths",
+      "verdict": "KILLED",
+      "failed_tests": 2,
+      "failed_examples": [
+        "FAILED tests/test_hull_family.py::TestSeries60Dispatch::test_offsets_keep_the_full_girth_convention",
+        "FAILED tests/test_hull_family.py::TestTransomAndBulb::test_transom_sets_the_aft_deck_breadth_and_stays_watertight"
+      ]
+    },
+    {
+      "name": "HF-3-family-branch-dead",
+      "defect": "if False:\n        return _generate_family_hull(p)",
+      "claim": "family='series60' must not silently fall back to the sine loft",
+      "verdict": "KILLED",
+      "failed_tests": 3,
+      "failed_examples": [
+        "FAILED tests/test_hull_family.py::TestSeries60Dispatch::test_metadata_carries_the_family_report",
+        "FAILED tests/test_hull_family.py::TestTransomAndBulb::test_transom_sets_the_aft_deck_breadth_and_stays_watertight",
+        "FAILED tests/test_hull_family.py::TestTransomAndBulb::test_bulb_is_a_separate_solid_and_leaves_the_hull_displacement_alone"
+      ]
+    },
+    {
+      "name": "HF-4-family-validation-dropped",
+      "defect": "pass  # mutant: family errors dropped",
+      "claim": "a knob a family cannot honour must be refused, not ignored",
+      "verdict": "KILLED",
+      "failed_tests": 5,
+      "failed_examples": [
+        "FAILED tests/test_hull_family.py::TestRefusalsInsteadOfSilence::test_series60_without_a_target_cb_is_refused",
+        "FAILED tests/test_hull_family.py::TestRefusalsInsteadOfSilence::test_series60_knobs_are_refused_on_the_sine_family",
+        "FAILED tests/test_hull_family.py::TestRefusalsInsteadOfSilence::test_sine_exponents_are_refused_on_the_series60_family",
+        "FAILED tests/test_hull_family.py::TestRefusalsInsteadOfSilence::test_unknown_family_is_named"
+      ]
+    },
+    {
+      "name": "HF-5-transom-dropped",
+      "defect": "transom_ratio=0.0,",
+      "claim": "the transom ratio must reach the station law",
+      "verdict": "KILLED",
+      "failed_tests": 1,
+      "failed_examples": [
+        "FAILED tests/test_hull_family.py::TestTransomAndBulb::test_transom_sets_the_aft_deck_breadth_and_stays_watertight"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 """Generate ``docs/hull_family.md`` from the evidence JSON and run the family mutants.
 
-The document is assembled from ``artifacts/hull_family/hull_family.json`` so no
-number is transcribed, and the mutation run answers one question: do the new tests
+The document is assembled from ``docs/hull_family/evidence.json`` so no number is
+transcribed, and the mutation run answers one question: do the new tests
 actually hold the dispatch in place, or do they merely execute it?
 
 Run: ``python tools/hull_family/gen_doc_and_gate.py`` (writes the page, then
@@ -16,9 +16,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / "artifacts" / "hull_family" / "hull_family.json"
+DATA = ROOT / "docs" / "hull_family" / "evidence.json"
 DOC = ROOT / "docs" / "hull_family.md"
-GATE = ROOT / "artifacts" / "hull_family" / "gate_power.json"
+GATE = ROOT / "docs" / "hull_family" / "gate.json"
 HULL = ROOT / "tensorcad" / "hull.py"
 
 MUTANTS = (
@@ -51,15 +51,17 @@ def pct(value: float) -> str:
 
 def build_doc(data: dict, gate: dict | None) -> str:
     parents = data["parents"]
+    figure = data["figure"]
     lines: list[str] = []
     L = data["principal_dimensions_m"]
     lines += [
         "# The unified hull-family entry: Series 60 through `tensorcad.hull`",
         "",
         "**Scope**: `tensorcad/hull.py` (`family` dispatch) · **Family module**:",
-        "`tensorcad.series60` · **Evidence**: `artifacts/hull_family/hull_family.json`",
+        f"`tensorcad.series60` · **Evidence**: `{DATA.relative_to(ROOT)}`",
         "(regenerate with `python tools/hull_family/report.py`) · **Figure**:",
-        "`docs/hull_family.png` · **Gate power**: `artifacts/hull_family/gate_power.json`",
+        f"`{figure['png']}` (`{figure['pixels'][0]} x {figure['pixels'][1]}` px) · "
+        f"**Gate power**: `{GATE.relative_to(ROOT)}`",
         "",
         "## 1. Case",
         "",
