@@ -158,3 +158,70 @@ The last two are the point of the exercise: they are killed by exactly one check
 fingerprint assertion and the invariant identities are shown to be load-bearing rather
 than redundant decoration. `tests/test_golden_regression.py` keeps a fast unit-level
 version of each claim plus one end-to-end run of the harness.
+
+## DTMB 5415: the published particulars are asserted, not only drift-locked
+
+The 5415 case used to assert exactly one number, the holdout residual of the reduced model.
+Its displacement, waterline beam, station length and block coefficient were *drift-locked*:
+the gate could tell that they had **changed**, never that they were **wrong**. That is the
+same gap the ellipsoid area had before it was bound to converged quadrature, and it is now
+closed the same way — against a reference that comes from outside this repository's
+geometry code.
+
+### Where the reference comes from
+
+`tensorcad.dtmb5415.readme_reference()` derives the full-scale principal particulars from
+the dataset README's **model-scale table** (`Lpp` 5.720 m, `B` 0.760 m, `T` 0.248 m,
+displaced mass 0.549 t at rho = 998.5 kg/m3), scaled by the case's own
+`SCALE_LAMBDA = 142.0 / 5.720`. Nothing is typed into the golden case:
+
+| quantity | reference | derived as |
+|---|---|---|
+| displacement volume | 8412.038 m3 | 0.549 t / 998.5 kg/m3 x lambda^3 |
+| Cb | 0.50999 | reference volume / (Lpp · B · T) — derived, not quoted |
+| station span | 142.000 m | README `geometry_scale` |
+| beam | 18.867 m | 0.760 m x lambda |
+
+The tool that first established the hull (`tools/dtmb5415_param/verify_geometry.py`) now
+delegates to the same function, so the contract and the gate cannot drift apart.
+
+### The band is quoted from the hull's own contract
+
+A published table has no coarse-to-fine signal, so the derived two-grid bound collapses to
+its 1e-4 floor and would reject the reference's own four-significant-figure precision. The
+case therefore **declares** its band from the geometry contract that already owns this
+comparison: 3 % accept / 15 % reject, declared in `verify_geometry.py` *before* its numbers
+were looked at. The engine supports this through `GoldenCase.reference_tolerance()` and
+refuses an unjustified declaration three ways (unknown metric, empty basis, or a band above
+`DECLARED_TOLERANCE_CAP = 5 %`), so "declare 40 % and pass" is an error, not a shortcut.
+
+| metric | measured | published | error | band |
+|---|---|---|---|---|
+| displacement volume | 8452.758 m3 | 8412.038 m3 | **+0.48 %** | 3 % |
+| Cb | 0.501988 | 0.509992 | **-1.57 %** | 3 % |
+| station span | 143.265 m | 142.000 m | **+0.89 %** | 3 % |
+| beam at design WL | 19.091 m | 18.867 m | **+1.18 %** | 3 % |
+
+All four are inside the band; Cb is the binding one because it carries the whole
+definitional mismatch (published `Lpp · B_moulded · T` against the measured station span,
+WL beam and moulded draft) and is still well inside 3 %.
+
+### What is deliberately *not* asserted
+
+* **`draft_m`** — `hydrostatics()` cuts the hull at `DRAFT_M = 0.248 m x lambda`, so the
+  reported draft *is* the README draft scaled to full size. Asserting it would compare a
+  constant with itself; it stays a drift-locked measurement and the band's basis says so.
+* **Surface-integral displacement** — still withheld, for the reason recorded in the case's
+  `known_limitations`: the shipped 5415 shell is an open sheet with one 722-edge boundary
+  loop, and its tetrahedron sum is not a volume. The displacement now asserted is the
+  dataset/station-area one, cross-checked against the README table; the surfaced integral
+  remains a disclosed gap rather than a passing number.
+
+### Teeth
+
+`tests/test_golden_regression.py::test_dtmb5415_particulars_gate_has_teeth` corrupts the
+README displaced mass by 10 % (what a unit slip looks like) and requires the gate to go red
+twice over: `reference_not_reproducible` (the stored reference no longer follows its source)
+and `reference_mismatch` on the displacement (the measurement left the band).
+
+![DTMB 5415 particulars](golden/dtmb5415_particulars.png)

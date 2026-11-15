@@ -39,7 +39,7 @@
           "asserted": false,
           "boundary_component_count": 1,
           "boundary_edge_count": 722,
-          "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld and only the dataset/station-area displacement is reported. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
+          "detail": "the shipped 5415 shell is an open sheet, not a solid: one boundary loop of 722 edges (deck edge plus the stem seam). Surface-integral displacement is therefore withheld: the displacement asserted on this case is the dataset/station-area one, cross-checked against the README particulars table (see reference), not an integral over this shell. Passing closed=True to compute_hydrostatics on this shell returns the signed tetrahedron sum of an open surface (negative here), which is not a volume; the previous 'relative_discrepancy' of 2.6 was measuring that artifact, not an integration error. Closing the sheet is not a one-liner: after welding, mesh_repair.boundary_loops refuses this boundary (a vertex is walked by two walks at the stem pinch), so a watertight repair needs the seam stitched first.",
           "displacement_volume_m3": 8452.757810023813,
           "id": "displacement-withheld-open-shell",
           "signed_tetra_sum_open_shell_m3": -13658.368296262934
@@ -94,14 +94,34 @@
         }
       },
       "reference": {
-        "holdout_rms_m": 0.11738199454341851
+        "block_coefficient": 0.509991541742904,
+        "displacement_volume_m3": 8412.037925248767,
+        "holdout_rms_m": 0.11738199454341851,
+        "length_stations_m": 142,
+        "waterline_beam_m": 18.86713286713287
       },
-      "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]",
+      "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]; principal particulars from tensorcad.dtmb5415.readme_reference() (dataset README model-scale table x lambda)",
       "title": "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)",
       "tolerances": {
+        "block_coefficient": {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; Cb over the published L.B.T vs Cb over the measured station span/WL beam/moulded draft; draft_m (= 6.1566 m) is an input and is not asserted",
+          "value": 0.03
+        },
+        "displacement_volume_m3": {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; displacement volume at the design waterline; draft_m (= 6.1566 m) is an input and is not asserted",
+          "value": 0.03
+        },
         "holdout_rms_m": {
           "basis": "two-grid change 0.000e+00 is below the floor, so the floor 0.0001 applies",
           "value": 0.0001
+        },
+        "length_stations_m": {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; station span vs published Lpp: the mesh spans the station grid, which runs ~0.9 % past Lpp; draft_m (= 6.1566 m) is an input and is not asserted",
+          "value": 0.03
+        },
+        "waterline_beam_m": {
+          "basis": "declared contract: 3% band of the hull's own pre-declared geometry contract (tools/dtmb5415_param/verify_geometry.py: 3 % accept, 15 % reject), reference = dataset README table x lambda; beam at the design waterline vs published moulded B_max: the two differ by the flare above the WL; draft_m (= 6.1566 m) is an input and is not asserted",
+          "value": 0.03
         }
       }
     },
@@ -343,8 +363,8 @@
   },
   "provenance": {
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "72762a77f1f303be9035ea65f132bed4c23e06e340625183059f83de709c38de",
-    "git_commit": "c772985a66c550b316b9dcfb1bec53d80e4d69b3",
+    "geometry_fingerprint": "0c8870b5ff5b921cfcab27c4b2b445a4503145333e4898db7db49b80b5b6b96c",
+    "git_commit": "ae83da9ceaf5f82b6e5bacba5f9fc55e4d731f06",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },
