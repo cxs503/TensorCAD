@@ -33,6 +33,9 @@ DEFAULT_DOC = ROOT / "docs" / "perf_scale_10m.md"
 DEFAULT_MESH = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_mesh.json"
 DEFAULT_VOXEL = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_voxel.json"
 DEFAULT_FLEET3PT = ROOT / "benchmarks" / "perf_scale" / "ladder_fleet_10m_3pt.json"
+DEFAULT_IMPORT = (
+    ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_import.json"
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -42,6 +45,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--voxel", default=str(DEFAULT_VOXEL))
     parser.add_argument("--fleet3pt", default=str(DEFAULT_FLEET3PT),
                         help="multi-body 10^6-10^7 ladder JSON (scripts/perf_scale_10m.py --bases)")
+    parser.add_argument("--import-run", dest="import_run", default=str(DEFAULT_IMPORT),
+                        help="OBJ import/export ladder JSON (obj_write/obj_read)")
     parser.add_argument("--write", action="store_true", help="rewrite the document")
     parser.add_argument("--check", action="store_true", help="verify (default)")
     args = parser.parse_args(argv)
@@ -51,6 +56,7 @@ def main(argv: list[str] | None = None) -> int:
         "mesh": load_artifact(args.mesh),
         "voxel": load_artifact(args.voxel),
         "fleet3pt": load_artifact(args.fleet3pt),
+        "import_run": load_artifact(args.import_run),
     }
     text = doc_path.read_text(encoding="utf-8")
 
