@@ -1,0 +1,22 @@
+faces 19 units MM metres_per_unit 0.001
+--- face 0 surface=bspline domain=(-176.1,125.7)x(-19.74,12.19)
+    surface bbox [(-314.115, -13.258), (-8.162, 31.802), (-0.04, 0.031)]
+    loop 0: 34 points bbox [(-312.0, -16.012), (0.0, 26.6), (-0.001, 0.001)]
+      point[0]=(-16.012, 0.0, 0.001) best uv=(125.5,12.19) residual=8.0843e+00
+      point[17]=(-200.837, 26.6, 0.0) best uv=(-140,-17.48) residual=6.3190e-03
+    loop 1: 2 points bbox [(-244.476, -72.758), (28.999, 29.0), (-28.0, -28.0)]
+      point[0]=(-72.758, 28.999, -28.0) best uv=(-150,12.19) residual=2.8400e+01
+      point[1]=(-244.476, 29.0, -28.0) best uv=(-161.2,-19.74) residual=2.7994e+01
+    loop 2: 34 points bbox [(-173.108, 122.778), (-19.417, 11.872), (0.0, 0.0)]
+      point[0]=(122.778, 4.099, 0.0) best uv=(125.7,12.19) residual=1.3659e+02
+      point[17]=(-62.691, -17.565, 0.0) best uv=(125.7,-10.31) residual=1.0717e+01
+    uv_loops provided: [None, None, None]
+--- face 1 surface=bspline domain=(0,8.305)x(0,16.01)
+    surface bbox [(-323.498, -312.001), (0.0, 15.359), (-28.001, -20.8)]
+    loop 0: 7 points bbox [(-323.498, -312.001), (0.0, 15.359), (-28.001, -20.8)]
+      point[0]=(-312.001, 11.445, -20.8) best uv=(0,0) residual=0.0000e+00
+      point[3]=(-320.0, 0.0, -20.8) best uv=(8.305,0) residual=0.0000e+00
+    uv_loops provided: [7]
+--- face 2 surface=bspline domain=(0,31.11)x(0,128.7)
+    surface bbox [(-288.001, -160.0), (20.953, 29.0), (-28.0, -0.0)]
+    loop 0: 47 points bbox [(-288.001, -160.0), (9.187, 29.01), (-28.0, 0.0)]
