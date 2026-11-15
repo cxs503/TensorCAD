@@ -734,6 +734,16 @@
               "unit_basis": "volume"
             },
             {
+              "family": "SIMMAN-SERIES",
+              "value": 312622.0,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "312622",
+              "label": "5.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%),",
+              "unit_basis": "volume"
+            },
+            {
               "family": "JSR-2017",
               "value": 312622.439,
               "source": "kvlcc2_ugent",
@@ -793,6 +803,16 @@
               "unit_basis": "volume"
             },
             {
+              "family": "SIMMAN-SERIES",
+              "value": 0.8098,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "0.8098",
+              "label": "0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%), fwd + 3.48 3.48 Propeller Type FP FP No. of blades",
+              "unit_basis": "volume"
+            },
+            {
               "family": "JSR-2017",
               "value": 0.8098,
               "source": "kvlcc2_ugent",
@@ -840,6 +860,16 @@
             {
               "family": "SIMMAN-SERIES",
               "value": 3.48,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "3.48",
+              "label": ") 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%), fwd + 3.48 3.48 Propeller Type FP FP No. of blades 4 4 Diameter (m) 9.86 0.0986 P/D (0.7",
+              "unit_basis": "volume"
+            },
+            {
+              "family": "SIMMAN-SERIES",
+              "value": 3.48,
               "source": "simman2014_kvlcc2",
               "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
               "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
@@ -872,6 +902,16 @@
             }
           ],
           "entries": [
+            {
+              "family": "SIMMAN-SERIES",
+              "value": 325.5,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "325.5",
+              "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displ",
+              "unit_basis": "volume"
+            },
             {
               "family": "SIMMAN-SERIES",
               "value": 325.5,
@@ -936,6 +976,16 @@
               "unit_basis": "volume"
             },
             {
+              "family": "SIMMAN-SERIES",
+              "value": 320.0,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "320.0",
+              "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for",
+              "unit_basis": "volume"
+            },
+            {
               "family": "JSR-2017",
               "value": 320.0,
               "source": "kvlcc2_ugent",
@@ -968,11 +1018,11 @@
           ]
         },
         "beam": {
-          "verdict": "CONFLICT",
-          "disputed": true,
+          "verdict": "CROSS_VERIFIED",
+          "disputed": false,
           "independent_families": 2,
           "tolerance": 0.005,
-          "range_relative": 1.6363636363636365,
+          "range_relative": 0.0,
           "values": [
             {
               "family": "JSR-2017",
@@ -980,7 +1030,7 @@
             },
             {
               "family": "SIMMAN-SERIES",
-              "value": 580.0
+              "value": 58.0
             }
           ],
           "entries": [
@@ -992,6 +1042,16 @@
               "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
               "raw": "58.0",
               "label": "Kwang-Jun Paik 3 Table 1 Principal dimensions of KVLCC2 (SIMMAN2008) pp L 320.0 m B 58.0 m D 30.0 m T 20.8 m \uf0d1 312622 3 m B C 0.8098 0 U 15.5 knots (7.973m/s) pp zz",
+              "unit_basis": "volume"
+            },
+            {
+              "family": "SIMMAN-SERIES",
+              "value": 58.0,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "58",
+              "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622",
               "unit_basis": "volume"
             },
             {
@@ -1068,6 +1128,16 @@
               "unit_basis": "volume"
             },
             {
+              "family": "SIMMAN-SERIES",
+              "value": 20.8,
+              "source": "kvlcc2_osaka",
+              "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+              "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+              "raw": "20.8",
+              "label": "1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71",
+              "unit_basis": "volume"
+            },
+            {
               "family": "JSR-2017",
               "value": 20.8,
               "source": "kvlcc2_ugent",
@@ -1100,9 +1170,7 @@
           ]
         }
       },
-      "published_disputed": [
-        "beam"
-      ],
+      "published_disputed": [],
       "published_reference_unresolved": [],
       "published_cross_refs": {
         "displacement_volume": [
