@@ -274,3 +274,81 @@ python scripts/perf_scale_10m.py --base 2001:501 --copies 2,3 --n-queries 2000 \
   报告粒度或释放时机问题。**本单不基于 RSS 给出 10⁷ 内存结论**，需单独标定。
 - 体数只有 2 和 3（无第三个规模点），所以复杂度门 `not_run`。要拿到 10⁷ 带的指数门，
   需再补一档，例如 `--base 1281:321 --copies 2,4,8`（1.6e6/3.3e6/6.6e6/1.3e7）。
+
+---
+
+## 9. 三点阶梯：把 10^6–10^7 带的指数门从 not_run 变成可判定（机制完成，10^7 重算排队中）
+
+### 9.1 为什么 §8.3 的指数门必然全部 not_run
+
+`scaling_gates()` 在**一个（子任务, 体数）分组内**拟合 log(秒) vs log(规模)。§8.3 的扶手只有
+**一个基础档**（2001×501）× 两个体数（2、3），于是每个分组只有 **1 个规模点**：四个子任务的
+not_run 不是数据坏了，而是阶梯形状本身不可能拟合指数。§8.5 末尾已把这条写成欠账。
+
+本单落地的修法两件：
+
+1. `scripts/perf_scale_10m.py --bases "641:161,1281:321,2001:501"`：**多基础档**，同一体数下
+   得到 3 个规模点 → 分组内可拟合指数（`--base` 单档用法保持不变）。
+2. `tensorcad.perf_benchmark.FLEET_SUBTASKS`：多体扶手只声明**适用**子任务
+   （`point_locate_accel`、`volume`）。`point_locate`（暴力参考假定星形单体）与 `voxelize`
+   （按网格分辨率而非网格规模成阶梯）改为每档一条 `status=not_run` + 原因，不再跑出 `failed`
+   行——`failed` 读起来像测量事故，实际是"结构上不适用"。
+
+### 9.2 机制验证（本机小阶梯：门真的会变 measured）
+
+命令：`python -m tensorcad.perf_benchmark --fleet-tier --ladder "21,9;41,13;61,19"
+--fleet-copies 2 --n-queries 200 --output benchmarks/perf_scale/ladder_3pt_mechanism_smoke.json`
+
+| 门 | 判定 | 细节 |
+|---|---|---|
+| `scaling_fleet_assemble[x2]` | pass | exponent=0.94 (limit 1.50), R^2=1.000, 3 sizes 1,356..8,876 |
+| `scaling_load` | pass | exponent=0.88 (limit 1.50), R^2=0.977, 3 sizes 678..4,438 |
+| `scaling_point_locate_accel[x2]` | pass | exponent=0.22 (limit 0.80), R^2=0.512, 3 sizes 1,356..8,876 |
+| `scaling_volume[x2]` | pass | exponent=0.91 (limit 1.50), R^2=0.954, 3 sizes 1,356..8,876 |
+
+gates_checked=4、gates_not_run=0、verdict=**pass**。
+这些指数来自 10^3–10^4 三角面的合成小阶梯，**只证明"三点阶梯 → 门可判定"这条机制，
+不构成任何性能结论**（小网格计时被解释器开销主导）。
+
+### 9.3 内存量纲：三个字段各自是什么（修正 §8.5 第一条局限）
+
+§8.5 记录"x2/x3 档 `peak_rss_mb` 与 load 档完全相同（5,770 MB），疑似报告粒度问题"。本单把语义
+讲清，并补两个新字段：
+
+| 字段 | 来源 | 语义 |
+|---|---|---|
+| `peak_rss_mb` | `resource.getrusage(RUSAGE_SELF).ru_maxrss` | **进程级高水位，不能逐档复位**；前面档位达到过的峰值会一直显示在后面档上。本机实测该字段工作正常（分配 300 MB 后 20.6 → 315.4 MB，与 `VmHWM` 一致），**不是** loongarch 粒度缺陷。 |
+| `rss_mb`（新增） | `/proc/self/status` `VmRSS` | 该档结束时的**活内存**，能区分档位。 |
+| `mesh_mb`（新增） | 采样 `sys.getsizeof` 外推（`mesh_footprint_mb`） | 网格容器自身占多少内存，**与机器负载无关**；这才是"10^7 三角面要多少 RAM"的可复现答案。 |
+
+于是 §8.3 表里 x2/x3 峰值相同，最简解释是"后续档位没有超过 load 档（4.0e6 生成）已达的进程高水位"；
+给出逐档真实内存须用 `rss_mb`/`mesh_mb` 重测。**本单不下 10^7 内存结论**：`ladder_fleet_10m.json`
+是旧版 JSON，没有这两个字段。
+
+### 9.4 10^6–10^7 重算：已递交，收尾时仍在排队（诚实记录）
+
+```
+python scripts/perf_scale_10m.py --bases "641:161,1281:321,2001:501" --copies 2,3 \
+    --n-queries 2000 --output benchmarks/perf_scale/ladder_fleet_10m_3pt.json
+```
+
+| 体数 | 三角面（3 点） |
+|---:|---|
+| 1（load） | 0.41e6 → 1.64e6 → 4.00e6 |
+| 2 | 0.82e6 → 3.28e6 → 8.01e6 |
+| 3 | 1.23e6 → 4.92e6 → 12.01e6 |
+
+作业 `cj3514` 递交后 28 min 仍为 `queued`（当时集群 50 个作业在飞），**本单未取得 10^7 新数字**。因此：
+
+- §8.3 的 10^7 表格**仍是唯一实测**，本单不覆盖、也不外推替代；
+- 10^7 带的指数门**仍是欠账**（not_run），只因缺一次重算，不因缺机制；
+- 重算到件后：`python scripts/perf_3pt_report.py benchmarks/perf_scale/ladder_fleet_10m_3pt.json`
+  取表（零手抄）、`python scripts/gen_perf_3pt_figures.py` 出图，再把 9.1–9.3 的结论换成实测指数。
+
+### 9.5 测试
+
+`tests/test_perf_benchmark.py` 新增 4 项（该文件 37 项本机全通过）：三基础档 × 单一体数 → 每个
+`scaling_*` 门 `status=measured` 且 `gates_not_run == 0`；多体扶手上 `point_locate`/`voxelize`
+记 `not_run` 且带原因、无 `failed` 行、每个不适用子任务只记一条；采样内存估算 vs 逐元素精确核算
+相差 <5%；`rss_mb`/`mesh_mb` 有值且进 JSON。
+全量 `pytest tests/ -q` 另以 `cj3515` 递交集群（同样在排队），**本单不声称全量通过**。

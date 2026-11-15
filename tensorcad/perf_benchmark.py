@@ -124,7 +124,18 @@ class SubTaskResult:
     index_entries: int = 0
     index_bytes: int = 0
     #: Peak resident set size of the process when this measurement finished.
+    #: This is ``ru_maxrss``, a *process-wide high-water mark* that cannot be
+    #: reset between rungs: read it as "process peak so far", never as "this
+    #: rung's peak".  :attr:`rss_mb` is the live footprint at rung end and does
+    #: distinguish rungs.
     peak_rss_mb: float | None = None
+    #: Live resident set size (``/proc/self/status`` ``VmRSS``) at rung end, MiB.
+    rss_mb: float | None = None
+    #: Estimated bytes->MiB footprint of the measured mesh itself (sampled
+    #: ``sys.getsizeof`` extrapolation, see :func:`mesh_footprint_mb`).  This is
+    #: the memory question the scale table has to answer ("how much RAM do 10^7
+    #: triangles need"), and unlike RSS it does not depend on machine load.
+    mesh_mb: float | None = None
     #: Number of disjoint bodies in the measured mesh.  ``1`` is a single
     #: parametric hull; ``>1`` marks a multi-body *fleet* rung, which exists
     #: because ``HullParameters`` caps one body at 8.19e6 triangles and the
@@ -149,6 +160,8 @@ class SubTaskResult:
             "index_entries": self.index_entries,
             "index_bytes": self.index_bytes,
             "peak_rss_mb": self.peak_rss_mb,
+            "rss_mb": self.rss_mb,
+            "mesh_mb": self.mesh_mb,
         }
 
 
@@ -285,6 +298,72 @@ def peak_rss_mb() -> float | None:
     if sys.platform == "darwin":  # pragma: no cover
         return rss / (1024.0 * 1024.0)
     return rss / 1024.0
+
+
+def live_rss_mb() -> float | None:
+    """Current resident set size in MiB (Linux ``VmRSS``), ``None`` elsewhere."""
+    try:
+        with open("/proc/self/status", encoding="ascii", errors="replace") as fh:
+            for line in fh:
+                if line.startswith("VmRSS:"):
+                    return int(line.split()[1]) / 1024.0
+    except Exception:  # pragma: no cover - non-Linux
+        return None
+    return None  # pragma: no cover
+
+
+def mesh_footprint_mb(mesh: Any, sample: int = 256) -> float | None:
+    """Estimate the memory held by a triangle mesh, in MiB.
+
+    ``sys.getsizeof`` over every vertex of a 10^7-triangle mesh would itself
+    cost seconds, so the per-element cost is measured on at most ``sample``
+    evenly spaced elements and extrapolated.  Vertices are tuples of floats and
+    faces are tuples of flat vertex indices (``tensorcad.geometry.Mesh``), so
+    the two are scored with different element sizes.
+
+    The result is *mesh-only* (the geometry containers, not the spatial index
+    and not the interpreter), which is what "how much RAM do 10^7 triangles
+    need" actually asks.  It is an estimate by construction: small ints are
+    CPython-interned in the low range, so face indices are charged the
+    measured sample's average, not a per-index worst case.
+    """
+    try:
+        import sys as _sys
+
+        verts = getattr(mesh, "vertices", None)
+        faces = getattr(mesh, "faces", None)
+        if verts is None or faces is None:
+            return None
+        nv, nf = len(verts), len(faces)
+        if nv == 0 or nf == 0:
+            return None
+
+        vs = max(1, min(sample, nv))
+        vstep = max(1, nv // vs)
+        vsum, vcnt = 0, 0
+        for i in range(0, nv, vstep):
+            vertex = verts[i]
+            vsum += _sys.getsizeof(vertex) + sum(_sys.getsizeof(c) for c in vertex)
+            vcnt += 1
+            if vcnt >= vs:
+                break
+
+        fs = max(1, min(sample, nf))
+        fstep = max(1, nf // fs)
+        fsum, fcnt = 0, 0
+        for i in range(0, nf, fstep):
+            face = faces[i]
+            fsum += _sys.getsizeof(face) + sum(_sys.getsizeof(k) for k in face)
+            fcnt += 1
+            if fcnt >= fs:
+                break
+
+        per_v = vsum / vcnt
+        per_f = fsum / fcnt
+        total = nv * per_v + nf * per_f + _sys.getsizeof(verts) + _sys.getsizeof(faces)
+        return total / (1024.0 * 1024.0)
+    except Exception:  # pragma: no cover - defensive
+        return None
 
 
 #: Bound on retained meshes: one rung plus its predecessor.
@@ -442,6 +521,8 @@ def _run_load(nx: int, nz: int) -> SubTaskResult:
         seconds=round(elapsed, 6),
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
         peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+        mesh_mb=mesh_footprint_mb(model.mesh),
     )
 
 
@@ -481,6 +562,8 @@ def _run_point_locate(nx: int, nz: int, n_queries: int = 1000, copies: int = 1) 
         throughput=round(n_queries / elapsed, 1) if elapsed > 0 else None,
         note=f"hits={hits}/{n_queries}, brute-force reference (no index)",
         peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+        mesh_mb=mesh_footprint_mb(model.mesh),
     )
 
 
@@ -528,6 +611,8 @@ def _run_point_locate_accel(
         index_entries=int(stats["entries"]),
         index_bytes=int(stats["index_bytes"]),
         peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+        mesh_mb=mesh_footprint_mb(mesh),
         note=(
             f"hits={hits}/{n_queries}, grid={tuple(stats['resolution'])}, "
             f"entries/tri={stats['entries_per_triangle']:.2f}, "
@@ -563,6 +648,7 @@ def _run_voxelize(grid_res: int) -> SubTaskResult:
         throughput=round(cells / elapsed, 1) if elapsed > 0 else None,
         note=f"grid={grid.shape}, cells={cells:,}",
         peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
     )
 
 
@@ -598,6 +684,8 @@ def _run_volume(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
             f"rel_err={rel_err:+.3%}, bodies={copies}"
         ),
         peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+        mesh_mb=mesh_footprint_mb(mesh),
     )
 
 
@@ -631,6 +719,8 @@ def _run_fleet_assemble(nx: int, nz: int, copies: int) -> SubTaskResult:
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
         note=f"bodies={copies} x {base_tris:,} tri from one generated body",
         peak_rss_mb=peak_rss_mb(),
+        rss_mb=live_rss_mb(),
+        mesh_mb=mesh_footprint_mb(mesh),
     )
 
 
@@ -793,6 +883,14 @@ def run_perf_benchmark(
 FLEET_BASE_LADDER: tuple[tuple[int, int], ...] = ((2001, 501),)
 FLEET_COPIES_LADDER: tuple[int, ...] = (2, 3)
 
+#: Sub-tasks that are meaningful on a multi-body fleet rung.  ``point_locate``
+#: (brute-force star-shaped reference) and ``voxelize`` (a grid-resolution
+#: ladder, not a mesh one) are structurally inapplicable: running them would
+#: put rows in the table and JSON whose status is ``failed``, which reads as a
+#: measurement error rather than "does not apply".  They are recorded once per
+#: base rung with ``status=not_run`` and a reason instead.
+FLEET_SUBTASKS: tuple[str, ...] = ("point_locate_accel", "volume")
+
 
 def run_fleet_benchmark(
     base_ladder: tuple[tuple[int, int], ...] = FLEET_BASE_LADDER,
@@ -811,6 +909,7 @@ def run_fleet_benchmark(
     t_start = time.perf_counter()
     results: list[SubTaskResult] = []
     cluster_warnings: list[str] = []
+    reported_skips: set[tuple[str, str]] = set()
 
     for nx, nz in base_ladder:
         base_tris = 4 * (nx - 1) * (nz - 1)
@@ -836,6 +935,21 @@ def run_fleet_benchmark(
                 continue
             for task_name in subtasks:
                 if task_name in ("load", "fleet_assemble"):
+                    continue
+                if task_name not in FLEET_SUBTASKS:
+                    key = ("skip", task_name)
+                    if key not in reported_skips:
+                        reported_skips.add(key)
+                        results.append(SubTaskResult(
+                            subtask=task_name, nx=nx, nz=nz, triangles=0, vertices=0,
+                            grid_cells=0, seconds=None, status=NOT_RUN, copies=copies,
+                            note=(
+                                "not applicable to a multi-body fleet rung: "
+                                + ("the brute-force reference assumes a star-shaped single body"
+                                   if task_name == "point_locate" else
+                                   "the sub-task is a grid-resolution ladder, not a mesh one")
+                            ),
+                        ))
                     continue
                 try:
                     if task_name == "point_locate_accel":
@@ -1114,10 +1228,11 @@ def main(argv: list[str] | None = None) -> int:
             base_ladder = ladder
         else:
             base_ladder = FLEET_BASE_LADDER
+        fleet_subtasks = tuple(t for t in subtasks if t in ("load",) + FLEET_SUBTASKS) or ("load",) + FLEET_SUBTASKS
         result = run_fleet_benchmark(
             base_ladder=base_ladder,
             copies_ladder=copies_ladder,
-            subtasks=subtasks,
+            subtasks=fleet_subtasks,
             n_queries=n_queries or FULL_N_QUERIES,
             max_triangles=args.max_triangles,
         )
@@ -1197,13 +1312,14 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
                 sec = f"{r.seconds:.4f}" if r.seconds is not None else "N/A"
                 print(f"  {r.nx:>6} {r.grid_cells:>12,} {sec:>10} {tp:>14} {r.status:>10}")
         else:
-            print(f"  {'nx':>5} {'nz':>5} {'bodies':>6} {'triangles':>11} {'vertices':>11} {'seconds':>10} {'throughput':>14} {'build':>8} {'rss_MB':>8} {'status':>10}")
+            print(f"  {'nx':>5} {'nz':>5} {'bodies':>6} {'triangles':>11} {'vertices':>11} {'seconds':>10} {'throughput':>14} {'build':>8} {'rss_MB':>8} {'mesh_MB':>8} {'status':>10}")
             for r in entries:
                 tp = f"{r.throughput:,.0f}" if r.throughput else "N/A"
                 sec = f"{r.seconds:.4f}" if r.seconds is not None else "N/A"
                 bld = f"{r.build_seconds:.3f}" if r.build_seconds is not None else "-"
                 rss = f"{r.peak_rss_mb:,.0f}" if r.peak_rss_mb is not None else "-"
-                print(f"  {r.nx:>5} {r.nz:>5} {r.copies:>6} {r.triangles:>11,} {r.vertices:>11,} {sec:>10} {tp:>14} {bld:>8} {rss:>8} {r.status:>10}")
+                meshm = f"{r.mesh_mb:,.0f}" if r.mesh_mb is not None else "-"
+                print(f"  {r.nx:>5} {r.nz:>5} {r.copies:>6} {r.triangles:>11,} {r.vertices:>11,} {sec:>10} {tp:>14} {bld:>8} {rss:>8} {meshm:>8} {r.status:>10}")
         print()
 
     if result.cluster_warnings:
