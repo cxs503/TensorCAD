@@ -30,11 +30,17 @@ Usage
     # Full ladder (up to ~10^7 triangles, may take minutes)
     python -m tensorcad.perf_benchmark --full
 
-    # Save baseline for future regression gates
-    python -m tensorcad.perf_benchmark --full --save-baseline runs/perf_baseline.json
+    # Save baseline for future regression gates (write it under benchmarks/,
+    # which is version-controlled; ``runs/`` is filtered out by the merge gate,
+    # so a baseline saved there never reaches ``main`` and the gate goes blind)
+    python -m tensorcad.perf_benchmark --quick --save-baseline benchmarks/perf_scale/baseline.json
 
-    # Check against a saved baseline
-    python -m tensorcad.perf_benchmark --full --baseline runs/perf_baseline.json
+    # Check against the committed baseline
+    python -m tensorcad.perf_benchmark --quick --baseline benchmarks/perf_scale/baseline.json
+
+See ``docs/perf_benchmark.md`` for the gate conventions (this module's
+documentation of record) and ``docs/perf_scale_10m.md`` for the 10^6--10^7
+measurements.
 
 Exit code is 0 when all gates pass, 1 when any gate fails.
 """
@@ -96,7 +102,14 @@ VOXEL_LADDER: tuple[int, ...] = (32, 48, 64, 96, 128, 192, 256, 384)
 QUICK_VOXEL_LADDER: tuple[int, ...] = (32, 48, 64, 96)
 
 #: Maximum triangles for a single run before we warn about cluster need.
+#: This is a *warning* threshold for the naive path, not a measured cluster
+#: boundary: the accelerated path runs 12e6 triangles in seconds, so the real
+#: cluster question is algorithmic (see ``docs/perf_scale_10m.md`` §5).
 CLUSTER_THRESHOLD = 5_000_000
+
+#: Default RED threshold for the wall-clock regression gate: a measurement that
+#: takes more than this multiple of the stored baseline seconds is a regression.
+DEFAULT_GATE_FACTOR = 2.0
 
 #: Ray queries for point_locate (scales with mesh size in full mode).
 QUICK_N_QUERIES = 1000
@@ -1246,7 +1259,7 @@ def main(argv: list[str] | None = None) -> int:
                         help="Save results as baseline JSON at this path")
     parser.add_argument("--baseline", type=str, default=None,
                         help="Compare against baseline JSON at this path")
-    parser.add_argument("--regression-factor", type=float, default=2.0,
+    parser.add_argument("--regression-factor", type=float, default=DEFAULT_GATE_FACTOR,
                         help="RED threshold: measured > factor × baseline")
     parser.add_argument("--output", type=str, default=None,
                         help="Write result JSON to this path")

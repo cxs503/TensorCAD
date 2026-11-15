@@ -1,240 +1,186 @@
-# TensorCAD 大几何性能基准（GAP-CAD-D4-PERF-SCALE）
+# TensorCAD 大几何性能基准（GAP-CAD-D4-PERF-SCALE）—— 回归门与口径手册
 
-> **已被 `docs/perf_scale_10m.md` 取代**（本版最高只测到 1.0e5 三角面；新文档含 10⁶ 带实测、空间索引加速路径、集群判据修订）。
+> **测量报告已迁移到 `docs/perf_scale_10m.md`**：10⁶–10⁷ 三角面实测、空间索引加速、
+> 指数门、集群判据修订都在那里。本文件只保留一条窄职责——`tensorcad.perf_benchmark`
+> 的**回归门口径**（基线在哪、阈值多少、`not_run` 与 pass 的区别），并记录 v0.2.0 版
+> 文档的五处**勘误**（§5）。本文件所有数字由 `tensorcad.perf_evidence` 从受版本控制的
+> JSON 渲染，`python scripts/perf_benchmark_doc.py --check` 在漂移时失败。
 
-**版本**: 0.2.0  
-**日期**: 2026-11-14  
-**锚点**: `GAP-CAD-D4-PERF-SCALE`  
-**模块**: `tensorcad.perf_benchmark`  
-**基线**: `runs/perf_baseline.json`（20 条测量记录，4 子任务 × 多尺度）
+**版本**: 0.3.0（取代 0.2.0）
+**日期**: 2026-11-15
+**锚点**: `GAP-CAD-D4-PERF-SCALE`
+**模块**: `tensorcad/perf_benchmark.py`
+**回归基线**: `benchmarks/perf_scale/baseline.json`
+**后继文档**: `docs/perf_scale_10m.md`
 
 ---
 
-## 1. 案例介绍
+## 1. 这个模块做什么
 
-### 物理背景
+`tensorcad.perf_benchmark` 在本仓库里有**两个**不同用途，混用会得出错误结论：
 
-船舶几何处理管线中，网格规模从数千三角面（概念设计）到数千万三角面（CFD 前处理）跨越三个数量级。不同几何操作（加载/点定位/体素化/体积积分）的计算复杂度各异，在什么规模下需要集群计算、什么规模下单机可接受，此前缺乏系统测量。
-
-本基准回答 GAP-CAD-D4-PERF-SCALE 的核心问题：**在什么网格规模下，每个几何子任务变得昂贵？何时需要集群？**
-
-### 基准目标
-
-| 子任务 | 操作 | 被测对象 | 复杂度 |
-|---|---|---|---|
-| `load` | 参数化船体网格生成 | `generate_hull()` | O(N×M) Python 循环 |
-| `point_locate` | 射线投射/点定位 | `_RayCaster.radius()` | O(N×Q) 朴素遍历 |
-| `voxelize` | SDF 体素网格采样 | `to_voxel_grid()` | O(G³) NumPy 向量化 |
-| `volume` | 散度定理体积积分 | `total_signed_volume()` | O(N) 极简循环 |
-
-### 验收标准（来自 feature_ledger）
-
-| # | 标准 | 状态 |
+| 用途 | 回答的问题 | 证据形态 |
 |---|---|---|
-| 1 | 加载/点定位/体素化/体积积分子任务基准表 | ✅ 已实现（20 条记录） |
-| 2 | 性能回归门（超基线 2×=RED） | ✅ 已实现（13 门全绿） |
-| 3 | 记录在什么规模上需要集群 | ✅ 已实现（CLUSTER_THRESHOLD = 5×10⁶） |
+| 回归门（CI） | 某个几何操作**变慢了吗**？ | `benchmarks/perf_scale/baseline.json` 秒数 + 2× 阈值 / 指数门 |
+| 规模测量 | 某个规模**要多久、要不要集群**？ | `benchmarks/perf_scale/artifacts/ladder_mesh.json` 等工件 |
 
----
+回归门本身也分两级，两者互补、不可互相替代：
 
-## 2. 方法
+1. **墙钟门（2×）**：`ratio = measured_seconds / baseline_seconds > factor → RED`。
+   只看 quick 阶梯（≤2.6×10⁴ 三角面），成本秒级，适合每次提交跑。
+2. **指数门（`scaling_*`）**：在**同一（子任务, 体数）分组内**拟合 `log(秒)` vs
+   `log(规模)` 的斜率，超上限即 RED。是**尺度不变量**——把 O(N) 通道改成 O(N²)，
+   小阶梯也会给出指数 ≈2 而 RED；反之 2× 墙钟门在小网格上完全看不见复杂度退化。
+   规模点数不足时报 `status=not_run`，**不是 pass**。
 
-### 网格阶梯
+被测子任务（同一阶梯上依次测）：
 
-| 档 | nx | nz | 三角面数 | 顶点数 | 用途 |
-|---|---|---|---|---|---|
-| 1 | 21 | 9 | 678 | 341 | 冒烟测试 |
-| 2 | 41 | 13 | 1,998 | 1,001 | 默认分辨率 |
-| 3 | 81 | 21 | 6,558 | 3,281 | 中等精度 |
-| 4 | 161 | 41 | 25,918 | 12,961 | 高精度 |
-| 5 | 321 | 81 | 103,038 | 51,521 | 工程级 |
-| 6 | 641 | 161 | ~412k | ~206k | 高保真 |
-| 7 | 1281 | 321 | ~1.64M | ~821k | 集群门槛 |
-| 8 | 2001 | 501 | ~4.0M | ~2.0M | 极限 |
-
-### 体素化阶梯
-
-| 档 | 网格分辨率 | 体素数 | 内存 (float64) |
+| 子任务 | 操作 | 复杂度 | 备注 |
 |---|---|---|---|
-| 1 | 32³ | 32,768 | 0.25 MB |
-| 2 | 48³ | 110,592 | 0.84 MB |
-| 3 | 64³ | 262,144 | 2.0 MB |
-| 4 | 96³ | 884,736 | 6.7 MB |
-| 5 | 128³ | 2,097,152 | 16 MB |
-| 6 | 192³ | 7,077,888 | 54 MB |
-| 7 | 256³ | 16,777,216 | 128 MB |
-| 8 | 384³ | 56,623,104 | 432 MB |
+| `load` | `hull.generate_hull` 参数化船体生成 | O(N) Python 循环 | 每档只生成一次（缓存上限见 §4） |
+| `point_locate` | `_RayCaster` 逐三角遍历 | O(N·Q) | 暴力参考实现；超阈值标 `not_run` |
+| `point_locate_accel` | `spatial_index.TriangleGrid`（均匀网格 + DDA） | 近 O(cells·Q) | 工程路径 |
+| `voxelize` | `voxel.to_voxel_grid` SDF 采样 | O(G³) NumPy | 按分辨率成阶梯 |
+| `volume` | `mesh.total_signed_volume` 散度定理 | O(N) | 与解析体积对表 |
 
-### 回归门机制
+## 2. 基线在哪，怎么跑
 
-```
-ratio = measured_seconds / baseline_seconds
-if ratio > 2.0 → RED (性能回归)
-else → GREEN (可接受)
-```
-
-### 运行方式
+**基线必须写在 `benchmarks/` 下**，因为 `runs/` 不被版本控制、且合并门禁会把 `runs/`
+从分支里滤掉：基线写在那儿，`main` 上永远拿不到它，回归门就是空转（v0.2.0 的实际情况，
+见 §5 第 1 条）。
 
 ```bash
-# 快速冒烟（~10s）
-python -m tensorcad.perf_benchmark --quick
+# 快速冒烟 + 回归门（约 15 s，CI 口径）
+python -m tensorcad.perf_benchmark --quick \
+    --baseline benchmarks/perf_scale/baseline.json
 
-# 完整阶梯（可能需要数分钟）
-python -m tensorcad.perf_benchmark --full
+# 重建 quick 基线（3 轮取每键最慢，抑制共享机负载噪声）
+python scripts/build_perf_baseline.py
 
-# 保存基线
-python -m tensorcad.perf_benchmark --full --save-baseline runs/perf_baseline.json
+# 全阶梯测量到 8.2e6 三角面（分钟级，经计算调度递交）
+python -m tensorcad.perf_benchmark --full --output benchmarks/perf_scale/artifacts/ladder_mesh.json
 
-# 回归检查
-python -m tensorcad.perf_benchmark --quick --baseline runs/perf_baseline.json
+# 10⁶–10⁷ 多体三点阶梯（指数门数据）
+python scripts/perf_scale_10m.py --bases "641:161,1281:321,2001:501" --copies 2,3 \
+    --output benchmarks/perf_scale/ladder_fleet_10m_3pt.json
+
+# 校验本文档的表格与基线文件一致
+python scripts/perf_benchmark_doc.py --check
 ```
 
----
+退出码：全部门通过 → 0；任一门 RED → 1。**没有门被判过**（`gates_checked == 0`）时
+CLI 打印 "This is NOT a pass."，`verdict` 为 `not_run`——不要把它读成绿色。
 
-## 3. 计算结果
+## 3. 回归基线（程序化渲染）
 
-> 以下数据来自本机实测（LoongArch64 128 核，Python 3.11.6，TensorCAD 0.23.0）。
-> 测量时系统负载较高（load15 ≈ 80-180），实际低负载环境下性能会更好。
+下表由 `benchmarks/perf_scale/baseline.json` 渲染；门键用
+`tensorcad.perf_benchmark.measurement_key()` 生成，与运行时查表用的是**同一函数**；
+RED 阈值列用模块的 `DEFAULT_GATE_FACTOR`，不是手写的 `2`。
 
-### 3.1 加载（Hull Generation）
+<!-- perf-evidence:baseline-gate-table begin -->
+| 门键 | 规模 | 基线秒 | RED 阈值 2× | 基线吞吐 |
+|---|---:|---:|---:|---:|
+| `load:21x9` | 三角面 678 | 0.0230 | 0.0459 | 29,514 tri/s |
+| `load:41x13` | 三角面 1,998 | 0.0866 | 0.1731 | 23,085 tri/s |
+| `load:81x21` | 三角面 6,558 | 0.2309 | 0.4618 | 28,400 tri/s |
+| `load:161x41` | 三角面 25,918 | 1.0846 | 2.1692 | 23,896 tri/s |
+| `point_locate:21x9` | 三角面 678 | 0.0807 | 0.1614 | 6,196 query/s |
+| `point_locate:41x13` | 三角面 1,998 | 0.2656 | 0.5312 | 1,882 query/s |
+| `point_locate:81x21` | 三角面 6,558 | 0.8249 | 1.6498 | 606 query/s |
+| `point_locate:161x41` | 三角面 25,918 | 3.2109 | 6.4217 | 156 query/s |
+| `point_locate_accel:21x9` | 三角面 678 | 0.0253 | 0.0507 | 19,742 query/s |
+| `point_locate_accel:41x13` | 三角面 1,998 | 0.0345 | 0.0689 | 14,512 query/s |
+| `point_locate_accel:81x21` | 三角面 6,558 | 0.0487 | 0.0975 | 10,256 query/s |
+| `point_locate_accel:161x41` | 三角面 25,918 | 0.0854 | 0.1709 | 5,853 query/s |
+| `volume:21x9` | 三角面 678 | 0.0004 | 0.0008 | 1,711,605 tri/s |
+| `volume:41x13` | 三角面 1,998 | 0.0013 | 0.0026 | 1,542,191 tri/s |
+| `volume:81x21` | 三角面 6,558 | 0.0041 | 0.0083 | 1,587,759 tri/s |
+| `volume:161x41` | 三角面 25,918 | 0.0202 | 0.0404 | 1,283,388 tri/s |
+| `voxelize:32x0` | 体素 32,768 | 0.2269 | 0.4539 | 144,392 cell/s |
+| `voxelize:48x0` | 体素 110,592 | 0.6639 | 1.3279 | 166,569 cell/s |
+| `voxelize:64x0` | 体素 262,144 | 1.7893 | 3.5787 | 146,504 cell/s |
+| `voxelize:96x0` | 体素 884,736 | 6.1233 | 12.2466 | 144,487 cell/s |
 
-| nx | nz | 三角面 | 时间 (s) | 吞吐量 (三角/s) |
+基线记录 20 条；环境 `machine=loongarch64`、`cpu_count=128`、`python=3.11.6`；口径：max of 3 runs per (subtask, nx, nz) key - tolerant of load noise on a shared machine
+<!-- perf-evidence:baseline-gate-table end -->
+
+**读法**：一份实测取值 `s`，与同键基线秒 `b` 比较，`s/b > factor` 即 RED。环境
+（`machine`/`platform`）不一致时模块**拒绝比较**，给出 `regression_environment` 门且
+`status=not_run`——跨机秒数不可比，宁可不判也不误判（`cpu_count`/`python` 差异只写进
+detail，不影响判定）。
+
+**注意**：基线文件里 `gates` 是空数组、`passed` 字段不代表任何一个门被判过——它只是
+一份"基线秒"快照。判绿以运行时 `--baseline` 的输出（`verdict`/`gates_checked`）为准。
+
+## 4. 代码事实（程序化渲染）
+
+文档里出现的阈值/阶梯若靠手抄就会漂。下表直接读 `tensorcad.perf_benchmark` 的常量，
+改代码不重渲染即测试失败。
+
+<!-- perf-evidence:code-facts-table begin -->
+| 常量（`tensorcad.perf_benchmark`） | 值 | 作用 |
+|---|---|---|
+| `CLUSTER_THRESHOLD` | 5,000,000 | 朴素路径的单次规模告警线（三角面）；不是实测集群边界 |
+| `DEFAULT_GATE_FACTOR` | 2 | 墙钟回归门 RED 阈值（`--regression-factor` 的默认值） |
+| `DEFAULT_MAX_NAIVE_TRIANGLES` | 300,000 | 超过即跳过 O(N·Q) 暴力参考，标 `not_run` |
+| `MIN_SCALING_POINTS` | 3 | 规模点数不足则指数门 `not_run`（不是 pass） |
+| `MESH_CACHE_SIZE` | 2 | 阶梯每档只生成一次网格的缓存上限 |
+| `DEFAULT_LADDER` | 21×9 → 41×13 → 81×21 → 161×41 → 321×81 → 641×161 → 1281×321 → 2001×501 → 4001×513 | full 阶梯（顶端受 `HullParameters` 上限约束） |
+| `QUICK_LADDER` | 21×9 → 41×13 → 81×21 → 161×41 | quick 阶梯，即 CI 基线覆盖的范围 |
+| `VOXEL_LADDER` | 32³ → 48³ → 64³ → 96³ → 128³ → 192³ → 256³ → 384³ | 体素阶梯 |
+| `SCALING_LIMITS` | `fleet_assemble`≤1.5; `load`≤1.5; `point_locate`≤1.5; `point_locate_accel`≤0.8; `volume`≤1.5; `voxelize`≤1.5 | 指数门上限（log(秒) vs log(规模) 最小二乘斜率） |
+<!-- perf-evidence:code-facts-table end -->
+
+## 5. v0.2.0 勘误（本版新增）
+
+v0.2.0 的几处结论在后续实测中被推翻或被发现不可复现；保留原文会误导读者，故逐条改正。
+每条都给出**可执行的证据**，不是编辑意见。
+
+| # | v0.2.0 原说法 | 事实 | 本版怎么改 | 证据 |
 |---|---|---|---|---|
-| 21 | 9 | 678 | 0.0225 | 30,126 |
-| 41 | 13 | 1,998 | 0.0841 | 23,770 |
-| 81 | 21 | 6,558 | 0.2660 | 24,651 |
-| 161 | 41 | 25,918 | 1.5443 | 16,783 |
-| 321 | 81 | 103,038 | 5.7519 | 17,914 |
+| 1 | "使用保存的基线 `runs/perf_baseline.json` 进行回归检查，**13 个门全部通过**" | 该文件**不在仓库里**（`runs/` 未提交，且被合并门禁过滤），干净检出无法复现；`main` 上的回归门因此一直拿不到基线 | 基线迁到 `benchmarks/perf_scale/baseline.json`；§3 表格从该文件渲染；测试断言文档不再引用 `runs/` 下的基线 | `git ls-files runs` 为空；`test_perf_benchmark_doc_retracted_paths_only_in_erratum` |
+| 2 | §5 集群建议："`point_locate` > 100k 三角 → 用集群" | **算法缺口，不是机器缺口**：同一查询集经均匀网格索引在 4.1×10⁵ 档快三个数量级，12.0×10⁶ 三角面 2000 条射线 1.25 s（单节点） | 集群判据改由 `docs/perf_scale_10m.md` §5/§9.4 的实测给出；本文件 §6 曲线即其证据 | `benchmarks/perf_scale/artifacts/ladder_mesh.json`、`ladder_fleet_10m.json` |
+| 3 | 结果图指向 `artifacts/perf_benchmark/scaling.png`、`throughput.png` | 这两个文件**不在 git 里**（`artifacts/` 被合并门禁过滤，仓库只提交过 `artifacts/m3768/*`），任何干净检出上都是断链 | 换成本文件 §6 的 `docs/perf_benchmark/figures/point_locate_latency.png`，由 `scripts/gen_perf_benchmark_doc_figure.py` 从工件渲染 | `test_perf_benchmark_doc_figure_is_committed_png` |
+| 4 | 阶梯把 `2001×501`（"~4.0M 三角"）列为"极限" | `HullParameters` 上限是 `nx ≤ 4001`、`nz ≤ 513`，单体最大 **8,199,998** 三角面；10⁷ 带只能靠多体装配到达 | 阶梯顶改为 `4001×513`；§4 表的 `DEFAULT_LADDER` 由代码渲染 | `docs/perf_scale_10m.md` §6 第 1 条 |
+| 5 | 手写"模块 612 行 / 15 个测试"等计数 | 计数随每次提交漂移，手写必然过期，且无证据价值 | 不再写行数/测试数；凡阈值与阶梯一律由 §4 表从代码渲染 | `test_perf_benchmark_doc_tables_match_sources` |
 
-**趋势**: 吞吐量在 17k-30k 三角/s 之间。在 100k 三角面时约 5.8s，**500k 三角面预计 ~25-30s，5M 三角面预计 ~4-5 分钟**。线性缩放良好，单机舒适区 ≤ 500k 三角。
+## 6. 结果图
 
-### 3.2 点定位（Ray Casting）
+![点定位延迟 vs 网格规模](perf_benchmark/figures/point_locate_latency.png)
 
-| nx | nz | 三角面 | 时间 (s) | 吞吐量 (查询/s) | 命中数 |
-|---|---|---|---|---|---|
-| 21 | 9 | 678 | 0.0837 | 5,973 | 39/500 |
-| 41 | 13 | 1,998 | 0.2754 | 1,816 | 46/500 |
-| 81 | 21 | 6,558 | 0.8571 | 583 | 54/500 |
-| 161 | 41 | 25,918 | 6.9115 | 72 | 63/500 |
-| 321 | 81 | 103,038 | 39.4002 | 13 | 71/500 |
+*左：每条射线的延迟（µs）vs 三角面数，log-log。暴力路径（红）斜率 ≈1，即 O(N)；
+均匀网格路径（蓝）近水平——它随**网格规模**几乎不涨，代价转移到了建索引的
+`build_seconds`。右：同一查询集上的加速比。数据来自
+`benchmarks/perf_scale/artifacts/ladder_mesh.json`（每档 2000 条射线），由
+`scripts/gen_perf_benchmark_doc_figure.py` 渲染，手改无效。*
 
-**趋势**: 射线投射是 O(N×Q) 朴素算法（N=三角面数，Q=射线数），无加速结构。吞吐量从 6k 查询/s（678 三角）骤降至 13 查询/s（103k 三角）。**超过 50k 三角面强烈建议使用集群或引入 BVH/Octree 加速结构**。
+这是本文件的唯一图：本任务没有需要云图展示的物理场量（纯性能测量），故不伪造场量云图。
 
-### 3.3 体素化（SDF Voxelization）
+## 7. 工件索引（每条路径都在干净检出中存在）
 
-| 网格 | 体素数 | 时间 (s) | 吞吐量 (体素/s) |
-|---|---|---|---|
-| 32³ | 32,768 | 0.2413 | 135,789 |
-| 48³ | 110,592 | 0.8365 | 132,208 |
-| 64³ | 262,144 | 2.5010 | 104,816 |
-| 96³ | 884,736 | 6.9356 | 127,564 |
-| 128³ | 2,097,152 | 16.2529 | 129,033 |
+| 工件 | 路径 | 作用 |
+|---|---|---|
+| 基准模块 | `tensorcad/perf_benchmark.py` | 阶梯、子任务、墙钟门、指数门、CLI |
+| 证据渲染 | `tensorcad/perf_evidence.py` | 工件 → markdown 表（本文档与 `docs/perf_scale_10m.md` 共用） |
+| 回归基线 | `benchmarks/perf_scale/baseline.json` | quick 阶梯基线秒（3 轮取最慢） |
+| 基线构建 | `scripts/build_perf_baseline.py` | 重建上一行 |
+| 文档校验 | `scripts/perf_benchmark_doc.py` | `--check` / `--write` 本文档的两张表 |
+| 图渲染 | `scripts/gen_perf_benchmark_doc_figure.py` | 生成 §6 的 png |
+| 测量工件 | `benchmarks/perf_scale/artifacts/ladder_mesh.json` | 全阶梯网格子任务实测 |
+| 测量工件 | `benchmarks/perf_scale/artifacts/ladder_voxel.json` | 全阶梯体素化实测 |
+| 10⁶–10⁷ 工件 | `benchmarks/perf_scale/ladder_fleet_10m_3pt.json` | 多体三点阶梯（指数门数据） |
+| 图 | `docs/perf_benchmark/figures/point_locate_latency.png` | §6 |
+| 测试 | `tests/test_perf_benchmark.py` | 门语义、环境闸门、阶梯、文档绑定 |
 
-**趋势**: NumPy 向量化路径保持 ~105k-136k 体素/s 的吞吐量。在 128³（2M 体素）时约 16s，**256³（16M 体素）预计约 2-2.5 分钟，384³（56M 体素）预计约 7-8 分钟**。内存带宽受限但缩放可预测。
+## 8. 局限（诚实记录）
 
-### 3.4 体积积分（Volume Integration）
-
-| nx | nz | 三角面 | 时间 (s) | 吞吐量 (三角/s) | 体积 (m³) |
-|---|---|---|---|---|---|
-| 21 | 9 | 678 | 0.0004 | 1,702,487 | 7.374345 |
-| 41 | 13 | 1,998 | 0.0009 | 2,222,198 | 7.446554 |
-| 81 | 21 | 6,558 | 0.0070 | 933,397 | 7.483649 |
-| 161 | 41 | 25,918 | 0.0167 | 1,552,377 | 7.502488 |
-| 321 | 81 | 103,038 | 0.0775 | 1,328,895 | 7.509115 |
-
-**趋势**: 体积积分是最快的操作，即使在 100k 三角面时也在 78ms 内完成。纯 Python 循环但操作极简（每个三角面 1 次点积），吞吐量达 900k-2.2M 三角/s。**单机可轻松处理 5M+ 三角面**。
-
----
-
-## 4. 结果图
-
-### 4.1 性能缩放曲线
-
-![Scaling](../artifacts/perf_benchmark/scaling.png)
-
-*四子任务 log-log 缩放图：吞吐量（蓝）与耗时（红）随网格/体素规模的变化。*
-
-### 4.2 吞吐量对比
-
-![Throughput](../artifacts/perf_benchmark/throughput.png)
-
-*各子任务在最大测量规模下的峰值吞吐量对比（对数坐标）。*
-
----
-
-## 5. 集群规模建议
-
-| 子任务 | 单机舒适区 | 集群建议阈值 | 说明 |
-|---|---|---|---|
-| load | ≤ 500k 三角 | > 5M 三角 | Python 生成，线性缩放，5M 三角约 4-5 分钟 |
-| point_locate | ≤ 50k 三角 | > 100k 三角 | O(N×M) 朴素算法，无加速结构，100k 三角仅 13 查询/s |
-| voxelize | ≤ 2M 体素 | > 5M 体素 | NumPy 向量化，内存带宽受限，16M 体素约 2-3 分钟 |
-| volume | ≤ 5M 三角 | > 10M 三角 | 极简操作，单机可处理较大规模 |
-
-**关键发现**:
-1. **点定位是最大瓶颈**：在 100k 三角面时吞吐量仅 13 查询/s，比加载慢 1000 倍。对于需要大量点定位的场景（CFD 重叠网格、粒子追踪），必须引入加速结构或集群并行。
-2. **体积积分极其高效**：即使在百万三角面级别也在亚秒级完成，无需集群。
-3. **体素化可预测**：NumPy 向量化路径缩放线性，可通过增加分辨率精确预估时间。
-
----
-
-## 6. 回归门验证
-
-使用保存的基线 `runs/perf_baseline.json` 进行回归检查，**13 个门全部通过**（ratio < 2.0×）：
-
-| 门 | 基线 (s) | 实测 (s) | 比率 | 状态 |
-|---|---|---|---|---|
-| load:21×9 | 0.0225 | 0.0193 | 0.86× | ✓ |
-| load:41×13 | 0.0841 | 0.0643 | 0.76× | ✓ |
-| load:81×21 | 0.2660 | 0.1980 | 0.74× | ✓ |
-| load:161×41 | 1.5443 | 0.9396 | 0.61× | ✓ |
-| point_locate:21×9 | 0.0837 | 0.0679 | 0.81× | ✓ |
-| point_locate:41×13 | 0.2754 | 0.2177 | 0.79× | ✓ |
-| point_locate:81×21 | 0.8571 | 0.7584 | 0.88× | ✓ |
-| point_locate:161×41 | 6.9115 | 3.0277 | 0.44× | ✓ |
-| volume:21×9 | 0.0004 | 0.0004 | 1.00× | ✓ |
-| volume:41×13 | 0.0009 | 0.0008 | 0.90× | ✓ |
-| volume:81×21 | 0.0070 | 0.0027 | 0.39× | ✓ |
-| volume:161×41 | 0.0167 | 0.0112 | 0.67× | ✓ |
-| voxelize:32³ | 0.2413 | 0.1843 | 0.76× | ✓ |
-
-> 注：实测值普遍低于基线，因为基线测量时系统负载更高（load15 ≈ 80-180 vs 本次 ≈ 106-178）。
-
----
-
-## 7. 注意点
-
-### 7.1 系统负载影响
-
-基准运行时系统负载较高（load15 ≈ 80-180/128），测量值可能偏高。建议在低负载环境下重新建立基线用于 CI 回归门。
-
-### 7.2 射线投射算法
-
-当前 `_RayCaster` 使用朴素 O(N) 遍历，无空间加速结构。对于大规模网格，建议：
-- 引入 BVH/Octree 加速（可将复杂度降至 O(log N)）
-- 使用 NumPy 向量化批量查询
-- 或使用集群并行（每个射线独立，天然可并行）
-
-### 7.3 体素化内存
-
-256³ 体素网格需要 ~128MB（float64），384³ 需要 ~432MB。在内存受限环境中应使用 `dtype="float32"` 减半。
-
-### 7.4 局限性
-
-- 仅测量了参数化船体和 SUBOFF 艇体，未覆盖 NURBS/IGES 导入路径
-- 点定位仅测试了从原点的射线，未测试任意起点/方向的通用射线-三角相交
-- 未测量网格修复/简化操作的性能
-- 未测量 1M+ 三角面的加载性能（需集群递交）
-
----
-
-## 8. 工件索引
-
-| 工件 | 路径 |
-|---|---|
-| 基准模块 | `tensorcad/perf_benchmark.py` (612 行) |
-| 测试 | `tests/test_perf_benchmark.py` (15 测试) |
-| 基线数据 | `runs/perf_baseline.json` (20 条记录) |
-| 缩放图 | `artifacts/perf_benchmark/scaling.png` |
-| 吞吐量图 | `artifacts/perf_benchmark/throughput.png` |
-| 图生成脚本 | `scripts/gen_perf_figures.py` |
+1. **墙钟基线只覆盖 quick 阶梯**（≤2.6×10⁴ 三角面）。10⁶ 带不设 2× 墙钟门：共享机上
+   load1 波动 10–20%，噪声大于信号；10⁶–10⁷ 带的守护是**指数门 + 工件绑定**。
+2. **`peak_rss_mb` 是进程高水位**（`ru_maxrss`），不能读作"这一档的峰值"——同进程里
+   前面档位撑起来的峰值会留在后面。"这一档要多少 RAM"读 `mesh_mb` + `index_bytes`
+   + `rss_mb`。
+3. **指数门是无置信区间的多点最小二乘**。3 个规模点时只声明"没有观察到超限增长"，
+   不声明精确指数值；`not_run` 表示"没判"，不是"通过"。
+4. **测量数据来自共享节点**，绝对秒数不可跨作业逐档相减，只比同工件内部的比值与数量级。
+5. **本文件不测量导入式网格**（STEP/IGES/STL 路径）；阶梯全部由参数化生成器产生，
+   10⁷ 带是多体装配规模而非单网格。

@@ -801,3 +801,166 @@ def test_live_rss_is_reported_and_serialised() -> None:
     payload = volume_row.to_dict()
     assert payload["rss_mb"] == volume_row.rss_mb
     assert payload["mesh_mb"] == volume_row.mesh_mb
+
+
+# ---------------------------------------------------------------------------
+# Documentation binding: the gate-conventions manual must not drift from code
+# ---------------------------------------------------------------------------
+#
+# ``docs/perf_benchmark.md`` used to be a hand-written report whose numbers could
+# not be reproduced on a clean checkout (it cited a baseline in ``runs/``, which
+# the merge gate strips, and figures in ``artifacts/``, which the gate also
+# strips).  The tests below bind every claim that can be machine-checked to its
+# source: rendered tables to their artifacts, cited paths to files that exist,
+# retracted claims to the erratum section only.
+
+DOC_BENCH = ROOT / "docs" / "perf_benchmark.md"
+FIGURE = ROOT / "docs" / "perf_benchmark" / "figures" / "point_locate_latency.png"
+
+
+def _bench_doc() -> str:
+    return DOC_BENCH.read_text(encoding="utf-8")
+
+
+def _erratum() -> str:
+    """The §5 erratum section, where retracted v0.2.0 claims are quoted."""
+    text = _bench_doc()
+    start = text.index("## 5.")
+    end = text.index("## 6.")
+    return text[start:end]
+
+
+def test_perf_benchmark_doc_tables_match_sources(tmp_path: Path) -> None:
+    """Both injected tables equal what the committed sources render to."""
+    from tensorcad.perf_evidence import (
+        BENCHMARK_DOC_TABLE_NAMES,
+        check_document,
+        load_artifact,
+    )
+
+    artifacts = {"baseline": load_artifact(BASELINE)}
+    doc = _bench_doc()
+    assert check_document(doc, artifacts, names=BENCHMARK_DOC_TABLE_NAMES) == []
+
+    # A hand-edited number inside a marked table must be a failure, not a silent
+    # claim: replace one rendered digit and expect drift to be reported.
+    body_start = doc.index("<!-- perf-evidence:baseline-gate-table begin -->")
+    edited = doc[:body_start] + doc[body_start:].replace("0.0230", "0.0199", 1)
+    assert edited != doc
+    problems = check_document(edited, artifacts, names=BENCHMARK_DOC_TABLE_NAMES)
+    assert problems and "baseline-gate-table" in problems[0]
+
+
+def test_perf_benchmark_doc_check_script_passes(tmp_path: Path) -> None:
+    """The published document passes its own ``--check`` entry point."""
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "perf_benchmark_doc.py"), "--check"],
+        cwd=str(ROOT), env=_env(), capture_output=True, text=True, timeout=180,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "ok" in proc.stdout
+
+
+def test_perf_benchmark_doc_cited_paths_exist() -> None:
+    """Every repo path the manual cites is present in a clean checkout."""
+    import re as _re
+
+    cited = sorted(set(_re.findall(
+        r"`((?:benchmarks|docs|scripts|tests|tensorcad)/[^`\s]*)`", _bench_doc()
+    )))
+    assert cited, "document cites no repository paths"
+    missing = [p for p in cited if not (ROOT / p).exists()]
+    assert not missing, f"cited but missing: {missing}"
+
+
+def test_perf_benchmark_doc_retracted_paths_only_in_erratum() -> None:
+    """The dead baseline/figure paths may appear only as retracted claims."""
+    text = _bench_doc()
+    erratum = _erratum()
+    outside = text.replace(erratum, "")
+    for token in ("runs/perf_baseline.json", "artifacts/perf_benchmark/"):
+        assert token in erratum, f"{token} should be quoted as a retraction"
+        assert token not in outside, f"{token} cited outside the erratum section"
+    # And the live baseline path must be the tracked one.
+    assert "benchmarks/perf_scale/baseline.json" in text
+    assert BASELINE.exists()
+
+
+def test_perf_benchmark_doc_constants_come_from_code() -> None:
+    """The facts table reads the module constants at render time, not literals."""
+    from tensorcad import perf_benchmark as pb
+    from tensorcad.perf_evidence import render_code_facts
+
+    baseline_facts = render_code_facts()
+    assert f"{pb.CLUSTER_THRESHOLD:,}" in baseline_facts
+    assert f"{pb.DEFAULT_GATE_FACTOR:g}" in baseline_facts
+
+    original = pb.CLUSTER_THRESHOLD
+    try:
+        pb.CLUSTER_THRESHOLD = 12345678
+        assert "12,345,678" in render_code_facts()
+    finally:
+        pb.CLUSTER_THRESHOLD = original
+
+
+def test_gate_factor_default_is_a_named_constant() -> None:
+    """The 2x threshold is a constant the document can render, not a literal."""
+    from tensorcad import perf_benchmark as pb
+
+    assert pb.DEFAULT_GATE_FACTOR == 2.0
+    source = (ROOT / "tensorcad" / "perf_benchmark.py").read_text(encoding="utf-8")
+    assert "default=DEFAULT_GATE_FACTOR" in source
+
+
+def test_module_docstring_points_baseline_at_tracked_path() -> None:
+    """The CLI usage in the module docstring must not send users to ``runs/``."""
+    from tensorcad import perf_benchmark as pb
+
+    doc = pb.__doc__ or ""
+    assert "runs/perf_baseline.json" not in doc
+    assert "benchmarks/perf_scale/baseline.json" in doc
+
+
+def test_baseline_records_cover_the_quick_ladder() -> None:
+    """The committed baseline covers every quick rung and sub-task, once each."""
+    from tensorcad import perf_benchmark as pb
+
+    baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+    keys = [r["subtask"] for r in baseline["results"]]
+    rungs = {(r["nx"], r["nz"]) for r in baseline["results"] if r["subtask"] != "voxelize"}
+    assert rungs == set(pb.QUICK_LADDER)
+    for subtask in ("load", "point_locate", "point_locate_accel", "volume"):
+        assert keys.count(subtask) == len(pb.QUICK_LADDER)
+    voxel = {r["nx"] for r in baseline["results"] if r["subtask"] == "voxelize"}
+    assert voxel == set(pb.QUICK_VOXEL_LADDER)
+    # The baseline file records seconds only: it is not evidence that any gate
+    # passed, and the document has to say so.
+    assert baseline["gates"] == []
+    assert "空数组" in _bench_doc()
+
+
+def test_perf_benchmark_doc_figure_is_committed_png() -> None:
+    """The embedded figure is a real committed PNG, regenerable from the artifact."""
+    assert FIGURE.exists(), f"missing figure: {FIGURE}"
+    data = FIGURE.read_bytes()
+    assert data[:8] == b"\x89PNG\r\n\x1a\n"
+    assert len(data) > 4096, "figure looks truncated"
+    assert "docs/perf_benchmark/figures/point_locate_latency.png" in _bench_doc()
+
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "gen_perf_benchmark_doc_figure.py"), "--check"],
+        cwd=str(ROOT), env=_env(), capture_output=True, text=True, timeout=180,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_perf_benchmark_doc_cited_test_names_exist() -> None:
+    """Test names quoted by the manual must still exist (stale names are drift)."""
+    import re as _re
+
+    doc = _bench_doc()
+    cited = sorted(set(_re.findall(r"`(test_[a-z0-9_]+)`", doc)))
+    assert cited, "document cites no test names"
+    suite = (ROOT / "tests" / "test_perf_benchmark.py").read_text(encoding="utf-8")
+    missing = [name for name in cited if f"def {name}(" not in suite]
+    assert not missing, f"cited but absent: {missing}"
