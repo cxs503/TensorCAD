@@ -33,7 +33,7 @@ from typing import Any, Iterable, Mapping, Sequence
 SCHEMA = "tensorcad.fleet.official.v1"
 
 #: Publisher pages the published particulars are read from, with the sha256 recorded on the
-#: fetching run (2026-11-14). A re-fetch whose digest differs is a source change and must be
+#: fetching run (2026-11-14; re-verified 2026-11-15). A re-fetch whose digest differs is a source change and must be
 #: re-verified deliberately, exactly like the geometry archives.
 PAGES: dict[str, dict[str, str]] = {
     "KCS": {
@@ -62,9 +62,11 @@ PAGES: dict[str, dict[str, str]] = {
     },
     "DTC": {
         "url": "https://www.uni-due.de/ship/dtc.php",
-        "sha256": "583c8e1318ab13568c6cf984255074dcf566987f5b166801570c9109f41c3e06",
+        "sha256": "DEAD_LINK_404",  # confirmed 404 on 2026-11-15; original page no longer exists
         "publisher": "University of Duisburg-Essen (El Moctar et al. 2012)",
         "locator": "DTC main particulars table (Lpp, B, T, Cb, displacement)",
+        "note": "Original URL returns HTTP 404 (confirmed 2026-11-15). DTC geometry download link also dead. "
+                  "See docs/source_hunt_gap_cad_t1.md for full source hunt results.",
     },
 }
 
@@ -134,9 +136,12 @@ LICENCE = {
 #: reference basis as ``literature_value_recalled`` or ``closure`` rather than ``external``.
 WITHHELD: dict[str, str] = {
     "DTC": (
-        "official IGES not yet fetched from uni-due.de; geometry built from Series-60 form family "
-        "calibrated to the published Cb=0.661, L=355 m, B=51 m, T=14.5 m; volume verified to 0.24% "
-        "against the cited 173467 m3 (El Moctar et al. 2012)"
+        "official IGES download link dead (HTTP 404, confirmed 2026-11-15); "
+        "original URL https://www.uni-due.de/ship/dtc_download/DTC_IGES.zip no longer exists; "
+        "SIMMAN 2008/2014/2020 sites have no DTC geometry; T2015 site has no DTC page; "
+        "geometry built from Series-60 form family calibrated to published Cb=0.661, L=355 m, "
+        "B=51 m, T=14.5 m; volume verified to 0.24% against cited 173467 m3 (El Moctar et al. 2012); "
+        "see docs/source_hunt_gap_cad_t1.md for full source hunt"
     ),
     "Series60": (
         "DTMB Report 1710 offset table not digitised into IGES; geometry built from the Series-60 "
