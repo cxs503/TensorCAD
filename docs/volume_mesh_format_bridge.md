@@ -93,3 +93,110 @@ python -m pytest tests/test_volume_mesh_format_bridge.py -q   # 14 passed
 4. **The grid must be split at build time** (`split_tets=True`, the default). A grid built
    with `split_tets=False` is refused with that remedy in the message rather than re-split
    here, so there is exactly one place that decides how a hexahedron is cut.
+
+## 6. Second pass (m22029): the file a solver can actually load
+
+### 6.1 The residual gap, measured
+
+Section 2 delivered *cells*. It did not deliver a *boundary*, and a volume format without one
+is not a solver file. Measured on the box of §3 (`test_unmarked_su2_has_no_markers`):
+
+```
+NDIME= 3
+NPOIN= 140
+NELEM= 432
+NMARK= 0          <-- no marker at all
+```
+
+The cause is not carelessness, it is a missing binding: meshio's SU2 writer emits
+`MARKER_ELEMENTS` only for triangle blocks that carry integer cell data, and
+`TetrahedralMesh` is tetrahedra and nothing else. So `write_meshio(..., file_format="su2")`
+writes a file that a solver config cannot bind `MARKER_HEATFLUX= (hull, 0.0)` to.
+
+### 6.2 What was added
+
+`tensorcad.meshio_exchange`:
+
+* `volume_mesh_patches(volume_mesh, *, tetrahedral=None, tolerance=None) -> VolumePatches`
+  — **welds coincident points**, takes the outer skin of the surviving tetrahedra, cancels
+  the zero-thickness slit, and names the remaining triangles from the grid's own station and
+  level planes (`symmetry`, `bottom`, `top`, `fore`, `aft`, and `hull` as the catch-all for
+  the body surface). Refuses to return a skin that is not watertight or whose divergence-
+  theorem volume differs from the tetrahedra's.
+* `write_su2_volume_mesh(path, volume_mesh, *, patches=None) -> Path` — writes the SU2 ASCII
+  mesh directly, with **string** `MARKER_TAG`s. It is written here rather than through meshio
+  because meshio cannot keep string tags: it renumbers them 1, 2, 3… and warns as it goes.
+* `read_su2_markers(path) -> dict[str, tuple[Tri, ...]]` — reads the marker sections back
+  with the tags as names, closing the loop on a file meshio would flatten.
+
+Why welding is not cosmetic: `volume_mesh` keeps a distinct node per
+`(station, level, breadth)` index even where the breadth collapses. Dropping the zero-volume
+cells then exposes the *interior* faces of the surviving cells. On the Wigley body of §3,
+**1050 of the 2184 triangles that look like boundary are that
+slit** — coincident pairs of a zero-thickness sheet. Exporting them would give a solver a
+doubly covered, non-manifold wall. Welding merges 328 coincident points, the pairs cancel, and what is
+left is a closed surface.
+
+### 6.3 Measured results
+
+`python examples/meshio_volume_bridge/run_example.py` →
+`runs/m19950_volume_bridge/bridge_matrix.json` (numbers below read from that file; the two
+`.su2` files it writes are in the same directory).
+
+| body | boundary tri (split) | skin tri | slit tri cancelled | points welded | NPOIN | NELEM | NMARK | hull area [m²] | anchor [m²] | rel | watertight |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| box 2x1x0.6 | 216 | 216 | 0 | 0 | 140 | 432 | 5 | 2.400000 | 2.400000 | 0.00% | yes |
+| Wigley body L10xB1xT0.625 | 2184 | 1134 | 1050 | 328 | 1696 | 8280 | 2 | 14.839762 | 14.879052 | 0.26% | yes |
+
+Patch table:
+
+| body | patch | triangles | area [m²] |
+|---|---|---|---|
+| box 2x1x0.6 | `bottom` | 48 | 2.000000000 |
+| box 2x1x0.6 | `top` | 48 | 2.000000000 |
+| box 2x1x0.6 | `fore` | 36 | 0.600000000 |
+| box 2x1x0.6 | `aft` | 36 | 0.600000000 |
+| box 2x1x0.6 | `hull` | 48 | 2.400000000 |
+| Wigley body L10xB1xT0.625 | `bottom` | 368 | 6.655092593 |
+| Wigley body L10xB1xT0.625 | `hull` | 766 | 14.839761791 |
+
+Four independent checks, kept separate:
+
+1. **Closure.** Every edge of the skin is used exactly once in each direction, and the
+   divergence-theorem volume of the skin reproduces the tetrahedra's volume to
+   8.7e-15 (Wigley) / 1.9e-16 (box). A slit face would fail both.
+2. **Box areas are exact.** A box has closed-form sides: `bottom = top = L·B = 2.0`,
+   `fore = aft = B·H = 0.6`, `hull = 2·L·H = 2.4`, total surface `7.6 m²`. Measured to
+   1.9e-16 relative — a zero-error control for the patch split and for the winding.
+3. **Wigley area against a quadrature of the breadth function.**
+   `2·∬sqrt(1 + b_x² + b_z²) dx dz = 14.879052 m²` (midpoint, 400×200, converged to 1e-6);
+   the mesh's `hull` patch measures `14.839762 m²`, **0.26% low**. That is the piecewise-linear
+   body discretisation (25 stations × 9 levels), not a defect of the export: refining the grid
+   25×9 → 49×17 → 97×25 closes the gap 0.264 % → 0.066 % → 0.023 %.
+4. **Independent reader.** meshio reads the file we wrote and recovers 8280 tetrahedra whose
+   volume equals the patch object's to 1e-12, plus 1134 boundary triangles equal, as
+   geometry, to ours. Our own reader recovers the tags as *names*
+   (`bottom, hull` for the Wigley body, `bottom, top, fore, aft, hull` for the box).
+
+### 6.4 What is still withheld
+
+* **Solver-side acceptance is WITHHELD.** No `SU2_CFD` binary exists on this host (checked:
+  `which SU2_CFD` empty), so "SU2 runs this file" is not claimed. What is claimed and tested
+  is that the file follows the SU2 mesh-file layout (element types 10 and 5, 0-based node
+  indices, `NMARK`/`MARKER_TAG`/`MARKER_ELEMS` sections) and that two independent parsers
+  read it back consistently.
+* **String tags are a deliberate deviation from this package's meshio path.** meshio
+  renumbers them; SU2's specification uses names. Code that must round-trip through meshio
+  should expect `su2:tag` integers, not the names — use `read_su2_markers` when the names
+  matter.
+* **Patches are grid planes, not physics.** `hull` is "the skin that is not on the
+  centreplane or on a station/level cap"; a real case would merge or split patches
+  per component (rudder, skeg, deck) and that is per-case configuration, not geometry.
+* The CGNS metadata limitation of §5.1 and the VTK classification of §5.3 are unchanged.
+
+### 6.5 Reproduce
+
+```bash
+python -m pytest tests/test_volume_mesh_su2_markers.py -q   # the marker contract
+python examples/meshio_volume_bridge/run_example.py         # table + JSON + 4-panel figure
+```
