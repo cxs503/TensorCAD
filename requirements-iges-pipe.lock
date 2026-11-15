@@ -1,0 +1,9 @@
+# IGES/STEP -> watertight mesh import pipeline: verification stack lock
+# platform: loongarch64, CPython 3.11 (702 HPC compute nodes)
+# The pipeline itself is stdlib-only (pyproject: dependencies = []); these pins cover
+# the *independent verification* stack used by benchmarks/ tools/ tests/.
+--only-binary=:all:
+numpy==2.4.6
+pytest==9.2.0
+trimesh==5.0.0
+meshio==5.3.5

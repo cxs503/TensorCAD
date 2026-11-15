@@ -42,6 +42,7 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 from ..geometry import Mesh
+from .stitch import seam_report, stitch_t_junctions
 from .iges_trim import (
     IgesError,
     PlaneSurface,
@@ -981,6 +982,37 @@ def repair_mesh(vertices: Sequence[Vec3], faces: Sequence[Triangle], *, weld_tol
 
 
 # --------------------------------------------------------------------------- #
+# seam stage: measured, optional, and never silent
+# --------------------------------------------------------------------------- #
+def seam_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
+               tolerance: float | None, audit: bool = True) -> tuple[list[Vec3], list[Triangle], dict[str, Any]]:
+    """Measure the open boundary and, when asked, stitch near-coincident seams.
+
+    ``tolerance`` is a *seam coincidence* budget in model units, not a weld tolerance:
+    a vertex is snapped onto a neighbour chord only when it lies that close to it, and
+    the surface therefore moves by at most that much.  ``None`` (the default) measures
+    without touching the mesh, so a caller can ask "would stitching help here?" without
+    changing the geometry it is about to report.
+    """
+    record: dict[str, Any] = {"requested_tolerance": tolerance}
+    if audit:
+        record["analysis_before"] = seam_report(vertices, faces,
+                                                tolerance=tolerance if tolerance else 1e-3)
+    if tolerance is None:
+        record["applied"] = False
+        record["note"] = "measurement only; pass seam_tolerance to stitch"
+        return list(vertices), [tuple(face) for face in faces], record
+    stitched_vertices, stitched_faces, stitch_record = stitch_t_junctions(
+        vertices, faces, tolerance=tolerance)
+    record["applied"] = True
+    record["stitch"] = stitch_record
+    if audit:
+        record["analysis_after"] = seam_report(stitched_vertices, stitched_faces,
+                                               tolerance=tolerance)
+    return stitched_vertices, stitched_faces, record
+
+
+# --------------------------------------------------------------------------- #
 # the import pipeline
 # --------------------------------------------------------------------------- #
 @dataclass
@@ -997,11 +1029,17 @@ class CadImport:
 def import_iges(path: str | Path, *, tolerance: float | None = None, scale: float | None = None,
                 weld_tolerance: float | None = None, repair: bool = True,
                 fill_holes: bool = True, max_hole_edges: int = 32,
-                chord_tolerance: float | None = None, refine_levels: int = 6) -> CadImport:
+                chord_tolerance: float | None = None, refine_levels: int = 6,
+                seam_tolerance: float | None = None, seam_audit: bool = True) -> CadImport:
     """Import an IGES file: parse, invert trims, tessellate, repair, audit.
 
     ``scale`` converts the file's units to metres; it defaults to the file's own declared
     units.  ``weld_tolerance`` defaults to 1e-6 times the model's largest coordinate.
+
+    ``seam_tolerance`` is the seam-coincidence budget of the seam stage
+    (:func:`seam_stage`): neighbours exported within that distance of each other are
+    stitched, which moves the surface by at most that much.  ``None`` measures the open
+    boundary without changing the mesh; the measurement travels in ``report["seam"]``.
     """
     started = time.time()
     digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -1014,8 +1052,8 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
     weld = weld_tolerance if weld_tolerance is not None else 1e-6 * max(extent, 1e-9)
 
     before = audit_mesh(tessellation.vertices, tessellation.faces, degenerate_area=0.0)
-    vertices = list(tessellation.vertices)
-    faces = list(tessellation.faces)
+    vertices, faces, seam_record = seam_stage(tessellation.vertices, tessellation.faces,
+                                              tolerance=seam_tolerance, audit=seam_audit)
     repair_record: dict[str, Any] = {}
     if repair:
         vertices, faces, repair_record = repair_mesh(
@@ -1058,6 +1096,7 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
             "warnings": list(model.warnings),
         },
         "before_repair": before.to_dict(),
+        "seam": seam_record,
         "repair": repair_record,
         "after_repair": after.to_dict(),
         "gates": gates,
@@ -1113,6 +1152,10 @@ def _gates(model: TrimmedModel, tessellation: Tessellation, audit: MeshAudit) ->
     }
 
 
+_PATCH_ROUTE_KEYS = {"scale", "weld_tolerance", "repair", "fill_holes", "max_hole_edges",
+                     "seam_tolerance", "seam_audit"}
+
+
 def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
                **kwargs: Any) -> CadImport:
     """Import a CAD file, choosing the route the file's own content justifies.
@@ -1133,8 +1176,7 @@ def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
             if not allow_patch_fallback:
                 raise
             result = import_patch_set(target, **{k: v for k, v in kwargs.items()
-                                                if k in {"scale", "weld_tolerance", "repair",
-                                                         "fill_holes", "max_hole_edges"}},
+                                                if k in _PATCH_ROUTE_KEYS},
                                      u_samples=u_samples, v_samples=v_samples)
             result.report.setdefault("route_notes", []).append(
                 f"trimmed reader refused the file, fell back to the patch-set route: {exc}"
@@ -1143,8 +1185,7 @@ def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
             return result
     if suffix in (".step", ".stp"):
         return import_patch_set(target, **{k: v for k, v in kwargs.items()
-                                          if k in {"scale", "weld_tolerance", "repair",
-                                                   "fill_holes", "max_hole_edges"}},
+                                          if k in _PATCH_ROUTE_KEYS},
                                 u_samples=u_samples, v_samples=v_samples)
     raise IgesError(f"unsupported CAD suffix {suffix!r}: expected .igs/.iges/.step/.stp")
 
@@ -1189,7 +1230,8 @@ def _unused(*_: Iterable[Any]) -> None:  # pragma: no cover
 def import_patch_set(path: str | Path, *, scale: float | None = None,
                      weld_tolerance: float | None = None, repair: bool = True,
                      fill_holes: bool = True, max_hole_edges: int = 32,
-                     u_samples: int = 24, v_samples: int = 12) -> CadImport:
+                     u_samples: int = 24, v_samples: int = 12,
+                     seam_tolerance: float | None = None, seam_audit: bool = True) -> CadImport:
     """Import an *untrimmed* patch set (the flavour this repository's writer emits).
 
     IGES 128 patch sets and STEP patch sets carry no topology: adjacency has to be
@@ -1215,6 +1257,8 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
         extent = max(extent, abs(vertex[0]), abs(vertex[1]), abs(vertex[2]))
     weld = weld_tolerance if weld_tolerance is not None else 1e-6 * max(extent * unit_scale, 1e-9)
     before = audit_mesh(vertices, faces)
+    vertices, faces, seam_record = seam_stage(vertices, faces,
+                                              tolerance=seam_tolerance, audit=seam_audit)
     if repair:
         vertices, faces, repair_record = repair_mesh(
             vertices, faces, weld_tolerance=weld, max_hole_edges=max_hole_edges,
@@ -1254,6 +1298,7 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
                    "faces_refused": 0, "refused": {},
                    "samples": {"u": u_samples, "v": v_samples}, "weld_tolerance": weld},
         "before_repair": before.to_dict(),
+        "seam": seam_record,
         "repair": repair_record,
         "after_repair": after.to_dict(),
         "gates": gates,
