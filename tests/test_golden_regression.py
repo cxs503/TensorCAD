@@ -66,6 +66,15 @@ class ProbeCase(golden.GoldenCase):
         return self.fingerprint
 
 
+class DeclaringProbeCase(ProbeCase):
+    """A probe whose band is declared, like the 5415 particulars table."""
+
+    def reference_tolerance(
+        self, values: dict[str, float], reference: dict[str, float]
+    ) -> dict[str, tuple[float, str]]:
+        return {"value": (3e-2, "declared contract: the test's own 3 % band")}
+
+
 def _bless(tmp_path: Path, case: golden.GoldenCase) -> Path:
     path = tmp_path / "baseline.json"
     golden.bless(path, cases=[case])
@@ -714,6 +723,9 @@ def _load_redteam():
     spec = importlib.util.spec_from_file_location("golden_mutation_redteam", path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    # dataclasses resolve their own module through sys.modules while the class body runs,
+    # so an unregistered module fails to load (AttributeError: 'NoneType' has no __dict__)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -827,3 +839,116 @@ def test_a_declared_tolerance_must_be_justified() -> None:
 
 def dtmb5415_golden_case() -> golden.GoldenCase:
     return next(case for case in golden.golden_cases() if case.name == "dtmb5415")
+
+# --------------------------------------------------------------------------------------
+# the recorded criterion is a derivation, not a chosen number
+# --------------------------------------------------------------------------------------
+# `--quick` (the mode the git hook runs) has no coarse level, so it asserts against the
+# band the baseline records.  That band sits in a committed JSON file: unless the checker
+# re-derives it, a hand edit decides the gate while the table still reads green.
+def test_hand_inflated_band_is_rejected_in_quick_mode(tmp_path: Path) -> None:
+    path = _bless(tmp_path, ProbeCase())
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["cases"]["probe"]["tolerances"]["value"]["value"] *= 100.0
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    result = golden.run_suite(baseline_path=path, cases=[ProbeCase()], quick=True)
+
+    assert not result.passed
+    assert "tolerance_not_derived" in _codes(result), _codes(result)
+    detail = next(f for f in result.errors if f.code == "tolerance_not_derived").detail
+    assert "derivation gives" in detail
+    # the inflated band is refused, not silently replaced: the case still reports it
+    (metric,) = [m for m in result.cases[0].metrics if m.name == "value"]
+    assert metric.tolerance is not None and metric.tolerance > 0.1
+
+
+def test_hand_inflated_band_is_rejected_in_full_mode(tmp_path: Path) -> None:
+    """Full mode re-derives the band for its verdict; it must still refuse the record.
+
+    Otherwise a baseline whose criterion was inflated passes CI (which ignores the stored
+    value) and fails the developer hook (which reads it) -- the two gates would disagree
+    about the same tree, and the disagreement would be silent.
+    """
+    path = _bless(tmp_path, ProbeCase())
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["cases"]["probe"]["tolerances"]["value"]["value"] *= 100.0
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    result = golden.run_suite(baseline_path=path, cases=[ProbeCase()], quick=False)
+
+    assert not result.passed
+    assert "tolerance_not_derived" in _codes(result), _codes(result)
+
+
+def test_hand_edited_declared_band_is_rejected(tmp_path: Path) -> None:
+    path = _bless(tmp_path, DeclaringProbeCase())
+    data = json.loads(path.read_text(encoding="utf-8"))
+    recorded = data["cases"]["probe"]["tolerances"]["value"]
+    assert recorded["basis"].startswith(golden.DECLARED_BASIS_PREFIX)
+    recorded["value"] = 0.049
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    result = golden.run_suite(baseline_path=path, cases=[DeclaringProbeCase()], quick=True)
+
+    assert not result.passed
+    assert "tolerance_not_derived" in _codes(result), _codes(result)
+
+
+def test_recorded_band_must_match_its_origin(tmp_path: Path) -> None:
+    """A declared metric recorded with a two-grid basis (or the reverse) is an error.
+
+    The two modes then assert different criteria on the same tree: quick mode would read
+    the record, full mode the fresh declaration.
+    """
+    path = _bless(tmp_path, ProbeCase())
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["cases"]["probe"]["tolerances"]["value"]["basis"] = (
+        f"{golden.DECLARED_BASIS_PREFIX}: invented by the test"
+    )
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    result = golden.run_suite(baseline_path=path, cases=[ProbeCase()], quick=True)
+
+    assert not result.passed
+    assert "tolerance_origin_mismatch" in _codes(result), _codes(result)
+
+
+def test_band_for_a_metric_that_is_not_asserted_is_rejected(tmp_path: Path) -> None:
+    path = _bless(tmp_path, ProbeCase())
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["cases"]["probe"]["tolerances"]["ghost"] = {"value": 0.5, "basis": "chosen"}
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    result = golden.run_suite(baseline_path=path, cases=[ProbeCase()], quick=True)
+
+    assert not result.passed
+    assert "tolerance_unknown_metric" in _codes(result), _codes(result)
+
+
+def test_committed_bands_are_their_own_derivation(committed: golden.SuiteResult) -> None:
+    """Every band in the committed baseline reproduces from the inputs it was derived on."""
+    assert not [f for f in committed.errors if f.code.startswith("tolerance_")], [
+        f"{f.case}/{f.code}: {f.detail}" for f in committed.errors
+    ]
+    data = json.loads(BASELINE.read_text(encoding="utf-8"))
+    recorded = {
+        (case, metric): entry
+        for case, payload in data["cases"].items()
+        for metric, entry in (payload.get("tolerances") or {}).items()
+    }
+    assert recorded
+    for (case, metric), entry in recorded.items():
+        assert isinstance(entry["value"], float) and entry["value"] > 0.0, (case, metric)
+        assert entry["basis"], (case, metric)
+
+
+def test_redteam_harness_kills_the_inflated_band_mutant() -> None:
+    """The gate's negative control for the criterion itself, not only for the geometry."""
+    harness = _load_redteam()
+    report = harness.run_redteam(quick=True, only=("baseline-tolerance-hand-inflated",))
+
+    assert report["control"]["passed"], report["control"]
+    (mutant,) = report["mutants"]
+    assert mutant["killed"], mutant["observed"]
+    assert "tolerance_not_derived" in mutant["observed"]
