@@ -1,6 +1,7 @@
 {
   "cases": {
     "dtmb5415": {
+      "extrapolated": {},
       "geometry_sha256": "30c05a782971768c7a8b6c0e4e9a30938d14878f6ad9f218b112fc7ee6ccc2bc",
       "invariants": {
         "identity_cb_equals_volume_over_lbt": {
@@ -126,7 +127,39 @@
       }
     },
     "series60": {
-      "geometry_sha256": "f9da70a467f6d4270dc0dac74423ffa4ddb6347106b451bd114bcaff829faf9d",
+      "extrapolated": {
+        "block_coefficient": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 8.851e-03 (remaining 4.140e-03; observed order p = 1.05 over r = 2.0000, 2.0000: 0.589706575 then 0.595016927)",
+          "tolerance": 0.011063233886346446,
+          "value": 0.5950169271076804
+        },
+        "displacement_volume_m3": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 8.851e-03 (remaining 4.140e-03; observed order p = 1.05 over r = 2.0000, 2.0000: 5.30735917 then 5.35515234)",
+          "tolerance": 0.01106323388634655,
+          "value": 5.355152343969123
+        },
+        "longitudinal_centre_buoyancy_m": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 3.553e-16 (remaining 1.776e-16; observed order p = 1.00 over r = 2.0000, 2.0000: 5 then 5)",
+          "tolerance": 0.0001,
+          "value": 4.999999999999999
+        },
+        "maximum_section_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 8.799e-03 (remaining 4.158e-03; observed order p = 1.04 over r = 2.0000, 2.0000: 0.849213223 then 0.856815861)",
+          "tolerance": 0.010999186047039106,
+          "value": 0.8568158607712125
+        },
+        "prismatic_coefficient": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.176e-05 (remaining 8.669e-06; observed order p = 1.99 over r = 2.0000, 2.0000: 0.624956827 then 0.624989176)",
+          "tolerance": 0.0001,
+          "value": 0.6249891756003374
+        },
+        "waterplane_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.176e-05 (remaining 8.669e-06; observed order p = 1.99 over r = 2.0000, 2.0000: 9.37435241 then 9.37483763)",
+          "tolerance": 0.0001,
+          "value": 9.37483763400506
+        }
+      },
+      "geometry_sha256": "a85fba6697f3da04724118fea74fd1fd7b63082880c3be94f7991ef234d0ac9b",
       "invariants": {
         "identity_cb_equals_cp_times_cm": {
           "basis": "Cb = Cp\u00b7Cm with Cm = A_midship / (B\u00b7T)",
@@ -156,6 +189,14 @@
           "maximum_section_area_m2": 0.8566071822349225,
           "prismatic_coefficient": 0.624978419562839,
           "waterplane_area_m2": 9.374676293442585
+        },
+        "finer": {
+          "block_coefficient": 0.5975007349542327,
+          "displacement_volume_m3": 5.3775066145880945,
+          "longitudinal_centre_buoyancy_m": 5,
+          "maximum_section_area_m2": 0.8604085009327792,
+          "prismatic_coefficient": 0.6249945937026744,
+          "waterplane_area_m2": 9.374918905540113
         }
       },
       "reference": {
@@ -196,6 +237,7 @@
       }
     },
     "sphere_ellipsoid": {
+      "extrapolated": {},
       "geometry_sha256": "f6ded09395f752148a916d9da9150e3faea6375667030258a6045de5ee452219",
       "invariants": {},
       "known_limitations": [],
@@ -283,7 +325,44 @@
       }
     },
     "wigley": {
-      "geometry_sha256": "0ef07ca68299b6216ab5ef817f324e38eb17d8e79d4c319ff9116200106986eb",
+      "extrapolated": {
+        "block_coefficient": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.930e-04 (remaining 4.521e-05; observed order p = 2.08 over r = 3.3333, 2.0000: 0.444272444 then 0.444402648)",
+          "tolerance": 0.00036619663238444955,
+          "value": 0.4444026477297761
+        },
+        "displacement_volume_m3": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.930e-04 (remaining 4.521e-05; observed order p = 2.08 over r = 3.3333, 2.0000: 2.77670278 then 2.77751655)",
+          "tolerance": 0.00036619663238437463,
+          "value": 2.777516548311101
+        },
+        "maximum_section_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.344e-04 (remaining 3.906e-05; observed order p = 2.00 over r = 3.3333, 2.0000: 0.416536458 then 0.416634115)",
+          "tolerance": 0.00029296875000073275,
+          "value": 0.41663411458333327
+        },
+        "prismatic_coefficient": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.859e-05 (remaining 7.099e-06; observed order p = 2.36 over r = 3.3333, 2.0000: 0.666616361 then 0.666655423)",
+          "tolerance": 0.0001,
+          "value": 0.6666554233790719
+        },
+        "vertical_centre_buoyancy_m": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 7.814e-05 (remaining 1.300e-05; observed order p = 2.00 over r = 3.3333, 2.0000: -0.234350586 then -0.2343689)",
+          "tolerance": 0.0001,
+          "value": -0.23436890015280867
+        },
+        "waterplane_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 5.859e-05 (remaining 7.099e-06; observed order p = 2.36 over r = 3.3333, 2.0000: 6.66616361 then 6.66655423)",
+          "tolerance": 0.0001,
+          "value": 6.6665542337907215
+        },
+        "wetted_surface_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 2.701e-05 (remaining 4.485e-06; observed order p = 2.00 over r = 3.3333, 2.0000: 14.8785275 then 14.8789294)",
+          "tolerance": 0.0001,
+          "value": 14.878929386581742
+        }
+      },
+      "geometry_sha256": "a06f04cb8a1af6bee75946cd59ade7b5e4ac2e9a439e9b691239d91682072780",
       "invariants": {},
       "known_limitations": [],
       "measurements": {
@@ -306,6 +385,16 @@
           "vertical_centre_buoyancy_m": -0.23436279106110336,
           "waterplane_area_m2": 6.66640625,
           "wetted_surface_area_m2": 14.87879518241892
+        },
+        "finer": {
+          "block_coefficient": 0.4444227432250974,
+          "displacement_volume_m3": 2.7776421451568587,
+          "longitudinal_centre_buoyancy_m": 5,
+          "maximum_section_area_m2": 0.41665039062500003,
+          "prismatic_coefficient": 0.6666601562499996,
+          "vertical_centre_buoyancy_m": -0.23437194812297352,
+          "waterplane_area_m2": 6.6666015625,
+          "wetted_surface_area_m2": 14.878996125883496
         }
       },
       "reference": {
@@ -359,12 +448,13 @@
   "policy": {
     "acceptance_tolerance": "two-grid: 2 x |fine - coarse| / |reference|, floor 0.0001 (relative)",
     "drift_tolerance": "1e-09 (relative, vs the blessed measurement)",
-    "reference_tolerance": "1e-09 (relative): a stored reference must equal what its declared source computes on every run"
+    "reference_tolerance": "1e-09 (relative): a stored reference must equal what its declared source computes on every run",
+    "richardson_tolerance": "GCI: 1.25 x |extrapolated - finest| / |reference|, floor 0.0001 (relative): on a three-level ladder the extrapolated value must agree with the analytic reference within the band the measurements' own convergence justifies"
   },
   "provenance": {
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "0c8870b5ff5b921cfcab27c4b2b445a4503145333e4898db7db49b80b5b6b96c",
-    "git_commit": "ae83da9ceaf5f82b6e5bacba5f9fc55e4d731f06",
+    "geometry_fingerprint": "ea1a69b0b32a48e357da6b30cc396bff5b186ad7d6570eb6c790eff855feccce",
+    "git_commit": "e61fe0b4144d5c06f341e7b433a77d9d754d8137",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },

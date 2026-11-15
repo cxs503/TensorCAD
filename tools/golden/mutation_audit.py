@@ -458,8 +458,14 @@ class _CachedPerturbed(golden.GoldenCase):
                 values[key] = values[key] * factor
         return values
 
+    def levels(self) -> tuple[str, ...]:
+        return self._inner.levels()
+
+    def refinement_factor(self, coarse_level: str, fine_level: str) -> float | None:
+        return self._inner.refinement_factor(coarse_level, fine_level)
+
     def all_values(self) -> dict[str, dict[str, float]]:
-        return {level: self.measure(level) for level in golden.LEVELS}
+        return {level: self.measure(level) for level in self._inner.levels()}
 
     def reference(self) -> dict[str, float]:
         # the reference is invariant under the mutation: it encodes the adversary's blind
@@ -510,12 +516,18 @@ def _blessed_like(inner: golden.GoldenCase, case_result: golden.CaseResult) -> d
     """Assemble a baseline entry exactly the way ``bless`` would, from a live case result."""
 
     reference = case_result.reference
-    coarse = case_result.measurements.get("coarse")
+    ladder = inner.levels()
+    if len(ladder) >= 3:
+        acceptance, partner = ladder[-2], ladder[-3]
+    else:
+        acceptance, partner = ladder[-1], (ladder[0] if len(ladder) > 1 else None)
+    coarse = case_result.measurements.get(partner) if partner is not None else None
     tolerances: dict[str, Any] = {}
     for key, expected in reference.items():
         if inner.name:
             tolerance, basis = golden._tolerance(
-                expected, coarse.get(key) if coarse else None, case_result.measurements["fine"][key]
+                expected, coarse.get(key) if coarse else None,
+                case_result.measurements[acceptance][key]
             )
         else:  # pragma: no cover - defensive
             tolerance, basis = golden.TOLERANCE_FLOOR, "floor"
@@ -527,6 +539,11 @@ def _blessed_like(inner: golden.GoldenCase, case_result: golden.CaseResult) -> d
         "measurements": copy.deepcopy(case_result.measurements),
         "reference": dict(reference),
         "tolerances": tolerances,
+        "extrapolated": {
+            m.name: {"value": m.value, "tolerance": m.tolerance, "basis": m.basis}
+            for m in case_result.metrics
+            if m.kind == "richardson"
+        },
     }
 
 

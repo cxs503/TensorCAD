@@ -1207,3 +1207,73 @@ def test_a_forced_bless_stays_visible_in_every_later_run(tmp_path: Path) -> None
         assert forced[0].severity == golden.WARNING
         assert "drift" in forced[0].detail
     assert result.passed, "a reviewed override must not make the gate permanently red"
+
+
+# --------------------------------------------------------------------------------------
+# three-level ladder: grid-convergence (GCI) assertion
+# --------------------------------------------------------------------------------------
+def test_three_level_cases_record_a_grid_convergence_band() -> None:
+    data = json.loads(BASELINE.read_text(encoding="utf-8"))
+    three = {case.name: case for case in golden.golden_cases() if len(case.levels()) >= 3}
+    assert three, "no case declares a third level: the GCI layer would be dead code"
+    for name, case in three.items():
+        entry = data["cases"][name]
+        assert set(entry["measurements"]) == set(case.levels())
+        recorded = entry["extrapolated"]
+        assert recorded, f"{name}: three levels but no grid-convergence band recorded"
+        for key, band in recorded.items():
+            assert band["value"] is not None
+            assert band["tolerance"] >= golden.TOLERANCE_FLOOR
+            assert band["basis"].startswith("GCI:")
+
+
+def test_recorded_grid_convergence_band_reproduces() -> None:
+    """Every recorded GCI band is the one the blessed measurements derive (no hand numbers)."""
+    data = json.loads(BASELINE.read_text(encoding="utf-8"))
+    checked = 0
+    for case in golden.golden_cases():
+        if len(case.levels()) < 3:
+            continue
+        entry = data["cases"][case.name]
+        derived = golden._gci_estimates(
+            case, case.levels(), entry["measurements"], entry["reference"], []
+        )
+        recorded = entry["extrapolated"]
+        assert set(derived) == set(recorded)
+        for key, (value, band, _basis) in derived.items():
+            assert abs(value - recorded[key]["value"]) <= 1e-12 * max(1.0, abs(value))
+            assert abs(band - recorded[key]["tolerance"]) <= 1e-9 * band
+            checked += 1
+    assert checked
+
+
+def test_hand_widened_grid_convergence_band_is_rejected(tmp_path: Path) -> None:
+    data = json.loads(BASELINE.read_text(encoding="utf-8"))
+    entry = data["cases"]["series60"]["extrapolated"]
+    key = sorted(entry)[0]
+    entry[key]["tolerance"] = float(entry[key]["tolerance"]) * 10.0
+    path = tmp_path / "baseline.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    result = golden.run_suite(quick=True, baseline_path=path)
+    assert "extrapolation_not_derived" in _codes(result), _codes(result)
+
+
+def test_first_order_case_keeps_a_wide_band_honestly() -> None:
+    """The negative result this mission found, pinned.
+
+    Series 60's volume / Cb / mid-section converge at order ~1.05, because the section law
+    ``y ~ zeta**(1/m)`` has an unbounded slope at the keel (m ~ 12 at Cb = 0.6).  A
+    three-level extrapolation therefore cannot buy a tight band: the two extrapolants
+    disagree by ~0.9 %, and the GCI band stays above 1 %.  The assertion keeps that honest
+    rather than letting the "extrapolated" label imply convergence that is not there.
+    """
+    case = next(c for c in golden.golden_cases() if c.name == "series60")
+    data = json.loads(BASELINE.read_text(encoding="utf-8"))["cases"]["series60"]
+    derived = golden._gci_estimates(
+        case, case.levels(), data["measurements"], data["reference"], []
+    )
+    band = derived["displacement_volume_m3"][1]
+    two_grid = data["tolerances"]["displacement_volume_m3"]["value"]
+    assert band > 1e-2, band            # still above the 1 % blind-spot line: not closed
+    assert band < two_grid              # but it is the band that now binds
+    assert "observed order p" in derived["displacement_volume_m3"][2]
