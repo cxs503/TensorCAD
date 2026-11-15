@@ -57,14 +57,30 @@ _PARENT_FORMS: dict[float, tuple[float, float]] = {
 #: The five Todd (1951) parent forms, ascending: the family's published ladder.
 PARENT_CB: tuple[float, ...] = tuple(sorted(_PARENT_FORMS))
 
+#: The window the family actually admits.  The published Todd ladder ends at
+#: ``Cb = 0.80`` and ``Cm = Cb/Cp`` needs a prismatic coefficient *above* the block
+#: coefficient, so above the fullest parent there is no parent to interpolate from:
+#: a request at ``Cb = 0.85`` used to raise ``Cp (0.805) must exceed Cb (0.850)`` from
+#: inside the interpolation while this module's own docstring advertised 0.85 as
+#: admissible.  The window is therefore the ladder, not one more than it.
+CB_MIN = 0.55
+CB_MAX = max(_PARENT_FORMS)
+#: Largest prismatic coefficient any published parent carries.
+CP_MAX = max(cp for cp, _n in _PARENT_FORMS.values())
+
 SAMPLING_ERROR_WARNING = 0.02
 MAX_STATIONS = 4001
 MAX_LEVELS = 513
 
 
 def _interpolate_exponents(cb: float) -> tuple[float, float]:
-    if not math.isfinite(cb) or not 0.55 <= cb <= 0.85:
-        raise ValueError(f"Cb must lie in [0.55, 0.85], got {cb!r}")
+    if not math.isfinite(cb) or not CB_MIN <= cb <= CB_MAX:
+        raise ValueError(
+            f"Cb must lie in [{CB_MIN}, {CB_MAX}], got {cb!r}: the published Todd ladder "
+            f"ends at Cb={CB_MAX} (Cp={CP_MAX:.3f}), and Cm=Cb/Cp needs a prismatic "
+            "coefficient above the block coefficient, which no published parent "
+            "provides beyond that point"
+        )
     sorted_cb = sorted(_PARENT_FORMS.keys())
     if cb <= sorted_cb[0]:
         cp, n = _PARENT_FORMS[sorted_cb[0]]
@@ -560,7 +576,7 @@ class Series60Parameters:
         if not math.isfinite(self.water_density) or not 300.0 <= self.water_density <= 2000.0:
             errors.append(f"water_density must be in [300, 2000], got {self.water_density!r}")
         if not math.isfinite(self.cb) or not 0.55 <= self.cb <= 0.85:
-            errors.append(f"cb must lie in [0.55, 0.85], got {self.cb!r}")
+            errors.append(f"cb must lie in [{CB_MIN}, {CB_MAX}], got {self.cb!r}")
         for name in ("cwp", "lcb"):
             value = getattr(self, name)
             if value is not None and not math.isfinite(value):
@@ -1274,4 +1290,218 @@ def series60_appended_hydrostatics(p: Series60Parameters,
         "bulb_fp_area_submerged_m2": bulb.fp_area_submerged if bulb else 0.0,
         "bulb_wetted_area_m2": bulb.wetted_area if bulb else 0.0,
         "bulb_pierces_waterline": bool(bulb.pierces_waterline) if bulb else False,
+    }
+
+
+# --------------------------------------------------------------------------------------
+# Wetted surface area: the family's one quantity with no closed form, and the one the
+# resistance chain consumes.  The reference below is an independent construction -- a
+# 2-D quadrature of the parametric metric -- so the lofted mesh's own area has
+# something to be wrong against.
+# --------------------------------------------------------------------------------------
+
+def _deck_taper_derivative(law: Series60SectionLaw, xi: float) -> float:
+    """``d(deck_taper)/dxi``, analytic on the branch the loft uses.
+
+    ``deck_taper = 1 - |2 xi - 1|^n`` (transom blend on the aft half), so
+    ``d/dxi = -2 n |2 xi - 1|^(n-1)`` forward and ``+2 n |2 xi - 1|^(n-1)`` abaft;
+    at ``xi = 1/2`` both sides give ``0`` for every ``n > 1``.
+    """
+    if xi < 0.0 or xi > 1.0:
+        return 0.0
+    n = law.side_exponent(xi)
+    magnitude = math.pow(abs(2.0 * xi - 1.0), n - 1.0)
+    value = -2.0 * n * magnitude * (1.0 if xi > 0.5 else -1.0)
+    if law.transom_ratio > 0.0 and xi < 0.5:
+        return (1.0 - law.transom_ratio) * value
+    return value
+
+
+def _fullness_derivative(law: Series60SectionLaw, xi: float) -> float:
+    """``d(fullness)/dxi = -Cm_mid * gain * d(deck_taper)/dxi``."""
+    return -law.cm_mid * law.gain * _deck_taper_derivative(law, xi)
+
+
+def _exponent_derivative(law: Series60SectionLaw, xi: float) -> float:
+    """``d m / d xi`` for ``m = q/(1-q)``, i.e. ``q'/(1-q)^2``."""
+    q = law.fullness(xi)
+    return _fullness_derivative(law, xi) / ((1.0 - q) ** 2)
+
+
+def vertical_exponent_range(p: Series60Parameters, law: Series60SectionLaw,
+                            samples: int = 257) -> tuple[float, float]:
+    """``(min, max)`` of the vertical exponent ``m(xi)`` over the hull."""
+    low, high = math.inf, 0.0
+    for i in range(samples):
+        m = law.exponent(i / (samples - 1))
+        low = min(low, m)
+        high = max(high, m)
+    return low, high
+
+
+def _surface_point(p: Series60Parameters, law: Series60SectionLaw,
+                   xi: float, u: float, k: float) -> tuple[float, float, float]:
+    """Starboard surface point for ``zeta = u**k`` (the keel-regularising map)."""
+    zeta = u ** k
+    y = 0.5 * p.beam * law.deck_taper(xi) * math.pow(zeta, 1.0 / law.exponent(xi))
+    return (p.length * xi, y, -p.draft * (1.0 - zeta))
+
+
+def _surface_area_integrand(p: Series60Parameters, law: Series60SectionLaw,
+                           xi: float, u: float, k: float) -> float:
+    """Both-sided area element ``2 |r_xi x r_zeta| dzeta/du`` on ``zeta = u**k``.
+
+    ``r = (L xi, y, -T (1 - zeta))`` with ``y = (B/2) f(xi) zeta**(1/m(xi))``, so
+    ``|r_xi x r_zeta| = sqrt((T y_xi)^2 + (L T)^2 + (L y_zeta)^2)``.  With ``zeta =
+    u**k`` and ``j = dzeta/du = k u**(k-1)`` the three components of the substituted
+    element are, term by term,
+
+    * ``T y_xi j     = T (B/2) k u**(k/m + k - 1) [f' - f k ln(u) m'/m^2]``
+    * ``L T j        = L T k u**(k - 1)``
+    * ``L y_zeta j   = L (B/2) f (k/m) u**(k/m - 1)``
+
+    every one of which is a power of ``u`` with a *non-negative* exponent (``k >=
+    max m``), so the keel end is integrable.  They are summed in log space: at
+    ``k`` around 170 the individual powers underflow long before their sum does, and
+    evaluating them as floats first raised ``OverflowError`` (found by
+    ``tests/test_series60_domain_and_surface.py``).
+    """
+    ln_u = math.log(u)
+    f = law.deck_taper(xi)
+    q = law.fullness(xi)
+    m = q / (1.0 - q)
+    ratio = k / m
+    dm = _exponent_derivative(law, xi)
+    bracket = _deck_taper_derivative(law, xi) - f * k * ln_u * dm / (m * m)
+    half_beam = 0.5 * p.beam
+    logs: list[float] = []
+    if bracket != 0.0:
+        logs.append(2.0 * (math.log(p.draft * half_beam * k)
+                           + (ratio + k - 1.0) * ln_u + math.log(abs(bracket))))
+    logs.append(2.0 * (math.log(p.length * p.draft * k) + (k - 1.0) * ln_u))
+    if f > 0.0:
+        logs.append(2.0 * (math.log(p.length * half_beam * ratio * f) + (ratio - 1.0) * ln_u))
+    biggest = max(logs)
+    total = biggest + math.log(math.fsum(math.exp(value - biggest) for value in logs))
+    return 2.0 * math.exp(0.5 * total)
+
+
+def _triangle_area(a, b, c) -> float:
+    ux, uy, uz = b[0] - a[0], b[1] - a[1], b[2] - a[2]
+    vx, vy, vz = c[0] - a[0], c[1] - a[1], c[2] - a[2]
+    cx, cy, cz = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
+    return 0.5 * math.sqrt(cx * cx + cy * cy + cz * cz)
+
+
+def hull_surface_area_quadrature(p: Series60Parameters, law: Series60SectionLaw | None = None,
+                                 order: int = 48, refine: bool = True) -> dict[str, Any]:
+    """Deliberately independent of the loft: 2-D Gauss-Legendre on the metric.
+
+    No triangle, no mesh, no sampling in ``(nx, nz)`` -- the same station law, but the
+    surface is integrated rather than polygonised.  ``order`` is refined once so the
+    rule reports its own error instead of asserting it is exact.
+    """
+    law = law if law is not None else series60_section_law(p)
+    k = vertical_exponent_range(p, law)[1] * 1.05 + 1e-9
+
+    def rule(n: int) -> float:
+        nodes, weights = gauss_legendre_unit(n)
+        terms = []
+        for xu, wu in zip(nodes, weights):
+            for xv, wv in zip(nodes, weights):
+                terms.append(wu * wv * _surface_area_integrand(p, law, xu, xv, k))
+        return math.fsum(terms)
+
+    value = rule(order)
+    refined = rule(2 * order) if refine else value
+    return {
+        "hull_area_m2": value,
+        "hull_area_refined_m2": refined,
+        "quadrature_error_m2": abs(refined - value),
+        "order": order,
+        "keel_map_exponent": k,
+    }
+
+
+def hull_surface_area_quad_sum(p: Series60Parameters, law: Series60SectionLaw | None = None,
+                               n_xi: int = 160, n_u: int = 160) -> float:
+    """Same surface, a second and cruder construction: parametric quads on a grid.
+
+    Corners come straight from :func:`_surface_point`, so this path shares no
+    derivative algebra with :func:`hull_surface_area_quadrature`; agreement between
+    the two is what makes the reference trustworthy.
+    """
+    law = law if law is not None else series60_section_law(p)
+    k = vertical_exponent_range(p, law)[1] * 1.05 + 1e-9
+    xs = [i / n_xi for i in range(n_xi + 1)]
+    us = [j / n_u for j in range(n_u + 1)]
+    rows = [[_surface_point(p, law, x, u, k) for u in us] for x in xs]
+    terms = []
+    for i in range(n_xi):
+        top, bottom = rows[i], rows[i + 1]
+        for j in range(n_u):
+            a, b, c, d = top[j], bottom[j], bottom[j + 1], top[j + 1]
+            terms.append(_triangle_area(a, b, c) + _triangle_area(a, c, d))
+    # the grid above spans the starboard half only; the hull is symmetric
+    return 2.0 * math.fsum(terms)
+
+
+def series60_surface_area_reference(p: Series60Parameters, *,
+                                    order: int = 48,
+                                    ladder: tuple[int, ...] = (80, 160, 320)) -> dict[str, Any]:
+    """Wetted surface area of the hull ``p`` describes, from two constructions.
+
+    * ``quadrature``: 2-D Gauss-Legendre on the analytic metric (self-reported error).
+    * ``quad_sum``: parametric quads on ``ladder`` grids, Richardson-extrapolated with
+      the order estimated from the ladder itself.
+    * ``transom_area``: the immersed stern face, added because the wetted surface
+      reported by :func:`~tensorcad.hydrostatics.compute_hydrostatics` includes it.
+      The waterplane cap is not wetted and neither side includes it.
+
+    ``path_agreement`` is ``|quadrature - extrapolated| / extrapolated``: two
+    independent constructions of the same integral, so a disagreement means this
+    reference is wrong, not that the mesh is.
+    """
+    law = series60_section_law(p)
+    quad = hull_surface_area_quadrature(p, law, order=order)
+    sums = {n: hull_surface_area_quad_sum(p, law, n, n) for n in ladder}
+    coarse, mid, fine = (sums[n] for n in ladder)
+    order_est = 2.0
+    if mid != coarse and fine != mid and mid != fine:
+        ratio = (mid - coarse) / (fine - mid) if fine != mid else 0.0
+        if ratio > 0.0:
+            order_est = math.log2(ratio)
+            order_est = min(max(order_est, 0.5), 8.0)
+    extrapolated = fine + (fine - mid) / (math.pow(2.0, order_est) - 1.0)
+    transom = transom_area(p, law)
+    return {
+        "basis": "independent 2-D quadrature of the parametric metric; no mesh involved",
+        "hull_area_quadrature_m2": quad["hull_area_m2"],
+        "hull_area_quadrature_error_m2": quad["quadrature_error_m2"],
+        "hull_area_quad_sum_ladder_m2": {str(n): v for n, v in sums.items()},
+        "hull_area_extrapolated_m2": extrapolated,
+        "extrapolation_order": order_est,
+        "transom_area_m2": transom,
+        "total_reference_m2": extrapolated + transom,
+        "path_agreement": abs(quad["hull_area_m2"] - extrapolated) / extrapolated,
+        "area_quad_sum_agreement": abs(fine - extrapolated) / extrapolated,
+    }
+
+
+def series60_surface_area_audit(p: Series60Parameters, hydro: Hydrostatics | None = None,
+                                **reference_kwargs: Any) -> dict[str, Any]:
+    """The lofted mesh's wetted area against the reference, signed and in percent."""
+    if hydro is None:
+        mesh, _ = build_series60_mesh(p)
+        hydro = compute_hydrostatics(mesh, 0.0, water_density=p.water_density, closed=True)
+    reference = series60_surface_area_reference(p, **reference_kwargs)
+    measured = hydro.wetted_surface_area
+    target = reference["total_reference_m2"]
+    return {
+        "grid": {"nx": p.nx, "nz": p.nz},
+        "cb": p.cb,
+        "measured_m2": measured,
+        "reference_m2": target,
+        "relative_error": (measured - target) / target,
+        "reference": reference,
     }
