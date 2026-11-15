@@ -313,6 +313,9 @@ def _rebuild_calibrated(ship: dict, nx: int, nz: int) -> RebuildResult:
             midship_coefficient=ship.get("Cm", 0.98),
             waterplane_coefficient=ship.get("Cwp", 0.80),
             nx=nx, nz=nz,
+            # Optional hull-form features; absent -> the round-3 flat-keel family.
+            parallel_body_fraction=float(ship.get("parallel_body_fraction", 0.0)),
+            end_draft_ratio=float(ship.get("end_draft_ratio", 1.0)),
         )
         problems = params.problems()
         if problems:
