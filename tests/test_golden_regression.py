@@ -207,7 +207,8 @@ def test_baseline_provenance_and_policy_are_complete() -> None:
     for name in ("wigley", "series60", "sphere_ellipsoid", "dtmb5415"):
         case = data["cases"][name]
         assert case["reference"]
-        assert set(case["measurements"]) == {"coarse", "fine"}
+        # Cases may carry extra levels (e.g. "finer" for GCI three-grid); require at least coarse+fine.
+        assert {"coarse", "fine"} <= set(case["measurements"])
         assert case["tolerances"]
         assert case["reference_source"]
 
