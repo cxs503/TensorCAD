@@ -431,6 +431,17 @@ class BoundedParametricSurface(Surface):
     def evaluate(self, u: float, v: float) -> Vec3:
         return self.surface.evaluate(u, v)
 
+    def partials(self, u: float, v: float) -> tuple[Vec3, Vec3, Vec3]:
+        """``(S, dS/du, dS/dv)`` from the spline's exact derivative net.
+
+        The inversion solver needs the two parametric tangents; finite differences cost
+        two extra surface evaluations and carry a truncation error that matters at the
+        tolerances this pipeline accepts, so the exact partials are exposed when the
+        underlying surface can produce them.
+        """
+        derivatives = self.surface.derivatives(u, v, 1)
+        return derivatives[(0, 0)], derivatives[(1, 0)], derivatives[(0, 1)]
+
 
 # --------------------------------------------------------------------------- #
 # records
