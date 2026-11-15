@@ -1118,3 +1118,92 @@ def test_redteam_harness_kills_the_inflated_band_mutant() -> None:
     (mutant,) = report["mutants"]
     assert mutant["killed"], mutant["observed"]
     assert "tolerance_not_derived" in mutant["observed"]
+
+
+# --------------------------------------------------------------------------------------
+# the override path: `--bless --force` must leave a record
+# --------------------------------------------------------------------------------------
+class MovingGeometry(golden.GoldenCase):
+    """A synthetic geometry whose size is a parameter.
+
+    Measurement and reference move *together*, so a re-blessed tree is self-consistent:
+    this is what a deliberate geometry update looks like from the engine's side, and it
+    is the only shape in which a forced bless can be followed by an otherwise green run.
+    """
+
+    name = "moving"
+    title = "synthetic probe whose geometry has a size parameter"
+    reference_source = "tests.test_golden_regression.MovingGeometry.reference (closed form)"
+
+    def __init__(self, size: float = 1.0) -> None:
+        self.size = size
+
+    def _volume(self) -> float:
+        return 4.0 / 3.0 * math.pi * self.size**3
+
+    def _parameters(self, level: str) -> dict[str, float]:
+        return {"nx": {"coarse": 11, "fine": 21}[level]}
+
+    def measure(self, level: str) -> dict[str, float]:
+        offset = {"coarse": 3e-3, "fine": 8e-4}[level]
+        return {"value": self._volume() * (1.0 + offset)}
+
+    def reference(self) -> dict[str, float]:
+        return {"value": self._volume()}
+
+    def invariants(self, values: dict[str, float]) -> dict[str, tuple[float, float, str]]:
+        return {}
+
+    def geometry_sha256(self) -> str:
+        return f"moving-geometry-{self.size:g}"
+
+
+def _forced_baseline(tmp_path: Path) -> Path:
+    """Bless a 1.0 tree, then force-bless the 1.05 tree on top of it."""
+    path = tmp_path / "baseline.json"
+    golden.bless(path, cases=[MovingGeometry(1.0)])
+    golden.bless(path, cases=[MovingGeometry(1.05)], force=True)
+    return path
+
+
+def test_forced_bless_records_the_findings_it_overrode(tmp_path: Path) -> None:
+    """`--force` is the one path that can write a baseline the gate refuses.
+
+    It has to be an auditable act: the baseline must say which commit overrode which
+    findings, otherwise a laundered baseline is indistinguishable from a reviewed one.
+    """
+    path = _forced_baseline(tmp_path)
+    baseline = json.loads(path.read_text(encoding="utf-8"))
+    record = baseline["provenance"]["forced_bless"]
+    assert len(record) == 1
+    assert record[0]["git_commit"]
+    assert "drift" in record[0]["exceeded"]
+    assert any("drift" in detail for detail in record[0]["details"])
+
+
+def test_a_forced_bless_is_not_erased_by_a_later_bless(tmp_path: Path) -> None:
+    """The record is append-only: a second (now clean) bless carries it forward."""
+    path = _forced_baseline(tmp_path)
+    baseline, result = golden.bless(path, cases=[MovingGeometry(1.05)])
+    assert result.passed, [f"{f.case}/{f.code}" for f in result.errors]
+    record = baseline["provenance"]["forced_bless"]
+    assert len(record) == 1, "a clean bless must neither drop nor duplicate the record"
+
+    fresh, _ = golden.bless(tmp_path / "fresh.json", cases=[MovingGeometry(1.0)])
+    assert "forced_bless" not in fresh["provenance"]
+
+
+def test_a_forced_bless_stays_visible_in_every_later_run(tmp_path: Path) -> None:
+    """A reviewed override is visible, not fatal — and visible in quick mode too.
+
+    Quick mode is what the git hook runs, so a signal that only full mode emits would be
+    absent from exactly the loop that a developer iterates in.
+    """
+    path = _forced_baseline(tmp_path)
+    for quick in (False, True):
+        result = golden.run_suite(baseline_path=path, cases=[MovingGeometry(1.05)], quick=quick)
+        forced = [f for f in result.all_findings if f.code == "forced_bless_recorded"]
+        assert forced, f"no visible record in {'quick' if quick else 'full'} mode"
+        assert forced[0].severity == golden.WARNING
+        assert "drift" in forced[0].detail
+    assert result.passed, "a reviewed override must not make the gate permanently red"
