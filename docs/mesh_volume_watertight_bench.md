@@ -193,11 +193,11 @@
 ## 一键复现
 
 ```bash
-python benchmarks/verified/mesh_volume_watertight/run_benchmark.py --out benchmarks/verified/mesh_volume_watertight   # 约 18 s，判据不过则退出码 1
+python benchmarks/verified/mesh_volume_watertight/run_benchmark.py --out benchmarks/verified/mesh_volume_watertight   # 约 15 s，判据不过则退出码 1
 python -m pytest tests/test_mesh_volume.py -q             # 12 passed
 python benchmarks/verified/mesh_volume_watertight/publish_report.py   # 重新生成本文（数字仍来自 result.json）
 ```
 
 运行环境：Python 3.11.6，numpy 2.4.6，
 trimesh 5.0.0，matplotlib 3.10.8；
-平台 Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38；算例耗时 17.88 s（单机、单线程 numpy，<8 核，无需集群）。
+平台 Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38；算例耗时 15.18 s（单机、单线程 numpy，<8 核，无需集群）。

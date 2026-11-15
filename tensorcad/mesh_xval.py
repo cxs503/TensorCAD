@@ -192,6 +192,139 @@ def ellipsoid(semi_axes, subdivisions=2):
     scale = np.array([a, b, c], dtype=np.float64)
     return TriMesh(unit.points * scale, unit.faces, f"ellipsoid{a:g}x{b:g}x{c:g}_sub{subdivisions}")
 
+def cylinder(radius: float = 1.0, height: float = 2.0, n_radial: int = 64, n_axial: int = 16) -> TriMesh:
+    """Closed cylinder (side + top + bottom caps) as a triangle mesh.
+
+    The side is a regular N-gonal prism; the caps are triangulated from the
+    centre vertex.  The mesh is consistently oriented with outward normals.
+
+    Parameters
+    ----------
+    radius : float
+        Cylinder radius.
+    height : float
+        Cylinder height (extent in z, centred on z=0).
+    n_radial : int
+        Number of radial divisions (side faces = n_radial).
+    n_axial : int
+        Number of axial divisions (side faces = n_radial * n_axial).
+    """
+    r = float(radius)
+    h = float(height)
+    nr = int(n_radial)
+    na = int(n_axial)
+    if nr < 3:
+        raise ValueError(f"n_radial must be >= 3, got {nr}")
+    if na < 1:
+        raise ValueError(f"n_axial must be >= 1, got {na}")
+
+    # Vertices: side grid + top centre + bottom centre
+    # Side: (na+1) rings × nr vertices
+    theta = np.linspace(0, 2 * np.pi, nr, endpoint=False)
+    cos_t, sin_t = np.cos(theta), np.sin(theta)
+    z_ring = np.linspace(-h / 2, h / 2, na + 1)
+
+    pts = []
+    for z in z_ring:
+        for ct, st in zip(cos_t, sin_t):
+            pts.append((r * ct, r * st, z))
+    # Top centre and bottom centre
+    top_idx = len(pts)
+    pts.append((0.0, 0.0, h / 2))
+    bot_idx = len(pts)
+    pts.append((0.0, 0.0, -h / 2))
+
+    points = np.array(pts, dtype=np.float64)
+    faces = []
+
+    # Side faces: na rings × nr columns, each quad split into 2 triangles
+    for iz in range(na):
+        for it in range(nr):
+            it_next = (it + 1) % nr
+            # Quad corners: (iz, it), (iz, it_next), (iz+1, it_next), (iz+1, it)
+            v0 = iz * nr + it
+            v1 = iz * nr + it_next
+            v2 = (iz + 1) * nr + it_next
+            v3 = (iz + 1) * nr + it
+            # Two triangles, outward orientation (normal points radially outward)
+            faces.append((v0, v1, v2))
+            faces.append((v0, v2, v3))
+
+    # Top cap: triangles from top centre to top ring
+    top_ring_start = 0  # first ring is at z = -h/2, last ring at z = h/2
+    top_ring_start = na * nr  # last ring
+    for it in range(nr):
+        it_next = (it + 1) % nr
+        v0 = top_ring_start + it
+        v1 = top_ring_start + it_next
+        faces.append((top_idx, v0, v1))  # outward = +z
+
+    # Bottom cap: triangles from bottom centre to bottom ring
+    bot_ring_start = 0  # first ring is at z = -h/2
+    for it in range(nr):
+        it_next = (it + 1) % nr
+        v0 = bot_ring_start + it
+        v1 = bot_ring_start + it_next
+        faces.append((bot_idx, v1, v0))  # outward = -z (reversed order)
+
+    return TriMesh(points, np.array(faces, dtype=np.int64), f"cylinder_r{r:g}_h{h:g}_nr{nr}_na{na}")
+
+
+def cone(radius: float = 1.0, height: float = 2.0, n_radial: int = 64) -> TriMesh:
+    """Closed cone (side + base cap) as a triangle mesh.
+
+    The side is a regular N-gonal pyramid; the base is triangulated from the
+    centre vertex.  The mesh is consistently oriented with outward normals.
+
+    Parameters
+    ----------
+    radius : float
+        Cone base radius.
+    height : float
+        Cone height (apex at z = +h/2, base centre at z = -h/2).
+    n_radial : int
+        Number of radial divisions (side faces = n_radial).
+    """
+    r = float(radius)
+    h = float(height)
+    nr = int(n_radial)
+    if nr < 3:
+        raise ValueError(f"n_radial must be >= 3, got {nr}")
+
+    theta = np.linspace(0, 2 * np.pi, nr, endpoint=False)
+    cos_t, sin_t = np.cos(theta), np.sin(theta)
+
+    pts = []
+    # Base ring vertices at z = -h/2
+    for ct, st in zip(cos_t, sin_t):
+        pts.append((r * ct, r * st, -h / 2))
+    # Apex at z = +h/2
+    apex_idx = len(pts)
+    pts.append((0.0, 0.0, h / 2))
+    # Base centre
+    base_idx = len(pts)
+    pts.append((0.0, 0.0, -h / 2))
+
+    points = np.array(pts, dtype=np.float64)
+    faces = []
+
+    # Side faces: triangles from apex to base ring
+    for it in range(nr):
+        it_next = (it + 1) % nr
+        v0 = it
+        v1 = it_next
+        faces.append((apex_idx, v0, v1))  # outward
+
+    # Base cap: triangles from base centre to base ring
+    for it in range(nr):
+        it_next = (it + 1) % nr
+        v0 = it
+        v1 = it_next
+        faces.append((base_idx, v1, v0))  # outward = -z (reversed order)
+
+    return TriMesh(points, np.array(faces, dtype=np.int64), f"cone_r{r:g}_h{h:g}_nr{nr}")
+
+
 
 def torus(major: float = 1.0, minor: float = 0.3, nu: int = 64, nv: int = 32) -> TriMesh:
     u = np.linspace(0, 2 * np.pi, nu, endpoint=False)

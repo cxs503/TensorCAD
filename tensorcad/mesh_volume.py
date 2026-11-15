@@ -90,6 +90,10 @@ __all__ = [
     "ClosedBodyCheck",
     "analytic_box_area",
     "analytic_box_volume",
+    "analytic_cone_area",
+    "analytic_cone_volume",
+    "analytic_cylinder_area",
+    "analytic_cylinder_volume",
     "analytic_icosahedron_volume",
     "analytic_ellipsoid_volume",
     "analytic_sphere_area",
@@ -98,7 +102,10 @@ __all__ = [
     "as_geometry_mesh",
     "box_mesh",
     "check_closed_body",
+    "cone_mesh",
     "convergence_study",
+    "cylinder_convergence_study",
+    "cylinder_mesh",
     "defect_detection",
     "ellipsoid_convergence_study",
     "mean_edge_length",
@@ -170,6 +177,29 @@ def analytic_icosahedron_volume(circumradius: float) -> float:
     return (5.0 / 12.0) * (3.0 + math.sqrt(5.0)) * edge**3
 
 
+def analytic_cylinder_volume(radius: float, height: float) -> float:
+    """``V = pi r^2 h``."""
+    return math.pi * float(radius) ** 2 * float(height)
+
+
+def analytic_cylinder_area(radius: float, height: float) -> float:
+    """Total surface area: ``A = 2 pi r (r + h)`` (side + 2 caps)."""
+    r, h = float(radius), float(height)
+    return 2.0 * math.pi * r * (r + h)
+
+
+def analytic_cone_volume(radius: float, height: float) -> float:
+    """``V = 1/3 pi r^2 h``."""
+    return math.pi * float(radius) ** 2 * float(height) / 3.0
+
+
+def analytic_cone_area(radius: float, height: float) -> float:
+    """Total surface area: ``A = pi r (r + sqrt(r^2 + h^2))`` (base + lateral)."""
+    r, h = float(radius), float(height)
+    slant = math.sqrt(r * r + h * h)
+    return math.pi * r * (r + slant)
+
+
 # ---------------------------------------------------------------------------
 # meshes
 # ---------------------------------------------------------------------------
@@ -195,6 +225,28 @@ def box_mesh(a: float, b: float, c: float) -> TriMesh:
     base = cube(2.0)
     scale = np.array([float(a), float(b), float(c)], dtype=np.float64) / 2.0
     return TriMesh(base.points * scale, base.faces, f"box{a:g}x{b:g}x{c:g}")
+
+
+def cylinder_mesh(radius: float, height: float, n_radial: int = 32, n_axial: int = 8) -> TriMesh:
+    """Closed cylinder mesh for volume verification.
+
+    The mesh is an inscribed N-gonal prism with triangulated caps.  Because the
+    side is flat-faced (not curved), the volume deficit comes only from the
+    radial discretisation and converges at ``O(1/n_radial^2)``.
+    """
+    from .mesh_xval import cylinder
+    return cylinder(float(radius), float(height), int(n_radial), int(n_axial))
+
+
+def cone_mesh(radius: float, height: float, n_radial: int = 64) -> TriMesh:
+    """Closed cone mesh for volume verification.
+
+    The mesh is an inscribed N-gonal pyramid with a triangulated base.  The
+    apex singularity is handled by the mesh generator; the volume deficit
+    converges at ``O(1/n_radial^2)``.
+    """
+    from .mesh_xval import cone
+    return cone(float(radius), float(height), int(n_radial))
 
 
 def as_geometry_mesh(mesh: TriMesh) -> Mesh:
@@ -409,6 +461,70 @@ def convergence_study(
                     ),
                 }
             )
+        rows.append(row)
+    return rows
+
+
+def cylinder_convergence_study(
+    radius: float = 1.0,
+    height: float = 2.0,
+    radial_levels: Sequence[int] = (16, 32, 64, 128, 256),
+) -> list[ClosedBodyCheck]:
+    """Volume/area deficit of an inscribed cylinder at each radial resolution.
+
+    The cylinder side is a flat-faced prism, so the volume deficit comes only
+    from the radial discretisation (the caps are exact triangles).  The error
+    converges at ``O(1/n^2)`` where n is the number of radial divisions.
+
+    Note: ``mean_edge_length`` is not a good ``h`` here because the axial
+    resolution is held fixed; the observed order should be computed against
+    ``2 pi r / n_radial`` (the arc length between radial vertices).
+    """
+    volume = analytic_cylinder_volume(radius, height)
+    area = analytic_cylinder_area(radius, height)
+    rows: list[ClosedBodyCheck] = []
+    for nr in radial_levels:
+        mesh = cylinder_mesh(radius, height, n_radial=nr, n_axial=max(8, nr // 4))
+        row = check_closed_body(
+            mesh,
+            name=f"cylinder_r{radius:g}_h{height:g}_nr{nr}",
+            family="cylinder",
+            reference_volume=volume,
+            reference_area=area,
+            length=2.0 * max(radius, height),
+        )
+        rows.append(row)
+    return rows
+
+
+def cone_convergence_study(
+    radius: float = 1.0,
+    height: float = 2.0,
+    radial_levels: Sequence[int] = (16, 32, 64, 128, 256),
+) -> list[ClosedBodyCheck]:
+    """Volume/area deficit of an inscribed cone at each radial resolution.
+
+    The cone side is a flat-faced pyramid, so the volume deficit comes only
+    from the radial discretisation (the base is exact triangles).  The error
+    converges at ``O(1/n^2)`` where n is the number of radial divisions.
+
+    Note: ``mean_edge_length`` is not a good ``h`` here because the cone mesh
+    has only one axial division; the observed order should be computed against
+    ``2 pi r / n_radial`` (the arc length between radial vertices).
+    """
+    volume = analytic_cone_volume(radius, height)
+    area = analytic_cone_area(radius, height)
+    rows: list[ClosedBodyCheck] = []
+    for nr in radial_levels:
+        mesh = cone_mesh(radius, height, n_radial=nr)
+        row = check_closed_body(
+            mesh,
+            name=f"cone_r{radius:g}_h{height:g}_nr{nr}",
+            family="cone",
+            reference_volume=volume,
+            reference_area=area,
+            length=2.0 * max(radius, height),
+        )
         rows.append(row)
     return rows
 
