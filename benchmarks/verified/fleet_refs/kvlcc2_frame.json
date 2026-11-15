@@ -1,0 +1,468 @@
+{
+  "schema": "tensorcad.fleet.kvlcc2_frame.v1",
+  "anchor": "REPRO-GEOM-FLEET-REFS",
+  "ship": "KVLCC2",
+  "generated_by": "tools/baseline_fleet/kvlcc2_frame_build.py",
+  "host": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+  "geometry": {
+    "pointer": "/srv/tensor/agent/assets/geometry/hulls/KVLCC2/kvlcc2.igs",
+    "sha256": "d55e1d84247046d55dc72e61a45db97c7d47c2ca4410dc1e2feff8e6473c06f0"
+  },
+  "frame": {
+    "policy": {
+      "z_axis": "auto",
+      "x_origin": "auto"
+    },
+    "evidence": {
+      "samples": 99702,
+      "x_min": -328.0774,
+      "x_max": 5.3635,
+      "y_min": -0.3011,
+      "y_max": 29.0616,
+      "z_min": -27.8706,
+      "z_max": 0.0,
+      "x_extent": 333.4409,
+      "depth": 27.8706,
+      "z_axis": "down",
+      "below_zero": 27.8706,
+      "above_zero": 0.0,
+      "z_below_zero_fraction": 0.446972,
+      "y_negative_fraction": 0.002357,
+      "half_model": true
+    },
+    "z_flip": true,
+    "x_shift": 328.077404,
+    "frame": "x from 0 at the aft-most point, y to starboard, z up from the design waterline (m)",
+    "note": "detected from the sampled surface, not assumed: a z-down, stern-negative file is reflected and translated before it reaches the half-breadth field"
+  },
+  "frame_policy": {
+    "z_axis": "auto",
+    "x_origin": "auto",
+    "x_extent": "geometry"
+  },
+  "surfaces": 19,
+  "length_pp": 320.0,
+  "beam": 58.0,
+  "draft": 20.8,
+  "reference_volume_m3": 312622.0,
+  "reference_cb": 0.8098,
+  "reference_lcb_percent": 3.48,
+  "runs": [
+    {
+      "dx": 2.0,
+      "dz": 0.1,
+      "samples_per_metre": 0.5,
+      "volume_m3": 97355.87,
+      "volume_relative_error": -0.688583,
+      "cb_reconstructed": 0.25219,
+      "lcb_percent_lpp": -2.266,
+      "lcb_x_m": 152.748,
+      "watertight": true,
+      "boundary_edge_count": 0,
+      "nonmanifold_edge_count": 0,
+      "triangle_count": 86400,
+      "route": "iges_field",
+      "frame": {
+        "policy": {
+          "z_axis": "auto",
+          "x_origin": "auto"
+        },
+        "evidence": {
+          "samples": 23485,
+          "x_min": -327.9571,
+          "x_max": 4.4622,
+          "y_min": -0.2648,
+          "y_max": 29.0613,
+          "z_min": -27.073,
+          "z_max": 0.0,
+          "x_extent": 332.4194,
+          "depth": 27.073,
+          "z_axis": "down",
+          "below_zero": 27.073,
+          "above_zero": 0.0,
+          "z_below_zero_fraction": 0.164147,
+          "y_negative_fraction": 0.00115,
+          "half_model": true
+        },
+        "z_flip": true,
+        "x_shift": 327.957135,
+        "frame": "x from 0 at the aft-most point, y to starboard, z up from the design waterline (m)",
+        "note": "detected from the sampled surface, not assumed: a z-down, stern-negative file is reflected and translated before it reaches the half-breadth field"
+      },
+      "field": {
+        "filled_nodes": 3348,
+        "empty_nodes": 31555,
+        "interpolated_nodes": 6519
+      },
+      "loft": {
+        "slices": 180,
+        "slices_capped": 2,
+        "first_slice_area_m2": 4140.364633437506,
+        "last_slice_area_m2": 1159.8769346722424,
+        "max_slice_area_m2": 11860.56144932986,
+        "degenerate_skipped": 0,
+        "orientation_flipped": null,
+        "z_min": 0.0,
+        "z_max": 20.6
+      },
+      "seconds": 9.74
+    },
+    {
+      "dx": 2.0,
+      "dz": 0.1,
+      "samples_per_metre": 4.0,
+      "volume_m3": 219565.48,
+      "volume_relative_error": -0.297665,
+      "cb_reconstructed": 0.56875,
+      "lcb_percent_lpp": -1.588,
+      "lcb_x_m": 154.918,
+      "watertight": true,
+      "boundary_edge_count": 0,
+      "nonmanifold_edge_count": 0,
+      "triangle_count": 99360,
+      "route": "iges_field",
+      "frame": {
+        "policy": {
+          "z_axis": "auto",
+          "x_origin": "auto"
+        },
+        "evidence": {
+          "samples": 99702,
+          "x_min": -328.0774,
+          "x_max": 5.3635,
+          "y_min": -0.3011,
+          "y_max": 29.0616,
+          "z_min": -27.8706,
+          "z_max": 0.0,
+          "x_extent": 333.4409,
+          "depth": 27.8706,
+          "z_axis": "down",
+          "below_zero": 27.8706,
+          "above_zero": 0.0,
+          "z_below_zero_fraction": 0.446972,
+          "y_negative_fraction": 0.002357,
+          "half_model": true
+        },
+        "z_flip": true,
+        "x_shift": 328.077404,
+        "frame": "x from 0 at the aft-most point, y to starboard, z up from the design waterline (m)",
+        "note": "detected from the sampled surface, not assumed: a z-down, stern-negative file is reflected and translated before it reaches the half-breadth field"
+      },
+      "field": {
+        "filled_nodes": 9318,
+        "empty_nodes": 25585,
+        "interpolated_nodes": 16274
+      },
+      "loft": {
+        "slices": 207,
+        "slices_capped": 2,
+        "first_slice_area_m2": 4552.0413782002815,
+        "last_slice_area_m2": 1275.8045529057467,
+        "max_slice_area_m2": 14112.330066473978,
+        "degenerate_skipped": 0,
+        "orientation_flipped": null,
+        "z_min": 0.0,
+        "z_max": 20.8
+      },
+      "seconds": 18.27
+    },
+    {
+      "dx": 1.0,
+      "dz": 0.1,
+      "samples_per_metre": 0.5,
+      "volume_m3": 96487.61,
+      "volume_relative_error": -0.69136,
+      "cb_reconstructed": 0.24994,
+      "lcb_percent_lpp": -2.38,
+      "lcb_x_m": 152.385,
+      "watertight": true,
+      "boundary_edge_count": 0,
+      "nonmanifold_edge_count": 0,
+      "triangle_count": 86880,
+      "route": "iges_field",
+      "frame": {
+        "policy": {
+          "z_axis": "auto",
+          "x_origin": "auto"
+        },
+        "evidence": {
+          "samples": 23485,
+          "x_min": -327.9571,
+          "x_max": 4.4622,
+          "y_min": -0.2648,
+          "y_max": 29.0613,
+          "z_min": -27.073,
+          "z_max": 0.0,
+          "x_extent": 332.4194,
+          "depth": 27.073,
+          "z_axis": "down",
+          "below_zero": 27.073,
+          "above_zero": 0.0,
+          "z_below_zero_fraction": 0.164147,
+          "y_negative_fraction": 0.00115,
+          "half_model": true
+        },
+        "z_flip": true,
+        "x_shift": 327.957135,
+        "frame": "x from 0 at the aft-most point, y to starboard, z up from the design waterline (m)",
+        "note": "detected from the sampled surface, not assumed: a z-down, stern-negative file is reflected and translated before it reaches the half-breadth field"
+      },
+      "field": {
+        "filled_nodes": 3634,
+        "empty_nodes": 65963,
+        "interpolated_nodes": 15993
+      },
+      "loft": {
+        "slices": 181,
+        "slices_capped": 2,
+        "first_slice_area_m2": 4140.356727082458,
+        "last_slice_area_m2": 1217.7995737314184,
+        "max_slice_area_m2": 11880.853833256115,
+        "degenerate_skipped": 0,
+        "orientation_flipped": null,
+        "z_min": 0.0,
+        "z_max": 20.6
+      },
+      "seconds": 8.8
+    },
+    {
+      "dx": 1.0,
+      "dz": 0.1,
+      "samples_per_metre": 4.0,
+      "volume_m3": 220085.24,
+      "volume_relative_error": -0.296002,
+      "cb_reconstructed": 0.5701,
+      "lcb_percent_lpp": -1.472,
+      "lcb_x_m": 155.291,
+      "watertight": true,
+      "boundary_edge_count": 0,
+      "nonmanifold_edge_count": 0,
+      "triangle_count": 99360,
+      "route": "iges_field",
+      "frame": {
+        "policy": {
+          "z_axis": "auto",
+          "x_origin": "auto"
+        },
+        "evidence": {
+          "samples": 99702,
+          "x_min": -328.0774,
+          "x_max": 5.3635,
+          "y_min": -0.3011,
+          "y_max": 29.0616,
+          "z_min": -27.8706,
+          "z_max": 0.0,
+          "x_extent": 333.4409,
+          "depth": 27.8706,
+          "z_axis": "down",
+          "below_zero": 27.8706,
+          "above_zero": 0.0,
+          "z_below_zero_fraction": 0.446972,
+          "y_negative_fraction": 0.002357,
+          "half_model": true
+        },
+        "z_flip": true,
+        "x_shift": 328.077404,
+        "frame": "x from 0 at the aft-most point, y to starboard, z up from the design waterline (m)",
+        "note": "detected from the sampled surface, not assumed: a z-down, stern-negative file is reflected and translated before it reaches the half-breadth field"
+      },
+      "field": {
+        "filled_nodes": 17450,
+        "empty_nodes": 52356,
+        "interpolated_nodes": 33864
+      },
+      "loft": {
+        "slices": 207,
+        "slices_capped": 2,
+        "first_slice_area_m2": 4497.5218823172945,
+        "last_slice_area_m2": 1159.8664051576727,
+        "max_slice_area_m2": 14053.549167372026,
+        "degenerate_skipped": 0,
+        "orientation_flipped": null,
+        "z_min": 0.0,
+        "z_max": 20.8
+      },
+      "seconds": 18.24
+    }
+  ],
+  "gates": {
+    "ship": "KVLCC2",
+    "ship_class": "MOERI very large crude carrier (KRISO Tanker)",
+    "route": "iges_field",
+    "topology": {
+      "triangle_count": 99360,
+      "vertex_count": 49682,
+      "edge_count": 149040,
+      "boundary_edge_count": 0,
+      "nonmanifold_edge_count": 0,
+      "inconsistently_oriented_edge_count": 0,
+      "euler_characteristic": 2,
+      "signed_volume": 220085.2361667778,
+      "surface_area": 719454.9715180903,
+      "zero_area_face_count": 0,
+      "duplicate_face_count": 0,
+      "bbox": [
+        0.0,
+        332.999999999999,
+        -29.061552893154314,
+        29.061552893154314,
+        0.0,
+        20.8
+      ]
+    },
+    "gates": [
+      {
+        "name": "G0_provenance",
+        "passed": true,
+        "detail": "source/license stated ('MOERI KVLCC2 tanker benchmark particulars (SIMMA'); retrieval=offline_recollection; verified=False; manifest_sha256=7311b586d9a4b3fc",
+        "values": {
+          "provenance_complete": true,
+          "retrieval": "offline_recollection",
+          "verified": false,
+          "manifest_sha256": "7311b586d9a4b3fc0abc04a28e8ae95afdc6a5f8734da97c0f39973d865982b6",
+          "url": "https://simman2014.dk/ (workshop hull data sheets)",
+          "license": "public benchmark data, workshop report"
+        }
+      },
+      {
+        "name": "G0b_source_anchor",
+        "passed": true,
+        "detail": "anchor 'simman-kvlcc2': 'SIMMAN 2008 / SIMMAN 2014 workshop series (eds. Stern, Agdrup) \u2014'; locator 'KVLCC2 test-case particulars (Lpp 320.0 m, B 58.'; licence 'published workshop benchmark data, research use'; retrieval=offline_recollection; verified=False; anchors=['beam', 'block_coefficient', 'displacement_volume', 'draft', 'lcb_fraction', 'length', 'midship_coefficient']",
+        "values": {
+          "registry_sha256": "a86986e87823f9c19141676baab970b76dc55bbdd11609ebbd6006631ec0e75e",
+          "anchor_id": "simman-kvlcc2",
+          "citation": "SIMMAN 2008 / SIMMAN 2014 workshop series (eds. Stern, Agdrup) \u2014 MOERI KVLCC2 tanker test case",
+          "url": "https://simman2014.dk/",
+          "license": "published workshop benchmark data, research use",
+          "locator": "KVLCC2 test-case particulars (Lpp 320.0 m, B 58.0 m, T 20.8 m, Cb 0.8098, Cm 0.9956, LCB +3.48 % Lpp, grad 312622 m^3)",
+          "anchors": [
+            "beam",
+            "block_coefficient",
+            "displacement_volume",
+            "draft",
+            "lcb_fraction",
+            "length",
+            "midship_coefficient"
+          ],
+          "retrieval": "offline_recollection",
+          "verified": false
+        }
+      },
+      {
+        "name": "G1_not_placeholder",
+        "passed": true,
+        "detail": "no placeholder signature",
+        "values": {
+          "reasons": [],
+          "triangle_count": 99360,
+          "vertices_on_bbox_corners": null
+        }
+      },
+      {
+        "name": "G2_no_duplicate_geometry",
+        "passed": true,
+        "detail": "each ship owns a distinct geometry sha256",
+        "values": {
+          "collisions": {}
+        }
+      },
+      {
+        "name": "G3_watertight",
+        "passed": true,
+        "detail": "boundary edges = 0 (tolerance 0)",
+        "values": {
+          "boundary_edge_count": 0,
+          "tolerance": 0
+        }
+      },
+      {
+        "name": "G4_manifold_oriented",
+        "passed": true,
+        "detail": "non-manifold edges = 0, inconsistent directed edges = 0, zero-area faces = 0, duplicate faces = 0",
+        "values": {
+          "nonmanifold_edge_count": 0,
+          "inconsistently_oriented_edge_count": 0,
+          "zero_area_face_count": 0,
+          "duplicate_face_count": 0
+        }
+      },
+      {
+        "name": "G5_single_closed_shell",
+        "passed": true,
+        "detail": "Euler characteristic = 2 (expect 2), signed volume = 220085 (expect > 0)",
+        "values": {
+          "euler_characteristic": 2,
+          "signed_volume": 220085.2361667778
+        }
+      },
+      {
+        "name": "G6_particulars_consistent",
+        "passed": true,
+        "detail": "|Cb*L*B*T - V_published| / V_published = 0.000% (tolerance 3%), V_published = 312622 m^3",
+        "values": {
+          "closed_form_volume": 312621.6704,
+          "displacement_volume": 312622.0,
+          "relative_difference": 1.054308397992781e-06,
+          "tolerance": 0.03
+        }
+      },
+      {
+        "name": "G6b_reference_consistency",
+        "passed": true,
+        "detail": "cited V = 312622 m^3 vs Cb*L*B*T = 312622 m^3: +0.0001% (tolerance 0.5%); a disagreement beyond this band means L, B, T, Cb or the cited volume was mis-transcribed",
+        "values": {
+          "cited_volume": 312622.0,
+          "closure_volume": 312621.6704,
+          "relative_error": 1.054308397992781e-06,
+          "tolerance": 0.005,
+          "vacuous": false,
+          "basis": "literature_value_recalled"
+        }
+      },
+      {
+        "name": "G7_volume_vs_reference",
+        "passed": false,
+        "detail": "|V_mesh - V_ref| / V_ref = 29.6002% (tolerance 1%); V_mesh = 220085 m^3, V_ref = 312622 m^3, basis = literature (literature_value_recalled)",
+        "values": {
+          "mesh_volume": 220085.2361667778,
+          "reference_volume": 312622.0,
+          "reference_basis": "literature_value_recalled",
+          "reference_is_external": false,
+          "relative_error": 0.2960020850523067,
+          "tolerance": 0.01
+        }
+      },
+      {
+        "name": "G8_principal_dimensions",
+        "passed": false,
+        "detail": "length: measured 333 vs declared 320 (4.0625%); beam: measured 58.1231 vs declared 58 (0.2123%); draft: measured 20.8 vs declared 20.8 (0.0000%) (tolerance 1%)",
+        "values": {
+          "measured": {
+            "length": 332.999999999999,
+            "beam": 58.12310578630863,
+            "draft": 20.8
+          },
+          "declared": {
+            "length": 320.0,
+            "beam": 58.0,
+            "draft": 20.8
+          },
+          "relative_errors": {
+            "length": 0.0406249999999968,
+            "beam": 0.0021225135570453065,
+            "draft": 0.0
+          },
+          "tolerance": 0.01
+        }
+      }
+    ],
+    "passed": false,
+    "failed_gates": [
+      "G7_volume_vs_reference",
+      "G8_principal_dimensions"
+    ],
+    "volume_relative_error": 0.2960020850523067,
+    "reference_basis": "literature_value_recalled",
+    "reference_is_external": false
+  }
+}

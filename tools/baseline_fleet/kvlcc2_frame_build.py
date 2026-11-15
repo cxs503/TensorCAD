@@ -130,7 +130,7 @@ def make_figure(payload: dict[str, Any], path: Path) -> None:
     import matplotlib.pyplot as plt
 
     runs = payload["runs"]
-    labels = [f"dx {r['dx']} m" for r in runs] + ["published\n(SIMMAN)"]
+    labels = [f"dx {r['dx']}\n{r['samples_per_metre']}/m" for r in runs] + ["published\n(SIMMAN)"]
     volumes = [r["volume_m3"] for r in runs] + [payload["reference_volume_m3"]]
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
     bars = axes[0].bar(labels, volumes, color=["#4080c0"] * len(runs) + ["#808080"])
@@ -166,11 +166,14 @@ def make_figure(payload: dict[str, Any], path: Path) -> None:
 def write_doc(payload: dict[str, Any], path: Path, figure_rel: str) -> None:
     runs = payload["runs"]
     rows = "\n".join(
-        f"| {r['dx']} | {r['dz']} | {r['volume_m3']:,.1f} | {100 * r['volume_relative_error']:+.3f} | "
+        f"| {r['dx']} | {r['dz']} | {r['samples_per_metre']} | {r['volume_m3']:,.1f} | "
+        f"{100 * r['volume_relative_error']:+.3f} | "
         f"{r['cb_reconstructed']:.4f} | {r['lcb_percent_lpp']} | {'yes' if r['watertight'] else 'no'} | "
         f"{r['triangle_count']:,} |"
         for r in runs
     )
+    errors = [100.0 * r["volume_relative_error"] for r in runs]
+    spread = max(errors) - min(errors)
     evidence = payload["frame"]["evidence"]
     gates = payload["gates"]
     gate_rows = "\n".join(
@@ -213,7 +216,7 @@ run's `frame_normalisation` block, so the build is re-derivable from numbers.
 
 ## 3. Result — ∇ vs the published reference
 
-| dx (m) | dz (m) | ∇ (m³) | error | Cb (reconstructed) | LCB (% Lpp) | watertight | triangles |
+| dx (m) | dz (m) | sample density (1/m) | ∇ (m³) | error | Cb (reconstructed) | LCB (% Lpp) | watertight | triangles |
 |---|---|---|---|---|---|---|---|
 {rows}
 
@@ -230,9 +233,12 @@ Reference: ∇ = {payload['reference_volume_m3']:,.0f} m³, Cb = {payload['refer
 
 ## 5. Honest limits
 
-* The `max`-binned half-breadth field biases the surface outwards by O(cell²/R); the
-  sign of the error above ({100 * runs[-1]['volume_relative_error']:+.3f} % at the finest cell) is consistent with that
-  bias plus the waterline cut, not evidence of a shape defect.
+* **The reconstruction is not converged, and that is the finding.** Across the
+  ({len(runs)} run) grid the error spans {min(errors):+.2f} % … {max(errors):+.2f} % (spread {spread:.2f} percentage
+  points), so no single row in the table above may be quoted as "the" reconstruction error.
+  The `max`-binned half-breadth field is a *lower* bound argument for under-sampling, not an
+  explanation for a 30 % deficit; the route needs a resolution study with a cell-size and
+  density criterion before KVLCC2 can be called comparable at all.
 * LCB is measured from the reconstructed mesh, whose resolution is the field cell; a
   trim/LCB claim at 0.1 %Lpp precision needs a finer field than the one run here.
 * The published file was read from the platform asset store
@@ -250,7 +256,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--figs", default="docs/figs/fleet_refs")
     parser.add_argument("--resolutions", default="1.0,0.5", help="comma list of dx values")
     parser.add_argument("--dz", type=float, default=0.1)
-    parser.add_argument("--spacing", type=float, default=0.5, help="patch sampling (m)")
+    parser.add_argument(
+        "--spacings",
+        default="0.5,4.0",
+        help="comma list of patch sample densities (samples per metre); the run grid is "
+        "the cartesian product with --resolutions",
+    )
     parser.add_argument("--asset", default=None)
     args = parser.parse_args(argv)
 
@@ -274,13 +285,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         geometry_frame=dict(FRAME),
     )
     runs = [
-        build_once(record, iges, dx=float(dx), dz=args.dz, spacing=args.spacing)
+        build_once(record, iges, dx=float(dx), dz=args.dz, spacing=float(spacing))
         for dx in args.resolutions.split(",")
+        for spacing in args.spacings.split(",")
     ]
     best = min(runs, key=lambda r: abs(r["volume_relative_error"]))
     # Rebuild at the best resolution to run the full gate set (cheap relative to the build).
     built = build_ship_geometry(record, iges_path=str(iges), dx=best["dx"], dz=args.dz,
-                                ring_points=240, samples_per_metre=args.spacing)
+                                ring_points=240, samples_per_metre=best["samples_per_metre"])
     gates = evaluate_gates(record, built.mesh, manifest, registry=load_registry())
 
     payload: dict[str, Any] = {
