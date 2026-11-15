@@ -6,6 +6,14 @@
 
 `tensorcad.meshquality.door.admit` composes the three gates the library already shipped separately -- shell topology (watertight / edge- and vertex-manifold / winding / outward / genus), the per-element `DEFAULT_GATE`, and the OpenFOAM interior-face non-orthogonality -- into one verdict whose failures still name the threshold, the cell kind and the margin. It adds no measure and no threshold of its own.
 
+The interior-face measure is applied to every volume kind the library can gate --
+`tet`, `hex`, `prism`, `pyramid` (`door.CELL_KINDS_WITH_INTERNAL_FACES`). Prisms and
+pyramids were added after this report was first generated, because skipping a kind makes
+the verdict read PASS for a measure that was never taken; the closed-form evidence for the
+two new kinds is in `docs/mesh_quality_prism_pyramid.md` §5a, and it uses the same 70 deg
+default. A mesh that has no interior face for a kind it contains fails that check with
+"no internal faces", which is the pre-existing policy for a single tet or hex.
+
 ## 2. Suite and verdicts
 
 | case | kind | expected | door | why |
