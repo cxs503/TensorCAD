@@ -422,7 +422,14 @@ BENCHMARK_DOC_TABLE_NAMES: tuple[str, ...] = tuple(BENCHMARK_DOC_SPECS)
 ALL_TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     **TABLE_SPECS,
     **BENCHMARK_DOC_SPECS,
+    # ``SINGLE10M_SPECS`` is defined at the end of the module (it depends on the
+    # renderers below the registries); register it there via ``_register``.
 }
+
+
+def _register(specs: dict[str, tuple[tuple[str, ...], Any]]) -> None:
+    """Add a late-defined renderer bundle to :data:`ALL_TABLE_SPECS`."""
+    ALL_TABLE_SPECS.update(specs)
 
 
 def render_block(name: str, artifacts: Mapping[str, Mapping[str, Any]]) -> str:
@@ -509,3 +516,175 @@ def render_document(
         if all(k in artifacts for k in keys):
             out = replace_block(out, name, render_block(name, artifacts))
     return out
+
+# ---------------------------------------------------------------------------
+# Single connected body (subdivision source), 10^6-10^7 triangles
+# ---------------------------------------------------------------------------
+
+SINGLE10M_ORDER: tuple[str, ...] = (
+    "load", "subdivide", "volume", "point_locate_accel",
+)
+
+
+def _bases(artifact: Mapping[str, Any]) -> list[str]:
+    """Distinct ``nx x nz`` labels in first-appearance order."""
+    out: list[str] = []
+    for r in _results(artifact):
+        label = f"{r.get('nx')}x{r.get('nz')}"
+        if label not in out:
+            out.append(label)
+    return out
+
+
+def _rows_for_base(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]]:
+    return [r for r in rows if f"{r.get('nx')}x{r.get('nz')}" == base]
+
+
+def render_single10m_table(artifact: Mapping[str, Any]) -> str:
+    """Markdown table of the single-body subdivision ladder.
+
+    Every rung is *one* connected closed mesh (no fleet copies), so the numbers
+    apply to an imported 10^7-triangle body.  ``not_run`` rows keep their reason
+    in the seconds column -- a rung that was refused for size must not look like
+    a measurement.
+    """
+    rows = _results(artifact)
+    order = {name: i for i, name in enumerate(SINGLE10M_ORDER)}
+    lines = [
+        "| 基座 nx×nz | 级别 | 三角面 | 子任务 | 秒 | 吞吐 | 建索引 s | 索引 MiB | 活 RSS MiB | 峰值 RSS MiB |",
+        "|---|---:|---:|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for base in _bases(artifact):
+        group = sorted(
+            _rows_for_base(rows, base),
+            key=lambda r: (r.get("levels") or 0, order.get(r.get("subtask"), len(order))),
+        )
+        for r in group:
+            subtask = r.get("subtask", "?")
+            _, unit = AXIS_LABEL.get(subtask, ("tri", "tri/s"))
+            measured = r.get("status") == "measured"
+            index_mb = (r.get("index_bytes") or 0) / (1024.0 * 1024.0)
+            lines.append(
+                "| "
+                + " | ".join([
+                    base,
+                    str(r.get("levels") or 0),
+                    _int(r.get("triangles")),
+                    f"**{subtask}**" if subtask == "point_locate_accel" else subtask,
+                    _num(r.get("seconds"), ".3f") if measured else f"not_run: {r.get('note') or '?'}",
+                    f"{_num(r.get('throughput'), ',.0f')} {unit}".strip() if measured else DASH,
+                    _num(r.get("build_seconds"), ".2f") if r.get("build_seconds") else DASH,
+                    _num(index_mb, ".1f") if index_mb else DASH,
+                    _num(r.get("rss_mb"), ",.0f"),
+                    _num(r.get("peak_rss_mb"), ",.0f"),
+                ])
+                + " |"
+            )
+    return "\n".join(lines)
+
+
+def render_single10m_invariants(artifact: Mapping[str, Any]) -> str:
+    """Markdown table of the per-rung invariant checks.
+
+    Two distinct questions are kept apart, because mixing them is how a
+    performance table silently becomes an accuracy claim:
+
+    * ``vs 父网格`` drift must be ~1e-12: subdivision may not *change* the
+      discrete solid (exact tiling of each planar parent);
+    * ``vs 解析`` error is inherited from the sampled parent and is identical on
+      every rung -- refining does not improve it, and it is not an invariant.
+    """
+    checks = artifact.get("checks") or []
+    lines = [
+        "| 基座 nx×nz | 级别 | 三角面 | 顶点 | 连通体 | 水密 | 边流形 | Euler | 体积 m³ | vs 解析 | vs 父网格 | 面积漂移 |",
+        "|---|---:|---:|---:|---:|---|---|---:|---:|---:|---:|---:|",
+    ]
+    for c in checks:
+        lines.append(
+            "| "
+            + " | ".join([
+                f"{c.get('nx')}x{c.get('nz')}",
+                str(c.get("levels") or 0),
+                _int(c.get("triangles")),
+                _int(c.get("vertices")),
+                str(c.get("connected_bodies")),
+                "✅" if c.get("watertight") else "❌",
+                "✅" if c.get("edge_manifold") else "❌",
+                str(c.get("euler_characteristic")),
+                _num(c.get("volume_m3"), ".6f"),
+                f"{_num((c.get('volume_rel_err') or 0.0) * 100.0, '+.4f')} %",
+                f"{((c.get('volume_rel_drift_vs_base') or 0.0) * 100.0):+.2e} %"
+                if c.get("volume_rel_drift_vs_base") is not None else DASH,
+                f"{((c.get('surface_area_rel_drift') or 0.0) * 100.0):+.2e} %"
+                if c.get("surface_area_rel_drift") is not None else DASH,
+            ])
+            + " |"
+        )
+    summary = artifact.get("summary") or {}
+    lines.append("")
+    lines.append(
+        "判定：invariants_ok = **{}**（水密 {} / 边流形 {} / Euler=2 {} / 体积漂移 ≤{:g} / "
+        "面积漂移 ≤{:g}）；解析误差最大 {:.4f}% 属父网格离散误差，逐级常量。".format(
+            summary.get("invariants_ok"),
+            summary.get("all_watertight"),
+            summary.get("all_edge_manifold"),
+            summary.get("all_euler_2"),
+            summary.get("volume_tolerance") or 0.0,
+            summary.get("area_tolerance") or 0.0,
+            (summary.get("max_analytic_rel_err") or 0.0) * 100.0,
+        )
+    )
+    return "\n".join(lines)
+
+
+def render_single10m_exponents(artifact: Mapping[str, Any]) -> str:
+    """log-log slope of seconds vs triangles per (base, sub-task).
+
+    A single body lets the exponent be read off a ladder that changes *only* the
+    triangle count along one connected surface; the fleet ladder changes body
+    count at the same time.  Fewer than two measured rungs prints ``not_run``.
+    """
+    from .perf_benchmark import _loglog_slope
+
+    rows = _results(artifact)
+    lines = [
+        "| 基座 nx×nz | 子任务 | 规模点 | 指数 (斜率) | R² | 判定 |",
+        "|---|---|---:|---:|---:|---|",
+    ]
+    for base in _bases(artifact):
+        group = _rows_for_base(rows, base)
+        for subtask in SINGLE10M_ORDER:
+            if subtask == "load":
+                continue
+            points = [
+                (float(r["triangles"]), float(r["seconds"]))
+                for r in group
+                if r.get("subtask") == subtask
+                and r.get("status") == "measured"
+                and r.get("triangles") and r.get("seconds")
+            ]
+            if len(points) < 2:
+                lines.append(f"| {base} | {subtask} | {len(points)} | not_run | — | 规模点不足 |")
+                continue
+            slope, r2 = _loglog_slope(points)
+            lines.append(
+                f"| {base} | {subtask} | {len(points)} | {slope:.2f} | {r2:.3f} | "
+                f"{'线性或更优' if slope <= 1.5 else '超线性'} |"
+            )
+    return "\n".join(lines)
+
+
+#: Tables of ``docs/perf_scale_single_body_10m.md``.  A separate registry for the
+#: same reason as ``BENCHMARK_DOC_SPECS``: an absent marker counts as drift, so a
+#: document must not be required to embed tables it does not carry.
+SINGLE10M_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
+    "single10m-table": (("single10m",), render_single10m_table),
+    "single10m-invariants": (("single10m",), render_single10m_invariants),
+    "single10m-exponents": (("single10m",), render_single10m_exponents),
+}
+
+#: Table names ``docs/perf_scale_single_body_10m.md`` must embed, in display order.
+SINGLE10M_TABLE_NAMES: tuple[str, ...] = tuple(SINGLE10M_SPECS)
+
+
+_register(SINGLE10M_SPECS)
