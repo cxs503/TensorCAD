@@ -169,3 +169,38 @@ def test_benchmark_case_passes_its_declared_gates(tmp_path):
     assert (tmp_path / "convergence.csv").exists()
     exemptions = [row for row in result["gates"] if row["case"] == "sphere_r1_sub4"]
     assert any(row["quantity"] == "coarse_must_exceed_tolerance" for row in exemptions)
+
+
+# ---------------------------------------------------------------------------
+# ellipsoid: non-uniform curvature, same O(h^2) convergence
+# ---------------------------------------------------------------------------
+def test_ellipsoid_volume_converges_at_second_order():
+    """Triaxial ellipsoid (a=1.5, b=1.0, c=0.7) converges at O(h^2)."""
+    semi_axes = (1.5, 1.0, 0.7)
+    rows = mv.ellipsoid_convergence_study(semi_axes, range(0, 6))
+    errors = [row.volume_error for row in rows]
+    assert all(err < 0.0 for err in errors), "an inscribed polyhedron is below the ellipsoid"
+    pairs = list(itertools.pairwise(errors))
+    assert all(abs(later) < abs(earlier) for earlier, later in pairs)
+    assert mv.observed_order(rows) == pytest.approx(2.0, abs=0.15)
+    assert abs(rows[-1].volume_error) <= mv.RELATIVE_TOLERANCE
+    for row in rows:
+        assert row.topologically_closed and row.watertight
+        assert row.route_difference <= mv.ROUTE_TOLERANCE
+
+
+def test_ellipsoid_reference_matches_analytic_solids():
+    """The ellipsoid volume reference matches analytic_solids.ellipsoid_volume."""
+    from tensorcad.analytic_solids import ellipsoid_volume as ev
+    semi_axes = (1.5, 1.0, 0.7)
+    ref = mv.analytic_ellipsoid_volume(semi_axes)
+    assert ref == pytest.approx(ev(semi_axes), rel=1e-15)
+
+
+def test_ellipsoid_spheroid_limit():
+    """When a=b=c, the ellipsoid is a sphere and the volume matches."""
+    r = 1.23
+    semi_axes = (r, r, r)
+    ell_vol = mv.analytic_ellipsoid_volume(semi_axes)
+    sph_vol = mv.analytic_sphere_volume(r)
+    assert ell_vol == pytest.approx(sph_vol, rel=1e-15)

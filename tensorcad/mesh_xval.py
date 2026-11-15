@@ -166,6 +166,33 @@ def icosphere(radius: float = 1.0, subdivisions: int = 2) -> TriMesh:
     return TriMesh(np.array(P) * radius, np.array(F), f"icosphere{subdivisions}")
 
 
+
+def ellipsoid(semi_axes, subdivisions=2):
+    """Triaxial ellipsoid mesh by scaling an icosphere.
+
+    The icosphere is an inscribed polyhedron on the unit sphere; scaling its
+    vertices by ``(a, b, c)`` produces an inscribed polyhedron on the ellipsoid
+    ``x^2/a^2 + y^2/b^2 + z^2/c^2 = 1``.  The volume deficit is therefore
+    strictly negative (the mesh is inside the ellipsoid) and converges at
+    ``O(h^2)`` just like the sphere case, but the non-uniform curvature tests
+    the integrator on skewed triangles that the sphere's symmetry hides.
+
+    Parameters
+    ----------
+    semi_axes : (a, b, c)
+        The three semi-axes of the ellipsoid (all positive).
+    subdivisions : int
+        Icosphere subdivision level; faces = 20 * 4**subdivisions.
+    """
+    a, b, c = (float(x) for x in semi_axes)
+    if a <= 0 or b <= 0 or c <= 0:
+        raise ValueError(f"semi_axes must be positive, got {(a, b, c)}")
+    # Build a unit icosphere and scale each axis independently.
+    unit = icosphere(1.0, subdivisions)
+    scale = np.array([a, b, c], dtype=np.float64)
+    return TriMesh(unit.points * scale, unit.faces, f"ellipsoid{a:g}x{b:g}x{c:g}_sub{subdivisions}")
+
+
 def torus(major: float = 1.0, minor: float = 0.3, nu: int = 64, nv: int = 32) -> TriMesh:
     u = np.linspace(0, 2 * np.pi, nu, endpoint=False)
     v = np.linspace(0, 2 * np.pi, nv, endpoint=False)
