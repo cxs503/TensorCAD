@@ -25,6 +25,7 @@ Design rules that the tests enforce
 
 from __future__ import annotations
 
+import copy
 import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Mapping, Sequence
@@ -1141,7 +1142,9 @@ def adjudicate(report: Mapping[str, Any]) -> dict[str, Any]:
                 "explained_by_scale_slip": slip,
             }
             if slip is not None:
-                scale_typos.append({"ship": ship, "family": family, **slip})
+                scale_typos.append(
+                    {"ship": ship, "family": family, "origin": "family_value", **slip}
+                )
                 # Bind the finding to the votes it came from: the entry keeps its printed
                 # value and gains the reason it is not corroboration.
                 for entry in report[ship]["quantities"][slip["quantity"]]["entries"]:
@@ -1154,6 +1157,56 @@ def adjudicate(report: Mapping[str, Any]) -> dict[str, Any]:
                             "corrected": slip["corrected"],
                             "corrected_residual": slip["corrected_residual"],
                         }
+        # *The dissent is evidence too.*  Round 1 saw the KVLCC2 ``Bwl 580`` typo as a family
+        # value (one lineage, one numeral) and the family failed to close, so the scan above
+        # found the slip.  Round 3 put a second lineage on the same row printing the corrected
+        # 58 m: the majority cluster now *is* the corrected value, the family closes, and a
+        # detector that only inspects the winning numeral reports "no typo" for a source that
+        # still prints one in four of its entries.  Audit every dissenting numeral with the
+        # same single-factor scan, and bind the finding to the cells that print it.
+        for quantity in _SCALE_SCAN_ORDER:
+            notes = report[ship]["quantities"][quantity].get("family_disagreement") or {}
+            for family in sorted(notes):
+                for printed in sorted(set(notes[family].get("dissent") or ())):
+                    if not printed or family not in tables[quantity]:
+                        continue
+                    trial = {q: dict(step) for q, step in tables.items()}
+                    if any(family not in trial[q] for q in ("cb", "beam", "draft", "displacement_volume")):
+                        continue
+                    basis = next((q for q in ("length_pp", "lwl") if family in trial[q]), None)
+                    if basis is None:
+                        continue
+                    trial[quantity][family] = printed
+                    raw = _identity_residual(
+                        trial["displacement_volume"][family],
+                        trial["cb"][family],
+                        trial[basis][family],
+                        trial["beam"][family],
+                        trial["draft"][family],
+                    )
+                    slip = _scale_slip(trial, family, raw)
+                    if slip is None:
+                        continue
+                    finding = {
+                        "ship": ship,
+                        "family": family,
+                        "origin": "dissent",
+                        "family_value": tables[quantity][family],
+                        **slip,
+                    }
+                    scale_typos.append(finding)
+                    for entry in report[ship]["quantities"][quantity]["entries"]:
+                        cell = entry["cell"]
+                        if entry["family"] == family and cell["value"] == slip["printed"]:
+                            cell["closure_defect"] = {
+                                "quantity": slip["quantity"],
+                                "printed": slip["printed"],
+                                "divide_by": slip["divide_by"],
+                                "corrected": slip["corrected"],
+                                "corrected_residual": slip["corrected_residual"],
+                                "origin": "dissent",
+                            }
+
         ship_conflicts: dict[str, Any] = {}
         for quantity in QUANTITIES:
             row = report[ship]["quantities"][quantity]
@@ -1226,6 +1279,101 @@ def coverage_summary(report: Mapping[str, Any]) -> dict[str, Any]:
             )
         ],
     }
+
+#: Blocks of ``crossref.json`` that are pure *functions of* ``report``.  They are cached in
+#: the committed file so a reader (and the report generator) does not have to run the library,
+#: and that is exactly how they go wrong: a later round rewrites ``report`` -- a repaired
+#: numeral, a new publisher, an extra ship -- and the cache keeps the previous round's answer.
+#: :func:`stale_derived` is the invariant that catches it.
+DERIVED_BLOCKS: tuple[str, ...] = ("coverage", "closure", "adjudication")
+
+
+def _normalise(value: Any) -> Any:
+    """Comparable form of a JSON value: floats rounded so a last-bit difference is not drift."""
+    if isinstance(value, float):
+        return float(f"{value:.12g}")
+    if isinstance(value, Mapping):
+        return {str(key): _normalise(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_normalise(item) for item in value]
+    return value
+
+
+def recompute_derived(
+    report: Mapping[str, Any], blocks: Sequence[str] = DERIVED_BLOCKS
+) -> dict[str, Any]:
+    """Recompute the cached blocks from ``report`` alone, without touching ``report``.
+
+    :func:`adjudicate` stamps ``closure_defect`` onto the cells it explains, so the report is
+    deep-copied first: asking "is the cache stale?" must not itself rewrite the library.
+    """
+    view = copy.deepcopy(dict(report))
+    out: dict[str, Any] = {}
+    if "coverage" in blocks:
+        out["coverage"] = coverage_summary(view)
+    if "closure" in blocks:
+        out["closure"] = closure_check(view)
+    if "adjudication" in blocks:
+        out["adjudication"] = adjudicate(view)
+    return out
+
+
+def refresh_derived(
+    payload: dict[str, Any], blocks: Sequence[str] = DERIVED_BLOCKS
+) -> list[str]:
+    """Rewrite the cached blocks in ``payload`` from its ``report``; returns the names."""
+    report = payload["report"]
+    written: list[str] = []
+    if "coverage" in blocks:
+        payload["coverage"] = coverage_summary(report)
+        written.append("coverage")
+    if "closure" in blocks:
+        payload["closure"] = closure_check(report)
+        written.append("closure")
+    if "adjudication" in blocks:
+        # Adjudicates the *live* report on purpose: the ``closure_defect`` stamp it writes on
+        # the offending cells is part of the committed library.
+        payload["adjudication"] = adjudicate(report)
+        written.append("adjudication")
+    return written
+
+
+def stale_derived(
+    payload: Mapping[str, Any], blocks: Sequence[str] = DERIVED_BLOCKS
+) -> dict[str, Any]:
+    """Which cached blocks no longer follow from ``payload['report']``.
+
+    Returns ``{"stale": [...], "fresh": {block: value}, "differences": {block: [paths]}}``;
+    the diff paths are what makes the failure actionable instead of "the block changed".
+    """
+    fresh = recompute_derived(payload["report"], blocks)
+    stale: list[str] = []
+    differences: dict[str, list[str]] = {}
+    for name, value in fresh.items():
+        stored = payload.get(name)
+        if _normalise(stored) == _normalise(value):
+            continue
+        stale.append(name)
+        differences[name] = _diff_paths(stored, value)
+    return {"stale": stale, "fresh": fresh, "differences": differences}
+
+
+def _diff_paths(stored: Any, fresh: Any, path: str = "") -> list[str]:
+    """Leaf-level ``path: stored -> fresh`` strings, for reporting a stale block."""
+    out: list[str] = []
+    if isinstance(stored, Mapping) and isinstance(fresh, Mapping):
+        for key in sorted(set(stored) | set(fresh)):
+            if key not in stored:
+                out.append(f"{path}/{key}: absent -> {fresh[key]!r}"[:200])
+            elif key not in fresh:
+                out.append(f"{path}/{key}: {stored[key]!r} -> absent"[:200])
+            else:
+                out.extend(_diff_paths(stored[key], fresh[key], f"{path}/{key}"))
+        return out
+    if _normalise(stored) != _normalise(fresh):
+        out.append(f"{path}: {stored!r} -> {fresh!r}"[:200])
+    return out
+
 
 #: A pinned digest is a SHA-256 hex string, nothing else.  ``pin_audit`` exists because a
 #: digest that was typed rather than fetched still *looks* like a fingerprint: two of the

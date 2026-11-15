@@ -87,8 +87,11 @@ Coverage: **21/42** cells cross-verified, 10 single-source, 1 conflict, 10 missi
 |---|---|---|---|---|---|
 | KCS | NMRI-T2015 | 52,030.1 | 52,030.0 | +0.000 | ok |
 | KCS | SIMMAN-SERIES | 52,070.1 | 52,030.0 | +0.001 | ok |
-| KVLCC2 | SIMMAN-SERIES | 3,126,216.7 | 312,622.0 | +9.000 | **defect** — implied Bwl 58.00 m |
+| KVLCC2 | JSR-2017 | 312,621.7 | 312,622.4 | -0.000 | ok |
+| KVLCC2 | SIMMAN-SERIES | 312,621.7 | 312,622.0 | -0.000 | ok |
 | JBC | NMRI-T2015 | 178,378.2 | 178,369.9 | +0.000 | ok |
+| DTC | DTC-PRIMARY | 173,527.4 | 173,467.5 | +0.000 | ok |
+| DTC | JSR-2017 | 173,527.4 | 173,468.0 | +0.000 | ok |
 
 ## 5. Sensitivity / what the classification is sensitive to
 
