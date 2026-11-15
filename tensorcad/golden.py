@@ -476,7 +476,16 @@ class SphereEllipsoidGolden(GoldenCase):
     RADIUS = 1.0
 
     def _resolution(self, level: str) -> int:
-        return {"coarse": 24, "fine": 48}[level]
+        return {"coarse": 24, "fine": 48, "finer": 96}[level]
+
+    def levels(self) -> tuple[str, ...]:
+        """Three-level ladder for GCI: the two-grid band on volume/area is ~5e-3;
+        a third level proves the measured error is discretisation, not model error."""
+        return ("coarse", "fine", "finer")
+
+    def refinement_factor(self, coarse_level: str, fine_level: str) -> float:
+        """Cell-size ratio h(coarse) / h(fine) for the SDF marching tetrahedra."""
+        return self._resolution(fine_level) / self._resolution(coarse_level)
 
     def measure(self, level: str) -> dict[str, float]:
         from .geometry_field import EllipsoidField, SphereField, to_mesh
