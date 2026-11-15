@@ -35,7 +35,12 @@ Pure standard library (the package charter keeps ``dependencies = []``).
   uniform ``z`` grid; **volume** ``nabla = k * int A(x) dx`` with ``k = 2`` for a
   half-breadth model and ``k = 1`` for a full one (detected from the model).
 * **Wetted area**: triangle area below the waterline, clipped by Sutherland-
-  Hodgman at ``z = T``, doubled for a half-breadth model.
+  Hodgman at ``z = T``, doubled for a half-breadth model.  Publisher files skin
+  the hull with *overlapping* patches, so the raw sum counts the same skin twice:
+  :func:`wetted_area` therefore removes hidden triangles first (centroid ray
+  along the outward normal, plus a coplanar-coincidence test for sheets that lie
+  on top of each other) and reports how much area it discarded.  ``dedup=False``
+  reproduces the old raw sum, which stays available as the measured defect.
 
 The result carries its own discretisation knob (``stations``/``levels``) so the
 convergence of the integrals can be shown rather than assumed.
@@ -217,6 +222,187 @@ def classify_model(vertices: Sequence[Vec3]) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------- #
+# hidden-surface removal on a patch soup
+# --------------------------------------------------------------------------- #
+def _sub(a: Vec3, b: Vec3) -> Vec3:
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def _cross(u: Vec3, v: Vec3) -> Vec3:
+    return (u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0])
+
+
+def _dot(u: Vec3, v: Vec3) -> float:
+    return u[0] * v[0] + u[1] * v[1] + u[2] * v[2]
+
+
+def _unit_normal(triangle: Sequence[Vec3]) -> Vec3:
+    """Unit normal of a triangle, or ``(0, 0, 0)`` when it is degenerate."""
+    normal = _cross(_sub(triangle[1], triangle[0]), _sub(triangle[2], triangle[0]))
+    length = math.sqrt(_dot(normal, normal))
+    if length == 0.0:
+        return (0.0, 0.0, 0.0)
+    return (normal[0] / length, normal[1] / length, normal[2] / length)
+
+
+def _point_in_triangle(a: Vec3, b: Vec3, c: Vec3, point: Vec3, normal: Vec3,
+                       tolerance: float) -> bool:
+    """Is ``point`` inside (or within ``tolerance`` of) the triangle ``a, b, c``?"""
+    for start, end in ((a, b), (b, c), (c, a)):
+        edge = _sub(end, start)
+        if _dot(_cross(edge, _sub(point, start)), normal) < -tolerance * math.sqrt(_dot(edge, edge)):
+            return False
+    return True
+
+
+class _TriGrid:
+    """Uniform 3-D cell index, so a ray only meets the triangles near it."""
+
+    def __init__(self, triangles: Sequence[Sequence[Vec3]], cell: float) -> None:
+        self.triangles = triangles
+        self.cell = cell
+        self.cells: dict[tuple[int, int, int], list[int]] = {}
+        for index, triangle in enumerate(triangles):
+            for key in self._span(triangle):
+                self.cells.setdefault(key, []).append(index)
+
+    def _span(self, triangle: Sequence[Vec3]) -> list[tuple[int, int, int]]:
+        lo = [min(p[axis] for p in triangle) for axis in range(3)]
+        hi = [max(p[axis] for p in triangle) for axis in range(3)]
+        return [(i, j, k)
+                for i in range(int(math.floor(lo[0] / self.cell)), int(math.floor(hi[0] / self.cell)) + 1)
+                for j in range(int(math.floor(lo[1] / self.cell)), int(math.floor(hi[1] / self.cell)) + 1)
+                for k in range(int(math.floor(lo[2] / self.cell)), int(math.floor(hi[2] / self.cell)) + 1)]
+
+    def at(self, point: Sequence[float]) -> list[int]:
+        key = (int(math.floor(point[0] / self.cell)),
+               int(math.floor(point[1] / self.cell)),
+               int(math.floor(point[2] / self.cell)))
+        return self.cells.get(key, [])
+
+
+def _march(candidates: list[int], grid: _TriGrid, origin: Vec3, direction: Vec3,
+           stride: float, reach: float, skip: int, tolerance: float,
+           source: int | None = None) -> bool:
+    """Walk the ray ``origin + t*direction`` to ``reach``; True if a sheet is hit."""
+    steps = int(math.ceil(reach / stride))
+    visited: set[int] = set()
+    for step in range(steps + 1):
+        point = (origin[0] + direction[0] * step * stride,
+                 origin[1] + direction[1] * step * stride,
+                 origin[2] + direction[2] * step * stride)
+        candidates.extend(grid.at(point))
+    for index in dict.fromkeys(candidates):
+        if index == skip:
+            continue
+        a, b, c = grid.triangles[index]
+        normal = _unit_normal((a, b, c))
+        if normal == (0.0, 0.0, 0.0):
+            continue
+        # Coincident sheets do not cross the ray at a positive distance -- the
+        # centroid we cast from lies *on* them.  That is still an occlusion, and
+        # it is how two patches that tile the same skin get counted once.
+        # Tie-break by index: two *exactly* coincident sheets would otherwise hide
+        # each other and both vanish from the sum.  Only a lower-numbered sheet may
+        # claim a coincident one, so each coincident cluster keeps exactly one copy.
+        if (index < source and abs(_dot(normal, _sub(origin, a))) <= tolerance
+                and _point_in_triangle(a, b, c, origin, normal, tolerance)):
+            return True
+        denominator = _dot(normal, direction)
+        if abs(denominator) < 1e-9:
+            continue
+        distance = _dot(normal, _sub(a, origin)) / denominator
+        if distance <= 1e-6:
+            continue
+        hit = (origin[0] + distance * direction[0],
+               origin[1] + distance * direction[1],
+               origin[2] + distance * direction[2])
+        if _point_in_triangle(a, b, c, hit, normal, tolerance):
+            return True
+    return False
+
+
+def wetted_area(vertices: Sequence[Vec3], faces: Iterable[Sequence[int]], *,
+                waterline: float, dedup: bool = True,
+                cell_size: float | None = None,
+                tolerance: float | None = None) -> tuple[float, float]:
+    """Wetted surface at ``waterline``: ``(area, discarded)``, both full-hull.
+
+    ``area`` is the skin of the hull below the waterline, doubled for a
+    half-breadth model; ``discarded`` is the area of the triangles that turned out
+    to be hidden under another sheet (``0.0`` when ``dedup`` is off).
+
+    Publisher IGES hull files describe the skin with untrimmed patches that
+    *overlap*: summing triangle areas then counts the shared skin twice (on
+    ``KCS_hull_SVA.igs`` this is +19.4 % against the published 9 424 m²).  With
+    ``dedup`` each triangle casts a ray from its centroid along its outward
+    normal; a hit means another sheet covers it and it is dropped from the sum.
+    Two coincident sheets have no crossing point, so a coplanar test at the same
+    tolerance catches those as well.
+
+    The outward direction is taken from the bounding-box centroid, which is exact
+    for a star-shaped (convex-ish) hull skin and the reason this is not a general
+    solid modeller: a deeply concave pocket can be hidden in the wrong direction.
+    ``cell_size`` and ``tolerance`` default to a fraction of the model size.
+    """
+    if waterline <= 0.0:
+        raise ValueError("waterline must be positive")
+    triangles = [tuple(vertices[i] for i in face) for face in faces]
+    if not triangles:
+        raise ValueError("mesh has no triangles")
+    characteristics = classify_model(vertices)
+    factor = characteristics["symmetry_factor"]
+    span = max(max(p[axis] for t in triangles for p in t) - min(p[axis] for t in triangles for p in t)
+               for axis in range(3))
+    if span <= 0.0:
+        raise ValueError("mesh has zero extent")
+    cell = cell_size if cell_size is not None else max(span / 64.0, 1e-9)
+    tol = tolerance if tolerance is not None else 1e-4 * span
+    symmetry_tolerance = 1e-6 * max(abs(p[1]) for t in triangles for p in t)
+
+    def is_centreplane(triangle: Sequence[Vec3]) -> bool:
+        return characteristics["half_breadth"] and all(
+            abs(p[1]) <= symmetry_tolerance for p in triangle)
+
+    if not dedup:
+        total = 0.0
+        for triangle in triangles:
+            if not is_centreplane(triangle):
+                total += _clip_area_below(triangle, waterline)
+        return factor * total, 0.0
+
+    points = [p for t in triangles for p in t]
+    centre = tuple(sum(p[axis] for p in points) / len(points) for axis in range(3))
+    grid = _TriGrid(triangles, cell)
+    stride = 0.5 * cell
+    kept = 0.0
+    discarded = 0.0
+    for index, triangle in enumerate(triangles):
+        if is_centreplane(triangle):
+            continue
+        area = _clip_area_below(triangle, waterline)
+        if area == 0.0:
+            continue
+        normal = _unit_normal(triangle)
+        if normal == (0.0, 0.0, 0.0):
+            kept += area
+            continue
+        centroid = tuple(sum(p[axis] for p in triangle) / 3.0 for axis in range(3))
+        if _dot(normal, _sub(centroid, centre)) < 0.0:
+            normal = (-normal[0], -normal[1], -normal[2])
+        offset = 1e-3 * tol
+        origin = (centroid[0] + offset * normal[0],
+                  centroid[1] + offset * normal[1],
+                  centroid[2] + offset * normal[2])
+        if _march([], grid, origin, normal, stride, reach=4.0 * cell,
+                  skip=index, tolerance=tol, source=index):
+            discarded += area
+        else:
+            kept += area
+    return factor * kept, factor * discarded
+
+
+# --------------------------------------------------------------------------- #
 # whole-hull characteristics
 # --------------------------------------------------------------------------- #
 @dataclass
@@ -234,12 +420,19 @@ class HullCharacteristics:
     symmetry_factor: int
     station_count: int
     level_count: int
+    #: Raw triangle sum, i.e. what the soup measures before hidden sheets are
+    #: removed; kept so the de-duplication stays auditable.
+    s_wetted_naive: float = 0.0
+    #: Area dropped as hidden under an overlapping sheet.
+    s_wetted_discarded: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "waterline": self.waterline,
             "volume": self.volume,
             "s_wetted": self.s_wetted,
+            "s_wetted_naive": self.s_wetted_naive,
+            "s_wetted_discarded": self.s_wetted_discarded,
             "lwl": self.lwl,
             "beam": self.beam,
             "mid_ship_area": self.mid_ship_area,
@@ -255,11 +448,13 @@ class HullCharacteristics:
 
 def hull_characteristics(vertices: Sequence[Vec3], faces: Sequence[Sequence[int]], *,
                          waterline: float, stations: int = 61, levels: int = 48,
-                         slab_count: int = 256) -> HullCharacteristics:
+                         slab_count: int = 256, dedup: bool = True) -> HullCharacteristics:
     """Displacement volume, ``Cb``/``Cm``, ``Lwl``, beam and wetted area.
 
     Every quantity is measured on the surface as imported: no closure surface is
-    invented, so this works on the open half-breadth workshop files.
+    invented, so this works on the open half-breadth workshop files.  ``dedup``
+    passes through to :func:`wetted_area`; the raw sum is reported alongside in
+    ``s_wetted_naive`` so the effect of the de-duplication is always visible.
     """
     if waterline <= 0.0:
         raise ValueError("waterline must be positive")
@@ -279,15 +474,13 @@ def hull_characteristics(vertices: Sequence[Vec3], faces: Sequence[Sequence[int]
     characteristics = classify_model(vertices)
     factor = characteristics["symmetry_factor"]
 
-    wetted = 0.0
-    symmetry_tolerance = 1e-6 * max(abs(p[1]) for tri in slabs.triangles for p in tri)
-    for triangle in slabs.triangles:
-        if characteristics["half_breadth"] and all(abs(p[1]) <= symmetry_tolerance
-                                                  for p in triangle):
-            # A face lying in the centreplane is a cut through the interior, not
-            # wetted surface: counting it (and doubling) would invent area.
-            continue
-        wetted += _clip_area_below(triangle, waterline)
+    # A face lying in the centreplane is a cut through the interior, not wetted
+    # surface: counting it (and doubling) would invent area -- `wetted_area`
+    # skips those, and removes the sheets that hide under an overlapping patch.
+    wetted, discarded = wetted_area(vertices, faces, waterline=waterline, dedup=dedup)
+    wetted_naive = wetted + discarded if dedup else wetted
+    if dedup:
+        wetted_naive = wetted_area(vertices, faces, waterline=waterline, dedup=False)[0]
 
     beam = 0.0
     for station in grid:
@@ -307,7 +500,7 @@ def hull_characteristics(vertices: Sequence[Vec3], faces: Sequence[Sequence[int]
         stations=tuple(grid),
         sectional_areas=tuple(areas),
         volume=volume,
-        s_wetted=factor * wetted,
+        s_wetted=wetted,
         lwl=lwl,
         beam=beam,
         mid_ship_area=mid_ship,
@@ -316,6 +509,8 @@ def hull_characteristics(vertices: Sequence[Vec3], faces: Sequence[Sequence[int]
         symmetry_factor=factor,
         station_count=stations,
         level_count=levels,
+        s_wetted_naive=wetted_naive,
+        s_wetted_discarded=discarded,
     )
 
 
