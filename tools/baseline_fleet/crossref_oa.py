@@ -63,6 +63,9 @@ RAW_FILES: dict[str, str] = {
     "jbc_scse": "jbc_scienpg.pdf",
     "jbc_memorial": "jbc_kabonge.pdf",
     "dtc_strath": "dtc_strath.pdf",
+    # third round (m21345): documents fetched after the second round was merged
+    "dtc_ije": "dtc_ije.pdf",
+    "kvlcc2_osaka": "kvlcc2_osaka.pdf",
 }
 
 OA_KEYS = tuple(RAW_FILES)
@@ -93,11 +96,22 @@ def pdf_text(path: Path) -> tuple[str, int]:
 
 def cmd_ingest(args: argparse.Namespace) -> int:
     raw = Path(args.raw)
+    out = Path(args.out)
+    previous: dict[str, dict[str, Any]] = {}
+    if out.exists():
+        previous = json.loads(out.read_text()).get("sources", {})
     seen: dict[str, dict[str, Any]] = {}
     for key in OA_KEYS:
         path = raw / RAW_FILES[key]
         if not path.exists():
-            seen[key] = {"status": "missing_local_file", "file": str(path)}
+            # A document obtained in an earlier round is no longer cached in the worktree.
+            # Re-using its last read row keeps coverage from silently shrinking; the row keeps
+            # the digest it was read from, so the cell stays auditable.
+            cached = previous.get(key)
+            if args.keep_existing and cached is not None:
+                seen[key] = dict(cached, note="reused from the previous ingest; local file absent")
+            else:
+                seen[key] = {"status": "missing_local_file", "file": str(path)}
             continue
         spec = next(s for s in SOURCES if s.key == key)
         digest = sha256(path)
@@ -114,7 +128,6 @@ def cmd_ingest(args: argparse.Namespace) -> int:
             "quantities_read": sorted(cells),
             "cells": {q: c.as_dict() for q, c in cells.items()},
         }
-    out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema": "tensorcad.fleet_refs.oa_ingest/1.0",
@@ -294,6 +307,8 @@ def main(argv: list[str] | None = None) -> int:
     p_ingest = sub.add_parser("ingest", help="hash + quote-extract the local PDFs")
     p_ingest.add_argument("--raw", default="/tmp/oa")
     p_ingest.add_argument("--out", default="benchmarks/verified/fleet_refs/oa_ingest.json")
+    p_ingest.add_argument("--keep-existing", action="store_true",
+                          help="keep the rows of documents whose local file is no longer cached")
     p_ingest.set_defaults(func=cmd_ingest)
     p_build = sub.add_parser("build", help="merge the OA cells into the committed library")
     p_build.add_argument("--library", default="benchmarks/verified/fleet_refs/crossref.json")

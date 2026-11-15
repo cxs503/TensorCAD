@@ -1,7 +1,7 @@
 {
  "schema": "tensorcad.fleet_refs.crossref/1.0",
  "anchor": "REPRO-GEOM-FLEET-REFS",
- "generated_utc": "2026-11-15T02:50:49+00:00",
+ "generated_utc": "2026-11-15T03:57:49+00:00",
  "quantity_labels": {
   "displacement_volume": "\u2207 (m\u00b3)",
   "cb": "Cb",
@@ -224,7 +224,7 @@
      "published_values": [
       {
        "family": "DTC-PRIMARY",
-       "value": 173467.0
+       "value": 173467.5
       },
       {
        "family": "JSR-2017",
@@ -233,14 +233,29 @@
      ],
      "independent_families": 2,
      "family_values": {
-      "DTC-PRIMARY": 173467.0,
+      "DTC-PRIMARY": 173467.5,
       "JSR-2017": 173468.0
      },
      "family_disagreement": {},
-     "range": 1.0,
-     "range_relative": 5.764768616599651e-06,
+     "range": 0.5,
+     "range_relative": 2.882380154236162e-06,
      "tolerance": 0.005,
      "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 173468.0,
+        "raw": "173468",
+        "label": "76 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume displacement \u2207 0.824 173468 [m3] Wetted surface \ud835\udc46\ud835\udc64 1.209 22032 [m2] Block coefficient \ud835\udc36\ud835\udc35 0.661 0.661 [-]",
+        "source": "dtc_ije",
+        "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+        "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 6"
+       }
+      },
       {
        "family": "DTC-PRIMARY",
        "cell": {
@@ -296,6 +311,21 @@
      "range_relative": 0.0,
      "tolerance": 0.005,
      "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.661,
+        "raw": "0.661",
+        "label": "m ] Volume displacement \u2207 0.824 173468 [m3] Wetted surface \ud835\udc46\ud835\udc64 1.209 22032 [m2] Block coefficient \ud835\udc36\ud835\udc35 0.661 0.661 [-] Design speed V 1.68 12.86 [m/s] Longitudinal center of gravity\u2014from af",
+        "source": "dtc_ije",
+        "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+        "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 6"
+       }
+      },
       {
        "family": "DTC-PRIMARY",
        "cell": {
@@ -380,6 +410,21 @@
        "cell": {
         "quantity": "length_pp",
         "value": 355.0,
+        "raw": "355",
+        "label": "Characteristics Variable Model Full scale Unit Scale factor \u03bb 1:59.407 [-] [-] Length between perpendiculars \ud835\udc3f\ud835\udc43\ud835\udc43 5.976 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume",
+        "source": "dtc_ije",
+        "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+        "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 6"
+       }
+      },
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 355.0,
         "raw": "355.0",
         "label": "Table 1. Main particulars of DTC hull DTC Model DTC \u03bb 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA",
         "source": "dtc_strath",
@@ -430,6 +475,21 @@
      "range_relative": 0.0,
      "tolerance": 0.005,
      "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "beam",
+        "value": 51.0,
+        "raw": "51",
+        "label": "cale factor \u03bb 1:59.407 [-] [-] Length between perpendiculars \ud835\udc3f\ud835\udc43\ud835\udc43 5.976 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume displacement \u2207 0.824 173468 [m3] We",
+        "source": "dtc_ije",
+        "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+        "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 6"
+       }
+      },
       {
        "family": "DTC-PRIMARY",
        "cell": {
@@ -491,6 +551,21 @@
         "quantity": "draft",
         "value": 14.5,
         "raw": "14.5",
+        "label": "th between perpendiculars \ud835\udc3f\ud835\udc43\ud835\udc43 5.976 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume displacement \u2207 0.824 173468 [m3] Wetted surface \ud835\udc46\ud835\udc64 1.209 22032 [m2",
+        "source": "dtc_ije",
+        "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+        "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 6"
+       }
+      },
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "draft",
+        "value": 14.5,
+        "raw": "14.5",
         "label": "DTC hull DTC Model DTC \u03bb 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA (m2) 6.243 22032.0 Fig. 1. 3-D view",
         "source": "dtc_strath",
         "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
@@ -522,7 +597,7 @@
    "single_source": 0,
    "conflict": 0,
    "missing": 2,
-   "corroborated_by_repeat_family": 0,
+   "corroborated_by_repeat_family": 5,
    "disputed_quantities": []
   },
   "JBC": {
@@ -1576,6 +1651,21 @@
        }
       },
       {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 312622.0,
+        "raw": "312622",
+        "label": "5.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%),",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
+       }
+      },
+      {
        "family": "JSR-2017",
        "cell": {
         "quantity": "displacement_volume",
@@ -1661,6 +1751,21 @@
        }
       },
       {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.8098,
+        "raw": "0.8098",
+        "label": "0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%), fwd + 3.48 3.48 Propeller Type FP FP No. of blades",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
+       }
+      },
+      {
        "family": "JSR-2017",
        "cell": {
         "quantity": "cb",
@@ -1731,6 +1836,21 @@
         "quantity": "lcb_percent",
         "value": 3.48,
         "raw": "3.48",
+        "label": ") 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%), fwd + 3.48 3.48 Propeller Type FP FP No. of blades 4 4 Diameter (m) 9.86 0.0986 P/D (0.7",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": 3.48,
+        "raw": "3.48",
         "label": "LCB (%), fwd+",
         "source": "simman2014_kvlcc2",
         "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
@@ -1775,6 +1895,21 @@
      "range_relative": 0.0,
      "tolerance": 0.005,
      "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lwl",
+        "value": 325.5,
+        "raw": "325.5",
+        "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displ",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
+       }
+      },
       {
        "family": "SIMMAN-SERIES",
        "cell": {
@@ -1866,6 +2001,21 @@
        }
       },
       {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 320.0,
+        "raw": "320.0",
+        "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
+       }
+      },
+      {
        "family": "JSR-2017",
        "cell": {
         "quantity": "length_pp",
@@ -1913,8 +2063,8 @@
      ]
     },
     "beam": {
-     "verdict": "CONFLICT",
-     "disputed": true,
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
      "published_values": [
       {
        "family": "JSR-2017",
@@ -1922,31 +2072,33 @@
       },
       {
        "family": "SIMMAN-SERIES",
-       "value": 580.0
+       "value": 58.0
       }
      ],
      "independent_families": 2,
      "family_values": {
       "JSR-2017": 58.0,
-      "SIMMAN-SERIES": 580.0
+      "SIMMAN-SERIES": 58.0
      },
      "family_disagreement": {
       "SIMMAN-SERIES": {
-       "chosen": 580.0,
+       "chosen": 58.0,
        "cluster_size": 2,
        "values": [
+        58.0,
         58.0,
         580.0,
         580.0
        ],
        "dissent": [
-        58.0
+        580.0,
+        580.0
        ],
        "rule": "majority cluster; never the mean of disagreeing entries"
       }
      },
-     "range": 522.0,
-     "range_relative": 1.6363636363636365,
+     "range": 0.0,
+     "range_relative": 0.0,
      "tolerance": 0.005,
      "entries": [
       {
@@ -1962,6 +2114,21 @@
         "column": 0,
         "unit_basis": "volume",
         "note": "page 3"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 58.0,
+        "raw": "58",
+        "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
        }
       },
       {
@@ -2070,6 +2237,21 @@
        }
       },
       {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 20.8,
+        "raw": "20.8",
+        "label": "1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71",
+        "source": "kvlcc2_osaka",
+        "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 34"
+       }
+      },
+      {
        "family": "JSR-2017",
        "cell": {
         "quantity": "draft",
@@ -2117,14 +2299,12 @@
      ]
     }
    },
-   "cross_verified": 4,
+   "cross_verified": 5,
    "single_source": 2,
-   "conflict": 1,
+   "conflict": 0,
    "missing": 0,
    "corroborated_by_repeat_family": 7,
-   "disputed_quantities": [
-    "beam"
-   ]
+   "disputed_quantities": []
   },
   "ONRT": {
    "quantities": {
@@ -2565,9 +2745,9 @@
    "Series60"
   ],
   "cells": 42,
-  "cross_verified": 20,
+  "cross_verified": 21,
   "single_source": 10,
-  "conflict": 2,
+  "conflict": 1,
   "missing": 10,
   "ships_fully_cross_verified": [
    "KCS"
@@ -2918,13 +3098,14 @@
      "JSR-2017"
     ],
     "sources": [
+     "dtc_ije",
      "dtc_strath",
      "dtc_ugent"
     ],
     "published_values": [
      {
       "family": "DTC-PRIMARY",
-      "value": 173467.0
+      "value": 173467.5
      },
      {
       "family": "JSR-2017",
@@ -2949,6 +3130,7 @@
      "JSR-2017"
     ],
     "sources": [
+     "dtc_ije",
      "dtc_strath",
      "dtc_ugent"
     ],
@@ -2999,6 +3181,7 @@
      "JSR-2017"
     ],
     "sources": [
+     "dtc_ije",
      "dtc_strath",
      "dtc_ugent"
     ],
@@ -3029,6 +3212,7 @@
      "JSR-2017"
     ],
     "sources": [
+     "dtc_ije",
      "dtc_strath",
      "dtc_ugent"
     ],
@@ -3059,6 +3243,7 @@
      "JSR-2017"
     ],
     "sources": [
+     "dtc_ije",
      "dtc_strath",
      "dtc_ugent"
     ],
@@ -3493,6 +3678,7 @@
     ],
     "sources": [
      "kvlcc2_hrcak",
+     "kvlcc2_osaka",
      "kvlcc2_ugent",
      "simman2014_kvlcc2",
      "simman2020_summary"
@@ -3525,6 +3711,7 @@
     ],
     "sources": [
      "kvlcc2_hrcak",
+     "kvlcc2_osaka",
      "kvlcc2_ugent",
      "simman2014_kvlcc2",
      "simman2020_summary"
@@ -3554,6 +3741,7 @@
      "SIMMAN-SERIES"
     ],
     "sources": [
+     "kvlcc2_osaka",
      "simman2014_kvlcc2",
      "simman2020_summary"
     ],
@@ -3578,6 +3766,7 @@
      "SIMMAN-SERIES"
     ],
     "sources": [
+     "kvlcc2_osaka",
      "simman2014_kvlcc2",
      "simman2020_summary"
     ],
@@ -3608,6 +3797,7 @@
     "sources": [
      "kvlcc2_hrcak",
      "kvlcc2_jstage",
+     "kvlcc2_osaka",
      "kvlcc2_ugent",
      "simman2014_kvlcc2",
      "simman2020_summary"
@@ -3632,8 +3822,8 @@
     "disputed": false
    },
    "beam": {
-    "verdict": "CONFLICT",
-    "core_verdict": "CONFLICT",
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
     "families": [
      "JSR-2017",
      "SIMMAN-SERIES"
@@ -3644,6 +3834,7 @@
     ],
     "sources": [
      "kvlcc2_hrcak",
+     "kvlcc2_osaka",
      "kvlcc2_ugent",
      "simman2014_kvlcc2",
      "simman2020_summary"
@@ -3655,14 +3846,14 @@
      },
      {
       "family": "SIMMAN-SERIES",
-      "value": 580.0
+      "value": 58.0
      }
     ],
     "distinct_values": [
      58.0,
      580.0
     ],
-    "disputed": true
+    "disputed": false
    },
    "draft": {
     "verdict": "CROSS_VERIFIED_LINEAGE",
@@ -3680,6 +3871,7 @@
     "sources": [
      "kvlcc2_hrcak",
      "kvlcc2_jstage",
+     "kvlcc2_osaka",
      "kvlcc2_ugent",
      "simman2014_kvlcc2",
      "simman2020_summary"
@@ -4074,17 +4266,47 @@
     "draft",
     "length_pp"
    ]
+  },
+  "dtc_ije": {
+   "status": "read",
+   "file": "dtc_ije.pdf",
+   "bytes": 3133493,
+   "pages": 20,
+   "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp"
+   ]
+  },
+  "kvlcc2_osaka": {
+   "status": "read",
+   "file": "kvlcc2_osaka.pdf",
+   "bytes": 8079863,
+   "pages": 158,
+   "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "lcb_percent",
+    "length_pp",
+    "lwl"
+   ]
   }
  },
- "oa_cells_added": 40,
+ "oa_cells_added": 52,
  "closure_oa": {
   "DTC": {
    "DTC-PRIMARY": {
     "cb_lpp_bwl_t_m3": 173527.3725,
-    "published_volume_m3": 173467.0,
-    "rel_error": 0.0003480344964748204,
+    "published_volume_m3": 173467.5,
+    "rel_error": 0.0003451511089973492,
     "consistent": true,
-    "implied_beam_m": 50.98225641605909
+    "implied_beam_m": 50.98240336693855
    },
    "JSR-2017": {
     "cb_lpp_bwl_t_m3": 173527.3725,
@@ -4128,10 +4350,10 @@
     "implied_beam_m": 58.000142596640686
    },
    "SIMMAN-SERIES": {
-    "cb_lpp_bwl_t_m3": 3126216.7039999994,
+    "cb_lpp_bwl_t_m3": 312621.6704,
     "published_volume_m3": 312622.0,
-    "rel_error": 8.999989456916019,
-    "consistent": false,
+    "rel_error": -1.054308397992781e-06,
+    "consistent": true,
     "implied_beam_m": 58.00006114995156
    }
   },

@@ -1,0 +1,309 @@
+{
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "schema": "tensorcad.fleet_refs.acceptance/1.0",
+ "library": "benchmarks/verified/fleet_refs/crossref.json",
+ "criteria": {
+  "one_two_independent_lineages": {
+   "pass": false,
+   "ships": {
+    "DTC": {
+     "pass": false,
+     "cross_verified_lineages": [
+      "displacement_volume",
+      "cb"
+     ],
+     "failing": [
+      "lcb_percent",
+      "lwl"
+     ],
+     "documents_total": 3
+    },
+    "JBC": {
+     "pass": false,
+     "cross_verified_lineages": [],
+     "failing": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl"
+     ],
+     "documents_total": 4
+    },
+    "KCS": {
+     "pass": true,
+     "cross_verified_lineages": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl"
+     ],
+     "failing": [],
+     "documents_total": 3
+    },
+    "KVLCC2": {
+     "pass": false,
+     "cross_verified_lineages": [
+      "displacement_volume",
+      "cb"
+     ],
+     "failing": [
+      "lcb_percent",
+      "lwl"
+     ],
+     "documents_total": 6
+    },
+    "ONRT": {
+     "pass": false,
+     "cross_verified_lineages": [
+      "displacement_volume",
+      "cb",
+      "lwl"
+     ],
+     "failing": [
+      "lcb_percent"
+     ],
+     "documents_total": 2
+    },
+    "Series60": {
+     "pass": false,
+     "cross_verified_lineages": [],
+     "failing": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl"
+     ],
+     "documents_total": 0
+    }
+   }
+  },
+  "two_citation_and_digest": {
+   "pass": true,
+   "cells_checked": 104,
+   "cells_without_citation": []
+  },
+  "three_disputed_marked_with_both_values": {
+   "pass": true,
+   "conflicts": {
+    "ONRT/displacement_volume": {
+     "disputed": true,
+     "values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 8299.5
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 8507.0
+      }
+     ],
+     "range_relative": 0.024692827179960134,
+     "tolerance": 0.005
+    }
+   },
+   "unmarked_conflicts": [],
+   "dissent_recorded": {
+    "KVLCC2/beam": {
+     "SIMMAN-SERIES": {
+      "chosen": 58.0,
+      "cluster_size": 2,
+      "values": [
+       58.0,
+       58.0,
+       580.0,
+       580.0
+      ],
+      "dissent": [
+       580.0,
+       580.0
+      ],
+      "rule": "majority cluster; never the mean of disagreeing entries"
+     }
+    }
+   }
+  },
+  "four_specs_multi_source_arrays": {
+   "pass": true,
+   "ships": {
+    "DTC": {
+     "in_specs": false,
+     "quantities": [
+      "displacement_volume",
+      "cb",
+      "length_pp",
+      "beam",
+      "draft"
+     ]
+    },
+    "JBC": {
+     "in_specs": true,
+     "quantities": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl",
+      "length_pp",
+      "beam",
+      "draft"
+     ],
+     "arrays_present": [
+      "beam",
+      "cb",
+      "displacement_volume",
+      "draft",
+      "lcb_percent",
+      "length_pp",
+      "lwl"
+     ],
+     "missing_arrays": [],
+     "multi_source_arrays": {
+      "displacement_volume": 4,
+      "cb": 3,
+      "lwl": 4,
+      "length_pp": 4,
+      "beam": 4,
+      "draft": 4
+     }
+    },
+    "KCS": {
+     "in_specs": true,
+     "quantities": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl",
+      "length_pp",
+      "beam",
+      "draft"
+     ],
+     "arrays_present": [
+      "beam",
+      "cb",
+      "displacement_volume",
+      "draft",
+      "lcb_percent",
+      "length_pp",
+      "lwl"
+     ],
+     "missing_arrays": [],
+     "multi_source_arrays": {
+      "displacement_volume": 3,
+      "cb": 3,
+      "lcb_percent": 3,
+      "lwl": 3,
+      "length_pp": 3,
+      "beam": 3,
+      "draft": 3
+     }
+    },
+    "KVLCC2": {
+     "in_specs": true,
+     "quantities": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl",
+      "length_pp",
+      "beam",
+      "draft"
+     ],
+     "arrays_present": [
+      "beam",
+      "cb",
+      "displacement_volume",
+      "draft",
+      "lcb_percent",
+      "length_pp",
+      "lwl"
+     ],
+     "missing_arrays": [],
+     "multi_source_arrays": {
+      "displacement_volume": 4,
+      "cb": 4,
+      "lcb_percent": 2,
+      "lwl": 2,
+      "length_pp": 5,
+      "beam": 4,
+      "draft": 5
+     }
+    },
+    "ONRT": {
+     "in_specs": true,
+     "quantities": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl",
+      "beam",
+      "draft"
+     ],
+     "arrays_present": [
+      "beam",
+      "cb",
+      "displacement_volume",
+      "draft",
+      "lcb_percent",
+      "lwl"
+     ],
+     "missing_arrays": [],
+     "multi_source_arrays": {
+      "displacement_volume": 2,
+      "cb": 2,
+      "lwl": 2,
+      "beam": 2,
+      "draft": 2
+     }
+    },
+    "Series60": {
+     "in_specs": false,
+     "quantities": []
+    }
+   }
+  },
+  "five_kvlcc2_reference_wired": {
+   "pass": true,
+   "kvlcc2_published_volume_m3": 312622.0,
+   "runner_reads_published_volume": true,
+   "volume_documents": [
+    "kvlcc2_hrcak",
+    "kvlcc2_ugent",
+    "simman2014_kvlcc2",
+    "simman2020_summary"
+   ]
+  }
+ },
+ "passing": [
+  "two_citation_and_digest",
+  "three_disputed_marked_with_both_values",
+  "four_specs_multi_source_arrays",
+  "five_kvlcc2_reference_wired"
+ ],
+ "failing": [
+  "one_two_independent_lineages"
+ ],
+ "coverage": {
+  "ships": [
+   "DTC",
+   "JBC",
+   "KCS",
+   "KVLCC2",
+   "ONRT",
+   "Series60"
+  ],
+  "cells": 42,
+  "cross_verified": 21,
+  "single_source": 10,
+  "conflict": 1,
+  "missing": 10,
+  "ships_fully_cross_verified": [
+   "KCS"
+  ],
+  "ships_failing_min_two_sources": [
+   "DTC",
+   "JBC",
+   "KVLCC2",
+   "ONRT",
+   "Series60"
+  ]
+ }
+}

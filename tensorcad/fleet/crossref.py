@@ -351,7 +351,53 @@ _OA_SOURCES: tuple[SourceSpec, ...] = (
     ),
 )
 
-SOURCES = SOURCES + _OA_SOURCES
+#: Third-round documents: two further open-access full texts fetched from hosts that do answer
+#: this egress, aimed at the two largest remaining holes of the library -- KVLCC2's ``lwl`` and
+#: ``lcb_percent`` (one document each before this round) and DTC's publisher diversity.  Neither
+#: document is claimed as an independent source: a case-definition table restated by a later
+#: paper is transcription corroboration, and :data:`LINEAGE` records exactly that.
+_ROUND3_SOURCES: tuple[SourceSpec, ...] = (
+    SourceSpec(
+        key="dtc_ije",
+        ship="DTC",
+        publisher="International Journal of Engineering (open access) - Ahmadi, Yousefifard and Nowruzi 2026, Table 2",
+        family="IJE-2026",
+        url="https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+        kind="pdf",
+        sha256="8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+        licence="CC BY 4.0 (declared in the article); digest + quoted cells only, bytes not redistributed",
+        note="Table 2 prints 'Model (lambda 1:59.407) | Full scale'; every quote captures the full-scale column",
+        quotes=(
+            ("length_pp", r"Length between\s*\nperpendiculars\s*\n\S+\s*\n[0-9.]+\s*\n([0-9.]+)", "volume"),
+            ("beam", r"Waterline breadth\s*\n\S+\s*\n[0-9.]+\s*\n([0-9.]+)", "volume"),
+            ("draft", r"Design draft\s*\n\S+\s*\n[0-9.]+\s*\n([0-9.]+)", "volume"),
+            ("displacement_volume", r"Volume displacement\s*\n\S+\s*\n[0-9.]+\s*\n([0-9]{5,})", "volume"),
+            ("cb", r"Block coefficient\s*\n\S+\s*\n([0-9.]+)", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="kvlcc2_osaka",
+        ship="KVLCC2",
+        publisher="Osaka University institutional repository - doctoral dissertation (hdl 11094/50514), Table 2-4",
+        family="OSAKA-REPO",
+        url="https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+        kind="pdf",
+        sha256="0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+        licence="INSTITUTIONAL REPOSITORY; digest + quoted cells only, bytes not redistributed",
+        note="Table 2-4 'KVLCC2 geometry data' prints 'Full Scale | Osaka University Model (1/100)'; quotes capture the full-scale column.  The numerals are the test-case definition, so this document is transcription corroboration, not a second measurement.",
+        quotes=(
+            ("length_pp", r"Main Particulars[\s\S]{0,200}?\(\s*m\s*\)\s*\n([0-9.]+)\s*\n[0-9.]+", "volume"),
+            ("lwl", r"Main Particulars[\s\S]{0,200}?\(m\)\s*\n(?:[0-9.]+\s*\n){2}[^\n]*\n([0-9.]+)\s*\n", "volume"),
+            ("beam", r"Main Particulars[\s\S]{0,200}?\(m\)\s*\n(?:[0-9.]+\s*\n){2}(?:[^\n]*\n)(?:[0-9.]+\s*\n){2}[^\n]*\n([0-9.]+)\s*\n", "volume"),
+            ("draft", r"Draft\s*\(m\)\s*\n([0-9.]+)", "volume"),
+            ("displacement_volume", r"Displacement\s*\(m3\)\s*\n([0-9]+)", "volume"),
+            ("cb", r"\nCB\s*\n([0-9.]+)\s*\n[0-9.]+", "volume"),
+            ("lcb_percent", r"LCB\s*\(%\),\s*fwd\s*\+\s*\n([0-9.]+)", "volume"),
+        ),
+    ),
+)
+
+SOURCES = SOURCES + _OA_SOURCES + _ROUND3_SOURCES
 
 
 @dataclass
@@ -690,6 +736,18 @@ LINEAGE.update(
         "jbc_scse": "NMRI-T2015",
         "jbc_memorial": "NMRI-T2015",
         "dtc_strath": "DTC-PRIMARY",
+    }
+)
+
+LINEAGE.update(
+    {
+        # A later journal paper that prints the DTC particulars table verbatim is a third
+        # *publisher* but the same lineage: only a measurement at another facility would count
+        # as a second independent source.
+        "dtc_ije": "DTC-PRIMARY",
+        # The Osaka dissertation restates the standard KVLCC2 case definition (identical
+        # 320 / 325.5 / 58 / 20.8 / 312622 / 0.8098 / 3.48), so it corroborates the transcription.
+        "kvlcc2_osaka": "SIMMAN-SERIES",
     }
 )
 
