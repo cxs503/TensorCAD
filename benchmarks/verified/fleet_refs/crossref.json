@@ -4743,5 +4743,869 @@
     "disputed": false
    }
   }
+ },
+ "documents": {
+  "schema": "tensorcad.fleet_refs.documents/1.0",
+  "anchor": "REPRO-GEOM-FLEET-REFS",
+  "note": "document-level independence, additive to the lineage verdict in `report`; LINEAGE_LIMITED = \u22652 documents, 1 origin (transcription corroboration)",
+  "summary": {
+   "named_quantities": [
+    "displacement_volume",
+    "cb",
+    "lcb_percent",
+    "lwl"
+   ],
+   "ships": {
+    "DTC": {
+     "documents_on_named": 2,
+     "independent_on_named": 2,
+     "lineage_limited_on_named": 0,
+     "single_document_on_named": 0,
+     "missing_on_named": 2,
+     "documents_total": 3
+    },
+    "JBC": {
+     "documents_on_named": 3,
+     "independent_on_named": 0,
+     "lineage_limited_on_named": 3,
+     "single_document_on_named": 1,
+     "missing_on_named": 0,
+     "documents_total": 4
+    },
+    "KCS": {
+     "documents_on_named": 4,
+     "independent_on_named": 4,
+     "lineage_limited_on_named": 0,
+     "single_document_on_named": 0,
+     "missing_on_named": 0,
+     "documents_total": 3
+    },
+    "KVLCC2": {
+     "documents_on_named": 4,
+     "independent_on_named": 2,
+     "lineage_limited_on_named": 2,
+     "single_document_on_named": 0,
+     "missing_on_named": 0,
+     "documents_total": 6
+    },
+    "ONRT": {
+     "documents_on_named": 3,
+     "independent_on_named": 2,
+     "lineage_limited_on_named": 0,
+     "single_document_on_named": 1,
+     "missing_on_named": 0,
+     "documents_total": 2
+    },
+    "Series60": {
+     "documents_on_named": 0,
+     "independent_on_named": 0,
+     "lineage_limited_on_named": 0,
+     "single_document_on_named": 0,
+     "missing_on_named": 4,
+     "documents_total": 0
+    }
+   },
+   "ships_with_two_documents_on_all_named": [
+    "KCS",
+    "KVLCC2"
+   ],
+   "ships_independent_on_all_named": [
+    "KCS"
+   ]
+  },
+  "cells": {
+   "DTC": {
+    "displacement_volume": {
+     "documents": 3,
+     "document_keys": [
+      "dtc_ije",
+      "dtc_strath",
+      "dtc_ugent"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "IJE-2026",
+      "JSR-2017",
+      "STRATH-ISNAM2018"
+     ],
+     "lineages": [
+      "DTC-PRIMARY",
+      "JSR-2017"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "cb": {
+     "documents": 3,
+     "document_keys": [
+      "dtc_ije",
+      "dtc_strath",
+      "dtc_ugent"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "IJE-2026",
+      "JSR-2017",
+      "STRATH-ISNAM2018"
+     ],
+     "lineages": [
+      "DTC-PRIMARY",
+      "JSR-2017"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "lcb_percent": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "lwl": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "length_pp": {
+     "documents": 3,
+     "document_keys": [
+      "dtc_ije",
+      "dtc_strath",
+      "dtc_ugent"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "IJE-2026",
+      "JSR-2017",
+      "STRATH-ISNAM2018"
+     ],
+     "lineages": [
+      "DTC-PRIMARY",
+      "JSR-2017"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "beam": {
+     "documents": 3,
+     "document_keys": [
+      "dtc_ije",
+      "dtc_strath",
+      "dtc_ugent"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "IJE-2026",
+      "JSR-2017",
+      "STRATH-ISNAM2018"
+     ],
+     "lineages": [
+      "DTC-PRIMARY",
+      "JSR-2017"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "draft": {
+     "documents": 3,
+     "document_keys": [
+      "dtc_ije",
+      "dtc_strath",
+      "dtc_ugent"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "IJE-2026",
+      "JSR-2017",
+      "STRATH-ISNAM2018"
+     ],
+     "lineages": [
+      "DTC-PRIMARY",
+      "JSR-2017"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    }
+   },
+   "JBC": {
+    "displacement_volume": {
+     "documents": 4,
+     "document_keys": [
+      "jbc_cfdletters",
+      "jbc_memorial",
+      "jbc_scse",
+      "t2015_jbc"
+     ],
+     "publishers": 4,
+     "publisher_families": [
+      "CFDLETTERS-2023",
+      "MEMORIAL-2025",
+      "NMRI-T2015",
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "cb": {
+     "documents": 3,
+     "document_keys": [
+      "jbc_cfdletters",
+      "jbc_scse",
+      "t2015_jbc"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "CFDLETTERS-2023",
+      "NMRI-T2015",
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "lcb_percent": {
+     "documents": 1,
+     "document_keys": [
+      "jbc_scse"
+     ],
+     "publishers": 1,
+     "publisher_families": [
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": false,
+     "verdict": "SINGLE_DOCUMENT",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "lwl": {
+     "documents": 4,
+     "document_keys": [
+      "jbc_cfdletters",
+      "jbc_memorial",
+      "jbc_scse",
+      "t2015_jbc"
+     ],
+     "publishers": 4,
+     "publisher_families": [
+      "CFDLETTERS-2023",
+      "MEMORIAL-2025",
+      "NMRI-T2015",
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "length_pp": {
+     "documents": 4,
+     "document_keys": [
+      "jbc_cfdletters",
+      "jbc_memorial",
+      "jbc_scse",
+      "t2015_jbc"
+     ],
+     "publishers": 4,
+     "publisher_families": [
+      "CFDLETTERS-2023",
+      "MEMORIAL-2025",
+      "NMRI-T2015",
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "beam": {
+     "documents": 4,
+     "document_keys": [
+      "jbc_cfdletters",
+      "jbc_memorial",
+      "jbc_scse",
+      "t2015_jbc"
+     ],
+     "publishers": 4,
+     "publisher_families": [
+      "CFDLETTERS-2023",
+      "MEMORIAL-2025",
+      "NMRI-T2015",
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "draft": {
+     "documents": 4,
+     "document_keys": [
+      "jbc_cfdletters",
+      "jbc_memorial",
+      "jbc_scse",
+      "t2015_jbc"
+     ],
+     "publishers": 4,
+     "publisher_families": [
+      "CFDLETTERS-2023",
+      "MEMORIAL-2025",
+      "NMRI-T2015",
+      "SCSE-2025"
+     ],
+     "lineages": [
+      "NMRI-T2015"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    }
+   },
+   "KCS": {
+    "displacement_volume": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "cb": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "lcb_percent": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "lwl": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "length_pp": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "beam": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "draft": {
+     "documents": 3,
+     "document_keys": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    }
+   },
+   "KVLCC2": {
+    "displacement_volume": {
+     "documents": 5,
+     "document_keys": [
+      "kvlcc2_hrcak",
+      "kvlcc2_osaka",
+      "kvlcc2_ugent",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 5,
+     "publisher_families": [
+      "BRODOGRADNJA-2017",
+      "JSR-2017",
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "JSR-2017",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "cb": {
+     "documents": 5,
+     "document_keys": [
+      "kvlcc2_hrcak",
+      "kvlcc2_osaka",
+      "kvlcc2_ugent",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 5,
+     "publisher_families": [
+      "BRODOGRADNJA-2017",
+      "JSR-2017",
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "JSR-2017",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "lcb_percent": {
+     "documents": 3,
+     "document_keys": [
+      "kvlcc2_osaka",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "lwl": {
+     "documents": 3,
+     "document_keys": [
+      "kvlcc2_osaka",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 3,
+     "publisher_families": [
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": true,
+     "verdict": "LINEAGE_LIMITED",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "length_pp": {
+     "documents": 6,
+     "document_keys": [
+      "kvlcc2_hrcak",
+      "kvlcc2_jstage",
+      "kvlcc2_osaka",
+      "kvlcc2_ugent",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 6,
+     "publisher_families": [
+      "BRODOGRADNJA-2017",
+      "JASNAOE-2016",
+      "JSR-2017",
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "JASNAOE-2016",
+      "JSR-2017",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "beam": {
+     "documents": 5,
+     "document_keys": [
+      "kvlcc2_hrcak",
+      "kvlcc2_osaka",
+      "kvlcc2_ugent",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 5,
+     "publisher_families": [
+      "BRODOGRADNJA-2017",
+      "JSR-2017",
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "JSR-2017",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "draft": {
+     "documents": 6,
+     "document_keys": [
+      "kvlcc2_hrcak",
+      "kvlcc2_jstage",
+      "kvlcc2_osaka",
+      "kvlcc2_ugent",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+     ],
+     "publishers": 6,
+     "publisher_families": [
+      "BRODOGRADNJA-2017",
+      "JASNAOE-2016",
+      "JSR-2017",
+      "OSAKA-REPO",
+      "SIMMAN-2014",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "JASNAOE-2016",
+      "JSR-2017",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    }
+   },
+   "ONRT": {
+    "displacement_volume": {
+     "documents": 2,
+     "document_keys": [
+      "simman2020_summary",
+      "t2015_onrt"
+     ],
+     "publishers": 2,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "CONFLICT",
+     "lineage_verdict": "CONFLICT"
+    },
+    "cb": {
+     "documents": 2,
+     "document_keys": [
+      "simman2020_summary",
+      "t2015_onrt"
+     ],
+     "publishers": 2,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "lcb_percent": {
+     "documents": 1,
+     "document_keys": [
+      "simman2020_summary"
+     ],
+     "publishers": 1,
+     "publisher_families": [
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "SINGLE_DOCUMENT",
+     "lineage_verdict": "SINGLE_SOURCE"
+    },
+    "lwl": {
+     "documents": 2,
+     "document_keys": [
+      "simman2020_summary",
+      "t2015_onrt"
+     ],
+     "publishers": 2,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "length_pp": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "beam": {
+     "documents": 2,
+     "document_keys": [
+      "simman2020_summary",
+      "t2015_onrt"
+     ],
+     "publishers": 2,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    },
+    "draft": {
+     "documents": 2,
+     "document_keys": [
+      "simman2020_summary",
+      "t2015_onrt"
+     ],
+     "publishers": 2,
+     "publisher_families": [
+      "NMRI-T2015",
+      "SIMMAN-2020"
+     ],
+     "lineages": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+     ],
+     "lineage_limited": false,
+     "verdict": "INDEPENDENT",
+     "lineage_verdict": "CROSS_VERIFIED"
+    }
+   },
+   "Series60": {
+    "displacement_volume": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "cb": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "lcb_percent": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "lwl": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "length_pp": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "beam": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    },
+    "draft": {
+     "documents": 0,
+     "document_keys": [],
+     "publishers": 0,
+     "publisher_families": [],
+     "lineages": [],
+     "lineage_limited": false,
+     "verdict": "MISSING",
+     "lineage_verdict": "MISSING"
+    }
+   }
+  }
  }
 }
