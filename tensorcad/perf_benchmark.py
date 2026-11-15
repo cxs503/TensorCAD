@@ -972,6 +972,7 @@ def run_perf_benchmark(
     voxel_ladder: tuple[int, ...] = VOXEL_LADDER,
     subtasks: tuple[str, ...] = (
         "load", "point_locate", "point_locate_accel", "voxelize", "volume",
+        "obj_write", "obj_read",  # import/export sub-tasks (GAP-CAD-D4-PERF-SCALE §11)
     ),
     max_triangles: int | None = None,
     n_queries: int = QUICK_N_QUERIES,
@@ -1562,7 +1563,7 @@ def _print_summary(result: PerfBenchmarkResult) -> None:
         by_task.setdefault(r.subtask, []).append(r)
 
     for task_name in ("load", "fleet_assemble", "point_locate", "point_locate_accel",
-                      "voxelize", "volume"):
+                      "voxelize", "volume", "obj_write", "obj_read"):
         entries = by_task.get(task_name, [])
         if not entries:
             continue
