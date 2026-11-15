@@ -68,6 +68,11 @@ DEFAULT_SAMPLES_PER_METRE = 8.0  # ~0.125 m spacing on the surface
 #: Volume acceptance against the publisher's displacement (the gate's tolerance).
 VOLUME_TOLERANCE = 0.01
 
+#: How far a declared waterline may miss the published draft / beam before the hull is
+#: refused instead of graded (percent).  The two dimensions are measured after the cut, so
+#: this is a check on the *frame*, not on the volume.
+FRAME_CHECK_TOL_PERCENT = 2.0
+
 VERIFIED = "VERIFIED"
 WITHHELD = "WITHHELD"
 
@@ -377,18 +382,27 @@ def solid_from_points(
     dx: float = DEFAULT_DX,
     dz: float = DEFAULT_DZ,
     ring_points: int = DEFAULT_RING_POINTS,
+    waterline_z_file: float | None = None,
 ) -> dict[str, Any]:
     """Scale, place, bin and mesh a point cloud of hull-sheet samples."""
     points = [(x * factor, y * factor, z * factor) for x, y, z in raw_points]
     z_min = min(z for _, _, z in points)
     z_max = max(z for _, _, z in points)
     frame_shift_z = 0.0
-    if z_min < -0.5 * draft and -0.05 * draft <= z_max <= 0.05 * draft:
+    frame_source = "keel_at_origin"
+    if waterline_z_file is not None:
+        # Declared waterline (file units): move that plane onto z = draft, so the
+        # immersed hull is [0, draft] exactly as the field grid expects.
+        frame_shift_z = draft - waterline_z_file * factor
+        points = [(x, y, z + frame_shift_z) for x, y, z in points]
+        frame_source = "declared_waterline_z_file"
+    elif z_min < -0.5 * draft and -0.05 * draft <= z_max <= 0.05 * draft:
         # Waterline-at-origin file: the hull hangs below a plane at z = 0, so the *deepest*
         # point is the keel and the shift that puts it at z = 0 is -z_min.  (Shifting by
         # -z_max moved nothing: z_max is the waterline itself.)
         frame_shift_z = -z_min
         points = [(x, y, z + frame_shift_z) for x, y, z in points]
+        frame_source = "auto_waterline_at_origin"
     field = field_from_points(points, draft, dx=dx, dz=dz)
     mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=draft)
     return {
@@ -397,6 +411,7 @@ def solid_from_points(
         "mesh": mesh,
         "mesh_info": mesh_info,
         "frame_shift_z": frame_shift_z,
+        "frame_source": frame_source,
         "volume_m3": measure_mesh(mesh, draft)["volume_m3"],
         "dz": dz,
         "dx": dx,
@@ -780,6 +795,14 @@ class ShipSpec:
     #: (shape) gate, so it is never silent.
     geometry_scale: float | None = 1.0
     scale_basis: str = ""
+    #: z of the design waterline **in file units**, for archives that neither leave the
+    #: keel at z=0 nor the waterline at z=0 (ONRT: a unit-Lpp model with the superstructure
+    #: sitting above z=0, so the automatic guard below cannot tell which side is the hull).
+    #: ``None`` keeps the automatic keel/waterline-at-origin guard.  A declared value is
+    #: not believed: after sampling the immersed depth it produces is measured against the
+    #: published draft and the hull is refused when they disagree beyond DRAFT_CHECK_TOL.
+    waterline_z_file: float | None = None
+    waterline_basis: str = ""
     published_source: str = ""
     source_url: str = ""
     publisher: str = ""
@@ -848,7 +871,17 @@ def build_ship(
     usable, quarantined = partition_surfaces(surfaces)
     if not usable:
         raise ValueError(f"{spec.name}: every surface was quarantined")
-    spacing = 1.0 / max(samples_per_metre, 1e-6)
+    # Sampling density is a *physical* quantity (samples per metre of ship) while
+    # sample_patches() walks the parametric grid in *file* units, so the spacing has to be
+    # divided by metres-per-file-unit.  A fixed 1/8 "unit" spacing happened to be 0.125 m on
+    # KCS (metre archive), was 0.125 mm on the millimetre JBC archive (1.53 M samples, 40 s
+    # of work for no extra accuracy) and 0.125 *ship lengths* on the unit-Lpp ONRT model --
+    # 8 samples over the whole hull, which no reconstruction can survive.
+    metres_per_unit = declared_factor * (spec.geometry_scale if spec.geometry_scale else 1.0)
+    physical_spacing_m = 1.0 / max(samples_per_metre, 1e-6)
+    spacing = (
+        physical_spacing_m / metres_per_unit if metres_per_unit > 0.0 else physical_spacing_m
+    )
     raw_points = list(sample_patches(usable, spacing=spacing))
     geometry_scale = spec.geometry_scale
     scale_basis = spec.scale_basis or "geometry file is full scale"
@@ -898,12 +931,14 @@ def build_ship(
                     f"({trim_record['patches_used']}/{trim_record['patches_total']} patches)"
                 )
             ingest = solid_from_points(
-                trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points
+                trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points,
+                waterline_z_file=spec.waterline_z_file,
             )
             route = "trimmed_patch_loops"
         else:
             ingest = solid_from_points(
-                raw_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points
+                raw_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points,
+                waterline_z_file=spec.waterline_z_file,
             )
     except ValueError as exc:
         # The untrimmed sheet could not carry the hull.  If the patch set is trimmed, the
@@ -925,10 +960,12 @@ def build_ship(
                 "refusal describes the patch set that arrived, not the shape"
             ) from exc
         coarse = ingest if route == "trimmed_patch_loops" else solid_from_points(
-            trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points
+            trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points,
+            waterline_z_file=spec.waterline_z_file,
         )
         fine = solid_from_points(
-            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points
+            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points,
+            waterline_z_file=spec.waterline_z_file,
         )
         # The keel-to-deck extent of a trimmed hull set can exceed the draft by half again
         # (KVLCC2: 28 m deep, 20.8 m draft), so the default dz is refined once and the
@@ -952,7 +989,8 @@ def build_ship(
         # deep set is off by several percent.  Refine once and report the change instead of
         # hiding it in the uncertainty.
         fine = solid_from_points(
-            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points
+            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points,
+            waterline_z_file=spec.waterline_z_file,
         )
         trim_record["dz_refinement"] = {
             "dz_m": [dz, 0.5 * dz],
@@ -1019,6 +1057,51 @@ def build_ship(
         spec.length_pp and extent_x and 0.85 <= scale_ratio <= 1.20
     )
 
+    # A declared waterline is corroborated, not trusted.  Two facts the cut must reproduce,
+    # both independent of the volume that is being graded: (1) the immersed depth -- the
+    # deepest point of the *widest* sheet, i.e. the hull proper, must sit the publisher's
+    # draft below the waterline plane; (2) the immersed half-breadth must be B/2.  ONRT is
+    # the reason this exists: its archive is a unit-Lpp model whose superstructure sits
+    # *above* z = 0, so both the keel-at-origin and waterline-at-origin guards are silent and
+    # a wrong cut plane would have been accepted silently.
+    frame_check: dict[str, Any] | None = None
+    if spec.waterline_z_file is not None:
+        submerged = [point for point in points if 0.0 <= point[2] <= spec.draft]
+        if submerged:
+            widest = max(abs(point[1]) for point in submerged)
+            if widest > 0.0:
+                keel = min(
+                    point[2] for point in submerged if abs(point[1]) >= 0.98 * widest
+                )
+                immersed = spec.draft - keel
+                draft_error = (
+                    (immersed - spec.draft) / spec.draft * 100.0 if spec.draft else float("nan")
+                )
+                beam_error = (
+                    (2.0 * widest - spec.beam) / spec.beam * 100.0 if spec.beam else float("nan")
+                )
+                frame_check = {
+                    "waterline_z_file": spec.waterline_z_file,
+                    "waterline_basis": spec.waterline_basis,
+                    "frame_shift_z_m": frame_shift_z,
+                    "frame_source": ingest.get("frame_source"),
+                    "immersed_depth_m": immersed,
+                    "published_draft_m": spec.draft,
+                    "draft_relative_error_percent": draft_error,
+                    "immersed_half_breadth_m": widest,
+                    "published_beam_m": spec.beam,
+                    "beam_relative_error_percent": beam_error,
+                    "tolerance_percent": FRAME_CHECK_TOL_PERCENT,
+                    # The *draft* is what the declared waterline is on trial for: it is the one
+                    # dimension a misplaced cut plane destroys.  The immersed half-breadth is
+                    # reported alongside but does not gate, because a cut that is correct can
+                    # still read narrow when the archive's sheets are only partly consumed (ONRT:
+                    # 132 sheets, of which the bare hull is two) -- a coverage fact, reported as
+                    # `patches_used` by the same run, not a frame error.
+                    "ok": bool(abs(draft_error) <= FRAME_CHECK_TOL_PERCENT),
+                }
+    frame_ok = True if frame_check is None else frame_check["ok"]
+
     topology_ok = (
         mesh_stats["is_watertight"]
         and mesh_stats["is_edge_manifold"]
@@ -1026,7 +1109,9 @@ def build_ship(
         and volume > 0.0
     )
     verdict = (
-        VERIFIED if (topology_ok and volume_ok is True and scale_consistent) else WITHHELD
+        VERIFIED
+        if (topology_ok and volume_ok is True and scale_consistent and frame_ok)
+        else WITHHELD
     )
 
     reasons: list[str] = []
@@ -1036,6 +1121,14 @@ def build_ship(
         reasons.append("mesh is not edge-manifold")
     if mesh_stats["zero_area_faces"]:
         reasons.append(f"{mesh_stats['zero_area_faces']} zero-area faces")
+    if not frame_ok:
+        reasons.append(
+            f"declared waterline z={spec.waterline_z_file} (file units) is not corroborated by "
+            f"the geometry: immersed depth {frame_check['immersed_depth_m']:.3f} m vs published "
+            f"draft {spec.draft:.3f} m ({frame_check['draft_relative_error_percent']:+.2f}%), "
+            f"immersed half-breadth {frame_check['immersed_half_breadth_m']:.3f} m vs B/2 "
+            f"{0.5 * spec.beam:.3f} m ({frame_check['beam_relative_error_percent']:+.2f}%)"
+        )
     if volume_ok is False:
         reasons.append(
             f"volume {volume:.0f} m3 is {volume_error:+.2f}% off the published "
@@ -1082,9 +1175,12 @@ def build_ship(
             "surface_count": len(surfaces),
             "sample_count": len(points),
             "sampling_spacing_m": 1.0 / max(samples_per_metre, 1e-6),
+            "sampling_spacing_file_units": spacing,
+            "metres_per_file_unit_for_spacing": metres_per_unit,
             "surface_census": census,
         },
         "field": field.to_dict(),
+        "frame_check": frame_check,
         "mesh_info": mesh_info,
         "mesh": mesh_stats,
         "integrals": integrals,
@@ -1186,6 +1282,21 @@ def specs_from_json(path: str | Path, *, asset_registry: object | None = None) -
                 iges_sha256=entry.get("iges_sha256", ""),
                 iges_path=iges_path,
                 notes=entry.get("notes", ""),
+                # The loader used to drop these, so a JSON-driven fleet run silently graded
+                # every archive as full scale: the millimetre JBC model and the unit-Lpp ONRT
+                # model were read as metre hulls and refused for a "units error" that was
+                # really a dropped field.  Passing them through is what makes the spec file
+                # the single place a hull's scale lives.
+                geometry_scale=(
+                    None if entry.get("geometry_scale", 1.0) is None
+                    else float(entry.get("geometry_scale", 1.0))
+                ),
+                scale_basis=entry.get("scale_basis", ""),
+                waterline_z_file=(
+                    None if entry.get("waterline_z_file") is None
+                    else float(entry["waterline_z_file"])
+                ),
+                waterline_basis=entry.get("waterline_basis", ""),
             )
         )
     return specs
