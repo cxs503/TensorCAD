@@ -566,6 +566,140 @@ def test_ci_workflow_is_wired_to_geometry_paths() -> None:
 
 
 # --------------------------------------------------------------------------------------
+# Reach: a geometry change that arrives as a data edit
+# --------------------------------------------------------------------------------------
+# The suite measures one case that is a *shipped dataset* rather than generated code
+# (``dtmb5415``): its basis, its fit and its reference residual all live under
+# ``docs/data/``.  Editing any of them changes what the gate asserts while touching no
+# file under ``tensorcad/``, so before the declared inputs existed the gate printed
+# "no staged geometry change, check skipped" -- a green pass over a changed dataset.  The
+# tests below hold the trigger set, the source fingerprint and the CI path filter to the
+# inputs the cases declare, instead of to a list somebody remembered to update.
+
+
+def test_every_declared_input_exists() -> None:
+    for case in golden.golden_cases():
+        for path in case.geometry_inputs():
+            assert Path(path).is_file(), (case.name, path)
+
+
+def test_staged_declared_input_triggers_the_gate() -> None:
+    declared = [
+        path.relative_to(ROOT).as_posix()
+        for case in golden.golden_cases()
+        for path in case.geometry_inputs()
+        if ROOT in Path(path).parents
+    ]
+    assert declared, "no case declares a data input: the reach below is untested"
+    for path in declared:
+        assert golden.staged_requires_golden([path]), path
+        # and it is not the tensorcad/ rule that catches it
+        assert not path.startswith("tensorcad/"), path
+
+
+def test_staged_data_that_no_case_reads_is_still_skipped() -> None:
+    """The trigger must be the declared inputs, not "everything under docs/data"."""
+    assert not golden.staged_requires_golden(["docs/data/dtmb5415/README.md"])
+    assert not golden.staged_requires_golden(["docs/data/other/fixture.npz"])
+
+
+def test_geometry_files_include_the_declared_inputs() -> None:
+    relative = {path.relative_to(ROOT).as_posix() for path in golden.geometry_files()}
+    for case in golden.golden_cases():
+        for path in case.geometry_inputs():
+            if ROOT in Path(path).parents:
+                assert path.relative_to(ROOT).as_posix() in relative, path
+
+
+def test_source_fingerprint_moves_when_a_dataset_edit_lands(tmp_path: Path) -> None:
+    """The fingerprint is a statement about the inputs, not only about the code."""
+    fake = tmp_path / "repo"
+    (fake / "tensorcad").mkdir(parents=True)
+    (fake / "tests").mkdir()
+    (fake / "tensorcad" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    data = fake / "docs" / "data" / "dtmb5415"
+    data.mkdir(parents=True)
+    for case in golden.golden_cases():
+        for path in case.geometry_inputs():
+            if ROOT in Path(path).parents:
+                (fake / path.relative_to(ROOT)).write_bytes(b"dataset v1")
+    first = golden.geometry_fingerprint(fake)
+    (data / "holdout_fixture.npz").write_bytes(b"dataset v2")
+    second = golden.geometry_fingerprint(fake)
+    assert first != second
+    assert len(second) == 64
+
+
+def test_git_hook_runs_the_gate_on_a_dataset_edit(tmp_path: Path) -> None:
+    listing = tmp_path / "staged.txt"
+    listing.write_text("docs/data/dtmb5415/holdout_fixture.npz\n", encoding="utf-8")
+    completed = subprocess.run(
+        ["/bin/sh", str(ROOT / ".githooks" / "pre-commit")],
+        cwd=ROOT,
+        env={
+            "PATH": "/usr/bin:/bin",
+            "PYTHON": sys.executable,
+            "TENSORCAD_GOLDEN_STAGED_FILE": str(listing),
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "golden geometry regression" in completed.stdout, completed.stdout
+    assert "PASS" in completed.stdout
+
+
+def _workflow_globs() -> list[str]:
+    workflow = (ROOT / ".github" / "workflows" / "golden-geometry.yml").read_text(encoding="utf-8")
+    globs: list[str] = []
+    inside = False
+    for line in workflow.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("paths:"):
+            inside = True
+            continue
+        if inside:
+            if stripped.startswith("- "):
+                globs.append(stripped[2:].strip().strip('"'))
+            elif stripped and not stripped.startswith("#"):
+                inside = False
+    return globs
+
+
+def _glob_matches(pattern: str, path: str) -> bool:
+    """Minimal ``**`` matcher: the workflow's path filter uses no other operator."""
+    import re
+
+    regex = ""
+    index = 0
+    while index < len(pattern):
+        if pattern.startswith("**", index):
+            regex += ".*"
+            index += 2
+        elif pattern[index] == "*":
+            regex += "[^/]*"
+            index += 1
+        else:
+            regex += re.escape(pattern[index])
+            index += 1
+    return re.fullmatch(regex, path) is not None
+
+
+def test_ci_path_filter_watches_every_declared_input() -> None:
+    globs = _workflow_globs()
+    assert "tensorcad/**" in globs, globs
+    for case in golden.golden_cases():
+        for path in case.geometry_inputs():
+            if ROOT not in Path(path).parents:
+                continue
+            relative = path.relative_to(ROOT).as_posix()
+            assert any(_glob_matches(pattern, relative) for pattern in globs), (
+                relative, globs
+            )
+
+
+# --------------------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------------------
 def test_cli_list_and_staged_skip(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
@@ -813,8 +947,16 @@ def test_dtmb5415_particulars_gate_has_teeth(monkeypatch: pytest.MonkeyPatch) ->
     assert result.passed is False
 
 
-def test_a_declared_tolerance_must_be_justified() -> None:
-    """No basis, an unknown metric and a 40 % band are all errors, not warnings."""
+def test_a_declared_tolerance_must_be_justified(tmp_path: Path) -> None:
+    """No basis, an unknown metric and a 40 % band are all errors, not warnings.
+
+    Two declarations, because the three ways a band can be worthless are not reachable in
+    one mapping: ``probe`` asserts exactly one reference metric, so a *known but unjustified*
+    band and a *too loose* band would have to share the key ``value``.  The band without a
+    basis is therefore declared on a metric the reference does assert, in a second call --
+    declaring it on a measured-but-unasserted key (e.g. ``coarse_only``) only ever reaches
+    the unknown-metric branch, which is a different defect.
+    """
 
     class Loose(ProbeCase):
         name = "loose"
@@ -822,7 +964,6 @@ def test_a_declared_tolerance_must_be_justified() -> None:
         def reference_tolerance(self, values, reference):  # type: ignore[no-untyped-def]
             return {
                 "value": (0.40, "because I said so"),
-                "coarse_only": (0.0, ""),
                 "not_a_metric": (0.01, "names nothing"),
             }
 
@@ -832,9 +973,34 @@ def test_a_declared_tolerance_must_be_justified() -> None:
     )
     codes = {finding.code for finding in result.findings} | {f.code for f in findings}
     assert "declared_tolerance_too_loose" in codes, codes
-    assert "declared_tolerance_without_basis" in codes, codes
     assert "declared_tolerance_unknown_metric" in codes, codes
-    assert result.passed is False
+    # ... and the case really fails: `evaluate_case` hands the declaration errors back to
+    # the caller, so the pass/fail flag is only meaningful through the suite. Asserting it
+    # on the bare case result was vacuously true (no accuracy error on this probe).
+    suite = golden.run_suite(
+        cases=[Loose()], baseline_path=tmp_path / "no_baseline.json", baseline_optional=True
+    )
+    assert suite.passed is False
+    assert "declared_tolerance_too_loose" in _codes(suite)
+
+    class Unjustified(ProbeCase):
+        name = "unjustified"
+
+        def reference_tolerance(self, values, reference):  # type: ignore[no-untyped-def]
+            return {"value": (0.01, "   ")}
+
+    findings = []
+    result = golden.evaluate_case(
+        Unjustified(), None, quick=False, findings=findings, baseline_optional=True
+    )
+    codes = {finding.code for finding in result.findings} | {f.code for f in findings}
+    assert "declared_tolerance_without_basis" in codes, codes
+    assert "declared_tolerance_too_loose" not in codes, codes
+    suite = golden.run_suite(
+        cases=[Unjustified()], baseline_path=tmp_path / "no_baseline.json", baseline_optional=True
+    )
+    assert suite.passed is False
+    assert "declared_tolerance_without_basis" in _codes(suite)
 
 
 def dtmb5415_golden_case() -> golden.GoldenCase:

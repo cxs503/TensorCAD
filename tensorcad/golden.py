@@ -259,6 +259,19 @@ class GoldenCase:
     def geometry_sha256(self) -> str:
         return ""
 
+    def geometry_inputs(self) -> tuple[Path, ...]:
+        """Data files this case reads, beyond the library code.
+
+        A case whose geometry is generated from code alone reads nothing, and the gate is
+        triggered by ``tensorcad/`` itself.  A case that measures a *shipped dataset* has
+        inputs a change to which moves the measured geometry without touching a line of
+        ``tensorcad/``: those must be declared here, because they are also what the trigger
+        set (:func:`geometry_files`, :func:`staged_requires_golden`) and the source
+        fingerprint are derived from.  Listing them by hand anywhere else would let the
+        gate go quiet on a dataset edit.
+        """
+        return ()
+
 
 class WigleyGolden(GoldenCase):
     """Classic Wigley hull: every hydrostatic quantity has a closed form."""
@@ -486,6 +499,19 @@ class DTMB5415Golden(GoldenCase):
     )
     CONFIG = 0
     MIRROR_AXIS = 1
+
+    #: The shipped reduced model: ``design_space.npz`` is the rank-40 basis the hull is
+    #: rebuilt from, ``design_space_metrics.json`` carries the fit that produced it, and
+    #: ``holdout_fixture.npz`` supplies the reference residual of :meth:`measure`.  All
+    #: three are inputs of this case: editing any of them changes what the gate asserts.
+    DATA_DIR = ROOT / "docs" / "data" / "dtmb5415"
+
+    def geometry_inputs(self) -> tuple[Path, ...]:
+        return (
+            self.DATA_DIR / "design_space.npz",
+            self.DATA_DIR / "design_space_metrics.json",
+            self.DATA_DIR / "holdout_fixture.npz",
+        )
 
     def _fixture(self) -> Any:
         import numpy as np
@@ -724,10 +750,35 @@ def _mesh_sha256(mesh: Any) -> str:
     return digest.hexdigest()
 
 
+def _declared_inputs(root: Path = ROOT) -> list[Path]:
+    """The data inputs every case declares, restricted to files inside ``root``."""
+    inputs: list[Path] = []
+    for case in golden_cases():
+        for path in case.geometry_inputs():
+            path = Path(path)
+            if path in inputs:
+                continue
+            if root != ROOT:
+                try:
+                    path = root / path.relative_to(ROOT)
+                except ValueError:
+                    continue
+            inputs.append(path)
+    return sorted(inputs)
+
+
 def geometry_files(root: Path = ROOT) -> list[Path]:
-    """Every file whose change obliges a golden run."""
+    """Every file whose change obliges a golden run.
+
+    The library code, the suite's own tests, and the data inputs the cases declare
+    (:meth:`GoldenCase.geometry_inputs`).  The last group is what makes the fingerprint a
+    statement about the *inputs* of the measurement, not only about the code that reads
+    them: a dataset edit moves neither file name nor module, so a code-only fingerprint
+    would call it unchanged.
+    """
     files = sorted((root / "tensorcad").rglob("*.py"))
     files.append(root / "tests" / "test_golden_regression.py")
+    files.extend(_declared_inputs(root))
     return [path for path in files if path.is_file()]
 
 
@@ -753,6 +804,15 @@ def staged_requires_golden(paths: Iterable[str], root: Path = ROOT) -> bool:
             return True
         if path in ("tests/test_golden_regression.py", BASELINE.relative_to(ROOT).as_posix()):
             return True
+        # a declared data input of any case (see GoldenCase.geometry_inputs): staging one of
+        # these edits the shipped dataset the gate measures, which is a geometry change
+        # that touches no file under tensorcad/ and so would otherwise pass unnoticed
+        for declared in _declared_inputs(root):
+            try:
+                if declared.relative_to(root).as_posix() == path:
+                    return True
+            except ValueError:
+                continue
         if path.startswith("docs/golden/"):
             return True
     return False
