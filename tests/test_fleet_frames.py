@@ -167,3 +167,51 @@ def test_packaged_manifest_still_has_no_iges_route():
     assert json.dumps([ship.geometry_frame for ship in packaged.ships]) == json.dumps(
         [None] * len(packaged.ships)
     )
+
+# ---------------------------------------------------- x-origin: AP vs forward end
+#
+# The `auto` x policy has to answer *where the file's own origin is*, not merely *where the
+# model starts*.  The published KCS export is the case that exposed the difference: its
+# origin is the aft perpendicular, with 6 m of transom overhang behind it and a bulb 7.8 m
+# ahead of the FP.  Translating its aft-most point to 0 slides the hull 6 m forward into
+# the Lpp window, and the window then cuts the forebody off -- measured length 227 m
+# against a declared 230 m, which the principal-dimension gate refuses.
+
+# KCS as published: x = 0 at the AP, transom overhang behind it, bulb ahead of the FP.
+KCS_PUBLISHED_POINTS = [
+    (x, y, z)
+    for x in (-6.0, 0.0, 60.0, 120.0, 180.0, 230.0, 237.84)
+    for y in (0.0, 8.0, 16.12)
+    for z in (0.0, 5.4, 10.8)
+]
+
+
+def test_aft_perpendicular_origin_is_not_translated():
+    points, report = normalise(KCS_PUBLISHED_POINTS)
+    assert report.z_flip is False
+    assert report.x_shift == 0.0
+    assert min(p[0] for p in points) == pytest.approx(-6.0)
+    assert "aft perpendicular" in report.x_origin_reason
+    assert report.as_dict()["x_origin_reason"] == report.x_origin_reason
+
+
+def test_model_forward_of_its_own_origin_is_translated_to_zero():
+    shifted = [(x + 3.0, y, z) for x, y, z in Z_UP_POINTS]
+    _, report = normalise(shifted)
+    assert report.x_shift == pytest.approx(-3.0)
+    assert "forward of its own x = 0" in report.x_origin_reason
+
+
+def test_stern_negative_export_is_still_translated():
+    _, report = normalise(Z_DOWN_POINTS)
+    assert report.x_shift == pytest.approx(328.116, abs=1e-6)
+    assert "stern-negative" in report.x_origin_reason
+
+
+def test_the_kcs_and_kvlcc2_policies_disagree_for_the_right_reason():
+    """Same publisher, opposite x decisions -- and each decision is measured, not assumed."""
+    _, kcs = normalise(KCS_PUBLISHED_POINTS)
+    _, kvlcc2 = normalise(Z_DOWN_POINTS)
+    assert kcs.x_shift == 0.0 and kvlcc2.x_shift != 0.0
+    assert abs(kcs.evidence.x_min) / kcs.evidence.x_extent < 0.5
+    assert abs(kvlcc2.evidence.x_min) / kvlcc2.evidence.x_extent > 0.5
