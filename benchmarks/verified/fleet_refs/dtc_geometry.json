@@ -1,0 +1,186 @@
+{
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "archive": {
+  "bytes": 2343841,
+  "hull_bytes": 2309858,
+  "hull_member": "DTC_hull.igs",
+  "hull_sha256": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+  "license": "publisher states no licence; the bytes are digested, not redistributed",
+  "members": {
+   "DTC_bilgekeel.igs": "17ec321702f738f1ec9d9f9fd5f05c2a80304f14199139bafccac0f1fc8a1fc4",
+   "DTC_hull.igs": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+   "DTC_propeller.igs": "8e3cf3fc8e3cd8b22606a85f25a1cd2a669da2abfe042a72b44c5afeb5138fac",
+   "DTC_propeller_hull_conection.igs": "fdd3939835d8abbe989db1a9bc76f2d83636468e47e77dd6b04cb1907cf0244e",
+   "DTC_rudder_skeg.igs": "af257520b304c0f5dbf609ed9456121db49fdca555fd6e123ffbd57978de065a"
+  },
+  "path_in_cache": "dtc_igs_ordner.zip",
+  "sha256": "7b18e40d783b670f226a55a7d3f0ccf13c0978e3d80a13a78eced65a7a852541"
+ },
+ "control": {
+  "sample_census": {
+   "bbox_max": [
+    237.844162,
+    16.157656,
+    23.595658
+   ],
+   "bbox_min": [
+    -6.009996,
+    -0.261942,
+    -0.149943
+   ],
+   "extent_m": [
+    243.854158,
+    16.419598,
+    23.745601
+   ],
+   "max_extent_m": 243.854158,
+   "sample_points": 33666,
+   "sample_spacing_m": 0.5,
+   "surfaces_read": 55,
+   "unique_points": 33629
+  },
+  "ship": "KCS",
+  "why": "a hull the same reader handles, so a zero sample cloud is attributable to the file, not the reader"
+ },
+ "dtc_sample_census": {
+  "bbox_max": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "bbox_min": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "extent_m": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max_extent_m": 0.0,
+  "sample_points": 448590,
+  "sample_spacing_m": 0.4,
+  "surfaces_read": 1345,
+  "unique_points": 1
+ },
+ "entity_census": {
+  "directory_entries": 1629,
+  "entity_types": {
+   "102": 1,
+   "126": 232,
+   "128": 1345,
+   "141": 24,
+   "143": 24,
+   "314": 1,
+   "406": 2
+  },
+  "type_126_curves": 232,
+  "type_128_surfaces": 1345,
+  "type_144_trimmed_patches": 0
+ },
+ "published_reference": {
+  "beam": {
+   "independent_families": 2,
+   "published_values": [
+    {
+     "family": "DTC-PRIMARY",
+     "value": 51.0
+    },
+    {
+     "family": "JSR-2017",
+     "value": 51.0
+    }
+   ],
+   "range_relative": 0.0,
+   "tolerance": 0.005,
+   "verdict": "CROSS_VERIFIED"
+  },
+  "cb": {
+   "independent_families": 2,
+   "published_values": [
+    {
+     "family": "DTC-PRIMARY",
+     "value": 0.661
+    },
+    {
+     "family": "JSR-2017",
+     "value": 0.661
+    }
+   ],
+   "range_relative": 0.0,
+   "tolerance": 0.005,
+   "verdict": "CROSS_VERIFIED"
+  },
+  "displacement_volume": {
+   "independent_families": 2,
+   "published_values": [
+    {
+     "family": "DTC-PRIMARY",
+     "value": 173467.5
+    },
+    {
+     "family": "JSR-2017",
+     "value": 173468.0
+    }
+   ],
+   "range_relative": 2.882380154236162e-06,
+   "tolerance": 0.005,
+   "verdict": "CROSS_VERIFIED"
+  },
+  "draft": {
+   "independent_families": 2,
+   "published_values": [
+    {
+     "family": "DTC-PRIMARY",
+     "value": 14.5
+    },
+    {
+     "family": "JSR-2017",
+     "value": 14.5
+    }
+   ],
+   "range_relative": 0.0,
+   "tolerance": 0.005,
+   "verdict": "CROSS_VERIFIED"
+  },
+  "lcb_percent": {
+   "independent_families": 0,
+   "published_values": [],
+   "range_relative": 0.0,
+   "tolerance": 0.02,
+   "verdict": "MISSING"
+  },
+  "length_pp": {
+   "independent_families": 2,
+   "published_values": [
+    {
+     "family": "DTC-PRIMARY",
+     "value": 355.0
+    },
+    {
+     "family": "JSR-2017",
+     "value": 355.0
+    }
+   ],
+   "range_relative": 0.0,
+   "tolerance": 0.005,
+   "verdict": "CROSS_VERIFIED"
+  },
+  "lwl": {
+   "independent_families": 0,
+   "published_values": [],
+   "range_relative": 0.0,
+   "tolerance": 0.005,
+   "verdict": "MISSING"
+  }
+ },
+ "route": {
+  "outcome": "refused",
+  "reason": "IGES sampling collapsed to a point: 448590 sample(s) from 1345 B-spline surface(s) of /tmp/dtc_probe/route/dtc_probe.igs span 0.000e+00 m (hull length 355.0 m); the surface entities could not be evaluated"
+ },
+ "schema": "tensorcad.fleet_refs.dtc_geometry/1.0",
+ "ship": "DTC",
+ "status": "WITHHELD_READER",
+ "status_reason": "the official DTC hull file is present (archive sha256 pinned) but the IGES reader evaluates all 1345 type-128 surfaces to the origin: 448590 sample points, extent 0.0 m, while the KCS control file gives 33666 points spanning 243.854158 m. The geometry route refuses rather than lofting a zero-volume hull, so no DTC displacement can be measured against the published reference yet."
+}

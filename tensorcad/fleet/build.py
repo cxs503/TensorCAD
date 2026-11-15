@@ -459,6 +459,26 @@ def resolve_geometry_path(pointer: str | Path, *, sha256: str | None = None) -> 
     return str(resolve_pointer(text, sha256 or ""))
 
 
+def _sample_extent(points: Sequence[Sequence[float]]) -> float:
+    """Largest axis extent of a sample cloud, in metres (0.0 for an empty/coincident cloud)."""
+    lo: list[float] = []
+    hi: list[float] = []
+    for point in points:
+        if not lo:
+            lo = [float(point[0]), float(point[1]), float(point[2])]
+            hi = list(lo)
+            continue
+        for axis in range(3):
+            value = float(point[axis])
+            if value < lo[axis]:
+                lo[axis] = value
+            elif value > hi[axis]:
+                hi[axis] = value
+    if not lo:
+        return 0.0
+    return max(h - l for l, h in zip(lo, hi))
+
+
 def iges_field_mesh(
     record: ShipRecord,
     iges_path: str | Path,
@@ -531,6 +551,23 @@ def iges_field_mesh(
                 trim_report = {**trim_report, "mode": "untrimmed_fallback", "fallback_reason": "no sample inside trim loops"}
     if trim_report["mode"] in ("untrimmed", "untrimmed_fallback"):
         raw_points = sample_patches(surfaces, spacing=spacing)
+
+    # A sample cloud that collapses to a point is a *reader* failure -- an entity flavour the
+    # reader parses into zero-valued fields -- not a hull.  Measured case: the DTC hull IGES
+    # from the uni-due INAM archive (1345 type-128 surfaces) samples 448 590 points, every one
+    # of them at the origin.  Lofting that cloud yields a zero-volume "hull" that no gate can
+    # tell from a bad integral, so the route refuses and names the extent instead.
+    if not raw_points:
+        raise RouteRefusal(
+            f"IGES sampling produced no points from {len(surfaces)} B-spline surfaces of {iges_path}"
+        )
+    extent = _sample_extent(raw_points)
+    if extent < 1e-6 * max(record.length, 1.0):
+        raise RouteRefusal(
+            f"IGES sampling collapsed to a point: {len(raw_points)} sample(s) from {len(surfaces)} "
+            f"B-spline surface(s) of {iges_path} span {extent:.3e} m (hull length {record.length} m); "
+            "the surface entities could not be evaluated"
+        )
 
     # Frame first: a waterline-origin, z-down file keeps nothing under ``0 <= z <= draft``.
     points, frame_report = normalise(raw_points, frame)
