@@ -29,6 +29,7 @@ corroboration of transcription, never evidence of a second measurement.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import datetime
 import hashlib
 import json
@@ -128,6 +129,14 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+CELL_FIELDS = tuple(f.name for f in dataclasses.fields(Cell))
+
+
+def cell_from(data: Mapping[str, Any]) -> Cell:
+    """``Cell`` from a stored dict, ignoring keys added downstream (adjudication, notes)."""
+    return Cell(**{name: data[name] for name in CELL_FIELDS if name in data})
+
+
 def cells_from_report(report: Mapping[str, Any]) -> dict[str, dict[str, dict[str, Cell]]]:
     """Rebuild the first round's cells from the committed library (no re-fetch required)."""
     extractions: dict[str, dict[str, dict[str, Cell]]] = {}
@@ -137,8 +146,12 @@ def cells_from_report(report: Mapping[str, Any]) -> dict[str, dict[str, dict[str
                 if entry["cell"].get("unit_basis") == "fallback_column":
                     continue
                 data = dict(entry["cell"])
-                key = data.pop("source", None) or "unattributed"
-                extractions.setdefault(ship, {}).setdefault(key, {})[quantity] = Cell(**data)
+                # ``source`` both keys the extraction and is a required ``Cell`` field: it is
+                # read, never dropped (popping it made ``build`` raise TypeError on the first
+                # committed cell, so the merge path had never run).
+                key = data.get("source") or "unattributed"
+                data["source"] = key
+                extractions.setdefault(ship, {}).setdefault(key, {})[quantity] = cell_from(data)
     return extractions
 
 
@@ -179,12 +192,23 @@ def merge_into(payload: dict[str, Any], ingest: Mapping[str, Any], fleet_specs: 
         if row["status"] != "read":
             continue
         spec = next(s for s in SOURCES if s.key == key)
+        digest = row.get("sha256") or spec.sha256
         for quantity, cell in row["cells"].items():
             data = dict(cell)
-            data.pop("note", None)
+            # A cell quoted out of a PDF is only auditable with the digest of the bytes it was
+            # read from; the ingest report holds that digest, the cell itself may predate it.
+            if not data.get("sha256"):
+                data["sha256"] = digest
             extractions.setdefault(spec.ship, {}).setdefault(key, {})[quantity] = Cell(**data)
             added += 1
     report = cross_reference(extractions)
+    # A ship whose every quantity is MISSING contributes no extraction, so rebuilding from
+    # cells alone would silently drop it from the report (Series 60 has no readable source at
+    # all).  Keep such ships with empty rows: "no source found" is a result the coverage table
+    # must keep scoring, not a row that disappears.
+    for ship in payload.get("report", {}):
+        if ship not in report:
+            report.update(cross_reference({ship: {}}))
     payload["report"] = report
     payload["coverage"] = coverage_summary(report)
     payload["lineage"] = lineage_tally(report)
@@ -274,7 +298,8 @@ def main(argv: list[str] | None = None) -> int:
     p_build = sub.add_parser("build", help="merge the OA cells into the committed library")
     p_build.add_argument("--library", default="benchmarks/verified/fleet_refs/crossref.json")
     p_build.add_argument("--ingest", default="benchmarks/verified/fleet_refs/oa_ingest.json")
-    p_build.add_argument("--fleet-specs", default="benchmarks/verified/baseline_fleet/fleet_specs.json")
+    p_build.add_argument("--fleet-specs", default="",
+                     help="optional; the canonical specs refresh is tools/baseline_fleet/backfill_refs.py")
     p_build.set_defaults(func=cmd_build)
     args = parser.parse_args(argv)
     return args.func(args)
