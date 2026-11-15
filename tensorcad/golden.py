@@ -72,6 +72,9 @@ REFERENCE_TOLERANCE = 1e-9
 #: question, and above the few-percent band a four-significant-figure reference table and a
 #: reconstructed hull can honestly support.
 DECLARED_TOLERANCE_CAP = 0.05
+#: Prefix of the ``basis`` a *declared* tolerance carries in the baseline.  It is the
+#: marker the checker reads to know which derivation a recorded band came from.
+DECLARED_BASIS_PREFIX = "declared contract"
 
 ERROR, WARNING, NOTICE = "error", "warning", "notice"
 LEVELS: tuple[str, ...] = ("coarse", "fine")
@@ -803,6 +806,119 @@ def _tolerance(
     )
 
 
+def _check_recorded_criterion(
+    case: "GoldenCase",
+    blessed: Mapping[str, Any],
+    reference: Mapping[str, float],
+    declared: Mapping[str, tuple[float, str]],
+    findings: list[Finding],
+) -> None:
+    """The tolerance stored in the baseline must be its own derivation, in every mode.
+
+    ``--quick`` -- the mode the git hook runs -- has no coarse level, so it asserts the
+    acceptance against the band the baseline recorded.  That band is therefore an *input a
+    hand can edit*: inflate it and the local gate becomes a rubber stamp whose table still
+    reads green (reproduced: a 100x Wigley band passes ``--check --quick``).  The stored
+    value is never taken on trust.  It is re-derived from the blessed inputs -- the two
+    measurements the two-grid bound was taken on, or the band the case declares -- and a
+    value that does not reproduce is an error, in quick mode and in full mode alike.  The
+    band is derived, not chosen, and the derivation is re-run on every check.
+    """
+    recorded = blessed.get("tolerances") or {}
+    if not isinstance(recorded, Mapping) or not recorded:
+        return
+    measurements = blessed.get("measurements") or {}
+    if not isinstance(measurements, Mapping):
+        measurements = {}
+    coarse = measurements.get("coarse") or {}
+    fine = measurements.get("fine") or {}
+    if not isinstance(coarse, Mapping) or not isinstance(fine, Mapping):
+        coarse, fine = {}, {}
+
+    for key in sorted(recorded):
+        entry = recorded[key]
+        entry = entry if isinstance(entry, Mapping) else {}
+        stored = entry.get("value")
+        basis = str(entry.get("basis") or "")
+        if key not in reference:
+            findings.append(
+                Finding(
+                    ERROR,
+                    "tolerance_unknown_metric",
+                    case.name,
+                    (
+                        f"the baseline records a tolerance for '{key}', which no reference "
+                        "asserts; a band without a criterion to bound is a chosen band"
+                    ),
+                    metric=key,
+                )
+            )
+            continue
+        is_declared = basis.startswith(DECLARED_BASIS_PREFIX)
+        if is_declared != (key in declared):
+            findings.append(
+                Finding(
+                    ERROR,
+                    "tolerance_origin_mismatch",
+                    case.name,
+                    (
+                        f"'{key}' is recorded with basis {basis!r} but the case "
+                        f"{'declares' if key in declared else 'does not declare'} a band for "
+                        "it; quick mode and full mode would then assert different criteria"
+                    ),
+                    metric=key,
+                )
+            )
+            continue
+        if is_declared:
+            expected, expected_basis = declared[key]
+        elif key in coarse and key in fine:
+            expected, expected_basis = _tolerance(reference[key], coarse[key], fine[key])
+        else:
+            findings.append(
+                Finding(
+                    ERROR,
+                    "tolerance_not_derived",
+                    case.name,
+                    (
+                        f"'{key}' records tolerance {stored!r} but the baseline carries no "
+                        "coarse/fine measurement to derive it from; the recorded band cannot "
+                        "be checked against a two-grid bound"
+                    ),
+                    metric=key,
+                )
+            )
+            continue
+        if not isinstance(stored, (int, float)) or isinstance(stored, bool):
+            findings.append(
+                Finding(
+                    ERROR,
+                    "tolerance_not_derived",
+                    case.name,
+                    f"'{key}' records tolerance {stored!r}, which is not a number",
+                    metric=key,
+                )
+            )
+            continue
+        difference = _relative(float(stored) - float(expected), float(expected))
+        if difference > REFERENCE_TOLERANCE:
+            findings.append(
+                Finding(
+                    ERROR,
+                    "tolerance_not_derived",
+                    case.name,
+                    (
+                        f"'{key}' records tolerance {float(stored):.6g} but its own "
+                        f"derivation gives {float(expected):.6g} (relative difference "
+                        f"{difference:.3e}; {expected_basis}). The recorded band is not the "
+                        "one the checker derives, so a hand-edited criterion would decide "
+                        "the gate; a criterion may not be chosen"
+                    ),
+                    metric=key,
+                )
+            )
+
+
 def _checked_declarations(
     case: GoldenCase,
     values: Mapping[str, float],
@@ -893,6 +1009,7 @@ def evaluate_case(
     declared_tolerances = _checked_declarations(case, finest, reference, findings)
 
     blessed = dict(blessed or {})
+    _check_recorded_criterion(case, blessed, reference, declared_tolerances, findings)
     if not blessed and not baseline_optional:
         findings.append(
             Finding(
@@ -961,7 +1078,7 @@ def evaluate_case(
                 f"blessed tolerance {tolerance:.3e} (quick mode: "
                 f"{blessed_tolerance.get('basis', 'derived at bless time')})"
             )
-            if str(blessed_tolerance.get("basis", "")).startswith("declared contract"):
+            if str(blessed_tolerance.get("basis", "")).startswith(DECLARED_BASIS_PREFIX):
                 origin = "declared"
         elif key in declared_tolerances:
             tolerance, declared_basis = declared_tolerances[key]
