@@ -469,6 +469,7 @@ def iges_field_mesh(
     samples_per_metre: float = 8.0,
     frame: Mapping[str, Any] | FramePolicy | None = None,
     x_extent: str = "record",
+    trim: bool = True,
 ) -> BuiltGeometry:
     """Build a watertight hull mesh from an IGES file via the half-breadth field route.
 
@@ -510,7 +511,26 @@ def iges_field_mesh(
         raise RouteRefusal(f"no B-spline surfaces found in {iges_path}")
 
     spacing = 1.0 / samples_per_metre
-    raw_points = sample_patches(surfaces, spacing=spacing)
+    raw_points: list[tuple[float, float, float]]
+    trim_report: dict[str, Any] = {"mode": "untrimmed"}
+    if trim:
+        # A CATIA-style export wraps the hull in type-144 trimmed patches whose basis
+        # surfaces run past the hull; sampling the basis rectangles puts sheet that is not
+        # ship into the half-breadth field (KVLCC2: +57.7 % volume error, measured).
+        from .trimfield import sample_trimmed_patches, trim_polygons
+
+        records = trim_polygons(iges)
+        decided = [r for r in records if r.get("verdict") == "decided"]
+        if decided:
+            trimmed_points, trim_report = sample_trimmed_patches(records, spacing=spacing)
+            trim_report["patches_decided"] = len(decided)
+            trim_report["patches_total"] = len(records)
+            raw_points = trimmed_points
+            if not raw_points:  # nothing survived the loops: fall back, visibly
+                raw_points = sample_patches(surfaces, spacing=spacing)
+                trim_report = {**trim_report, "mode": "untrimmed_fallback", "fallback_reason": "no sample inside trim loops"}
+    if trim_report["mode"] in ("untrimmed", "untrimmed_fallback"):
+        raw_points = sample_patches(surfaces, spacing=spacing)
 
     # Frame first: a waterline-origin, z-down file keeps nothing under ``0 <= z <= draft``.
     points, frame_report = normalise(raw_points, frame)
@@ -543,6 +563,7 @@ def iges_field_mesh(
             "num_raw_sample_points": len(raw_points),
             "frame_normalisation": frame_report.as_dict(),
             "x_extent": x_extent,
+            "trim": trim_report,
             "field": field.to_dict(),
             "loft": loft_info,
             "dx": dx,
