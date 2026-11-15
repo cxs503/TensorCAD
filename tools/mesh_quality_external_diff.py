@@ -64,7 +64,6 @@ MAP: dict[str, dict[str, dict[str, str]]] = {
     "verdict": {
         "tri": {
             "area": "area",
-            "aspect_ratio": "aspect_ratio",
             "edge_ratio": "edge_ratio",
             "min_angle": "min_angle",
             "max_angle": "max_angle",
@@ -83,9 +82,6 @@ MAP: dict[str, dict[str, dict[str, str]]] = {
             "volume": "volume",
             "edge_ratio": "edge_ratio",
             "scaled_jacobian": "scaled_jacobian",
-            "skewness": "equiangle_skew",
-            "aspect_ratio": "aspect_ratio",
-            "min_dihedral": "minimum_angle",
         },
         "hex": {
             "scaled_jacobian": "scaled_jacobian",
@@ -123,6 +119,19 @@ MAP: dict[str, dict[str, dict[str, str]]] = {
     },
 }
 
+#: Unit changes: the oracle and we measure the same quantity in different units. The factor is
+#: ``external / canonical``; the tool divides the oracle's values by it before comparing and
+#: records the *measured* spread of the ratio, so a factor that is not really constant is
+#: reported as a mismatch instead of being papered over.
+SCALE: dict[tuple[str, str, str], tuple[float, str]] = {
+    ("verdict", "tet", "scaled_jacobian"): (
+        math.sqrt(2.0),
+        "Verdict normalises the tet Jacobian by the *regular* tetrahedron (regular tet = 1); the "
+        "canonical metric divides by the Jacobian's column norms, which give 1/sqrt(2) for the "
+        "same regular tet. Exact unit change, ratio external/ours = sqrt(2).",
+    ),
+}
+
 #: Pairs that are *known* to be different quantities and are reported as explained
 #: differences instead of being compared (metric, external name, why).
 EXPLAINED: dict[str, dict[str, list[tuple[str, str, str]]]] = {
@@ -130,6 +139,24 @@ EXPLAINED: dict[str, dict[str, list[tuple[str, str, str]]]] = {
         "tri": [
             ("gamma", "radius_ratio", "gamma = 1 / radius_ratio (Verdict radius_ratio = R/(2r)); "
                                       "compared after inversion"),
+            ("aspect_ratio", "aspect_ratio",
+             "different quantity, not a unit change: the canonical triangle aspect ratio is "
+             "max edge / (2 * inradius-like edge form) scaled so an equilateral triangle is 1, "
+             "Verdict's tri_aspect_ratio is R/(2r) with a different normalisation; the measured "
+             "ratio external/ours is not constant across elements (spread recorded below), so no "
+             "single factor reconciles them"),
+        ],
+        "tet": [
+            ("skewness", "equiangle_skew",
+             "different quantity: Verdict's tet_equiangle_skew (V_TetMetric.cpp) measures the six "
+             "*interior dihedral* angles with equilibrium angle 70.5287793655093 deg; the "
+             "canonical skewness measures the twelve *face* angles with equilibrium 60 deg. Both "
+             "are equiangle skew, of different angle sets; ratio is not constant"),
+            ("min_dihedral", "minimum_angle",
+             "different quantity: Verdict's tet_minimum_angle uses the *unsigned* face-normal dot "
+             "product, i.e. it reports the supplement of the interior dihedral for the same edge; "
+             "the canonical min_dihedral is the interior dihedral, so the two agree only when the "
+             "dihedral is 90 deg"),
         ],
     },
     "gmsh": {
@@ -376,11 +403,31 @@ def main(argv: list[str] | None = None) -> int:
                     continue
                 statuses[oracle] = "RAN"
                 ext = data.get(kind, {})
-                cmp = compare(
-                    {k: list(v) for k, v in ours.items()},
-                    ext,
-                    MAP[oracle].get(kind, {}),
-                )
+                mapping = MAP[oracle].get(kind, {})
+                ext_cmp = dict(ext)
+                unit_changes = {}
+                for mine, theirs in mapping.items():
+                    key = (oracle, kind, mine)
+                    vals = ext.get(theirs)
+                    if vals is None or key not in SCALE:
+                        continue
+                    factor, why = SCALE[key]
+                    a = list(ours.get(mine) or [])
+                    ratios = [y / x for x, y in zip(a, vals) if x and abs(x) > 1.0e-9]
+                    ext_cmp[theirs] = [v / factor for v in vals]
+                    unit_changes[mine] = {
+                        "factor": factor,
+                        "why": why,
+                        "measured_ratio_min": min(ratios) if ratios else None,
+                        "measured_ratio_max": max(ratios) if ratios else None,
+                        "constant": bool(ratios) and abs(max(ratios) - min(ratios)) <= 1.0e-12,
+                    }
+                    if not unit_changes[mine]["constant"]:
+                        failed.append(
+                            f"{name}/{oracle}/{mine}: declared unit factor {factor:.12g} is not "
+                            f"constant (ratio {min(ratios):.12g}..{max(ratios):.12g})"
+                        )
+                cmp = compare({k: list(v) for k, v in ours.items()}, ext_cmp, mapping)
                 explained = []
                 for mine, theirs, why in EXPLAINED.get(oracle, {}).get(kind, []):
                     if mine == "gamma" and theirs == "radius_ratio" and "radius_ratio" in ext:
@@ -390,12 +437,26 @@ def main(argv: list[str] | None = None) -> int:
                         )["gamma"]
                         explained.append({"pair": [mine, theirs], "why": why})
                     else:
-                        explained.append({"pair": [mine, theirs], "why": why})
+                        ev = {"pair": [mine, theirs], "why": why}
+                        a = list(ours.get(mine) or [])
+                        b = ext.get(theirs)
+                        if a and b and len(a) == len(b):
+                            rr = [y / x for x, y in zip(a, b) if x and abs(x) > 1.0e-9]
+                            if rr:
+                                ev["measured_ratio_min"] = min(rr)
+                                ev["measured_ratio_max"] = max(rr)
+                                ev["unit_change"] = abs(max(rr) - min(rr)) <= 1.0e-12
+                        explained.append(ev)
                 entry["oracles"][oracle] = {"status": "RAN", "version": version,
-                                            "comparisons": cmp, "explained": explained}
+                                            "comparisons": cmp, "explained": explained,
+                                            "unit_changes": unit_changes}
                 for metric, c in cmp.items():
-                    if c.get("status") == "DIFFER":
-                        failed.append(f"{name}/{oracle}/{metric}: rel {c['max_rel_diff']:.3e}")
+                    # A truncated oracle response (fewer values than elements) is a silent loss of
+                    # evidence, not a pass: the CI gate must fail on it too.
+                    if c.get("status") in ("DIFFER", "LENGTH_MISMATCH"):
+                        rel = c.get("max_rel_diff")
+                        detail = f"rel {rel:.3e}" if rel is not None else c["status"].lower()
+                        failed.append(f"{name}/{oracle}/{metric}: {detail}")
             report["meshes"][name] = entry
 
     report["oracle_status"] = statuses
