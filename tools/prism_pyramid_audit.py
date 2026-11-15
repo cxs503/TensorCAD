@@ -35,8 +35,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tensorcad.meshquality import DEFAULT_GATE, measure  # noqa: E402
-from tensorcad.meshquality.reference import reference_prisms, reference_pyramids  # noqa: E402
+from tensorcad.meshquality import DEFAULT_GATE, measure, non_orthogonality  # noqa: E402
+from tensorcad.meshquality.reference import (  # noqa: E402
+    reference_non_orthogonality,
+    reference_prisms,
+    reference_pyramids,
+)
 
 ARTIFACTS = ROOT / "artifacts" / "mesh_quality_prism_pyramid"
 TOLERANCE = 1.0e-6
@@ -283,6 +287,57 @@ def ideal_element_records() -> list[dict]:
 
 
 # --------------------------------------------------------------------------------------
+# interior faces: non-orthogonality on the two new cell kinds
+# --------------------------------------------------------------------------------------
+def prism_stack(layers: int, shear: float) -> tuple[list, list]:
+    """A conforming column of right prisms, sheared in x proportional to z."""
+    points = []
+    for level in range(layers + 1):
+        z = float(level)
+        points += [(shear * z, 0.0, z), (shear * z + 1.0, 0.0, z), (shear * z, 1.0, z)]
+    cells = [(3 * k, 3 * k + 1, 3 * k + 2, 3 * k + 3, 3 * k + 4, 3 * k + 5) for k in range(layers)]
+    return points, cells
+
+
+def pyramid_pair(shear: float) -> tuple[list, list]:
+    """Two pyramids sharing one base quad: apex up and apex down (a hex/tet transition)."""
+    base = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0)]
+    points = [(x + shear * z, y, z) for x, y, z in base + [(0.5, 0.5, 1.0), (0.5, 0.5, -1.0)]]
+    return points, [(0, 1, 2, 3, 4), (0, 1, 2, 3, 5)]
+
+
+def non_orthogonality_records(shears=(0.0, 0.25, 0.5, 1.0, 3.0)) -> list[dict]:
+    """Library vs the ``atan2`` reference route vs the closed form ``atan(shear)``."""
+    records = []
+    for kind, builder in (("prism", prism_stack), ("pyramid", pyramid_pair)):
+        for shear in shears:
+            points, cells = builder(3, shear) if kind == "prism" else builder(shear)
+            library = non_orthogonality(points, cells, kind)
+            second = reference_non_orthogonality(points, cells, kind)
+            closed = math.degrees(math.atan(shear))
+            difference = abs(library.maximum - (max(second) if second else math.nan))
+            records.append(
+                {
+                    "kind": kind,
+                    "shear": shear,
+                    "cells": library.cells,
+                    "internal_faces": library.internal_faces,
+                    "boundary_faces": library.boundary_faces,
+                    "closed_form_deg": closed,
+                    "library_deg": library.maximum,
+                    "second_route_deg": max(second) if second else None,
+                    "library_minus_closed_form": abs(library.maximum - closed),
+                    "library_minus_second_route": difference,
+                    "criteria": {
+                        "closed_form_within_1e-12": abs(library.maximum - closed) <= 1e-12,
+                        "second_route_within_1e-9": difference <= 1e-9,
+                    },
+                }
+            )
+    return records
+
+
+# --------------------------------------------------------------------------------------
 # figure
 # --------------------------------------------------------------------------------------
 def make_figure(records: list[dict], ideals: list[dict], path: Path) -> None:
@@ -363,6 +418,13 @@ def main() -> int:
         if abs(value - record["library"][metric]) > 1e-9
     ]
 
+    non_orth = non_orthogonality_records()
+    non_orth_failures = [
+        (record["kind"], record["shear"])
+        for record in non_orth
+        if not all(record["criteria"].values())
+    ]
+
     payload = {
         "domain": "mesh quality metrics, prism + pyramid",
         "tolerance_second_route": TOLERANCE,
@@ -370,6 +432,8 @@ def main() -> int:
         "ideal_elements": ideals,
         "ideal_element_failures": ideal_failures,
         "node_table": {"prism": 6, "pyramid": 5},
+        "non_orthogonality": non_orth,
+        "non_orthogonality_failures": non_orth_failures,
     }
     audit_path = ARTIFACTS / "audit.json"
     audit_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -390,6 +454,7 @@ def main() -> int:
         },
         "criteria_failed": failed,
         "ideal_element_failures": ideal_failures,
+        "non_orthogonality_failures": non_orth_failures,
     }
     (ARTIFACTS / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -411,9 +476,16 @@ def main() -> int:
                 failing=failing,
             )
         )
+    worst_non_orth = max(
+        record["library_minus_second_route"] for record in non_orth
+    )
+    print(
+        f"non-orthogonality: {len(non_orth)} sheared stacks, max |lib-2nd| = {worst_non_orth:.3e} "
+        f"deg, closed-form failures = {len(non_orth_failures)}"
+    )
     print(f"\nartifacts: {audit_path.relative_to(ROOT)}, {figure_path.relative_to(ROOT)}")
-    if failed or ideal_failures:
-        print(f"FAILED criteria: {failed} ideal={ideal_failures}")
+    if failed or ideal_failures or non_orth_failures:
+        print(f"FAILED criteria: {failed} ideal={ideal_failures} non_orth={non_orth_failures}")
         return 1
     print("all criteria satisfied")
     return 0
