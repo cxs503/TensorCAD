@@ -1,3 +1,5 @@
+> **Superseded (2026-11-17, mission m21785).** The `RouteRefusal` measured here is a *reader defect that has since been fixed* (type-128 control-net layout in `tensorcad.iges._split_control`). Re-measured against the same cached bytes the DTC hull now yields a full point cloud and a displacement 0.005 % from the published value: see `docs/fleet_refs_dtc_hull_measured.md` and `benchmarks/verified/fleet_refs/dtc_hull_measured.json`. This file is kept unchanged as the historical record of the defect, not as the current state of the DTC geometry.
+
 # DTC hull file: present in the source cache, unreadable by this reader (measured)
 
 Anchor **REPRO-GEOM-FLEET-REFS** (TensorCAD). Round 3 of the fleet-reference library recorded the

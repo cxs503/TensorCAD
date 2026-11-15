@@ -4,6 +4,45 @@
  "license_note": "Fingerprints and pointers only: the geometry bytes are publisher material without a redistribution grant and are NOT stored in this repository.",
  "assets": [
   {
+   "asset_id": "geometry/hulls/DTC/DTC_bilgekeel.igs",
+   "uri": "asset://geometry/hulls/DTC/DTC_bilgekeel.igs",
+   "kind": "geometry",
+   "hull": "DTC",
+   "sha256": "17ec321702f738f1ec9d9f9fd5f05c2a80304f14199139bafccac0f1fc8a1fc4",
+   "bytes": 1099948,
+   "status": "verified",
+   "verified": true,
+   "source": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip (page https://www.uni-due.de/ship/dtc.php states the benchmark geometry is downloadable)",
+   "duplicate_of": "",
+   "note": "DTC_hull.igs measured 2026-11-17 (mission m21785): IGES unit flag 6 = metres, full scale; half-breadth field gives displacement 173459.0 m3 vs published 173467.5 m3 (-0.005 %), Cb 0.6607 vs 0.661 (-0.045 %), beam 51.0022 m vs 51.0 m (+0.004 %). The appendage files (rudder_skeg, bilgekeel) are imported for completeness and are NOT geometrically measured here. Record benchmarks/verified/fleet_refs/dtc_hull_measured.json, tool tools/baseline_fleet/dtc_hull_measure.py. The earlier 'IGES sampling collapses to a point' withdraw is stale: it predates the type-128 control-net layout fix in tensorcad.iges._split_control."
+  },
+  {
+   "asset_id": "geometry/hulls/DTC/DTC_hull.igs",
+   "uri": "asset://geometry/hulls/DTC/DTC_hull.igs",
+   "kind": "geometry",
+   "hull": "DTC",
+   "sha256": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+   "bytes": 2309858,
+   "status": "verified",
+   "verified": true,
+   "source": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip (page https://www.uni-due.de/ship/dtc.php states the benchmark geometry is downloadable)",
+   "duplicate_of": "",
+   "note": "DTC_hull.igs measured 2026-11-17 (mission m21785): IGES unit flag 6 = metres, full scale; half-breadth field gives displacement 173459.0 m3 vs published 173467.5 m3 (-0.005 %), Cb 0.6607 vs 0.661 (-0.045 %), beam 51.0022 m vs 51.0 m (+0.004 %). The appendage files (rudder_skeg, bilgekeel) are imported for completeness and are NOT geometrically measured here. Record benchmarks/verified/fleet_refs/dtc_hull_measured.json, tool tools/baseline_fleet/dtc_hull_measure.py. The earlier 'IGES sampling collapses to a point' withdraw is stale: it predates the type-128 control-net layout fix in tensorcad.iges._split_control."
+  },
+  {
+   "asset_id": "geometry/hulls/DTC/DTC_rudder_skeg.igs",
+   "uri": "asset://geometry/hulls/DTC/DTC_rudder_skeg.igs",
+   "kind": "geometry",
+   "hull": "DTC",
+   "sha256": "af257520b304c0f5dbf609ed9456121db49fdca555fd6e123ffbd57978de065a",
+   "bytes": 516354,
+   "status": "verified",
+   "verified": true,
+   "source": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip (page https://www.uni-due.de/ship/dtc.php states the benchmark geometry is downloadable)",
+   "duplicate_of": "",
+   "note": "DTC_hull.igs measured 2026-11-17 (mission m21785): IGES unit flag 6 = metres, full scale; half-breadth field gives displacement 173459.0 m3 vs published 173467.5 m3 (-0.005 %), Cb 0.6607 vs 0.661 (-0.045 %), beam 51.0022 m vs 51.0 m (+0.004 %). The appendage files (rudder_skeg, bilgekeel) are imported for completeness and are NOT geometrically measured here. Record benchmarks/verified/fleet_refs/dtc_hull_measured.json, tool tools/baseline_fleet/dtc_hull_measure.py. The earlier 'IGES sampling collapses to a point' withdraw is stale: it predates the type-128 control-net layout fix in tensorcad.iges._split_control."
+  },
+  {
    "asset_id": "geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
    "uri": "asset://geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
    "kind": "geometry",
@@ -212,6 +251,21 @@
   }
  ],
  "hulls": {
+  "DTC": {
+   "hull": "DTC",
+   "status": "verified",
+   "manifest": "/root/tp-agent/assets/geometry/hulls/DTC/MANIFEST.json",
+   "manifest_declared_status": "verified",
+   "declared_files": 3,
+   "files_on_disk": 3,
+   "verified": true,
+   "license": "publisher terms apply; benchmark data published by UD without an explicit licence grant; platform-internal use; bytes NOT for public repo (TensorCAD is public)",
+   "provenance": "IGES workshop archive igs_ordner.zip (dtc-2012-01-10) from the uni-due INAM file area; archive sha256 7b18e40d783b670f226a55a7d3f0ccf13c0978e3d80a13a78eced65a7a852541, cache key dtc_igs_ordner.zip. Members carry backslash paths in the central directory, so the archive is read with ZipInfo.orig_filename normalised (tools/baseline_fleet/dtc_hull_measure.py:extract_members).",
+   "source": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip (page https://www.uni-due.de/ship/dtc.php states the benchmark geometry is downloadable)",
+   "verification_note": "DTC_hull.igs measured 2026-11-17 (mission m21785): IGES unit flag 6 = metres, full scale; half-breadth field gives displacement 173459.0 m3 vs published 173467.5 m3 (-0.005 %), Cb 0.6607 vs 0.661 (-0.045 %), beam 51.0022 m vs 51.0 m (+0.004 %). The appendage files (rudder_skeg, bilgekeel) are imported for completeness and are NOT geometrically measured here. Record benchmarks/verified/fleet_refs/dtc_hull_measured.json, tool tools/baseline_fleet/dtc_hull_measure.py. The earlier 'IGES sampling collapses to a point' withdraw is stale: it predates the type-128 control-net layout fix in tensorcad.iges._split_control.",
+   "captured": "2026-11-17",
+   "ship_bound": false
+  },
   "JBC": {
    "hull": "JBC",
    "status": "pending",
@@ -289,18 +343,22 @@
   }
  },
  "snapshot": {
-  "assets": 13,
-  "bytes": 20165115,
-  "verified": 2,
-  "verified_fraction": 0.153846,
+  "assets": 16,
+  "bytes": 24091275,
+  "verified": 5,
+  "verified_fraction": 0.3125,
   "by_kind": {
    "geometry": {
-    "assets": 13,
-    "bytes": 20165115,
-    "verified": 2
+    "assets": 16,
+    "bytes": 24091275,
+    "verified": 5
    }
   },
   "by_hull": {
+   "DTC": {
+    "assets": 3,
+    "bytes": 3926160
+   },
    "JBC": {
     "assets": 7,
     "bytes": 8985926
@@ -326,6 +384,9 @@
   "spec_ships": 4,
   "coverage": 1.0,
   "asset_ids": [
+   "geometry/hulls/DTC/DTC_bilgekeel.igs",
+   "geometry/hulls/DTC/DTC_hull.igs",
+   "geometry/hulls/DTC/DTC_rudder_skeg.igs",
    "geometry/hulls/JBC/Description_Of_JBC_CAD_Data_New.pdf",
    "geometry/hulls/JBC/jbc-boss-cap.igs",
    "geometry/hulls/JBC/jbc-boss.igs",
@@ -340,7 +401,7 @@
    "geometry/hulls/KVLCC2/kvlcc2.igs",
    "geometry/hulls/ONRT/onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs"
   ],
-  "generated_at": "2026-11-14T14:03:25+00:00",
+  "generated_at": "2026-11-15T11:17:05+00:00",
   "problems": []
  }
 }
