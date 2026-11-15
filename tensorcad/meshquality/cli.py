@@ -128,9 +128,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         payload["topology"] = topology.to_dict()
         checks.extend(gate_surface(topology, max_genus=args.max_genus))
     if args.max_non_orth is not None:
-        kind = next((k for k in ("hex", "tet") if spec.elements.get(k)), None)
+        kind = next((k for k in ("hex", "tet", "prism", "pyramid") if spec.elements.get(k)), None)
         if kind is None:
-            print("meshquality: --max-non-orth needs 'hex' or 'tet' cells", file=sys.stderr)
+            print(
+                "meshquality: --max-non-orth needs 'hex', 'tet', 'prism' or 'pyramid' cells",
+                file=sys.stderr,
+            )
             return 2
         faces = non_orthogonality(spec.points, spec.elements[kind], kind)
         payload["non_orthogonality"] = faces.to_dict()

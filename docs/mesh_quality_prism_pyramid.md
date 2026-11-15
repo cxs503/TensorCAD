@@ -147,6 +147,72 @@ literal dictionary, and the CLI reads the same table. A kind the mesh does not c
 still yields no checks (vacuous, not an error), and a mesh whose only cells are prisms is
 gated on prisms.
 
+## 5a. The other half: interior faces, extended to the two new kinds
+
+§5 gates the *cells*. A solver also rejects a mesh for its *faces*, and that measure --
+`topology.non_orthogonality`, the OpenFOAM `checkMesh` quantity -- accepted only `hex`/`tet`
+until now. The consequence inside this package was not a missing number, it was a **silent
+pass**: `door.admit` loops over `CELL_KINDS_WITH_INTERNAL_FACES` and skips kinds that are
+not in it, so a prism-only boundary-layer mesh was admitted with no interior-face check at
+all -- the failure mode §1 of `docs/mesh-quality-lib.md` complains about ("a gate that
+silently measures nothing is worse than no gate, because its PASS looks the same").
+
+Closing it needed two table rows, not new arithmetic: the angle depends only on the face
+polygon and the two node centroids, so `non_orthogonality` was never hex-specific;
+
+| kind | faces (outward winding) | nodes |
+|---|---|---|
+| `prism` | `(0,2,1)`, `(3,4,5)`, `(0,1,4,3)`, `(1,2,5,4)`, `(2,0,3,5)` | 6 |
+| `pyramid` | `(0,3,2,1)`, `(0,1,4)`, `(1,2,4)`, `(2,3,4)`, `(3,0,4)` | 5 |
+
+and the second route in `reference.reference_non_orthogonality` (triangle-fan normal,
+`atan2(|n x d|, n . d)`) is generic over the same table, so it became a check for the new
+kinds for free. The tables are pinned by properties rather than by transcription: every
+face normal must point away from the cell centroid, and the divergence-theorem volume of
+the table must be positive **and equal to the metric module's independent tet-split
+volume** (`tests/test_meshquality_prism_pyramid_faces.py`). A table with one face wound
+backwards still produces numbers -- that is why it is tested this way.
+
+Closed form: for a conforming stack sheared in *x* proportional to *z*, the
+centre-to-centre line tilts by exactly `atan(shear)`, the same closed form the hexahedral
+stack uses. Two stacks are conforming without gaps: a column of prisms, and a pair of
+pyramids sharing one base quad (apex up / apex down, the hex-to-tet transition). Both are
+in `tools/prism_pyramid_audit.py`, and the numbers it wrote:
+
+| kind | shear | cells | internal | boundary | `atan(shear)` | library | abs. diff | vs `atan2` route |
+|---|---|---|---|---|---|---|---|---|
+| `prism` | 0.0 | 3 | 2 | 11 | 0 | 0 | 0.000e+00 | 0.000e+00 |
+| `prism` | 0.25 | 3 | 2 | 11 | 14.0362434679265 | 14.0362434679265 | 5.329e-15 | 1.776e-15 |
+| `prism` | 0.5 | 3 | 2 | 11 | 26.565051177078 | 26.565051177078 | 3.553e-15 | 3.553e-15 |
+| `prism` | 1.0 | 3 | 2 | 11 | 45 | 45 | 7.105e-15 | 0.000e+00 |
+| `prism` | 3.0 | 3 | 2 | 11 | 71.565051177078 | 71.565051177078 | 0.000e+00 | 0.000e+00 |
+| `pyramid` | 0.0 | 2 | 1 | 8 | 0 | 0 | 0.000e+00 | 0.000e+00 |
+| `pyramid` | 0.25 | 2 | 1 | 8 | 14.0362434679265 | 14.0362434679265 | 3.197e-14 | 2.665e-14 |
+| `pyramid` | 0.5 | 2 | 1 | 8 | 26.565051177078 | 26.565051177078 | 1.066e-14 | 3.553e-15 |
+| `pyramid` | 1.0 | 2 | 1 | 8 | 45 | 45 | 0.000e+00 | 0.000e+00 |
+| `pyramid` | 3.0 | 2 | 1 | 8 | 71.565051177078 | 71.565051177078 | 0.000e+00 | 0.000e+00 |
+
+Worst residual against the closed form is `7.1e-15` deg, worst against the second route
+`2.7e-14` deg, on quantities of order 10-70 -- i.e. `1e-15` relative, so this is again an
+identity rather than an approximation, and the `<1e-6` acceptance holds with 8 orders to
+spare. The pyramid row is the interesting one: its two cells are *not* similar and its apex
+is a singularity of the map (§2), yet the interior face is still the flat base quad, so the
+angle is exact. Note also `boundary_faces = 11` for three stacked prisms (3x5 - 2 shared),
+which is the count that catches a face table with a missing or duplicated face.
+
+Consequences, stated because they are behaviour changes and not just new numbers:
+
+* `door.admit` now emits `non_orthogonality_prism` / `non_orthogonality_pyramid` and gates
+  them at the same 70 deg default, so a prism mesh that used to be admitted with the
+  measure skipped can now fail on it. A single-cell prism mesh now fails with "no internal
+  faces", exactly as a single hexahedron already did -- the policy is "no interior faces is
+  a FAIL, because only one cell with no interior face exists in no mesh at all".
+* `meshquality --max-non-orth` accepts `prism`/`pyramid` in the same kind-preference order
+  (`hex` > `tet` > `prism` > `pyramid`), and now names the four kinds in its error message.
+* `tests/test_meshquality_door.py::test_admit_asks_about_interior_faces_for_every_gated_kind`
+  replaces the test that asserted the old *skip*, so the old behaviour cannot come back by
+  accident.
+
 ## 6. Limitations, stated rather than hidden
 
 * **No parity against `gmsh`/`meshmagick` binaries.** Neither imports on this host and
@@ -163,9 +229,9 @@ gated on prisms.
   deliberately warped (non-planar) base — `WARPED_PYRAMID` in the tests — the two
   diagonals give different splits; the metric reports the `0-2` diagonal, and the test only
   asserts agreement with the reference route on the *same* split.
-* **Non-orthogonality is not extended to prisms/pyramids.** `topology.non_orthogonality`
-  still accepts only `hex`/`tet`; the face-pair tables for the two new kinds are a
-  follow-up, not covered here.
+* **Non-orthogonality is measured, but not against `checkMesh`.** §5a extends the
+  interior-face measure to both kinds; what is still missing is a run of the OpenFOAM
+  binary on the same mesh, the same way the metric set lacks a `gmsh` diff above.
 * **FD-route precision is 6e-10, not 1e-15, on degenerate cells.** The collapsed prism
   shows `max |lib−2nd| = 6.2e-10` while every other mesh is ≤ 2e-11: a finite difference
   of a map whose volume element goes to zero loses relative precision. That is why the
@@ -176,7 +242,8 @@ gated on prisms.
 
 ```bash
 python -m pytest tests/test_meshquality_prism_pyramid.py -q      # 21 passed
+python -m pytest tests/test_meshquality_prism_pyramid_faces.py -q # 36 passed
 python tools/prism_pyramid_audit.py                              # exit 0, rewrites artifacts
 python -m pytest tests/test_meshquality.py tests/test_meshquality_topology.py \
-                 tests/test_meshquality_dialects.py -q           # 94 passed, 1 skipped
+                 tests/test_meshquality_dialects.py tests/test_meshquality_door.py -q
 ```

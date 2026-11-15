@@ -120,17 +120,24 @@ def test_admit_rejects_an_inverted_cell():
     assert "hex.min_sicn" in {check.name for check in verdict.failures}
 
 
-def test_admit_only_asks_about_interior_faces_for_tet_and_hex():
-    """A prism mesh has no supported interior-face measure, so the door must not invent one."""
+def test_admit_asks_about_interior_faces_for_every_gated_kind():
+    """Prisms and pyramids are measured too -- skipping a kind reads as a PASS in the verdict.
+
+    A single cell has no interior face, so the check is present and fails with "no internal
+    faces", which is exactly what the door already does for a single tet or hex.
+    """
     prism_points = [
         (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0),
         (0.0, 0.0, 0.5), (1.0, 0.0, 0.5), (0.0, 1.0, 0.5),
     ]
     verdict = admit(prism_points, cells={"prism": [[0, 1, 2, 3, 4, 5]]})
-    names = {check.name for check in verdict.checks}
-    assert not any(name.startswith("volume.") for name in names)
-    assert any(name.startswith("prism.") for name in names)
-    assert "non_orthogonality_prism" not in verdict.payload
+    assert any(name.startswith("prism.") for name in {check.name for check in verdict.checks})
+    record = verdict.payload["non_orthogonality_prism"]
+    assert record["kind"] == "prism"
+    assert (record["internal_faces"], record["boundary_faces"]) == (0, 5)
+    (check,) = [c for c in verdict.checks if c.name == "volume.max_non_orthogonality"]
+    assert check.passed is False and "no internal faces" in check.detail
+    assert any(c.name.startswith("volume.") for c in verdict.checks)
 
 
 def test_admit_rejects_an_empty_mesh():

@@ -434,6 +434,10 @@ def reference_non_orthogonality(
     triangles of a fan around the face centroid and takes the angle with ``atan2(|u x v|,
     u . v)``, which stays accurate for nearly parallel vectors where ``acos`` loses half
     its digits. Both must agree to about 1e-9 deg on a well-conditioned face.
+
+    The route is generic over :data:`tensorcad.meshquality.topology.CELL_FACES`, so it
+    covers ``tet``/``hex``/``prism``/``pyramid`` without a per-kind branch -- which is what
+    made it usable as the second route for the two new kinds by adding table rows only.
     """
     from .topology import CELL_FACES  # local import: reference must not import at module load
 
@@ -457,8 +461,6 @@ def reference_non_orthogonality(
         for position in range(len(face)):
             a = pts[face[position]]
             b = pts[face[(position + 1) % len(face)]]
-            for axis in range(3):
-                total[axis] += (a[axis] - centre[axis] + b[axis] - centre[axis]) * 0.0
             # triangle (centre, a, b) contributes cross(a-centre, b-centre)
             u = [a[i] - centre[i] for i in range(3)]
             v = [b[i] - centre[i] for i in range(3)]

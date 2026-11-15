@@ -13,6 +13,10 @@ its faces:
 * **face coupling** -- for a volume mesh, the non-orthogonality of every internal face,
   the OpenFOAM ``checkMesh`` quantity. A previous repository audit found that mesh
   quality was measured in three vocabularies and none of them checked any of this.
+  It is measured for all four volume kinds the package can gate -- ``tet``, ``hex``,
+  ``prism`` and ``pyramid`` -- because a boundary-layer prism column is exactly the
+  place where a solver hits the worst non-orthogonality, and a gate that silently
+  measures nothing for a cell kind is indistinguishable from a gate that passes it.
 
 Conventions (stated once, tested everywhere below):
 
@@ -56,13 +60,22 @@ __all__ = [
 Vec3 = tuple[float, float, float]
 
 #: Face node tables, in the winding that points out of a positively oriented cell.
+#: Prism = Gmsh/VTK ``wedge6`` (triangles 0-1-2 and 3-4-5, node 3 above node 0); pyramid =
+#: Gmsh/VTK 5-node pyramid (base quad 0-1-2-3, apex 4). ``tests/test_meshquality_prism_pyramid_faces.py``
+#: pins both tables by asserting that every face normal points away from the cell centroid
+#: and that the divergence-theorem volume of the table is positive -- a table with one
+#: face wound the wrong way still produces *numbers*, which is why it is tested this way.
 CELL_FACES: dict[str, tuple[tuple[int, ...], ...]] = {
     "tet": ((0, 2, 1), (0, 1, 3), (0, 3, 2), (1, 2, 3)),
     "hex": ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)),
+    "prism": ((0, 2, 1), (3, 4, 5), (0, 1, 4, 3), (1, 2, 5, 4), (2, 0, 3, 5)),
+    "pyramid": ((0, 3, 2, 1), (0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)),
 }
 
-#: Nodes per cell, which is not the nodes per face of the table above.
-CELL_NODES = {"tet": 4, "hex": 8}
+#: Nodes per cell, which is not the nodes per face of the table above. Kept equal to
+#: :data:`tensorcad.meshquality.metrics.NODES_PER_CELL` for the shared kinds; the tests
+#: assert that, because the two tables are read by different code paths.
+CELL_NODES = {"tet": 4, "hex": 8, "prism": 6, "pyramid": 5}
 
 
 # --------------------------------------------------------------------------------------
@@ -376,7 +389,7 @@ def gate_surface(
 # --------------------------------------------------------------------------------------
 @dataclass(frozen=True)
 class FaceNonOrthogonality:
-    """Non-orthogonality of every internal face of a tetrahedral or hexahedral mesh."""
+    """Non-orthogonality of every internal face of a tet/hex/prism/pyramid mesh."""
 
     kind: str
     cells: int
@@ -437,7 +450,10 @@ def non_orthogonality(
 ) -> FaceNonOrthogonality:
     """Angle between each internal face normal and the line joining its two cell centres.
 
-    ``kind`` is ``"tet"`` or ``"hex"``; the face tables are :data:`CELL_FACES`. Faces used
+    ``kind`` is one of ``"tet"``, ``"hex"``, ``"prism"``, ``"pyramid"``; the face tables are
+    :data:`CELL_FACES`. All four are measured by the same code: the angle depends only on
+    the face polygon and the two node centroids, so nothing in the measure is hex-specific
+    and restricting the kinds would only mean a prism boundary layer going ungated. Faces used
     by one cell are boundary faces and are counted, not measured (a boundary face has no
     second centre). A face used by three or more cells raises, because a non-conforming
     mesh has no unique centre-to-centre line and silently averaging it would hide exactly
