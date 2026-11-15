@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 #: Measured sub-tasks, in display order, with the axis they scale in.
 MESH_ORDER = ("load", "point_locate", "point_locate_accel", "volume")
@@ -305,6 +305,95 @@ def render_fleet3pt_gates(artifact: Mapping[str, Any]) -> str:
     return "\n".join(lines) + footer
 
 
+def render_baseline_gate_table(baseline: Mapping[str, Any]) -> str:
+    """Markdown table of the committed quick-ladder wall-clock baseline.
+
+    This is the reference every 2x regression gate compares against, so it is
+    rendered from ``benchmarks/perf_scale/baseline.json`` rather than copied
+    into prose: the gate keys are built with
+    :func:`tensorcad.perf_benchmark.measurement_key`, i.e. exactly the keys the
+    gate lookup uses, and the RED threshold column uses the module default
+    factor instead of a hand-typed ``2``.
+    """
+    from .perf_benchmark import DEFAULT_GATE_FACTOR, measurement_key
+
+    rows = _results(baseline)
+    order = {name: i for i, name in enumerate(MESH_ORDER + ("voxelize",))}
+    rows = sorted(
+        rows,
+        key=lambda r: (order.get(r.get("subtask"), len(order)),
+                       r.get("nx") or 0, r.get("nz") or 0),
+    )
+    factor = DEFAULT_GATE_FACTOR
+    lines = [
+        f"| 门键 | 规模 | 基线秒 | RED 阈值 {factor:g}× | 基线吞吐 |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for r in rows:
+        subtask = r.get("subtask", "?")
+        axis_name, unit = AXIS_LABEL.get(subtask, ("规模", ""))
+        size = r.get("triangles") or r.get("grid_cells") or 0
+        seconds = r.get("seconds")
+        key = measurement_key(subtask, int(r.get("nx") or 0), int(r.get("nz") or 0),
+                              int(r.get("copies") or 1))
+        lines.append(
+            "| "
+            + " | ".join([
+                f"`{key}`",
+                f"{axis_name} {_int(size)}",
+                _num(seconds, ".4f"),
+                _num(None if seconds is None else seconds * factor, ".4f"),
+                f"{_num(r.get('throughput'), ',.0f')} {unit}".strip(),
+            ])
+            + " |"
+        )
+    env = baseline.get("environment") or {}
+    lines.append("")
+    lines.append(
+        f"基线记录 {len(rows)} 条；环境 `machine={env.get('machine')}`、"
+        f"`cpu_count={env.get('cpu_count')}`、`python={env.get('python')}`；"
+        f"口径：{baseline.get('baseline_policy')}"
+    )
+    return "\n".join(lines)
+
+
+def render_code_facts() -> str:
+    """Markdown table of the benchmark's tuning constants, read from the code.
+
+    A document that quotes a constant is a second source of truth; this table
+    removes the second source.  Values are read from
+    :mod:`tensorcad.perf_benchmark` at render time, so changing a threshold
+    without re-rendering is a test failure.
+    """
+    from . import perf_benchmark as pb
+
+    def ladder(pairs: tuple[tuple[int, int], ...]) -> str:
+        return " → ".join(f"{nx}×{nz}" for nx, nz in pairs)
+
+    facts: list[tuple[str, str, str]] = [
+        ("`CLUSTER_THRESHOLD`", f"{pb.CLUSTER_THRESHOLD:,}",
+         "朴素路径的单次规模告警线（三角面）；不是实测集群边界"),
+        ("`DEFAULT_GATE_FACTOR`", f"{pb.DEFAULT_GATE_FACTOR:g}",
+         "墙钟回归门 RED 阈值（`--regression-factor` 的默认值）"),
+        ("`DEFAULT_MAX_NAIVE_TRIANGLES`", f"{pb.DEFAULT_MAX_NAIVE_TRIANGLES:,}",
+         "超过即跳过 O(N·Q) 暴力参考，标 `not_run`"),
+        ("`MIN_SCALING_POINTS`", f"{pb.MIN_SCALING_POINTS}",
+         "规模点数不足则指数门 `not_run`（不是 pass）"),
+        ("`MESH_CACHE_SIZE`", f"{pb.MESH_CACHE_SIZE}", "阶梯每档只生成一次网格的缓存上限"),
+        ("`DEFAULT_LADDER`", ladder(pb.DEFAULT_LADDER),
+         "full 阶梯（顶端受 `HullParameters` 上限约束）"),
+        ("`QUICK_LADDER`", ladder(pb.QUICK_LADDER), "quick 阶梯，即 CI 基线覆盖的范围"),
+        ("`VOXEL_LADDER`", " → ".join(f"{g}³" for g in pb.VOXEL_LADDER), "体素阶梯"),
+        ("`SCALING_LIMITS`",
+         "; ".join(f"`{k}`≤{v:g}" for k, v in sorted(pb.SCALING_LIMITS.items())),
+         "指数门上限（log(秒) vs log(规模) 最小二乘斜率）"),
+    ]
+    lines = ["| 常量（`tensorcad.perf_benchmark`） | 值 | 作用 |", "|---|---|---|"]
+    for name, value, why in facts:
+        lines.append(f"| {name} | {value} | {why} |")
+    return "\n".join(lines)
+
+
 #: table name -> (artifact keys it consumes, renderer)
 TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     "mesh-table": (("mesh",), render_mesh_table),
@@ -317,11 +406,29 @@ TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
 #: Table names the document can embed, in display order.
 TABLE_NAMES: tuple[str, ...] = tuple(TABLE_SPECS)
 
+#: Tables of ``docs/perf_benchmark.md`` (the gate-conventions manual, not the
+#: measurement report).  Kept in a separate registry because a document must not
+#: be required to embed tables it does not need: an absent marker counts as
+#: drift, and mixing the two bundles would make both documents fail.
+BENCHMARK_DOC_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
+    "baseline-gate-table": (("baseline",), render_baseline_gate_table),
+    "code-facts-table": ((), render_code_facts),
+}
+
+#: Table names ``docs/perf_benchmark.md`` must embed, in display order.
+BENCHMARK_DOC_TABLE_NAMES: tuple[str, ...] = tuple(BENCHMARK_DOC_SPECS)
+
+#: Every renderer, from both registries.
+ALL_TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
+    **TABLE_SPECS,
+    **BENCHMARK_DOC_SPECS,
+}
+
 
 def render_block(name: str, artifacts: Mapping[str, Mapping[str, Any]]) -> str:
     """Rendered body (markers excluded) of table ``name``."""
     try:
-        keys, renderer = TABLE_SPECS[name]
+        keys, renderer = ALL_TABLE_SPECS[name]
     except KeyError:  # pragma: no cover - guard for typos
         raise ValueError(f"unknown perf-evidence table {name!r}") from None
     missing = [k for k in keys if k not in artifacts]
@@ -359,6 +466,7 @@ def replace_block(doc_text: str, name: str, body: str) -> str:
 def check_document(
     doc_text: str,
     artifacts: Mapping[str, Mapping[str, Any]],
+    names: Sequence[str] | None = None,
 ) -> list[str]:
     """Return the drift problems between ``doc_text`` and ``artifacts``.
 
@@ -367,7 +475,7 @@ def check_document(
     silently stopped being rendered is the failure mode this module prevents.
     """
     problems: list[str] = []
-    for name in TABLE_NAMES:
+    for name in TABLE_NAMES if names is None else names:
         body = extract_block(doc_text, name)
         if body is None:
             problems.append(f"{name}: markers not found in document")
@@ -392,11 +500,12 @@ def load_artifact(path: str | Path) -> dict[str, Any]:
 def render_document(
     doc_text: str,
     artifacts: Mapping[str, Mapping[str, Any]],
+    names: Sequence[str] | None = None,
 ) -> str:
     """Return ``doc_text`` with every marked block re-rendered from artifacts."""
     out = doc_text
-    for name in TABLE_NAMES:
-        keys = TABLE_SPECS[name][0]
+    for name in TABLE_NAMES if names is None else names:
+        keys = ALL_TABLE_SPECS[name][0]
         if all(k in artifacts for k in keys):
             out = replace_block(out, name, render_block(name, artifacts))
     return out
