@@ -30,6 +30,14 @@ SU2     NOT_SUPPORTED (*)    REAL                            round trip
 CGNS    NOT_SUPPORTED (*)    REAL                            round trip
 ======  ===================  ==============================  ============
 
+The matrix is about meshio's surface/volume split, and it stays as it is: ``gmsh`` is
+listed as a *surface* format because that is what the 18-combination gate measures through
+meshio.  A body grid still reaches gmsh -- through
+:func:`write_gmsh_volume_mesh`/:func:`read_gmsh_volume_groups`, which write msh 2.2 ASCII
+with one named physical group per patch (the same patches :func:`volume_mesh_patches`
+derives for SU2).  That is a separate entry point rather than a new member of the matrix
+because reclassifying a format would silently change what the existing gate measures.
+
 Import direction (files TensorCAD did not write)
 ------------------------------------------------
 The table above is about what TensorCAD can *emit*.  Reading is a different
@@ -90,27 +98,31 @@ from . import mesh as meshlib
 from .geometry import Mesh
 
 __all__ = [
-    "SURFACE_CELL_TYPES",
-    "VOLUME_CELL_TYPES",
     "FORMATS_ALL",
     "FORMATS_SURFACE",
     "FORMATS_VOLUME",
+    "GMSH_SOLID_GROUP",
+    "GMSH_VOLUME_VERSION",
+    "PATCH_NAMES",
+    "SURFACE_CELL_TYPES",
+    "VOLUME_CELL_TYPES",
     "MeshioFormatError",
     "TetrahedralMesh",
     "TetrahedralisationError",
+    "VolumePatches",
     "mesh_to_meshio",
     "meshio_to_mesh",
     "meshio_to_tetrahedral",
+    "read_gmsh_volume_groups",
     "read_meshio",
+    "read_su2_markers",
     "round_trip_meshio",
     "surface_signed_volume",
     "tetrahedral_volume",
     "tetrahedralise_surface",
-    "PATCH_NAMES",
-    "VolumePatches",
-    "read_su2_markers",
     "volume_mesh_patches",
     "volume_mesh_to_tetrahedral",
+    "write_gmsh_volume_mesh",
     "write_meshio",
     "write_su2_volume_mesh",
 ]
@@ -515,11 +527,7 @@ def _triangulate_block(block_type: str, data: Any) -> list[tuple[int, int, int]]
     Triangles with a repeated index are dropped: they are topologically invalid
     (zero area, self-edge) and cannot come from a conforming writer.
     """
-    if block_type == "triangle":
-        rows = data
-    elif block_type == "quad":
-        rows = data
-    elif block_type == "polygon":
+    if block_type == "triangle" or block_type == "quad" or block_type == "polygon":
         rows = data
     else:  # pragma: no cover - guarded by the caller
         raise MeshioFormatError(f"cell type '{block_type}' is not a surface facet")
@@ -1173,6 +1181,249 @@ def read_su2_markers(path: str | Path) -> dict[str, tuple[Tri, ...]]:
             markers[tag] = tuple(faces)
             tag = None
     return markers
+
+
+#: gmsh mesh format written by :func:`write_gmsh_volume_mesh`.  Version 2.2 is the last
+#: ASCII version that carries per-element physical tags in one flat ``$Elements`` block, and
+#: it is what ``gmsh`` itself, ``dolfin-convert``, ``gmshio`` and TensorCAD's own FEM handoff
+#: (``tensorcad.solver_interface.read_gmsh_volume``) all read.
+GMSH_VOLUME_VERSION = "2.2"
+
+#: Physical name given to the tetrahedral volume group.
+GMSH_SOLID_GROUP = "solid"
+
+
+def write_gmsh_volume_mesh(
+    path: str | Path,
+    volume_mesh: Any,
+    *,
+    patches: VolumePatches | None = None,
+    solid_name: str = GMSH_SOLID_GROUP,
+) -> Path:
+    """Write a body-fitted volume grid as gmsh 2.2 ASCII *with named physical groups*.
+
+    This is the gmsh counterpart of :func:`write_su2_volume_mesh`: the same named skin, written
+    into the format the open-source solver stack actually consumes.  It is a separate entry
+    point rather than a new member of :data:`FORMATS_ALL` on purpose -- ``FORMATS_SURFACE``
+    classifies ``gmsh`` as a *surface* format (that is what the 18-combination matrix of
+    ``tests/test_meshio_format_matrix.py`` measures, through meshio), and reclassifying it
+    would silently change the meaning of that matrix.  A volume grid leaves through *this*
+    function, and comes back through :func:`read_gmsh_volume_groups`.
+
+    What lands in the file:
+
+    * one ``$PhysicalNames`` entry per patch -- ``hull``, ``symmetry``, ``bottom``, ``top``,
+      ``fore``, ``aft`` as :func:`volume_mesh_patches` names them, dimension 2 -- plus the
+      tetrahedral volume group ``solid`` at dimension 3 (tag 1, patches from tag 2 on);
+    * the welded points, ``repr``-formatted, so a read returns the *same doubles* the grid
+      builder produced (a ``%.6f`` would move a node by up to a micrometre and turn a
+      zero-error control into a 1e-6 error);
+    * every skin triangle (gmsh element type 2) carrying its physical tag, then every
+      tetrahedron (type 4), both with the two mandatory tags (physical, elementary) set to the
+      physical tag -- gmsh's reader requires the elementary entity to exist, and reusing the
+      physical tag keeps the file readable by tools that only understand one of the two.
+
+    Parameters
+    ----------
+    path :
+        Output ``.msh`` path.
+    volume_mesh :
+        A :class:`tensorcad.volume_mesh.VolumeMesh` built with ``split_tets=True``.
+    patches :
+        The already-computed :func:`volume_mesh_patches` result, to avoid deriving it twice.
+    solid_name :
+        Physical name of the volume group.  Must differ from every patch name.
+
+    Returns
+    -------
+    Path
+        The file written.
+    """
+    skin = volume_mesh_patches(volume_mesh) if patches is None else patches
+    if solid_name in skin.names():
+        raise MeshioFormatError(
+            f"solid name {solid_name!r} collides with a patch name; the physical groups "
+            f"would be indistinguishable (patches: {skin.names()})"
+        )
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    # (name, dimension, physical tag); the volume group is tag 1, patches follow.
+    groups = [(solid_name, 3, 1)] + [
+        (name, 2, index + 2) for index, (name, _) in enumerate(skin.patches)
+    ]
+    lines = [
+        "$MeshFormat",
+        f"{GMSH_VOLUME_VERSION} 0 8",
+        "$EndMeshFormat",
+        "$Comments",
+        "generated by TensorCAD tensorcad.meshio_exchange.write_gmsh_volume_mesh",
+        f"units {skin.units}",
+        f"coordinate_frame {skin.coordinate_frame}",
+        "$EndComments",
+        "$PhysicalNames",
+        str(len(groups)),
+    ]
+    lines += [f'{dimension} {tag} "{name}"' for name, dimension, tag in groups]
+    lines.append("$EndPhysicalNames")
+    lines.append("$Nodes")
+    lines.append(str(len(skin.vertices)))
+    lines += [
+        f"{index} {x!r} {y!r} {z!r}"
+        for index, (x, y, z) in enumerate(skin.vertices, start=1)
+    ]
+    lines.append("$EndNodes")
+
+    elements: list[str] = []
+    for name, _dimension, tag in groups[1:]:
+        for a, b, c in skin.faces(name):
+            elements.append(f"{len(elements) + 1} 2 2 {tag} {tag} {a + 1} {b + 1} {c + 1}")
+    for a, b, c, d in skin.tets:
+        elements.append(f"{len(elements) + 1} 4 2 1 1 {a + 1} {b + 1} {c + 1} {d + 1}")
+    lines.append("$Elements")
+    lines.append(str(len(elements)))
+    lines += elements
+    lines.append("$EndElements")
+    target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return target
+
+
+def _gmsh_block(text: str, name: str, path: str | Path) -> list[str]:
+    """Lines of one ``$name`` block of a gmsh ASCII file, stripped, blanks removed."""
+    marker, end = f"${name}", f"$End{name}"
+    if marker not in text:
+        raise MeshioFormatError(f"{marker} is missing from {path}")
+    body = text.split(marker, 1)[1].split(end, 1)[0]
+    return [line.strip() for line in body.splitlines() if line.strip()]
+
+
+def read_gmsh_volume_groups(path: str | Path) -> VolumePatches:
+    """Read a gmsh 2.2 ASCII volume mesh, keeping the physical groups as patch names.
+
+    An independent parser, not a call into meshio: the point of writing the format by hand is
+    that reading it back with the same library would only prove self-consistency.  Two
+    readers that agree (this one and meshio's, see
+    ``tests/test_gmsh_volume_patches.py``) plus the volume an independent writer measures is
+    the evidence the file is what it claims to be.
+
+    Returns
+    -------
+    VolumePatches
+        ``vertices``/``tets``/``patches`` exactly as the file states them, with ``units`` and
+        ``coordinate_frame`` taken from the ``$Comments`` block when present.  ``merged_points``
+        and ``cancelled_faces`` are **zero**: they describe the hex-grid conversion that
+        produced the file, which a reader cannot reconstruct, and reporting a number there
+        would be inventing one.
+
+    Raises
+    ------
+    MeshioFormatError
+        On a version other than 2.2, on a file with no tetrahedra (that is a surface mesh --
+        use :func:`read_meshio`), or on a boundary element type this reader cannot express as
+        a triangle.
+    """
+    raw = Path(path).read_bytes()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise MeshioFormatError(
+            f"{path} is not gmsh ASCII text (byte {exc.start} is not UTF-8): a binary gmsh "
+            "file cannot carry the per-element tags this reader groups by name; write it "
+            "with binary=False, or with write_gmsh_volume_mesh"
+        ) from exc
+
+    header = _gmsh_block(text, "MeshFormat", path)
+    if not header:
+        raise MeshioFormatError(f"empty $MeshFormat block in {path}")
+    version = header[0].split()[0]
+    if not version.startswith("2."):
+        raise MeshioFormatError(
+            f"{path} is gmsh {version}, but only 2.x ASCII carries per-element physical tags "
+            "in one $Elements block; re-export with gmsh -format msh2"
+        )
+
+    units, coordinate_frame = "m", "unspecified right-handed frame"
+    if "$Comments" in text:
+        for line in _gmsh_block(text, "Comments", path):
+            key, _, value = line.partition(" ")
+            if key == "units" and value:
+                units = value
+            elif key == "coordinate_frame" and value:
+                coordinate_frame = value
+
+    names: dict[int, tuple[str, int]] = {}
+    if "$PhysicalNames" in text:
+        entries = _gmsh_block(text, "PhysicalNames", path)
+        count = int(entries[0])
+        for line in entries[1 : count + 1]:
+            parts = line.replace('"', " ").split()
+            if len(parts) < 3:
+                raise MeshioFormatError(f"malformed $PhysicalNames entry {line!r} in {path}")
+            names[int(parts[1])] = (parts[2], int(parts[0]))
+
+    nodes = _gmsh_block(text, "Nodes", path)
+    count = int(nodes[0])
+    if len(nodes) - 1 < count:
+        raise MeshioFormatError(f"{path} declares {count} nodes but carries {len(nodes) - 1}")
+    vertices: list[Vec3] = []
+    for line in nodes[1 : count + 1]:
+        parts = line.split()
+        vertices.append((float(parts[1]), float(parts[2]), float(parts[3])))
+
+    elements = _gmsh_block(text, "Elements", path)
+    nelem = int(elements[0])
+    if len(elements) - 1 < nelem:
+        raise MeshioFormatError(f"{path} declares {nelem} elements but carries {len(elements) - 1}")
+    tets: list[Tet] = []
+    bucketed: dict[str, list[Tri]] = {}
+    for line in elements[1 : nelem + 1]:
+        parts = line.split()
+        kind, tags = int(parts[1]), int(parts[2])
+        if tags < 1:
+            raise MeshioFormatError(
+                f"element {parts[0]} in {path} carries no physical tag, so it belongs to no "
+                "patch; a solver file needs every boundary element marked"
+            )
+        physical = int(parts[3])
+        connectivity = [int(value) - 1 for value in parts[3 + tags :]]
+        name, _dimension = names.get(physical, (f"group_{physical}", 0))
+        if kind == 4:
+            if len(connectivity) != 4:
+                raise MeshioFormatError(
+                    f"tetrahedron {parts[0]} in {path} has {len(connectivity)} nodes"
+                )
+            tets.append((connectivity[0], connectivity[1], connectivity[2], connectivity[3]))
+        elif kind == 2:
+            if len(connectivity) != 3:
+                raise MeshioFormatError(
+                    f"triangle {parts[0]} in {path} has {len(connectivity)} nodes"
+                )
+            bucketed.setdefault(name, []).append(
+                (connectivity[0], connectivity[1], connectivity[2])
+            )
+        else:
+            raise MeshioFormatError(
+                f"element type {kind} (element {parts[0]}) in {path} cannot be expressed as a "
+                "tetrahedron or a boundary triangle; only types 2 and 4 are read here"
+            )
+
+    if not tets:
+        raise MeshioFormatError(
+            f"{path} carries no tetrahedra: it is a surface mesh. Read it with "
+            "read_meshio(file_format='gmsh') instead"
+        )
+    patches = tuple((name, tuple(faces)) for name, faces in bucketed.items())
+    if not patches:
+        raise MeshioFormatError(
+            f"{path} carries no marked boundary triangles; a solver cannot bind a wall to it"
+        )
+    return VolumePatches(
+        vertices=tuple(vertices),
+        tets=tuple(tets),
+        patches=patches,
+        units=units,
+        coordinate_frame=coordinate_frame,
+    )
 
 
 def _check_topology_supported(mesh: Mesh | TetrahedralMesh, file_format: str) -> None:

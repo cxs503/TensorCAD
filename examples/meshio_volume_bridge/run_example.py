@@ -41,11 +41,13 @@ sys.path.insert(0, str(REPO_ROOT))
 from tensorcad import volume_mesh as vmlib
 from tensorcad.meshio_exchange import (
     FORMATS_VOLUME,
+    read_gmsh_volume_groups,
     read_su2_markers,
     round_trip_meshio,
     tetrahedral_volume,
     volume_mesh_patches,
     volume_mesh_to_tetrahedral,
+    write_gmsh_volume_mesh,
     write_su2_volume_mesh,
 )
 
@@ -195,6 +197,144 @@ def markers(name: str, vm: vmlib.VolumeMesh, path: Path) -> dict[str, Any]:
     return row
 
 
+def gmsh_export(
+    name: str, vm: vmlib.VolumeMesh, path: Path, anchors: dict[str, float]
+) -> dict[str, Any]:
+    """Export the body grid to gmsh 2.2 with named physical groups, and read it back thrice.
+
+    Three independent readers: this package's own parser, meshio's gmsh reader and the
+    package's FEM-handoff reader (``tensorcad.solver_interface.read_gmsh_volume``).  The
+    first proves the writer/reader pair is self-consistent; the other two are the evidence
+    that the file is a gmsh file rather than a private dialect.
+    """
+    import meshio
+
+    from tensorcad.solver_interface import read_gmsh_volume
+
+    patches = volume_mesh_patches(vm)
+    write_gmsh_volume_mesh(path, vm, patches=patches)
+    own = read_gmsh_volume_groups(path)
+
+    mio = meshio.read(str(path))
+    blocks = {cell.type: cell.data for cell in mio.cells}
+    points = [tuple(float(value) for value in row) for row in mio.points]
+    meshio_volume = sum(
+        tetrahedral_volume(points, tuple(int(i) for i in tet)) for tet in blocks["tetra"]
+    )
+
+    bundle = read_gmsh_volume(path)
+    handoff_volume = sum(
+        tetrahedral_volume(bundle["nodes"], tet) for tet in bundle["tets"]
+    )
+
+    areas = own.areas()
+    row: dict[str, Any] = {
+        "body": name,
+        "path": str(path.relative_to(REPO)),
+        "bytes": path.stat().st_size,
+        "names": list(own.names()),
+        "vertices": len(own.vertices),
+        "tets": len(own.tets),
+        "triangles": len(own.skin()),
+        "volume_tets": patches.tet_volume(),
+        "volume_file": own.tet_volume(),
+        "rel_volume": abs(own.tet_volume() - patches.tet_volume()) / patches.tet_volume(),
+        "skin_volume": own.skin_volume(),
+        "rel_skin_vs_tets": abs(own.skin_volume() - own.tet_volume()) / own.tet_volume(),
+        "watertight": own.is_watertight(),
+        "vertices_identical": own.vertices == patches.vertices,
+        "tets_identical": own.tets == patches.tets,
+        "patches": own.counts(),
+        "areas": areas,
+        "area_reference": {key: anchors[key] for key in areas if key in anchors},
+        "meshio_volume": meshio_volume,
+        "meshio_cells": {kind: len(data) for kind, data in blocks.items()},
+        "meshio_rel_volume": abs(meshio_volume - patches.tet_volume()) / patches.tet_volume(),
+        "meshio_physical_names": sorted(mio.field_data),
+        "handoff_volume": handoff_volume,
+        "handoff_rel_volume": abs(handoff_volume - patches.tet_volume()) / patches.tet_volume(),
+        "handoff_tets": len(bundle["tets"]),
+        "handoff_triangles": len(bundle["triangles"]),
+        "handoff_names": sorted(set(bundle["physical_names"].values())),
+    }
+    row["area_rel"] = {
+        key: abs(areas[key] - value) / value for key, value in row["area_reference"].items()
+    }
+    return row
+
+
+def figure_gmsh(rows: list[dict[str, Any]], out: Path) -> None:
+    """The named skin as a field plot, plus the parity of the three readers."""
+    fig = plt.figure(figsize=(15.5, 4.4))
+
+    # (a) the hull skin, every triangle coloured by the physical group it landed in -- this is
+    # the field the export carries; a mis-assigned triangle shows up as a speck of the wrong
+    # colour on a flat face.
+    ax = fig.add_subplot(1, 3, 1, projection="3d")
+    hull_row = next(row for row in rows if row["body"].startswith("Wigley"))
+    hull_path = REPO / hull_row["path"]
+    vertex_list = read_gmsh_volume_groups(hull_path)
+    colors = plt.get_cmap("tab10")
+    for index, (patch, faces) in enumerate(vertex_list.patches):
+        triangles = np.array(
+            [[vertex_list.vertices[vid] for vid in face] for face in faces], dtype=float
+        )
+        ax.plot_trisurf(
+            triangles[:, :, 0].ravel(),
+            triangles[:, :, 1].ravel(),
+            triangles[:, :, 2].ravel(),
+            triangles=np.arange(len(faces) * 3).reshape(len(faces), 3),
+            color=colors(index),
+            alpha=0.85,
+            linewidth=0.1,
+            edgecolor="#333333",
+            label=f"{patch} ({len(faces)} tri)",
+        )
+    ax.set_xlabel("x [m]")
+    ax.set_ylabel("y [m]")
+    ax.set_zlabel("z [m]")
+    ax.set_title("(a) hull skin coloured by gmsh physical group")
+    ax.legend(fontsize=7, loc="upper left")
+
+    # (b) the same volume read three ways: our parser, meshio, the FEM handoff reader.
+    ax = fig.add_subplot(1, 3, 2)
+    labels, errors = [], []
+    for row in rows:
+        labels += [f"{row['body'].split()[0]}\nown", "meshio", "handoff"]
+        errors += [row["rel_volume"], row["meshio_rel_volume"], row["handoff_rel_volume"]]
+    positions = range(len(errors))
+    ax.bar(positions, [max(e, 1e-18) for e in errors], color="#1f5fa8")
+    ax.set_yscale("log")
+    ax.set_xticks(list(positions))
+    ax.set_xticklabels(labels, fontsize=7, rotation=45, ha="right")
+    ax.axhline(1e-12, color="#c0392b", linestyle="--", linewidth=1, label="round-off floor")
+    ax.set_ylabel("relative volume error vs the tetrahedra")
+    ax.set_title("(b) three independent readers, one volume")
+    ax.legend(fontsize=7)
+    ax.grid(alpha=0.25, axis="y")
+
+    # (c) patch areas against the closed-form / quadrature anchors.
+    ax = fig.add_subplot(1, 3, 3)
+    offset = 0.0
+    for row in rows:
+        names = list(row["area_rel"])
+        ax.bar([offset + i for i in range(len(names))],
+               [max(row["area_rel"][n], 1e-18) for n in names], width=0.38,
+               label=row["body"])
+        offset += len(names) + 1
+    ax.set_yscale("log")
+    ax.axhline(1e-2, color="#c0392b", linestyle="--", linewidth=1, label="1 % line")
+    ax.set_ylabel("relative area error vs analytic anchor")
+    ax.set_title("(c) physical-group areas vs anchors")
+    ax.legend(fontsize=7)
+    ax.grid(alpha=0.25, axis="y")
+
+    fig.tight_layout()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+
+
 def figure(rows: list[dict[str, Any]], hull: vmlib.VolumeMesh, out: Path,
            marker_rows: list[dict[str, Any]] | None = None) -> None:
     fig = plt.figure(figsize=(17.6, 4.4))
@@ -326,11 +466,29 @@ def main() -> int:
 
     marker_rows = [box_markers, hull_markers]
 
+    box_gmsh = gmsh_export(
+        "box 2x1x0.6",
+        box_vm,
+        RUNS / "box_volume.msh",
+        {"bottom": 2.0, "top": 2.0, "fore": 0.6, "aft": 0.6, "hull": 2.4},
+    )
+    hull_gmsh = gmsh_export(
+        "Wigley body L10xB1xT0.625",
+        hull_vm,
+        RUNS / "hull_volume.msh",
+        {
+            "hull": hull_markers["hull_area_reference"],
+            "bottom": hull_markers["bottom_area_reference"],
+        },
+    )
+    gmsh_rows = [box_gmsh, hull_gmsh]
+
     payload = {
         "mission": "m19950",
         "anchor": "GAP-CAD-B2-MESH-FORMAT-MATRIX (residual limit 2 closed)",
         "bodies": rows,
         "markers": marker_rows,
+        "gmsh": gmsh_rows,
         "criteria": {
             "split_conservation_rel": 1e-12,
             "analytic_rel": 1e-12,
@@ -338,6 +496,8 @@ def main() -> int:
             "skin_watertight": True,
             "skin_vs_tets_rel": 1e-12,
             "patch_area_rel": 1e-2,
+            "gmsh_volume_rel": 1e-12,
+            "gmsh_area_rel": 1e-2,
         },
         "all_pass": all(
             r["rel_split_vs_grid"] < 1e-12
@@ -356,12 +516,27 @@ def main() -> int:
             and abs(m["areas"]["hull"] - m["hull_area_reference"]) / m["hull_area_reference"]
             < 1e-2
             for m in marker_rows
+        )
+        and all(
+            g["watertight"]
+            and g["vertices_identical"]
+            and g["tets_identical"]
+            and g["rel_volume"] < 1e-12
+            and g["meshio_rel_volume"] < 1e-12
+            and g["handoff_rel_volume"] < 1e-12
+            and g["handoff_tets"] == g["tets"]
+            and g["handoff_triangles"] == g["triangles"]
+            and "solid" in g["meshio_physical_names"]
+            and all(value < 1e-2 for value in g["area_rel"].values())
+            for g in gmsh_rows
         ),
     }
     (RUNS / "bridge_matrix.json").write_text(json.dumps(payload, indent=2) + "\n")
 
     fig_path = ARTIFACTS / "volume_bridge_fidelity.png"
     figure(rows, hull_vm, fig_path, marker_rows)
+    gmsh_fig = ARTIFACTS / "gmsh_volume_export.png"
+    figure_gmsh(gmsh_rows, gmsh_fig)
 
     for row in rows:
         print(f"\n{row['body']}")
@@ -395,9 +570,23 @@ def main() -> int:
                   f"{row['hull_area_reference']:.9f} "
                   f"(rel {abs(row['areas']['hull'] - row['hull_area_reference']) / row['hull_area_reference']:.3e})")
 
+    for row in gmsh_rows:
+        print(f"\n{row['body']} -- gmsh 2.2 physical groups ({Path(row['path']).name})")
+        print(f"  NPOIN {row['vertices']:5d}  NELEM(tet) {row['tets']:6d}  "
+              f"triangles {row['triangles']:5d}  groups {row['names']}")
+        print(f"  volume file {row['volume_file']:.12f}  vs tets {row['volume_tets']:.12f} "
+              f"(rel {row['rel_volume']:.2e})  watertight {row['watertight']}")
+        print(f"  meshio  volume rel {row['meshio_rel_volume']:.2e}  names "
+              f"{row['meshio_physical_names']}")
+        print(f"  handoff volume rel {row['handoff_rel_volume']:.2e}  cells "
+              f"{row['handoff_tets']} tets / {row['handoff_triangles']} tri")
+        for patch, value in row["area_rel"].items():
+            print(f"    {patch:8s} area {row['areas'][patch]:.9f} vs anchor "
+                  f"(rel {value:.3e})")
+
     print(f"\nALL PASS: {payload['all_pass']}")
     print(f"json : {RUNS / 'bridge_matrix.json'}")
-    print(f"figure: {fig_path}")
+    print(f"figure: {fig_path}\n        {gmsh_fig}")
     return 0 if payload["all_pass"] else 1
 
 
