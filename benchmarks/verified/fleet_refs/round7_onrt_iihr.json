@@ -1,0 +1,137 @@
+{
+ "schema": "tensorcad.fleet_refs.round7_iihr/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "generated_utc": "2026-11-15T16:36:11+00:00",
+ "document": {
+  "key": "onrt_iihr",
+  "publisher": "University of Iowa (IIHR) thesis 2016, Bottiglieri - Table 2.1 main particulars",
+  "family": "IIHR-2016",
+  "lineage": "IIHR-2016",
+  "url": "https://iro.uiowa.edu/view/delivery/01IOWA_INST/12730586600002771/13730793940002771",
+  "sha256_pinned": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+  "sha256_observed": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+  "digest_matches_pin": true,
+  "bytes": 3532926,
+  "licence": "thesis: free to read and download (Iowa Research Online); digest + quoted cells only, bytes not redistributed"
+ },
+ "cells": {
+  "lwl": {
+   "quantity": "lwl",
+   "value": 154.0,
+   "raw": "154",
+   "label": "le dimensions Main particulars Model scale (1/49) Full scale Length of waterline LWL (m) 3.147 \u00b1 0.001 154 Maximum beam of waterline BWL (m) 0.384 \u00b1 0.001 18.78 Depth D (m) 0.266 14.5 Dra",
+   "source": "onrt_iihr",
+   "url": "https://iro.uiowa.edu/view/delivery/01IOWA_INST/12730586600002771/13730793940002771",
+   "sha256": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+   "column": 0,
+   "unit_basis": "volume",
+   "note": "page 36",
+   "derivation": ""
+  },
+  "beam": {
+   "quantity": "beam",
+   "value": 18.78,
+   "raw": "18.78",
+   "label": "Full scale Length of waterline LWL (m) 3.147 \u00b1 0.001 154 Maximum beam of waterline BWL (m) 0.384 \u00b1 0.001 18.78 Depth D (m) 0.266 14.5 Draft T (m) 0.112 \u00b1 0.001 5.494 Displacement \u0394 72.6 \u00b1 0",
+   "source": "onrt_iihr",
+   "url": "https://iro.uiowa.edu/view/delivery/01IOWA_INST/12730586600002771/13730793940002771",
+   "sha256": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+   "column": 0,
+   "unit_basis": "volume",
+   "note": "page 36",
+   "derivation": ""
+  },
+  "draft": {
+   "quantity": "draft",
+   "value": 5.494,
+   "raw": "5.494",
+   "label": "154 Maximum beam of waterline BWL (m) 0.384 \u00b1 0.001 18.78 Depth D (m) 0.266 14.5 Draft T (m) 0.112 \u00b1 0.001 5.494 Displacement \u0394 72.6 \u00b1 0.1 kg 8507 ton Wetted surface area (fully appended) S0 (m2",
+   "source": "onrt_iihr",
+   "url": "https://iro.uiowa.edu/view/delivery/01IOWA_INST/12730586600002771/13730793940002771",
+   "sha256": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+   "column": 0,
+   "unit_basis": "volume",
+   "note": "page 36",
+   "derivation": ""
+  },
+  "displacement_volume": {
+   "quantity": "displacement_volume",
+   "value": 8299.5122,
+   "raw": "8507",
+   "label": "epth D (m) 0.266 14.5 Draft T (m) 0.112 \u00b1 0.001 5.494 Displacement \u0394 72.6 \u00b1 0.1 kg 8507 ton Wetted surface area (fully appended) S0 (m2 ) 1.5 NA Block coefficient (CB) \u2207 /(L",
+   "source": "onrt_iihr",
+   "url": "https://iro.uiowa.edu/view/delivery/01IOWA_INST/12730586600002771/13730793940002771",
+   "sha256": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+   "column": 0,
+   "unit_basis": "mass",
+   "note": "page 36; mass 8507 t converted at 1.025 t/m3",
+   "derivation": ""
+  },
+  "cb": {
+   "quantity": "cb",
+   "value": 0.535,
+   "raw": "0.535",
+   "label": "7 ton Wetted surface area (fully appended) S0 (m2 ) 1.5 NA Block coefficient (CB) \u2207 /(LWLBWL T) 0.535 0.535 LCB LCB (m) aft of FP 1.625 NA Vertical Center of Gravity (from keel) KG (",
+   "source": "onrt_iihr",
+   "url": "https://iro.uiowa.edu/view/delivery/01IOWA_INST/12730586600002771/13730793940002771",
+   "sha256": "6fd4b42f0f0b873b96114fddeac77dce962a73d7ddc11ea55470170dcf91961d",
+   "column": 0,
+   "unit_basis": "volume",
+   "note": "page 36",
+   "derivation": ""
+  }
+ },
+ "cells_not_matched": [],
+ "closure": {
+  "implied_volume_from_cb_m3": 8500.8,
+  "residual_if_volume_percent": 0.0731,
+  "residual_if_mass_percent": 2.425,
+  "reading": "volume",
+  "margin_percent": 2.3519
+ },
+ "disputed_cell": {
+  "ship": "ONRT",
+  "quantity": "displacement_volume",
+  "library_families": [
+   "NMRI-T2015",
+   "SIMMAN-SERIES"
+  ],
+  "library_values": [
+   {
+    "family": "SIMMAN-SERIES",
+    "value": 8507.0,
+    "unit_basis": "volume"
+   },
+   {
+    "family": "NMRI-T2015",
+    "value": 8299.5,
+    "unit_basis": "mass"
+   }
+  ],
+  "nmri_reading": [
+   8299.5
+  ],
+  "simman_reading": [
+   8507.0
+  ],
+  "printed_numeral": 8507.0,
+  "mass_equivalent_of_this_document_m3": 8299.5,
+  "verdict": "UNIT_BASIS_CONFLICT",
+  "explanation": "the IIHR table's numeral 8507 closes as a volume (residual 0.0731 % vs 2.425 % if read as mass); read as a mass it converts to 8299.5 m3, i.e. the NMRI-T2015 value. The disagreement is therefore a basis question, not two measurements that differ: no published value is changed here, and the cell must keep both readings until a document states the basis explicitly."
+ },
+ "lcb_evidence": {
+  "quoted": "1.625",
+  "raw_row": "LCB LCB (m) aft of FP 1.625 NA",
+  "model_scale": 49.0,
+  "full_scale_m_aft_fp": 79.625,
+  "votes": false,
+  "reason": "the full-scale column reads NA: multiplying the model value by 49 would be this tool's arithmetic, not the document's statement, so ONRT lcb_percent stays SINGLE_DOCUMENT"
+ },
+ "lineage_gain": {
+  "ONRT/lwl": "IIHR-2016 adds a second lineage (NMRI-T2015, SIMMAN-SERIES)",
+  "ONRT/cb": "IIHR-2016 states 0.535, agreeing with both committed families",
+  "ONRT/displacement_volume": "IIHR-2016 corroborates the volume reading of 8507",
+  "ONRT/lcb_percent": "no vote (full-scale column NA)"
+ },
+ "figure": "docs/figs/fleet_refs_round7_onrt_iihr.png"
+}
