@@ -29,6 +29,9 @@ This package is the single library behind that question:
   ``constant/polyMesh`` (points/faces/owner/neighbour/boundary), measures the three numbers
   ``checkMesh`` prints (non-orthogonality, skewness, cell volume) with OpenFOAM's own
   definitions, and gates them;
+* :mod:`tensorcad.meshquality.door` -- admission control: one verdict out of shell topology,
+  per-element quality and interior-face non-orthogonality, so a pipeline has one door to
+  call instead of three (:func:`admit`);
 * :mod:`tensorcad.meshquality.reference` -- second implementations and external oracles
   (Gmsh, trimesh, and the VTK/Verdict definitions meshmagick uses) that the benchmark
   compares against, so the library is never its own judge.
@@ -52,6 +55,7 @@ from .polymesh import (
     read_polymesh,
     write_polymesh,
 )
+from .door import DoorVerdict, admit
 from .dialects import ASPECT_DIALECTS, aspect_dialects, conservative_limit, dialect_audit
 from .metrics import (
     ELEMENT_KINDS,
@@ -88,6 +92,8 @@ from .report import (
 
 __all__ = [
     "DEFAULT_GATE",
+    "DoorVerdict",
+    "admit",
     "DEFAULT_LIMITS",
     "DEFAULT_POLYMESH_LIMITS",
     "PolyMesh",
