@@ -45,10 +45,19 @@ not, rather than silently returning a mesh that misses its coefficients.
 
 Known limitations (deliberate, documented rather than hidden)
 =============================================================
-* The family has no parallel middle body, no bulbous bow, no transom, no flare and
-  no hollow waterlines: it is a *coefficient-faithful* hull, not a ship's lines.
-  It is therefore the right input for mesh-quality and hydrostatic self-consistency
-  work, and the wrong input for resistance or seakeeping claims.
+* The family has **no bulbous bow, no transom, no flare and no hollow waterlines**:
+  it is a *coefficient-faithful* hull, not a ship's lines. It is therefore the right
+  input for mesh-quality and hydrostatic self-consistency work, and the wrong input
+  for resistance or seakeeping claims.
+* It does carry two real hull-form features, both off by default so that the
+  round-3 family is reproduced exactly: a **parallel middle body**
+  (``parallel_body_fraction``) and a **rising keel toward the ends**, i.e. the
+  forefoot/run cut-away (``end_draft_ratio``). Both are needed to reproduce a real
+  hull's *wetted surface* at fixed coefficients: without the keel rise the family
+  gives every station the full design draft, so the ends are full-height blades and
+  the surface comes out high (up to +14.7 % against the Holtrop & Mennen regression
+  for fine hulls). With the rise the same coefficients are realised by a hollowed
+  run and entrance, which is what a real hull looks like.
 * ``LCB`` is fixed by the symmetric sine law (``LCB = L/2`` for ``s = r``); only
   symmetric fore/aft families are generated.
 * Only ``Cb``, ``Cm`` and ``Cwp`` are honoured. Anything else a caller thinks a
@@ -92,6 +101,13 @@ _INVERSE_TABLE_SIZE = 2001
 #: (both ``b`` and the area go to zero at the ends, so the profile exponent is moot).
 FULLNESS_FLOOR = 1.0e-12
 
+#: Exponent concentrating the keel rise toward the ends. A real hull keeps a flat
+#: keel over the parallel middle body and lifts it through the entrance and the run,
+#: so the draft ratio is ``eps + (1-eps) * taper**KEEL_RISE_EXPONENT``: at the
+#: middle of a taper body (``taper = 0.5``) the keel has risen only 12.5 % of the way
+#: to its end value, which is the shape of a forefoot, not a straight wedge.
+KEEL_RISE_EXPONENT = 3.0
+
 
 # --------------------------------------------------------------------------- #
 # Discrete functionals -- the ones the mesh actually integrates
@@ -109,47 +125,135 @@ def _trapezoid_mean(values: list[float] | tuple[float, ...]) -> float:
     return (math.fsum(values) - 0.5 * (values[0] + values[-1])) / (n - 1)
 
 
-def sine_power_mean(beta: float, nx: int) -> float:
-    """Discrete ``mean_xi sin(pi*xi)**beta`` over ``nx`` stations -- the quantity a
-    sine-law breadth distribution contributes to ``Cwp`` (and, with ``Cm`` in
-    front, to ``Cb``).
+def taper_profile(nx: int, parallel_body_fraction: float = 0.0) -> tuple[float, ...]:
+    """Longitudinal taper shape ``g_i`` in ``[0, 1]``: the planform of the hull.
+
+    ``g = 1`` over the parallel middle body (the middle ``parallel_body_fraction`` of
+    the length) and ``cos(pi*u/2)`` through the entrance and the run, with ``u`` the
+    normalised distance from the end of the parallel body to the end of the ship. At
+    ``parallel_body_fraction = 0`` this is exactly ``sin(pi*x/L)``, so the round-3
+    family is reproduced bit for bit.
+
+    The end stations are pinned to zero *exactly*: ``sin(pi)`` is 1.2e-16 and
+    ``1.2e-16 ** 0.07`` is 0.08, so leaving it in would both fatten the stem and --
+    worse -- keep the end ring from degenerating, which leaves the loft open and the
+    divergence-theorem volume short by a whole end cap (measured: 14 % on a fine
+    hull). Both the solve and the loft read this one function, so they cannot drift.
     """
+    if not (0.0 <= parallel_body_fraction < 1.0):
+        raise ValueError(
+            f"parallel_body_fraction must lie in [0, 1), got {parallel_body_fraction!r}"
+        )
     last = nx - 1
-    values = [
-        # The end stations are pinned to zero exactly as the generator pins them
-        # (``sin(pi)`` is 1.2e-16, and ``1.2e-16 ** 0.07`` is 0.08 -- leaving it in
-        # would make the solve and the loft disagree by the whole end panel).
-        0.0 if i == 0 or i == last else math.sin(math.pi * i / last) ** beta
-        for i in range(nx)
-    ]
-    return _trapezoid_mean(values)
+    half = 0.5 * parallel_body_fraction
+    out: list[float] = []
+    for i in range(nx):
+        if i == 0 or i == last:
+            out.append(0.0)
+            continue
+        xi = i / last
+        distance = abs(xi - 0.5)
+        if distance <= half:
+            out.append(1.0)
+        else:
+            u = (distance - half) / (0.5 - half)
+            out.append(math.cos(0.5 * math.pi * u))
+    return tuple(out)
 
 
-def _solve_sine_power(target: float, nx: int) -> float:
-    """Invert :func:`sine_power_mean`: the exponent whose discrete mean is ``target``.
+def keel_ratio_profile(
+    taper: Sequence[float], end_draft_ratio: float = 1.0
+) -> tuple[float, ...]:
+    """Local draft / design draft: ``1`` amidships, ``end_draft_ratio`` at the ends.
 
-    The mean falls monotonically from ``1`` (``beta -> 0``) to ``0``
-    (``beta -> inf``), so a plain bisection in ``log beta`` converges for any
-    ``0 < target < 1``. The endpoints of the station grid contribute
-    ``sin(0) = sin(pi) = 0``, hence the ``< 1`` ceiling.
+    This is the forefoot and the run: the keel is flat over the parallel middle body
+    and rises through the entrance and the run, with the rise concentrated toward
+    the ends by :data:`KEEL_RISE_EXPONENT`. ``end_draft_ratio = 1`` keeps every
+    station at the design draft (the round-3 family, no keel rise).
+    """
+    if not (0.0 < end_draft_ratio <= 1.0):
+        raise ValueError(f"end_draft_ratio must lie in (0, 1], got {end_draft_ratio!r}")
+    if end_draft_ratio == 1.0:
+        return tuple(1.0 for _ in taper)
+    return tuple(
+        end_draft_ratio + (1.0 - end_draft_ratio) * (g**KEEL_RISE_EXPONENT) for g in taper
+    )
+
+
+def power_mean(samples: Sequence[float], beta: float) -> float:
+    """Discrete ``mean`` of ``samples ** beta`` over the station grid.
+
+    The trapezoid weights are the ones the loft itself integrates, so a coefficient
+    solved against this mean is realised by the *sampled* mesh, not merely in the
+    continuum limit.
+    """
+    return _trapezoid_mean([max(value, 0.0) ** beta for value in samples])
+
+
+def weighted_power_mean(
+    samples: Sequence[float], beta: float, weights: Sequence[float]
+) -> float:
+    """``mean(weights * samples ** beta)`` -- the keel-rise form of :func:`power_mean`.
+
+    The sectional area at a station is ``2 * (B/2 * g**s) * (T * h) * Cm * g**r``, so
+    ``Cb = Cm * mean(h * g**(s+r))``: the draft ratio ``h`` enters the block
+    coefficient as a weight, which is why it needs its own inverse.
+    """
+    if len(samples) != len(weights):
+        raise ValueError("samples and weights must be the same length")
+    return _trapezoid_mean(
+        [max(value, 0.0) ** beta * weight for value, weight in zip(samples, weights)]
+    )
+
+
+def sine_power_mean(beta: float, nx: int) -> float:
+    """Discrete ``mean_xi sin(pi*xi)**beta`` over ``nx`` stations.
+
+    Kept as the round-3 entry point; equal to :func:`power_mean` of
+    :func:`taper_profile` at zero parallel body.
+    """
+    return power_mean(taper_profile(nx, 0.0), beta)
+
+
+def _solve_power(
+    target: float,
+    samples: Sequence[float],
+    weights: Sequence[float] | None = None,
+) -> float:
+    """Invert :func:`power_mean` / :func:`weighted_power_mean`.
+
+    The mean falls monotonically from ``max(samples)`` (``beta -> 0``) to ``0``
+    (``beta -> inf``), so a bisection in ``log beta`` converges for any target in
+    between. ``target`` must be strictly below the ``beta -> 0`` limit, which the
+    end stations pin at the value of the interior samples: if every station were
+    ``1`` there would be no taper to solve for.
     """
     if not (0.0 < target < 1.0):
-        raise ValueError(f"sine-power mean target must be in (0, 1), got {target!r}")
+        raise ValueError(f"power-mean target must be in (0, 1), got {target!r}")
+    weights = list(weights) if weights is not None else [1.0] * len(samples)
+
+    def mean(beta: float) -> float:
+        return weighted_power_mean(samples, beta, weights)
+
     low, high = -12.0, 12.0  # log10(beta)
-    # Guard: make sure the bracket really straddles the target.
-    if sine_power_mean(10.0**low, nx) < target:  # pragma: no cover - extreme input
-        raise ValueError(f"target {target!r} above the representable sine-power mean")
-    if sine_power_mean(10.0**high, nx) > target:  # pragma: no cover - extreme input
-        raise ValueError(f"target {target!r} below the representable sine-power mean")
+    if mean(10.0**low) < target:  # pragma: no cover - extreme input
+        raise ValueError(f"target {target!r} above the representable power mean")
+    if mean(10.0**high) > target:  # pragma: no cover - extreme input
+        raise ValueError(f"target {target!r} below the representable power mean")
     for _ in range(200):
         mid = 0.5 * (low + high)
-        if sine_power_mean(10.0**mid, nx) > target:
+        if mean(10.0**mid) > target:
             low = mid
         else:
             high = mid
         if high - low < 1.0e-14:
             break
     return 10.0 ** (0.5 * (low + high))
+
+
+def _solve_sine_power(target: float, nx: int) -> float:
+    """Round-3 entry point: the sine-law exponent whose discrete mean is ``target``."""
+    return _solve_power(target, taper_profile(nx, 0.0))
 
 
 # --------------------------------------------------------------------------- #
@@ -253,6 +357,12 @@ class CalibratedHullParameters:
     nx: int = 81
     nz: int = 21
     water_density: float = 1025.0
+    #: Middle fraction of the length held at full breadth and full section area.
+    #: ``0`` (default) is the round-3 sine planform with no parallel body.
+    parallel_body_fraction: float = 0.0
+    #: Draft at the extreme ends divided by the design draft -- the forefoot and the
+    #: run. ``1`` (default) keeps every station at the design draft, i.e. no rise.
+    end_draft_ratio: float = 1.0
 
     @property
     def prismatic_coefficient(self) -> float:
@@ -288,7 +398,60 @@ class CalibratedHullParameters:
             )
         if not (0.0 < cp < 1.0):
             out.append(f"prismatic coefficient Cb/Cm must lie in (0, 1), got {cp!r}")
+        if not (0.0 <= self.parallel_body_fraction < 1.0):
+            out.append(
+                "parallel_body_fraction must lie in [0, 1), got "
+                f"{self.parallel_body_fraction!r}"
+            )
+        if not (0.0 < self.end_draft_ratio <= 1.0):
+            out.append(
+                f"end_draft_ratio must lie in (0, 1], got {self.end_draft_ratio!r}"
+            )
+        if out:
+            return out
+        # A keel rise hollows out the ends, so the fullness law has to be *keener*
+        # than the breadth law to still hold Cb: when the required fullness exponent
+        # would go negative the parameter set is geometrically impossible (the ends
+        # are asked to carry more volume than they have box), and it is refused here
+        # rather than silently returned as a hull that misses its block coefficient.
+        try:
+            if self.fullness_exponents()[1] < 0.0:
+                out.append(
+                    "inconsistent shape request: end_draft_ratio "
+                    f"{self.end_draft_ratio:.3f} with parallel_body_fraction "
+                    f"{self.parallel_body_fraction:.3f} hollows the ends so far that "
+                    "no positive fullness exponent realises Cb; use a larger "
+                    "end_draft_ratio or a fuller hull"
+                )
+        except ValueError as error:
+            out.append(
+                f"inconsistent shape request: end_draft_ratio "
+                f"{self.end_draft_ratio:.3f} with parallel_body_fraction "
+                f"{self.parallel_body_fraction:.3f} leaves the ends too little volume "
+                f"for Cb = {self.block_coefficient:.3f} ({error}); use a larger "
+                "end_draft_ratio or a fuller hull"
+            )
         return out
+
+    def taper(self) -> tuple[float, ...]:
+        """The planform shape sampled on this hull's station grid."""
+        return taper_profile(self.nx, self.parallel_body_fraction)
+
+    def keel_ratios(self) -> tuple[float, ...]:
+        """Draft / design draft at each station."""
+        return keel_ratio_profile(self.taper(), self.end_draft_ratio)
+
+    def fullness_exponents(self) -> tuple[float, float]:
+        """``(s, r)``: breadth exponent from ``Cwp``, fullness exponent from ``Cb``.
+
+        Both are solved on the discrete functional the loft integrates:
+        ``Cwp = mean(g**s)`` and ``Cb = Cm * mean(h * g**(s+r))``.
+        """
+        taper = self.taper()
+        keel = self.keel_ratios()
+        s = _solve_power(self.waterplane_coefficient, taper)
+        q = _solve_power(self.prismatic_coefficient, taper, keel)
+        return s, q - s
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -298,6 +461,8 @@ class CalibratedHullParameters:
             "block_coefficient": self.block_coefficient,
             "midship_coefficient": self.midship_coefficient,
             "waterplane_coefficient": self.waterplane_coefficient,
+            "parallel_body_fraction": self.parallel_body_fraction,
+            "end_draft_ratio": self.end_draft_ratio,
             "prismatic_coefficient": self.prismatic_coefficient,
             "nx": self.nx,
             "nz": self.nz,
@@ -317,6 +482,8 @@ class CalibratedHull:
     #: Per-station half-breadth and profile exponent actually used.
     half_breadths: tuple[float, ...]
     profile_exponents: tuple[float, ...]
+    #: Per-station draft / design draft actually used (empty = flat keel).
+    keel_ratios: tuple[float, ...] = ()
 
     def calibration_report(self) -> dict[str, Any]:
         """Requested vs realised coefficients, integrated from the mesh itself."""
@@ -337,8 +504,14 @@ class CalibratedHull:
             "relative_error": relative_errors(realised["coefficients"], requested),
             "breadth_exponent": self.breadth_exponent,
             "fullness_exponent": self.fullness_exponent,
-            "settings": {"nx": self.parameters.nx, "nz": self.parameters.nz,
-                         "level_cluster": LEVEL_CLUSTER},
+            "settings": {
+                "nx": self.parameters.nx,
+                "nz": self.parameters.nz,
+                "level_cluster": LEVEL_CLUSTER,
+                "parallel_body_fraction": self.parameters.parallel_body_fraction,
+                "end_draft_ratio": self.parameters.end_draft_ratio,
+                "keel_rise_exponent": KEEL_RISE_EXPONENT,
+            },
         }
 
 
@@ -416,25 +589,21 @@ def build_calibrated_hull(parameters: CalibratedHullParameters) -> CalibratedHul
     p = parameters
     nx, nz = p.nx, p.nz
 
-    # 1) Breadth law from Cwp: the trapezoid mean of sin^s over the station grid.
-    breadth_exponent = _solve_sine_power(p.waterplane_coefficient, nx)
+    # 1) Breadth law from Cwp and 2) fullness law from Cb, both on the discrete
+    #    functional the loft integrates: Cwp = mean(g**s), Cb = Cm*mean(h*g**(s+r)),
+    #    with ``g`` the planform taper (parallel middle body) and ``h`` the local
+    #    draft ratio (forefoot / run).
+    taper = p.taper()
+    keel_ratios = p.keel_ratios()
+    breadth_exponent, fullness_exponent = p.fullness_exponents()
+    if fullness_exponent < 0.0:  # pragma: no cover - problems() rejects this request
+        raise ValueError("no realisable fullness law for this shape request")
 
-    # 2) Fullness law from Cb: Cb = Cm * mean(sin**(s+r)).
-    target = p.prismatic_coefficient
-    fullness_exponent = _solve_sine_power(target, nx) - breadth_exponent
-    if fullness_exponent < 0.0:  # pragma: no cover - problems() rejects Cp > Cwp
-        raise ValueError("Cp exceeds Cwp: no realisable fullness law")
-
-    last = nx - 1
     half_breadths: list[float] = []
     fullnesses: list[float] = []
-    for i in range(nx):
-        # ``math.sin(math.pi)`` is 1.2e-16, not zero: the end stations are forced
-        # to a point explicitly, otherwise the loft leaves an open slot at the stem
-        # and the post (the same trap ``tensorcad.hull`` documents).
-        sine = 0.0 if i == 0 or i == last else math.sin(math.pi * i / last)
-        half_breadths.append(0.5 * p.beam * sine**breadth_exponent)
-        fullnesses.append(p.midship_coefficient * sine**fullness_exponent)
+    for g in taper:
+        half_breadths.append(0.5 * p.beam * g**breadth_exponent)
+        fullnesses.append(p.midship_coefficient * g**fullness_exponent)
 
     # 3) Per-station section profile so the sampled area is exactly fullness*B*T.
     profile_exponents = [solve_profile_exponent(f, nz) for f in fullnesses]
@@ -443,10 +612,13 @@ def build_calibrated_hull(parameters: CalibratedHullParameters) -> CalibratedHul
     builder = MeshBuilder(units=UNITS, coordinate_frame=COORDINATE_FRAME)
     rings: list[list[int]] = []
     for i in range(nx):
-        x = p.length * i / last
+        x = p.length * i / (nx - 1)
+        station_draft = p.draft * keel_ratios[i]
         rings.append([
             builder.add_vertex(
-                _section_point(x, half_breadths[i], profile_exponents[i], p.draft, nz, j)
+                _section_point(
+                    x, half_breadths[i], profile_exponents[i], station_draft, nz, j
+                )
             )
             for j in range(ring_size)
         ])
@@ -470,6 +642,7 @@ def build_calibrated_hull(parameters: CalibratedHullParameters) -> CalibratedHul
         fullness_exponent=fullness_exponent,
         half_breadths=tuple(half_breadths),
         profile_exponents=tuple(profile_exponents),
+        keel_ratios=tuple(keel_ratios),
     )
 
 
@@ -482,8 +655,9 @@ def sectional_area_curve(hull: CalibratedHull) -> tuple[tuple[float, ...], tuple
     p = hull.parameters
     nz = p.nz
     xs = tuple(p.length * i / (p.nx - 1) for i in range(p.nx))
+    drafts = hull.keel_ratios or tuple(1.0 for _ in hull.half_breadths)
     areas = tuple(
-        2.0 * b * p.draft * section_area_ratio(pe, nz)
-        for b, pe in zip(hull.half_breadths, hull.profile_exponents)
+        2.0 * b * p.draft * h * section_area_ratio(pe, nz)
+        for b, h, pe in zip(hull.half_breadths, drafts, hull.profile_exponents)
     )
     return xs, areas
