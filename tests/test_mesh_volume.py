@@ -204,3 +204,68 @@ def test_ellipsoid_spheroid_limit():
     ell_vol = mv.analytic_ellipsoid_volume(semi_axes)
     sph_vol = mv.analytic_sphere_volume(r)
     assert ell_vol == pytest.approx(sph_vol, rel=1e-15)
+
+
+# ---------------------------------------------------------------------------
+# cylinder: mixed curvature (flat side + curved caps approximated)
+# ---------------------------------------------------------------------------
+def test_cylinder_volume_converges_monotonically():
+    """Cylinder (r=1, h=2) volume error decreases monotonically with radial resolution."""
+    rows = mv.cylinder_convergence_study(1.0, 2.0, radial_levels=(16, 32, 64, 128, 256))
+    errors = [row.volume_error for row in rows]
+    assert all(err < 0.0 for err in errors), "an inscribed prism is below the cylinder"
+    pairs = list(itertools.pairwise(errors))
+    assert all(abs(later) < abs(earlier) for earlier, later in pairs)
+    # Error ratio between successive levels should approach 4 (O(1/n^2))
+    ratios = [abs(earlier / later) for earlier, later in pairs]
+    assert all(r > 2.0 for r in ratios), f"ratios {ratios} should approach 4"
+    assert abs(rows[-1].volume_error) <= mv.RELATIVE_TOLERANCE
+    for row in rows:
+        assert row.topologically_closed and row.watertight
+        assert row.route_difference <= mv.ROUTE_TOLERANCE
+
+
+def test_cylinder_reference_matches_closed_form():
+    """Cylinder volume reference matches pi*r^2*h."""
+    r, h = 1.5, 3.0
+    ref = mv.analytic_cylinder_volume(r, h)
+    assert ref == pytest.approx(math.pi * r**2 * h, rel=1e-15)
+    area_ref = mv.analytic_cylinder_area(r, h)
+    assert area_ref == pytest.approx(2 * math.pi * r * (r + h), rel=1e-15)
+
+
+# ---------------------------------------------------------------------------
+# cone: singularity at apex, flat base
+# ---------------------------------------------------------------------------
+def test_cone_volume_converges_monotonically():
+    """Cone (r=1, h=2) volume error decreases monotonically with radial resolution."""
+    rows = mv.cone_convergence_study(1.0, 2.0, radial_levels=(16, 32, 64, 128, 256))
+    errors = [row.volume_error for row in rows]
+    assert all(err < 0.0 for err in errors), "an inscribed pyramid is below the cone"
+    pairs = list(itertools.pairwise(errors))
+    assert all(abs(later) < abs(earlier) for earlier, later in pairs)
+    # Error ratio between successive levels should approach 4 (O(1/n^2))
+    ratios = [abs(earlier / later) for earlier, later in pairs]
+    assert all(r > 2.0 for r in ratios), f"ratios {ratios} should approach 4"
+    assert abs(rows[-1].volume_error) <= mv.RELATIVE_TOLERANCE
+    for row in rows:
+        assert row.topologically_closed and row.watertight
+        assert row.route_difference <= mv.ROUTE_TOLERANCE
+
+
+def test_cone_reference_matches_closed_form():
+    """Cone volume reference matches pi*r^2*h/3."""
+    r, h = 1.5, 3.0
+    ref = mv.analytic_cone_volume(r, h)
+    assert ref == pytest.approx(math.pi * r**2 * h / 3.0, rel=1e-15)
+    area_ref = mv.analytic_cone_area(r, h)
+    slant = math.sqrt(r**2 + h**2)
+    assert area_ref == pytest.approx(math.pi * r * (r + slant), rel=1e-15)
+
+
+def test_cone_sphere_limit():
+    """When the cone becomes a degenerate case, volume behaves correctly."""
+    # A cone with very small height should have very small volume
+    r, h = 1.0, 0.001
+    ref = mv.analytic_cone_volume(r, h)
+    assert ref == pytest.approx(math.pi * r**2 * h / 3.0, rel=1e-10)
