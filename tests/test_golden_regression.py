@@ -1317,3 +1317,31 @@ def test_verification_report_test_count_is_accurate() -> None:
             f"verification_report.md claims ~{reported} tests but there are {actual}; "
             "update the report"
         )
+
+
+def test_sphere_ellipsoid_has_three_grid_gci(committed: golden.SuiteResult) -> None:
+    """Regression: sphere_ellipsoid now carries a finer level for GCI extrapolation.
+
+    Before this test, only wigley and series60 had three-grid convergence. The
+    sphere/ellipsoid SDF case now matches them, proving its volume/area error is
+    discretisation (not model error) via Richardson extrapolation.
+    """
+    case = {result.name: result for result in committed.cases}["sphere_ellipsoid"]
+    assert {"coarse", "fine", "finer"} <= set(case.measurements), (
+        f"sphere_ellipsoid missing finer level; levels={sorted(case.measurements)}"
+    )
+    assert case.measurements.get("extrapolated"), "sphere_ellipsoid has no GCI extrapolation"
+    # The extrapolated values must be closer to the reference than the fine-level values
+    extrapolated = case.measurements["extrapolated"]
+    fine = case.measurements["fine"]
+    for key in ("sphere_volume_m3", "sphere_surface_area_m2",
+                "ellipsoid_volume_m3", "ellipsoid_surface_area_m2"):
+        assert key in extrapolated, f"missing extrapolated {key}"
+        ext_val = extrapolated[key]["value"]
+        fine_val = fine[key]
+        ref = case.reference[key]
+        ext_err = abs(ext_val - ref) / ref
+        fine_err = abs(fine_val - ref) / ref
+        assert ext_err <= fine_err, (
+            f"{key}: GCI extrapolation error {ext_err:.3e} > fine error {fine_err:.3e}"
+        )

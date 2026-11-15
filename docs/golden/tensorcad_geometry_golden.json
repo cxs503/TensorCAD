@@ -237,7 +237,28 @@
       }
     },
     "sphere_ellipsoid": {
-      "extrapolated": {},
+      "extrapolated": {
+        "ellipsoid_surface_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 6.780e-04 (remaining 1.096e-04; observed order p = 2.03 over r = 2.0000, 2.0000: 22.0568116 then 22.0717798)",
+          "tolerance": 0.0008475081087523838,
+          "value": 22.07177975770822
+        },
+        "ellipsoid_volume_m3": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 1.333e-03 (remaining 2.155e-04; observed order p = 2.03 over r = 2.0000, 2.0000: 6.27207567 then 6.28045305)",
+          "tolerance": 0.0016666269374558194,
+          "value": 6.280453050482593
+        },
+        "sphere_surface_area_m2": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 6.869e-04 (remaining 1.108e-04; observed order p = 2.04 over r = 2.0000, 2.0000: 12.5549294 then 12.5635613)",
+          "tolerance": 0.0008586285521692176,
+          "value": 12.563561300596854
+        },
+        "sphere_volume_m3": {
+          "basis": "GCI: 1.25 x max(|extrapolated - finer|, |X23 - X12|) / |reference| = 1.25 x 1.333e-03 (remaining 2.155e-04; observed order p = 2.03 over r = 2.0000, 2.0000: 4.18138378 then 4.1869687)",
+          "tolerance": 0.0016666269374558196,
+          "value": 4.186968700321728
+        }
+      },
       "geometry_sha256": "f6ded09395f752148a916d9da9150e3faea6375667030258a6045de5ee452219",
       "invariants": {},
       "known_limitations": [],
@@ -265,6 +286,18 @@
           "sphere_extent_z_m": 2,
           "sphere_surface_area_m2": 12.560637572470489,
           "sphere_volume_m3": 4.1850791277245145
+        },
+        "finer": {
+          "ellipsoid_extent_x_m": 4,
+          "ellipsoid_extent_y_m": 3,
+          "ellipsoid_extent_z_m": 1,
+          "ellipsoid_surface_area_m2": 22.074198708742284,
+          "ellipsoid_volume_m3": 6.281807381941161,
+          "sphere_extent_x_m": 2,
+          "sphere_extent_y_m": 2,
+          "sphere_extent_z_m": 2,
+          "sphere_surface_area_m2": 12.56495351031314,
+          "sphere_volume_m3": 4.187871587960774
         }
       },
       "reference": {
@@ -452,9 +485,21 @@
     "richardson_tolerance": "GCI: 1.25 x |extrapolated - finest| / |reference|, floor 0.0001 (relative): on a three-level ladder the extrapolated value must agree with the analytic reference within the band the measurements' own convergence justifies"
   },
   "provenance": {
+    "forced_bless": [
+      {
+        "details": [
+          "[sphere_ellipsoid/extrapolation_not_blessed] the ladder ('coarse', 'fine', 'finer') supports a grid-convergence assertion but the baseline records none for this case; re-run '--bless' so the band is recorded"
+        ],
+        "exceeded": [
+          "extrapolation_not_blessed"
+        ],
+        "git_commit": "9778a1050bb0bd6764dde0b2d0b8116338ed213b",
+        "python": "3.11.6"
+      }
+    ],
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "ea1a69b0b32a48e357da6b30cc396bff5b186ad7d6570eb6c790eff855feccce",
-    "git_commit": "e61fe0b4144d5c06f341e7b433a77d9d754d8137",
+    "geometry_fingerprint": "f8931ca5fb034064c5ced5ac01134ce8b0886a9b52222cb9a976c9a9503489c8",
+    "git_commit": "9778a1050bb0bd6764dde0b2d0b8116338ed213b",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },

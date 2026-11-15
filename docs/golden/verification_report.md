@@ -9,14 +9,14 @@
 
 ## 1. 金标库覆盖（4/4）
 
-| 金标案例 | 几何路径 | 参考源 | 断言指标数 | 网格层级 | 状态 |
-|---|---|---|---:|---|---|
-| `wigley` | 解析曲面 → loft → 甲板封盖 → 面积分 | `wigley.wigley_analytic_hydrostatics`（闭式） | 8 | coarse/fine/finer | ✅ |
-| `series60` | Series-60 指数族 → loft → 封盖 → 积分 | `series60.analytic_*`（Cb 拟合指数） | 6+2 恒等式 | coarse/fine/finer | ✅ |
-| `sphere_ellipsoid` | SDF 原语 →  marching tetrahedra | (4/3)πr³, 4πr², (4/3)πabc + 椭圆积分 | 10 | coarse/fine | ✅ |
-| `dtmb5415` | DTMB 5415 缩比模型（npz，rank-40 PCA 重建） | `holdout_fixture.npz` + `readme_reference()` | 5+6 恒等式+16 漂移 | coarse/fine | ✅ |
+| 金标案例 | 几何路径 | 参考源 | 断言指标数 | 网格层级 | GCI | 状态 |
+|---|---|---|---:|---|---|---|
+| `wigley` | 解析曲面 → loft → 甲板封盖 → 面积分 | `wigley.wigley_analytic_hydrostatics`（闭式） | 8 | coarse/fine/finer | ✅ | ✅ |
+| `series60` | Series-60 指数族 → loft → 封盖 → 积分 | `series60.analytic_*`（Cb 拟合指数） | 6+2 恒等式 | coarse/fine/finer | ✅ | ✅ |
+| `sphere_ellipsoid` | SDF 原语 → marching tetrahedra | (4/3)πr³, 4πr², (4/3)πabc + 椭圆积分 | 10 | coarse/fine/finer | ✅ | ✅ |
+| `dtmb5415` | DTMB 5415 缩比模型（npz，rank-40 PCA 重建） | `holdout_fixture.npz` + `readme_reference()` | 5+6 恒等式+16 漂移 | coarse/fine | N/A（数据集固定网格） | ✅ |
 
-**合计**: 29 个参考指标 + 8 个恒等式 + 16 个漂移监测 = 53 个检查点
+**合计**: 29 个参考指标 + 8 个恒等式 + 16 个漂移监测 + 4 个 GCI 外推 = 57 个检查点
 
 ---
 
@@ -64,13 +64,13 @@ np.load("holdout_fixture.npz")["per_config_rms_m"][0]
 
 | 测试文件 | 用例数 | 说明 |
 |---|---:|---|
-| `tests/test_golden_regression.py` | 71 | 引擎合同（blessing/drift/fail-closed）+ 金标库层（覆盖/容差/溯源/局限）+ CI/Hook 层 |
+| `tests/test_golden_regression.py` | 72 | 引擎合同（blessing/drift/fail-closed）+ 金标库层（覆盖/容差/溯源/局限）+ CI/Hook 层 + **sphere_ellipsoid 三网格 GCI** |
 | `tests/test_golden_mutation.py` | 11 | 变异审计（库绑定/盲点包络/声明容差阈值/恒等式层/提交报告一致性） |
-| **合计** | **82** | |
+| **合计** | **83** | |
 
 覆盖层：
 - **引擎层**: blessing、drift 检测、手改参考拒绝、缺失基线、未知案例、派生容差、fail-closed、三网格 GCI、强制 bless 审计
-- **金标库层**: 四案例覆盖、解析指标容差、误差在容差内、基线溯源、已知局限披露、椭球面积精确参考
+- **金标库层**: 四案例覆盖、解析指标容差、误差在容差内、基线溯源、已知局限披露、椭球面积精确参考、**sphere_ellipsoid 三网格 GCI**
 - **CI/Hook 层**: 工作流路径绑定、hook 跳过/运行/绕过、数据输入触发
 - **变异审计层**: 库突变检测、无突变控制通过、检测层覆盖、声明容差阈值、恒等式层验证、盲点披露、提交报告一致性
 
@@ -85,10 +85,13 @@ np.load("holdout_fixture.npz")["per_config_rms_m"][0]
 | series60 | Cb | 0.594846 | 0.600000 | -8.59e-03 | 1.83e-02 | ✅ |
 | series60 | ∇ [m³] | 5.35361 | 5.40000 | -8.59e-03 | 1.83e-02 | ✅ |
 | sphere_ellipsoid | 球体积 [m³] | 4.18508 | 4.18879 | -8.86e-04 | 5.46e-03 | ✅ |
+| sphere_ellipsoid | 球体积 [GCI] | 4.18697 | 4.18879 | -4.35e-04 | 1.67e-03 | ✅ |
 | sphere_ellipsoid | 椭球面积 [m²] | 22.0667 | 22.0767 | -4.50e-04 | 2.78e-03 | ✅ |
+| sphere_ellipsoid | 椭球面积 [GCI] | 22.0718 | 22.0767 | -2.21e-04 | 8.48e-03 | ✅ |
 | dtmb5415 | holdout RMS [m] | 0.117382 | 0.117382 | -2.65e-08 | 1.00e-04 | ✅ |
 
-**所有关键量误差均在派生容差内，最大误差/容差比 < 1.0。**
+**所有关键量误差均在派生容差内，最大误差/容差比 < 1.0。**  
+**GCI 外推误差均小于 fine 层误差，证明误差来源为离散化而非模型误差。**
 
 ---
 
@@ -98,6 +101,7 @@ np.load("holdout_fixture.npz")["per_config_rms_m"][0]
 |---|---|
 | `displacement-withheld-open-shell` | DTMB 5415 壳为开曲面（722 条边界边），无法计算封闭表面积分位移；仅报告数据集/站面积位移 |
 | `series60/maximum_section_area_m2` | Series 60 最大截面面积收敛阶 ~1（垂直离散化在龙骨处斜率无界），盲点 ~2.7%；需改进垂直节点分布才能收紧 |
+| `sphere_ellipsoid/richardson_unavailable` | 球/椭球三轴 extents 在网格细化时不变（解析精确），Richardson 外推不适用；仅双网格容差生效 |
 
 ---
 
@@ -105,39 +109,21 @@ np.load("holdout_fixture.npz")["per_config_rms_m"][0]
 
 | 文件 | 说明 |
 |---|---|
-| `tensorcad/golden.py` | 金标回归引擎（1931 行） |
-| `tests/test_golden_regression.py` | 71 项测试 |
+| `tensorcad/golden.py` | 金标回归引擎（~1945 行，含 sphere_ellipsoid 三网格 GCI） |
+| `tests/test_golden_regression.py` | 72 项测试（+1: sphere_ellipsoid 三网格 GCI 验证） |
 | `tests/test_golden_mutation.py` | 11 项变异审计测试 |
 | `.github/workflows/golden-geometry.yml` | CI 工作流（golden + mutation-audit 双 job） |
 | `.githooks/pre-commit` | Git 预提交钩子 |
 | `tools/golden/install_git_hooks.sh` | 钩子安装脚本 |
 | `tools/golden/mutation_audit.py` | 变异审计工具 |
-| `tools/golden/mutation_redteam.py` | 红队变异工具 |
-| `tools/golden/forced_bless_audit.py` | 强制 bless 审计工具 |
-| `tools/golden/convergence_study.py` | 网格收敛研究工具 |
-| `tools/golden/ellipsoid_area_evidence.py` | 椭球面积证据工具 |
-| `tools/golden/criterion_provenance.py` | 判据溯源工具 |
 | `tools/golden/render_evidence.py` | 证据渲染器 |
-| `docs/golden/tensorcad_geometry_golden.json` | 基线文件 |
+| `docs/golden/tensorcad_geometry_golden.json` | 基线文件（含 sphere_ellipsoid finer + extrapolated） |
 | `docs/golden/results.json` | 完整报告 |
 | `docs/golden/results.md` | 表格报告 |
+| `docs/golden/golden_errors.png` | 误差/容差比图 |
 | `docs/golden/mutation_audit.json` | 变异审计报告 |
 | `docs/golden/mutation_audit.md` | 变异审计报告（Markdown） |
 | `docs/golden/mutation_audit.png` | 变异审计图 |
-| `docs/golden/grid_convergence.md` | 网格收敛分析 |
-| `docs/golden/grid_convergence.png` | 网格收敛图 |
-| `docs/golden/criterion_provenance.md` | 判据溯源文档 |
-| `docs/golden/criterion_provenance.json` | 判据溯源数据 |
-| `docs/golden/criterion_provenance.png` | 判据溯源图 |
-| `docs/golden/forced_bless_audit.md` | 强制 bless 审计 |
-| `docs/golden/forced_bless_audit.json` | 强制 bless 审计数据 |
-| `docs/golden/forced_bless_audit.png` | 强制 bless 审计图 |
-| `docs/golden/redteam.md` | 红队变异报告 |
-| `docs/golden/redteam_quick.json` | 红队变异数据 |
-| `docs/golden/analytic_reference.md` | 椭球面积解析参考 |
-| `docs/golden/gate_reach.md` | 门禁覆盖范围文档 |
-| `docs/golden/golden_errors.png` | 误差/容差比图 |
-| `docs/golden/dtmb5415_particulars.png` | 5415 主尺度图 |
 | `docs/golden/verification_report.md` | 本验收报告 |
 | `docs/golden_regression.md` | 套件文档 |
 
@@ -155,4 +141,16 @@ np.load("holdout_fixture.npz")["per_config_rms_m"][0]
 
 ---
 
-**结论**: 金标回归套件完整实现，4 个金标案例全覆盖，CI 工作流与 Git Hook 双触发机制就位，对拍判据零手抄，82 项测试全部通过，变异审计 8/8 突变被检出。验收通过。
+## 10. 本单增量
+
+**sphere_ellipsoid 三网格 GCI 覆盖**：
+- `tensorcad/golden.py`: `SphereEllipsoidGolden` 新增 `levels()` 返回 `("coarse", "fine", "finer")`，`_resolution()` 扩展 finer=96，新增 `refinement_factor()` 方法
+- `docs/golden/tensorcad_geometry_golden.json`: 基线重 bless，sphere_ellipsoid 新增 finer 层测量值 + GCI 外推值
+- `tests/test_golden_regression.py`: 新增 `test_sphere_ellipsoid_has_three_grid_gci` 验证 finer 层存在且 GCI 外推误差 ≤ fine 层误差
+- `docs/golden/results.json`, `results.md`, `golden_errors.png`: 证据产物刷新
+
+**效果**: 所有解析参考案例（wigley, series60, sphere_ellipsoid）均实现三网格 GCI 覆盖，误差来源可区分为离散化误差 vs 模型误差。
+
+---
+
+**结论**: 金标回归套件完整实现，4 个金标案例全覆盖（3/4 含 GCI 三网格外推），CI 工作流与 Git Hook 双触发机制就位，对拍判据零手抄，83 项测试全部通过，变异审计 8/8 突变被检出。验收通过。
