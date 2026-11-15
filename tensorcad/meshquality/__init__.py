@@ -32,6 +32,9 @@ This package is the single library behind that question:
 * :mod:`tensorcad.meshquality.door` -- admission control: one verdict out of shell topology,
   per-element quality and interior-face non-orthogonality, so a pipeline has one door to
   call instead of three (:func:`admit`);
+* :mod:`tensorcad.meshquality.bridge` -- the same numbers for the repository's own
+  :class:`tensorcad.geometry.Mesh`, plus the four aspect dialects and the conservative
+  limit transfer that lets :mod:`tensorcad.gate` gate on canonical metrics;
 * :mod:`tensorcad.meshquality.reference` -- second implementations and external oracles
   (Gmsh, trimesh, and the VTK/Verdict definitions meshmagick uses) that the benchmark
   compares against, so the library is never its own judge.
@@ -42,6 +45,14 @@ run in this environment and why.
 """
 from __future__ import annotations
 
+from .bridge import (
+    CanonicalMeshQuality,
+    canonical_stats,
+    dialect_identities,
+    gate_to_canonical_limit,
+    legacy_to_canonical_limit,
+    qualify,
+)
 from .polymesh import (
     DEFAULT_POLYMESH_LIMITS,
     PolyMesh,
@@ -91,6 +102,12 @@ from .report import (
 )
 
 __all__ = [
+    "CanonicalMeshQuality",
+    "canonical_stats",
+    "dialect_identities",
+    "gate_to_canonical_limit",
+    "legacy_to_canonical_limit",
+    "qualify",
     "DEFAULT_GATE",
     "DoorVerdict",
     "admit",
