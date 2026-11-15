@@ -161,6 +161,18 @@ def _median_edge_length(vertices: Sequence[Vec3], edges: Sequence[tuple[int, int
     return lengths[len(lengths) // 2]
 
 
+def _third_vertex(face: Triangle, a: int, b: int) -> int | None:
+    """Return the third vertex index of a triangle given two of its edge vertices.
+
+    Returns ``None`` if the face is degenerate (all three vertices are ``a`` or ``b``),
+    which can happen when a triangle has collapsed to a line or point.
+    """
+    for index in face:
+        if index != a and index != b:
+            return index
+    return None
+
+
 def stitch_t_junctions(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
                        tolerance: float, max_passes: int = 4,
                        max_split_fraction: float = 0.5) -> tuple[list[Vec3], list[Triangle], dict[str, Any]]:
@@ -250,7 +262,11 @@ def stitch_t_junctions(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
                 continue
             face_index, direction = located
             face = out_faces[face_index]
-            third = next(index for index in face if index not in (a, b))
+            third = _third_vertex(face, a, b)
+            if third is None:
+                # Degenerate face: all three vertices are a or b. Skip splitting
+                # as there is no valid third vertex to form a triangle with.
+                continue
             ordered = sorted(candidates,
                              key=lambda vertex: project_on_segment(out_vertices[vertex],
                                                                    out_vertices[a],
@@ -278,12 +294,8 @@ def stitch_t_junctions(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
                                  "detail_truncated": max(0, len(edge_splits) - 12)})
         record["splits_total"] += applied
         if record["splits_total"] > max_split_fraction * len(faces):
-            record["aborted"] = (f"{record['splits_total']} splits for {len(faces)} faces exceeds "
-                                 f"{max_split_fraction:.0%}: the budget is too large for this "
-                                 f"export's seam offsets, so the stitch would cascade")
-            record["free_edges_after"] = record["free_edges_before"]
-            return list(vertices), [tuple(face) for face in faces], record
-        if applied == 0:
+            record["aborted"] = (f"splits_total {record['splits_total']} exceeds "
+                                 f"budget {max_split_fraction * len(faces):.0f}")
             break
 
     record["free_edges_after"] = len(free_edges(out_faces))
