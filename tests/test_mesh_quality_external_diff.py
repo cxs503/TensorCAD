@@ -100,7 +100,7 @@ def test_compare_agree_and_differ():
 
 
 def test_compare_reports_missing_and_length_mismatch():
-    res = diff.compare({"a": (1.0, 2.0)}, {"z": [1.0]}, {"a": "x", "b": "z"})
+    res = diff.compare({"a": (1.0, 2.0), "b": (1.0, 2.0)}, {"z": [1.0]}, {"a": "x", "b": "z"})
     assert res["a"]["status"] == "NOT_RETURNED"
     assert res["b"]["status"] == "LENGTH_MISMATCH"
 
@@ -166,48 +166,62 @@ def test_every_agreeing_pair_is_within_one_e_minus_six(artifact):
     assert agree >= 14, f"only {agree} agreeing pairs recorded"
 
 
-def test_explained_differences_are_exactly_the_documented_four(artifact):
-    """If a difference disappears or a new one appears, the doc must be updated with it."""
+def test_no_pair_in_the_artifact_is_left_unexplained(artifact):
+    """Every metric pair is either AGREE (<= 1e-6), a declared unit change, or a declared
+    different quantity. A pair that merely DIFFERs is a finding, not a pass."""
     differing = set()
     for name, mesh in artifact["meshes"].items():
         for oracle, res in mesh["oracles"].items():
-            if res["status"] != "RAN":
+            if res.get("status") != "RAN":
                 continue
-            for metric, cmp in res["comparisons"].items():
-                if cmp.get("status") == "DIFFER":
+            for metric, c in res.get("comparisons", {}).items():
+                if c.get("status") == "DIFFER":
                     differing.add((mesh["kind"], oracle, metric))
-    assert differing == {
-        ("tet", "verdict", "scaled_jacobian"),
-        ("tet", "verdict", "min_dihedral"),
-        ("tet", "verdict", "skewness"),
-        ("tri", "verdict", "aspect_ratio"),
-    }, differing
+            for ev in res.get("unit_changes", {}).values():
+                assert ev["constant"], "a declared unit factor must be constant on every element"
+    assert differing == set(), f"unexplained differences: {sorted(differing)}"
+    declared = set()
+    for name, mesh in artifact["meshes"].items():
+        for oracle, res in mesh["oracles"].items():
+            for ev in res.get("explained", []):
+                if ev.get("unit_change") is False:
+                    declared.add((mesh["kind"], oracle, ev["pair"][0]))
+    assert declared == {("tri", "verdict", "aspect_ratio"),
+                        ("tet", "verdict", "skewness"),
+                        ("tet", "verdict", "min_dihedral")}, sorted(declared)
 
-
-def test_tet_scaled_jacobian_differs_from_verdict_by_exactly_sqrt2(artifact):
-    """Documented normalisation: Verdict / library = √2, on every mesh where both ran."""
+def test_tet_scaled_jacobian_is_a_sqrt2_unit_change_not_a_disagreement(artifact):
+    """Verdict normalises by the regular tetrahedron, we divide by the column norms: the ratio is
+    exactly sqrt(2) on every element, so the pair is compared after dividing the oracle by it."""
     checked = 0
     for name, mesh in artifact["meshes"].items():
         if mesh["kind"] != "tet":
             continue
-        cmp = mesh["oracles"].get("verdict", {}).get("comparisons", {}).get("scaled_jacobian")
-        if not cmp or cmp.get("status") != "DIFFER":
+        res = mesh["oracles"].get("verdict", {})
+        uc = res.get("unit_changes", {}).get("scaled_jacobian")
+        if not uc:
             continue
-        ratio = cmp["external_at_worst"] / cmp["ours_at_worst"]
-        assert ratio == pytest.approx(math.sqrt(2.0), rel=1e-12), name
+        assert uc["factor"] == pytest.approx(math.sqrt(2.0), rel=1e-15), name
+        assert uc["measured_ratio_min"] == pytest.approx(math.sqrt(2.0), rel=1e-12), name
+        assert uc["measured_ratio_max"] == pytest.approx(math.sqrt(2.0), rel=1e-12), name
+        assert uc["constant"] is True, name
+        cmp = res["comparisons"]["scaled_jacobian"]
+        assert cmp["status"] == "AGREE" and cmp["max_rel_diff"] <= artifact["tolerance"], name
         checked += 1
-    assert checked >= 2
+    assert checked >= 2, "the sqrt2 unit change must be exercised on at least two tet meshes"
 
-
-def test_tri_aspect_ratio_discrepancy_is_the_documented_one(artifact):
-    """Finding F5: our triangle aspect_ratio is Verdict's radius_ratio, so it differs by ≲2/√3."""
-    cmp = artifact["meshes"]["tri_warped"]["oracles"]["verdict"]["comparisons"]["aspect_ratio"]
-    assert cmp["status"] == "DIFFER"
-    assert cmp["n_beyond_tol"] == cmp["n_elements"]
-    ratio = cmp["external_at_worst"] / cmp["ours_at_worst"]
-    assert 1.0 < ratio <= 2.0 / math.sqrt(3.0) + 1e-12
-    assert cmp["max_rel_diff"] > 0.1, "the documented discrepancy is ~15 %, not round-off"
-
+def test_tri_aspect_ratio_is_a_different_quantity_not_a_unit_change(artifact):
+    """Finding F5, restated after measuring it: Verdict's tri_aspect_ratio is not our aspect_ratio
+    in another unit -- the ratio external/ours is *not* constant (measured spread below), so the
+    pair is declared a different quantity instead of being reconciled by a factor."""
+    res = artifact["meshes"]["tri_warped"]["oracles"]["verdict"]
+    ev = [e for e in res["explained"] if e["pair"] == ["aspect_ratio", "aspect_ratio"]]
+    assert ev, "the aspect-ratio pair must be declared, not silently mapped"
+    ev = ev[0]
+    assert ev["unit_change"] is False
+    assert ev["measured_ratio_min"] > 1.0
+    assert ev["measured_ratio_max"] <= 2.0 / math.sqrt(3.0) + 1e-12
+    assert ev["measured_ratio_max"] - ev["measured_ratio_min"] > 1e-3, "measured spread is real"
 
 def test_gmsh_half_is_recorded_as_not_run_not_as_passed(artifact):
     assert artifact["gmsh_oracle"]["version"] == "unknown" or True  # informational
