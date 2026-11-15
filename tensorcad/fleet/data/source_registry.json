@@ -69,7 +69,7 @@
    "citation": "Numerical Ship Hydrodynamics: An Assessment of the Tokyo 2015 Workshop (eds. Hino, Stern), Springer 2020 \u2014 JBC (SR266 bulk carrier) test case",
    "url": "https://tokyo2015.k.u-tokyo.ac.jp/",
    "license": "published workshop benchmark data, research use",
-   "locator": "JBC test-case particulars (Lpp 280.0 m, B 45.0 m, T 16.5 m, Cb 0.858, Cm 0.992, grad 178369.9 m^3)",
+   "locator": "JBC test-case particulars (Lpp 280.0 m, B 45.0 m, T 16.5 m, Cb 0.858, Cm 0.9981, grad 178369.9 m^3)",
    "anchors": [
     "length",
     "beam",
@@ -80,7 +80,7 @@
    ],
    "retrieval": "offline_recollection",
    "verified": false,
-   "note": "grad 178369.9 m^3 is the value this repository already recorded in benchmarks/verified/baseline_fleet/result.json from a page fetch made when egress was still available; it now also passes the Cb*L*B*T cross-check to 0.005 %."
+   "note": "grad 178369.9 m^3 is the value this repository already recorded in benchmarks/verified/baseline_fleet/result.json from a page fetch made when egress was still available; it now also passes the Cb*L*B*T cross-check to 0.005 %. CORRECTED 2026-11-15: the recalled Cm 0.992 was wrong; the T2015 JBC page prints 0.9981 (page sha256 fc2ce905..., see tensorcad/fleet/data/geometry_source_ledger.json and benchmarks/verified/fleet_refs/crossref.json)."
   },
   {
    "ship": "DTC",
