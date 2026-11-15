@@ -175,16 +175,19 @@ def _gauss_newton(surface: Surface, point: Sequence[float], seed: tuple[float, f
     span_v = max(v1 - v0, 1e-12)
     step_u = 1e-6 * span_u
     step_v = 1e-6 * span_v
+    exact_partials = getattr(surface, "partials", None) if exact else None
     for _ in range(iterations):
-        base = surface.evaluate(u, v)
+        if exact_partials is not None:
+            # One derivative-net evaluation yields the point *and* both tangents; asking
+            # for ``evaluate`` and then ``partials`` doubled the cost of every iteration.
+            base, du, dv = exact_partials(u, v)
+        else:
+            base = surface.evaluate(u, v)
         residual = _sub(base, point)
         error = _norm(residual)
         if error <= tolerance:
             break
-        exact_partials = getattr(surface, "partials", None) if exact else None
-        if exact_partials is not None:
-            _, du, dv = exact_partials(u, v)
-        else:
+        if exact_partials is None:
             du = _scale(_sub(surface.evaluate(min(u + step_u, u1), v), base), 1.0 / step_u)
             dv = _scale(_sub(surface.evaluate(u, min(v + step_v, v1)), base), 1.0 / step_v)
         a11, a12 = _dot(du, du), _dot(du, dv)
