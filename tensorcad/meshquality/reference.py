@@ -310,11 +310,23 @@ def _version(module: str) -> str | None:
 
 
 def external_availability() -> dict[str, str | None]:
-    """Version of each external oracle, or ``None`` when it is not importable."""
+    """Version of each external oracle, or ``None`` when it is not available.
+
+    ``verdict_oracle`` is not a package: it is a compiled build of VTK's Verdict sources
+    (``tools/verdict_oracle/build.py``), reported with its own version string so a caller can
+    tell "not built here" from "built, wrong library".
+    """
+    try:  # imported lazily: the oracle module is optional, exactly like gmsh and trimesh
+        from . import verdict_oracle
+    except Exception:  # pragma: no cover - only if the module itself is broken
+        verdict: str | None = "import-failed"
+    else:
+        verdict = verdict_oracle.info() if verdict_oracle.available() else None
     return {
         "gmsh": _version("gmsh"),
         "meshmagick": _version("meshmagick"),
         "trimesh": _version("trimesh"),
+        "verdict_oracle": verdict,
     }
 
 
