@@ -25,6 +25,8 @@ from tensorcad.perf_evidence import (
     render_block,
     render_document,
     render_budget_table,
+    render_fleet3pt_gates,
+    render_fleet3pt_table,
     render_mesh_table,
     render_voxel_table,
 )
@@ -33,6 +35,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "docs" / "perf_scale_10m.md"
 MESH = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_mesh.json"
 VOXEL = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_voxel.json"
+FLEET3PT = ROOT / "benchmarks" / "perf_scale" / "ladder_fleet_10m_3pt.json"
 
 
 def _row(**kw):
@@ -50,6 +53,24 @@ def _row(**kw):
 
 def _mesh_artifact(rows):
     return {"schema": "tensorcad.perf_benchmark/2", "results": rows}
+
+
+def _fleet3pt_artifact(rows=None, gates=None, checks=None):
+    return {
+        "schema": "tensorcad.perf_benchmark/2",
+        "results": rows if rows is not None else [_row()],
+        "gates": gates or [],
+        "gates_checked": len(gates or []),
+        "gates_not_run": sum(1 for g in (gates or []) if g["status"] == "not_run"),
+        "volume_checks": checks or [],
+        "verdict": "pass" if gates and all(g["passed"] for g in gates) else "not_run",
+    }
+
+
+def _all(mesh, voxel, fleet3pt=None):
+    """Artifact mapping that satisfies every marked table in the document."""
+    return {"mesh": mesh, "voxel": voxel,
+            "fleet3pt": fleet3pt if fleet3pt is not None else _fleet3pt_artifact()}
 
 
 # ---------------------------------------------------------------------------
@@ -136,20 +157,20 @@ def test_check_document_accepts_matching_doc() -> None:
     mesh = _mesh_artifact([_row()])
     voxel = _mesh_artifact([_row(subtask="voxelize", nx=32, nz=0, triangles=0,
                                 grid_cells=32768)])
-    artifacts = {"mesh": mesh, "voxel": voxel}
+    artifacts = _all(mesh, voxel)
     doc = _doc_with({name: render_block(name, artifacts) for name in TABLE_NAMES})
-    assert check_document(doc, {"mesh": mesh, "voxel": voxel}) == []
+    assert check_document(doc, _all(mesh, voxel)) == []
 
 
 def test_check_document_detects_hand_edited_number() -> None:
     mesh = _mesh_artifact([_row(seconds=1.2345)])
     voxel = _mesh_artifact([_row(subtask="voxelize", nx=32, nz=0, triangles=0,
                                 grid_cells=32768)])
-    artifacts = {"mesh": mesh, "voxel": voxel}
+    artifacts = _all(mesh, voxel)
     blocks = {name: render_block(name, artifacts) for name in TABLE_NAMES}
     blocks["mesh-table"] = blocks["mesh-table"].replace("1.234", "0.987")
     doc = _doc_with(blocks)
-    problems = check_document(doc, {"mesh": mesh, "voxel": voxel})
+    problems = check_document(doc, _all(mesh, voxel))
     assert len(problems) == 1
     assert "mesh-table" in problems[0]
 
@@ -164,7 +185,7 @@ def test_render_document_is_idempotent() -> None:
     mesh = _mesh_artifact([_row()])
     voxel = _mesh_artifact([_row(subtask="voxelize", nx=32, nz=0, triangles=0,
                                 grid_cells=32768)])
-    artifacts = {"mesh": mesh, "voxel": voxel}
+    artifacts = _all(mesh, voxel)
     once = render_document(_doc_with({k: "" for k in TABLE_NAMES}), artifacts)
     twice = render_document(once, artifacts)
     assert once == twice
@@ -207,7 +228,8 @@ def test_committed_document_matches_committed_artifacts() -> None:
     assert DOC.exists(), f"missing {DOC}"
     problems = check_document(
         DOC.read_text(encoding="utf-8"),
-        {"mesh": load_artifact(MESH), "voxel": load_artifact(VOXEL)},
+        {"mesh": load_artifact(MESH), "voxel": load_artifact(VOXEL),
+         "fleet3pt": load_artifact(FLEET3PT)},
     )
     assert problems == [], (
         "docs/perf_scale_10m.md drifted from the committed artifacts; "
@@ -236,6 +258,79 @@ def test_accelerated_point_location_beats_brute_force_at_same_size() -> None:
             assert times["point_locate_accel"] < times["point_locate"], size
             compared += 1
     assert compared >= 3, "not enough sizes with both point-location paths"
+
+
+# ---------------------------------------------------------------------------
+# 10^6-10^7 multi-body ladder (fleet3pt)
+# ---------------------------------------------------------------------------
+
+def _gate(name, detail, passed=True, status="measured", ratio=None):
+    return {"name": name, "detail": detail, "passed": passed,
+            "status": status, "ratio": ratio}
+
+
+def test_fleet3pt_table_one_row_per_rung_in_subtask_order() -> None:
+    rows = [
+        _row(subtask="volume", copies=3, triangles=12_011_994),
+        _row(subtask="load", copies=1, triangles=4_003_998),
+        _row(subtask="point_locate_accel", copies=2, triangles=8_007_996,
+             build_seconds=63.55, index_bytes=636_834_220),
+        _row(subtask="fleet_assemble", copies=2, triangles=8_007_996),
+    ]
+    lines = render_fleet3pt_table(_fleet3pt_artifact(rows)).splitlines()
+    assert len(lines) == 2 + len(rows)
+    assert "load" in lines[2] and "fleet_assemble" in lines[3]
+    assert "point_locate_accel" in lines[4] and "volume" in lines[5]
+    assert "607.3" in lines[4]          # 636,834,220 B -> MiB
+    assert "63.55" in lines[4]          # index build seconds
+    assert "12,011,994" in lines[5]
+
+
+def test_fleet3pt_table_keeps_not_run_explicit() -> None:
+    rows = [_row(subtask="point_locate", copies=1, triangles=8_192_000,
+                 seconds=None, throughput=None, status="not_run",
+                 note="brute-force reference skipped")]
+    body = render_fleet3pt_table(_fleet3pt_artifact(rows)).splitlines()[2]
+    assert "not_run" in body
+    assert "brute-force reference skipped" in body
+    assert DASH in body
+
+
+def test_fleet3pt_gates_parse_detail_and_mark_not_run() -> None:
+    gates = [
+        _gate("scaling_load", "exponent=1.17 (limit 1.50), R^2=0.999, 3 sizes 410,878..4,003,998",
+              ratio=1.173),
+        _gate("scaling_fleet_assemble[x2]",
+              "not_run: 1 distinct size(s), need 3 to fit an exponent",
+              passed=True, status="not_run"),
+    ]
+    table = render_fleet3pt_gates(_fleet3pt_artifact(gates=gates))
+    lines = table.splitlines()
+    load_row = [ln for ln in lines if "scaling_load" in ln][0]
+    assert "1.17" in load_row and "1.50" in load_row
+    assert "0.999" in load_row and "| 3 |" in load_row
+    not_run_row = [ln for ln in lines if "fleet_assemble" in ln][0]
+    assert "not_run" in not_run_row
+    assert "pass" not in not_run_row.split("|")[2]
+
+
+def test_committed_fleet3pt_artifact_measures_the_10m_band() -> None:
+    """The anchor's missing piece: 10^6-10^7 band with *evaluable* gates."""
+    artifact = load_artifact(FLEET3PT)
+    biggest = max(r["triangles"] for r in artifact["results"])
+    assert biggest >= 10_000_000, f"largest fleet rung is only {biggest:,}"
+    scaling = [g for g in artifact["gates"] if g["name"].startswith("scaling_")]
+    assert scaling, "no complexity gates in the fleet ladder"
+    assert all(g["status"] == "measured" for g in scaling)
+    assert artifact["gates_not_run"] == 0
+    assert artifact["verdict"] == "pass"
+    assert all(c["ok"] for c in artifact.get("volume_checks", []))
+
+
+def test_committed_mesh_artifact_reaches_the_generator_limit() -> None:
+    mesh = load_artifact(MESH)
+    biggest = max(r["triangles"] for r in mesh["results"])
+    assert biggest >= 8_000_000, f"largest single-body rung is only {biggest:,}"
 
 
 if __name__ == "__main__":  # pragma: no cover
