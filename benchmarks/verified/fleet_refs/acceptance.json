@@ -16,7 +16,7 @@
       "lcb_percent",
       "lwl"
      ],
-     "documents_total": 3
+     "documents_total": 4
     },
     "JBC": {
      "pass": false,
@@ -38,30 +38,29 @@
       "lwl"
      ],
      "failing": [],
-     "documents_total": 3
+     "documents_total": 4
     },
     "KVLCC2": {
      "pass": false,
      "cross_verified_lineages": [
       "displacement_volume",
-      "cb"
+      "cb",
+      "lcb_percent"
      ],
      "failing": [
-      "lcb_percent",
       "lwl"
      ],
      "documents_total": 6
     },
     "ONRT": {
-     "pass": false,
+     "pass": true,
      "cross_verified_lineages": [
       "displacement_volume",
       "cb",
+      "lcb_percent",
       "lwl"
      ],
-     "failing": [
-      "lcb_percent"
-     ],
+     "failing": [],
      "documents_total": 2
     },
     "Series60": {
@@ -163,7 +162,7 @@
   },
   "two_citation_and_digest": {
    "pass": true,
-   "cells_checked": 104,
+   "cells_checked": 108,
    "cells_without_citation": []
   },
   "three_disputed_marked_with_both_values": {

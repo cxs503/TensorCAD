@@ -1,7 +1,7 @@
 {
  "schema": "tensorcad.fleet_refs.crossref/1.0",
  "anchor": "REPRO-GEOM-FLEET-REFS",
- "generated_utc": "2026-11-15T03:57:49+00:00",
+ "generated_utc": "2026-11-15T19:35:04+00:00",
  "quantity_labels": {
   "displacement_volume": "\u2207 (m\u00b3)",
   "cb": "Cb",
@@ -253,8 +253,10 @@
         "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 6"
-       }
+        "note": "page 6",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "DTC-PRIMARY",
@@ -268,8 +270,10 @@
         "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 5"
-       }
+        "note": "page 5",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -283,8 +287,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -323,8 +329,10 @@
         "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 6"
-       }
+        "note": "page 6",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "DTC-PRIMARY",
@@ -338,8 +346,10 @@
         "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 5"
-       }
+        "note": "page 5",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -353,8 +363,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -368,7 +380,37 @@
      "range": 0.0,
      "range_relative": 0.0,
      "tolerance": 0.02,
-     "entries": []
+     "entries": [
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -0.969296,
+        "raw": "LCG (m) 171.1 169.0 174.059 170.460  (KVLCC2 | heavy ballast | design | light ballast)",
+        "label": "LCG converted to percent_Lpp_fwd_from_lpp_mid",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "derived",
+        "note": "identity_derived; page 4",
+        "derivation": "LCG 174.059 m, ap datum, fwd+ -> x=174.0590 m from AP; (174.0590 - 177.500) / 355.000 = -0.9693 %Lpp [LCG=LCB under the stated even keel]"
+       },
+       "votes": false
+      }
+     ],
+     "derived": {
+      "cells": [
+       {
+        "family": "JSR-2017",
+        "value": -0.969296,
+        "unit_basis": "derived",
+        "derivation": "LCG 174.059 m, ap datum, fwd+ -> x=174.0590 m from AP; (174.0590 - 177.500) / 355.000 = -0.9693 %Lpp [LCG=LCB under the stated even keel]",
+        "note": "identity_derived; page 4"
+       }
+      ],
+      "vs_voters": null
+     }
     },
     "lwl": {
      "verdict": "MISSING",
@@ -417,8 +459,10 @@
         "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 6"
-       }
+        "note": "page 6",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "DTC-PRIMARY",
@@ -432,8 +476,10 @@
         "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 5"
-       }
+        "note": "page 5",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -447,8 +493,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -487,8 +535,10 @@
         "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 6"
-       }
+        "note": "page 6",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "DTC-PRIMARY",
@@ -502,8 +552,10 @@
         "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 5"
-       }
+        "note": "page 5",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -517,8 +569,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -557,8 +611,10 @@
         "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 6"
-       }
+        "note": "page 6",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "DTC-PRIMARY",
@@ -572,8 +628,10 @@
         "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 5"
-       }
+        "note": "page 5",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -587,8 +645,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     }
@@ -632,8 +692,10 @@
         "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -647,8 +709,10 @@
         "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 47"
-       }
+        "note": "page 47",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -662,8 +726,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -677,8 +743,10 @@
         "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -712,8 +780,10 @@
         "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -727,8 +797,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -742,8 +814,10 @@
         "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -777,8 +851,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -812,8 +888,10 @@
         "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -827,8 +905,10 @@
         "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 47"
-       }
+        "note": "page 47",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -842,8 +922,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -857,8 +939,10 @@
         "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -892,8 +976,10 @@
         "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -907,8 +993,10 @@
         "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 47"
-       }
+        "note": "page 47",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -922,8 +1010,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -937,8 +1027,10 @@
         "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -972,8 +1064,10 @@
         "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -987,8 +1081,10 @@
         "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 47"
-       }
+        "note": "page 47",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1002,8 +1098,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1017,8 +1115,10 @@
         "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1052,8 +1152,10 @@
         "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1067,8 +1169,10 @@
         "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 47"
-       }
+        "note": "page 47",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1082,8 +1186,10 @@
         "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1097,8 +1203,10 @@
         "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     }
@@ -1147,8 +1255,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1162,8 +1272,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1177,8 +1289,10 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1217,8 +1331,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1232,8 +1348,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1247,8 +1365,10 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1276,6 +1396,23 @@
      "tolerance": 0.02,
      "entries": [
       {
+       "family": "dtc_arxiv",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -0.533435,
+        "raw": "LCB [%L aft] +1.00 ... (Lwl [m] 232.19, Lpp [m] 230.00); 1.00 % of 232.19 m = 2.3219 m aft of the waterline mid-point",
+        "label": "LCB converted to percent_Lpp_fwd_from_lpp_mid",
+        "source": "dtc_arxiv",
+        "url": "https://arxiv.org/html/2411.09725v1",
+        "sha256": "f7af76c786f9a7f6d2a0fadb6a88560ae6a3ccb0db0acfdd5fd633fd80fa1f26",
+        "column": 0,
+        "unit_basis": "derived",
+        "note": "computed_not_published; page 16",
+        "derivation": "LCB 2.3219 m, lwl_mid datum, aft+ -> x=113.7731 m from AP; (113.7731 - 115.000) / 230.000 = -0.5334 %Lpp"
+       },
+       "votes": false
+      },
+      {
        "family": "SIMMAN-SERIES",
        "cell": {
         "quantity": "lcb_percent",
@@ -1287,8 +1424,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1302,8 +1441,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1317,10 +1458,29 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
-     ]
+     ],
+     "derived": {
+      "cells": [
+       {
+        "family": "dtc_arxiv",
+        "value": -0.533435,
+        "unit_basis": "derived",
+        "derivation": "LCB 2.3219 m, lwl_mid datum, aft+ -> x=113.7731 m from AP; (113.7731 - 115.000) / 230.000 = -0.5334 %Lpp",
+        "note": "computed_not_published; page 16"
+       }
+      ],
+      "vs_voters": {
+       "reference": -1.48,
+       "deltas": [
+        0.946565
+       ]
+      }
+     }
     },
     "lwl": {
      "verdict": "CROSS_VERIFIED",
@@ -1357,8 +1517,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1372,8 +1534,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1387,8 +1551,10 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1427,8 +1593,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1442,8 +1610,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1457,8 +1627,10 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1497,8 +1669,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1512,8 +1686,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1527,8 +1703,10 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1567,8 +1745,10 @@
         "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1582,8 +1762,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -1597,8 +1779,10 @@
         "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
         "column": 2,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     }
@@ -1647,8 +1831,10 @@
         "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1662,8 +1848,10 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -1677,8 +1865,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "mass",
-        "note": "page 4; mass 320,438 t converted at 1.025 t/m3"
-       }
+        "note": "page 4; mass 320,438 t converted at 1.025 t/m3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1692,8 +1882,10 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1707,8 +1899,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1747,8 +1941,10 @@
         "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1762,8 +1958,10 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -1777,8 +1975,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1792,8 +1992,10 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1807,8 +2009,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1842,8 +2046,27 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": 3.46875,
+        "raw": "Table 1 Main particulars and loading conditions for the KVLCC2 and DTC (all values refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 ... LCG",
+        "label": "LCG converted to percent_Lpp_fwd_from_lpp_mid",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "derived",
+        "note": "identity_derived; page 4",
+        "derivation": "LCG 171.1 m, ap datum, fwd+ -> x=171.1000 m from AP; (171.1000 - 160.000) / 320.000 = +3.4687 %Lpp [LCG=LCB under the stated even keel]"
+       },
+       "votes": false
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1857,8 +2080,10 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1872,10 +2097,29 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
-     ]
+     ],
+     "derived": {
+      "cells": [
+       {
+        "family": "JSR-2017",
+        "value": 3.46875,
+        "unit_basis": "derived",
+        "derivation": "LCG 171.1 m, ap datum, fwd+ -> x=171.1000 m from AP; (171.1000 - 160.000) / 320.000 = +3.4687 %Lpp [LCG=LCB under the stated even keel]",
+        "note": "identity_derived; page 4"
+       }
+      ],
+      "vs_voters": {
+       "reference": 3.48,
+       "deltas": [
+        -0.01125
+       ]
+      }
+     }
     },
     "lwl": {
      "verdict": "SINGLE_SOURCE",
@@ -1907,8 +2151,10 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1922,8 +2168,10 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -1937,8 +2185,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -1982,8 +2232,10 @@
         "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JASNAOE-2016",
@@ -1997,8 +2249,10 @@
         "sha256": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 2"
-       }
+        "note": "page 2",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2012,8 +2266,10 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -2027,8 +2283,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2042,8 +2300,10 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2057,8 +2317,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -2113,8 +2375,10 @@
         "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2128,8 +2392,10 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -2143,8 +2409,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2159,6 +2427,7 @@
         "column": 1,
         "unit_basis": "volume",
         "note": "",
+        "derivation": "",
         "closure_defect": {
          "quantity": "beam",
          "printed": 580.0,
@@ -2167,7 +2436,8 @@
          "corrected_residual": -1.0543083980296686e-06,
          "origin": "dissent"
         }
-       }
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2182,6 +2452,7 @@
         "column": 1,
         "unit_basis": "volume",
         "note": "",
+        "derivation": "",
         "closure_defect": {
          "quantity": "beam",
          "printed": 580.0,
@@ -2190,7 +2461,8 @@
          "corrected_residual": -1.0543083980296686e-06,
          "origin": "dissent"
         }
-       }
+       },
+       "votes": true
       }
      ]
     },
@@ -2234,8 +2506,10 @@
         "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 3"
-       }
+        "note": "page 3",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JASNAOE-2016",
@@ -2249,8 +2523,10 @@
         "sha256": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 2"
-       }
+        "note": "page 2",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2264,8 +2540,10 @@
         "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 34"
-       }
+        "note": "page 34",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "JSR-2017",
@@ -2279,8 +2557,10 @@
         "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
         "column": 0,
         "unit_basis": "volume",
-        "note": "page 4"
-       }
+        "note": "page 4",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2294,8 +2574,10 @@
         "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "SIMMAN-SERIES",
@@ -2309,8 +2591,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     }
@@ -2359,8 +2643,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -2374,8 +2660,10 @@
         "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         "column": 3,
         "unit_basis": "mass",
-        "note": "mass 8507 ton converted at 1.025 t/m3"
-       }
+        "note": "mass 8507 ton converted at 1.025 t/m3",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -2414,8 +2702,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -2429,8 +2719,10 @@
         "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         "column": 3,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -2464,10 +2756,46 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -1.704545,
+        "raw": "LCB LCB (m) aft of FP 1.625 NA",
+        "label": "LCB converted to percent_Lpp_fwd_from_lpp_mid",
+        "source": "t2015_onrt",
+        "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+        "column": 0,
+        "unit_basis": "derived",
+        "note": "scale_derived; page 1",
+        "derivation": "LCB 1.625 x49 m, fp datum, aft+ -> x=74.3750 m from AP; (74.3750 - 77.000) / 154.000 = -1.7045 %Lpp"
+       },
+       "votes": false
       }
-     ]
+     ],
+     "derived": {
+      "cells": [
+       {
+        "family": "NMRI-T2015",
+        "value": -1.704545,
+        "unit_basis": "derived",
+        "derivation": "LCB 1.625 x49 m, fp datum, aft+ -> x=74.3750 m from AP; (74.3750 - 77.000) / 154.000 = -1.7045 %Lpp",
+        "note": "scale_derived; page 1"
+       }
+      ],
+      "vs_voters": {
+       "reference": -1.68,
+       "deltas": [
+        -0.024545
+       ]
+      }
+     }
     },
     "lwl": {
      "verdict": "CROSS_VERIFIED",
@@ -2504,8 +2832,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -2519,8 +2849,10 @@
         "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         "column": 3,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -2571,8 +2903,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -2586,8 +2920,10 @@
         "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         "column": 3,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     },
@@ -2626,8 +2962,10 @@
         "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
         "column": 1,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       },
       {
        "family": "NMRI-T2015",
@@ -2641,8 +2979,10 @@
         "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         "column": 3,
         "unit_basis": "volume",
-        "note": ""
-       }
+        "note": "",
+        "derivation": ""
+       },
+       "votes": true
       }
      ]
     }
@@ -2651,7 +2991,7 @@
    "single_source": 1,
    "conflict": 1,
    "missing": 1,
-   "corroborated_by_repeat_family": 0,
+   "corroborated_by_repeat_family": 1,
    "disputed_quantities": [
     "displacement_volume"
    ]
@@ -3218,9 +3558,15 @@
    "lcb_percent": {
     "verdict": "MISSING",
     "core_verdict": "MISSING",
-    "families": [],
-    "lineages": [],
-    "sources": [],
+    "families": [
+     "JSR-2017"
+    ],
+    "lineages": [
+     "JSR-2017"
+    ],
+    "sources": [
+     "kvlcc2_ugent"
+    ],
     "published_values": [],
     "distinct_values": [],
     "disputed": false
@@ -3579,13 +3925,16 @@
     "core_verdict": "CROSS_VERIFIED",
     "families": [
      "NMRI-T2015",
-     "SIMMAN-SERIES"
+     "SIMMAN-SERIES",
+     "dtc_arxiv"
     ],
     "lineages": [
      "NMRI-T2015",
-     "SIMMAN-SERIES"
+     "SIMMAN-SERIES",
+     "dtc_arxiv"
     ],
     "sources": [
+     "dtc_arxiv",
      "simman2014_kcs",
      "simman2020_summary",
      "t2015_kcs"
@@ -3801,13 +4150,16 @@
     "verdict": "SINGLE_SOURCE",
     "core_verdict": "SINGLE_SOURCE",
     "families": [
+     "JSR-2017",
      "SIMMAN-SERIES"
     ],
     "lineages": [
+     "JSR-2017",
      "SIMMAN-SERIES"
     ],
     "sources": [
      "kvlcc2_osaka",
+     "kvlcc2_ugent",
      "simman2014_kvlcc2",
      "simman2020_summary"
     ],
@@ -4027,13 +4379,16 @@
     "verdict": "SINGLE_SOURCE",
     "core_verdict": "SINGLE_SOURCE",
     "families": [
+     "NMRI-T2015",
      "SIMMAN-SERIES"
     ],
     "lineages": [
+     "NMRI-T2015",
      "SIMMAN-SERIES"
     ],
     "sources": [
-     "simman2020_summary"
+     "simman2020_summary",
+     "t2015_onrt"
     ],
     "published_values": [
      {
@@ -5607,5 +5962,12 @@
     }
    }
   }
+ },
+ "lcb_frames": {
+  "registry": "benchmarks/verified/fleet_refs/lcb_frames.json",
+  "artifact": "benchmarks/verified/fleet_refs/lcb_frames_out.json",
+  "canonical": "percent_Lpp_fwd_from_lpp_mid",
+  "cells_added": 4,
+  "note": "non-voting (unit_basis='derived'); verdicts unchanged by construction"
  }
 }

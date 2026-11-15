@@ -29,9 +29,9 @@ cells 42, cross-verified 21, single-source 10, conflict 1, missing 10; fully cro
 |---|---|---|---|---|---|---|---|
 | DTC | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | MISSING (0) | MISSING (0) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
 | JBC | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) |
-| KCS | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
-| KVLCC2 | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | CROSS_VERIFIED (3) | CROSS_VERIFIED (2) | CROSS_VERIFIED (3) |
-| ONRT | CONFLICT (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (1) | CROSS_VERIFIED (2) | MISSING (0) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
+| KCS | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (3) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
+| KVLCC2 | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (2) | SINGLE_SOURCE (1) | CROSS_VERIFIED (3) | CROSS_VERIFIED (2) | CROSS_VERIFIED (3) |
+| ONRT | CONFLICT (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (2) | CROSS_VERIFIED (2) | MISSING (0) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
 | Series60 | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) |
 
 Cells show the family-level verdict with the number of independent **lineages** in brackets;
@@ -42,9 +42,9 @@ from one origin — both numbers are printed so the reader is not misled.
 
 | criterion | verdict | detail |
 |---|---|---|
-| ① ≥2 independent sources per ship on ∇/Cb/LCB/Lwl | **FAIL** | DTC: 2 of 4 quantities short; JBC: 4 of 4 quantities short; KCS: 0 of 4 quantities short; KVLCC2: 2 of 4 quantities short; ONRT: 1 of 4 quantities short; Series60: 4 of 4 quantities short |
+| ① ≥2 independent sources per ship on ∇/Cb/LCB/Lwl | **FAIL** | DTC: 2 of 4 quantities short; JBC: 4 of 4 quantities short; KCS: 0 of 4 quantities short; KVLCC2: 1 of 4 quantities short; ONRT: 0 of 4 quantities short; Series60: 4 of 4 quantities short |
 | ①b ≥2 independent *documents* per ship on the four named quantities (tier B: a reprinted table counts, and is labelled) | **FAIL** | DTC: 2 short, 0 lineage-limited; JBC: 1 short, 3 lineage-limited; KCS: 0 short, 0 lineage-limited; KVLCC2: 0 short, 2 lineage-limited; ONRT: 1 short, 1 lineage-limited; Series60: 4 short, 0 lineage-limited |
-| ② citation + source digest on every value | **PASS** | 104 cells checked, 0 without citation |
+| ② citation + source digest on every value | **PASS** | 108 cells checked, 0 without citation |
 | ③ >0.5 % spread marked disputed with both values | **PASS** | 1 conflicts, 1 recorded dissents |
 | ④ multi-source arrays back-filled into fleet_specs.json | **PASS** | JBC: 7 quantities; KCS: 7 quantities; KVLCC2: 7 quantities; ONRT: 6 quantities |
 | ⑤ KVLCC2 reference reaches the runner | **PASS** | published ∇ 312622.0 m³ from 4 documents, runner reads the field: True |
@@ -75,10 +75,10 @@ from one origin — both numbers are printed so the reader is not misled.
 |---|---|---|---|---|---|---|
 | `t2015_kcs` | NMRI-T2015 | NMRI-T2015 | KCS | displacement_volume, cb, lcb_percent, lwl, length_pp, beam, draft | - | `68d9c24600cb699b` |
 | `t2015_jbc` | NMRI-T2015 | NMRI-T2015 | JBC | displacement_volume, cb, lwl, length_pp, beam, draft | - | `fc2ce9054a8b7842` |
-| `t2015_onrt` | NMRI-T2015 | NMRI-T2015 | ONRT | displacement_volume, cb, lwl, beam, draft | - | `5e13427332de8be1` |
+| `t2015_onrt` | NMRI-T2015 | NMRI-T2015 | ONRT | displacement_volume, cb, lcb_percent, lwl, beam, draft | - | `5e13427332de8be1` |
 | `simman2014_kvlcc2` | SIMMAN-2014 | SIMMAN-SERIES | KVLCC2 | displacement_volume, cb, lcb_percent, lwl, length_pp, beam, draft | - | `bfc9101e3a4afa4f` |
 | `simman2014_kcs` | SIMMAN-2014 | SIMMAN-SERIES | KCS | displacement_volume, cb, lcb_percent, lwl, length_pp, beam, draft | - | `3cbc3a22daf3d494` |
-| `kvlcc2_ugent` | JSR-2017 | JSR-2017 | KVLCC2 | displacement_volume, cb, length_pp, beam, draft | - | `172f78d49f36be74` |
+| `kvlcc2_ugent` | JSR-2017 | JSR-2017 | KVLCC2 | displacement_volume, cb, lcb_percent, length_pp, beam, draft | - | `172f78d49f36be74` |
 | `dtc_ugent` | JSR-2017 | JSR-2017 | DTC | displacement_volume, cb, length_pp, beam, draft | - | `172f78d49f36be74` |
 | `kvlcc2_hrcak` | BRODOGRADNJA-2017 | SIMMAN-SERIES | KVLCC2 | displacement_volume, cb, length_pp, beam, draft | - | `c20acf9e8eae047a` |
 | `kvlcc2_jstage` | JASNAOE-2016 | JASNAOE-2016 | KVLCC2 | length_pp, draft | - | `c97b1d3e62b27e19` |
