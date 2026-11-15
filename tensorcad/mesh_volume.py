@@ -80,7 +80,7 @@ import numpy as np
 
 from .geometry import Mesh
 from .geometry_audit import audit_watertightness, inject_duplicate_faces, inject_flip_faces, inject_hole
-from .mesh_xval import TriMesh, cube, icosphere
+from .mesh_xval import TriMesh, cube, icosphere, ellipsoid as ellipsoid_mesh
 
 __all__ = [
     "EXACT_TOLERANCE",
@@ -91,6 +91,7 @@ __all__ = [
     "analytic_box_area",
     "analytic_box_volume",
     "analytic_icosahedron_volume",
+    "analytic_ellipsoid_volume",
     "analytic_sphere_area",
     "analytic_sphere_volume",
     "analytic_sphere_volume_via_cylinder",
@@ -99,6 +100,7 @@ __all__ = [
     "check_closed_body",
     "convergence_study",
     "defect_detection",
+    "ellipsoid_convergence_study",
     "mean_edge_length",
     "observed_order",
     "triangle_area",
@@ -171,6 +173,18 @@ def analytic_icosahedron_volume(circumradius: float) -> float:
 # ---------------------------------------------------------------------------
 # meshes
 # ---------------------------------------------------------------------------
+
+def analytic_ellipsoid_volume(semi_axes) -> float:
+    """Volume of a triaxial ellipsoid: ``V = 4/3 pi a b c``.
+
+    Delegates to :func:`tensorcad.analytic_solids.ellipsoid_volume` so the
+    reference is evaluated by the same converged quadrature used elsewhere
+    in the codebase.
+    """
+    from .analytic_solids import ellipsoid_volume
+    return ellipsoid_volume(semi_axes)
+
+
 def box_mesh(a: float, b: float, c: float) -> TriMesh:
     """Axis-aligned box ``a x b x c`` centred on the origin, as 12 triangles.
 
@@ -438,6 +452,40 @@ def _soup(mesh: TriMesh) -> TriMesh:
     corners = mesh.points[mesh.faces].reshape(-1, 3)
     faces = np.arange(len(corners), dtype=np.int64).reshape(-1, 3)
     return TriMesh(corners, faces, mesh.name + "/soup")
+
+
+
+def ellipsoid_convergence_study(
+    semi_axes,
+    levels: Sequence[int] = range(0, 7),
+) -> list[ClosedBodyCheck]:
+    """Volume/area deficit of an inscribed ellipsoid mesh at each subdivision level.
+
+    The mesh is built by scaling a unit icosphere, so the topology is identical
+    to the sphere ladder but the curvature is non-uniform.  This tests the
+    volume integrator on skewed triangles that the sphere's symmetry hides.
+
+    The reference volume is ``4/3 pi a b c`` and the reference area is computed
+    by converged Gauss-Legendre quadrature (:func:`analytic_solids.ellipsoid_surface_area`).
+    """
+    from .analytic_solids import ellipsoid_surface_area, ellipsoid_volume
+
+    a, b, c = (float(x) for x in semi_axes)
+    volume = ellipsoid_volume(semi_axes)
+    area = ellipsoid_surface_area(semi_axes)
+    rows: list[ClosedBodyCheck] = []
+    for level in levels:
+        mesh = ellipsoid_mesh(semi_axes, int(level))
+        row = check_closed_body(
+            mesh,
+            name=f"ellipsoid{a:g}x{b:g}x{c:g}_sub{level}",
+            family="ellipsoid",
+            reference_volume=volume,
+            reference_area=area,
+            length=2.0 * max(a, b, c),
+        )
+        rows.append(row)
+    return rows
 
 
 def defect_detection(
