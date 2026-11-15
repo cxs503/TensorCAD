@@ -77,6 +77,7 @@ machine to check it independently.
 """
 from __future__ import annotations
 
+import math
 import tempfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -105,8 +106,13 @@ __all__ = [
     "surface_signed_volume",
     "tetrahedral_volume",
     "tetrahedralise_surface",
+    "PATCH_NAMES",
+    "VolumePatches",
+    "read_su2_markers",
+    "volume_mesh_patches",
     "volume_mesh_to_tetrahedral",
     "write_meshio",
+    "write_su2_volume_mesh",
 ]
 
 Vec3 = tuple[float, float, float]
@@ -745,6 +751,428 @@ def volume_mesh_to_tetrahedral(
         coordinate_frame=coordinate_frame,
         degenerate_cells=degenerate,
     )
+
+
+# ---------------------------------------------------------------------------
+# Boundary patches: the outer skin of the body grid, named for a solver
+# ---------------------------------------------------------------------------
+#
+# A tetrahedral block on its own is not a usable solver mesh: the formats that carry volume
+# cells expect the outer skin to be *named*, and SU2 in particular does nothing with a mesh
+# whose ``NMARK`` is zero.  ``write_meshio(..., file_format="su2")`` writes exactly that --
+# ``NMARK= 0`` -- because meshio's SU2 writer only emits markers for triangle blocks that
+# carry integer cell data, and :class:`TetrahedralMesh` has no boundary at all.
+#
+# Naming the skin is therefore less a formatting chore than the place where the grid's two
+# real defects have to be dealt with.
+#
+# **Coincident points.**  :mod:`tensorcad.volume_mesh` keeps a *distinct* node for every
+# ``(station, level, breadth)`` index even where the breadth collapses, on purpose (see its
+# docstring).  The cells of those columns have zero volume and
+# :func:`volume_mesh_to_tetrahedral` drops them exactly, but dropping them exposes the
+# *interior* faces of the surviving cells as if they were skin.  On the Wigley body used by
+# ``examples/meshio_volume_bridge/run_example.py``, 1050 of the 2184 triangles that look like
+# boundary are such zero-thickness slit faces -- each has an exact coincident twin with the
+# opposite winding.  Handing those to a solver is not an approximation, it is a defect: a
+# doubly covered, non-manifold wall.  :func:`volume_mesh_patches` welds coincident points, so
+# a slit pair collapses onto one triangle and cancels, and what remains is a closed surface.
+#
+# **Anonymity.**  An unnamed skin cannot be referred to from a solver config.  Patches are
+# assigned from the grid's own station and level planes, so a name means what the geometry
+# means: ``hull`` is the body surface proper, ``fore``/``aft`` the two end stations,
+# ``bottom``/``top`` the first and last level lines, ``symmetry`` the centreplane.
+#
+# The result is asserted, not assumed: the skin must be watertight (every edge used exactly
+# twice, in opposite directions) and its divergence-theorem volume must reproduce the volume
+# of the tetrahedra it was taken from.  A patch set that satisfied neither would still write
+# a syntactically valid SU2 file -- which is exactly why the checks are here and not in a
+# solver's error message.
+
+#: Patch names, in the order they are tested.  The first plane a triangle lies on names it;
+#: anything left over is ``hull``.  ``symmetry`` comes first because a triangle on the
+#: centreplane is a symmetry boundary wherever else it also lies, and ``hull`` last because
+#: the body surface is the general case, not a plane.
+PATCH_NAMES: tuple[str, ...] = ("symmetry", "bottom", "top", "fore", "aft", "hull")
+
+Tri = tuple[int, int, int]
+
+
+def _oriented_tet_faces(tet: Tet) -> tuple[Tri, Tri, Tri, Tri]:
+    """The four faces of a *positively oriented* tetrahedron, wound outward.
+
+    For a tet whose signed volume is positive, reversing the cyclic order of three of the
+    four index triples (and keeping the first) points every normal away from the fourth
+    node; the derivation is the reason the ordering looks arbitrary and is not.
+    """
+    a, b, c, d = tet
+    return ((a, c, b), (a, b, d), (b, c, d), (a, d, c))
+
+
+def _sorted_face(face: Tri) -> Tri:
+    """The triangle's three indices in ascending order, as a 3-tuple."""
+    a, b, c = sorted(face)
+    return (a, b, c)
+
+
+def _winding(face: Tri) -> int:
+    """``+1``/``-1`` for the two cyclic orientations of a triangle, independent of rotation.
+
+    The face is compared with its own sorted order: rotating the triple to start at its
+    smallest index and then asking whether the next two indices run upward gives the same
+    answer for all three rotations of one orientation and the opposite for its reverse --
+    which is exactly the property the slit cancellation relies on.
+    """
+    low = min(face)
+    for start in range(3):
+        if face[start] == low:
+            following = (face[(start + 1) % 3], face[(start + 2) % 3])
+            return 1 if following[0] < following[1] else -1
+    raise AssertionError("unreachable: min() of a 3-tuple is one of its entries")
+
+
+def _weld(vertices: Sequence[Vec3]) -> tuple[tuple[Vec3, ...], tuple[int, ...], int]:
+    """Merge exactly coincident points, keeping first-use order.
+
+    ``0.0`` and ``-0.0`` compare and hash equal, so the centreplane nodes the builder
+    normalises to zero weld onto each other as well.
+    """
+    index: dict[Vec3, int] = {}
+    welded: list[Vec3] = []
+    remap: list[int] = []
+    for vertex in vertices:
+        key = (float(vertex[0]), float(vertex[1]), float(vertex[2]))
+        found = index.get(key)
+        if found is None:
+            found = len(welded)
+            index[key] = found
+            welded.append(key)
+        remap.append(found)
+    return tuple(welded), tuple(remap), len(vertices) - len(welded)
+
+
+def _skin_from_tets(
+    tets: Sequence[Tet],
+) -> tuple[tuple[Tri, ...], int]:
+    """Outer skin of a positively oriented tetrahedral block, with the slit cancelled.
+
+    A face that occurs once is skin.  A face that occurs twice must be the same triangle
+    seen from both sides (the zero-thickness slit between two coincident columns); both
+    copies are cancelled.  Anything else -- a face used by three cells, or twice with the
+    *same* winding -- is a non-manifold or inverted tiling and raises.
+    """
+    entries: dict[Tri, list[tuple[Tri, int]]] = {}
+    for tet in tets:
+        for face in _oriented_tet_faces(tet):
+            entries.setdefault(_sorted_face(face), []).append((face, _winding(face)))
+    skin: list[Tri] = []
+    cancelled = 0
+    for rotated, seen in entries.items():
+        if len(seen) == 1:
+            skin.append(seen[0][0])
+        elif len(seen) == 2:
+            if seen[0][1] == seen[1][1]:
+                raise MeshioFormatError(
+                    f"triangle {rotated} is used twice with the same winding: two "
+                    "coincident cells face the same way, so the block is folded onto "
+                    "itself (a zero-thickness sheet), not a tiling of a body"
+                )
+            cancelled += 1
+        else:
+            raise MeshioFormatError(
+                f"triangle {rotated} is shared by {len(seen)} tetrahedra; a surface that "
+                "is not edge-to-edge is not a skin"
+            )
+    return tuple(sorted(skin)), cancelled
+
+
+def _on_plane(values: Sequence[float], plane: float, tolerance: float) -> bool:
+    return all(abs(value - plane) <= tolerance for value in values)
+
+
+@dataclass(frozen=True)
+class VolumePatches:
+    """A welded tetrahedral body mesh together with its named outer skin.
+
+    ``vertices`` holds only the points the kept tetrahedra actually use (coincident points
+    merged, unreferenced points dropped), ``tets`` index into it, and ``patches`` is a tuple
+    of ``(name, faces)`` in :data:`PATCH_NAMES` order with outward-wound triangles indexing
+    the same ``vertices``.
+
+    ``merged_points`` counts the coincident points the weld removed and ``cancelled_faces``
+    the slit triangles that cancelled -- both are properties of the source grid that a
+    reader of the exported file can no longer see, so they are carried rather than hidden.
+    """
+
+    vertices: tuple[Vec3, ...]
+    tets: tuple[Tet, ...]
+    patches: tuple[tuple[str, tuple[Tri, ...]], ...]
+    merged_points: int = 0
+    cancelled_faces: int = 0
+    degenerate_cells: int = 0
+    units: str = "m"
+    coordinate_frame: str = "unspecified right-handed frame"
+
+    def names(self) -> tuple[str, ...]:
+        """Non-empty patch names, in priority order."""
+        return tuple(name for name, _ in self.patches)
+
+    def faces(self, name: str) -> tuple[Tri, ...]:
+        """Outward-wound triangles of one patch."""
+        for patch_name, faces in self.patches:
+            if patch_name == name:
+                return faces
+        raise KeyError(f"no patch named {name!r}; this mesh has {self.names()}")
+
+    def counts(self) -> dict[str, int]:
+        """Triangle count per patch."""
+        return {name: len(faces) for name, faces in self.patches}
+
+    def area(self, name: str) -> float:
+        """Total area of one patch, in square metres."""
+        return sum(_triangle_area(self.vertices, face) for face in self.faces(name))
+
+    def areas(self) -> dict[str, float]:
+        """Total area per patch, in square metres."""
+        return {name: self.area(name) for name, _ in self.patches}
+
+    def skin(self) -> tuple[Tri, ...]:
+        """Every skin triangle, all patches together."""
+        return tuple(face for _, faces in self.patches for face in faces)
+
+    def skin_volume(self) -> float:
+        """Volume enclosed by the oriented skin (divergence theorem)."""
+        return sum(_triangle_solid_angle_volume(self.vertices, face) for face in self.skin())
+
+    def tet_volume(self) -> float:
+        """Total volume of the tetrahedra, by their signed volumes."""
+        return sum(tetrahedral_volume(self.vertices, tet) for tet in self.tets)
+
+    def edge_counts(self) -> dict[tuple[int, int], int]:
+        """How often each undirected *directed-consistent* edge is used by the skin.
+
+        A closed, consistently oriented surface uses every undirected edge exactly twice,
+        once in each direction; :meth:`is_watertight` is the assertion of that.
+        """
+        counts: dict[tuple[int, int], int] = {}
+        for a, b, c in self.skin():
+            for tail, head in ((a, b), (b, c), (c, a)):
+                counts[(tail, head)] = counts.get((tail, head), 0) + 1
+        return counts
+
+    def is_watertight(self) -> bool:
+        """True when every edge is used once in each direction on the skin."""
+        counts = self.edge_counts()
+        return all(
+            counts.get(edge, 0) == 1 and counts.get((edge[1], edge[0]), 0) == 1
+            for edge in counts
+        )
+
+
+def _triangle_area(vertices: Sequence[Vec3], face: Tri) -> float:
+    p0, p1, p2 = (vertices[index] for index in face)
+    ux, uy, uz = p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]
+    vx, vy, vz = p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]
+    cx = uy * vz - uz * vy
+    cy = uz * vx - ux * vz
+    cz = ux * vy - uy * vx
+    return 0.5 * math.sqrt(cx * cx + cy * cy + cz * cz)
+
+
+def _triangle_solid_angle_volume(vertices: Sequence[Vec3], face: Tri) -> float:
+    """One term of the divergence-theorem volume of a closed oriented surface."""
+    ax, ay, az = vertices[face[0]]
+    bx, by, bz = vertices[face[1]]
+    cx, cy, cz = vertices[face[2]]
+    return (
+        ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx)
+    ) / 6.0
+
+
+def volume_mesh_patches(
+    volume_mesh: Any,
+    *,
+    tetrahedral: TetrahedralMesh | None = None,
+    tolerance: float | None = None,
+) -> VolumePatches:
+    """Weld the body grid's tetrahedra and name their outer skin.
+
+    Parameters
+    ----------
+    volume_mesh :
+        A :class:`tensorcad.volume_mesh.VolumeMesh` with ``split_tets=True`` (the default).
+    tetrahedral :
+        The already-converted tetrahedra, to avoid converting twice.  ``None`` calls
+        :func:`volume_mesh_to_tetrahedral`.
+    tolerance :
+        Absolute distance under which a point counts as lying on a grid plane.  ``None``
+        uses ``1e-12`` of the mesh extent, which is far above the round-off of the builder's
+        own coordinates (they *are* ``grid.xs``/``grid.zs``) and far below any real geometry.
+
+    Raises
+    ------
+    MeshioFormatError
+        If the skin is not watertight, if a patch is empty, or if the enclosed volume does
+        not reproduce the tetrahedra's.
+    """
+    tet_mesh = volume_mesh_to_tetrahedral(volume_mesh) if tetrahedral is None else tetrahedral
+    welded, remap, merged = _weld(tet_mesh.vertices)
+
+    kept: list[Tet] = []
+    for index, tet in enumerate(tet_mesh.tets):
+        mapped = (remap[tet[0]], remap[tet[1]], remap[tet[2]], remap[tet[3]])
+        if len(set(mapped)) != 4:
+            raise MeshioFormatError(
+                f"tetrahedron {index} has two nodes that coincide after welding "
+                f"({tet} -> {mapped}); a positive-volume cell cannot, so the source "
+                "topology is inconsistent"
+            )
+        kept.append(mapped)
+
+    skin, cancelled = _skin_from_tets(kept)
+    if not skin:
+        raise MeshioFormatError("the tetrahedral block has no skin: it is empty")
+
+    used = sorted({vertex for tet in kept for vertex in tet})
+    compact = {old: new for new, old in enumerate(used)}
+    vertices = tuple(welded[old] for old in used)
+    tets = tuple(
+        (compact[a], compact[b], compact[c], compact[d]) for a, b, c, d in kept
+    )
+
+    xs = tuple(float(x) for x in getattr(volume_mesh, "station_lines", ()))
+    zs = tuple(float(z) for z in getattr(volume_mesh, "level_lines", ()))
+    if not xs or not zs:
+        raise MeshioFormatError(
+            "the volume mesh carries no station/level lines, so its skin cannot be named"
+        )
+    span = max(
+        max(coordinate[axis] for coordinate in vertices) - min(coordinate[axis] for coordinate in vertices)
+        for axis in range(3)
+    )
+    tol = (1e-12 * max(1.0, span)) if tolerance is None else float(tolerance)
+
+    bucketed: dict[str, list[Tri]] = {name: [] for name in PATCH_NAMES}
+    for face in skin:
+        points = [vertices[compact[index]] for index in face]
+        if _on_plane([point[1] for point in points], 0.0, tol):
+            name = "symmetry"
+        elif _on_plane([point[2] for point in points], zs[0], tol):
+            name = "bottom"
+        elif _on_plane([point[2] for point in points], zs[-1], tol):
+            name = "top"
+        elif _on_plane([point[0] for point in points], xs[0], tol):
+            name = "fore"
+        elif _on_plane([point[0] for point in points], xs[-1], tol):
+            name = "aft"
+        else:
+            name = "hull"
+        bucketed[name].append((compact[face[0]], compact[face[1]], compact[face[2]]))
+
+    patches = tuple((name, tuple(faces)) for name, faces in bucketed.items() if faces)
+    result = VolumePatches(
+        vertices=vertices,
+        tets=tets,
+        patches=patches,
+        merged_points=merged,
+        cancelled_faces=cancelled,
+        degenerate_cells=tet_mesh.degenerate_cells,
+        units=tet_mesh.units,
+        coordinate_frame=tet_mesh.coordinate_frame,
+    )
+
+    if not result.is_watertight():
+        raise MeshioFormatError(
+            "the named skin is not watertight: some edge is not used exactly once in each "
+            "direction, so the marker set would leave a hole in the body"
+        )
+    reference = tet_mesh.volume()
+    if abs(result.tet_volume() - reference) > max(abs(reference), 1.0) * 1e-12:
+        raise MeshioFormatError(
+            f"welding changed the tetrahedra's volume: {result.tet_volume():.16e} versus "
+            f"{reference:.16e}"
+        )
+    if abs(result.skin_volume() - reference) > max(abs(reference), 1.0) * 1e-12:
+        raise MeshioFormatError(
+            f"the skin encloses {result.skin_volume():.16e} but the tetrahedra measure "
+            f"{reference:.16e}: the patch set does not bound the body"
+        )
+    return result
+
+
+def write_su2_volume_mesh(
+    path: str | Path,
+    volume_mesh: Any,
+    *,
+    patches: VolumePatches | None = None,
+) -> Path:
+    """Write a body-fitted volume grid as an SU2 ASCII mesh *with named markers*.
+
+    The file is written here rather than through meshio because meshio's SU2 writer only
+    accepts integer marker tags: it replaces a string tag with its own running index, and a
+    solver config that says ``MARKER_HEATFLUX= (hull, 0.0)`` cannot then find its wall.
+    Writing string tags is four lines of ASCII, so the format is emitted directly and read
+    back by :func:`read_su2_markers` (and, independently, by meshio's reader, which accepts
+    the file -- see ``tests/test_volume_mesh_su2_markers.py``).
+
+    Returns
+    -------
+    Path
+        The file written.  Call :func:`volume_mesh_patches` (or pass ``patches=`` to obtain
+        the same object twice-free) for the counts and areas that went into it.
+    """
+    skin = volume_mesh_patches(volume_mesh) if patches is None else patches
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    lines = ["NDIME= 3", f"NPOIN= {len(skin.vertices)}"]
+    lines += [f"{x:.16e} {y:.16e} {z:.16e}" for x, y, z in skin.vertices]
+    lines.append(f"NELEM= {len(skin.tets)}")
+    lines += [f"10 {a} {b} {c} {d}" for a, b, c, d in skin.tets]
+    lines.append(f"NMARK= {len(skin.patches)}")
+    for name, faces in skin.patches:
+        lines.append(f"MARKER_TAG= {name}")
+        lines.append(f"MARKER_ELEMS= {len(faces)}")
+        lines += [f"5 {a} {b} {c}" for a, b, c in faces]
+    target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return target
+
+
+def read_su2_markers(path: str | Path) -> dict[str, tuple[Tri, ...]]:
+    """Read the marker sections of an SU2 ASCII mesh, keeping the tags as names.
+
+    Only what the writer above emits is parsed (plus the coordinate and element blocks, which
+    are skipped): this is the reader that closes the loop on a file whose tags meshio would
+    flatten to indices.  Boundary element types other than triangles are accepted and
+    discarded, so a hand-edited file still reads.
+    """
+    text = Path(path).read_text(encoding="utf-8").splitlines()
+    markers: dict[str, tuple[Tri, ...]] = {}
+    tag: str | None = None
+    index = 0
+    while index < len(text):
+        line = text[index].strip()
+        index += 1
+        if not line or line.startswith("%"):
+            continue
+        if line.startswith(("NPOIN=", "NELEM=")):
+            index += int(line.split("=", 1)[1].split()[0])
+        elif line.startswith("MARKER_TAG="):
+            tag = line.split("=", 1)[1].strip()
+        elif line.startswith("MARKER_ELEMS="):
+            count = int(line.split("=", 1)[1])
+            if tag is None:
+                raise MeshioFormatError("MARKER_ELEMS before any MARKER_TAG")
+            faces: list[Tri] = []
+            for _ in range(count):
+                entry = text[index].split()
+                index += 1
+                if int(entry[0]) == 5:
+                    faces.append((int(entry[1]), int(entry[2]), int(entry[3])))
+            if tag in markers:
+                raise MeshioFormatError(f"marker {tag!r} appears twice")
+            markers[tag] = tuple(faces)
+            tag = None
+    return markers
 
 
 def _check_topology_supported(mesh: Mesh | TetrahedralMesh, file_format: str) -> None:
