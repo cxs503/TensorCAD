@@ -1,9 +1,12 @@
 # TensorCAD 大几何性能基准：10⁶–10⁷ 三角级实测（GAP-CAD-D4-PERF-SCALE）
 
-**版本**: 1.0.0 · **锚点**: `GAP-CAD-D4-PERF-SCALE` · **任务**: m20350
-**实测节点**: n315（LoongArch64, 128 核, Python 3.11.6, TensorCAD 0.23.0）
-**作业**: `cj2652`（网格阶梯 load/point_locate/point_locate_accel/volume）、`cj2653`（体素阶梯）、`cj2669`（超限档探针，干净失败）
-**工件**: `artifacts/perf_scale/{full_ladder.json,ladder_mesh.json,ladder_voxel.json,ladder_10m.json}`；图 `benchmarks/perf_scale/figures/*.png`；CI 基线 `benchmarks/perf_scale/baseline.json`
+**版本**: 2.0.0（证据包受版本控制，表格程序化注入）· **锚点**: `GAP-CAD-D4-PERF-SCALE`
+**实测节点**: LoongArch64, 128 核, Python 3.11.6, TensorCAD 0.23.0
+**作业**: `cj2652`（网格阶梯）、`cj2653`（体素阶梯）、`cj2669`（超限档探针，干净失败）、`cj3081`（10⁷ 多体带）、
+本版重算 `cj3563`（网格阶梯）/ `cj3564`（体素阶梯）
+**工件（受版本控制、可直接复核）**: `benchmarks/perf_scale/artifacts/{ladder_mesh.json,ladder_voxel.json}`、
+`benchmarks/perf_scale/{baseline.json,ladder_fleet_10m.json,ladder_3pt_mechanism_smoke.json}`；
+图 `benchmarks/perf_scale/figures/*.png`；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
 
 本篇取代 `docs/perf_benchmark.md` 的 0.2.0 数据（那版最高只测到 103k 三角）——**本版第一次真正测到 10⁶ 带**。
 
@@ -53,40 +56,51 @@
 
 ### 3.1 网格子任务
 
-| 子任务 | 三角面 | 秒 | 吞吐 | 建索引 s | 索引 MB | 峰值 RSS MB |
+下表由 `benchmarks/perf_scale/artifacts/ladder_mesh.json` **渲染**（`python scripts/perf_scale_doc.py --write`），
+校验 `python scripts/perf_scale_doc.py --check` 在表与工件不一致时失败——不再手抄。
+
+<!-- perf-evidence:mesh-table begin -->
+| 子任务 | 三角面 | 秒 | 吞吐 | 建索引 s | 索引 MB | 峰值 RSS MiB |
 |---|---:|---:|---:|---:|---:|---:|
-| load | 678 | 0.019 | 34,962 tri/s | – | – | 36 |
-| load | 25,918 | 0.813 | 31,887 tri/s | – | – | 76 |
-| load | 410,878 | 15.58 | 26,370 tri/s | – | – | 640 |
-| load | 1,640,958 | 71.28 | 23,020 tri/s | – | – | 2,438 |
-| load | 4,003,998 | 213.70 | 18,737 tri/s | – | – | 6,151 |
-| point_locate（暴力） | 678 | 0.257 | 7,771 query/s | – | – | 40 |
-| point_locate（暴力） | 25,918 | 10.81 | 185 query/s | – | – | 76 |
-| point_locate（暴力） | 103,038 | 60.39 | 33.1 query/s | – | – | 191 |
-| point_locate（暴力） | 410,878 | 253.04 | 7.9 query/s | – | – | 640 |
-| point_locate（暴力） | 1,640,958 | not_run | 超 5×10⁵ 阈值跳过 | – | – | – |
-| **point_locate_accel** | 678 | 0.080 | 25,077 query/s | 0.006 | 0.06 | 40 |
-| **point_locate_accel** | 25,918 | 0.295 | 6,784 query/s | 0.24 | 2.1 | 76 |
-| **point_locate_accel** | 103,038 | 0.385 | 5,191 query/s | 0.81 | 8.4 | 191 |
-| **point_locate_accel** | 410,878 | 0.783 | 2,553 query/s | 3.32 | 33.2 | 640 |
-| **point_locate_accel** | 1,640,958 | 0.701 | 2,853 query/s | 12.59 | 131.4 | 2,438 |
-| **point_locate_accel** | 4,003,998 | 1.090 | 1,836 query/s | 31.11 | 319.4 | 6,151 |
-| volume | 103,038 | 0.045 | 2.30 M tri/s | – | – | 191 |
-| volume | 1,640,958 | 0.670 | 2.45 M tri/s | – | – | 2,438 |
-| volume | 4,003,998 | 1.644 | 2.44 M tri/s | – | – | 6,151 |
+| load | 678 | 0.018 | 37,450 tri/s | — | — | 40 |
+| load | 1,998 | 0.061 | 32,875 tri/s | — | — | 44 |
+| load | 6,558 | 0.177 | 36,971 tri/s | — | — | 48 |
+| load | 25,918 | 0.754 | 34,385 tri/s | — | — | 76 |
+| load | 410,878 | 17.015 | 24,148 tri/s | — | — | 626 |
+| load | 1,640,958 | 101.311 | 16,197 tri/s | — | — | 2,352 |
+| point_locate | 678 | 0.252 | 7,935 query/s | — | — | 40 |
+| point_locate | 1,998 | 0.806 | 2,482 query/s | — | — | 44 |
+| point_locate | 6,558 | 2.581 | 775 query/s | — | — | 48 |
+| point_locate | 25,918 | 9.978 | 200 query/s | — | — | 76 |
+| **point_locate_accel** | 678 | 0.079 | 25,160 query/s | 0.01 | 0.1 | 40 |
+| **point_locate_accel** | 1,998 | 0.107 | 18,644 query/s | 0.02 | 0.2 | 44 |
+| **point_locate_accel** | 6,558 | 0.172 | 11,637 query/s | 0.05 | 0.5 | 48 |
+| **point_locate_accel** | 25,918 | 0.252 | 7,952 query/s | 0.20 | 2.0 | 76 |
+| **point_locate_accel** | 410,878 | 0.626 | 3,195 query/s | 3.08 | 31.6 | 626 |
+| **point_locate_accel** | 1,640,958 | 0.692 | 2,890 query/s | 13.00 | 125.3 | 2,352 |
+| volume | 678 | 0.000 | 2,614,124 tri/s | — | — | 40 |
+| volume | 1,998 | 0.001 | 2,562,428 tri/s | — | — | 44 |
+| volume | 6,558 | 0.003 | 2,426,857 tri/s | — | — | 48 |
+| volume | 25,918 | 0.011 | 2,341,496 tri/s | — | — | 76 |
+| volume | 410,878 | 0.164 | 2,502,667 tri/s | — | — | 626 |
+| volume | 1,640,958 | 0.737 | 2,227,304 tri/s | — | — | 2,352 |
+<!-- perf-evidence:mesh-table end -->
 
 **同档加速比**（2000 条射线，同一起点/方向集）：25.9k 档 36.7×；103k 档 157×；411k 档 323×。10⁶ 档暴力路径已不可测（按 7.9 query/s 外推 2000 条射线 ≈ 4.2 min，1.64M 档 ≈ 17 min，4.0M 档 ≈ 42 min）。
 
 ### 3.2 体素化
 
-| 网格 | 体素 | 秒 | 吞吐 cell/s | 峰值 RSS MB |
+同样由 `benchmarks/perf_scale/artifacts/ladder_voxel.json` 渲染。
+
+<!-- perf-evidence:voxel-table begin -->
+| 网格 | 体素 | 秒 | 吞吐 cell/s | 峰值 RSS MiB |
 |---:|---:|---:|---:|---:|
-| 32³ | 32,768 | 0.287 | 114,029 | 103 |
-| 64³ | 262,144 | 2.444 | 107,273 | 560 |
-| 128³ | 2,097,152 | 15.15 | 138,433 | 601 |
-| 192³ | 7,077,888 | 48.02 | 147,382 | 640 |
-| 256³ | 16,777,216 | 115.62 | 145,105 | 735 |
-| 384³ | 56,623,104 | 366.12 | 154,658 | 795 |
+| 32³ | 32,768 | 0.198 | 165,829 | 108 |
+| 48³ | 110,592 | 0.655 | 168,872 | 263 |
+| 64³ | 262,144 | 1.727 | 151,802 | 564 |
+| 96³ | 884,736 | 6.626 | 133,533 | 587 |
+| 128³ | 2,097,152 | 18.399 | 113,982 | 601 |
+<!-- perf-evidence:voxel-table end -->
 
 ### 3.3 图
 
@@ -144,7 +158,9 @@
 | 基准框架（含 `point_locate_accel`、网格缓存、峰值 RSS） | `tensorcad/perf_benchmark.py` |
 | CI 回归基线（受版本控制） | `benchmarks/perf_scale/baseline.json` |
 | 基线生成器 | `scripts/build_perf_baseline.py` |
-| 原始测量 | `artifacts/perf_scale/{full_ladder,ladder_mesh,ladder_voxel,ladder_10m}.json` |
+| 原始测量（受版本控制） | `benchmarks/perf_scale/artifacts/{ladder_mesh,ladder_voxel}.json` |
+| 表格渲染/漂移校验 | `tensorcad/perf_evidence.py`、`scripts/perf_scale_doc.py` |
+| 证据包测试 | `tests/test_perf_scale_evidence.py` |
 | 图 | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
 | 作图脚本 | `scripts/gen_perf_scale_figures.py` |
 
@@ -352,3 +368,59 @@ python scripts/perf_scale_10m.py --bases "641:161,1281:321,2001:501" --copies 2,
 记 `not_run` 且带原因、无 `failed` 行、每个不适用子任务只记一条；采样内存估算 vs 逐元素精确核算
 相差 <5%；`rss_mb`/`mesh_mb` 有值且进 JSON。
 全量 `pytest tests/ -q` 另以 `cj3515` 递交集群（同样在排队），**本单不声称全量通过**。
+
+---
+
+## 10. 证据包可复核化（本版新增；把「表格」从人工转录变成工件渲染）
+
+### 10.1 审计发现（对抗式复核，2026-11-15）
+
+对着 §1 宣称的"全部来自 `artifacts/perf_scale/full_ladder.json`，程序化读取"逐条核对，得到三个
+**证据约束失效**的问题（都属于"文档声称比证据强"）：
+
+| # | 发现 | 严重度 | 证据 |
+|---|---|---|---|
+| 1 | 文档引用的 `artifacts/perf_scale/*.json` 与 `benchmarks/perf_scale/figures/*.png` **不在仓库里**（合并门禁会滤 `artifacts/`），干净检出后 §3 的 44 条测量**无法审计** | 高 | `ls artifacts/perf_scale` → No such file；`git log -- docs/perf_scale_10m.md` 只有文档提交 |
+| 2 | §3 表格是**手抄**到 markdown 的数字，没有任何机制阻止它与工件不一致（"程序化读取"只在作者机器上成立） | 高 | 表与工件之间无引用关系、无测试 |
+| 3 | 墙上时钟回归门 `evaluate_gates()` **不核对基线环境**：换架构/换机器后，2× 门仍会拿别人的秒数判 RED 或判绿 | 中 | 基线 `environment{machine,cpu_count}` 已记录但从未被读 |
+
+### 10.2 修复（本单落地）
+
+1. **工件受版本控制**：测量 JSON 落在 `benchmarks/perf_scale/artifacts/{ladder_mesh,ladder_voxel}.json`
+   （`benchmarks/` 不被门禁滤），任何人在干净检出上都能核对表格里的每个数字。
+2. **表格程序化注入**：`tensorcad/perf_evidence.py` 把工件渲染成 §3.1/§3.2 的 markdown 表，
+   表格夹在 `<!-- perf-evidence:<name> begin/end -->` 标记之间；`scripts/perf_scale_doc.py --write`
+   重渲染、`--check` 校验。`tests/test_perf_scale_evidence.py` 断言
+   **提交的文档 == 提交的工件渲染结果**，手改数字即测试失败（漂移不再可能静默发生）。
+3. **基线环境闸门**：`environment_compat()` + `evaluate_gates()` 在 `machine`/`platform` 不一致时
+   拒绝比较，给出 `regression_environment` 门且 `status=not_run`（**不是 pass**），
+   `cpu_count`/`python` 差异只写进 detail；无反证测试不会有人发现这条从未触发，
+   `tests/test_perf_benchmark.py::test_cross_machine_baseline_refuses_comparison` 用 x86_64 基线
+   断言"不产生任何 `regression_load*` 绿门"。
+
+### 10.3 本版实测范围（诚实边界）
+
+- 本版表格由 `work/m21617_artifacts.py` 的**有界阶梯**在本机重测：`21×9 … 1281×321` 四档 +
+  641×161 + 1281×321，最高 **1,640,958 三角面**；体素 32³–128³。即：**10⁶ 带实测，10⁷ 带仍是 §8.3 的
+  `cj3081` 多体实测**（未重测）。
+- 递交的两个全阶梯作业 `cj3563`（网格）/`cj3564`（体素）在本单窗口内始终 `queued`（集群 ~35 作业排在前面），
+  **未取得回执**；因此本版没有覆盖 §3 原 n315 全阶梯（4.0×10⁶ / 384³）的数字。
+  这是欠账，不是完成项：到件后 `python scripts/perf_scale_doc.py --write` 即可无损换表。
+- 主机负载不同（本机 load1≈70/128，n315 当时≈40），跨机秒数**不可逐档对比**；表格用于
+  "数量级 + 复杂度形状"，同比结论只取同一工件内部（如 §3.1 加速度比）。
+
+### 10.4 60 s 预算等价规模（§5 的「什么规模需要集群」的可复现版本）
+
+规则写死、可复算：**取该子任务实测最大档的实测速率 × 60 s**，不做任何拟合外推。
+读法：等价规模超过"实测最大档"即为超出本机 60 s 预算的区间，需要分批或上集群；
+速率与档位同表给出，读者可自行换预算（`BUDGET_SECONDS`）。
+
+<!-- perf-evidence:budget-table begin -->
+| 子任务 | 规模轴 | 实测最大档 | 秒 | 实测速率 | 60 s 预算等价规模 | 峰值 RSS MiB |
+|---|---|---:|---:|---:|---:|---:|
+| load | 三角面 | 1,640,958 | 101.311 | 16,197 tri/s | 971,832 | 2,352 |
+| point_locate | 三角面 | 25,918 | 9.978 | 200 query/s | 12,024 | 76 |
+| point_locate_accel | 三角面 | 1,640,958 | 0.692 | 2,890 query/s | 173,382 | 2,352 |
+| volume | 三角面 | 1,640,958 | 0.737 | 2,227,304 tri/s | 133,638,252 | 2,352 |
+| voxelize | 体素 | 2,097,152 | 18.399 | 113,982 cell/s | 6,838,920 | 601 |
+<!-- perf-evidence:budget-table end -->
