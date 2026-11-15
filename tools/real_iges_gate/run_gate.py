@@ -107,6 +107,45 @@ def measure(mesh_path: Path, published: dict[str, Any] | None) -> dict[str, Any]
     return out
 
 
+def score_against_published(measured: dict[str, Any], spec: dict[str, Any],
+                            tolerance: float) -> dict[str, Any]:
+    """Score an independent measurement against the published numbers.
+
+    Only *commensurable* quantities are scored as precision errors.  ``Lpp`` is the
+    length between perpendiculars, a hydrostatic datum defined on the design waterline;
+    it is not the model's x-extent.  A hull specimen legitimately has a bulbous bow or a
+    stern overhang outside both perpendiculars (KCS: x spans -6.000...237.844 m against
+    Lpp 230 m), so ``|bbox - Lpp| / Lpp`` is meaningless as an error and was reported as a
+    spurious 6.02 % failure of a specimen that is in fact correctly scaled.  Length is
+    therefore tested one-sided -- the model cannot be *shorter* than its own Lpp -- which
+    still catches the failure the number is good for (a units/scale mistake, as in the
+    ONRT specimen) without inventing a precision claim.
+    """
+    errors: dict[str, float] = {}
+    if "volume_relative_error_pct" in measured:
+        errors["displacement"] = abs(measured["volume_relative_error_pct"])
+    if "cb_relative_error_pct" in measured:
+        errors["cb"] = abs(measured["cb_relative_error_pct"])
+    beam = spec.get("beam")
+    if beam and "beam_bbox" in measured:
+        errors["beam_bbox"] = 100.0 * abs(measured["beam_bbox"] - float(beam)) / float(beam)
+    out: dict[str, Any] = {
+        "relative_errors_pct": errors,
+        "within_tolerance": {name: value <= tolerance for name, value in errors.items()},
+        "containment": {},
+    }
+    length_pp = spec.get("length_pp")
+    if length_pp and "length_bbox" in measured:
+        out["length_bbox_vs_lpp_pct"] = 100.0 * (
+            measured["length_bbox"] - float(length_pp)) / float(length_pp)
+        out["containment"]["length_bbox_at_least_lpp"] = (
+            measured["length_bbox"] >= float(length_pp))
+        out["length_basis"] = (
+            "one-sided containment only: bbox x-extent >= Lpp. Lpp is not a bounding-box "
+            "length, so the difference is recorded and not scored as a precision error")
+    return out
+
+
 def run_one(ship: str, spec: dict[str, Any], registry: dict[str, Any], root: Path,
             out_dir: Path, tolerance: float, kwargs: dict[str, Any]) -> dict[str, Any]:
     source = resolve(spec["iges_path"], registry, root)
@@ -152,17 +191,14 @@ def run_one(ship: str, spec: dict[str, Any], registry: dict[str, Any], root: Pat
     record["stl_sha256"] = hashlib.sha256(stl.read_bytes()).hexdigest()
     measured = measure(stl, spec)
     record["mesh"] = measured
-    errors = {}
-    if "volume_relative_error_pct" in measured:
-        errors["displacement"] = abs(measured["volume_relative_error_pct"])
-    if "cb_relative_error_pct" in measured:
-        errors["cb"] = abs(measured["cb_relative_error_pct"])
-    for axis, published_key in (("length_bbox", "length_pp"), ("beam_bbox", "beam")):
-        reference = spec.get(published_key)
-        if reference and axis in measured:
-            errors[axis] = 100.0 * abs(measured[axis] - float(reference)) / float(reference)
-    record["relative_errors_pct"] = errors
-    record["within_tolerance"] = {name: value <= tolerance for name, value in errors.items()}
+    scoring = score_against_published(measured, spec, tolerance)
+    record["relative_errors_pct"] = scoring["relative_errors_pct"]
+    record["within_tolerance"] = scoring["within_tolerance"]
+    record["containment"] = scoring["containment"]
+    if "length_bbox_vs_lpp_pct" in scoring:
+        record["length_bbox_vs_lpp_pct"] = scoring["length_bbox_vs_lpp_pct"]
+    if "length_basis" in scoring:
+        record["length_basis"] = scoring["length_basis"]
     record["status"] = "measured"
     return record
 
@@ -209,6 +245,7 @@ def main(argv: list[str] | None = None) -> int:
         "ships": records,
         "all_within_tolerance": all(
             record.get("status") == "measured" and all(record.get("within_tolerance", {}).values())
+            and all(record.get("containment", {}).values())
             and record.get("faces_refused") == 0
             for record in records
         ) if records else False,
