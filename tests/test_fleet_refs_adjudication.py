@@ -107,12 +107,22 @@ def test_onrt_closure_uses_the_length_the_publisher_states(verdict: dict) -> Non
     assert {row["length_basis"] for row in closure.values()} <= {"lwl", "length_pp"}
 
 
-@pytest.mark.xfail(reason="round 3: a second family prints the corrected 58, so the majority-digit scale-slip rule finds no slip; detector must be rewritten to flag the 580 dissent", strict=False)
 def test_kvlcc2_beam_cell_is_attributed_to_a_scale_slip(verdict: dict) -> None:
+    """The ``Bwl 580`` typo is found in the *dissent*, which is where round 3 put it.
+
+    One lineage printing 580 (SIMMAN 2014/2020 pages) is outvoted by two printing the
+    corrected 58 (Osaka dissertation, UGent reprint), so the family value closes on its own
+    ``Cb·Lpp·Bwl·T`` and a detector that only looks at the winning numeral finds nothing --
+    which is what had turned this assertion into an ``xfail``.  The typo is still printed in
+    two entries of the library, so the scan must audit the dissenting numerals too, and it
+    must return exactly the numbers round 1 reported for it.
+    """
     slips = [row for row in verdict["scale_typos"] if row["ship"] == "KVLCC2"]
     assert len(slips) == 1
     slip = slips[0]
     assert slip["quantity"] == "beam"
+    assert slip["origin"] == "dissent"
+    assert slip["family_value"] == pytest.approx(58.0)  # what the family settled on
     assert slip["printed"] == pytest.approx(580.0)
     assert slip["divide_by"] == pytest.approx(10.0)
     assert slip["corrected"] == pytest.approx(58.0)
@@ -120,7 +130,6 @@ def test_kvlcc2_beam_cell_is_attributed_to_a_scale_slip(verdict: dict) -> None:
     assert abs(slip["raw_residual"]) > CLOSURE_TOLERANCE
 
 
-@pytest.mark.xfail(reason="round 3: a second family prints the corrected 58, so the majority-digit scale-slip rule finds no slip; detector must be rewritten to flag the 580 dissent", strict=False)
 def test_scale_slip_does_not_rewrite_the_printed_cell(library: dict, verdict: dict) -> None:
     """The library keeps the bytes as printed; the finding rides alongside them."""
     entries = library["report"]["KVLCC2"]["quantities"]["beam"]["entries"]
@@ -129,8 +138,13 @@ def test_scale_slip_does_not_rewrite_the_printed_cell(library: dict, verdict: di
     flagged = [entry for entry in entries if "closure_defect" in entry["cell"]]
     assert len(flagged) >= 1
     assert {f["cell"]["closure_defect"]["divide_by"] for f in flagged} == {10.0}
+    assert {f["cell"]["closure_defect"]["origin"] for f in flagged} == {"dissent"}
+    # Every flagged cell is one that prints the typo, never the corrected numeral.
+    assert all(f["cell"]["value"] == pytest.approx(580.0) for f in flagged)
     values = library["report"]["KVLCC2"]["quantities"]["beam"]["family_values"]
-    assert values["SIMMAN-SERIES"] == pytest.approx(580.0)  # votes stay raw, never pre-fixed
+    assert values["SIMMAN-SERIES"] == pytest.approx(58.0)  # majority reading, never the mean
+    dissent = library["report"]["KVLCC2"]["quantities"]["beam"]["family_disagreement"]
+    assert sorted(dissent["SIMMAN-SERIES"]["dissent"]) == [580.0, 580.0]
 
 
 def test_healthy_hull_is_left_alone(verdict: dict) -> None:
