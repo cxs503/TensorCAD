@@ -38,7 +38,7 @@ Sources (digest pinned; the bytes stay out of the repository, see the licence co
 | KVLCC2 | LCB (% Lpp, fwd+) | SIMMAN-SERIES 3.48 | SINGLE_SOURCE |
 | KVLCC2 | Lwl (m) | SIMMAN-SERIES 325.5 | SINGLE_SOURCE |
 | KVLCC2 | Lpp (m) | JASNAOE-2016 320, JSR-2017 320, SIMMAN-SERIES 320 | CROSS_VERIFIED |
-| KVLCC2 | Bwl (m) | JSR-2017 58, SIMMAN-SERIES 580 | CONFLICT |
+| KVLCC2 | Bwl (m) | JSR-2017 58, SIMMAN-SERIES 58 | CROSS_VERIFIED |
 | KVLCC2 | T (m) | JASNAOE-2016 20.8, JSR-2017 20.8, SIMMAN-SERIES 20.8 | CROSS_VERIFIED |
 | JBC | ∇ (m³) | NMRI-T2015 178,369.9 | SINGLE_SOURCE |
 | JBC | Cb | NMRI-T2015 0.858 | SINGLE_SOURCE |
@@ -53,7 +53,7 @@ Sources (digest pinned; the bytes stay out of the repository, see the licence co
 | ONRT | Lwl (m) | NMRI-T2015 154, SIMMAN-SERIES 154 | CROSS_VERIFIED |
 | ONRT | Bwl (m) | NMRI-T2015 18.78, SIMMAN-SERIES 18.78 | CROSS_VERIFIED |
 | ONRT | T (m) | NMRI-T2015 5.494, SIMMAN-SERIES 5.494 | CROSS_VERIFIED |
-| DTC | ∇ (m³) | DTC-PRIMARY 173,467.0, JSR-2017 173,468.0 | CROSS_VERIFIED |
+| DTC | ∇ (m³) | DTC-PRIMARY 173,467.5, JSR-2017 173,468.0 | CROSS_VERIFIED |
 | DTC | Cb | DTC-PRIMARY 0.661, JSR-2017 0.661 | CROSS_VERIFIED |
 | DTC | Lpp (m) | DTC-PRIMARY 355, JSR-2017 355 | CROSS_VERIFIED |
 | DTC | Bwl (m) | DTC-PRIMARY 51, JSR-2017 51 | CROSS_VERIFIED |
@@ -70,7 +70,7 @@ Sources (digest pinned; the bytes stay out of the repository, see the licence co
 | DTC | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | MISSING (0) | MISSING (0) |
 | Series60 | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) |
 
-Coverage: **20/42** cells cross-verified, 10 single-source, 2 conflict, 10 missing. Hulls with all four key quantities (∇, Cb, LCB, Lwl) backed by ≥2 lineages: **KCS**. Hulls still below two sources: **DTC, JBC, KVLCC2, ONRT, Series60**.
+Coverage: **21/42** cells cross-verified, 10 single-source, 1 conflict, 10 missing. Hulls with all four key quantities (∇, Cb, LCB, Lwl) backed by ≥2 lineages: **KCS**. Hulls still below two sources: **DTC, JBC, KVLCC2, ONRT, Series60**.
 
 ### 4.1 Reference vs reconstruction
 

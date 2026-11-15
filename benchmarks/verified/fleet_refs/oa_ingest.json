@@ -1,6 +1,6 @@
 {
  "schema": "tensorcad.fleet_refs.oa_ingest/1.0",
- "generated_utc": "2026-11-15T02:49:20+00:00",
+ "generated_utc": "2026-11-15T03:57:45+00:00",
  "sources": {
   "kvlcc2_ugent": {
    "status": "read",
@@ -623,6 +623,188 @@
      "column": 0,
      "unit_basis": "volume",
      "note": "page 5"
+    }
+   }
+  },
+  "dtc_ije": {
+   "status": "read",
+   "file": "dtc_ije.pdf",
+   "bytes": 3133493,
+   "pages": 20,
+   "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "pinned": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "digest_matches_pin": true,
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp"
+   ],
+   "cells": {
+    "length_pp": {
+     "quantity": "length_pp",
+     "value": 355.0,
+     "raw": "355",
+     "label": "Characteristics Variable Model Full scale Unit Scale factor \u03bb 1:59.407 [-] [-] Length between perpendiculars \ud835\udc3f\ud835\udc43\ud835\udc43 5.976 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume",
+     "source": "dtc_ije",
+     "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 6"
+    },
+    "beam": {
+     "quantity": "beam",
+     "value": 51.0,
+     "raw": "51",
+     "label": "cale factor \u03bb 1:59.407 [-] [-] Length between perpendiculars \ud835\udc3f\ud835\udc43\ud835\udc43 5.976 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume displacement \u2207 0.824 173468 [m3] We",
+     "source": "dtc_ije",
+     "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 6"
+    },
+    "draft": {
+     "quantity": "draft",
+     "value": 14.5,
+     "raw": "14.5",
+     "label": "th between perpendiculars \ud835\udc3f\ud835\udc43\ud835\udc43 5.976 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume displacement \u2207 0.824 173468 [m3] Wetted surface \ud835\udc46\ud835\udc64 1.209 22032 [m2",
+     "source": "dtc_ije",
+     "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 6"
+    },
+    "displacement_volume": {
+     "quantity": "displacement_volume",
+     "value": 173468.0,
+     "raw": "173468",
+     "label": "76 355 [m] Waterline breadth \ud835\udc35\ud835\udc4a\ud835\udc3f 0.859 51 [m] Design draft T 0.244 14.5 [m ] Volume displacement \u2207 0.824 173468 [m3] Wetted surface \ud835\udc46\ud835\udc64 1.209 22032 [m2] Block coefficient \ud835\udc36\ud835\udc35 0.661 0.661 [-]",
+     "source": "dtc_ije",
+     "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 6"
+    },
+    "cb": {
+     "quantity": "cb",
+     "value": 0.661,
+     "raw": "0.661",
+     "label": "m ] Volume displacement \u2207 0.824 173468 [m3] Wetted surface \ud835\udc46\ud835\udc64 1.209 22032 [m2] Block coefficient \ud835\udc36\ud835\udc35 0.661 0.661 [-] Design speed V 1.68 12.86 [m/s] Longitudinal center of gravity\u2014from af",
+     "source": "dtc_ije",
+     "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 6"
+    }
+   }
+  },
+  "kvlcc2_osaka": {
+   "status": "read",
+   "file": "kvlcc2_osaka.pdf",
+   "bytes": 8079863,
+   "pages": 158,
+   "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "pinned": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "digest_matches_pin": true,
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "lcb_percent",
+    "length_pp",
+    "lwl"
+   ],
+   "cells": {
+    "length_pp": {
+     "quantity": "length_pp",
+     "value": 320.0,
+     "raw": "320.0",
+     "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
+    },
+    "lwl": {
+     "quantity": "lwl",
+     "value": 325.5,
+     "raw": "325.5",
+     "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displ",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
+    },
+    "beam": {
+     "quantity": "beam",
+     "value": 58.0,
+     "raw": "58",
+     "label": "p the original boundary layer blocks. Then, the hub blocks overlap the tail blocks and Main Particulars Full Scale Osaka University Model Scale 1 1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
+    },
+    "draft": {
+     "quantity": "draft",
+     "value": 20.8,
+     "raw": "20.8",
+     "label": "1/100 \ud835\udc3f\ud835\udc43\ud835\udc43 (m) 320.0 3.2 \ud835\udc3f\ud835\udc64\ud835\udc59 (m) 325.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
+    },
+    "displacement_volume": {
+     "quantity": "displacement_volume",
+     "value": 312622.0,
+     "raw": "312622",
+     "label": "5.5 3.255 \ud835\udc35\ud835\udc64\ud835\udc59 (m) 58 0.58 Depth(m) 30 0.3 Draft (m) 20.8 0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%),",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
+    },
+    "cb": {
+     "quantity": "cb",
+     "value": 0.8098,
+     "raw": "0.8098",
+     "label": "0.208 (for even keel) Displacement (m3) 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%), fwd + 3.48 3.48 Propeller Type FP FP No. of blades",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
+    },
+    "lcb_percent": {
+     "quantity": "lcb_percent",
+     "value": 3.48,
+     "raw": "3.48",
+     "label": ") 312622 0.313 S w/o rudder (m2) 27194 2.71 CB 0.8098 0.8098 CM 0.9980 0.9980 LCB (%), fwd + 3.48 3.48 Propeller Type FP FP No. of blades 4 4 Diameter (m) 9.86 0.0986 P/D (0.7",
+     "source": "kvlcc2_osaka",
+     "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "column": 0,
+     "unit_basis": "volume",
+     "note": "page 34"
     }
    }
   }
