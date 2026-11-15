@@ -72,6 +72,29 @@ TOLERANCE: dict[str, float] = {
 
 _NUMBER = re.compile(r"[-+]?\d+(?:\.\d+)?")
 
+#: Row-label guards.  They are switched together so the *pre-guard* reading stays reproducible on
+#: the same code: ``tools/baseline_fleet/refs_instrument_audit.py --prefix`` flips this off and
+#: scores the corpus again, which is what makes the audit's defect report an experiment instead of
+#: a claim about the past.  Production code never touches it.
+INSTRUMENT_GUARDS = True
+
+#: A label that names *two* quantities in a quotient -- ``Lwl/Lpp``, ``Bwl/Lpp``, ``T/L``, ``L/B``
+#: -- states a dimensionless ratio, which is a value of neither quantity.  Read as its first
+#: quantity it is silently a length in metres: a real page that prints the ratio row above the row
+#: it divides then hands back ``lwl = 1.0109`` and skips the genuine ``232.5`` because the first
+#: row for a quantity wins.  Only the hull-letter symbols enter this pattern, so ordinary units
+#: (``kg/m3``, ``m/s``) and compound labels (``TFP / TAP``) are untouched.
+#: A displacement printed under a mass header (``Displacement (t)``, ``Displacement, tonnes``,
+#: ``Displacement mass``) states a mass even when the numeral cell is bare.  The unit heuristic on
+#: the value cell alone cannot see it, and reading 52 030 t as 52 030 m3 absorbs a 2.4 % error into a
+#: "cross-verified" reference.
+_MASS_LABEL = re.compile(r"(?i)\btonns?e?s?\b|\bton\b|\bmass\b|\(\s*t\s*\)")
+
+_RATIO_LABEL = re.compile(
+    r"(?i)\b(?:l\s?wl|l\s?pp|b\s?wl|c\s?b|c\s?m|b|t|l)\s*/\s*"
+    r"(?:l\s?wl|l\s?pp|b\s?wl|c\s?b|c\s?m|b|t|l)\b"
+)
+
 #: Row-label patterns.  Matched case-insensitively against the *whole* flattened row so a
 #: page that prints "Maximum beam of waterline B WL (m)" and one that prints "Bwl (m)" are
 #: both understood.  Order matters: the first pattern that matches wins, so LCB is tested
@@ -551,6 +574,21 @@ def derive_cells(
                 f"{witness_value[2][0]:g} m) = {cell.value:g} m"
             )
             continue
+        if quantity == "displacement_volume":
+            # Volume scales as the third power of the table's own length ratio.  Using the *length*
+            # ratio here would understate the displacement by five orders of magnitude on a 1:100
+            # table, so the cube is not decoration: it is the only correct scaling.
+            cell.value = round(model_value * ratio**3, 4)
+            cell.unit_basis = f"{DERIVED_BASIS}_model_column_cubed"
+            cell.note = (
+                f"model-scale {cell.raw} x {ratio:.6g}^3 "
+                f"({witness} {witness_value[0]:g}/{witness_value[2][0]:g} in the same table)"
+            )
+            cell.derivation = (
+                f"full-scale = model {model_value:g} m3 * ({witness_value[0]:g} m / "
+                f"{witness_value[2][0]:g} m)^3 = {cell.value:g} m3"
+            )
+            continue
         if quantity == "lcb_percent":
             # A distance from the forward perpendicular is a length; converting it to a
             # percentage needs a reference length, which the page may not publish.
@@ -598,12 +636,24 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
         label = row[0]
         if re.search(r"(?i)izz|ixx|hub|\bic\b", label):
             continue
+        if INSTRUMENT_GUARDS and _RATIO_LABEL.search(label):
+            continue  # a quotient of two particulars is a value of neither
         quantity = None
         for name, pattern in LABEL_PATTERNS:
             if re.search(pattern, label, flags=re.I):
                 quantity = name
                 break
-        if quantity is None or quantity in out:
+        # LCB printed as a distance from the forward perpendicular is a length, not a percentage
+        # of Lpp: it is kept for the audit trail but must never vote as a percentage, and a genuine
+        # percentage row later on the same page replaces it (never the other way round).
+        lcb_as_length = bool(
+            INSTRUMENT_GUARDS and quantity == "lcb_percent" and _LCB_AS_LENGTH.search(label)
+        )
+        if quantity is None:
+            continue
+        if quantity in out and not (
+            out[quantity].unit_basis == "lcb_as_length" and not lcb_as_length
+        ):
             continue
         picked = _pick(row, spec.column)
         if picked is None:
@@ -611,7 +661,21 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
         value, raw, index, basis = picked
         if quantity in LENGTH_LIKE or quantity == "lcb_percent":
             pairs[quantity] = (value, index, _alt_numeric(row, index))
-        if spec.column is not None and index != spec.column:
+        elif quantity == "displacement_volume" and basis != "mass":
+            pairs[quantity] = (value, index, _alt_numeric(row, index))
+        if (
+            INSTRUMENT_GUARDS
+            and basis == "volume"
+            and quantity == "displacement_volume"
+            and _MASS_LABEL.search(label)
+        ):
+            basis = "mass"
+        if lcb_as_length:
+            basis = "lcb_as_length"
+            cell_note = "printed as a length (distance from FP), not as a percentage of Lpp"
+        else:
+            cell_note = ""
+        if spec.column is not None and index != spec.column and not lcb_as_length:
             # The configured full-scale column was empty, so a neighbour was read.  Its scale
             # is unknown: keep it for the audit trail, never let it vote.
             basis = "fallback_column"
@@ -625,6 +689,7 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
             sha256=spec.sha256,
             column=index,
             unit_basis=basis,
+            note=cell_note,
         )
     derive_cells(out, pairs, spec)
     if "displacement_volume" in out:
@@ -743,7 +808,7 @@ def votes(cell: "Cell") -> bool:
     *derived* from such a column, are kept for the audit trail but do not vote: letting
     either vote would turn arithmetic into a second opinion.
     """
-    return not cell.unit_basis.startswith(("fallback_column", DERIVED_BASIS))
+    return not cell.unit_basis.startswith(("fallback_column", DERIVED_BASIS, "lcb_as_length"))
 
 
 def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]]) -> dict[str, Any]:
