@@ -101,6 +101,41 @@ METRIC_NAMES: dict[str, str] = {
 
 _NAN = math.nan
 
+#: Cell count at or above which ``backend="auto"`` switches to the numpy implementation.
+AUTO_NUMPY_MIN_CELLS = 128
+
+#: Accepted values of the ``backend`` argument of every metric function.
+BACKENDS = ("auto", "scalar", "numpy")
+
+
+def _numpy_impl(backend: str, count: int, kind: str):
+    """Return the vectorised module for ``kind``, or ``None`` for the scalar path.
+
+    ``"auto"`` uses the vectorised second implementation above
+    :data:`AUTO_NUMPY_MIN_CELLS` cells (below that the Python call overhead dominates and
+    the scalar path is as fast), ``"scalar"`` never does, and ``"numpy"`` demands it and
+    raises rather than silently falling back on a kind it does not implement.
+    """
+    if backend not in BACKENDS:
+        raise ValueError(f"unknown backend {backend!r}; use one of {', '.join(BACKENDS)}")
+    if backend == "scalar":
+        return None
+    if backend == "auto" and count < AUTO_NUMPY_MIN_CELLS:
+        return None
+    try:
+        from . import numpy_backend
+    except ImportError as exc:  # pragma: no cover - numpy is a test/dev dependency
+        if backend == "numpy":
+            raise RuntimeError("backend='numpy' needs numpy, which is not installed") from exc
+        return None
+    if kind in numpy_backend.UNSUPPORTED_KINDS:
+        if backend == "numpy":
+            raise ValueError(
+                f"backend='numpy' does not implement {kind!r} cells; use backend='scalar'"
+            )
+        return None
+    return numpy_backend
+
 
 # --------------------------------------------------------------------------------------
 # small vector helpers (tuples, no numpy: the core has no dependencies)
@@ -147,6 +182,22 @@ def _angle_deg(u: Vec3, v: Vec3) -> float:
         return _NAN
     c = _dot(u, v) / (nu * nv)
     return math.degrees(math.acos(max(-1.0, min(1.0, c))))
+
+
+def _min_max_deg(angles: Sequence[float]) -> tuple[float, float]:
+    """``(min, max)`` over the valid angles: a ``NaN`` corner (degenerate edge) is dropped.
+
+    Before this helper, triangles and quadrilaterals called ``min``/``max`` on a tuple that
+    could contain ``NaN``, and Python then depends on the *position* of the ``NaN`` (a
+    ``NaN`` first element wins, a later one is ignored because every comparison is False).
+    Hexahedra and tetrahedra already filtered, so the same degenerate cell produced
+    different angles depending on the cell kind. Both paths now drop invalid corners and
+    report ``NaN`` only when no corner is valid.
+    """
+    valid = [a for a in angles if not (a != a)]
+    if not valid:
+        return _NAN, _NAN
+    return min(valid), max(valid)
 
 
 def _equiangle_skew(angles: Sequence[float], ideal: float) -> float:
@@ -231,8 +282,13 @@ def _triangle_sicn(p0: Vec3, p1: Vec3, p2: Vec3, signed_area: float) -> float:
     return 2.0 * det_m / fro2
 
 
-def tri_metrics(points: Sequence[Vec3], triangles: Sequence[Sequence[int]]) -> ElementQuality:
+def tri_metrics(
+    points: Sequence[Vec3], triangles: Sequence[Sequence[int]], backend: str = "auto"
+) -> ElementQuality:
     """Area, angles, Verdict aspect ratio and Gmsh gamma/eta/SICN of triangles."""
+    impl = _numpy_impl(backend, len(triangles), "tri")
+    if impl is not None:
+        return impl.tri_metrics(points, triangles)
     area: list[float] = []
     min_edge: list[float] = []
     max_edge: list[float] = []
@@ -254,20 +310,21 @@ def tri_metrics(points: Sequence[Vec3], triangles: Sequence[Sequence[int]]) -> E
         sides = (_norm(_sub(p1, p0)), _norm(_sub(p2, p1)), _norm(_sub(p0, p2)))
         shortest, longest = min(sides), max(sides)
         angles = _triangle_angles(p0, p1, p2)
+        worst, biggest = _min_max_deg(angles)
         g = _triangle_gamma(abs_area, sides)
         area.append(abs_area)
         min_edge.append(shortest)
         max_edge.append(longest)
         edge_ratio.append(longest / shortest if shortest > 0.0 else math.inf)
-        min_angle.append(min(angles))
-        max_angle.append(max(angles))
+        min_angle.append(worst)
+        max_angle.append(biggest)
         aspect.append(1.0 / g if g > 0.0 else math.inf)
         gamma.append(g)
-        eta.append(1.0 - abs(60.0 - min(angles)) / 60.0)
+        eta.append(1.0 - abs(60.0 - worst) / 60.0)
         # Gmsh NCJ == Verdict scaled Jacobian for triangles: (2/sqrt3) sin(angle),
         # signed by the winding so a flipped triangle is negative.
         sign = 1.0 if signed_area > 0.0 else -1.0
-        sj.append(sign * (2.0 / math.sqrt(3.0)) * math.sin(math.radians(min(angles))))
+        sj.append(sign * (2.0 / math.sqrt(3.0)) * math.sin(math.radians(worst)))
         sicn.append(_triangle_sicn(p0, p1, p2, signed_area))
         skew.append(_equiangle_skew(angles, 60.0))
     return ElementQuality(
@@ -345,8 +402,13 @@ def _quad_angles(p: Sequence[Vec3]) -> tuple[float, float, float, float]:
     )
 
 
-def quad_metrics(points: Sequence[Vec3], quads: Sequence[Sequence[int]]) -> ElementQuality:
+def quad_metrics(
+    points: Sequence[Vec3], quads: Sequence[Sequence[int]], backend: str = "auto"
+) -> ElementQuality:
     """Metric set of bilinear quadrilaterals (reference square; an ideal square scores 1)."""
+    impl = _numpy_impl(backend, len(quads), "quad")
+    if impl is not None:
+        return impl.quad_metrics(points, quads)
     area: list[float] = []
     min_edge: list[float] = []
     max_edge: list[float] = []
@@ -377,9 +439,11 @@ def quad_metrics(points: Sequence[Vec3], quads: Sequence[Sequence[int]]) -> Elem
         max_edge.append(max(sides))
         edge_ratio.append(max(sides) / min(sides) if min(sides) > 0.0 else math.inf)
         angles = _quad_angles(p)
-        min_angle.append(min(angles))
-        max_angle.append(max(angles))
-        eta.append(1.0 - max(abs(90.0 - a) for a in angles) / 90.0)
+        worst, biggest = _min_max_deg(angles)
+        min_angle.append(worst)
+        max_angle.append(biggest)
+        valid_angles = [a for a in angles if not (a != a)]
+        eta.append(1.0 - max(abs(90.0 - a) for a in valid_angles) / 90.0 if valid_angles else _NAN)
         skew.append(_equiangle_skew(angles, 90.0))
         worst_sj = math.inf
         worst_sicn = math.inf
@@ -471,8 +535,13 @@ _HEX_EDGES = (
 )
 
 
-def hex_metrics(points: Sequence[Vec3], hexes: Sequence[Sequence[int]]) -> ElementQuality:
+def hex_metrics(
+    points: Sequence[Vec3], hexes: Sequence[Sequence[int]], backend: str = "auto"
+) -> ElementQuality:
     """Metric set of trilinear hexahedra (reference cube; an ideal cube scores 1)."""
+    impl = _numpy_impl(backend, len(hexes), "hex")
+    if impl is not None:
+        return impl.hex_metrics(points, hexes)
     volume: list[float] = []
     min_edge: list[float] = []
     max_edge: list[float] = []
@@ -613,8 +682,13 @@ def _tet_dihedral_angles(p: Sequence[Vec3]) -> list[float]:
     return out
 
 
-def tet_metrics(points: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> ElementQuality:
+def tet_metrics(
+    points: Sequence[Vec3], tets: Sequence[Sequence[int]], backend: str = "auto"
+) -> ElementQuality:
     """Volume, dihedral angles, Gmsh gamma/eta, scaled Jacobian and both SICN units."""
+    impl = _numpy_impl(backend, len(tets), "tet")
+    if impl is not None:
+        return impl.tet_metrics(points, tets)
     regular = _regular_tet()
     gmsh_ref = _gmsh_tet()
     volume: list[float] = []
@@ -826,8 +900,11 @@ def _quad_volume_split(p: Sequence[Vec3], tets: Sequence[Sequence[int]]) -> floa
     return _tet_split_volume(p, tets)
 
 
-def prism_metrics(points: Sequence[Vec3], prisms: Sequence[Sequence[int]]) -> ElementQuality:
+def prism_metrics(
+    points: Sequence[Vec3], prisms: Sequence[Sequence[int]], backend: str = "auto"
+) -> ElementQuality:
     """Volume, angles/skewness, edge ratio, scaled Jacobian and SICN of wedge6 cells."""
+    _numpy_impl(backend, len(prisms), "prism")  # raises for backend="numpy"
     ideal = _ideal_prism()
     normaliser = _reference_icn(ideal, _PRISM_CORNERS, _prism_jacobian)
     volume: list[float] = []
@@ -883,8 +960,11 @@ def prism_metrics(points: Sequence[Vec3], prisms: Sequence[Sequence[int]]) -> El
     )
 
 
-def pyramid_metrics(points: Sequence[Vec3], pyramids: Sequence[Sequence[int]]) -> ElementQuality:
+def pyramid_metrics(
+    points: Sequence[Vec3], pyramids: Sequence[Sequence[int]], backend: str = "auto"
+) -> ElementQuality:
     """Volume, angles/skewness, edge ratio, scaled Jacobian and SICN of 5-node pyramids."""
+    _numpy_impl(backend, len(pyramids), "pyramid")  # raises for backend="numpy"
     ideal = _ideal_pyramid()
     normaliser = _reference_icn(ideal, _PYRAMID_POINTS, _pyramid_jacobian)
     volume: list[float] = []
