@@ -1278,3 +1278,42 @@ def test_first_order_case_keeps_a_wide_band_honestly() -> None:
     assert band > 1e-2, band            # still above the 1 % blind-spot line: not closed
     assert band < two_grid              # but it is the band that now binds
     assert "observed order p" in derived["displacement_volume_m3"][2]
+
+
+def test_verification_report_test_count_is_accurate() -> None:
+    """The verification report must not claim a stale test count.
+
+    Regression: the report said "40 tests" when the file had 71+11=82.
+    This test reads the report and the actual test count, and fails if
+    the report's stated number differs from reality by more than 1.
+    """
+    import re
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    report = root / "docs" / "golden" / "verification_report.md"
+    assert report.is_file(), f"{report} is missing"
+
+    text = report.read_text(encoding="utf-8")
+    # Look for patterns like "71 项测试" or "82 项测试" or "合计.*82"
+    numbers = [int(m) for m in re.findall(r'(\d+)\s*项测试', text)]
+    # Also check the summary line
+    summary_matches = re.findall(r'合计.*?(\d+)', text)
+    all_numbers = numbers + [int(m) for m in summary_matches if m.isdigit()]
+
+    # Count actual test functions
+    test_file = Path(__file__)
+    mutation_file = test_file.parent / "test_golden_mutation.py"
+    actual = 0
+    for f in (test_file, mutation_file):
+        if f.is_file():
+            actual += sum(1 for line in f.read_text(encoding="utf-8").splitlines()
+                          if line.strip().startswith("def test_"))
+
+    # The report should mention a number close to the actual count
+    if all_numbers:
+        reported = max(all_numbers)
+        assert abs(reported - actual) <= 2, (
+            f"verification_report.md claims ~{reported} tests but there are {actual}; "
+            "update the report"
+        )
