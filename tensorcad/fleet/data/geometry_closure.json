@@ -1,0 +1,1397 @@
+{
+  "schema": "tensorcad.fleet.geometry_closure.v1",
+  "anchor": "GAP-CAD-T1-SOURCE-HUNT",
+  "generated_utc": "2026-11-15T02:30:12+00:00",
+  "generated_by": "python tools/baseline_fleet/geometry_closure.py --all",
+  "purpose": "Close the geometry -> particulars loop for the fleet hulls whose publisher geometry is reachable, and keep the unreachable ones on record.",
+  "method": "published table read from the digested page (full scale = largest number in the row); file->full scale from two independent waterline conditions solved on the IGES patch grids; L_WL/B_WL from the design-waterline cut; displacement by trapezoidal integration of the sampled patch cloud; graded at 3 %.",
+  "licence_note": "published workshop benchmark geometry (Tokyo 2015 / NMRI); the publisher ships no OSI licence file, so this is research use of published data. Bytes are NOT redistributed: the cache is git-ignored and only digests are committed.",
+  "resolutions": [
+    [
+      41,
+      81
+    ],
+    [
+      61,
+      121
+    ]
+  ],
+  "probes": {
+    "t2015_index": {
+      "url": "https://t2015.nmri.go.jp/index.html",
+      "http_status": 200,
+      "bytes": 16953,
+      "sha256": "dd3bc58f079619061b374a79be22e75a5be61c49a0ea17df7559ea37bc479f93"
+    },
+    "t2015_dtmb5415_page": {
+      "url": "https://t2015.nmri.go.jp/dtmb5415.html",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    },
+    "t2015_kvlcc2_page": {
+      "url": "https://t2015.nmri.go.jp/kvlcc2.html",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    },
+    "t2015_kvlcc2_gc_page": {
+      "url": "https://t2015.nmri.go.jp/kvlcc2_gc.html",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    },
+    "t2015_dtc_page": {
+      "url": "https://t2015.nmri.go.jp/dtc.html",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    },
+    "t2015_kvlcc2_iges_guess": {
+      "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/kvlcc2/KVLCC2_IGES.zip",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    },
+    "t2015_dtmb5415_iges_guess": {
+      "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/dtmb5415/DTMB5415_IGES.zip",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    },
+    "t2015_dtc_iges_guess": {
+      "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/dtc/DTC_IGES.zip",
+      "http_status": 404,
+      "bytes": 355,
+      "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264"
+    }
+  },
+  "ships": {
+    "KCS": {
+      "page": {
+        "url": "https://t2015.nmri.go.jp/kcs_gc.html",
+        "http_status": 200,
+        "bytes": 12978,
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4"
+      },
+      "note": "KCS (MOERI 3600 TEU) hull patch set; pages/tables carry full-scale column",
+      "licence": "published workshop benchmark geometry (Tokyo 2015 / NMRI); the publisher ships no OSI licence file, so this is research use of published data. Bytes are NOT redistributed: the cache is git-ignored and only digests are committed.",
+      "published": {
+        "length_pp": {
+          "row_values": [
+            230.0,
+            7.27,
+            86.0
+          ],
+          "snippet": "230.0 / 7.27 86",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 230.0,
+          "model_value": 7.27,
+          "implied_scale": 31.63686382393398,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "length_wl": {
+          "row_values": [
+            232.5,
+            7.35,
+            77.0
+          ],
+          "snippet": "232.5 / 7.35 77",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 232.5,
+          "model_value": 7.35,
+          "implied_scale": 31.63265306122449,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "beam_wl": {
+          "row_values": [
+            32.2,
+            1.019,
+            0.0
+          ],
+          "snippet": "32.2 / 1.019 0",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 32.2,
+          "model_value": 1.019,
+          "implied_scale": 31.59960745829245,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "draft": {
+          "row_values": [
+            10.8,
+            0.34,
+            18.0
+          ],
+          "snippet": "10.8 / 0.34 18",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 10.8,
+          "model_value": 0.34,
+          "implied_scale": 31.764705882352942,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "volume": {
+          "row_values": [
+            3.0,
+            52030.0
+          ],
+          "snippet": "&nabla; (m 3 ) / 52030",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 52030.0,
+          "rule": "full scale = largest number that is not a unit exponent"
+        },
+        "cb": {
+          "row_values": [
+            0.6505,
+            0.6505
+          ],
+          "snippet": "0.6505 / 0.6505",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 0.6505,
+          "rule": "dimensionless coefficient: first column"
+        },
+        "cm": {
+          "row_values": [
+            0.9849,
+            0.9849
+          ],
+          "snippet": "0.9849 / 0.9849",
+          "page_sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+          "value": 0.9849,
+          "rule": "dimensionless coefficient: first column"
+        }
+      },
+      "archive": {
+        "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/kcs/KCS_hull_SVA.zip",
+        "http_status": 200,
+        "bytes": 74086,
+        "sha256": "b9e334853857b819bbddfd549f4599dde7cba57a9540893b873aaae56dc99a20"
+      },
+      "iges": {
+        "member": "KCS_hull_SVA/KCS_hull_SVA.igs",
+        "members_in_archive": [
+          "KCS_hull_SVA/KCS_hull_SVA.igs",
+          "KCS_hull_SVA/memo.txt"
+        ],
+        "bytes": 246164,
+        "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d"
+      },
+      "census": {
+        "surfaces_type128": 55,
+        "curves_type126": 0,
+        "trimmed_patches_type143_144": 0,
+        "boundaries_type141": 0,
+        "curves_on_surface_type142": 0,
+        "basis_surfaces_trimmed": 0,
+        "basis_surfaces_untrimmed": 55,
+        "by_type": {
+          "128": 55
+        },
+        "metres_per_unit": 1.0,
+        "model_space_scale": 1.0
+      },
+      "measurements": [
+        {
+          "resolution": [
+            41,
+            81
+          ],
+          "patch_quality": {
+            "patches_total": 55,
+            "patches_evaluable": 55,
+            "patches_degenerate": 0,
+            "degenerate_indices": [],
+            "degenerate_fraction": 0.0,
+            "unit_to_metre_factor": 1.0,
+            "bbox_min_m": [
+              -6.009996,
+              -0.262217,
+              -0.149943
+            ],
+            "bbox_max_m": [
+              237.844162,
+              16.157968,
+              23.599659
+            ],
+            "extent_m": [
+              243.854158,
+              16.420185,
+              23.749603
+            ]
+          },
+          "conditions": {
+            "length": {
+              "root_m": 10.650555860127792,
+              "iterations": 16,
+              "converged": true,
+              "ratio_at_root": 21.5277708973568,
+              "quantity_at_root": 229.282726486332,
+              "bracket_m": [
+                10.632826569146108,
+                11.025760899134527
+              ],
+              "quantity": "length_m",
+              "target_ratio": 21.527777777777775,
+              "bracketed": true,
+              "all_roots_m": [
+                10.068712,
+                10.431164,
+                10.650556
+              ],
+              "all_roots_quantity": [
+                221.530829,
+                223.085822,
+                229.282726
+              ]
+            },
+            "beam": {
+              "root_m": 10.833035052223703,
+              "iterations": 12,
+              "converged": true,
+              "ratio_at_root": 2.9814823095876326,
+              "quantity_at_root": 32.29850236734771,
+              "bracket_m": [
+                10.632826569146108,
+                11.025760899134527
+              ],
+              "quantity": "beam_m",
+              "target_ratio": 2.9814814814814814,
+              "bracketed": true,
+              "all_roots_m": [
+                10.833035
+              ],
+              "all_roots_quantity": [
+                32.298502
+              ]
+            }
+          },
+          "scale_by_length": 1.0140315812465412,
+          "scale_by_beam": 0.9969505266008605,
+          "scale_spread_relative": 0.017133302194963732,
+          "scale": 1.0054910539237008,
+          "measurable": true,
+          "immersion_model_m": 10.741020477363225,
+          "length_model_m": 222.81298729259223,
+          "beam_model_m": 32.27279524578112,
+          "length_full_m": 224.0364654207167,
+          "beam_full_m": 32.45000690474426,
+          "volume": {
+            "volume_model_m3": 49932.2989966975,
+            "cloud_points": 49613,
+            "sample_spacing_file_units": 0.40642359745370366,
+            "bins": [
+              500,
+              250
+            ],
+            "dx_m": 0.4877083169444444,
+            "dz_m": 0.0429640819094529,
+            "volume_full_m3": 50759.3667297708
+          }
+        },
+        {
+          "resolution": [
+            61,
+            121
+          ],
+          "patch_quality": {
+            "patches_total": 55,
+            "patches_evaluable": 55,
+            "patches_degenerate": 0,
+            "degenerate_indices": [],
+            "degenerate_fraction": 0.0,
+            "unit_to_metre_factor": 1.0,
+            "bbox_min_m": [
+              -6.009996,
+              -0.262114,
+              -0.149943
+            ],
+            "bbox_max_m": [
+              237.844162,
+              16.157981,
+              23.599853
+            ],
+            "extent_m": [
+              243.854158,
+              16.420095,
+              23.749796
+            ]
+          },
+          "conditions": {
+            "length": {
+              "root_m": 10.211637178658627,
+              "iterations": 17,
+              "converged": true,
+              "ratio_at_root": 21.280441859019028,
+              "quantity_at_root": 217.308151265842,
+              "bracket_m": [
+                9.847038548665395,
+                10.239976096503092
+              ],
+              "quantity": "length_m",
+              "target_ratio": 21.527777777777775,
+              "bracketed": true,
+              "all_roots_m": [
+                10.211637
+              ],
+              "all_roots_quantity": [
+                217.308151
+              ]
+            },
+            "beam": {
+              "root_m": 10.83283597092618,
+              "iterations": 10,
+              "converged": true,
+              "ratio_at_root": 2.98149068821468,
+              "quantity_at_root": 32.29799957427343,
+              "bracket_m": [
+                10.632913644340789,
+                11.025851192178486
+              ],
+              "quantity": "beam_m",
+              "target_ratio": 2.9814814814814814,
+              "bracketed": true,
+              "all_roots_m": [
+                10.832836
+              ],
+              "all_roots_quantity": [
+                32.298
+              ]
+            }
+          },
+          "scale_by_length": 1.057616894435987,
+          "scale_by_beam": 0.9969688481378001,
+          "scale_spread_relative": 0.060832438657906954,
+          "scale": 1.0272928712868934,
+          "measurable": true,
+          "immersion_model_m": 10.513068183244378,
+          "length_model_m": 220.66965254764477,
+          "beam_model_m": 32.22955061050655,
+          "length_full_m": 226.69236097155112,
+          "beam_full_m": 33.109187586953524,
+          "volume": {
+            "volume_model_m3": 48643.26509161044,
+            "cloud_points": 49613,
+            "sample_spacing_file_units": 0.40642359745370366,
+            "bins": [
+              500,
+              250
+            ],
+            "dx_m": 0.4877083169444444,
+            "dz_m": 0.042052272732977514,
+            "volume_full_m3": 52735.80037662094
+          }
+        }
+      ],
+      "reported": {
+        "resolution": [
+          61,
+          121
+        ]
+      },
+      "closure": {
+        "rows": [
+          {
+            "quantity": "length_wl",
+            "published": 232.5,
+            "measured": 226.69236097155112,
+            "error_percent": -2.4979092595479035,
+            "within_3pct": true
+          },
+          {
+            "quantity": "beam_wl",
+            "published": 32.2,
+            "measured": 33.109187586953524,
+            "error_percent": 2.8235639346382735,
+            "within_3pct": true
+          },
+          {
+            "quantity": "volume",
+            "published": 52030.0,
+            "measured": 52735.80037662094,
+            "error_percent": 1.3565258055370677,
+            "within_3pct": true
+          },
+          {
+            "quantity": "cb",
+            "published": 0.6505,
+            "measured": 0.6593227760352083,
+            "error_percent": 1.3563068463041228,
+            "within_3pct": true
+          }
+        ],
+        "verdict": "PASS",
+        "failed_quantities": [],
+        "tolerance": 0.03
+      },
+      "fleet_specs_consistency": {
+        "recorded_geometry_scale": 1.0,
+        "recorded_scale_basis": "geometry file is full scale (policy: full)",
+        "recorded_iges_sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
+        "digest_matches": true,
+        "measured_file_to_full_scale": 1.0272928712868934,
+        "mismatch_factor": 0.9734322391892942,
+        "consistent": true
+      },
+      "status": "PASS"
+    },
+    "JBC": {
+      "page": {
+        "url": "https://t2015.nmri.go.jp/jbc_gc.html",
+        "http_status": 200,
+        "bytes": 13694,
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875"
+      },
+      "note": "JBC (Japan Bulk Carrier) bare hull; archive also carries duct/rudder/propeller",
+      "licence": "published workshop benchmark geometry (Tokyo 2015 / NMRI); the publisher ships no OSI licence file, so this is research use of published data. Bytes are NOT redistributed: the cache is git-ignored and only digests are committed.",
+      "published": {
+        "length_pp": {
+          "row_values": [
+            280.0
+          ],
+          "snippet": "280.000",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 280.0,
+          "model_value": 280.0,
+          "implied_scale": 1.0,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "length_wl": {
+          "row_values": [
+            285.0,
+            278.281
+          ],
+          "snippet": "285.000 / 278.281",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 285.0,
+          "model_value": 278.281,
+          "implied_scale": 1.0241446595347867,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "beam_wl": {
+          "row_values": [
+            45.0
+          ],
+          "snippet": "45.000",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 45.0,
+          "model_value": 45.0,
+          "implied_scale": 1.0,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "draft": {
+          "row_values": [
+            16.5
+          ],
+          "snippet": "16.500",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 16.5,
+          "model_value": 16.5,
+          "implied_scale": 1.0,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "volume": {
+          "row_values": [
+            3.0,
+            178369.9
+          ],
+          "snippet": "\\( \\nabla \\) (m 3 ) / 178369.9",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 178369.9,
+          "rule": "full scale = largest number that is not a unit exponent"
+        },
+        "cb": {
+          "row_values": [
+            0.858,
+            0.8216
+          ],
+          "snippet": "0.8580 / 0.8216",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 0.858,
+          "rule": "dimensionless coefficient: first column"
+        },
+        "cm": {
+          "row_values": [
+            0.9981,
+            0.9964
+          ],
+          "snippet": "0.9981 / 0.9964",
+          "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+          "value": 0.9981,
+          "rule": "dimensionless coefficient: first column"
+        }
+      },
+      "archive": {
+        "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/JBC_IGES.zip",
+        "http_status": 200,
+        "bytes": 2508534,
+        "sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c"
+      },
+      "iges": {
+        "member": "jbc.igs",
+        "members_in_archive": [
+          "jbc-spacer.igs",
+          "Description_Of_JBC_CAD_Data_New.pdf",
+          "jbc.igs",
+          "jbc_with_duct.igs",
+          "jbc-boss.igs",
+          "jbc-boss-cap.igs",
+          "jbc-propeller.igs"
+        ],
+        "bytes": 1713554,
+        "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab"
+      },
+      "census": {
+        "surfaces_type128": 45,
+        "curves_type126": 172,
+        "trimmed_patches_type143_144": 19,
+        "boundaries_type141": 19,
+        "curves_on_surface_type142": 0,
+        "basis_surfaces_trimmed": 0,
+        "basis_surfaces_untrimmed": 45,
+        "by_type": {
+          "126": 172,
+          "128": 45,
+          "141": 19,
+          "143": 19,
+          "314": 1,
+          "406": 1
+        },
+        "metres_per_unit": 0.001,
+        "model_space_scale": 1.0
+      },
+      "measurements": [
+        {
+          "resolution": [
+            41,
+            81
+          ],
+          "patch_quality": {
+            "patches_total": 45,
+            "patches_evaluable": 16,
+            "patches_degenerate": 29,
+            "degenerate_indices": [
+              3,
+              5,
+              6,
+              7,
+              8,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              19,
+              22,
+              24,
+              25,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              37,
+              38,
+              39,
+              42,
+              43,
+              44
+            ],
+            "degenerate_fraction": 0.6444,
+            "unit_to_metre_factor": 0.001,
+            "bbox_min_m": [
+              -3.856185,
+              -0.565345,
+              0.0
+            ],
+            "bbox_max_m": [
+              3.686589,
+              0.565345,
+              0.630385
+            ],
+            "extent_m": [
+              7.542774,
+              1.130691,
+              0.630385
+            ]
+          },
+          "conditions": {
+            "length": {
+              "root_m": 0.41794787903912367,
+              "iterations": 12,
+              "converged": true,
+              "ratio_at_root": 17.27275817869583,
+              "quantity_at_root": 7.2191126459416,
+              "bracket_m": [
+                0.4099708847500001,
+                0.42046679500000017
+              ],
+              "quantity": "length_m",
+              "target_ratio": 17.272727272727273,
+              "bracketed": true,
+              "all_roots_m": [
+                0.022096,
+                0.417948
+              ],
+              "all_roots_quantity": [
+                0.157424,
+                7.219113
+              ]
+            },
+            "beam": {
+              "root_m": 0.41250005062323003,
+              "iterations": 12,
+              "converged": true,
+              "ratio_at_root": 2.727272392573727,
+              "quantity_at_root": 1.125,
+              "bracket_m": [
+                0.4099708847500001,
+                0.42046679500000017
+              ],
+              "quantity": "beam_m",
+              "target_ratio": 2.727272727272727,
+              "bracketed": true,
+              "all_roots_m": [
+                0.022388,
+                0.4125
+              ],
+              "all_roots_quantity": [
+                0.060607,
+                1.125
+              ]
+            }
+          },
+          "scale_by_length": 39.47860684909817,
+          "scale_by_beam": 39.999995091081324,
+          "scale_spread_relative": 0.013206855145017961,
+          "scale": 39.739300970089744,
+          "measurable": true,
+          "immersion_model_m": 0.4152060956587767,
+          "length_model_m": 7.212469953433221,
+          "beam_model_m": 1.125,
+          "length_full_m": 286.6185142172119,
+          "beam_full_m": 44.70671359135096,
+          "volume": {
+            "volume_model_m3": 0.8966097282922368,
+            "cloud_points": 108257,
+            "sample_spacing_file_units": 12.571289654056615,
+            "bins": [
+              500,
+              250
+            ],
+            "dx_m": 0.015085547584867938,
+            "dz_m": 0.0016608243826351067,
+            "volume_full_m3": 56268.34181017602
+          }
+        },
+        {
+          "resolution": [
+            61,
+            121
+          ],
+          "patch_quality": {
+            "patches_total": 45,
+            "patches_evaluable": 16,
+            "patches_degenerate": 29,
+            "degenerate_indices": [
+              3,
+              5,
+              6,
+              7,
+              8,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              19,
+              22,
+              24,
+              25,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              37,
+              38,
+              39,
+              42,
+              43,
+              44
+            ],
+            "degenerate_fraction": 0.6444,
+            "unit_to_metre_factor": 0.001,
+            "bbox_min_m": [
+              -3.856185,
+              -0.565345,
+              0.0
+            ],
+            "bbox_max_m": [
+              3.686589,
+              0.565345,
+              0.630385
+            ],
+            "extent_m": [
+              7.542774,
+              1.130691,
+              0.630385
+            ]
+          },
+          "conditions": {
+            "length": {
+              "root_m": 0.41794787903912367,
+              "iterations": 12,
+              "converged": true,
+              "ratio_at_root": 17.272734882499073,
+              "quantity_at_root": 7.219102909345575,
+              "bracket_m": [
+                0.4099708847500001,
+                0.42046679500000017
+              ],
+              "quantity": "length_m",
+              "target_ratio": 17.272727272727273,
+              "bracketed": true,
+              "all_roots_m": [
+                0.022096,
+                0.417948
+              ],
+              "all_roots_quantity": [
+                0.157431,
+                7.219103
+              ]
+            },
+            "beam": {
+              "root_m": 0.41250005062323003,
+              "iterations": 12,
+              "converged": true,
+              "ratio_at_root": 2.7272723925737274,
+              "quantity_at_root": 1.1250000000000002,
+              "bracket_m": [
+                0.4099708847500001,
+                0.42046679500000017
+              ],
+              "quantity": "beam_m",
+              "target_ratio": 2.727272727272727,
+              "bracketed": true,
+              "all_roots_m": [
+                0.022388,
+                0.4125
+              ],
+              "all_roots_quantity": [
+                0.060543,
+                1.125
+              ]
+            }
+          },
+          "scale_by_length": 39.47860684909817,
+          "scale_by_beam": 39.999995091081324,
+          "scale_spread_relative": 0.013206855145017961,
+          "scale": 39.739300970089744,
+          "measurable": true,
+          "immersion_model_m": 0.4152060956587767,
+          "length_model_m": 7.212459357804267,
+          "beam_model_m": 1.1250000000000002,
+          "length_full_m": 286.61809315432396,
+          "beam_full_m": 44.70671359135097,
+          "volume": {
+            "volume_model_m3": 2.074910496400613,
+            "volume_full_m3": 130214.70697107822,
+            "cloud_points": 635354,
+            "sample_spacing_file_units": 2.5142579308113233,
+            "sampling_divisor": 3000,
+            "bins": [
+              900,
+              400
+            ]
+          }
+        }
+      ],
+      "reported": {
+        "resolution": [
+          61,
+          121
+        ]
+      },
+      "closure": {
+        "rows": [
+          {
+            "quantity": "length_wl",
+            "published": 285.0,
+            "measured": 286.61809315432396,
+            "error_percent": 0.5677519839733192,
+            "within_3pct": true
+          },
+          {
+            "quantity": "beam_wl",
+            "published": 45.0,
+            "measured": 44.70671359135097,
+            "error_percent": -0.6517475747756296,
+            "within_3pct": true
+          },
+          {
+            "quantity": "volume",
+            "published": 178369.9,
+            "measured": 130214.70697107822,
+            "error_percent": -26.99737625514269,
+            "within_3pct": false
+          },
+          {
+            "quantity": "cb",
+            "published": 0.858,
+            "measured": 0.6263333668642531,
+            "error_percent": -27.00077309274439,
+            "within_3pct": false
+          }
+        ],
+        "verdict": "FAIL",
+        "failed_quantities": [
+          "volume",
+          "cb"
+        ],
+        "tolerance": 0.03,
+        "reason": "the waterline rows close (+0.57 % / -0.65 %) but the displacement does not, and it does not converge: -68 % / -27 % / -6.2 % on three sampling settings, because 29 of 45 patches (64 %) evaluate to a point, so the integrated volume is a property of the cloud grid, not of the hull. The committed -6.16 % is one grid's value, not a reproducible closure"
+      },
+      "fleet_specs_consistency": {
+        "recorded_geometry_scale": 39.72849598755336,
+        "recorded_scale_basis": "model scale derived from the publisher CAD (no scale row is published): B=45 m / D=25 m over the measured model spans, half-spread 0.18%; record artifacts/baseline_fleet/jbc_model_scale.json (page sha256 fc2ce9054a8b7842\u2026, archive sha256 e19800ee954f4960\u2026)",
+        "recorded_iges_sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+        "digest_matches": true,
+        "measured_file_to_full_scale": 39.739300970089744,
+        "mismatch_factor": 0.9997281033568125,
+        "consistent": true
+      },
+      "status": "FAIL",
+      "sampling_note": "volume integrated at sample spacing = x-extent/3000 (2.5 mm in file units), the resolution the committed JBC calibration used; a coarser 600-division cloud loses the hull's volume to -68 %, i.e. this closure is sampling-dominated, not hull-dominated",
+      "volume_sensitivity": [
+        {
+          "sampling_divisor": 600,
+          "sample_spacing_file_units": 12.57,
+          "volume_full_m3": 56268.3418,
+          "error_percent": -68.45,
+          "note": "resolution-relative rule of this tool"
+        },
+        {
+          "sampling_divisor": 3000,
+          "sample_spacing_file_units": 2.5143,
+          "volume_full_m3": 130214.707,
+          "error_percent": -27.0,
+          "note": "same spacing the committed JBC calibration used"
+        },
+        {
+          "sampling_divisor": "committed record (m20649)",
+          "volume_full_m3": 167386.0,
+          "error_percent": -6.16,
+          "note": "scale_calibration.json, fixed dx=0.01 m / dz=0.005 m grid"
+        }
+      ]
+    },
+    "ONRT": {
+      "page": {
+        "url": "https://t2015.nmri.go.jp/onrt_gc.html",
+        "http_status": 200,
+        "bytes": 8689,
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11"
+      },
+      "note": "ONRT (Office of Naval Research Tumblehome) hull+appendage merged export",
+      "licence": "published workshop benchmark geometry (Tokyo 2015 / NMRI); the publisher ships no OSI licence file, so this is research use of published data. Bytes are NOT redistributed: the cache is git-ignored and only digests are committed.",
+      "published": {
+        "length_wl": {
+          "row_values": [
+            3.147,
+            154.0
+          ],
+          "snippet": "3.147 / 154.0",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "value": 154.0,
+          "model_value": 3.147,
+          "implied_scale": 48.93549412138545,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "beam_wl": {
+          "row_values": [
+            0.384,
+            18.78
+          ],
+          "snippet": "0.384 / 18.78",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "value": 18.78,
+          "model_value": 0.384,
+          "implied_scale": 48.90625,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "draft": {
+          "row_values": [
+            0.112,
+            5.494
+          ],
+          "snippet": "0.112 / 5.494",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "value": 5.494,
+          "model_value": 0.112,
+          "implied_scale": 49.05357142857142,
+          "rule": "full scale = larger of the row's first two numbers"
+        },
+        "volume": {
+          "row_values": [
+            72.6,
+            8507.0
+          ],
+          "snippet": "72.6 kg / 8507 ton",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "value": 8507.0,
+          "rule": "full scale = largest number that is not a unit exponent"
+        },
+        "cb": {
+          "row_values": [
+            0.535,
+            0.535
+          ],
+          "snippet": "0.535 / 0.535",
+          "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+          "value": 0.535,
+          "rule": "dimensionless coefficient: first column"
+        }
+      },
+      "archive": {
+        "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/onrt/onrt_wo_gap.zip",
+        "http_status": 200,
+        "bytes": 752918,
+        "sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685"
+      },
+      "iges": {
+        "member": "onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+        "members_in_archive": [
+          "onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs"
+        ],
+        "bytes": 3374136,
+        "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21"
+      },
+      "census": {
+        "surfaces_type128": 132,
+        "curves_type126": 820,
+        "trimmed_patches_type143_144": 80,
+        "boundaries_type141": 98,
+        "curves_on_surface_type142": 0,
+        "basis_surfaces_trimmed": 0,
+        "basis_surfaces_untrimmed": 132,
+        "by_type": {
+          "126": 820,
+          "128": 132,
+          "141": 98,
+          "143": 80,
+          "314": 5,
+          "406": 135
+        },
+        "metres_per_unit": 1.0,
+        "model_space_scale": 1.0
+      },
+      "measurements": [
+        {
+          "resolution": [
+            41,
+            81
+          ],
+          "patch_quality": {
+            "patches_total": 132,
+            "patches_evaluable": 26,
+            "patches_degenerate": 106,
+            "degenerate_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              24,
+              25,
+              26,
+              29,
+              33,
+              34,
+              35,
+              38,
+              41,
+              42,
+              43,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              69,
+              70,
+              71,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              106,
+              107,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              118,
+              119,
+              121,
+              122,
+              123,
+              124,
+              125,
+              128,
+              129,
+              130,
+              131
+            ],
+            "degenerate_fraction": 0.803,
+            "unit_to_metre_factor": 1.0,
+            "bbox_min_m": [
+              -0.005847,
+              -0.061057,
+              -0.044713
+            ],
+            "bbox_max_m": [
+              1.000475,
+              0.061101,
+              0.058415
+            ],
+            "extent_m": [
+              1.006323,
+              0.122158,
+              0.103128
+            ]
+          },
+          "conditions": {
+            "length": {
+              "root_m": 0.016626899140279126,
+              "iterations": 8,
+              "converged": true,
+              "ratio_at_root": 28.035101429146025,
+              "quantity_at_root": 0.46613680384990613,
+              "bracket_m": [
+                0.016592705982830955,
+                0.017565311350245617
+              ],
+              "quantity": "length_m",
+              "target_ratio": 28.03057881325082,
+              "bracketed": true,
+              "all_roots_m": [
+                0.016627
+              ],
+              "all_roots_quantity": [
+                0.466137
+              ]
+            },
+            "beam": {
+              "root_m": 0.032363350045871084,
+              "iterations": 8,
+              "converged": true,
+              "ratio_at_root": 3.41811034848281,
+              "quantity_at_root": 0.11062150170336357,
+              "bracket_m": [
+                0.032154391861465584,
+                0.033126997228880246
+              ],
+              "quantity": "beam_m",
+              "target_ratio": 3.4182744812522756,
+              "bracketed": true,
+              "all_roots_m": [
+                0.032363
+              ],
+              "all_roots_quantity": [
+                0.110622
+              ]
+            }
+          },
+          "scale_by_length": 330.42841925291,
+          "scale_by_beam": 169.75992881493812,
+          "scale_spread_relative": 0.9464453216938068,
+          "scale": 250.09417403392405,
+          "measurable": false,
+          "why": "the two waterline conditions disagree by 94.6 % (length 330.42841925291, beam 169.75992881493812): the evaluated surface is not a closed hull, so no scale may be quoted"
+        },
+        {
+          "resolution": [
+            61,
+            121
+          ],
+          "patch_quality": {
+            "patches_total": 132,
+            "patches_evaluable": 26,
+            "patches_degenerate": 106,
+            "degenerate_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              24,
+              25,
+              26,
+              29,
+              33,
+              34,
+              35,
+              38,
+              41,
+              42,
+              43,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              69,
+              70,
+              71,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              106,
+              107,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              118,
+              119,
+              121,
+              122,
+              123,
+              124,
+              125,
+              128,
+              129,
+              130,
+              131
+            ],
+            "degenerate_fraction": 0.803,
+            "unit_to_metre_factor": 1.0,
+            "bbox_min_m": [
+              -0.005847,
+              -0.061086,
+              -0.044713
+            ],
+            "bbox_max_m": [
+              1.000475,
+              0.061106,
+              0.058415
+            ],
+            "extent_m": [
+              1.006323,
+              0.122193,
+              0.103128
+            ]
+          },
+          "conditions": {
+            "length": {
+              "root_m": 0.016626899140279126,
+              "iterations": 8,
+              "converged": true,
+              "ratio_at_root": 28.03510140594241,
+              "quantity_at_root": 0.46613680346410197,
+              "bracket_m": [
+                0.016592705982830955,
+                0.017565311350245617
+              ],
+              "quantity": "length_m",
+              "target_ratio": 28.03057881325082,
+              "bracketed": true,
+              "all_roots_m": [
+                0.016627
+              ],
+              "all_roots_quantity": [
+                0.466137
+              ]
+            },
+            "beam": {
+              "root_m": 0.032363350045871084,
+              "iterations": 8,
+              "converged": true,
+              "ratio_at_root": 3.4181103484828097,
+              "quantity_at_root": 0.11062150170336356,
+              "bracket_m": [
+                0.032154391861465584,
+                0.033126997228880246
+              ],
+              "quantity": "beam_m",
+              "target_ratio": 3.4182744812522756,
+              "bracketed": true,
+              "all_roots_m": [
+                0.032363
+              ],
+              "all_roots_quantity": [
+                0.110622
+              ]
+            }
+          },
+          "scale_by_length": 330.42841925291,
+          "scale_by_beam": 169.75992881493812,
+          "scale_spread_relative": 0.9464453216938068,
+          "scale": 250.09417403392405,
+          "measurable": false,
+          "why": "the two waterline conditions disagree by 94.6 % (length 330.42841925291, beam 169.75992881493812): the evaluated surface is not a closed hull, so no scale may be quoted"
+        }
+      ],
+      "reported": {
+        "resolution": [
+          61,
+          121
+        ]
+      },
+      "closure": {
+        "rows": [],
+        "verdict": "NOT_MEASURABLE",
+        "reason": "the two waterline conditions disagree by 94.6 % (length 330.42841925291, beam 169.75992881493812): the evaluated surface is not a closed hull, so no scale may be quoted"
+      },
+      "fleet_specs_consistency": {
+        "recorded_geometry_scale": 48.9355,
+        "recorded_scale_basis": "published model scale from artifacts/baseline_fleet/raw/pages/simman_summary.html: 48.93550",
+        "recorded_iges_sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+        "digest_matches": true,
+        "measured_file_to_full_scale": 250.09417403392405,
+        "mismatch_factor": 0.19566829251033308,
+        "consistent": false
+      },
+      "status": "NOT_MEASURABLE"
+    }
+  },
+  "effects": {
+    "reachable_hulls": [
+      "KCS",
+      "JBC"
+    ],
+    "unmeasurable_hulls": [
+      "ONRT"
+    ]
+  }
+}
