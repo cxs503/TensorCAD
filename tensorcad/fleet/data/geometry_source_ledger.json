@@ -1,0 +1,873 @@
+{
+ "schema": "tensorcad.fleet.geometry_source_ledger.v1",
+ "anchor": "GAP-CAD-T1-SOURCE-HUNT",
+ "generated_utc": "2026-11-15T03:52:34+00:00",
+ "tool": "tools/baseline_fleet/geometry_source_ledger.py",
+ "cache": {
+  "directory_hint": "raw",
+  "artefacts": 15,
+  "retrieval_window": [
+   "2026-11-14T14:07:22+00:00",
+   "2026-11-14T14:07:43+00:00",
+   "2026-11-14T14:09:19+00:00",
+   "2026-11-14T14:09:41+00:00",
+   "2026-11-14T14:09:43+00:00",
+   "2026-11-14T14:09:44+00:00",
+   "2026-11-14T14:09:45+00:00",
+   "2026-11-14T14:09:46+00:00",
+   "2026-11-14T14:11:24+00:00",
+   "2026-11-14T14:11:26+00:00",
+   "2026-11-14T14:11:29+00:00",
+   "2026-11-14T14:11:31+00:00",
+   "2026-11-14T14:11:36+00:00",
+   "2026-11-14T14:13:25+00:00"
+  ],
+  "note": "bytes stay out of git (publisher files, research-use grant only); the ledger keeps digest, byte count, URL and licence so a later run can re-fetch and compare"
+ },
+ "network": {
+  "state": "no egress at ledger build time",
+  "evidence": "urllib HTTPS GET to t2015.nmri.go.jp times out in this environment; the ledger therefore consumes the cache retrieved 2026-11-14 and adds no new fetch. A run with egress re-fetches and compares digests."
+ },
+ "sources": {
+  "dtc_github_search": {
+   "cache_file": "dtc_github_search-d54dbbaff553d678.bin",
+   "url": "https://api.github.com/search/repositories?q=DTCHull",
+   "final_url": "https://api.github.com/search/repositories?q=DTCHull",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:11:31+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 78643,
+   "sha256": "d54dbbaff553d678cbbd7b4b4f060959ed32a7175122f23d239f5602d00f894e",
+   "kind": "other",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "Tokyo 2015 workshop geometry archive, published by NMRI for research use; no OSI licence file ships with it, so only digests, member names and measured dimensions are recorded here -- the bytes are not redistributed"
+  },
+  "dtc_mirror_tree": {
+   "cache_file": "dtc_mirror_tree-9b927e6de3dd5baa.bin",
+   "url": "https://api.github.com/repos/crookies/DTCHull/git/trees/HEAD?recursive=1",
+   "final_url": "https://api.github.com/repos/crookies/DTCHull/git/trees/HEAD?recursive=1",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:13:25+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 9141,
+   "sha256": "9b927e6de3dd5baae983213f0c9252b0cdb490962fb21fa5f5bf7d3df40a111f",
+   "kind": "other",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "Tokyo 2015 workshop geometry archive, published by NMRI for research use; no OSI licence file ships with it, so only digests, member names and measured dimensions are recorded here -- the bytes are not redistributed"
+  },
+  "dtc_unidue_page": {
+   "cache_file": "dtc_unidue_page-a10ad3f53c6b474b.bin",
+   "url": "https://www.uni-due.de/ship/dtc.php",
+   "final_url": "https://www.uni-due.de/ship/dtc.php",
+   "http_status": 404,
+   "retrieved_utc": "2026-11-14T14:11:24+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 11672,
+   "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+   "kind": "html",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "page copyright NMRI / SIMMAN; digest + extracted row text only"
+  },
+  "dtc_unidue_section": {
+   "cache_file": "dtc_unidue_section-a10ad3f53c6b474b.bin",
+   "url": "https://www.uni-due.de/ship/",
+   "final_url": "https://www.uni-due.de/ship/",
+   "http_status": 404,
+   "retrieved_utc": "2026-11-14T14:11:26+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 11672,
+   "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+   "kind": "html",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "page copyright NMRI / SIMMAN; digest + extracted row text only"
+  },
+  "simman_onrt_wo_gap": {
+   "cache_file": "simman_onrt_wo_gap-bd747eff8f531ba4.bin",
+   "url": "https://simman2020.kr/download/onrt_wo_gap.zip",
+   "final_url": "https://simman2020.kr/download/onrt_wo_gap.zip",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:07:43+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 752918,
+   "sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685",
+   "kind": "zip",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "Tokyo 2015 workshop geometry archive, published by NMRI for research use; no OSI licence file ships with it, so only digests, member names and measured dimensions are recorded here -- the bytes are not redistributed"
+  },
+  "simman_summary": {
+   "cache_file": "simman_summary-c1a668f6d2440c5d.bin",
+   "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "final_url": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:11:29+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 35030,
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "kind": "html",
+   "digest_bound_in_repo": true,
+   "repo_source_key": "simman2020_summary",
+   "licence": "page copyright SIMMAN2020; digests + extracted cells only"
+  },
+  "t2015_dtc_page": {
+   "cache_file": "t2015_dtc_page-cc0b4e42510d49c6.bin",
+   "url": "https://t2015.nmri.go.jp/dtc.html",
+   "final_url": "https://t2015.nmri.go.jp/dtc.html",
+   "http_status": 404,
+   "retrieved_utc": "2026-11-14T14:09:45+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 355,
+   "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264",
+   "kind": "html",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "page copyright NMRI / SIMMAN; digest + extracted row text only"
+  },
+  "t2015_geometry_dir": {
+   "cache_file": "t2015_geometry_dir-ab768623070128cc.bin",
+   "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/",
+   "final_url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/",
+   "http_status": 403,
+   "retrieved_utc": "2026-11-14T14:09:46+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 239,
+   "sha256": "ab768623070128ccef048c88def86155dbe776c3d8db423cc8fa89432673d8a8",
+   "kind": "html",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "page copyright NMRI / SIMMAN; digest + extracted row text only"
+  },
+  "t2015_index": {
+   "cache_file": "t2015_index-dd3bc58f07961906.bin",
+   "url": "https://t2015.nmri.go.jp/index.html",
+   "final_url": "https://t2015.nmri.go.jp/index.html",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:09:19+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 16953,
+   "sha256": "dd3bc58f079619061b374a79be22e75a5be61c49a0ea17df7559ea37bc479f93",
+   "kind": "html",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "page copyright NMRI / SIMMAN; digest + extracted row text only"
+  },
+  "t2015_jbc_gc": {
+   "cache_file": "t2015_jbc_gc-fc2ce9054a8b7842.bin",
+   "url": "https://t2015.nmri.go.jp/jbc_gc.html",
+   "final_url": "https://t2015.nmri.go.jp/jbc_gc.html",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:09:43+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 13694,
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "kind": "html",
+   "digest_bound_in_repo": true,
+   "repo_source_key": "t2015_jbc",
+   "licence": "page copyright NMRI; digests + extracted cells only"
+  },
+  "t2015_jbc_iges": {
+   "cache_file": "t2015_jbc_iges-e19800ee954f4960.bin",
+   "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/JBC_IGES.zip",
+   "final_url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/JBC_IGES.zip",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:13:25+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 2508534,
+   "sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c",
+   "kind": "zip",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "Tokyo 2015 workshop geometry archive, published by NMRI for research use; no OSI licence file ships with it, so only digests, member names and measured dimensions are recorded here -- the bytes are not redistributed"
+  },
+  "t2015_jbc_mp687": {
+   "cache_file": "t2015_jbc_mp687-feb298a22caef7ef.bin",
+   "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/MP687_particulars.zip",
+   "final_url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/jbc/MP687_particulars.zip",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:11:36+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 248313,
+   "sha256": "feb298a22caef7efb9bfb17b55409f70c97547e0d57ea0ca55d132a61ae4342e",
+   "kind": "zip",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "Tokyo 2015 workshop geometry archive, published by NMRI for research use; no OSI licence file ships with it, so only digests, member names and measured dimensions are recorded here -- the bytes are not redistributed"
+  },
+  "t2015_kcs_gc": {
+   "cache_file": "t2015_kcs_gc-68d9c24600cb699b.bin",
+   "url": "https://t2015.nmri.go.jp/kcs_gc.html",
+   "final_url": "https://t2015.nmri.go.jp/kcs_gc.html",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:09:41+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 12978,
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "kind": "html",
+   "digest_bound_in_repo": true,
+   "repo_source_key": "t2015_kcs",
+   "licence": "page copyright NMRI; digests + extracted cells only, page bytes not redistributed"
+  },
+  "t2015_onrt_gc": {
+   "cache_file": "t2015_onrt_gc-5e13427332de8be1.bin",
+   "url": "https://t2015.nmri.go.jp/onrt_gc.html",
+   "final_url": "https://t2015.nmri.go.jp/onrt_gc.html",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:09:44+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 8689,
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "kind": "html",
+   "digest_bound_in_repo": true,
+   "repo_source_key": "t2015_onrt",
+   "licence": "page copyright NMRI; digests + extracted cells only"
+  },
+  "t2015_onrt_wo_gap": {
+   "cache_file": "t2015_onrt_wo_gap-bd747eff8f531ba4.bin",
+   "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/onrt/onrt_wo_gap.zip",
+   "final_url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/onrt/onrt_wo_gap.zip",
+   "http_status": 200,
+   "retrieved_utc": "2026-11-14T14:07:22+00:00",
+   "fetched_by": "tools/baseline_fleet/hunt_sources.py",
+   "bytes": 752918,
+   "sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685",
+   "kind": "zip",
+   "digest_bound_in_repo": false,
+   "repo_source_key": null,
+   "licence": "Tokyo 2015 workshop geometry archive, published by NMRI for research use; no OSI licence file ships with it, so only digests, member names and measured dimensions are recorded here -- the bytes are not redistributed"
+  }
+ },
+ "geometry": {
+  "JBC": {
+   "archive_sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c",
+   "archive_bytes": 2508534,
+   "members": [
+    {
+     "name": "jbc-spacer.igs",
+     "bytes": 91102,
+     "sha256": "dcacdeeed8d11718b71e7235a6f7b21cc9808e8682285cec027d3f5d73b47c59",
+     "kind": "iges"
+    },
+    {
+     "name": "Description_Of_JBC_CAD_Data_New.pdf",
+     "bytes": 305324,
+     "sha256": "688e44c3e9eac8d9c9e064598faed8212161ee91e6c29404826215e74d0ea7d6",
+     "kind": "pdf"
+    },
+    {
+     "name": "jbc.igs",
+     "bytes": 1713554,
+     "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
+     "kind": "iges"
+    },
+    {
+     "name": "jbc_with_duct.igs",
+     "bytes": 2279764,
+     "sha256": "9fb6555fb63270e4fbe1b142c1635505309de9ce2205d28f3aea3e4b009cdf22",
+     "kind": "iges"
+    },
+    {
+     "name": "jbc-boss.igs",
+     "bytes": 10988,
+     "sha256": "15e89397bb013051c542979d346ebdf656e98667e43b7fd8a54e638b5bc6d61f",
+     "kind": "iges"
+    },
+    {
+     "name": "jbc-boss-cap.igs",
+     "bytes": 6232,
+     "sha256": "be704bf23687c253858452b23d9281adff290c3822509f8330db5b6deabab34d",
+     "kind": "iges"
+    },
+    {
+     "name": "jbc-propeller.igs",
+     "bytes": 4578962,
+     "sha256": "d44e40b189d8367e0411713d575f059bbc539e447196656c572ad47ac8e22e2a",
+     "kind": "iges"
+    }
+   ],
+   "hull_member": {
+    "name": "jbc.igs",
+    "bytes": 1713554,
+    "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab"
+   },
+   "iges_fingerprint": {
+    "units": "mm",
+    "unit_flag": 2,
+    "unit_name": "MM",
+    "metres_per_unit": 0.001,
+    "model_space_scale": 1.0,
+    "header_max_coordinate": 3856.185,
+    "min_resolution": 0.0001,
+    "generation_stamp": "141031.065553",
+    "author": "",
+    "organisation": "National Maritime Research Institute, Japan",
+    "entity_census": {
+     "126": 172,
+     "128": 45,
+     "141": 19,
+     "143": 19,
+     "314": 1,
+     "406": 1
+    },
+    "metres_resolved_from": "unit_flag"
+   },
+   "extent": {
+    "extent_m": [
+     7.542605,
+     1.130691,
+     0.630385
+    ],
+    "low_m": [
+     -3.856185,
+     -0.565345,
+     0.0
+    ],
+    "high_m": [
+     3.68642,
+     0.565345,
+     0.630385
+    ],
+    "surfaces_measured": 45,
+    "grid": [
+     15,
+     15
+    ],
+    "method": "surface evaluation on a parameter grid (not the control net)",
+    "header_max_coordinate_m": 3.856185,
+    "measured_extreme_m": 3.856185,
+    "header_matches_extent": true
+   },
+   "axis_denominators": {
+    "x": {
+     "quantity": "Lpp",
+     "published_full": 280.0,
+     "measured_m": 7.542605,
+     "denominator": 37.122453051697654
+    },
+    "y": {
+     "quantity": "B",
+     "published_full": 45.0,
+     "measured_m": 1.130691,
+     "denominator": 39.798671785660275
+    },
+    "z": {
+     "quantity": "D (depth)",
+     "published_full": 25.0,
+     "measured_m": 0.630385,
+     "denominator": 39.65830405228551
+    }
+   },
+   "regime": {
+    "extent_max_m": 7.542605,
+    "published_lwl_m": 280.0,
+    "regime": "finite_length",
+    "implied_denominator": 37.122453051697654,
+    "note": "the export carries a physical length; a denominator can be read from it"
+   },
+   "checks": [
+    {
+     "quantity": "JBC scale denominator from B",
+     "measured": 39.798671785660275,
+     "reference": 40.0,
+     "unit": "--",
+     "reference_source": "quoted 'Scale factor 1 40' (jbc_scse)",
+     "abs_rel_error": 0.00503320535849312,
+     "within_tolerance": true,
+     "tolerance": 0.03,
+     "note": ""
+    },
+    {
+     "quantity": "JBC scale denominator from D",
+     "measured": 39.65830405228551,
+     "reference": 40.0,
+     "unit": "--",
+     "reference_source": "quoted 'Scale factor 1 40' (jbc_scse)",
+     "abs_rel_error": 0.008542398692862285,
+     "within_tolerance": true,
+     "tolerance": 0.03,
+     "note": ""
+    },
+    {
+     "quantity": "JBC B at 1:40 (m)",
+     "measured": 1.130691,
+     "reference": 1.125,
+     "unit": "m",
+     "reference_source": "published B=45 m / 40",
+     "abs_rel_error": 0.005058666666666569,
+     "within_tolerance": true,
+     "tolerance": 0.03,
+     "note": ""
+    },
+    {
+     "quantity": "JBC D at 1:40 (m)",
+     "measured": 0.630385,
+     "reference": 0.625,
+     "unit": "m",
+     "reference_source": "published D=25 m / 40",
+     "abs_rel_error": 0.008615999999999957,
+     "within_tolerance": true,
+     "tolerance": 0.03,
+     "note": ""
+    }
+   ],
+   "ship": "JBC"
+  },
+  "ONRT": {
+   "archive_sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685",
+   "archive_bytes": 752918,
+   "members": [
+    {
+     "name": "onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+     "bytes": 3374136,
+     "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+     "kind": "iges"
+    }
+   ],
+   "hull_member": {
+    "name": "onrt_wo_gap/onr5613-full_appendage_deckhous_mergedR.igs",
+    "bytes": 3374136,
+    "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21"
+   },
+   "iges_fingerprint": {
+    "units": "m",
+    "unit_flag": 6,
+    "unit_name": "M",
+    "metres_per_unit": 1.0,
+    "model_space_scale": 1.0,
+    "header_max_coordinate": 1.000475494567879,
+    "min_resolution": 0.0001,
+    "generation_stamp": "141112.162552",
+    "author": "",
+    "organisation": "",
+    "entity_census": {
+     "126": 820,
+     "128": 132,
+     "141": 98,
+     "143": 80,
+     "314": 5,
+     "406": 135
+    },
+    "metres_resolved_from": "unit_flag"
+   },
+   "extent": {
+    "extent_m": [
+     1.006323,
+     0.122081,
+     0.103128
+    ],
+    "low_m": [
+     -0.005847,
+     -0.06104,
+     -0.044713
+    ],
+    "high_m": [
+     1.000475,
+     0.06104,
+     0.058415
+    ],
+    "surfaces_measured": 132,
+    "grid": [
+     15,
+     15
+    ],
+    "method": "surface evaluation on a parameter grid (not the control net)",
+    "header_max_coordinate_m": 1.000475,
+    "measured_extreme_m": 1.000475,
+    "header_matches_extent": true
+   },
+   "axis_denominators": {
+    "x": {
+     "quantity": "Lpp",
+     "published_full": 154.0,
+     "measured_m": 1.006323,
+     "denominator": 153.0323762847515
+    },
+    "y": {
+     "quantity": "B",
+     "published_full": 18.78,
+     "measured_m": 0.122081,
+     "denominator": 153.83229167519926
+    },
+    "z": {
+     "quantity": "T (draft)",
+     "published_full": 5.494,
+     "measured_m": 0.103128,
+     "denominator": 53.273601737646416
+    }
+   },
+   "regime": {
+    "extent_max_m": 1.006323,
+    "published_lwl_m": 154.0,
+    "regime": "unit_length_normalised",
+    "implied_denominator": 153.0323762847515,
+    "note": "largest extent is 1.0 +-2 %, i.e. the export is normalised by a hull length; the physical scale must come from the published particulars, not from the file"
+   },
+   "checks": [
+    {
+     "quantity": "ONRT B/Lwl from geometry",
+     "measured": 0.12131393200791395,
+     "reference": 0.12194805194805196,
+     "unit": "--",
+     "reference_source": "published B=18.78 m, Lwl=154 m",
+     "abs_rel_error": 0.005199918571951745,
+     "within_tolerance": true,
+     "tolerance": 0.03,
+     "note": ""
+    },
+    {
+     "quantity": "ONRT file length vs published model Lwl",
+     "measured": 1.006323,
+     "reference": 3.147,
+     "unit": "m",
+     "reference_source": "published model Lwl=3.147 m (full 154 m)",
+     "abs_rel_error": 0.6802278360343184,
+     "within_tolerance": false,
+     "tolerance": 0.03,
+     "note": "expected mismatch: the export is unit-length normalised, so it must be scaled by the published Lwl before meshing; this row is the measurement that establishes the regime, not a defect of the archive"
+    }
+   ],
+   "ship": "ONRT"
+  }
+ },
+ "published": {
+  "KCS": {
+   "particulars": {
+    "length_pp": 230.0,
+    "beam": 32.2,
+    "draft": 10.8,
+    "displacement_volume": 52030.0,
+    "cb": 0.6505,
+    "published_source": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+    "scale_basis": "geometry file is full scale (policy: full)"
+   },
+   "digest_bound_entries": "benchmarks/verified/baseline_fleet/fleet_specs.json"
+  },
+  "KVLCC2": {
+   "particulars": {
+    "length_pp": 320.0,
+    "beam": 58.0,
+    "draft": 20.8,
+    "displacement_volume": 312622.0,
+    "cb": 0.8098,
+    "published_source": "https://simman2020.kr/contents/Ship_data_summary.php",
+    "scale_basis": "geometry file is full scale (policy: full)"
+   },
+   "digest_bound_entries": "benchmarks/verified/baseline_fleet/fleet_specs.json"
+  },
+  "JBC": {
+   "particulars": {
+    "length_pp": 280.0,
+    "beam": 45.0,
+    "draft": 16.5,
+    "displacement_volume": 178369.9,
+    "cb": 0.858,
+    "published_source": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+    "scale_basis": "model scale derived from the publisher CAD (no scale row is published): B=45 m / D=25 m over the measured model spans, half-spread 0.18%; record artifacts/baseline_fleet/jbc_model_scale.json (page sha256 fc2ce9054a8b7842\u2026, archive sha256 e19800ee954f4960\u2026)"
+   },
+   "digest_bound_entries": "benchmarks/verified/baseline_fleet/fleet_specs.json"
+  },
+  "ONRT": {
+   "particulars": {
+    "length_pp": 154.0,
+    "beam": 18.78,
+    "draft": 5.494,
+    "displacement_volume": 8500.7793948,
+    "cb": 0.535,
+    "published_source": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+    "scale_basis": "published model scale from artifacts/baseline_fleet/raw/pages/simman_summary.html: 48.93550"
+   },
+   "digest_bound_entries": "benchmarks/verified/baseline_fleet/fleet_specs.json"
+  }
+ },
+ "scraped": {
+  "jbc_depth": {
+   "value": 25.0,
+   "raw": "25.000",
+   "snippet": "B_{WL}\\) (m) 45.000 same as on the left Depth \\(D\\) (m) 25.000 same as on the left Draft(Full) T (m) 1",
+   "page": "t2015_jbc_gc",
+   "page_sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875"
+  },
+  "onrt_lwl": {
+   "values": [
+    3.147,
+    154.0
+   ],
+   "raw": [
+    "3.147",
+    "154.0"
+   ],
+   "snippet": "Main particulars Model scale Full scale Length of waterline L WL (m) 3.147 154.0 Maximum beam of waterline B WL (m) 0.38",
+   "page": "t2015_onrt_gc",
+   "page_sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11"
+  },
+  "jbc_scale_factor": {
+   "denominator": 40.0,
+   "quote": "Scale factor \ud835\udf06 1 40",
+   "source": "jbc_scse",
+   "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+   "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "cell_text": "lcb_percent 2.5475 0.858 0.858 -- Mid ship section co-efficient \ud835\udc36\ud835\udc40 0.9981 0.9981 -- Longitudinal center of buoyancy \ud835\udc3f\ud835\udc36\ud835\udc35 % Lpp 2.5475 2.5475 -- Scale factor \ud835\udf06 1 40 -- 5. Case condition JBC models at a Reyno jbc_scse https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf 1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa volume page 3"
+  }
+ },
+ "cross_host": {
+  "quantity": "ONRT geometry archive",
+  "hosts": {
+   "t2015_onrt_wo_gap": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685",
+   "simman_onrt_wo_gap": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685"
+  },
+  "identical": true
+ },
+ "dead_ends": {
+  "dtc_unidue_page": {
+   "http_status": 404,
+   "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+   "url": "https://www.uni-due.de/ship/dtc.php"
+  },
+  "dtc_unidue_section": {
+   "http_status": 404,
+   "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+   "url": "https://www.uni-due.de/ship/"
+  },
+  "t2015_dtc_page": {
+   "http_status": 404,
+   "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264",
+   "url": "https://t2015.nmri.go.jp/dtc.html"
+  },
+  "t2015_geometry_dir": {
+   "http_status": 403,
+   "sha256": "ab768623070128ccef048c88def86155dbe776c3d8db423cc8fa89432673d8a8",
+   "url": "https://t2015.nmri.go.jp/file/Geometry_IGES_files/"
+  }
+ },
+ "checks": [
+  {
+   "quantity": "JBC scale denominator from B",
+   "measured": 39.798671785660275,
+   "reference": 40.0,
+   "unit": "--",
+   "reference_source": "quoted 'Scale factor 1 40' (jbc_scse)",
+   "abs_rel_error": 0.00503320535849312,
+   "within_tolerance": true,
+   "tolerance": 0.03,
+   "note": ""
+  },
+  {
+   "quantity": "JBC scale denominator from D",
+   "measured": 39.65830405228551,
+   "reference": 40.0,
+   "unit": "--",
+   "reference_source": "quoted 'Scale factor 1 40' (jbc_scse)",
+   "abs_rel_error": 0.008542398692862285,
+   "within_tolerance": true,
+   "tolerance": 0.03,
+   "note": ""
+  },
+  {
+   "quantity": "JBC B at 1:40 (m)",
+   "measured": 1.130691,
+   "reference": 1.125,
+   "unit": "m",
+   "reference_source": "published B=45 m / 40",
+   "abs_rel_error": 0.005058666666666569,
+   "within_tolerance": true,
+   "tolerance": 0.03,
+   "note": ""
+  },
+  {
+   "quantity": "JBC D at 1:40 (m)",
+   "measured": 0.630385,
+   "reference": 0.625,
+   "unit": "m",
+   "reference_source": "published D=25 m / 40",
+   "abs_rel_error": 0.008615999999999957,
+   "within_tolerance": true,
+   "tolerance": 0.03,
+   "note": ""
+  },
+  {
+   "quantity": "ONRT B/Lwl from geometry",
+   "measured": 0.12131393200791395,
+   "reference": 0.12194805194805196,
+   "unit": "--",
+   "reference_source": "published B=18.78 m, Lwl=154 m",
+   "abs_rel_error": 0.005199918571951745,
+   "within_tolerance": true,
+   "tolerance": 0.03,
+   "note": ""
+  },
+  {
+   "quantity": "ONRT file length vs published model Lwl",
+   "measured": 1.006323,
+   "reference": 3.147,
+   "unit": "m",
+   "reference_source": "published model Lwl=3.147 m (full 154 m)",
+   "abs_rel_error": 0.6802278360343184,
+   "within_tolerance": false,
+   "tolerance": 0.03,
+   "note": "expected mismatch: the export is unit-length normalised, so it must be scaled by the published Lwl before meshing; this row is the measurement that establishes the regime, not a defect of the archive"
+  }
+ ],
+ "checks_summary": {
+  "rows": 6,
+  "within_tolerance": 5,
+  "worst_abs_rel_error": 0.6802278360343184,
+  "worst_quantity": "ONRT file length vs published model Lwl",
+  "all_within": false
+ },
+ "acceptance": {
+  "dtc_geometry": {
+   "verdict": "WITHHELD",
+   "detail": "no publisher-hosted DTC geometry: uni-due.de page and its section answer 404 with the same error-body digest, the T2015 DTC page answers 404, the geometry directory answers 403 (not listable) and the Internet Archive is unreachable from this network; the only public copy found is a third-party OpenFOAM tutorial whose licence does not travel with it",
+   "evidence": {
+    "dtc_unidue_page": {
+     "http_status": 404,
+     "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+     "url": "https://www.uni-due.de/ship/dtc.php"
+    },
+    "dtc_unidue_section": {
+     "http_status": 404,
+     "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+     "url": "https://www.uni-due.de/ship/"
+    },
+    "t2015_dtc_page": {
+     "http_status": 404,
+     "sha256": "cc0b4e42510d49c6decd464123ecf3b14ae9b47f9b4ed2ee64893e2d6520a264",
+     "url": "https://t2015.nmri.go.jp/dtc.html"
+    }
+   }
+  },
+  "onrt_geometry": {
+   "verdict": "MET",
+   "detail": "archive retrieved from the T2015 host, hull member fingerprinted, extent measured from the surface grid; the export is unit-length normalised (largest coordinate 1.0005) so the physical scale must come from the published Lwl",
+   "evidence": {
+    "archive_sha256": "bd747eff8f531ba4c698c4ad87fa52e7a8fa631594e49eb3eccbd2ec5c695685",
+    "hull_member_sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+    "cross_host_identical": true
+   }
+  },
+  "jbc_geometry": {
+   "verdict": "MET",
+   "detail": "IGES archive retrieved, seven members digested, hull member fingerprinted",
+   "evidence": {
+    "archive_sha256": "e19800ee954f4960ef0ccb5bd764b45774b3200cb5c783fdaf17f6b1661f3f9c",
+    "members": [
+     "jbc-spacer.igs",
+     "Description_Of_JBC_CAD_Data_New.pdf",
+     "jbc.igs",
+     "jbc_with_duct.igs",
+     "jbc-boss.igs",
+     "jbc-boss-cap.igs",
+     "jbc-propeller.igs"
+    ]
+   }
+  },
+  "jbc_scale_factor": {
+   "verdict": "MET",
+   "detail": "denominator derived from the hull geometry's transverse extent and cross-checked against the publisher's quoted 'Scale factor 1 40'",
+   "evidence": {
+    "derived": {
+     "x": {
+      "quantity": "Lpp",
+      "published_full": 280.0,
+      "measured_m": 7.542605,
+      "denominator": 37.122453051697654
+     },
+     "y": {
+      "quantity": "B",
+      "published_full": 45.0,
+      "measured_m": 1.130691,
+      "denominator": 39.798671785660275
+     },
+     "z": {
+      "quantity": "D (depth)",
+      "published_full": 25.0,
+      "measured_m": 0.630385,
+      "denominator": 39.65830405228551
+     }
+    },
+    "quoted": {
+     "denominator": 40.0,
+     "quote": "Scale factor \ud835\udf06 1 40",
+     "source": "jbc_scse",
+     "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+     "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+     "cell_text": "lcb_percent 2.5475 0.858 0.858 -- Mid ship section co-efficient \ud835\udc36\ud835\udc40 0.9981 0.9981 -- Longitudinal center of buoyancy \ud835\udc3f\ud835\udc36\ud835\udc35 % Lpp 2.5475 2.5475 -- Scale factor \ud835\udf06 1 40 -- 5. Case condition JBC models at a Reyno jbc_scse https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf 1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa volume page 3"
+    },
+    "checks": [
+     {
+      "quantity": "JBC scale denominator from B",
+      "measured": 39.798671785660275,
+      "reference": 40.0,
+      "unit": "--",
+      "reference_source": "quoted 'Scale factor 1 40' (jbc_scse)",
+      "abs_rel_error": 0.00503320535849312,
+      "within_tolerance": true,
+      "tolerance": 0.03,
+      "note": ""
+     },
+     {
+      "quantity": "JBC scale denominator from D",
+      "measured": 39.65830405228551,
+      "reference": 40.0,
+      "unit": "--",
+      "reference_source": "quoted 'Scale factor 1 40' (jbc_scse)",
+      "abs_rel_error": 0.008542398692862285,
+      "within_tolerance": true,
+      "tolerance": 0.03,
+      "note": ""
+     },
+     {
+      "quantity": "JBC B at 1:40 (m)",
+      "measured": 1.130691,
+      "reference": 1.125,
+      "unit": "m",
+      "reference_source": "published B=45 m / 40",
+      "abs_rel_error": 0.005058666666666569,
+      "within_tolerance": true,
+      "tolerance": 0.03,
+      "note": ""
+     },
+     {
+      "quantity": "JBC D at 1:40 (m)",
+      "measured": 0.630385,
+      "reference": 0.625,
+      "unit": "m",
+      "reference_source": "published D=25 m / 40",
+      "abs_rel_error": 0.008615999999999957,
+      "within_tolerance": true,
+      "tolerance": 0.03,
+      "note": ""
+     }
+    ]
+   }
+  },
+  "source_page_digests": {
+   "verdict": "MET",
+   "detail": "15 cached artefacts digested, of which 4 also appear with the same SHA-256 in the committed crossref registry, so the cache and the manifest are one chain",
+   "evidence": {
+    "artefacts": 15,
+    "digest_bound_in_repo": 4
+   }
+  }
+ },
+ "open_questions": [
+  {
+   "item": "DTC hull geometry (publisher copy)",
+   "status": "WITHHELD",
+   "evidence": "uni-due.de 404 / T2015 dtc page 404 / geometry dir 403 / archive.org unreachable; needs a network with egress or an owner-supplied copy"
+  },
+  {
+   "item": "JBC x-axis extent vs Lpp",
+   "status": "EXPLAINED_NOT_MATCHED",
+   "evidence": "x extent 7.5426 m implies denominator 37.122 against the quoted 40 (7.2 % long): the hull file carries geometry beyond the perpendiculars, so Lpp cannot be read off the bounding box. Beam and depth (transverse extents, insensitive to overhang) are used instead."
+  },
+  {
+   "item": "KCS / KVLCC2 / SERIES60 geometry archives",
+   "status": "WITHHELD",
+   "evidence": "this cache holds their particulars pages but no geometry archive for KCS or KVLCC2, and no Series 60 artefact at all"
+  }
+ ]
+}
