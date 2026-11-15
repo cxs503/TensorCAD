@@ -1,0 +1,11 @@
+{
+  "artifact": "ladder_import_single_10m.json",
+  "sha256": "94e92719bcdb297ba43049dd9e14fa2e05763a89479c48cf3e48ff612b181eea",
+  "job_id": "cj3891",
+  "node": "n330",
+  "rc": 0,
+  "wall_seconds": 872.417,
+  "command": "python -m tensorcad.perf_benchmark --subtasks load,obj_write,obj_read,volume --ladder 4001,513 --output benchmarks/perf_scale/artifacts/ladder_import_single.json",
+  "transport": "run_compute fetch (tar) + job-log human table as the independent second channel",
+  "note": "Single connected body at the HullParameters ceiling (4001 stations x 513 levels = 8,199,998 triangles): OBJ write/read round-trip plus divergence-theorem volume. One size, so every scaling gate in this run is not_run (never pass)."
+}

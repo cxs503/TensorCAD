@@ -404,6 +404,23 @@ IMPORT_ORDER: tuple[str, ...] = (
 )
 
 
+def _bytes_per_triangle(row: Mapping[str, Any]) -> str:
+    """Serialised bytes per triangle, recomputed from the structured fields.
+
+    ``file_bytes / triangles`` is the ratio that used to be hand-typed into the
+    document as a single "~48 B/tri" constant.  It is *not* constant: the OBJ
+    text is ~1 vertex line plus ~1 face line per triangle, so the ratio follows
+    the mesh's vertex:triangle ratio and therefore drifts with resolution
+    (measured 47.0 -- 54.6 B/tri over 1.2e6 -- 1.2e7 triangles).  Rendering it
+    per row keeps the claim tied to the artifact instead of to prose.
+    """
+    file_bytes = row.get("file_bytes") or 0
+    tris = row.get("triangles") or 0
+    if not file_bytes or not tris:
+        return DASH
+    return _num(file_bytes / tris, ",.1f")
+
+
 def render_import_table(artifact: Mapping[str, Any]) -> str:
     """Markdown table of the OBJ round-trip ladder (write, parse, verify).
 
@@ -420,15 +437,15 @@ def render_import_table(artifact: Mapping[str, Any]) -> str:
                        r.get("triangles") or 0),
     )
     lines = [
-        "| 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 峰值 RSS MiB | 导入体积误差 |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 文件 B/tri | 峰值 RSS MiB | 导入体积误差 |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
         subtask = r.get("subtask", "?")
         if r.get("status") != "measured":
             cells = [
                 subtask, _int(r.get("copies", 1)), _int(r.get("triangles")),
-                "not_run", r.get("note") or "", DASH, DASH, DASH, DASH,
+                "not_run", r.get("note") or "", DASH, DASH, DASH, DASH, DASH,
             ]
         else:
             file_mb = (r.get("file_bytes") or 0) / (1024.0 * 1024.0)
@@ -440,6 +457,7 @@ def render_import_table(artifact: Mapping[str, Any]) -> str:
                 _num(r.get("throughput"), ",.0f"),
                 _num(file_mb, ",.1f") if file_mb else DASH,
                 _num(r.get("file_mb_per_s"), ",.1f"),
+                _bytes_per_triangle(r),
                 _num(r.get("peak_rss_mb"), ",.0f"),
                 (
                     f"{100.0 * r['volume_rel_err']:+.3e} %"
@@ -466,7 +484,14 @@ def render_import_gates(artifact: Mapping[str, Any]) -> str:
     ]
     for g in gates:
         status = g.get("status", "?")
-        verdict = "pass" if g.get("passed") else ("RED" if status != "not_run" else "not_run")
+        # ``status`` outranks ``passed``: the engine sets ``passed=True`` on a
+        # gate it could not evaluate (nothing failed), but a gate with no
+        # answer must read ``not_run`` in the table -- otherwise a one-rung
+        # artifact would display four green "pass" rows with no exponent at all.
+        if status == "not_run":
+            verdict = "not_run"
+        else:
+            verdict = "pass" if g.get("passed") else "RED"
         lines.append(
             f"| `{g.get('name', '?')}` | {status} | {verdict} | {g.get('detail', '')} |"
         )
@@ -482,6 +507,13 @@ TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     "fleet3pt-gates": (("fleet3pt",), render_fleet3pt_gates),
     "import-table": (("import_run",), render_import_table),
     "import-gates": (("import_run",), render_import_gates),
+    # 10^6--10^7 band of the same two sub-tasks (the debt named in §11.3/§6.1):
+    # single connected body at the HullParameters ceiling, and the multi-body
+    # fleet that reaches 1.2e7 triangles.
+    "import-single10m-table": (("import_single10m",), render_import_table),
+    "import-single10m-gates": (("import_single10m",), render_import_gates),
+    "import-fleet-table": (("import_fleet",), render_import_table),
+    "import-fleet-gates": (("import_fleet",), render_import_gates),
 }
 
 #: Table names the document can embed, in display order.

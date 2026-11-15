@@ -1,0 +1,11 @@
+{
+  "artifact": "ladder_import_fleet_10m.json",
+  "sha256": "6ef8399d4004922fd52c859e22eb76f4d230962ed75dc87d930608f0997bcc4b",
+  "job_id": "cj3890",
+  "node": "n315",
+  "rc": 0,
+  "wall_seconds": 537.8,
+  "command": "python -m tensorcad.perf_benchmark --fleet-tier --ladder 641,161;1001,257;2001,501 --fleet-copies 2,3 --subtasks load,fleet_assemble,volume,obj_write,obj_read --output benchmarks/perf_scale/artifacts/ladder_import_fleet.json",
+  "transport": "run_compute fetch (tar) + job-log human table as the independent second channel",
+  "note": "Multi-body fleet ladder that reaches the 10^7 band (3 x 2,001x501 = 12,011,994 triangles) with OBJ round-trip and volume verification; eight sizes carry the obj_write/obj_read exponent gates up to 1.2e7 triangles."
+}
