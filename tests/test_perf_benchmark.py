@@ -636,3 +636,92 @@ def test_cli_does_not_claim_pass_when_no_gate_was_checked(tmp_path: Path) -> Non
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["verdict"] == "not_run"
     assert payload["gates_checked"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 10^6-10^7 band: measured exponents and honest "not applicable" rows
+# ---------------------------------------------------------------------------
+
+def test_multi_base_fleet_ladder_yields_measured_scaling_gates() -> None:
+    """Three base sizes make the fleet band's complexity gate *measured*.
+
+    The exponent is fitted inside one ``(sub-task, body count)`` group.  A
+    single base rung gives one size point per group, so every scaling gate came
+    out ``not_run`` for the 10^7 band (the documented debt of
+    GAP-CAD-D4-PERF-SCALE).  This test fixes the shape of the fix: with three
+    bases at one body count the gates must carry a verdict, not ``not_run``.
+    """
+    from tensorcad import perf_benchmark as pb
+
+    result = pb.run_fleet_benchmark(
+        base_ladder=((21, 9), (41, 13), (61, 19)),
+        copies_ladder=(2,),
+        subtasks=("load", "fleet_assemble", "point_locate_accel", "volume"),
+        n_queries=32,
+    )
+    scaling = [g for g in result.gates if g.name.startswith(pb.SCALING_GATE_PREFIX)]
+    assert scaling, "fleet ladder produced no scaling gates"
+    for gate in scaling:
+        assert gate.status == pb.MEASURED, f"{gate.name}: {gate.detail}"
+        assert gate.ratio is not None
+    assert result.gates_not_run == 0
+    assert result.verdict in ("pass", "fail")
+
+
+def test_fleet_run_reports_inapplicable_subtasks_as_not_run() -> None:
+    """A fleet rung must not show ``failed`` rows for tasks that cannot apply."""
+    from tensorcad import perf_benchmark as pb
+
+    result = pb.run_fleet_benchmark(
+        base_ladder=((21, 9),),
+        copies_ladder=(2,),
+        subtasks=("load", "point_locate", "voxelize", "volume"),
+        n_queries=8,
+    )
+    skipped = {r.subtask: r for r in result.results if r.status == pb.NOT_RUN}
+    assert "point_locate" in skipped and "voxelize" in skipped
+    assert "star-shaped" in skipped["point_locate"].note
+    assert not [r for r in result.results if r.status == pb.FAILED]
+    # One row per skipped sub-task, not one per (base, body count).
+    assert len([r for r in result.results if r.subtask == "point_locate"]) == 1
+
+
+def test_mesh_footprint_estimate_tracks_exact_size() -> None:
+    """The sampled footprint estimate must match an exact accounting closely."""
+    import sys
+
+    from tensorcad import perf_benchmark as pb
+    from tensorcad.hull import HullParameters, generate_hull
+
+    mesh = generate_hull(HullParameters(length=10.0, beam=2.0, draft=0.8, nx=41, nz=13)).mesh
+    exact = sum(
+        sys.getsizeof(v) + sum(sys.getsizeof(c) for c in v) for v in mesh.vertices
+    ) + sum(
+        sys.getsizeof(f) + sum(sys.getsizeof(k) for k in f) for f in mesh.faces
+    ) + sys.getsizeof(mesh.vertices) + sys.getsizeof(mesh.faces)
+    est_mb = pb.mesh_footprint_mb(mesh)
+    assert est_mb is not None
+    exact_mb = exact / (1024.0 * 1024.0)
+    assert abs(est_mb - exact_mb) / exact_mb < 0.05
+
+
+def test_live_rss_is_reported_and_serialised() -> None:
+    """Each rung carries a live RSS reading, distinct from the process peak."""
+    import os
+
+    from tensorcad import perf_benchmark as pb
+
+    if not os.path.exists("/proc/self/status"):
+        pytest.skip("/proc/self/status unavailable")
+    live = pb.live_rss_mb()
+    assert live is not None and live > 0.0
+
+    result = pb.run_fleet_benchmark(
+        base_ladder=((21, 9),), copies_ladder=(2,), subtasks=("volume",), n_queries=8
+    )
+    volume_row = next(r for r in result.results if r.subtask == "volume")
+    assert volume_row.rss_mb is not None and volume_row.rss_mb > 0.0
+    assert volume_row.mesh_mb is not None and volume_row.mesh_mb > 0.0
+    payload = volume_row.to_dict()
+    assert payload["rss_mb"] == volume_row.rss_mb
+    assert payload["mesh_mb"] == volume_row.mesh_mb
