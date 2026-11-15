@@ -870,6 +870,13 @@ __all__ = [
     "sphere_error",
     "vincenty_direct",
     "vincenty_inverse",
+    "INTEGRATION_SCHEMA",
+    "IntegrationReport",
+    "RouteResult",
+    "frame_tamper_refused",
+    "run_integration",
+    "summary_markdown",
+    "verify_frame_consistency",
 
 ]
 
@@ -887,5 +894,16 @@ from .geodesy import (  # ellipsoidal geodesics (WGS84): the Earth model behind 
     vincenty_direct,
     vincenty_inverse,
 )
+
+
+from .solver_integration import (
+    INTEGRATION_SCHEMA,
+    IntegrationReport,
+    RouteResult,
+    frame_tamper_refused,
+    run_integration,
+    summary_markdown,
+    verify_frame_consistency,
+)  # noqa: E402  (solver-interface integration)
 
 __version__ = "0.23.0"
