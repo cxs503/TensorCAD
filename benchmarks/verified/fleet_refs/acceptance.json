@@ -77,6 +77,90 @@
     }
    }
   },
+  "one_b_two_independent_documents": {
+   "pass": false,
+   "tier": "B: >=2 independent documents (transcription corroboration labelled)",
+   "ships": {
+    "DTC": {
+     "pass": false,
+     "documents_passing": [
+      "displacement_volume",
+      "cb"
+     ],
+     "lineage_limited": [],
+     "failing": [
+      "lcb_percent",
+      "lwl"
+     ]
+    },
+    "JBC": {
+     "pass": false,
+     "documents_passing": [
+      "displacement_volume",
+      "cb",
+      "lwl"
+     ],
+     "lineage_limited": [
+      "displacement_volume",
+      "cb",
+      "lwl"
+     ],
+     "failing": [
+      "lcb_percent"
+     ]
+    },
+    "KCS": {
+     "pass": true,
+     "documents_passing": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl"
+     ],
+     "lineage_limited": [],
+     "failing": []
+    },
+    "KVLCC2": {
+     "pass": true,
+     "documents_passing": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl"
+     ],
+     "lineage_limited": [
+      "lcb_percent",
+      "lwl"
+     ],
+     "failing": []
+    },
+    "ONRT": {
+     "pass": false,
+     "documents_passing": [
+      "displacement_volume",
+      "cb",
+      "lwl"
+     ],
+     "lineage_limited": [
+      "displacement_volume"
+     ],
+     "failing": [
+      "lcb_percent"
+     ]
+    },
+    "Series60": {
+     "pass": false,
+     "documents_passing": [],
+     "lineage_limited": [],
+     "failing": [
+      "displacement_volume",
+      "cb",
+      "lcb_percent",
+      "lwl"
+     ]
+    }
+   }
+  },
   "two_citation_and_digest": {
    "pass": true,
    "cells_checked": 104,
@@ -279,7 +363,8 @@
   "five_kvlcc2_reference_wired"
  ],
  "failing": [
-  "one_two_independent_lineages"
+  "one_two_independent_lineages",
+  "one_b_two_independent_documents"
  ],
  "coverage": {
   "ships": [

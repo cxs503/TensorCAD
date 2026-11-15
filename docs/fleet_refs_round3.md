@@ -43,6 +43,7 @@ from one origin — both numbers are printed so the reader is not misled.
 | criterion | verdict | detail |
 |---|---|---|
 | ① ≥2 independent sources per ship on ∇/Cb/LCB/Lwl | **FAIL** | DTC: 2 of 4 quantities short; JBC: 4 of 4 quantities short; KCS: 0 of 4 quantities short; KVLCC2: 2 of 4 quantities short; ONRT: 1 of 4 quantities short; Series60: 4 of 4 quantities short |
+| ①b ≥2 independent *documents* per ship on the four named quantities (tier B: a reprinted table counts, and is labelled) | **FAIL** | DTC: 2 short, 0 lineage-limited; JBC: 1 short, 3 lineage-limited; KCS: 0 short, 0 lineage-limited; KVLCC2: 0 short, 2 lineage-limited; ONRT: 1 short, 1 lineage-limited; Series60: 4 short, 0 lineage-limited |
 | ② citation + source digest on every value | **PASS** | 104 cells checked, 0 without citation |
 | ③ >0.5 % spread marked disputed with both values | **PASS** | 1 conflicts, 1 recorded dissents |
 | ④ multi-source arrays back-filled into fleet_specs.json | **PASS** | JBC: 7 quantities; KCS: 7 quantities; KVLCC2: 7 quantities; ONRT: 6 quantities |

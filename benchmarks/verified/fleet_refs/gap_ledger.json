@@ -1,0 +1,198 @@
+{
+ "schema": "tensorcad.fleet_refs.gap_ledger/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "mission": "m22012",
+ "rule": "a probe is search provenance, never evidence: no candidate listed here was fetched or pinned, so it cannot move a verdict",
+ "documents_pinned_total": 104,
+ "gaps": [
+  {
+   "ship": "DTC",
+   "quantity": "lcb_percent",
+   "label": "LCB (% Lpp, fwd+)",
+   "documents": 0,
+   "verdict": "MISSING",
+   "probe": {
+    "ship": "DTC",
+    "quantities": [
+     "lcb_percent",
+     "lwl"
+    ],
+    "query": "Duisburg Test Case DTC container ship LCB waterline length",
+    "candidates": [
+     "https://biblio.ugent.be/publication/8516555",
+     "https://strathprints.strath.ac.uk/54642/1/Tezdogan_etal_JMST_2015_A_numerical_investigation_of_the_squat_and_resistance_of_ships_advancing.pdf"
+    ],
+    "outcome": "the Strathclyde paper is already pinned as dtc_strath and does not print LCB/Lwl in a full-scale column; the Ghent record was not fetched",
+    "next_action": "read the DTC primary description (Moctar/Shigunov/Zorn, Ship Technology Research 2012) or a thesis that tabulates DTC including LCB and Lwl"
+   }
+  },
+  {
+   "ship": "DTC",
+   "quantity": "lwl",
+   "label": "Lwl (m)",
+   "documents": 0,
+   "verdict": "MISSING",
+   "probe": {
+    "ship": "DTC",
+    "quantities": [
+     "lcb_percent",
+     "lwl"
+    ],
+    "query": "Duisburg Test Case DTC container ship LCB waterline length",
+    "candidates": [
+     "https://biblio.ugent.be/publication/8516555",
+     "https://strathprints.strath.ac.uk/54642/1/Tezdogan_etal_JMST_2015_A_numerical_investigation_of_the_squat_and_resistance_of_ships_advancing.pdf"
+    ],
+    "outcome": "the Strathclyde paper is already pinned as dtc_strath and does not print LCB/Lwl in a full-scale column; the Ghent record was not fetched",
+    "next_action": "read the DTC primary description (Moctar/Shigunov/Zorn, Ship Technology Research 2012) or a thesis that tabulates DTC including LCB and Lwl"
+   }
+  },
+  {
+   "ship": "JBC",
+   "quantity": "lcb_percent",
+   "label": "LCB (% Lpp, fwd+)",
+   "documents": 1,
+   "verdict": "SINGLE_DOCUMENT",
+   "probe": null
+  },
+  {
+   "ship": "ONRT",
+   "quantity": "lcb_percent",
+   "label": "LCB (% Lpp, fwd+)",
+   "documents": 1,
+   "verdict": "SINGLE_DOCUMENT",
+   "probe": {
+    "ship": "ONRT",
+    "quantities": [
+     "lcb_percent",
+     "length_pp"
+    ],
+    "query": "ONR tumblehome DTMB 5613 main particulars LCB",
+    "candidates": [],
+    "outcome": "no open-access work returned by the API for this query",
+    "next_action": "hunt the SIMMAN 2020 ONRT detail page and DTMB 5613 model reports; the numerals wanted are Lpp and LCB (% Lpp)"
+   }
+  },
+  {
+   "ship": "Series60",
+   "quantity": "displacement_volume",
+   "label": "\u2207 (m\u00b3)",
+   "documents": 0,
+   "verdict": "MISSING",
+   "probe": {
+    "ship": "Series60",
+    "quantities": [
+     "displacement_volume",
+     "cb",
+     "lcb_percent",
+     "lwl",
+     "length_pp",
+     "beam",
+     "draft"
+    ],
+    "query": "Series 60 Cb 0.6 hull main particulars table resistance",
+    "candidates": [
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1975/138/1975_138_23/_pdf",
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1978/144/1978_144_1/_pdf",
+     "https://ynu.repo.nii.ac.jp/record/4500/files/11508181-01.pdf",
+     "https://www.mdpi.com/2077-1312/10/5/686/pdf?version=1652864259"
+    ],
+    "outcome": "all four are candidate documents; none fetched in this mission, so Series 60 still has zero pinned document and the parent-form table in docs/audit_m17434/data/series60_published_parents.json remains a non-voting source",
+    "next_action": "Series 60 is a *methodical series*: a document that reprints Todd's parent table gives one lineage; a second lineage needs an independent tabulation (e.g. an ITTC or SNAME procedure reproducing the parent-form coefficients)"
+   }
+  },
+  {
+   "ship": "Series60",
+   "quantity": "cb",
+   "label": "Cb",
+   "documents": 0,
+   "verdict": "MISSING",
+   "probe": {
+    "ship": "Series60",
+    "quantities": [
+     "displacement_volume",
+     "cb",
+     "lcb_percent",
+     "lwl",
+     "length_pp",
+     "beam",
+     "draft"
+    ],
+    "query": "Series 60 Cb 0.6 hull main particulars table resistance",
+    "candidates": [
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1975/138/1975_138_23/_pdf",
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1978/144/1978_144_1/_pdf",
+     "https://ynu.repo.nii.ac.jp/record/4500/files/11508181-01.pdf",
+     "https://www.mdpi.com/2077-1312/10/5/686/pdf?version=1652864259"
+    ],
+    "outcome": "all four are candidate documents; none fetched in this mission, so Series 60 still has zero pinned document and the parent-form table in docs/audit_m17434/data/series60_published_parents.json remains a non-voting source",
+    "next_action": "Series 60 is a *methodical series*: a document that reprints Todd's parent table gives one lineage; a second lineage needs an independent tabulation (e.g. an ITTC or SNAME procedure reproducing the parent-form coefficients)"
+   }
+  },
+  {
+   "ship": "Series60",
+   "quantity": "lcb_percent",
+   "label": "LCB (% Lpp, fwd+)",
+   "documents": 0,
+   "verdict": "MISSING",
+   "probe": {
+    "ship": "Series60",
+    "quantities": [
+     "displacement_volume",
+     "cb",
+     "lcb_percent",
+     "lwl",
+     "length_pp",
+     "beam",
+     "draft"
+    ],
+    "query": "Series 60 Cb 0.6 hull main particulars table resistance",
+    "candidates": [
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1975/138/1975_138_23/_pdf",
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1978/144/1978_144_1/_pdf",
+     "https://ynu.repo.nii.ac.jp/record/4500/files/11508181-01.pdf",
+     "https://www.mdpi.com/2077-1312/10/5/686/pdf?version=1652864259"
+    ],
+    "outcome": "all four are candidate documents; none fetched in this mission, so Series 60 still has zero pinned document and the parent-form table in docs/audit_m17434/data/series60_published_parents.json remains a non-voting source",
+    "next_action": "Series 60 is a *methodical series*: a document that reprints Todd's parent table gives one lineage; a second lineage needs an independent tabulation (e.g. an ITTC or SNAME procedure reproducing the parent-form coefficients)"
+   }
+  },
+  {
+   "ship": "Series60",
+   "quantity": "lwl",
+   "label": "Lwl (m)",
+   "documents": 0,
+   "verdict": "MISSING",
+   "probe": {
+    "ship": "Series60",
+    "quantities": [
+     "displacement_volume",
+     "cb",
+     "lcb_percent",
+     "lwl",
+     "length_pp",
+     "beam",
+     "draft"
+    ],
+    "query": "Series 60 Cb 0.6 hull main particulars table resistance",
+    "candidates": [
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1975/138/1975_138_23/_pdf",
+     "https://www.jstage.jst.go.jp/article/jjasnaoe1968/1978/144/1978_144_1/_pdf",
+     "https://ynu.repo.nii.ac.jp/record/4500/files/11508181-01.pdf",
+     "https://www.mdpi.com/2077-1312/10/5/686/pdf?version=1652864259"
+    ],
+    "outcome": "all four are candidate documents; none fetched in this mission, so Series 60 still has zero pinned document and the parent-form table in docs/audit_m17434/data/series60_published_parents.json remains a non-voting source",
+    "next_action": "Series 60 is a *methodical series*: a document that reprints Todd's parent table gives one lineage; a second lineage needs an independent tabulation (e.g. an ITTC or SNAME procedure reproducing the parent-form coefficients)"
+   }
+  }
+ ],
+ "counts": {
+  "gaps": 8,
+  "ships_with_gaps": [
+   "DTC",
+   "JBC",
+   "ONRT",
+   "Series60"
+  ]
+ }
+}
