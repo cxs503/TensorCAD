@@ -114,7 +114,7 @@ def audit_out(fmt: str, geom_name: str, files_dir: Path) -> dict:
         "format": fmt,
         "geometry": geom_name,
         "topology": "tetra" if isinstance(source, TetrahedralMesh) else "triangle",
-        "file": str(path.relative_to(ROOT)),
+        "file": str(path.resolve().relative_to(ROOT.resolve())),
         "bytes": path.stat().st_size,
         "sha256": _sha256(path),
         "source_volume": src_vol,
@@ -170,7 +170,7 @@ def audit_in(fmt: str, geom_name: str, files_dir: Path) -> dict:
         "direction": "in",
         "format": fmt,
         "geometry": geom_name,
-        "file": str(path.relative_to(ROOT)),
+        "file": str(path.resolve().relative_to(ROOT.resolve())),
         "sha256": _sha256(path),
         "source_volume": src_vol,
         "file_volume": vol,
@@ -217,9 +217,9 @@ def cgns_defect_evidence(files_dir: Path) -> dict:
     except Exception as exc:  # pragma: no cover - recorded, not raised
         meshio_read_ok = f"{type(exc).__name__}: {exc}"
     return {
-        "sids_writer": str(path.relative_to(ROOT)),
+        "sids_writer": str(path.resolve().relative_to(ROOT.resolve())),
         "sids_violations_ours": ours,
-        "meshio_writer_file": str(legacy.relative_to(ROOT)),
+        "meshio_writer_file": str(legacy.resolve().relative_to(ROOT.resolve())),
         "sids_violations_meshio": theirs,
         "meshio_reads_our_sids_file": meshio_read_ok,
     }
@@ -420,7 +420,7 @@ def main(argv: list[str] | None = None) -> int:
         "analytic_volumes": {g: ANALYTIC_VOLUME[g] for g in GEOM_NAMES},
         "rows": rows,
         "cgns": evidence,
-        "figures": [str((fig_dir / f["name"]).relative_to(ROOT)) for f in figures],
+        "figures": [str((fig_dir / f["name"]).resolve().relative_to(ROOT.resolve())) for f in figures],
     }
     (run_dir / "matrix18.json").write_text(json.dumps(payload, indent=2, sort_keys=False))
     (run_dir / "matrix.md").write_text(markdown_table(rows, evidence))
@@ -430,7 +430,7 @@ def main(argv: list[str] | None = None) -> int:
         run_dir / "matrix18.json",
         run_dir / "matrix.md",
     ]):
-        manifest[str(path.relative_to(ROOT))] = _sha256(path)
+        manifest[str(path.resolve().relative_to(ROOT.resolve()))] = _sha256(path)
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
 
     green = sum(1 for r in rows if r["green"])
