@@ -154,6 +154,7 @@ class MeshQuality:
 def measure(
     points: Sequence[Sequence[float]],
     elements: Mapping[str, Sequence[Sequence[int]]],
+    backend: str = "auto",
 ) -> MeshQuality:
     """Measure every cell kind in ``elements``; unknown kinds are a ``ValueError``."""
     vertices: list[Vec3] = [(float(p[0]), float(p[1]), float(p[2])) for p in points]
@@ -170,7 +171,7 @@ def measure(
         for cell in cells:
             if any(i < 0 or i >= len(vertices) for i in cell):
                 raise ValueError(f"{kind} cell {tuple(cell)} indexes outside {len(vertices)} points")
-        measured[kind] = _MEASURERS[kind](vertices, cells)
+        measured[kind] = _MEASURERS[kind](vertices, cells, backend=backend)
     if not measured:
         raise ValueError("no cells to measure")
     return MeshQuality(measured)
