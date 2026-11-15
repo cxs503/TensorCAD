@@ -3,10 +3,10 @@
     "codes": [],
     "passed": true,
     "returncode": 0,
-    "seconds": 11.29
+    "seconds": 12.38
   },
   "kill_rate": 1.0,
-  "killed": 7,
+  "killed": 8,
   "mutants": [
     {
       "expected": [
@@ -16,12 +16,13 @@
       "killed": true,
       "kind": "reference",
       "observed": [
-        "reference_not_reproducible"
+        "reference_not_reproducible",
+        "tolerance_not_derived"
       ],
       "output_tail": "",
       "rationale": "the closed form of the Wigley waterplane area is perturbed by 1e-3; the stored reference no longer equals what its declared source computes, so a hand-copied criterion cannot survive a source change",
       "returncode": 1,
-      "seconds": 10.81,
+      "seconds": 11.89,
       "target": "tensorcad/wigley.py"
     },
     {
@@ -33,12 +34,13 @@
       "kind": "reference",
       "observed": [
         "reference_mismatch",
-        "reference_not_reproducible"
+        "reference_not_reproducible",
+        "tolerance_not_derived"
       ],
       "output_tail": "",
       "rationale": "same proof on the second analytic family (Series 60 exponents)",
       "returncode": 1,
-      "seconds": 11.76,
+      "seconds": 14.23,
       "target": "tensorcad/series60.py"
     },
     {
@@ -54,7 +56,7 @@
       "output_tail": "",
       "rationale": "the fine grid is silently coarsened without re-blessing: in full mode the fine measurements move (drift) and in quick mode, where only the coarse level is re-measured, the fine mesh fingerprint is what fails",
       "returncode": 1,
-      "seconds": 11.04,
+      "seconds": 10.58,
       "target": "tensorcad/golden.py"
     },
     {
@@ -70,7 +72,7 @@
       "output_tail": "",
       "rationale": "marching tetrahedra stops repairing inverted winding: the surface area takes the norm, the sphere/ellipsoid volume the absolute value and the extents are unchanged, so every measured number is bit-identical and only the geometry fingerprint can fail",
       "returncode": 1,
-      "seconds": 14.85,
+      "seconds": 19.07,
       "target": "tensorcad/neural/extract.py"
     },
     {
@@ -84,12 +86,13 @@
       "observed": [
         "drift",
         "geometry_changed",
-        "reference_not_reproducible"
+        "reference_not_reproducible",
+        "tolerance_not_derived"
       ],
       "output_tail": "",
       "rationale": "the case definition itself changes (sphere radius 0.05 % larger): the reference moves with it, so only the drift lock and the fingerprint fire",
       "returncode": 1,
-      "seconds": 11.16,
+      "seconds": 15.48,
       "target": "tensorcad/golden.py"
     },
     {
@@ -105,8 +108,24 @@
       "output_tail": "",
       "rationale": "the case declares the mirror axis as x although the shipped shell mirrors about y: the measured extents do not change at all, so only the invariant identity can fail -- a check that is neither drift nor fingerprint",
       "returncode": 1,
-      "seconds": 12.03,
+      "seconds": 14.2,
       "target": "tensorcad/golden.py"
+    },
+    {
+      "expected": [
+        "tolerance_not_derived"
+      ],
+      "id": "baseline-tolerance-hand-inflated",
+      "killed": true,
+      "kind": "criterion",
+      "observed": [
+        "tolerance_not_derived"
+      ],
+      "output_tail": "",
+      "rationale": "someone widens the blessed Wigley Cb band 100x by hand: no measured number and no reference moves, so only a checker that re-derives the band from the blessed measurements can fail -- otherwise the quick gate (the git hook) asserts against a criterion a hand picked",
+      "returncode": 1,
+      "seconds": 13.78,
+      "target": "docs/golden/tensorcad_geometry_golden.json"
     },
     {
       "expected": [
@@ -121,13 +140,13 @@
       "output_tail": "",
       "rationale": "someone edits the blessed Wigley displacement by +0.4 % by hand; the gate recomputes the reference from the source and refuses the pass",
       "returncode": 1,
-      "seconds": 13.26,
+      "seconds": 15.38,
       "target": "docs/golden/tensorcad_geometry_golden.json"
     }
   ],
   "passed": true,
   "quick": true,
   "schema": "tensorcad.golden.redteam/1",
-  "seconds": 96.53,
-  "total": 7
+  "seconds": 138.76,
+  "total": 8
 }

@@ -1,0 +1,80 @@
+{
+  "baseline_edit": {
+    "derived": 0.004329439290363918,
+    "metric": "wigley/block_coefficient",
+    "recorded": 0.4329439290363918
+  },
+  "measurements": {
+    "after": {
+      "baseline_edit": {
+        "derived": 0.004329439290363918,
+        "metric": "wigley/block_coefficient",
+        "recorded": 0.4329439290363918
+      },
+      "runs": {
+        "control_quick": {
+          "codes": [],
+          "passed": true,
+          "quick": true,
+          "returncode": 0
+        },
+        "inflated_full": {
+          "codes": [
+            "tolerance_not_derived"
+          ],
+          "passed": false,
+          "quick": false,
+          "returncode": 1
+        },
+        "inflated_quick": {
+          "codes": [
+            "tolerance_not_derived"
+          ],
+          "passed": false,
+          "quick": true,
+          "returncode": 1
+        }
+      },
+      "source": {
+        "dirty": true,
+        "kind": "worktree",
+        "sha256": "45c006770fc3e89e7001ac8cd574fcab213a8991c0d22a1b1f9353875ba23b1a"
+      }
+    },
+    "before": {
+      "baseline_edit": {
+        "derived": 0.004329439290363918,
+        "metric": "wigley/block_coefficient",
+        "recorded": 0.4329439290363918
+      },
+      "runs": {
+        "control_quick": {
+          "codes": [],
+          "passed": true,
+          "quick": true,
+          "returncode": 0
+        },
+        "inflated_quick": {
+          "codes": [],
+          "passed": true,
+          "quick": true,
+          "returncode": 0
+        }
+      },
+      "source": {
+        "commit": "57dde0f3f56b75d3b8b57f5782e55a8e06a66bab",
+        "kind": "git",
+        "rev": "HEAD",
+        "sha256": "64ed9648160a2d95331e83754df138514e6e5ad4e19425e881770278c20c68ab"
+      }
+    }
+  },
+  "passed": true,
+  "question": "can a hand edit of the recorded acceptance band decide the golden gate while every measurement, reference and geometry fingerprint stays honest?",
+  "schema": "tensorcad.golden.criterion_provenance/1",
+  "verdict": {
+    "after_refuses_the_edit": true,
+    "before_admits_the_edit": true,
+    "refusal_code_present": true
+  }
+}
