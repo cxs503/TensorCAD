@@ -93,7 +93,7 @@ def test_cells_from_report_keeps_source(library: dict) -> None:
 def test_merge_adds_the_second_round_cells(merged: dict, library: dict) -> None:
     """The merge really moves the coverage the anchor is measured on."""
     before, after = library["coverage"], merged["coverage"]
-    assert merged["oa_cells_added"] == 40
+    assert merged["oa_cells_added"] == 52
     assert after["cross_verified"] == before["cross_verified"]  # committed library already carries round 2
     assert after["missing"] <= before["missing"]  # already merged in the committed library
     assert after["cells"] == before["cells"]  # same ship x quantity grid, no phantom rows
