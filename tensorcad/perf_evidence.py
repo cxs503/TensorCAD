@@ -29,6 +29,8 @@ from typing import Any, Mapping
 
 #: Measured sub-tasks, in display order, with the axis they scale in.
 MESH_ORDER = ("load", "point_locate", "point_locate_accel", "volume")
+#: Sub-tasks on the multi-body (fleet) 3-point ladder, in display order.
+FLEET3PT_ORDER = ("load", "fleet_assemble", "point_locate_accel", "volume")
 AXIS_LABEL = {
     "load": ("三角面", "tri/s"),
     "point_locate": ("三角面", "query/s"),
@@ -203,11 +205,113 @@ def render_budget_table(
     return "\n".join(lines)
 
 
+def render_fleet3pt_table(artifact: Mapping[str, Any]) -> str:
+    """Markdown table of the multi-body (fleet) 3-point ladder.
+
+    One row per (sub-task, body count, size).  The 10^6--10^7 band is only
+    reachable with disjoint copies of one generated body, so the body count is
+    part of the row identity: ``load`` is always a single body (it *is* the
+    generator), ``fleet_assemble``/``point_locate_accel``/``volume`` run on 2
+    and 3 bodies.  ``peak_rss_mb`` is the process high-water mark (labelled as
+    such), ``rss_mb``/``mesh_mb`` are the per-rung live numbers.
+    """
+    rows = _results(artifact)
+    order = {name: i for i, name in enumerate(FLEET3PT_ORDER)}
+    rows = sorted(
+        rows,
+        key=lambda r: (order.get(r.get("subtask"), len(order)),
+                       r.get("copies") or 1, r.get("triangles") or 0),
+    )
+    lines = [
+        "| 子任务 | 体数 | 三角面 | 秒 | 吞吐 | 建索引 s | 索引 MiB | 活 RSS MiB | 峰值 RSS MiB |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for r in rows:
+        subtask = r.get("subtask", "?")
+        _, unit = AXIS_LABEL.get(subtask, ("", ""))
+        measured = r.get("status") == "measured"
+        index_mb = (r.get("index_bytes") or 0) / (1024.0 * 1024.0)
+        lines.append(
+            "| "
+            + " | ".join([
+                f"**{subtask}**" if subtask == "point_locate_accel" else subtask,
+                str(r.get("copies") or 1),
+                _int(r.get("triangles")),
+                _num(r.get("seconds"), ".3f") if measured else "not_run",
+                f"{_num(r.get('throughput'), ',.0f')} {unit}".strip() if measured
+                else (r.get("note") or ""),
+                _num(r.get("build_seconds"), ".2f") if r.get("build_seconds") else DASH,
+                _num(index_mb, ".1f") if index_mb else DASH,
+                _num(r.get("rss_mb"), ",.0f"),
+                _num(r.get("peak_rss_mb"), ",.0f"),
+            ])
+            + " |"
+        )
+    return "\n".join(lines)
+
+
+def render_fleet3pt_gates(artifact: Mapping[str, Any]) -> str:
+    """Markdown table of the complexity (exponent) gates on the fleet ladder.
+
+    A gate that could not be evaluated is printed as ``not_run`` -- never as a
+    pass -- and the footer repeats the three-state ``verdict`` so a reader
+    cannot mistake "no data" for "within limit".  Exponent and R^2 are parsed
+    out of the gate ``detail`` string with a regex instead of a human reading
+    them, and a gate whose detail does not parse is rendered as ``—`` rather
+    than silently mis-filled.
+    """
+    import re
+
+    lines = [
+        "| 门 | 判定 | 拟合指数 | 限值 | R² | 规模点数 | 细节 |",
+        "|---|---|---:|---:|---:|---:|---|",
+    ]
+    for g in artifact.get("gates", []):
+        status = g.get("status")
+        detail = g.get("detail") or ""
+        exponent = re.search(r"exponent=([-0-9.]+)", detail)
+        limit = re.search(r"limit ([0-9.]+)", detail)
+        r2 = re.search(r"R\^2=([0-9.]+)", detail)
+        count = re.search(r"(\d+) sizes", detail)
+        if status == "not_run":
+            mark = "not_run（未检查）"
+        else:
+            mark = "pass" if g.get("passed") else "**RED**"
+        lines.append(
+            "| "
+            + " | ".join([
+                f"`{g.get('name')}`",
+                mark,
+                exponent.group(1) if exponent else DASH,
+                limit.group(1) if limit else DASH,
+                r2.group(1) if r2 else DASH,
+                count.group(1) if count else DASH,
+                detail,
+            ])
+            + " |"
+        )
+    checks = artifact.get("volume_checks") or []
+    footer = (
+        f"\n\nverdict=**{artifact.get('verdict')}**，gates_checked={artifact.get('gates_checked')}，"
+        f"gates_not_run={artifact.get('gates_not_run')}"
+    )
+    if checks:
+        worst = max(checks, key=lambda c: abs(c.get("rel_err") or 0.0))
+        footer += (
+            f"；体积校验 {sum(1 for c in checks if c.get('ok'))}/{len(checks)} 通过"
+            f"（最差 {worst.get('rel_err'):+.4%} @ {_int(worst.get('triangles'))} 三角面，"
+            f"判据 3%）"
+        )
+    return "\n".join(lines) + footer
+
+
 #: table name -> (artifact keys it consumes, renderer)
 TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     "mesh-table": (("mesh",), render_mesh_table),
     "voxel-table": (("voxel",), render_voxel_table),
     "budget-table": (("mesh", "voxel"), render_budget_table),
+    "fleet3pt-table": (("fleet3pt",), render_fleet3pt_table),
+    "fleet3pt-gates": (("fleet3pt",), render_fleet3pt_gates),
 }
 
 #: Table names the document can embed, in display order.
