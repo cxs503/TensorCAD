@@ -156,10 +156,21 @@ def test_every_analytic_metric_carries_a_derived_tolerance(
 ) -> None:
     analytic = [m for case in committed.cases for m in case.metrics if m.kind == "analytic"]
     assert analytic
+    origins = set()
     for metric in analytic:
         assert metric.tolerance is not None and metric.tolerance > 0.0
-        assert "two-grid" in metric.basis or "floor" in metric.basis
         assert metric.reference is not None
+        assert metric.origin in {"two-grid", "declared"}
+        origins.add(metric.origin)
+        if metric.origin == "two-grid":
+            assert "two-grid" in metric.basis or "floor" in metric.basis
+        else:
+            # a declared band must name the contract it is quoted from, and stay inside the
+            # engine's ceiling: that is the whole difference between declared and chosen
+            assert metric.basis.startswith("declared contract: ")
+            assert len(metric.basis) > len("declared contract: ")
+            assert metric.tolerance <= golden.DECLARED_TOLERANCE_CAP
+    assert origins == {"two-grid", "declared"}
 
 
 def test_measured_errors_are_inside_the_derived_tolerances(
@@ -705,3 +716,114 @@ def _load_redteam():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+# --------------------------------------------------------------------------------------
+# DTMB 5415: the published particulars, not only the drift lock
+# --------------------------------------------------------------------------------------
+def _blessed_5415() -> dict:
+    return json.loads(BASELINE.read_text(encoding="utf-8"))["cases"]["dtmb5415"]
+
+
+def test_dtmb5415_particulars_are_asserted_against_the_published_table(
+    committed: golden.SuiteResult,
+) -> None:
+    """Regression for "5415-particulars-drift-only".
+
+    The case used to assert a single number (the holdout residual); displacement, beam,
+    station length and Cb were drift-locked only, so the gate could notice that they
+    *changed* but never that they were *wrong*. They are now asserted against the dataset
+    README's principal-particulars table, scaled to full size by the case's own lambda.
+    """
+    from tensorcad.dtmb5415 import README_PARTICULARS_TOLERANCE, readme_reference
+
+    case = {result.name: result for result in committed.cases}["dtmb5415"]
+    published = readme_reference()
+    expected = {
+        "length_stations_m": published["Lpp_m"],
+        "waterline_beam_m": published["beam_m"],
+        "displacement_volume_m3": published["displacement_volume_m3"],
+        "block_coefficient": published["cb"],
+    }
+    for name, reference in expected.items():
+        metric = next(m for m in case.metrics if m.name == name)
+        assert metric.kind == "analytic"
+        assert metric.origin == "declared"
+        assert metric.reference == pytest.approx(reference, rel=1e-12)
+        assert metric.tolerance == pytest.approx(README_PARTICULARS_TOLERANCE)
+        assert metric.passed, (name, metric.relative_error, metric.tolerance)
+        assert abs(metric.relative_error) <= metric.tolerance
+    # Cb is the binding one: it carries the definitional mismatch (published Lpp/B_max/T
+    # against the measured station span/WL beam/draft) and still lands inside the band.
+    cb = next(m for m in case.metrics if m.name == "block_coefficient")
+    assert abs(cb.relative_error) > 1e-3
+
+
+def test_dtmb5415_draft_is_measured_but_not_passed_off_as_a_reference(
+    committed: golden.SuiteResult,
+) -> None:
+    """The draft cannot be "verified" against the README: it *is* the README's draft.
+
+    ``hydrostatics()`` cuts the hull at ``DRAFT_M = 0.248 m * lambda``, so asserting the
+    reported draft against the published draft compares a constant with itself. It stays a
+    drift-locked measurement, and the case says so in the band's basis.
+    """
+    case = {result.name: result for result in committed.cases}["dtmb5415"]
+    assert "draft_m" not in case.reference
+    assert "draft_m" in case.measurements["fine"]
+    assert not any(m.name == "draft_m" and m.kind == "analytic" for m in case.metrics)
+    basis = next(iter(_blessed_5415()["tolerances"].values()))["basis"]
+    assert "input" in basis
+
+
+def test_dtmb5415_particulars_gate_has_teeth(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A wrong published table must turn the gate red, not drift quietly green.
+
+    The teeth are the point: a drift lock detects *change*, this detects *disagreement*.
+    Here the dataset's displaced mass is corrupted by 10 % (as a unit slip in the README
+    table would) and the reference the case *derives* moves with it, so it no longer
+    reproduces the blessed baseline and the published comparison leaves its band.
+    """
+    from tensorcad import dtmb5415
+
+    table = dict(dtmb5415.DATASET["readme_model_scale_table"])
+    corrupted = dict(table, displacement_t=table["displacement_t"] * 1.10)
+    monkeypatch.setitem(dtmb5415.DATASET, "readme_model_scale_table", corrupted)
+
+    case = dtmb5415_golden_case()
+    findings: list[golden.Finding] = []
+    result = golden.evaluate_case(case, _blessed_5415(), quick=False, findings=findings)
+
+    codes = {finding.code for finding in result.findings} | {f.code for f in findings}
+    assert "reference_not_reproducible" in codes, codes
+    mismatch = [f for f in result.findings if f.code == "reference_mismatch"]
+    assert any(f.metric == "displacement_volume_m3" for f in mismatch), mismatch
+    assert result.passed is False
+
+
+def test_a_declared_tolerance_must_be_justified() -> None:
+    """No basis, an unknown metric and a 40 % band are all errors, not warnings."""
+
+    class Loose(ProbeCase):
+        name = "loose"
+
+        def reference_tolerance(self, values, reference):  # type: ignore[no-untyped-def]
+            return {
+                "value": (0.40, "because I said so"),
+                "coarse_only": (0.0, ""),
+                "not_a_metric": (0.01, "names nothing"),
+            }
+
+    findings: list[golden.Finding] = []
+    result = golden.evaluate_case(
+        Loose(), None, quick=False, findings=findings, baseline_optional=True
+    )
+    codes = {finding.code for finding in result.findings} | {f.code for f in findings}
+    assert "declared_tolerance_too_loose" in codes, codes
+    assert "declared_tolerance_without_basis" in codes, codes
+    assert "declared_tolerance_unknown_metric" in codes, codes
+    assert result.passed is False
+
+
+def dtmb5415_golden_case() -> golden.GoldenCase:
+    return next(case for case in golden.golden_cases() if case.name == "dtmb5415")

@@ -197,9 +197,15 @@ GRID = {"n_girth": 25, "n_station": 45, "n_patches": 2, "patch_names": ("fore", 
 #: Refinement of the parametric surface used for the mesh (per patch).
 MESH_RESOLUTION = {"n_station_out": 133, "n_girth_out": 49}
 
+#: Full-scale Lpp of the shipped geometry, from the dataset's own ``geometry_scale``
+#: ("full scale, Lpp = 142 m").
+LPP_M = 142.0
+
 #: Scale factor of the shipped database: the record's README table is at model scale
-#: (Lpp = 5.720 m), the geometry itself is full scale (Lpp = 142 m).
-SCALE_LAMBDA = 142.0 / 5.720
+#: (Lpp = 5.720 m), the geometry itself is full scale (Lpp = 142 m).  Read out of
+#: :data:`DATASET` rather than retyped, so the table stays the single source of the
+#: reference particulars.
+SCALE_LAMBDA = LPP_M / DATASET["readme_model_scale_table"]["Lpp_m"]
 
 #: Design draft used by :meth:`DTMB5415Space.hydrostatics`, measured from the baseline
 #: (z = 0; the bulb hangs below, z_keel = -3.28 m).  Taken straight from the README table
@@ -210,6 +216,51 @@ SCALE_LAMBDA = 142.0 / 5.720
 #: Geometry validation against the README table: ``tools/dtmb5415_param/verify_geometry.py``.
 DRAFT_M = 0.248 * SCALE_LAMBDA
 WATERLINE_Z = DRAFT_M
+
+#: Acceptance band for comparing the shipped hull against the dataset's published
+#: principal-particulars table.  The number is not chosen here: it is the band this hull's
+#: geometry contract declared *before* its numbers were looked at
+#: (``tools/dtmb5415_param/verify_geometry.py``: 3 % accept, 15 % reject, the latter being
+#: the platform standard), held at 3 % because the reference is a four-significant-figure
+#: particulars table rather than an experiment.
+README_PARTICULARS_TOLERANCE = 0.03
+
+
+def readme_reference() -> dict[str, Any]:
+    """Full-scale reference particulars implied by the README model-scale table.
+
+    The dataset README quotes the hull at model scale (Lpp 5.720 m, B 0.760 m, T 0.248 m,
+    displaced mass 0.549 t at rho = 998.5 kg/m^3); the geometry shipped here is full scale.
+    Every reference in the returned mapping is derived from that table and
+    :data:`SCALE_LAMBDA`, so no criterion is copied by hand.  ``cb`` is derived from the
+    other four, not quoted: a published Cb rounded independently of the volume would make
+    the reference internally inconsistent.
+    """
+    table = DATASET["readme_model_scale_table"]
+    lam = SCALE_LAMBDA
+    # 0.549 t of sea water at 998.5 kg/m^3 is 0.550 m^3 of displacement volume; the round-0
+    # slip was to divide 0.549 by 998.5 without converting tonnes -> m^3.
+    volume_model = (table["displacement_t"] * 1000.0) / table["rho_kg_m3"]  # m^3
+    reference: dict[str, Any] = {
+        "lambda": lam,
+        "Lpp_m": LPP_M,
+        "beam_m": table["beam_m"] * lam,
+        "draft_m": table["draft_m"] * lam,
+        "displacement_volume_m3": volume_model * lam**3,
+        "model_scale": {
+            "Lpp_m": table["Lpp_m"],
+            "beam_m": table["beam_m"],
+            "draft_m": table["draft_m"],
+            "displacement_t": table["displacement_t"],
+            "rho_kg_m3": table["rho_kg_m3"],
+            "displacement_volume_model_m3": volume_model,
+        },
+        "source": "DATASET.readme_model_scale_table (dataset README, quoted verbatim)",
+    }
+    reference["cb"] = reference["displacement_volume_m3"] / (
+        reference["Lpp_m"] * reference["beam_m"] * reference["draft_m"]
+    )
+    return reference
 
 _DATA_DIR = Path(__file__).resolve().parent.parent / "docs" / "data" / "dtmb5415"
 
