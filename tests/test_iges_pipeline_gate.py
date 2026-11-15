@@ -191,7 +191,12 @@ class TestDependencyLock:
             if isinstance(node, ast.Import):
                 imports.extend(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom):
-                # Skip relative imports (from .xxx or from tensorcad.xxx)
+                # Relative imports (``from .x import y``) are internal: ``ast`` stores the
+                # leading dots in ``node.level``, never in ``node.module``, so checking the
+                # module name alone misreads ``from .geomquality.iges_trim import ...`` as
+                # the third-party package ``geomquality``.
+                if node.level:
+                    continue
                 if node.module and not node.module.startswith(".") and not node.module.startswith("tensorcad"):
                     imports.append(node.module)
         # Only stdlib imports allowed

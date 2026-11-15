@@ -94,10 +94,11 @@ def _grid_seeds(u0: float, u1: float, v0: float, v1: float, steps: int,
 
 
 def _best_over(surface: Surface, point: Sequence[float], seeds: Sequence[tuple[float, float]],
-               iterations: int, tolerance: float) -> tuple[float, float, float]:
+               iterations: int, tolerance: float, *, exact: bool = False
+               ) -> tuple[float, float, float]:
     best: tuple[float, float, float] | None = None
     for seed in seeds:
-        candidate = _gauss_newton(surface, point, seed, iterations, tolerance)
+        candidate = _gauss_newton(surface, point, seed, iterations, tolerance, exact=exact)
         if best is None or candidate[2] < best[2]:
             best = candidate
         if best[2] <= tolerance:
@@ -140,7 +141,7 @@ def invert_point(surface: Surface, point: Sequence[float], *,
 
     grid_steps = 6
     coarse = _best_over(surface, point, _grid_seeds(u0, u1, v0, v1, grid_steps),
-                        iterations, tolerance)
+                        iterations, tolerance, exact=True)
     if best is None or coarse[2] < best[2]:
         best = coarse
     if best[2] <= tolerance or fallback_tolerance is None or best[2] <= fallback_tolerance:
@@ -149,12 +150,23 @@ def invert_point(surface: Surface, point: Sequence[float], *,
     half = ((u1 - u0) / grid_steps, (v1 - v0) / grid_steps)
     fine = _best_over(surface, point,
                       _grid_seeds(u0, u1, v0, v1, 4, (best[0], best[1]), half),
-                      iterations, tolerance)
+                      iterations, tolerance, exact=True)
     return fine if fine[2] < best[2] else best
 
 
 def _gauss_newton(surface: Surface, point: Sequence[float], seed: tuple[float, float],
-                  iterations: int, tolerance: float) -> tuple[float, float, float]:
+                  iterations: int, tolerance: float, *, exact: bool = False
+                  ) -> tuple[float, float, float]:
+    """Damped Gauss-Newton on ``|S(u, v) - p|^2``.
+
+    ``exact`` asks for the surface's analytic tangents instead of finite differences.
+    They are the more accurate option -- on the JBC boss a face whose trim loop is
+    inverted from difference tangents stalls at a 3.5e-2 residual while the exact
+    tangents reach 1e-12 --- but they are also the expensive option (a spline
+    derivative-net evaluation costs more than three plain surface evaluations), so the
+    cheap difference path is kept for the seeded walk, which succeeds for most loop
+    points, and the caller uses ``exact`` only for the fallback lattice.
+    """
     (u0, u1), (v0, v1) = surface.domain
     u = min(max(seed[0], u0), u1)
     v = min(max(seed[1], v0), v1)
@@ -168,8 +180,12 @@ def _gauss_newton(surface: Surface, point: Sequence[float], seed: tuple[float, f
         error = _norm(residual)
         if error <= tolerance:
             break
-        du = _scale(_sub(surface.evaluate(min(u + step_u, u1), v), base), 1.0 / step_u)
-        dv = _scale(_sub(surface.evaluate(u, min(v + step_v, v1)), base), 1.0 / step_v)
+        exact_partials = getattr(surface, "partials", None) if exact else None
+        if exact_partials is not None:
+            _, du, dv = exact_partials(u, v)
+        else:
+            du = _scale(_sub(surface.evaluate(min(u + step_u, u1), v), base), 1.0 / step_u)
+            dv = _scale(_sub(surface.evaluate(u, min(v + step_v, v1)), base), 1.0 / step_v)
         a11, a12 = _dot(du, du), _dot(du, dv)
         a22 = _dot(dv, dv)
         b1, b2 = -_dot(du, residual), -_dot(dv, residual)
