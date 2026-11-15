@@ -359,3 +359,80 @@ def test_su2_without_surface_cells_says_so(tmp_path):
     path.write_text("NDIME= 3\nNPOIN= 3\n0 0 0\n1 0 0\n0 1 0\nNELEM= 0\nNMARK= 0\n", encoding="utf-8")
     with pytest.raises(ValueError, match="no surface triangles or quads"):
         mf.read_su2(path)
+
+# ---------------------------------------------------------------------------
+# Polygon (n>4) intake — CAD kernels often produce pentagons/hexagons
+# ---------------------------------------------------------------------------
+
+#: A single pentagonal face on the XY plane (5 vertices, 1 pentagon → 3 triangles).
+PENTAGON_POINTS = np.array([
+    [0.0, 0.0, 0.0],
+    [1.0, 0.0, 0.0],
+    [1.2, 0.8, 0.0],
+    [0.5, 1.3, 0.0],
+    [-0.2, 0.6, 0.0],
+])
+PENTAGON = [[0, 1, 2, 3, 4]]
+# Fan triangulation from vertex 0: (0,1,2), (0,2,3), (0,3,4) → 3 triangles (n-2)
+_PENTAGON_TRIS = np.array([[0, 1, 2], [0, 2, 3], [0, 3, 4]], dtype=np.int64)
+_PENTAGON_REF = mf.TriMesh(PENTAGON_POINTS, _PENTAGON_TRIS, "pentagon_reference")
+
+
+def _write_pentagon_obj(path) -> None:
+    body = "".join(f"v {x} {y} {z}\n" for x, y, z in PENTAGON_POINTS)
+    body += "f 1 2 3 4 5\n"
+    path.write_text(body, encoding="utf-8")
+
+
+def _write_pentagon_vtk(path) -> None:
+    head = "# vtk DataFile Version 3.0\npentagon\nASCII\nDATASET UNSTRUCTURED_GRID\n"
+    head += f"POINTS {len(PENTAGON_POINTS)} float\n"
+    head += "".join(f"{x} {y} {z}\n" for x, y, z in PENTAGON_POINTS)
+    head += f"CELLS 1 6\n5 0 1 2 3 4\n"
+    head += "CELL_TYPES 1\n7\n"  # VTK_POLYGON = 7
+    path.write_text(head, encoding="utf-8")
+
+
+_PENTAGON_WRITERS = {"obj": _write_pentagon_obj, "vtk": _write_pentagon_vtk}
+
+
+@pytest.mark.parametrize("fmt", ("obj", "vtk"))
+def test_pentagon_intake_fan_triangulates_correctly(fmt, tmp_path):
+    """A 5-node polygon must yield 3 triangles (n-2) via fan triangulation from vertex 0.
+
+    A single planar face is not a closed surface, so we check triangulation
+    directly rather than using compare_meshes (which requires closedness).
+    """
+    path = tmp_path / f"pentagon.{_ext(fmt)}"
+    _PENTAGON_WRITERS[fmt](path)
+    got = mf.read(path, fmt)
+    assert len(got.faces) == 3, f"pentagon must yield 3 triangles, got {len(got.faces)}"
+    # Check the triangulation matches the reference (same face set)
+    got_faces = {tuple(sorted(f)) for f in got.faces.tolist()}
+    ref_faces = {tuple(sorted(f)) for f in _PENTAGON_REF.faces.tolist()}
+    assert got_faces == ref_faces, f"triangulation mismatch: {got_faces} vs {ref_faces}"
+    assert got.area() == pytest.approx(_PENTAGON_REF.area(), abs=1e-15)
+
+
+def test_hexagon_intake_via_obj(tmp_path):
+    """A 6-node polygon must yield 4 triangles (n-2) via fan triangulation."""
+    hex_pts = np.array([
+        [0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.5, 0.8, 0.0],
+        [1.0, 1.6, 0.0], [0.0, 1.6, 0.0], [-0.5, 0.8, 0.0],
+    ])
+    hex_faces = np.array([
+        [0, 1, 2], [0, 2, 3], [0, 3, 4], [0, 4, 5]
+    ], dtype=np.int64)
+    hex_ref = mf.TriMesh(hex_pts, hex_faces, "hexagon_reference")
+
+    path = tmp_path / "hexagon.obj"
+    body = "".join(f"v {x} {y} {z}\n" for x, y, z in hex_pts)
+    body += "f 1 2 3 4 5 6\n"
+    path.write_text(body, encoding="utf-8")
+
+    got = mf.read(path, "obj")
+    assert len(got.faces) == 4, f"hexagon must yield 4 triangles, got {len(got.faces)}"
+    got_faces = {tuple(sorted(f)) for f in got.faces.tolist()}
+    ref_faces = {tuple(sorted(f)) for f in hex_ref.faces.tolist()}
+    assert got_faces == ref_faces, f"triangulation mismatch: {got_faces} vs {ref_faces}"
+    assert got.area() == pytest.approx(hex_ref.area(), abs=1e-15)
