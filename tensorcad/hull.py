@@ -160,7 +160,8 @@ class HullParameters:
     #: :mod:`tensorcad.series60`.
     family: str = "sine"
     #: --- Series 60 only (refused, not ignored, on ``family="sine"``) ---
-    #: Target block coefficient of the Todd (1951) parent form, 0.55-0.85.
+    #: Target block coefficient of the Todd (1951) parent form, 0.55-0.80
+    #: (the published ladder's own span: see ``series60.CB_MIN/CB_MAX``).
     block_coefficient: float | None = None
     #: Waterplane coefficient. ``None`` keeps ``Cwp == Cp`` (the legacy single
     #: exponent, which is -10.7 % on Cwp at Cb = 0.60 against the parents); a value
@@ -241,7 +242,7 @@ def _series60_parameters(parameters: HullParameters):
         )
     if parameters.block_coefficient is None:
         raise ValueError(
-            "family='series60' needs block_coefficient: the target Cb (0.55-0.85) is what "
+            "family='series60' needs block_coefficient: the target Cb (0.55-0.80) is what "
             "picks the parent form, so there is no sensible default to fall back on"
         )
     from .series60 import Series60Parameters
