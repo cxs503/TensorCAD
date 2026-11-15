@@ -66,6 +66,21 @@ def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def display_path(path: Path) -> str:
+    """Repo-relative when possible, absolute otherwise.
+
+    ``--out`` used to be joined to ROOT and then passed to ``relative_to(ROOT)``,
+    so any path outside the checkout raised ``ValueError: ... is not in the
+    subpath of ...`` after all the numbers had already been computed.  The board
+    audit (m17308 F5) reproduced that crash; the artifact should simply record an
+    absolute path when the caller asked for one.
+    """
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def load_published() -> dict:
     return json.loads(DATA.read_text())
 
@@ -792,8 +807,8 @@ def main() -> int:
         "water_density": Series60Parameters().water_density,
         "published": published,
         "artifacts": {
-            "json": str((out / "five_cb_gradient.json").relative_to(ROOT)),
-            "published_data": str(DATA.relative_to(ROOT)),
+            "json": display_path(out / "five_cb_gradient.json"),
+            "published_data": display_path(DATA),
             "published_data_sha256": sha256_of(DATA),
         },
         "five_cb_gradient": gradient,
