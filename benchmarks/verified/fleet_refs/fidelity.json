@@ -1,0 +1,1460 @@
+{
+ "schema": "tensorcad.fleet_refs.fidelity_report/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "library": "benchmarks/verified/fleet_refs/crossref.json",
+ "library_generated_utc": "2026-11-15T03:57:49+00:00",
+ "documents_scanned": 11,
+ "fidelity": {
+  "schema": "tensorcad.fleet_refs.fidelity/1.0",
+  "anchor": "REPRO-GEOM-FLEET-REFS",
+  "tolerance_basis": "tensorcad.fleet.crossref.TOLERANCE",
+  "cells": {
+   "DTC": {
+    "displacement_volume": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      173467.0,
+      173468.0
+     ],
+     "spread_relative": 6e-06,
+     "modal_value": 173467.0,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "cb": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      0.661
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 0.661,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "lcb_percent": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.02
+    },
+    "lwl": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "length_pp": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      355.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 355.0,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "beam": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      51.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 51.0,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "draft": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      14.5
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 14.5,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    }
+   },
+   "JBC": {
+    "displacement_volume": {
+     "documents": 4,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      178369.9,
+      178370.0
+     ],
+     "spread_relative": 1e-06,
+     "modal_value": 178369.9,
+     "modal_cluster_size": 4,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "cb": {
+     "documents": 3,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      0.858
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 0.858,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "lcb_percent": {
+     "documents": 1,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      2.5475
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 2.5475,
+     "modal_cluster_size": 1,
+     "outliers": [],
+     "tolerance": 0.02
+    },
+    "lwl": {
+     "documents": 4,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      285.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 285.0,
+     "modal_cluster_size": 4,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "length_pp": {
+     "documents": 4,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      280.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 280.0,
+     "modal_cluster_size": 4,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "beam": {
+     "documents": 4,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      45.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 45.0,
+     "modal_cluster_size": 4,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "draft": {
+     "documents": 4,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      16.5
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 16.5,
+     "modal_cluster_size": 4,
+     "outliers": [],
+     "tolerance": 0.005
+    }
+   },
+   "KCS": {
+    "displacement_volume": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      52030.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 52030.0,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "cb": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      0.6505,
+      0.651
+     ],
+     "spread_relative": 0.000769,
+     "modal_value": 0.6505,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "lcb_percent": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      -1.48
+     ],
+     "spread_relative": -0.0,
+     "modal_value": -1.48,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.02
+    },
+    "lwl": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      232.5
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 232.5,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "length_pp": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      230.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 230.0,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "beam": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      32.2
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 32.2,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "draft": {
+     "documents": 3,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      10.8
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 10.8,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    }
+   },
+   "KVLCC2": {
+    "displacement_volume": {
+     "documents": 5,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      312622.0,
+      312622.439
+     ],
+     "spread_relative": 1e-06,
+     "modal_value": 312622.0,
+     "modal_cluster_size": 5,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "cb": {
+     "documents": 5,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      0.8098
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 0.8098,
+     "modal_cluster_size": 5,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "lcb_percent": {
+     "documents": 3,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      3.48
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 3.48,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.02
+    },
+    "lwl": {
+     "documents": 3,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      325.5
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 325.5,
+     "modal_cluster_size": 3,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "length_pp": {
+     "documents": 6,
+     "lineages": 3,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      320.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 320.0,
+     "modal_cluster_size": 6,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "beam": {
+     "documents": 5,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      58.0,
+      580.0
+     ],
+     "spread_relative": 9.0,
+     "modal_value": 58.0,
+     "modal_cluster_size": 3,
+     "outliers": [
+      {
+       "source": "simman2014_kvlcc2",
+       "family": "SIMMAN-SERIES",
+       "value": 580.0,
+       "raw": "580",
+       "label": "Bwl (m)",
+       "rel_to_modal": 0.9
+      },
+      {
+       "source": "simman2020_summary",
+       "family": "SIMMAN-SERIES",
+       "value": 580.0,
+       "raw": "580",
+       "label": "Bwl (m)",
+       "rel_to_modal": 0.9
+      },
+      {
+       "source": "simman2014_kvlcc2",
+       "family": "SIMMAN-SERIES",
+       "value": 580.0,
+       "raw": "580",
+       "label": "Bwl (m)",
+       "rel_to_modal": 0.9
+      },
+      {
+       "source": "simman2020_summary",
+       "family": "SIMMAN-SERIES",
+       "value": 580.0,
+       "raw": "580",
+       "label": "Bwl (m)",
+       "rel_to_modal": 0.9
+      }
+     ],
+     "tolerance": 0.005
+    },
+    "draft": {
+     "documents": 6,
+     "lineages": 3,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      20.8
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 20.8,
+     "modal_cluster_size": 6,
+     "outliers": [],
+     "tolerance": 0.005
+    }
+   },
+   "ONRT": {
+    "displacement_volume": {
+     "documents": 2,
+     "lineages": 2,
+     "verdict": "CONFLICT",
+     "distinct_values": [
+      8299.5,
+      8507.0
+     ],
+     "spread_relative": 0.025002,
+     "modal_value": 8299.5,
+     "modal_cluster_size": 1,
+     "outliers": [
+      {
+       "source": "simman2020_summary",
+       "family": "SIMMAN-SERIES",
+       "value": 8507.0,
+       "raw": "8507",
+       "label": "Displacement (m3)",
+       "rel_to_modal": 0.024392
+      }
+     ],
+     "tolerance": 0.005
+    },
+    "cb": {
+     "documents": 2,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      0.535
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 0.535,
+     "modal_cluster_size": 2,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "lcb_percent": {
+     "documents": 1,
+     "lineages": 1,
+     "verdict": "SINGLE_SOURCE",
+     "distinct_values": [
+      -1.68
+     ],
+     "spread_relative": 0.0,
+     "modal_value": -1.68,
+     "modal_cluster_size": 1,
+     "outliers": [],
+     "tolerance": 0.02
+    },
+    "lwl": {
+     "documents": 2,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      154.0
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 154.0,
+     "modal_cluster_size": 2,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "length_pp": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "beam": {
+     "documents": 2,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      18.78
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 18.78,
+     "modal_cluster_size": 2,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "draft": {
+     "documents": 2,
+     "lineages": 2,
+     "verdict": "CROSS_VERIFIED",
+     "distinct_values": [
+      5.494
+     ],
+     "spread_relative": 0.0,
+     "modal_value": 5.494,
+     "modal_cluster_size": 2,
+     "outliers": [],
+     "tolerance": 0.005
+    }
+   },
+   "Series60": {
+    "displacement_volume": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "cb": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "lcb_percent": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.02
+    },
+    "lwl": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "length_pp": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "beam": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    },
+    "draft": {
+     "documents": 0,
+     "lineages": 0,
+     "verdict": "MISSING",
+     "distinct_values": [],
+     "spread_relative": 0.0,
+     "modal_value": null,
+     "modal_cluster_size": 0,
+     "outliers": [],
+     "tolerance": 0.005
+    }
+   }
+  }
+ },
+ "determinability": {
+  "schema": "tensorcad.fleet_refs.determinability/1.0",
+  "anchor": "REPRO-GEOM-FLEET-REFS",
+  "core_quantities": [
+   "displacement_volume",
+   "cb",
+   "lcb_percent",
+   "lwl"
+  ],
+  "ships": {
+   "DTC": {
+    "quantities": {
+     "displacement_volume": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 6e-06,
+      "blocking": false
+     },
+     "cb": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "lcb_percent": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lwl": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "length_pp": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "beam": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "draft": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     }
+    },
+    "counts": {
+     "NO_DETERMINATION": 2,
+     "SINGLE_LINEAGE_SINGLE_DOCUMENT": 0,
+     "SINGLE_LINEAGE_TRANSCRIPTION": 0,
+     "MULTI_LINEAGE_AGREE": 5,
+     "MULTI_LINEAGE_DISPUTED": 0
+    },
+    "blocking": [
+     "lcb_percent",
+     "lwl"
+    ],
+    "core_four_resolved": false
+   },
+   "JBC": {
+    "quantities": {
+     "displacement_volume": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 4,
+      "lineages": 1,
+      "spread_relative": 1e-06,
+      "blocking": true
+     },
+     "cb": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 3,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lcb_percent": {
+      "class": "SINGLE_LINEAGE_SINGLE_DOCUMENT",
+      "documents": 1,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lwl": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 4,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "length_pp": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 4,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "beam": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 4,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "draft": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 4,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     }
+    },
+    "counts": {
+     "NO_DETERMINATION": 0,
+     "SINGLE_LINEAGE_SINGLE_DOCUMENT": 1,
+     "SINGLE_LINEAGE_TRANSCRIPTION": 6,
+     "MULTI_LINEAGE_AGREE": 0,
+     "MULTI_LINEAGE_DISPUTED": 0
+    },
+    "blocking": [
+     "displacement_volume",
+     "cb",
+     "lcb_percent",
+     "lwl",
+     "length_pp",
+     "beam",
+     "draft"
+    ],
+    "core_four_resolved": false
+   },
+   "KCS": {
+    "quantities": {
+     "displacement_volume": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "cb": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.000769,
+      "blocking": false
+     },
+     "lcb_percent": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": -0.0,
+      "blocking": false
+     },
+     "lwl": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "length_pp": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "beam": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "draft": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 3,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     }
+    },
+    "counts": {
+     "NO_DETERMINATION": 0,
+     "SINGLE_LINEAGE_SINGLE_DOCUMENT": 0,
+     "SINGLE_LINEAGE_TRANSCRIPTION": 0,
+     "MULTI_LINEAGE_AGREE": 7,
+     "MULTI_LINEAGE_DISPUTED": 0
+    },
+    "blocking": [],
+    "core_four_resolved": true
+   },
+   "KVLCC2": {
+    "quantities": {
+     "displacement_volume": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 5,
+      "lineages": 2,
+      "spread_relative": 1e-06,
+      "blocking": false
+     },
+     "cb": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 5,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "lcb_percent": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 3,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lwl": {
+      "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+      "documents": 3,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "length_pp": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 6,
+      "lineages": 3,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "beam": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 5,
+      "lineages": 2,
+      "spread_relative": 9.0,
+      "blocking": false
+     },
+     "draft": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 6,
+      "lineages": 3,
+      "spread_relative": 0.0,
+      "blocking": false
+     }
+    },
+    "counts": {
+     "NO_DETERMINATION": 0,
+     "SINGLE_LINEAGE_SINGLE_DOCUMENT": 0,
+     "SINGLE_LINEAGE_TRANSCRIPTION": 2,
+     "MULTI_LINEAGE_AGREE": 5,
+     "MULTI_LINEAGE_DISPUTED": 0
+    },
+    "blocking": [
+     "lcb_percent",
+     "lwl"
+    ],
+    "core_four_resolved": false
+   },
+   "ONRT": {
+    "quantities": {
+     "displacement_volume": {
+      "class": "MULTI_LINEAGE_DISPUTED",
+      "documents": 2,
+      "lineages": 2,
+      "spread_relative": 0.025002,
+      "blocking": false
+     },
+     "cb": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 2,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "lcb_percent": {
+      "class": "SINGLE_LINEAGE_SINGLE_DOCUMENT",
+      "documents": 1,
+      "lineages": 1,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lwl": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 2,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "length_pp": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "beam": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 2,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     },
+     "draft": {
+      "class": "MULTI_LINEAGE_AGREE",
+      "documents": 2,
+      "lineages": 2,
+      "spread_relative": 0.0,
+      "blocking": false
+     }
+    },
+    "counts": {
+     "NO_DETERMINATION": 1,
+     "SINGLE_LINEAGE_SINGLE_DOCUMENT": 1,
+     "SINGLE_LINEAGE_TRANSCRIPTION": 0,
+     "MULTI_LINEAGE_AGREE": 4,
+     "MULTI_LINEAGE_DISPUTED": 1
+    },
+    "blocking": [
+     "lcb_percent",
+     "length_pp"
+    ],
+    "core_four_resolved": false
+   },
+   "Series60": {
+    "quantities": {
+     "displacement_volume": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "cb": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lcb_percent": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "lwl": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "length_pp": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "beam": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     },
+     "draft": {
+      "class": "NO_DETERMINATION",
+      "documents": 0,
+      "lineages": 0,
+      "spread_relative": 0.0,
+      "blocking": true
+     }
+    },
+    "counts": {
+     "NO_DETERMINATION": 7,
+     "SINGLE_LINEAGE_SINGLE_DOCUMENT": 0,
+     "SINGLE_LINEAGE_TRANSCRIPTION": 0,
+     "MULTI_LINEAGE_AGREE": 0,
+     "MULTI_LINEAGE_DISPUTED": 0
+    },
+    "blocking": [
+     "displacement_volume",
+     "cb",
+     "lcb_percent",
+     "lwl",
+     "length_pp",
+     "beam",
+     "draft"
+    ],
+    "core_four_resolved": false
+   }
+  },
+  "ships_core_four_resolved": [
+   "KCS"
+  ],
+  "classes": [
+   "NO_DETERMINATION",
+   "SINGLE_LINEAGE_SINGLE_DOCUMENT",
+   "SINGLE_LINEAGE_TRANSCRIPTION",
+   "MULTI_LINEAGE_AGREE",
+   "MULTI_LINEAGE_DISPUTED"
+  ],
+  "blocking_classes": [
+   "NO_DETERMINATION",
+   "SINGLE_LINEAGE_SINGLE_DOCUMENT",
+   "SINGLE_LINEAGE_TRANSCRIPTION"
+  ]
+ },
+ "keyword_scan": {
+  "schema": "tensorcad.fleet_refs.keyword_scan/1.0",
+  "sources": {
+   "dtc_ije": {
+    "displacement_volume": {
+     "mentions": 7,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 3,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 2,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 4,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 23,
+     "extracted": true
+    }
+   },
+   "dtc_strath": {
+    "displacement_volume": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 3,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 0,
+     "extracted": true
+    }
+   },
+   "dtc_ugent": {
+    "displacement_volume": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 52,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 8,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 19,
+     "extracted": true
+    }
+   },
+   "ittc_benchmarks": {
+    "displacement_volume": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "cb": {
+     "mentions": 4,
+     "extracted": false
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "beam": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "draft": {
+     "mentions": 0,
+     "extracted": false
+    }
+   },
+   "jbc_cfdletters": {
+    "displacement_volume": {
+     "mentions": 2,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 2,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 8,
+     "extracted": true
+    },
+    "length_pp": {
+     "mentions": 2,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 2,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 1,
+     "extracted": true
+    }
+   },
+   "jbc_memorial": {
+    "displacement_volume": {
+     "mentions": 39,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 4,
+     "extracted": false
+    },
+    "lcb_percent": {
+     "mentions": 3,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 3,
+     "extracted": true
+    },
+    "length_pp": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 6,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 6,
+     "extracted": true
+    }
+   },
+   "jbc_scse": {
+    "displacement_volume": {
+     "mentions": 6,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "length_pp": {
+     "mentions": 7,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 1,
+     "extracted": true
+    }
+   },
+   "kvlcc2_hrcak": {
+    "displacement_volume": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 4,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 3,
+     "extracted": true
+    }
+   },
+   "kvlcc2_jstage": {
+    "displacement_volume": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "cb": {
+     "mentions": 3,
+     "extracted": false
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 3,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "draft": {
+     "mentions": 3,
+     "extracted": true
+    }
+   },
+   "kvlcc2_osaka": {
+    "displacement_volume": {
+     "mentions": 19,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 11,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 2,
+     "extracted": true
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": true
+    },
+    "length_pp": {
+     "mentions": 65,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 4,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 2,
+     "extracted": true
+    }
+   },
+   "kvlcc2_ugent": {
+    "displacement_volume": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "cb": {
+     "mentions": 1,
+     "extracted": true
+    },
+    "lcb_percent": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "lwl": {
+     "mentions": 0,
+     "extracted": false
+    },
+    "length_pp": {
+     "mentions": 52,
+     "extracted": true
+    },
+    "beam": {
+     "mentions": 8,
+     "extracted": true
+    },
+    "draft": {
+     "mentions": 19,
+     "extracted": true
+    }
+   }
+  },
+  "mention_without_extraction": [
+   {
+    "source": "ittc_benchmarks",
+    "quantity": "cb",
+    "mentions": 4,
+    "kind": "mention_without_extraction"
+   },
+   {
+    "source": "jbc_memorial",
+    "quantity": "cb",
+    "mentions": 4,
+    "kind": "mention_without_extraction"
+   },
+   {
+    "source": "jbc_memorial",
+    "quantity": "lcb_percent",
+    "mentions": 3,
+    "kind": "mention_without_extraction"
+   },
+   {
+    "source": "kvlcc2_jstage",
+    "quantity": "cb",
+    "mentions": 3,
+    "kind": "mention_without_extraction"
+   }
+  ],
+  "documents_scanned": 11
+ },
+ "summary": {
+  "cells_total": 42,
+  "cells_reproduced_by_two_or_more_documents": 30,
+  "cells_with_outlier": 2,
+  "outliers": [
+   {
+    "ship": "KVLCC2",
+    "quantity": "beam",
+    "source": "simman2014_kvlcc2",
+    "family": "SIMMAN-SERIES",
+    "value": 580.0,
+    "raw": "580",
+    "label": "Bwl (m)",
+    "rel_to_modal": 0.9
+   },
+   {
+    "ship": "KVLCC2",
+    "quantity": "beam",
+    "source": "simman2020_summary",
+    "family": "SIMMAN-SERIES",
+    "value": 580.0,
+    "raw": "580",
+    "label": "Bwl (m)",
+    "rel_to_modal": 0.9
+   },
+   {
+    "ship": "KVLCC2",
+    "quantity": "beam",
+    "source": "simman2014_kvlcc2",
+    "family": "SIMMAN-SERIES",
+    "value": 580.0,
+    "raw": "580",
+    "label": "Bwl (m)",
+    "rel_to_modal": 0.9
+   },
+   {
+    "ship": "KVLCC2",
+    "quantity": "beam",
+    "source": "simman2020_summary",
+    "family": "SIMMAN-SERIES",
+    "value": 580.0,
+    "raw": "580",
+    "label": "Bwl (m)",
+    "rel_to_modal": 0.9
+   },
+   {
+    "ship": "ONRT",
+    "quantity": "displacement_volume",
+    "source": "simman2020_summary",
+    "family": "SIMMAN-SERIES",
+    "value": 8507.0,
+    "raw": "8507",
+    "label": "Displacement (m3)",
+    "rel_to_modal": 0.024392
+   }
+  ],
+  "largest_transcription_spread": {
+   "spread_relative": 9.0,
+   "documents": 5,
+   "tolerance": 0.005
+  },
+  "ships_core_four_resolved": [
+   "KCS"
+  ],
+  "ships": [
+   "DTC",
+   "JBC",
+   "KCS",
+   "KVLCC2",
+   "ONRT",
+   "Series60"
+  ],
+  "mention_without_extraction": 4
+ }
+}
