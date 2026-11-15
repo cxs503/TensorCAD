@@ -1351,6 +1351,28 @@ def run_suite(
                         f"baseline schema {data.get('schema')!r} != {SCHEMA!r}",
                     )
                 )
+            forced = [
+                entry
+                for entry in ((data.get("provenance") or {}).get("forced_bless") or [])
+                if isinstance(entry, dict)
+            ]
+            if forced:
+                overridden = sorted(
+                    {str(code) for entry in forced for code in entry.get("exceeded") or []}
+                )
+                commits = ", ".join(
+                    str(entry.get("git_commit") or "?")[:12] for entry in forced
+                )
+                findings.append(
+                    Finding(
+                        WARNING,
+                        "forced_bless_recorded",
+                        "*",
+                        f"this baseline was written by {len(forced)} forced bless(es) "
+                        f"overriding {overridden or 'no boundary'} at {commits}: a forced "
+                        "bless is a reviewed decision and stays visible in every run",
+                    )
+                )
     blessed_cases = {str(key): value for key, value in (data.get("cases") or {}).items()}
     registered = list(cases) if cases is not None else golden_cases()
     registered_names = {case.name for case in registered}
@@ -1403,6 +1425,32 @@ def bless(
             "refusing to bless a tree that fails its own golden gate: "
             + "; ".join(f"[{finding.case}/{finding.code}] {finding.detail}" for finding in result.errors[:5])
         )
+    history: list[dict[str, Any]] = []
+    try:
+        previous = json.loads(Path(baseline_path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        previous = {}
+    for entry in ((previous.get("provenance") or {}).get("forced_bless") or []):
+        if isinstance(entry, dict):
+            history.append(dict(entry))
+    if not result.passed:
+        # ``--force`` is the one path that can write a baseline the gate itself refuses.
+        # An unrecorded override would make a laundered baseline indistinguishable from a
+        # reviewed one, so the override is written into the baseline and re-announced on
+        # every later run.  The list is append-only: a later blessing carries it forward,
+        # which is what stops a forced bless from being forgotten by a second bless.
+        history.append(
+            {
+                "git_commit": git_commit(),
+                "python": platform.python_version(),
+                "exceeded": sorted({finding.code for finding in result.errors}),
+                "details": [
+                    f"[{finding.case}/{finding.code}] {finding.detail}"
+                    for finding in result.errors[:10]
+                ],
+            }
+        )
+
     payloads: dict[str, Any] = {}
     for case in result.cases:
         payloads[case.name] = {
@@ -1454,6 +1502,8 @@ def bless(
         },
         "cases": payloads,
     }
+    if history:
+        baseline["provenance"]["forced_bless"] = history
     Path(baseline_path).parent.mkdir(parents=True, exist_ok=True)
     Path(baseline_path).write_text(json.dumps(baseline, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return baseline, result
