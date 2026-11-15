@@ -169,6 +169,12 @@ class SubTaskResult:
     #: reference (``obj_read``); the parse is only a measurement if the geometry
     #: that came back is still the geometry that went in.
     volume_rel_err: float | None = None
+    #: Uniform 1-to-4 midpoint subdivisions applied to the rung's mesh before the
+    #: sub-task ran (``0`` = the raw generated hull).  This is the geometry
+    #: source that puts a *single connected* body in the 10^7 band: the
+    #: parametric generator caps one hull at 8.19e6 triangles, and subdivision
+    #: refines the same discrete solid instead of assembling disjoint copies.
+    levels: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -193,6 +199,7 @@ class SubTaskResult:
             "file_bytes": self.file_bytes,
             "file_mb_per_s": self.file_mb_per_s,
             "volume_rel_err": self.volume_rel_err,
+            "levels": self.levels,
         }
 
 
@@ -527,6 +534,53 @@ def _mesh_for(nx: int, nz: int, copies: int) -> Any:
     return _cached_hull(nx, nz).mesh if copies == 1 else _cached_fleet(nx, nz, copies)
 
 
+#: Bound on retained *subdivided* meshes.  A 10^7-triangle mesh is several GB of
+#: Python tuples, so only the rung being measured and its parent are kept: the
+#: parent is what the next level refines, so dropping it would re-refine from
+#: the base every rung.
+SUBDIV_CACHE_SIZE = 2
+_SUBDIV_CACHE: "OrderedDict[tuple[int, int, int, int], Any]" = OrderedDict()
+
+
+def _subdivided_for(nx: int, nz: int, copies: int, levels: int = 0) -> Any:
+    """Rung mesh after ``levels`` uniform subdivisions (identity at ``levels=0``).
+
+    Subdivision is the geometry source used to reach the 10^7 band with *one*
+    connected body: each planar parent triangle is tiled exactly by its four
+    children, so volume, surface area and topology are preserved by
+    construction and the refinement is a sampling-density change, not a shape
+    change.  Middle points are welded by index identity (undirected edge
+    ``(min, max)``), so no tolerance-based welding is involved and the mesh
+    stays closed.
+    """
+    if levels <= 0:
+        return _mesh_for(nx, nz, copies)
+
+    from tensorcad.mesh_subdivision import subdivide_mesh
+
+    key = (nx, nz, copies, levels)
+    cached = _SUBDIV_CACHE.get(key)
+    if cached is not None:
+        _SUBDIV_CACHE.move_to_end(key)
+        return cached
+
+    parent_level, parent = 0, _mesh_for(nx, nz, copies)
+    for other, other_mesh in _SUBDIV_CACHE.items():
+        if other[:3] == (nx, nz, copies) and parent_level < other[3] < levels:
+            parent_level, parent = other[3], other_mesh
+    mesh = subdivide_mesh(parent, levels - parent_level)
+    _SUBDIV_CACHE[key] = mesh
+    _SUBDIV_CACHE.move_to_end(key)
+    while len(_SUBDIV_CACHE) > SUBDIV_CACHE_SIZE:
+        _SUBDIV_CACHE.popitem(last=False)
+    return mesh
+
+
+def clear_subdiv_cache() -> None:
+    """Drop cached subdivided meshes (tests and repeated benchmark runs)."""
+    _SUBDIV_CACHE.clear()
+
+
 # ---------------------------------------------------------------------------
 # Sub-task implementations
 # ---------------------------------------------------------------------------
@@ -683,7 +737,7 @@ def _run_voxelize(grid_res: int) -> SubTaskResult:
     )
 
 
-def _run_volume(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
+def _run_volume(nx: int, nz: int, copies: int = 1, levels: int = 0) -> SubTaskResult:
     """Measure volume integration time (divergence theorem over the triangles).
 
     The measured volume is reported together with its analytic reference
@@ -693,7 +747,7 @@ def _run_volume(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
     from tensorcad import mesh as meshlib
     from tensorcad.hull import analytic_volume
 
-    mesh = _mesh_for(nx, nz, copies)
+    mesh = _subdivided_for(nx, nz, copies, levels)
     tris = len(mesh.faces)
     verts = len(mesh.vertices)
 
@@ -710,9 +764,11 @@ def _run_volume(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
         copies=copies,
         seconds=round(elapsed, 6),
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
+        levels=levels,
         note=(
             f"volume={vol:.6f} m^3, analytic={reference:.6f} m^3, "
             f"rel_err={rel_err:+.3%}, bodies={copies}"
+            + (f", levels={levels}" if levels else "")
         ),
         peak_rss_mb=peak_rss_mb(),
         rss_mb=live_rss_mb(),
@@ -775,9 +831,15 @@ OBJ_BYTES_PER_TRIANGLE = 120
 OBJ_FREE_SPACE_FACTOR = 4.0
 
 
-def import_obj_path(nx: int, nz: int, copies: int = 1) -> Path:
-    """Path of the OBJ file the import sub-tasks share at one rung."""
-    return IMPORT_DIR / f"hull_{nx}x{nz}_b{copies}.obj"
+def import_obj_path(nx: int, nz: int, copies: int = 1, levels: int = 0) -> Path:
+    """Path of the OBJ file the import sub-tasks share at one rung.
+
+    The subdivision level is part of the name (and of the glob the pruner uses),
+    so a refined rung never reads the file an unrefined rung wrote -- a mixed-up
+    pair would report a parse time for the wrong triangle count.
+    """
+    suffix = f"_l{levels}" if levels else ""
+    return IMPORT_DIR / f"hull_{nx}x{nz}_b{copies}{suffix}.obj"
 
 
 def clear_import_files() -> list[str]:
@@ -818,7 +880,7 @@ def _obj_space_guard(tris: int) -> str | None:
     return None
 
 
-def _run_obj_write(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
+def _run_obj_write(nx: int, nz: int, copies: int = 1, levels: int = 0) -> SubTaskResult:
     """Measure writing the rung's mesh as OBJ text (serialisation cost).
 
     Deliberately split from :func:`_run_obj_read`: "importing this hull takes
@@ -828,15 +890,15 @@ def _run_obj_write(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
     """
     from tensorcad.export import write_obj
 
-    mesh = _mesh_for(nx, nz, copies)
+    mesh = _subdivided_for(nx, nz, copies, levels)
     tris = len(mesh.faces)
-    path = import_obj_path(nx, nz, copies)
+    path = import_obj_path(nx, nz, copies, levels)
     reason = _obj_space_guard(tris)
     if reason is not None:
         return SubTaskResult(
             subtask="obj_write", nx=nx, nz=nz, triangles=tris,
             vertices=len(mesh.vertices), grid_cells=0, seconds=None,
-            status=NOT_RUN, copies=copies, note=reason,
+            status=NOT_RUN, copies=copies, levels=levels, note=reason,
         )
     _prune_import_files(path)
     t0 = time.perf_counter()
@@ -846,11 +908,13 @@ def _run_obj_write(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
     return SubTaskResult(
         subtask="obj_write", nx=nx, nz=nz, triangles=tris,
         vertices=len(mesh.vertices), grid_cells=0, copies=copies,
+        levels=levels,
         seconds=round(elapsed, 6),
         throughput=round(tris / elapsed, 1) if elapsed > 0 else None,
         note=(
             f"file={size_mb:,.1f} MiB ({size_mb / elapsed:,.1f} MiB/s), "
             f"{size_mb * 1024 * 1024 / tris:.1f} B/tri, bodies={copies}"
+            + (f", levels={levels}" if levels else "")
         ),
         file_bytes=path.stat().st_size,
         file_mb_per_s=round(size_mb / elapsed, 3) if elapsed > 0 else None,
@@ -860,7 +924,7 @@ def _run_obj_write(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
     )
 
 
-def _run_obj_read(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
+def _run_obj_read(nx: int, nz: int, copies: int = 1, levels: int = 0) -> SubTaskResult:
     """Measure parsing an OBJ file back into a mesh, and check what came back.
 
     If the file is not on disk the sub-task prepares it first and records that
@@ -873,9 +937,9 @@ def _run_obj_read(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
     from tensorcad.hull import analytic_volume
     from tensorcad.mesh import total_signed_volume
 
-    mesh = _mesh_for(nx, nz, copies)
+    mesh = _subdivided_for(nx, nz, copies, levels)
     tris = len(mesh.faces)
-    path = import_obj_path(nx, nz, copies)
+    path = import_obj_path(nx, nz, copies, levels)
     prepared = 0.0
     if not path.exists():
         reason = _obj_space_guard(tris)
@@ -883,7 +947,7 @@ def _run_obj_read(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
             return SubTaskResult(
                 subtask="obj_read", nx=nx, nz=nz, triangles=tris,
                 vertices=len(mesh.vertices), grid_cells=0, seconds=None,
-                status=NOT_RUN, copies=copies,
+                status=NOT_RUN, copies=copies, levels=levels,
                 note=f"needs the OBJ file first; {reason}",
             )
         _prune_import_files(path)
@@ -909,12 +973,14 @@ def _run_obj_read(nx: int, nz: int, copies: int = 1) -> SubTaskResult:
         f"file={size_mb:,.1f} MiB ({size_mb / elapsed:,.1f} MiB/s), "
         f"volume={volume:.6f} m^3, analytic={reference:.6f} m^3, "
         f"rel_err={rel_err:+.3e}, bodies={copies}"
+        + (f", levels={levels}" if levels else "")
     )
     if prepared:
         note += f", file prepared in {prepared:.3f}s (not counted)"
     return SubTaskResult(
         subtask="obj_read", nx=nx, nz=nz, triangles=len(parsed.faces),
         vertices=len(parsed.vertices), grid_cells=0, copies=copies,
+        levels=levels,
         seconds=round(elapsed, 6),
         throughput=round(len(parsed.faces) / elapsed, 1) if elapsed > 0 else None,
         note=note,
@@ -949,6 +1015,12 @@ def _fibonacci_directions(n: int) -> list[tuple[float, float, float]]:
 # Benchmark runner
 # ---------------------------------------------------------------------------
 
+#: Sub-tasks that can be measured on a *subdivided* rung (a single connected
+#: body refined to the 10^7 band).  The others either regenerate their own
+#: source (``load``) or have a cost that is not a function of the refined mesh
+#: (``point_locate*`` index build, ``voxelize`` grid).
+_LEVEL_SUBTASKS: tuple[str, ...] = ("obj_write", "obj_read", "volume")
+
 _SUBTASKS_MESH = {
     "load": _run_load,
     "point_locate": _run_point_locate,
@@ -977,6 +1049,7 @@ def run_perf_benchmark(
     max_triangles: int | None = None,
     n_queries: int = QUICK_N_QUERIES,
     max_naive_triangles: int | None = DEFAULT_MAX_NAIVE_TRIANGLES,
+    subdivide_levels: tuple[int, ...] = (0,),
 ) -> PerfBenchmarkResult:
     """Run the full performance benchmark ladder.
 
@@ -996,6 +1069,11 @@ def run_perf_benchmark(
         Skip the brute-force ``point_locate`` reference above this triangle
         count (its cost grows as N x queries); ``point_locate_accel`` still
         covers such rungs.
+    subdivide_levels:
+        Subdivision levels to measure per rung (``(0,)`` = only the generated
+        hull).  Only ``obj_write``/``obj_read``/``volume`` accept a refined
+        mesh; the other sub-tasks are recorded ``not_run`` at ``levels > 0``
+        instead of silently measuring the unrefined mesh under a refined label.
     """
     t_start = time.perf_counter()
     results: list[SubTaskResult] = []
@@ -1003,48 +1081,77 @@ def run_perf_benchmark(
 
     # Mesh-based sub-tasks
     mesh_tasks = [t for t in subtasks if t != "voxelize"]
+    levels_ladder = tuple(subdivide_levels) or (0,)
     for nx, nz in ladder:
         est_tris = 4 * (nx - 1) * (nz - 1)
         if max_triangles is not None and est_tris > max_triangles:
             continue
 
-        for task_name in mesh_tasks:
-            fn = _SUBTASKS_MESH.get(task_name)
-            if fn is None:
-                continue
-            if (
-                task_name == "point_locate"
-                and max_naive_triangles is not None
-                and est_tris > max_naive_triangles
-            ):
-                results.append(SubTaskResult(
-                    subtask=task_name, nx=nx, nz=nz,
-                    triangles=est_tris, vertices=0, grid_cells=0,
-                    seconds=None, status=NOT_RUN,
-                    note=(
-                        f"brute-force reference skipped above "
-                        f"{max_naive_triangles:,} triangles (O(N) per ray); "
-                        f"use point_locate_accel"
-                    ),
-                ))
-                continue
-            try:
-                if task_name in _QUERY_SUBTASKS:
-                    result = fn(nx, nz, n_queries=n_queries)
-                else:
-                    result = fn(nx, nz)
-                results.append(result)
-                if result.triangles >= CLUSTER_THRESHOLD:
-                    cluster_warnings.append(
-                        f"{task_name} at {nx}x{nz} ({result.triangles:,} triangles) "
-                        f"took {result.seconds:.3f}s — consider cluster for larger scales"
-                    )
-            except Exception as exc:
-                results.append(SubTaskResult(
-                    subtask=task_name, nx=nx, nz=nz,
-                    triangles=0, vertices=0, grid_cells=0,
-                    seconds=None, status=FAILED, note=str(exc),
-                ))
+        for levels in levels_ladder:
+            level_tris = est_tris * (4 ** int(levels))
+            for task_name in mesh_tasks:
+                fn = _SUBTASKS_MESH.get(task_name)
+                if fn is None:
+                    continue
+                if levels and task_name not in _LEVEL_SUBTASKS:
+                    results.append(SubTaskResult(
+                        subtask=task_name, nx=nx, nz=nz,
+                        triangles=level_tris, vertices=0, grid_cells=0,
+                        seconds=None, status=NOT_RUN, levels=int(levels),
+                        note=(
+                            "subdivide_levels applies only to "
+                            + ", ".join(_LEVEL_SUBTASKS)
+                            + f"; {task_name} is measured on the generated hull"
+                        ),
+                    ))
+                    continue
+                if max_triangles is not None and level_tris > max_triangles:
+                    results.append(SubTaskResult(
+                        subtask=task_name, nx=nx, nz=nz,
+                        triangles=level_tris, vertices=0, grid_cells=0,
+                        seconds=None, status=NOT_RUN, levels=int(levels),
+                        note=(
+                            f"subdivided rung would have {level_tris:,} triangles "
+                            f"> max_triangles={max_triangles:,}"
+                        ),
+                    ))
+                    continue
+                if (
+                    task_name == "point_locate"
+                    and max_naive_triangles is not None
+                    and level_tris > max_naive_triangles
+                ):
+                    results.append(SubTaskResult(
+                        subtask=task_name, nx=nx, nz=nz,
+                        triangles=level_tris, vertices=0, grid_cells=0,
+                        seconds=None, status=NOT_RUN, levels=int(levels),
+                        note=(
+                            f"brute-force reference skipped above "
+                            f"{max_naive_triangles:,} triangles (O(N) per ray); "
+                            f"use point_locate_accel"
+                        ),
+                    ))
+                    continue
+                try:
+                    if task_name in _QUERY_SUBTASKS:
+                        result = fn(nx, nz, n_queries=n_queries)
+                    elif task_name in _LEVEL_SUBTASKS:
+                        result = fn(nx, nz, levels=int(levels))
+                    else:
+                        result = fn(nx, nz)
+                    results.append(result)
+                    if result.triangles >= CLUSTER_THRESHOLD:
+                        cluster_warnings.append(
+                            f"{task_name} at {nx}x{nz} ({result.triangles:,} triangles) "
+                            f"took {result.seconds:.3f}s — consider cluster for larger scales"
+                        )
+                except Exception as exc:
+                    results.append(SubTaskResult(
+                        subtask=task_name, nx=nx, nz=nz,
+                        triangles=0, vertices=0, grid_cells=0,
+                        seconds=None, status=FAILED, levels=int(levels),
+                        note=str(exc),
+                    ))
 
     # Voxelization sub-task
     if "voxelize" in subtasks:
@@ -1222,15 +1329,20 @@ SCALING_LIMITS: dict[str, float] = {
 MIN_SCALING_POINTS = 3
 
 
-def measurement_key(subtask: str, nx: int, nz: int, copies: int = 1) -> str:
+def measurement_key(subtask: str, nx: int, nz: int, copies: int = 1,
+                    levels: int = 0) -> str:
     """Stable identity of one measurement, used as the baseline/gate key.
 
-    Single-body keys keep the historical ``subtask:nxXxnz`` spelling so existing
-    baselines stay valid; fleet rungs append the body count.
+    Single-body unrefined keys keep the historical ``subtask:nxXxnz`` spelling so
+    existing baselines stay valid; fleet rungs append the body count and refined
+    rungs the subdivision level (a 4x larger mesh must never be compared against
+    the unrefined baseline time).
     """
     key = f"{subtask}:{nx}x{nz}"
     if copies != 1:
         key += f":b{copies}"
+    if levels:
+        key += f":l{levels}"
     return key
 
 
@@ -1379,7 +1491,8 @@ def evaluate_gates(
             baseline_env = data.get("environment")
             for entry in data.get("results", []):
                 key = measurement_key(
-                    entry["subtask"], entry["nx"], entry["nz"], entry.get("copies", 1)
+                    entry["subtask"], entry["nx"], entry["nz"],
+                    entry.get("copies", 1), entry.get("levels", 0),
                 )
                 if entry.get("seconds") is not None:
                     baseline[key] = entry["seconds"]
@@ -1401,7 +1514,7 @@ def evaluate_gates(
     for r in result.results:
         if r.seconds is None:
             continue
-        key = measurement_key(r.subtask, r.nx, r.nz, r.copies)
+        key = measurement_key(r.subtask, r.nx, r.nz, r.copies, r.levels)
         if key not in baseline:
             continue
         bl = baseline[key]
@@ -1445,6 +1558,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="Skip steps producing more than this many triangles")
     parser.add_argument("--n-queries", type=int, default=None,
                         help="Number of ray queries for point_locate")
+    parser.add_argument("--subdivide-levels", type=str, default="0",
+                        help="Comma-separated subdivision levels to measure per rung, "
+                             "e.g. '0,1,2,3'; applies to "
+                             + ",".join(_LEVEL_SUBTASKS))
     parser.add_argument("--fleet-tier", action="store_true",
                         help="Measure the 10^6-10^7 band on multi-body fleet meshes "
                              "(see build_fleet_mesh); uses --ladder/--fleet-copies")
@@ -1507,6 +1624,9 @@ def main(argv: list[str] | None = None) -> int:
             max_triangles=args.max_triangles,
             n_queries=n_queries,
             max_naive_triangles=args.max_naive_triangles,
+            subdivide_levels=tuple(
+                int(s) for s in args.subdivide_levels.split(",") if s.strip()
+            ),
         )
 
     failed_gates = []
