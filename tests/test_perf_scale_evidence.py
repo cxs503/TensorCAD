@@ -39,6 +39,10 @@ MESH = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_mesh.json"
 VOXEL = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_voxel.json"
 FLEET3PT = ROOT / "benchmarks" / "perf_scale" / "ladder_fleet_10m_3pt.json"
 IMPORT_RUN = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_import.json"
+IMPORT_SINGLE10M = (ROOT / "benchmarks" / "perf_scale" / "artifacts"
+                    / "ladder_import_single_10m.json")
+IMPORT_FLEET = (ROOT / "benchmarks" / "perf_scale" / "artifacts"
+                / "ladder_import_fleet_10m.json")
 
 
 def _row(**kw):
@@ -87,7 +91,11 @@ def _all(mesh, voxel, fleet3pt=None, import_run=None):
     """Artifact mapping that satisfies every marked table in the document."""
     return {"mesh": mesh, "voxel": voxel,
             "fleet3pt": fleet3pt if fleet3pt is not None else _fleet3pt_artifact(),
-            "import_run": import_run if import_run is not None else _import_artifact()}
+            "import_run": import_run if import_run is not None else _import_artifact(),
+            # §11.5 band blocks consume their own artifacts; the document is
+            # only complete when every registered table can be rendered.
+            "import_single10m": _import_artifact(),
+            "import_fleet": _import_artifact()}
 
 
 # ---------------------------------------------------------------------------
@@ -247,7 +255,9 @@ def test_committed_document_matches_committed_artifacts() -> None:
         DOC.read_text(encoding="utf-8"),
         {"mesh": load_artifact(MESH), "voxel": load_artifact(VOXEL),
          "fleet3pt": load_artifact(FLEET3PT),
-             "import_run": load_artifact(IMPORT_RUN)},
+             "import_run": load_artifact(IMPORT_RUN),
+             "import_single10m": load_artifact(IMPORT_SINGLE10M),
+             "import_fleet": load_artifact(IMPORT_FLEET)},
     )
     assert problems == [], (
         "docs/perf_scale_10m.md drifted from the committed artifacts; "
