@@ -16,6 +16,8 @@ import pytest
 
 from tensorcad.perf_evidence import (
     DASH,
+    render_import_gates,
+    render_import_table,
     TABLE_NAMES,
     check_document,
     extract_block,
@@ -36,6 +38,7 @@ DOC = ROOT / "docs" / "perf_scale_10m.md"
 MESH = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_mesh.json"
 VOXEL = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_voxel.json"
 FLEET3PT = ROOT / "benchmarks" / "perf_scale" / "ladder_fleet_10m_3pt.json"
+IMPORT_RUN = ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_import.json"
 
 
 def _row(**kw):
@@ -67,10 +70,24 @@ def _fleet3pt_artifact(rows=None, gates=None, checks=None):
     }
 
 
-def _all(mesh, voxel, fleet3pt=None):
+def _import_artifact(rows=None, gates=None):
+    rows = rows if rows is not None else [
+        _row(subtask="obj_write", file_bytes=1234567, file_mb_per_s=11.5),
+        _row(subtask="obj_read", file_bytes=1234567, file_mb_per_s=7.0,
+             volume_rel_err=-1.4e-03),
+    ]
+    gates = gates if gates is not None else [
+        {"name": "scaling_obj_read", "passed": True, "status": "measured",
+         "detail": "exponent=1.02 (limit 1.50), R^2=0.999, 3 sizes"},
+    ]
+    return {"schema": "tensorcad.perf_benchmark/2", "results": rows, "gates": gates}
+
+
+def _all(mesh, voxel, fleet3pt=None, import_run=None):
     """Artifact mapping that satisfies every marked table in the document."""
     return {"mesh": mesh, "voxel": voxel,
-            "fleet3pt": fleet3pt if fleet3pt is not None else _fleet3pt_artifact()}
+            "fleet3pt": fleet3pt if fleet3pt is not None else _fleet3pt_artifact(),
+            "import_run": import_run if import_run is not None else _import_artifact()}
 
 
 # ---------------------------------------------------------------------------
@@ -229,7 +246,8 @@ def test_committed_document_matches_committed_artifacts() -> None:
     problems = check_document(
         DOC.read_text(encoding="utf-8"),
         {"mesh": load_artifact(MESH), "voxel": load_artifact(VOXEL),
-         "fleet3pt": load_artifact(FLEET3PT)},
+         "fleet3pt": load_artifact(FLEET3PT),
+             "import_run": load_artifact(IMPORT_RUN)},
     )
     assert problems == [], (
         "docs/perf_scale_10m.md drifted from the committed artifacts; "

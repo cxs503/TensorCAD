@@ -394,6 +394,84 @@ def render_code_facts() -> str:
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# OBJ file import / export (the "imported large mesh" gap)
+# ---------------------------------------------------------------------------
+
+IMPORT_ORDER: tuple[str, ...] = (
+    "load", "fleet_assemble", "obj_write", "obj_read", "volume",
+)
+
+
+def render_import_table(artifact: Mapping[str, Any]) -> str:
+    """Markdown table of the OBJ round-trip ladder (write, parse, verify).
+
+    Every column is a structured field of the measurement (``file_bytes``,
+    ``file_mb_per_s``, ``volume_rel_err``), never text scraped out of ``note``:
+    the point of the table is that a reader can recompute the throughput from the
+    committed JSON.
+    """
+    rows = _results(artifact)
+    order = {name: i for i, name in enumerate(IMPORT_ORDER)}
+    rows = sorted(
+        rows,
+        key=lambda r: (r.get("copies", 1), order.get(r.get("subtask"), len(order)),
+                       r.get("triangles") or 0),
+    )
+    lines = [
+        "| 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 峰值 RSS MiB | 导入体积误差 |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for r in rows:
+        subtask = r.get("subtask", "?")
+        if r.get("status") != "measured":
+            cells = [
+                subtask, _int(r.get("copies", 1)), _int(r.get("triangles")),
+                "not_run", r.get("note") or "", DASH, DASH, DASH, DASH,
+            ]
+        else:
+            file_mb = (r.get("file_bytes") or 0) / (1024.0 * 1024.0)
+            cells = [
+                subtask,
+                _int(r.get("copies", 1)),
+                _int(r.get("triangles")),
+                _num(r.get("seconds"), ".3f"),
+                _num(r.get("throughput"), ",.0f"),
+                _num(file_mb, ",.1f") if file_mb else DASH,
+                _num(r.get("file_mb_per_s"), ",.1f"),
+                _num(r.get("peak_rss_mb"), ",.0f"),
+                (
+                    f"{100.0 * r['volume_rel_err']:+.3e} %"
+                    if r.get("volume_rel_err") is not None else DASH
+                ),
+            ]
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
+def render_import_gates(artifact: Mapping[str, Any]) -> str:
+    """Markdown table of the complexity/regression gates of the import ladder.
+
+    ``not_run`` is printed as ``not_run``, never as a pass: a gate that could not
+    be evaluated (fewer than three rungs, an incomparable baseline environment)
+    is an explicit non-answer.
+    """
+    gates = list(artifact.get("gates") or [])
+    if not gates:
+        raise ValueError("artifact has no gates")
+    lines = [
+        "| 门 | 状态 | 判定 | 证据 |",
+        "|---|---|---|---|",
+    ]
+    for g in gates:
+        status = g.get("status", "?")
+        verdict = "pass" if g.get("passed") else ("RED" if status != "not_run" else "not_run")
+        lines.append(
+            f"| `{g.get('name', '?')}` | {status} | {verdict} | {g.get('detail', '')} |"
+        )
+    return "\n".join(lines)
+
+
 #: table name -> (artifact keys it consumes, renderer)
 TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     "mesh-table": (("mesh",), render_mesh_table),
@@ -401,6 +479,8 @@ TABLE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
     "budget-table": (("mesh", "voxel"), render_budget_table),
     "fleet3pt-table": (("fleet3pt",), render_fleet3pt_table),
     "fleet3pt-gates": (("fleet3pt",), render_fleet3pt_gates),
+    "import-table": (("import_run",), render_import_table),
+    "import-gates": (("import_run",), render_import_gates),
 }
 
 #: Table names the document can embed, in display order.
@@ -516,6 +596,7 @@ def render_document(
         if all(k in artifacts for k in keys):
             out = replace_block(out, name, render_block(name, artifacts))
     return out
+
 
 # ---------------------------------------------------------------------------
 # Single connected body (subdivision source), 10^6-10^7 triangles

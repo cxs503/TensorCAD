@@ -159,7 +159,7 @@
 
 ## 6. 注意点 / 局限（诚实记录）
 
-1. **10⁷ 带靠 fleet 多体到达，单网格到不了**：`HullParameters` 上限（`nz ≤ 513 levels`、`nx ≤ 4001 stations`）使**单体**网格最大 **8,199,998 三角面**（4001×513，`cj3563` 已实测，load 573.5 s）；10⁷ 带由 `build_fleet_mesh` 的 3 个互不相交副本达到 **12,011,994 三角面**（`cj3514` 实测）。因此"10⁷ 三角面"是**多体装配**规模，不是"一个 10⁷ 三角面网格"——导入式大网格仍未被实测，这条限制是结构性的，不是本单没跑。**部分已补（见 `docs/perf_scale_single_body_10m.md`）**：以 1→4 中点细分为几何源，单个**连通**闭合体直接做到 10⁷ 三角面（体积/面积按构造守恒，作为校验而非估计）；剩余欠账只有"从文件导入 10⁷ 三角"一段（解析/分块/容差焊接开销）。
+1. **10⁷ 带靠 fleet 多体到达，单网格到不了**：`HullParameters` 上限（`nz ≤ 513 levels`、`nx ≤ 4001 stations`）使**单体**网格最大 **8,199,998 三角面**（4001×513，`cj3563` 已实测，load 573.5 s）；10⁷ 带由 `build_fleet_mesh` 的 3 个互不相交副本达到 **12,011,994 三角面**（`cj3514` 实测）。因此"10⁷ 三角面"是**多体装配**规模，不是"一个 10⁷ 三角面网格"——导入式大网格仍未被实测，这条限制是结构性的，不是本单没跑。**部分已补（见 `docs/perf_scale_single_body_10m.md`）**：以 1→4 中点细分为几何源，单个**连通**闭合体直接做到 10⁷ 三角面（体积/面积按构造守恒，作为校验而非估计）；"从文件导入 10⁷ 三角"这段欠账由 **§11** 交付（`obj_write`/`obj_read` 一等子任务 + 指数门 + 2× 回归基线键）。
 2. **越限档是干净失败**：`cj2669` 的两档返回 `status=failed` 并附生成器报错原话，没有静默跳过、也没有伪造数据；框架把异常记进结果表而非吞掉。
 3. **暴力参考在 4.1×10⁵ 以上被主动跳过**（`max_naive_triangles`），标 `not_run` 而不是给一个不存在的秒数。
 4. **回归基线的口径**：`benchmarks/perf_scale/baseline.json` 是共享机 3 轮取最慢，闸门阈值 2×；它只覆盖 quick 阶梯（≤2.6×10⁴ tri），10⁶ 档没有 CI 基线（成本太高），10⁶ 档的守护靠本单表格对比。
@@ -507,3 +507,90 @@ verdict=**pass**，gates_checked=7，gates_not_run=0；体积校验 6/6 通过�
 | volume | 三角面 | 8,199,998 | 3.363 | 2,438,286 tri/s | 146,297,166 | 12,746 |
 | voxelize | 体素 | 56,623,104 | 356.209 | 158,960 cell/s | 9,537,612 | 794 |
 <!-- perf-evidence:budget-table end -->
+
+## 11. 从文件导入大网格（OBJ 往返）——§6 第 1 条的剩余欠账
+
+### 11.1 为什么要拆成两个子任务
+
+「导入一个 10⁷ 三角的网格要多久」不是可操作的问题：**序列化**（内存网格 → 文本写盘）与
+**解析**（读入文本 → float → 扇化面索引）是两条不同的代码路径、不同量级的成本。
+因此它们是 `tensorcad.perf_benchmark` 的两个一等子任务：
+
+```bash
+python -m tensorcad.perf_benchmark --subtasks load,obj_write,obj_read,volume \
+    --ladder "4001,513"            # 单体 8.2e6 三角
+python -m tensorcad.perf_benchmark --fleet-tier --ladder "641,161;1001,257;2001,501" \
+    --fleet-copies 2,3 --subtasks load,fleet_assemble,volume,obj_write,obj_read
+```
+
+因为进了同一张子任务表，它们**自动继承**两者：
+
+1. **复杂度指数门** `scaling_obj_write` / `scaling_obj_read`（上限 1.50，O(N) 路径的判定口径）。
+   把 `read_obj` 的逐行解析改成 O(N²)（例如每面重扫顶点表），小阶梯上指数就会跳出来。
+2. **2× 墙钟回归门**：quick 阶梯（≤2.6×10⁴ tri）的 8 个 `obj_*` 基线键已写入
+   `benchmarks/perf_scale/baseline.json`（`scripts/build_perf_baseline.py --merge` 只新增键，
+   旧键一秒不改），任何一次提交都能在秒级成本下判 RED。
+
+### 11.2 口径（怎么才算一次正当测量）
+
+- **落盘位置**：`$TMPDIR/tensorcad-perf-import/hull_<nx>x<nz>_b<copies>.obj`。一档一个文件，写下一档时
+  删上一档，所以 10⁷ 档只占约 1 GiB、且**永远不会进仓库**（`benchmarks/` 之外的体积不进版本控制）。
+  写前按 `OBJ_BYTES_PER_TRIANGLE` 估算并要求 **4× 空闲空间**；空间不足记 `not_run` 并附原因，
+  不写半个文件。
+- **自证**：`obj_read` 解析回来的顶点数/面数必须与内存网格完全一致，并把散度定理体积对解析值
+  `copies × 7.512698 m³` 的相对误差记成 `volume_rel_err`。**快而丢面的解析是缺陷，不是测量**：
+  计数不符直接抛 `ValueError`（`failed` 行），而不是给出一个好看的秒数。
+- **无损**：`write_obj` 写 17 位有效数字，所以往返是逐坐标精确的
+  （`tests/test_perf_import.py` 断言 `parsed.vertices == mesh.vertices` 且体积完全相等，
+  不是「在容差内」）。
+
+### 11.3 实测（工件渲染，非手抄）
+
+<!-- perf-evidence:import-table begin -->
+| 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 峰值 RSS MiB | 导入体积误差 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| load | 1 | 410,878 | 15.282 | 26,887 | — | — | 622 | — |
+| load | 1 | 1,640,958 | 86.753 | 18,915 | — | — | 2,416 | — |
+| obj_write | 1 | 410,878 | 0.979 | 419,576 | 18.2 | 18.6 | 622 | — |
+| obj_write | 1 | 1,640,958 | 3.956 | 414,798 | 75.4 | 19.1 | 2,416 | — |
+| obj_read | 1 | 410,878 | 1.551 | 264,920 | 18.2 | 11.7 | 622 | -1.673e-02 % |
+| obj_read | 1 | 1,640,958 | 6.704 | 244,756 | 75.4 | 11.2 | 2,416 | -5.870e-03 % |
+| volume | 1 | 410,878 | 0.166 | 2,475,082 | — | — | 622 | — |
+| volume | 1 | 1,640,958 | 0.748 | 2,194,216 | — | — | 2,416 | — |
+<!-- perf-evidence:import-table end -->
+
+读法（数字全部取自上面的渲染表，读者可复算）：
+
+- **写比读快，且差距随规模放大**：同一文件两列 `MiB/s` 之比就是读写成本比。这不是 Python 的问题而是
+  两条路径的问题——写是 `"\n".join` 一批已格式化行，读是整文件 `read_text` + `splitlines` + 逐字段
+  `float` + 面索引扇化。
+- **文件体积是线性量**：`文件 MiB / 三角面` ≈ 48 B/tri（17 位有效数字的 `v` + `f` 行），10⁷ 档约 0.5 GiB，
+  写盘/读取的 I/O 不是瓶颈，解析才是。
+- **60 s 预算等价规模**：按上表最大档实测速率线性折算（不做拟合外推），`obj_read` 的 60 s 预算落在
+  **10⁷ 量级**——即"从文件导入一个 10⁷ 三角的网格"在本机上是**分钟级**作业，不是必须上集群的作业。
+  与 `point_locate` 的暴力路径（60 s 只够 5×10² 三角）相比，导入反而是整个基准里最省的一项。
+- **导入体积误差是网格本身的离散误差，不是解析误差**：往返是 17 位无损的，所以 `obj_read` 行的误差
+  与同档 `volume` 行同值——两者一致本身就是无损往返的证据。
+
+**诚实边界**
+
+- 表内最大档是 **1.64×10⁶ 三角**。10⁶→10⁷ 带的 OBJ 往返实测（单体 8.2×10⁶ 的 `cj3891`、三体 1.2×10⁷ 的
+  `cj3890`）递交后排队 **35 min 仍未出队**，本节**不填外推数字**：上表结论只覆盖到 1.64×10⁶ 三角。
+  两个作业到件后再 `python scripts/perf_scale_doc.py --write` 无损换表即可（表格与工件绑定，不会静默漂移）。
+- 本节阶梯只有 **2 档**，所以 §11.4 的复杂度指数门 `scaling_obj_write`/`scaling_obj_read` 是
+  **`not_run`（不是 pass）**：2 点拟合给不出可判定的斜率，硬给一个数就是编数字。指数门机制本身由
+  `tests/test_perf_import.py::test_import_subtasks_get_measured_scaling_gates` 在三点阶梯上覆盖
+  （断言 `status=measured` 且指数低于 `SCALING_LIMITS`）；10⁶–10⁷ 档的指数门由 `cj3890` 补齐。
+- 秒数含共享机负载（本档运行时 load1≈47/128），跨档只能比数量级与比值；读写是单进程单线程，
+  不受集群核数影响。
+
+### 11.4 门（`not_run` 不是 pass）
+
+<!-- perf-evidence:import-gates begin -->
+| 门 | 状态 | 判定 | 证据 |
+|---|---|---|---|
+| `scaling_load` | not_run | pass | not_run: 2 distinct size(s), need 3 to fit an exponent |
+| `scaling_obj_read` | not_run | pass | not_run: 2 distinct size(s), need 3 to fit an exponent |
+| `scaling_obj_write` | not_run | pass | not_run: 2 distinct size(s), need 3 to fit an exponent |
+| `scaling_volume` | not_run | pass | not_run: 2 distinct size(s), need 3 to fit an exponent |
+<!-- perf-evidence:import-gates end -->
