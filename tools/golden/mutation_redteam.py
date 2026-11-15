@@ -58,7 +58,7 @@ class Mutant:
     """One deliberate defect: a unique textual patch plus the codes it must trip."""
 
     id: str
-    kind: str  # "reference" | "numeric" | "identity"
+    kind: str  # "reference" | "numeric" | "identity" | "criterion"
     target: str
     find: str
     replace: str
@@ -141,6 +141,22 @@ MUTANTS: tuple[Mutant, ...] = (
             "the case declares the mirror axis as x although the shipped shell mirrors "
             "about y: the measured extents do not change at all, so only the invariant "
             "identity can fail -- a check that is neither drift nor fingerprint"
+        ),
+    ),
+    Mutant(
+        id="baseline-tolerance-hand-inflated",
+        kind="criterion",
+        target=str(BASELINE_REL),
+        find='"basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.165e-03 = 4.329e-03",\n'
+        '          "value": 0.004329439290363918',
+        replace='"basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 2.165e-03 = 4.329e-03",\n'
+        '          "value": 0.4329439290363918',
+        expected=("tolerance_not_derived",),
+        rationale=(
+            "someone widens the blessed Wigley Cb band 100x by hand: no measured number and "
+            "no reference moves, so only a checker that re-derives the band from the blessed "
+            "measurements can fail -- otherwise the quick gate (the git hook) asserts "
+            "against a criterion a hand picked"
         ),
     ),
     Mutant(
