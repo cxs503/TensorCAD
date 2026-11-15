@@ -970,8 +970,23 @@ class TrimmedFace:
     surface_kind: str
     outer_entity: int | None = None
     notes: tuple[str, ...] = ()
+    # Per loop, aligned with ``loops``: the exact parameter-space image when the file
+    # carried one (entity 142 with a parametric representation), else ``None``.  When it
+    # is present the mesh stage uses it instead of inverting the 3-D polyline, and the
+    # ``cross_checks`` entry records how far that image sits from the independent 3-D
+    # curve (``None`` when the file had no 3-D curve to check against).
+    uv_loops: tuple[tuple[tuple[float, float], ...] | None, ...] = ()
+    cross_checks: tuple[float | None, ...] = ()
+
+    def trim_routes(self) -> list[str]:
+        routes = []
+        for index in range(len(self.loops)):
+            provided = self.uv_loops[index] if index < len(self.uv_loops) else None
+            routes.append("parametric" if provided is not None else "inverted")
+        return routes
 
     def to_dict(self) -> dict[str, Any]:
+        checks = [value for value in self.cross_checks if value is not None]
         return {
             "index": self.index,
             "source_entity": self.source_entity,
@@ -979,6 +994,8 @@ class TrimmedFace:
             "name": self.name,
             "loop_count": len(self.loops),
             "loop_points": [len(loop) for loop in self.loops],
+            "trim_routes": self.trim_routes(),
+            "parametric_cross_check": max(checks) if checks else None,
             "notes": list(self.notes),
         }
 
@@ -1037,15 +1054,116 @@ def _loop_from_curve(builder: _Builder, sequence: int) -> tuple[Vec3, ...]:
     return tuple(points)
 
 
-def _curves_of_142(builder: _Builder, entry: DirectoryEntry) -> list[tuple[Vec3, ...]]:
-    """Resolve a curve-on-surface (142) into candidate 3-D boundary polylines.
+@dataclass(frozen=True)
+class BoundaryLoop:
+    """One boundary loop: 3-D points, and the exact ``(u, v)`` image when it is known."""
 
-    The field layout of entity 142 differs between exporters (CATIA writes the 3-D
-    curve, a parameter-space curve and a count into fields 4-6 of this file's records).
-    Rather than trust one layout, every curve reference inside the entity is taken as a
-    candidate and sampled as a 3-D curve; the face builder then keeps exactly those
-    candidates that invert onto the referenced surface within tolerance.  A wrong
-    candidate is dropped with a measured residual, not silently accepted.
+    points: tuple[Vec3, ...]
+    uv: tuple[tuple[float, float], ...] | None = None
+    route: str = "inverted"
+    residual: float | None = None
+    cross_check: float | None = None
+    source: int | None = None
+
+
+def _close_uv(surface: Surface, uv: Sequence[tuple[float, float]]) -> tuple[
+        tuple[tuple[float, float], ...], float]:
+    """Close a parametric loop and report the closing gap in model units.
+
+    A trim loop must be a closed polygon before it reaches the triangulator.  The gap is
+    measured on the surface, so a curve that ``looks`` closed in ``(u, v)`` but wraps a
+    seam is reported rather than silently welded.
+    """
+    points = [(float(u), float(v)) for u, v in uv]
+    if not points:
+        return tuple(), 0.0
+    first, last = points[0], points[-1]
+    gap = _norm(_sub(surface.evaluate(*first), surface.evaluate(*last)))
+    scale_u = abs(surface.domain[0][1] - surface.domain[0][0]) or 1.0
+    scale_v = abs(surface.domain[1][1] - surface.domain[1][0]) or 1.0
+    same = (abs(first[0] - last[0]) <= 1e-12 * max(scale_u, 1.0)
+            and abs(first[1] - last[1]) <= 1e-12 * max(scale_v, 1.0))
+    if not same:
+        points.append(first)
+    return tuple(points), gap
+
+
+def _uv_in_domain(surface: Surface, loop: Sequence[Vec3], margin: float = 1e-6) -> bool:
+    """True when the point coordinates could be a parameter-space image of the surface."""
+    (u0, u1), (v0, v1) = surface.domain
+    limit_u = margin * max(abs(u1 - u0), 1.0)
+    limit_v = margin * max(abs(v1 - v0), 1.0)
+    for point in loop:
+        if not (u0 - limit_u <= point[0] <= u1 + limit_u):
+            return False
+        if not (v0 - limit_v <= point[1] <= v1 + limit_v):
+            return False
+    return True
+
+
+def _point_segment_distance(point: Vec3, start: Vec3, end: Vec3) -> float:
+    """Distance from ``point`` to the segment ``start``-``end`` (clamped projection)."""
+    direction = _sub(end, start)
+    length2 = _dot(direction, direction)
+    if length2 <= 0.0:
+        return _norm(_sub(point, start))
+    t = _dot(_sub(point, start), direction) / length2
+    t = 0.0 if t < 0.0 else (1.0 if t > 1.0 else t)
+    return _norm(_sub(point, _add(start, _scale(direction, t))))
+
+
+def _uv_deviation(surface: Surface, uv: Sequence[tuple[float, float]],
+                  loop: Sequence[Vec3], samples: int = 40) -> float:
+    """Worst distance between ``evaluate(u, v)`` and a 3-D polyline.
+
+    Two independent representations of the same trim (a parameter-space image and a 3-D
+    curve) must cover the same 3-D set, so this measures how far apart they are instead
+    of trusting either one.  The distance is taken to the nearest *segment*, not to the
+    nearest vertex: the 3-D reference is itself a chord sampling of the curve, and a
+    vertex-distance metric reports that sampling's own sag as a disagreement (measured on
+    the 250 mm propeller: 0.265 by vertex, 0.043 by segment, for the same curve).
+    """
+    if not uv or len(loop) < 2:
+        return 0.0
+    step = max(1, len(uv) // samples)
+    worst = 0.0
+    for u, v in uv[::step]:
+        point = surface.evaluate(u, v)
+        best = min(_point_segment_distance(point, loop[index], loop[index + 1])
+                   for index in range(len(loop) - 1))
+        worst = max(worst, best)
+    return worst
+
+
+def _curves_of_142(builder: _Builder, entry: DirectoryEntry,
+                   surface: Surface | None = None) -> list[BoundaryLoop]:
+    """Resolve a curve-on-surface record (142) into the loops that trim ``surface``.
+
+    Entity 142 carries *two* representations of the same curve: a 3-D curve in model
+    space and, in most industrial exports, its image in the surface's parameter space
+    (stored as a plain curve whose "coordinates" are ``(u, v)``).  The field order differs
+    between exporters, and a parametric image read as a 3-D curve is geometrically
+    plausible -- for the 250 mm propeller used in the tests it is a loop around
+    ``(-1.9, 0.3, 0)`` while its blade sits at ``(14, 114, 50)`` -- so a positional guess
+    is invisible downstream: the face simply acquires a second, nonsense boundary and
+    fails its inversion gate.
+
+    Curve references are therefore classified by measurement, not by position:
+
+    * **parameter-space image** -- its coordinates fall inside the surface's domain and
+      evaluating the surface at them reproduces another reference's 3-D curve to within
+      ``max(2 * chord tolerance, 1e-12)``;
+    * **3-D boundary** -- every other reference; the mesh stage still gates it by
+      inversion, exactly as before.
+
+    Both representations present is the normal case: they are cross-checked against each
+    other and the parametric image is used, because it is exact (no inversion, no branch
+    ambiguity, no minutes-long walk over a 1 800-point curve).  A reference that sits in
+    the domain but does *not* reproduce the 3-D curve is not used as a trim -- it is
+    recorded as a refusal with the measured disagreement, so a face never acquires a
+    second, invented boundary loop.  A record whose only reference is inside the domain
+    cannot be classified without an inversion probe (minutes on a 126 x 54 patch), so it
+    keeps the 3-D route and is judged by the mesh stage's gate.
     """
     document = builder.document
     references: list[int] = []
@@ -1063,7 +1181,7 @@ def _curves_of_142(builder: _Builder, entry: DirectoryEntry) -> list[tuple[Vec3,
             f"curve-on-surface entity {entry.sequence} does not reference any curve this "
             f"reader can evaluate (tokens: {list(entry.tokens)})"
         )
-    loops: list[tuple[Vec3, ...]] = []
+    sampled: list[tuple[int, tuple[Vec3, ...]]] = []
     for reference in references:
         try:
             loop = _loop_from_curve(builder, reference)
@@ -1071,22 +1189,92 @@ def _curves_of_142(builder: _Builder, entry: DirectoryEntry) -> list[tuple[Vec3,
             builder.refused[reference] = str(exc)
             continue
         if len(loop) >= 2:
-            loops.append(loop)
-    if not loops:
+            sampled.append((reference, loop))
+    if not sampled:
         raise IgesError(
             f"curve-on-surface entity {entry.sequence} references only curves that were refused"
         )
-    return loops
+    if surface is None:
+        return [BoundaryLoop(points=points, source=reference) for reference, points in sampled]
+
+    gate = 1e-6 * builder.extent
+    in_domain = [(ref, points) for ref, points in sampled if _uv_in_domain(surface, points)]
+    outside = [item for item in sampled if item not in in_domain]
+    limit = max(2.0 * builder.tolerance, 1e-12)
+    parametric: list[tuple[int, tuple[Vec3, ...], float | None]] = []
+    three_d: list[tuple[int, tuple[Vec3, ...], float | None]] = [
+        (ref, points, None) for ref, points in outside
+    ]
+    rejected: dict[int, str] = {}
+    for reference, points in in_domain:
+        if not outside:
+            # A single reference that happens to sit inside the parameter domain cannot be
+            # told apart from a 3-D curve without an inversion probe (which on the 126x54
+            # patch of this benchmark costs minutes), so it is kept as a 3-D boundary: the
+            # mesh stage's inversion gate then judges it, and the face is not silently
+            # re-read on a guess.
+            three_d.append((reference, points, None))
+            continue
+        uv = [(point[0], point[1]) for point in points]
+        deviation = min(_uv_deviation(surface, uv, other) for _, other in outside)
+        if deviation <= limit:
+            parametric.append((reference, points, deviation))
+            for other_reference, _ in outside:
+                rejected[other_reference] = (
+                    f"3-D curve {other_reference} of 142 entity {entry.sequence} is the same "
+                    f"trim as its parameter-space image {reference} "
+                    f"(point-to-polyline agreement {deviation:.3e} <= {limit:.3e} model "
+                    f"units); the image is used because it is exact"
+                )
+        else:
+            three_d.append((reference, points, None))
+            rejected[reference] = (
+                f"reference {reference} of 142 entity {entry.sequence} sits inside the "
+                f"surface domain but disagrees with the 3-D curve {outside[0][0]} of the "
+                f"same record by {deviation:.3e} model units (> {limit:.3e}): not used as "
+                f"a trim, so no second boundary loop is invented"
+            )
+    builder.refused.update(rejected)
+
+    if parametric:
+        reference, points, deviation = parametric[0]
+        uv, gap = _close_uv(surface, [(point[0], point[1]) for point in points])
+        if len(uv) < 3:
+            raise IgesError(
+                f"curve-on-surface {entry.sequence}: parametric image {reference} collapses "
+                f"to {len(uv)} parameters"
+            )
+        image = tuple(surface.evaluate(u, v) for u, v in uv)
+        builder.consumed.add(entry.sequence)
+        return [BoundaryLoop(points=image, uv=uv, route="parametric", residual=0.0,
+                             cross_check=deviation, source=reference)]
+
+    if three_d:
+        return [BoundaryLoop(points=points, residual=residual, source=reference)
+                for reference, points, residual in three_d]
+
+    detail = "; ".join(
+        f"curve {reference}: 3-D residual {residual}, in domain={uv_ok}"
+        for reference, _, residual, uv_ok in [
+            (ref, pts, None, _uv_in_domain(surface, pts)) for ref, pts in sampled
+        ]
+    )
+    raise IgesError(
+        f"curve-on-surface entity {entry.sequence}: no representation lies on the surface "
+        f"({detail})"
+    )
 
 
-def _curves_of_boundary(builder: _Builder, sequence: int) -> list[tuple[Vec3, ...]]:
+def _curves_of_boundary(builder: _Builder, sequence: int,
+                        surface: Surface | None = None) -> list[BoundaryLoop]:
     """Closed polylines implied by one boundary pointer (141, 142, or a plain curve)."""
     entry = builder.document.entry(sequence)
     if entry.entity_type in (100, 102, 106, 110, 126):
-        return [_loop_from_curve(builder, sequence)]
+        return [BoundaryLoop(points=_loop_from_curve(builder, sequence), source=sequence)]
     if entry.entity_type == 141:
         # 141 is a list of (sense, curve) pairs; the curves chain into one boundary.
         chain: list[Vec3] = []
+        sources: list[int] = []
         for index in range(len(entry.tokens)):
             token = entry.tokens[index].strip()
             if not token or any(char in token for char in ".eEdD"):
@@ -1097,14 +1285,15 @@ def _curves_of_boundary(builder: _Builder, sequence: int) -> list[tuple[Vec3, ..
             if builder.document.entries[pointer].entity_type not in (100, 102, 106, 110, 126):
                 continue
             points = _loop_from_curve(builder, pointer)
+            sources.append(pointer)
             chain.extend(points if not chain else points[1:])
         if not chain:
             raise IgesError(f"boundary entity {sequence} (type 141) contains no usable curve")
         if _norm(_sub(chain[0], chain[-1])) <= builder.tolerance:
             chain[-1] = chain[0]
-        return [tuple(chain)]
+        return [BoundaryLoop(points=tuple(chain), source=sequence)]
     if entry.entity_type == 142:
-        return _curves_of_142(builder, entry)
+        return _curves_of_142(builder, entry, surface)
     raise IgesError(f"boundary entity {sequence} of type {entry.entity_type} is not supported")
 
 
@@ -1156,10 +1345,19 @@ def read_iges_trimmed(path: str | Path, *, tolerance: float | None = None) -> Tr
         try:
             surface, kind = builder.surface(entry.integer(0))
             outer, inner = _boundary_references(entry)
-            loops: list[tuple[Vec3, ...]] = []
-            notes: list[str] = []
+            boundary: list[BoundaryLoop] = []
             for reference in ([outer] if outer else []) + inner:
-                loops.extend(_curves_of_boundary(builder, reference))
+                boundary.extend(_curves_of_boundary(builder, reference, surface))
+            loops = [item.points for item in boundary]
+            uv_loops = [item.uv for item in boundary]
+            cross_checks = [item.cross_check for item in boundary]
+            routes = sorted({item.route for item in boundary})
+            notes: list[str] = []
+            if routes != ["inverted"]:
+                notes.append("trim route: " + ", ".join(routes))
+            for value in cross_checks:
+                if value is not None:
+                    notes.append(f"parametric/3-D agreement {value:.3e} file units")
             if not loops:
                 raise IgesError(
                     f"trimmed surface {entry.sequence} has no boundary loops "
@@ -1178,6 +1376,8 @@ def read_iges_trimmed(path: str | Path, *, tolerance: float | None = None) -> Tr
                 surface_kind=kind,
                 outer_entity=outer,
                 notes=tuple(notes),
+                uv_loops=tuple(uv_loops),
+                cross_checks=tuple(cross_checks),
             )
         )
 
