@@ -1,2168 +1,4459 @@
 {
-  "schema": "tensorcad.fleet_refs.crossref/1.0",
-  "anchor": "REPRO-GEOM-FLEET-REFS",
-  "generated_utc": "2026-11-15T00:59:10+00:00",
-  "quantity_labels": {
-    "displacement_volume": "\u2207 (m\u00b3)",
-    "cb": "Cb",
-    "lcb_percent": "LCB (% Lpp, fwd+)",
-    "lwl": "Lwl (m)",
-    "length_pp": "Lpp (m)",
-    "beam": "Bwl (m)",
-    "draft": "T (m)"
-  },
-  "sources": {
-    "t2015_kcs": {
-      "key": "t2015_kcs",
-      "ship": "KCS",
-      "family": "NMRI-T2015",
-      "publisher": "NMRI Tokyo 2015 workshop (G2015 geometry pages)",
-      "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-      "kind": "html",
-      "licence": "page copyright NMRI; digests + extracted cells only, page bytes not redistributed",
-      "note": "",
-      "http_status": 200,
-      "bytes": 12978,
-      "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-      "retrieved_utc": "2026-11-15T00:55:53+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "quantities_read": {
-        "KCS": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "length_pp",
-          "lwl"
-        ]
-      }
-    },
-    "t2015_jbc": {
-      "key": "t2015_jbc",
-      "ship": "JBC",
-      "family": "NMRI-T2015",
-      "publisher": "NMRI Tokyo 2015 workshop (G2015 geometry pages)",
-      "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-      "kind": "html",
-      "licence": "page copyright NMRI; digests + extracted cells only",
-      "note": "",
-      "http_status": 200,
-      "bytes": 13694,
-      "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-      "retrieved_utc": "2026-11-15T00:55:54+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "quantities_read": {
-        "JBC": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "length_pp",
-          "lwl"
-        ]
-      }
-    },
-    "t2015_onrt": {
-      "key": "t2015_onrt",
-      "ship": "ONRT",
-      "family": "NMRI-T2015",
-      "publisher": "NMRI Tokyo 2015 workshop (G2015 geometry pages)",
-      "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-      "kind": "html",
-      "licence": "page copyright NMRI; digests + extracted cells only",
-      "note": "",
-      "http_status": 200,
-      "bytes": 8689,
-      "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-      "retrieved_utc": "2026-11-15T00:55:57+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "quantities_read": {
-        "ONRT": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "lwl"
-        ]
-      }
-    },
-    "simman2020_summary": {
-      "key": "simman2020_summary",
-      "ship": "KCS|KVLCC2|ONRT",
-      "family": "SIMMAN-2020",
-      "publisher": "SIMMAN 2020 workshop (KRISO/SNU) \u2014 Table 1/2/3 main particulars",
-      "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-      "kind": "html",
-      "licence": "page copyright SIMMAN2020; digests + extracted cells only",
-      "note": "",
-      "http_status": 200,
-      "bytes": 35030,
-      "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-      "retrieved_utc": "2026-11-15T00:55:58+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "quantities_read": {
-        "KVLCC2": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "length_pp",
-          "lwl"
-        ],
-        "KCS": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "length_pp",
-          "lwl"
-        ],
-        "ONRT": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "lwl"
-        ]
-      }
-    },
-    "simman2014_kvlcc2": {
-      "key": "simman2014_kvlcc2",
-      "ship": "KVLCC2",
-      "family": "SIMMAN-2014",
-      "publisher": "SIMMAN 2014 workshop (FORCE Technology) \u2014 KVLCC2 geometry page",
-      "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-      "kind": "html",
-      "licence": "page copyright FORCE Technology; digests + extracted cells only",
-      "note": "",
-      "http_status": 200,
-      "bytes": 66359,
-      "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-      "retrieved_utc": "2026-11-15T00:56:00+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "quantities_read": {
-        "KVLCC2": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "length_pp",
-          "lwl"
-        ]
-      }
-    },
-    "simman2014_kcs": {
-      "key": "simman2014_kcs",
-      "ship": "KCS",
-      "family": "SIMMAN-2014",
-      "publisher": "SIMMAN 2014 workshop (FORCE Technology) \u2014 MOERI container ship geometry page",
-      "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-      "kind": "html",
-      "licence": "page copyright FORCE Technology; digests + extracted cells only",
-      "note": "",
-      "http_status": 200,
-      "bytes": 68248,
-      "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-      "retrieved_utc": "2026-11-15T00:56:02+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "quantities_read": {
-        "KCS": [
-          "beam",
-          "cb",
-          "displacement_volume",
-          "draft",
-          "lcb_percent",
-          "length_pp",
-          "lwl"
-        ]
-      }
-    },
-    "ittc_benchmarks": {
-      "key": "ittc_benchmarks",
-      "ship": "KCS|KVLCC2|JBC|ONRT|Series60|DTC",
-      "family": "ITTC",
-      "publisher": "ITTC Benchmark Repository \u2014 'List of Benchmarks' (ITTC, Z\u00fcrich)",
-      "url": "https://ittc.info/media/11250/list-of-benchmarks-2.pdf",
-      "kind": "pdf",
-      "licence": "ITTC publication; bibliographic endorsement of the hull set (no numerals read)",
-      "note": "",
-      "http_status": 200,
-      "bytes": 121652,
-      "sha256": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
-      "retrieved_utc": "2026-11-15T00:56:03+00:00",
-      "digest_matches_registry": true,
-      "status": "read",
-      "pages": 1,
-      "bibliography_mentions": {
-        "KCS": "Mod- els\u2013Ryuko- Maru and Hamburg Test Case\u2013,\u201d Proceedings of the Kansai Society of Naval Architects, No. 10, pp. 1-4. KRISO 3600 TEU (KCS) The KCS was con- ceived to provide data for both expli- cation of flow phys- ics and CFD valida- tion for a container ship with a bulbous bow https",
-        "KVLCC2": "ngs 1 st Osaka International Colloquium on Ship Viscous Flow, Osaka, Japan, pp. 432- 449. KRISO 300K VLCC (KVLCC or KVLCC2) The MOERI KVLCC2 was con- ceived to provide data for both expli- cation of flow phys- ics and CFD valida- tion for a modern tanker hull form. No http://w",
-        "JBC": "namics: an assessment of the Gothenburg 2010 workshop. Springer Science & Business Media, 2013. Japan Bulk Car- rier (JBC) JBC (Japan Bulk Carrier) is a capesize bulk car- rier equipped with a stern duct as an energy saving de- vice. https://www.t2015.nmri.go.jp/ https://www",
-        "ONRT": "on Practical Design of Ships and Other Floating Structures (PRADS), Copenhagen, Denmark, 2016 ONR Tumble- home Ship (ONRT) The ONR Tumble- home model 5613 is a preliminary de- sign of a modern surface combatant, which is publically accessible for fun- damental research. The",
-        "Series60": "1 / 7 Ship Name Short De- scription Links References Series 60 (S60) Single-screw mer- chant ship, part of a Systematic series of ships. - Todd, F.H. 1963 \u201cSeries 60 Methodical Experiments With Models Of Sin- gle-Sc",
-        "DTC": "waves\u201d, Journal of Marine Sci- ence and Technology, Vol. 24, No. 3, 2019, doi:10.1007/s00773-018-0598-3 7 / 7 Duisburg Test Case (DTC) Duisburg Test Case (DTC) is a hull design of a typ- ical 14000 TEU container ship, de- veloped at the Insti- tute of Ship Tech- nology, O"
-      }
-    }
-  },
-  "report": {
-    "JBC": {
-      "quantities": {
-        "displacement_volume": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 178369.9
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "NMRI-T2015": 178369.9
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 178369.9,
-                "raw": "178369.9",
-                "label": "Displacement volume of a hull",
-                "source": "t2015_jbc",
-                "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-                "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "cb": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 0.858
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "NMRI-T2015": 0.858
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.858,
-                "raw": "0.8580",
-                "label": "Block coefficient (\\(C_B\\))",
-                "source": "t2015_jbc",
-                "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-                "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lcb_percent": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.02,
-          "entries": []
-        },
-        "lwl": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 285.0
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "NMRI-T2015": 285.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "lwl",
-                "value": 285.0,
-                "raw": "285.000",
-                "label": "Length of waterline",
-                "source": "t2015_jbc",
-                "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-                "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "length_pp": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 280.0
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "NMRI-T2015": 280.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "length_pp",
-                "value": 280.0,
-                "raw": "280.000",
-                "label": "Length between perpendiculars",
-                "source": "t2015_jbc",
-                "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-                "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "beam": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 45.0
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "NMRI-T2015": 45.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "beam",
-                "value": 45.0,
-                "raw": "45.000",
-                "label": "Maximum beam of waterline",
-                "source": "t2015_jbc",
-                "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-                "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "draft": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 16.5
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "NMRI-T2015": 16.5
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "draft",
-                "value": 16.5,
-                "raw": "16.500",
-                "label": "Draft(Full)",
-                "source": "t2015_jbc",
-                "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
-                "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        }
-      },
-      "cross_verified": 0,
-      "single_source": 6,
-      "conflict": 0,
-      "missing": 1,
-      "corroborated_by_repeat_family": 0,
-      "disputed_quantities": []
-    },
-    "KCS": {
-      "quantities": {
-        "displacement_volume": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 52030.0
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 52030.0
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 52030.0,
-            "SIMMAN-SERIES": 52030.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 52030.0,
-                "raw": "52030",
-                "label": "Displacement (m 3 )",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 52030.0,
-                "raw": "52030",
-                "label": "Displacement (m3)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 52030.0,
-                "raw": "52030",
-                "label": "Displacement volume",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "cb": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 0.6505
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 0.651
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 0.6505,
-            "SIMMAN-SERIES": 0.651
-          },
-          "range": 0.000500000000000056,
-          "range_relative": 0.000768344218209844,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.651,
-                "raw": "0.651",
-                "label": "CB",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.651,
-                "raw": "0.651",
-                "label": "CB",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.6505,
-                "raw": "0.6505",
-                "label": "Block coefficient (CB)",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lcb_percent": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": -1.48
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": -1.48
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": -1.48,
-            "SIMMAN-SERIES": -1.48
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.02,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": -1.48,
-                "raw": "-1.48",
-                "label": "LCB (%), fwd+",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": -1.48,
-                "raw": "-1.48",
-                "label": "LCB (%), fwd+",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": -1.48,
-                "raw": "-1.48",
-                "label": "LCB (%L PP ), fwd+",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lwl": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 232.5
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 232.5
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 232.5,
-            "SIMMAN-SERIES": 232.5
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lwl",
-                "value": 232.5,
-                "raw": "232.5",
-                "label": "Lwl (m)",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lwl",
-                "value": 232.5,
-                "raw": "232.5",
-                "label": "Lwl (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "lwl",
-                "value": 232.5,
-                "raw": "232.5",
-                "label": "Length of waterline",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "length_pp": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 230.0
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 230.0
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 230.0,
-            "SIMMAN-SERIES": 230.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "length_pp",
-                "value": 230.0,
-                "raw": "230.0",
-                "label": "Lpp (m)",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "length_pp",
-                "value": 230.0,
-                "raw": "230",
-                "label": "Lpp (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "length_pp",
-                "value": 230.0,
-                "raw": "230.0",
-                "label": "Length between perpendiculars",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "beam": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 32.2
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 32.2
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 32.2,
-            "SIMMAN-SERIES": 32.2
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "beam",
-                "value": 32.2,
-                "raw": "32.2",
-                "label": "Bwl (m)",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "beam",
-                "value": 32.2,
-                "raw": "32.2",
-                "label": "Bwl (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "beam",
-                "value": 32.2,
-                "raw": "32.2",
-                "label": "Maximum beam of waterline",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "draft": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 10.8
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 10.8
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 10.8,
-            "SIMMAN-SERIES": 10.8
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "draft",
-                "value": 10.8,
-                "raw": "10.8",
-                "label": "T (m)",
-                "source": "simman2014_kcs",
-                "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
-                "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "draft",
-                "value": 10.8,
-                "raw": "10.8",
-                "label": "T (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "draft",
-                "value": 10.8,
-                "raw": "10.8",
-                "label": "Draft",
-                "source": "t2015_kcs",
-                "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
-                "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-                "column": 2,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        }
-      },
-      "cross_verified": 7,
-      "single_source": 0,
-      "conflict": 0,
-      "missing": 0,
-      "corroborated_by_repeat_family": 7,
-      "disputed_quantities": []
-    },
-    "KVLCC2": {
-      "quantities": {
-        "displacement_volume": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 312622.0
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 312622.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 312622.0,
-                "raw": "312622",
-                "label": "Displacement (m 3 )",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 312622.0,
-                "raw": "312622",
-                "label": "Displacement (m3)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "cb": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 0.8098
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 0.8098
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.8098,
-                "raw": "0.8098",
-                "label": "CB",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.8098,
-                "raw": "0.8098",
-                "label": "CB",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lcb_percent": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 3.48
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 3.48
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.02,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": 3.48,
-                "raw": "3.48",
-                "label": "LCB (%), fwd+",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": 3.48,
-                "raw": "3.48",
-                "label": "LCB (%), fwd+",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lwl": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 325.5
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 325.5
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lwl",
-                "value": 325.5,
-                "raw": "325.5",
-                "label": "Lwl (m)",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lwl",
-                "value": 325.5,
-                "raw": "325.5",
-                "label": "Lwl (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "length_pp": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 320.0
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 320.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "length_pp",
-                "value": 320.0,
-                "raw": "320.0",
-                "label": "Lpp (m)",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "length_pp",
-                "value": 320.0,
-                "raw": "320",
-                "label": "Lpp (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "beam": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 580.0
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 580.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "beam",
-                "value": 580.0,
-                "raw": "580",
-                "label": "Bwl (m)",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": "",
-                "closure_defect": {
-                  "quantity": "beam",
-                  "printed": 580.0,
-                  "divide_by": 10.0,
-                  "corrected": 58.0,
-                  "corrected_residual": -1.0543083980296686e-06
-                }
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "beam",
-                "value": 580.0,
-                "raw": "580",
-                "label": "Bwl (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": "",
-                "closure_defect": {
-                  "quantity": "beam",
-                  "printed": 580.0,
-                  "divide_by": 10.0,
-                  "corrected": 58.0,
-                  "corrected_residual": -1.0543083980296686e-06
-                }
-              }
-            }
-          ]
-        },
-        "draft": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 20.8
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": 20.8
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "draft",
-                "value": 20.8,
-                "raw": "20.8",
-                "label": "T (m)",
-                "source": "simman2014_kvlcc2",
-                "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
-                "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "draft",
-                "value": 20.8,
-                "raw": "20.8",
-                "label": "T (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        }
-      },
-      "cross_verified": 0,
-      "single_source": 7,
-      "conflict": 0,
-      "missing": 0,
-      "corroborated_by_repeat_family": 7,
-      "disputed_quantities": []
-    },
-    "ONRT": {
-      "quantities": {
-        "displacement_volume": {
-          "verdict": "CONFLICT",
-          "disputed": true,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 8299.5
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 8507.0
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 8299.5,
-            "SIMMAN-SERIES": 8507.0
-          },
-          "range": 207.5,
-          "range_relative": 0.024692827179960134,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 8507.0,
-                "raw": "8507",
-                "label": "Displacement (m3)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "displacement_volume",
-                "value": 8299.5,
-                "raw": "8507 ton",
-                "label": "Displacement",
-                "source": "t2015_onrt",
-                "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-                "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-                "column": 3,
-                "unit_basis": "mass",
-                "note": "mass 8507 ton converted at 1.025 t/m3"
-              }
-            }
-          ]
-        },
-        "cb": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 0.535
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 0.535
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 0.535,
-            "SIMMAN-SERIES": 0.535
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.535,
-                "raw": "0.535",
-                "label": "CB",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "cb",
-                "value": 0.535,
-                "raw": "0.535",
-                "label": "Block coefficient (CB)",
-                "source": "t2015_onrt",
-                "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-                "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-                "column": 3,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lcb_percent": {
-          "verdict": "SINGLE_SOURCE",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "SIMMAN-SERIES",
-              "value": -1.68
-            }
-          ],
-          "independent_families": 1,
-          "family_values": {
-            "SIMMAN-SERIES": -1.68
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.02,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": -1.68,
-                "raw": "-1.68",
-                "label": "LCB (%), fwd+",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "lcb_percent",
-                "value": 1.625,
-                "raw": "1.625",
-                "label": "LCB",
-                "source": "t2015_onrt",
-                "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-                "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-                "column": 2,
-                "unit_basis": "fallback_column",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "lwl": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 154.0
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 154.0
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 154.0,
-            "SIMMAN-SERIES": 154.0
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "lwl",
-                "value": 154.0,
-                "raw": "154",
-                "label": "Lwl (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "lwl",
-                "value": 154.0,
-                "raw": "154.0",
-                "label": "Length of waterline",
-                "source": "t2015_onrt",
-                "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-                "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-                "column": 3,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "length_pp": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": []
-        },
-        "beam": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 18.78
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 18.78
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 18.78,
-            "SIMMAN-SERIES": 18.78
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "beam",
-                "value": 18.78,
-                "raw": "18.78",
-                "label": "Bwl (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "beam",
-                "value": 18.78,
-                "raw": "18.78",
-                "label": "Maximum beam of waterline",
-                "source": "t2015_onrt",
-                "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-                "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-                "column": 3,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        },
-        "draft": {
-          "verdict": "CROSS_VERIFIED",
-          "disputed": false,
-          "published_values": [
-            {
-              "family": "NMRI-T2015",
-              "value": 5.494
-            },
-            {
-              "family": "SIMMAN-SERIES",
-              "value": 5.494
-            }
-          ],
-          "independent_families": 2,
-          "family_values": {
-            "NMRI-T2015": 5.494,
-            "SIMMAN-SERIES": 5.494
-          },
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.005,
-          "entries": [
-            {
-              "family": "SIMMAN-SERIES",
-              "cell": {
-                "quantity": "draft",
-                "value": 5.494,
-                "raw": "5.494",
-                "label": "T (m)",
-                "source": "simman2020_summary",
-                "url": "https://simman2020.kr/contents/Ship_data_summary.php",
-                "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-                "column": 1,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            },
-            {
-              "family": "NMRI-T2015",
-              "cell": {
-                "quantity": "draft",
-                "value": 5.494,
-                "raw": "5.494",
-                "label": "Draft",
-                "source": "t2015_onrt",
-                "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
-                "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-                "column": 3,
-                "unit_basis": "volume",
-                "note": ""
-              }
-            }
-          ]
-        }
-      },
-      "cross_verified": 4,
-      "single_source": 1,
-      "conflict": 1,
-      "missing": 1,
-      "corroborated_by_repeat_family": 1,
-      "disputed_quantities": [
-        "displacement_volume"
-      ]
-    },
-    "DTC": {
-      "quantities": {
-        "displacement_volume": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "cb": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "lcb_percent": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "lwl": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "length_pp": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "beam": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "draft": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        }
-      },
-      "cross_verified": 0,
-      "single_source": 0,
-      "conflict": 0,
-      "missing": 7,
-      "corroborated_by_repeat_family": 0
-    },
-    "Series60": {
-      "quantities": {
-        "displacement_volume": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "cb": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "lcb_percent": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "lwl": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "length_pp": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "beam": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        },
-        "draft": {
-          "verdict": "MISSING",
-          "disputed": false,
-          "published_values": [],
-          "independent_families": 0,
-          "family_values": {},
-          "range": 0.0,
-          "range_relative": 0.0,
-          "tolerance": 0.0,
-          "entries": []
-        }
-      },
-      "cross_verified": 0,
-      "single_source": 0,
-      "conflict": 0,
-      "missing": 7,
-      "corroborated_by_repeat_family": 0
-    }
-  },
-  "coverage": {
-    "ships": [
-      "DTC",
-      "JBC",
-      "KCS",
-      "KVLCC2",
-      "ONRT",
-      "Series60"
-    ],
-    "cells": 42,
-    "cross_verified": 11,
-    "single_source": 14,
-    "conflict": 1,
-    "missing": 16,
-    "ships_fully_cross_verified": [
-      "KCS"
-    ],
-    "ships_failing_min_two_sources": [
-      "DTC",
-      "JBC",
-      "KVLCC2",
-      "ONRT",
-      "Series60"
+ "schema": "tensorcad.fleet_refs.crossref/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "generated_utc": "2026-11-15T02:50:49+00:00",
+ "quantity_labels": {
+  "displacement_volume": "\u2207 (m\u00b3)",
+  "cb": "Cb",
+  "lcb_percent": "LCB (% Lpp, fwd+)",
+  "lwl": "Lwl (m)",
+  "length_pp": "Lpp (m)",
+  "beam": "Bwl (m)",
+  "draft": "T (m)"
+ },
+ "sources": {
+  "t2015_kcs": {
+   "key": "t2015_kcs",
+   "ship": "KCS",
+   "family": "NMRI-T2015",
+   "publisher": "NMRI Tokyo 2015 workshop (G2015 geometry pages)",
+   "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "kind": "html",
+   "licence": "page copyright NMRI; digests + extracted cells only, page bytes not redistributed",
+   "note": "",
+   "http_status": 200,
+   "bytes": 12978,
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "retrieved_utc": "2026-11-15T00:55:53+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "quantities_read": {
+    "KCS": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
     ]
+   }
   },
-  "adjudication": {
-    "closure_tolerance": 0.01,
-    "scale_factors": [
-      10.0,
-      100.0,
-      0.1,
-      0.01
+  "t2015_jbc": {
+   "key": "t2015_jbc",
+   "ship": "JBC",
+   "family": "NMRI-T2015",
+   "publisher": "NMRI Tokyo 2015 workshop (G2015 geometry pages)",
+   "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "kind": "html",
+   "licence": "page copyright NMRI; digests + extracted cells only",
+   "note": "",
+   "http_status": 200,
+   "bytes": 13694,
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "retrieved_utc": "2026-11-15T00:55:54+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "quantities_read": {
+    "JBC": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   }
+  },
+  "t2015_onrt": {
+   "key": "t2015_onrt",
+   "ship": "ONRT",
+   "family": "NMRI-T2015",
+   "publisher": "NMRI Tokyo 2015 workshop (G2015 geometry pages)",
+   "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "kind": "html",
+   "licence": "page copyright NMRI; digests + extracted cells only",
+   "note": "",
+   "http_status": 200,
+   "bytes": 8689,
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "retrieved_utc": "2026-11-15T00:55:57+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "quantities_read": {
+    "ONRT": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ]
+   }
+  },
+  "simman2020_summary": {
+   "key": "simman2020_summary",
+   "ship": "KCS|KVLCC2|ONRT",
+   "family": "SIMMAN-2020",
+   "publisher": "SIMMAN 2020 workshop (KRISO/SNU) \u2014 Table 1/2/3 main particulars",
+   "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "kind": "html",
+   "licence": "page copyright SIMMAN2020; digests + extracted cells only",
+   "note": "",
+   "http_status": 200,
+   "bytes": 35030,
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "retrieved_utc": "2026-11-15T00:55:58+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "quantities_read": {
+    "KVLCC2": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
     ],
-    "ships": {
-      "JBC": {
-        "closure": {
-          "NMRI-T2015": {
-            "length_basis": "length_pp",
-            "implied_volume_m3": 178378.2,
-            "published_volume_m3": 178369.9,
-            "rel_error": 4.653251473496489e-05,
-            "consistent": true,
-            "explained_by_scale_slip": null
-          }
-        },
-        "conflicts": {}
-      },
-      "KCS": {
-        "closure": {
-          "NMRI-T2015": {
-            "length_basis": "length_pp",
-            "implied_volume_m3": 52030.112400000005,
-            "published_volume_m3": 52030.0,
-            "rel_error": 2.160292139175013e-06,
-            "consistent": true,
-            "explained_by_scale_slip": null
-          },
-          "SIMMAN-SERIES": {
-            "length_basis": "length_pp",
-            "implied_volume_m3": 52070.104800000016,
-            "published_volume_m3": 52030.0,
-            "rel_error": 0.000770801460695969,
-            "consistent": true,
-            "explained_by_scale_slip": null
-          }
-        },
-        "conflicts": {}
-      },
-      "KVLCC2": {
-        "closure": {
-          "SIMMAN-SERIES": {
-            "length_basis": "length_pp",
-            "implied_volume_m3": 3126216.7039999994,
-            "published_volume_m3": 312622.0,
-            "rel_error": 8.999989456916019,
-            "consistent": false,
-            "explained_by_scale_slip": {
-              "quantity": "beam",
-              "printed": 580.0,
-              "divide_by": 10.0,
-              "corrected": 58.0,
-              "raw_residual": 8.999989456916019,
-              "corrected_residual": -1.0543083980296686e-06
-            }
-          }
-        },
-        "conflicts": {}
-      },
-      "ONRT": {
-        "closure": {
-          "NMRI-T2015": {
-            "length_basis": "lwl",
-            "implied_volume_m3": 8500.7793948,
-            "published_volume_m3": 8299.5,
-            "rel_error": 0.024251990457256456,
-            "consistent": false,
-            "explained_by_scale_slip": null
-          },
-          "SIMMAN-SERIES": {
-            "length_basis": "lwl",
-            "implied_volume_m3": 8500.7793948,
-            "published_volume_m3": 8507.0,
-            "rel_error": -0.0007312337134125491,
-            "consistent": true,
-            "explained_by_scale_slip": null
-          }
-        },
-        "conflicts": {
-          "displacement_volume": {
-            "families": [
-              "NMRI-T2015",
-              "SIMMAN-SERIES"
-            ],
-            "family_values": {
-              "NMRI-T2015": 8299.5,
-              "SIMMAN-SERIES": 8507.0
-            },
-            "closure_residual_by_family": {
-              "NMRI-T2015": 0.024251990457256456,
-              "SIMMAN-SERIES": -0.0007312337134125491
-            },
-            "consistent_families": [
-              "SIMMAN-SERIES"
-            ],
-            "preferred_family": "SIMMAN-SERIES",
-            "resolution": "resolved_by_closure",
-            "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
-          }
-        }
-      }
-    },
-    "scale_typos": [
+    "KCS": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ],
+    "ONRT": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ]
+   }
+  },
+  "simman2014_kvlcc2": {
+   "key": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "family": "SIMMAN-2014",
+   "publisher": "SIMMAN 2014 workshop (FORCE Technology) \u2014 KVLCC2 geometry page",
+   "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+   "kind": "html",
+   "licence": "page copyright FORCE Technology; digests + extracted cells only",
+   "note": "",
+   "http_status": 200,
+   "bytes": 66359,
+   "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+   "retrieved_utc": "2026-11-15T00:56:00+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "quantities_read": {
+    "KVLCC2": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ]
+   }
+  },
+  "simman2014_kcs": {
+   "key": "simman2014_kcs",
+   "ship": "KCS",
+   "family": "SIMMAN-2014",
+   "publisher": "SIMMAN 2014 workshop (FORCE Technology) \u2014 MOERI container ship geometry page",
+   "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+   "kind": "html",
+   "licence": "page copyright FORCE Technology; digests + extracted cells only",
+   "note": "",
+   "http_status": 200,
+   "bytes": 68248,
+   "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+   "retrieved_utc": "2026-11-15T00:56:02+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "quantities_read": {
+    "KCS": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ]
+   }
+  },
+  "ittc_benchmarks": {
+   "key": "ittc_benchmarks",
+   "ship": "KCS|KVLCC2|JBC|ONRT|Series60|DTC",
+   "family": "ITTC",
+   "publisher": "ITTC Benchmark Repository \u2014 'List of Benchmarks' (ITTC, Z\u00fcrich)",
+   "url": "https://ittc.info/media/11250/list-of-benchmarks-2.pdf",
+   "kind": "pdf",
+   "licence": "ITTC publication; bibliographic endorsement of the hull set (no numerals read)",
+   "note": "",
+   "http_status": 200,
+   "bytes": 121652,
+   "sha256": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "retrieved_utc": "2026-11-15T00:56:03+00:00",
+   "digest_matches_registry": true,
+   "status": "read",
+   "pages": 1,
+   "bibliography_mentions": {
+    "KCS": "Mod- els\u2013Ryuko- Maru and Hamburg Test Case\u2013,\u201d Proceedings of the Kansai Society of Naval Architects, No. 10, pp. 1-4. KRISO 3600 TEU (KCS) The KCS was con- ceived to provide data for both expli- cation of flow phys- ics and CFD valida- tion for a container ship with a bulbous bow https",
+    "KVLCC2": "ngs 1 st Osaka International Colloquium on Ship Viscous Flow, Osaka, Japan, pp. 432- 449. KRISO 300K VLCC (KVLCC or KVLCC2) The MOERI KVLCC2 was con- ceived to provide data for both expli- cation of flow phys- ics and CFD valida- tion for a modern tanker hull form. No http://w",
+    "JBC": "namics: an assessment of the Gothenburg 2010 workshop. Springer Science & Business Media, 2013. Japan Bulk Car- rier (JBC) JBC (Japan Bulk Carrier) is a capesize bulk car- rier equipped with a stern duct as an energy saving de- vice. https://www.t2015.nmri.go.jp/ https://www",
+    "ONRT": "on Practical Design of Ships and Other Floating Structures (PRADS), Copenhagen, Denmark, 2016 ONR Tumble- home Ship (ONRT) The ONR Tumble- home model 5613 is a preliminary de- sign of a modern surface combatant, which is publically accessible for fun- damental research. The",
+    "Series60": "1 / 7 Ship Name Short De- scription Links References Series 60 (S60) Single-screw mer- chant ship, part of a Systematic series of ships. - Todd, F.H. 1963 \u201cSeries 60 Methodical Experiments With Models Of Sin- gle-Sc",
+    "DTC": "waves\u201d, Journal of Marine Sci- ence and Technology, Vol. 24, No. 3, 2019, doi:10.1007/s00773-018-0598-3 7 / 7 Duisburg Test Case (DTC) Duisburg Test Case (DTC) is a hull design of a typ- ical 14000 TEU container ship, de- veloped at the Insti- tute of Ship Tech- nology, O"
+   }
+  }
+ },
+ "report": {
+  "DTC": {
+   "quantities": {
+    "displacement_volume": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
       {
-        "ship": "KVLCC2",
-        "family": "SIMMAN-SERIES",
+       "family": "DTC-PRIMARY",
+       "value": 173467.0
+      },
+      {
+       "family": "JSR-2017",
+       "value": 173468.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "DTC-PRIMARY": 173467.0,
+      "JSR-2017": 173468.0
+     },
+     "family_disagreement": {},
+     "range": 1.0,
+     "range_relative": 5.764768616599651e-06,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 173467.0,
+        "raw": "173467.0",
+        "label": "DTC \u03bb 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA (m2) 6.243 22032.0 Fig. 1. 3-D view of DTC hull Table 2.",
+        "source": "dtc_strath",
+        "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+        "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 5"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 173468.0,
+        "raw": "173,468",
+        "label": "ballast Design draught Light ballast TFP/TAP (m) 20.8/20.8 8.2/11.5 14.5/14.5 7.8/11.0 \u2207 (t) 320,438 133,186 173,468 104,102 LCG (m) 171.1 169.0 174.059 170.460 VCG (m) 18.56 11.17 19.851 16.56 GMT (m) 5.71",
+        "source": "dtc_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      }
+     ]
+    },
+    "cb": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "DTC-PRIMARY",
+       "value": 0.661
+      },
+      {
+       "family": "JSR-2017",
+       "value": 0.661
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "DTC-PRIMARY": 0.661,
+      "JSR-2017": 0.661
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.661,
+        "raw": "0.661",
+        "label": "Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA (m2) 6.243 22032.0 Fig. 1. 3-D view of DTC hull Table 2. Main particulars",
+        "source": "dtc_strath",
+        "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+        "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 5"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.661,
+        "raw": "0.661",
+        "label": "refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light ballast TFP/TAP (m) 20.8/20.8 8.2/11",
+        "source": "dtc_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      }
+     ]
+    },
+    "lcb_percent": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.02,
+     "entries": []
+    },
+    "lwl": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "length_pp": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "DTC-PRIMARY",
+       "value": 355.0
+      },
+      {
+       "family": "JSR-2017",
+       "value": 355.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "DTC-PRIMARY": 355.0,
+      "JSR-2017": 355.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 355.0,
+        "raw": "355.0",
+        "label": "Table 1. Main particulars of DTC hull DTC Model DTC \u03bb 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA",
+        "source": "dtc_strath",
+        "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+        "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 5"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 355.0,
+        "raw": "355.0",
+        "label": "for the KVLCC2 and DTC (all values refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light",
+        "source": "dtc_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      }
+     ]
+    },
+    "beam": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "DTC-PRIMARY",
+       "value": 51.0
+      },
+      {
+       "family": "JSR-2017",
+       "value": 51.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "DTC-PRIMARY": 51.0,
+      "JSR-2017": 51.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
         "quantity": "beam",
-        "printed": 580.0,
-        "divide_by": 10.0,
-        "corrected": 58.0,
-        "raw_residual": 8.999989456916019,
-        "corrected_residual": -1.0543083980296686e-06
+        "value": 51.0,
+        "raw": "51.0",
+        "label": ". Main particulars of DTC hull DTC Model DTC \u03bb 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA (m2) 6.243 22032.0",
+        "source": "dtc_strath",
+        "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+        "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 5"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "beam",
+        "value": 51.0,
+        "raw": "51.0",
+        "label": "DTC (all values refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light ballast TFP/TAP",
+        "source": "dtc_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
       }
-    ],
-    "conflicts": {
-      "ONRT/displacement_volume": {
-        "families": [
-          "NMRI-T2015",
-          "SIMMAN-SERIES"
-        ],
-        "family_values": {
-          "NMRI-T2015": 8299.5,
-          "SIMMAN-SERIES": 8507.0
-        },
-        "closure_residual_by_family": {
-          "NMRI-T2015": 0.024251990457256456,
-          "SIMMAN-SERIES": -0.0007312337134125491
-        },
-        "consistent_families": [
-          "SIMMAN-SERIES"
-        ],
-        "preferred_family": "SIMMAN-SERIES",
-        "resolution": "resolved_by_closure",
-        "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
+     ]
+    },
+    "draft": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "DTC-PRIMARY",
+       "value": 14.5
+      },
+      {
+       "family": "JSR-2017",
+       "value": 14.5
       }
-    },
-    "conflicts_resolved": 1,
-    "conflicts_unresolved": 0
-  },
-  "comparisons": {
-    "JBC": {
-      "reference_volume_m3": 178369.9,
-      "reference_verdict": "SINGLE_SOURCE",
-      "reference_families": {
-        "NMRI-T2015": 178369.9
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "DTC-PRIMARY": 14.5,
+      "JSR-2017": 14.5
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "DTC-PRIMARY",
+       "cell": {
+        "quantity": "draft",
+        "value": 14.5,
+        "raw": "14.5",
+        "label": "DTC hull DTC Model DTC \u03bb 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 \uf0d1(m3) 0.827 173467.0 CB 0.661 0.661 WSA (m2) 6.243 22032.0 Fig. 1. 3-D view",
+        "source": "dtc_strath",
+        "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+        "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 5"
+       }
       },
-      "got_volume_m3": 145769.0490375513,
-      "rel_error_percent": -18.277103346724246,
-      "benchmark_verdict": "WITHHELD",
-      "benchmark_reasons": [
-        "volume 145769 m3 is -18.28% off the published 178370 m3 (tolerance 1%)"
-      ],
-      "comparability": "full_scale",
-      "within_1_percent": false
-    },
-    "KCS": {
-      "reference_volume_m3": 52030.0,
-      "reference_verdict": "CROSS_VERIFIED",
-      "reference_families": {
-        "NMRI-T2015": 52030.0,
-        "SIMMAN-SERIES": 52030.0
-      },
-      "got_volume_m3": 52187.979152265085,
-      "rel_error_percent": 0.3036308903807128,
-      "benchmark_verdict": "VERIFIED",
-      "benchmark_reasons": [],
-      "comparability": "full_scale",
-      "within_1_percent": true
-    },
-    "KVLCC2": {
-      "reference_volume_m3": 312622.0,
-      "reference_verdict": "SINGLE_SOURCE",
-      "reference_families": {
-        "SIMMAN-SERIES": 312622.0
-      },
-      "got_volume_m3": null,
-      "rel_error_percent": null,
-      "benchmark_verdict": "WITHHELD",
-      "benchmark_reasons": [
-        "ValueError: field produced fewer than two usable waterline slices"
-      ],
-      "comparability": "full_scale",
-      "within_1_percent": null
-    },
-    "ONRT": {
-      "reference_volume_m3": 8299.5,
-      "reference_verdict": "CONFLICT",
-      "reference_families": {
-        "NMRI-T2015": 8299.5,
-        "SIMMAN-SERIES": 8507.0
-      },
-      "got_volume_m3": 92.94890171498025,
-      "rel_error_percent": null,
-      "benchmark_verdict": "WITHHELD",
-      "benchmark_reasons": [
-        "volume 93 m3 is -98.91% off the published 8501 m3 (tolerance 1%)",
-        "geometry extent 42.499 m vs published L_PP 154.0 m (ratio 0.2760): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 3.624^3 would give 4422.6 m3"
-      ],
-      "comparability": "not_comparable_scale_or_units",
-      "within_1_percent": null
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "draft",
+        "value": 14.5,
+        "raw": "14.5",
+        "label": "8.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light ballast TFP/TAP (m) 20.8/20.8 8.2/11.5 14.5/14.5 7.8/11.0 \u2207 (t) 320,438 133,186 173,468 104,102 LCG (m) 171.1 169.0 174.059 170.460 VC",
+        "source": "dtc_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      }
+     ]
     }
+   },
+   "cross_verified": 5,
+   "single_source": 0,
+   "conflict": 0,
+   "missing": 2,
+   "corroborated_by_repeat_family": 0,
+   "disputed_quantities": []
   },
-  "closure": {
-    "DTC": {},
-    "JBC": {
-      "NMRI-T2015": {
-        "cb_lpp_bwl_t_m3": 178378.2,
-        "published_volume_m3": 178369.9,
-        "rel_error": 4.653251473492704e-05,
-        "consistent": true,
-        "implied_beam_m": 44.99790613426977
+  "JBC": {
+   "quantities": {
+    "displacement_volume": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 178369.92500000002
       }
-    },
-    "KCS": {
-      "NMRI-T2015": {
-        "cb_lpp_bwl_t_m3": 52030.112400000005,
-        "published_volume_m3": 52030.0,
-        "rel_error": 2.1602921392549796e-06,
-        "consistent": true,
-        "implied_beam_m": 32.199930438743394
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 178369.92500000002
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 178369.9,
+        "raw": "178369.9",
+        "label": "(m) 45 Depth D (m) 25 Draft T (m) 16.5 Block coefficient Cb 0.858 Displacement volume \u2207 (m3) 178369.9 Wetted surface area S (m2) 19556.1 Design speed V 14.5 Scale \u03bb 40 Meanwhile,",
+        "source": "jbc_cfdletters",
+        "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
       },
-      "SIMMAN-SERIES": {
-        "cb_lpp_bwl_t_m3": 52070.104800000016,
-        "published_volume_m3": 52030.0,
-        "rel_error": 0.000770801460696051,
-        "consistent": true,
-        "implied_beam_m": 32.17519930937415
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 178370.0,
+        "raw": "178370",
+        "label": "LOA 291 m 2. Beam, B 45 m 3. LPP 280 m 4. LWL 285 m 5. Draught 16.5 m 6. Displacement 178370 m3 7. WSA 19556.1 m2 Source: Nobuyuki (2015). Figure 22 The body plan of the JBC s",
+        "source": "jbc_memorial",
+        "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+        "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 47"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 178369.9,
+        "raw": "178369.9",
+        "label": "5 [m] Beam \ud835\udc35\ud835\udc4a\ud835\udc3f 45 1.125 [m] Depth \ud835\udc37 24 0.625 [m] Draft \ud835\udc47 16.5 0.4125 [m] Displacement volume \ud835\udefb 178369.9 2.7870 [m3] Wetted surface area without ESD \ud835\udc46\ud835\udc64/\ud835\udc5c\ud835\udc38\ud835\udc46\ud835\udc37 19556.1 12.222 [m2] Wetted surface",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 178369.9,
+        "raw": "178369.9",
+        "label": "Displacement volume of a hull",
+        "source": "t2015_jbc",
+        "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
       }
+     ]
     },
-    "KVLCC2": {
-      "SIMMAN-SERIES": {
-        "cb_lpp_bwl_t_m3": 3126216.7039999994,
-        "published_volume_m3": 312622.0,
-        "rel_error": 8.999989456916019,
-        "consistent": false,
-        "implied_beam_m": 58.00006114995156
+    "cb": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 0.858
       }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 0.858
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.858,
+        "raw": "0.858",
+        "label": "285 Maximum beam of waterline BWL (m) 45 Depth D (m) 25 Draft T (m) 16.5 Block coefficient Cb 0.858 Displacement volume \u2207 (m3) 178369.9 Wetted surface area S (m2) 19556.1 Design spee",
+        "source": "jbc_cfdletters",
+        "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.858,
+        "raw": "0.858",
+        "label": "6.1 12.222 [m2] Wetted surface area with ESD \ud835\udc46\ud835\udc64\ud835\udc38\ud835\udc46\ud835\udc37 19633.9 12.270 [m2] Block co- efficient \ud835\udc36\ud835\udc35 0.858 0.858 -- Mid ship section co-efficient \ud835\udc36\ud835\udc40 0.9981 0.9981 -- Longitudinal center of bu",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.858,
+        "raw": "0.8580",
+        "label": "Block coefficient (\\(C_B\\))",
+        "source": "t2015_jbc",
+        "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
     },
-    "ONRT": {},
-    "Series60": {}
-  },
-  "probes": [
-    {
-      "want": "DTC particulars (originator page)",
-      "url": "https://www.uni-due.de/ship/dtc.php",
-      "outcome": "HTTP 404 (page retired); the institute's INAM pages carry only igs_ordner.zip (geometry, no particulars)",
-      "observed": "HTTPError: HTTP Error 404: Not Found"
+    "lcb_percent": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 2.5475
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 2.5475
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.02,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": 2.5475,
+        "raw": "2.5475",
+        "label": "0.858 0.858 -- Mid ship section co-efficient \ud835\udc36\ud835\udc40 0.9981 0.9981 -- Longitudinal center of buoyancy \ud835\udc3f\ud835\udc36\ud835\udc35 % Lpp 2.5475 2.5475 -- Scale factor \ud835\udf06 1 40 -- 5. Case condition JBC models at a Reyno",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      }
+     ]
     },
-    {
-      "want": "DTC particulars (peer-reviewed)",
-      "url": "https://koreascience.kr/article/JAKO201319850774702.pdf",
-      "outcome": "TCP closed without response (RemoteDisconnected) from this host",
-      "observed": "RemoteDisconnected: Remote end closed connection without response"
+    "lwl": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 285.0
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 285.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lwl",
+        "value": 285.0,
+        "raw": "285",
+        "label": "lar Parameter (Unit) Full Scale Length between perpendiculars LPP (m) 280 Length of waterline LWL (m) 285 Maximum beam of waterline BWL (m) 45 Depth D (m) 25 Draft T (m) 16.5 Block coef",
+        "source": "jbc_cfdletters",
+        "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lwl",
+        "value": 285.0,
+        "raw": "285",
+        "label": "o. Main Particulars Value Units 1. LOA 291 m 2. Beam, B 45 m 3. LPP 280 m 4. LWL 285 m 5. Draught 16.5 m 6. Displacement 178370 m3 7. WSA 19556.1 m2 Source: Nobu",
+        "source": "jbc_memorial",
+        "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+        "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 47"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lwl",
+        "value": 285.0,
+        "raw": "285",
+        "label": "Symbol Full scale Model scale Unit Length between perpendicular \ud835\udc3f\ud835\udc5d\ud835\udc5d 280 7 [m] Length waterline \ud835\udc3f\ud835\udc4a\ud835\udc3f 285 7.125 [m] Beam \ud835\udc35\ud835\udc4a\ud835\udc3f 45 1.125 [m] Depth \ud835\udc37 24 0.625 [m] Draft \ud835\udc47 16.5 0.4125 [m] D",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lwl",
+        "value": 285.0,
+        "raw": "285.000",
+        "label": "Length of waterline",
+        "source": "t2015_jbc",
+        "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
     },
-    {
-      "want": "Series 60 primary tables (Todd, DTMB Report 1258/1963)",
-      "url": "https://www.biodiversitylibrary.org/itempdf/102062",
-      "outcome": "HTTP 403 for programmatic clients",
-      "observed": "HTTPError: HTTP Error 403: Forbidden"
+    "length_pp": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 280.0
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 280.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 280.0,
+        "raw": "280",
+        "label": "Bulk Carrier at Full Scale Main particular Parameter (Unit) Full Scale Length between perpendiculars LPP (m) 280 Length of waterline LWL (m) 285 Maximum beam of waterline BWL (m) 45 Depth D (m)",
+        "source": "jbc_cfdletters",
+        "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 280.0,
+        "raw": "280",
+        "label": "a and geometry No. Main Particulars Value Units 1. LOA 291 m 2. Beam, B 45 m 3. LPP 280 m 4. LWL 285 m 5. Draught 16.5 m 6. Displacement 178370 m3 7. WSA 19556.1",
+        "source": "jbc_memorial",
+        "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+        "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 47"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 280.0,
+        "raw": "280",
+        "label": "ars of JBC Hull Specification Symbol Full scale Model scale Unit Length between perpendicular \ud835\udc3f\ud835\udc5d\ud835\udc5d 280 7 [m] Length waterline \ud835\udc3f\ud835\udc4a\ud835\udc3f 285 7.125 [m] Beam \ud835\udc35\ud835\udc4a\ud835\udc3f 45 1.125 [m] Depth \ud835\udc37 24 0",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 280.0,
+        "raw": "280.000",
+        "label": "Length between perpendiculars",
+        "source": "t2015_jbc",
+        "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
     },
-    {
-      "want": "arXiv full text (JBC/DTC case papers)",
-      "url": "https://arxiv.org/pdf/2411.09725v1",
-      "outcome": "PDF delivery stalls (connection accepted, body never completes); only /abs metadata is reachable",
-      "http_status": 200,
-      "bytes": 44179792
+    "beam": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 45.0
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 45.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "beam",
+        "value": 45.0,
+        "raw": "45",
+        "label": "between perpendiculars LPP (m) 280 Length of waterline LWL (m) 285 Maximum beam of waterline BWL (m) 45 Depth D (m) 25 Draft T (m) 16.5 Block coefficient Cb 0.858 Displacement volume",
+        "source": "jbc_cfdletters",
+        "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "beam",
+        "value": 45.0,
+        "raw": "45",
+        "label": "able 3 JBC hull data and geometry No. Main Particulars Value Units 1. LOA 291 m 2. Beam, B 45 m 3. LPP 280 m 4. LWL 285 m 5. Draught 16.5 m 6. Displacement 178370 m3",
+        "source": "jbc_memorial",
+        "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+        "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 47"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "beam",
+        "value": 45.0,
+        "raw": "45",
+        "label": "Length between perpendicular \ud835\udc3f\ud835\udc5d\ud835\udc5d 280 7 [m] Length waterline \ud835\udc3f\ud835\udc4a\ud835\udc3f 285 7.125 [m] Beam \ud835\udc35\ud835\udc4a\ud835\udc3f 45 1.125 [m] Depth \ud835\udc37 24 0.625 [m] Draft \ud835\udc47 16.5 0.4125 [m] Displacement volume \ud835\udefb 178",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "beam",
+        "value": 45.0,
+        "raw": "45.000",
+        "label": "Maximum beam of waterline",
+        "source": "t2015_jbc",
+        "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
     },
-    {
-      "want": "Open-access JBC paper (University of Edinburgh MARINE2021)",
-      "url": "http://journals.ed.ac.uk/MARINE2021/article/download/6788/8985",
-      "outcome": "request hangs until timeout",
-      "http_status": 200,
-      "bytes": 13628196
-    },
-    {
-      "want": "SIMMAN 2008 archive (KVLCC2 page, original FORCE edition)",
-      "url": "https://www.simman2008.dk/",
-      "outcome": "domain no longer serves the workshop; archived copies unreachable (web.archive.org egress blocked)",
-      "http_status": 200,
-      "bytes": 378529
-    },
-    {
-      "want": "DTC particulars (Korean Society of Ocean Engineers, IJOSE 2013)",
-      "url": "https://koreascience.kr/article/JAKO201319850774702.pdf",
-      "outcome": "TCP reset (RemoteDisconnected) on this egress; the host answers HTML headers only for browsers, so the numerals cannot be read programmatically",
-      "observed": "RemoteDisconnected: Remote end closed connection without response"
-    },
-    {
-      "want": "Series 60 primary tables (Todd, DTMB, Biodiversity Heritage Library mirror)",
-      "url": "https://www.biodiversitylibrary.org/itempdf/102062",
-      "outcome": "HTTP 403 for programmatic clients (same as the 2026-11-14 round)",
-      "observed": "HTTPError: HTTP Error 403: Forbidden"
-    },
-    {
-      "want": "Series 60 seakeeping tables (Procedia Engineering 2017, ScienceDirect)",
-      "url": "https://www.sciencedirect.com/science/article/pii/S1877705817332848/pdf",
-      "outcome": "HTTP 403 \u2014 publisher blocks non-browser fetches",
-      "observed": "HTTPError: HTTP Error 403: Forbidden"
-    },
-    {
-      "want": "DTC / JBC particulars via repository search (TU Delft, NTNU Open, J-STAGE)",
-      "url": "https://repository.tudelft.nl/search?q=Duisburg%20Test%20Case",
-      "outcome": "search pages are client-rendered JavaScript apps: the HTML carries no result list, and no public search API is reachable from here (DuckDuckGo/Bing blocked, OpenAlex has metadata only)",
-      "http_status": 200,
-      "bytes": 15459
-    },
-    {
-      "want": "KVLCC2 particulars from the NMRI Tokyo 2015 geometry page",
-      "url": "https://www.t2015.nmri.go.jp/kvlcc2.html",
-      "outcome": "HTTP 404 \u2014 the workshop index still links the page but the file is gone (the KCS/JBC/ONRT siblings are intact and re-fetch with matching digests)",
-      "observed": "HTTPError: HTTP Error 404: Not Found"
-    },
-    {
-      "want": "Wageningen 2022 workshop (KCS data)",
-      "url": "https://www.w2022.nl/",
-      "outcome": "placeholder page: 'Please stand by while configuration is in progress.'",
-      "http_status": 200,
-      "bytes": 52
+    "draft": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 16.5
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "NMRI-T2015": 16.5
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "draft",
+        "value": 16.5,
+        "raw": "16.5",
+        "label": "gth of waterline LWL (m) 285 Maximum beam of waterline BWL (m) 45 Depth D (m) 25 Draft T (m) 16.5 Block coefficient Cb 0.858 Displacement volume \u2207 (m3) 178369.9 Wetted surface area",
+        "source": "jbc_cfdletters",
+        "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "draft",
+        "value": 16.5,
+        "raw": "16.5",
+        "label": "rs Value Units 1. LOA 291 m 2. Beam, B 45 m 3. LPP 280 m 4. LWL 285 m 5. Draught 16.5 m 6. Displacement 178370 m3 7. WSA 19556.1 m2 Source: Nobuyuki (2015). Figure 2",
+        "source": "jbc_memorial",
+        "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+        "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 47"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "draft",
+        "value": 16.5,
+        "raw": "16.5",
+        "label": "th waterline \ud835\udc3f\ud835\udc4a\ud835\udc3f 285 7.125 [m] Beam \ud835\udc35\ud835\udc4a\ud835\udc3f 45 1.125 [m] Depth \ud835\udc37 24 0.625 [m] Draft \ud835\udc47 16.5 0.4125 [m] Displacement volume \ud835\udefb 178369.9 2.7870 [m3] Wetted surface area without ESD",
+        "source": "jbc_scse",
+        "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "draft",
+        "value": 16.5,
+        "raw": "16.500",
+        "label": "Draft(Full)",
+        "source": "t2015_jbc",
+        "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+        "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
     }
+   },
+   "cross_verified": 0,
+   "single_source": 7,
+   "conflict": 0,
+   "missing": 0,
+   "corroborated_by_repeat_family": 6,
+   "disputed_quantities": []
+  },
+  "KCS": {
+   "quantities": {
+    "displacement_volume": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 52030.0
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 52030.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 52030.0,
+      "SIMMAN-SERIES": 52030.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 52030.0,
+        "raw": "52030",
+        "label": "Displacement (m 3 )",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 52030.0,
+        "raw": "52030",
+        "label": "Displacement (m3)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 52030.0,
+        "raw": "52030",
+        "label": "Displacement volume",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "cb": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 0.6505
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 0.651
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 0.6505,
+      "SIMMAN-SERIES": 0.651
+     },
+     "family_disagreement": {},
+     "range": 0.000500000000000056,
+     "range_relative": 0.000768344218209844,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.651,
+        "raw": "0.651",
+        "label": "CB",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.651,
+        "raw": "0.651",
+        "label": "CB",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.6505,
+        "raw": "0.6505",
+        "label": "Block coefficient (CB)",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "lcb_percent": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": -1.48
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": -1.48
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": -1.48,
+      "SIMMAN-SERIES": -1.48
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.02,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -1.48,
+        "raw": "-1.48",
+        "label": "LCB (%), fwd+",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -1.48,
+        "raw": "-1.48",
+        "label": "LCB (%), fwd+",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -1.48,
+        "raw": "-1.48",
+        "label": "LCB (%L PP ), fwd+",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "lwl": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 232.5
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 232.5
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 232.5,
+      "SIMMAN-SERIES": 232.5
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lwl",
+        "value": 232.5,
+        "raw": "232.5",
+        "label": "Lwl (m)",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lwl",
+        "value": 232.5,
+        "raw": "232.5",
+        "label": "Lwl (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lwl",
+        "value": 232.5,
+        "raw": "232.5",
+        "label": "Length of waterline",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "length_pp": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 230.0
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 230.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 230.0,
+      "SIMMAN-SERIES": 230.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 230.0,
+        "raw": "230.0",
+        "label": "Lpp (m)",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 230.0,
+        "raw": "230",
+        "label": "Lpp (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 230.0,
+        "raw": "230.0",
+        "label": "Length between perpendiculars",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "beam": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 32.2
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 32.2
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 32.2,
+      "SIMMAN-SERIES": 32.2
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 32.2,
+        "raw": "32.2",
+        "label": "Bwl (m)",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 32.2,
+        "raw": "32.2",
+        "label": "Bwl (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "beam",
+        "value": 32.2,
+        "raw": "32.2",
+        "label": "Maximum beam of waterline",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "draft": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 10.8
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 10.8
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 10.8,
+      "SIMMAN-SERIES": 10.8
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 10.8,
+        "raw": "10.8",
+        "label": "T (m)",
+        "source": "simman2014_kcs",
+        "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+        "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 10.8,
+        "raw": "10.8",
+        "label": "T (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "draft",
+        "value": 10.8,
+        "raw": "10.8",
+        "label": "Draft",
+        "source": "t2015_kcs",
+        "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+        "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+        "column": 2,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    }
+   },
+   "cross_verified": 7,
+   "single_source": 0,
+   "conflict": 0,
+   "missing": 0,
+   "corroborated_by_repeat_family": 7,
+   "disputed_quantities": []
+  },
+  "KVLCC2": {
+   "quantities": {
+    "displacement_volume": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "JSR-2017",
+       "value": 312622.439
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 312622.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "JSR-2017": 312622.439,
+      "SIMMAN-SERIES": 312622.0
+     },
+     "family_disagreement": {},
+     "range": 0.4390000000130385,
+     "range_relative": 1.4042507941859151e-06,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 312622.0,
+        "raw": "312622",
+        "label": "pal dimensions of KVLCC2 (SIMMAN2008) pp L 320.0 m B 58.0 m D 30.0 m T 20.8 m \uf0d1 312622 3 m B C 0.8098 0 U 15.5 knots (7.973m/s) pp zz L / k 0.25 ' xG 0.0348 3. E",
+        "source": "kvlcc2_hrcak",
+        "url": "https://hrcak.srce.hr/file/274163",
+        "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 312622.439,
+        "raw": "320,438",
+        "label": "ballast Design draught Light ballast TFP/TAP (m) 20.8/20.8 8.2/11.5 14.5/14.5 7.8/11.0 \u2207 (t) 320,438 133,186 173,468 104,102 LCG (m) 171.1 169.0 174.059 170.460 VCG (m) 18.56 11.17 19.851 16",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "mass",
+        "note": "page 4; mass 320,438 t converted at 1.025 t/m3"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 312622.0,
+        "raw": "312622",
+        "label": "Displacement (m 3 )",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 312622.0,
+        "raw": "312622",
+        "label": "Displacement (m3)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "cb": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "JSR-2017",
+       "value": 0.8098
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 0.8098
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "JSR-2017": 0.8098,
+      "SIMMAN-SERIES": 0.8098
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.8098,
+        "raw": "0.8098",
+        "label": "of KVLCC2 (SIMMAN2008) pp L 320.0 m B 58.0 m D 30.0 m T 20.8 m \uf0d1 312622 3 m B C 0.8098 0 U 15.5 knots (7.973m/s) pp zz L / k 0.25 ' xG 0.0348 3. Equation of manoeuvri",
+        "source": "kvlcc2_hrcak",
+        "url": "https://hrcak.srce.hr/file/274163",
+        "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.8098,
+        "raw": "0.8098",
+        "label": "refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light ballast TFP/TAP (m) 20.8/20.8 8.2/11",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.8098,
+        "raw": "0.8098",
+        "label": "CB",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.8098,
+        "raw": "0.8098",
+        "label": "CB",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "lcb_percent": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 3.48
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "SIMMAN-SERIES": 3.48
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.02,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": 3.48,
+        "raw": "3.48",
+        "label": "LCB (%), fwd+",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": 3.48,
+        "raw": "3.48",
+        "label": "LCB (%), fwd+",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "lwl": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 325.5
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "SIMMAN-SERIES": 325.5
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lwl",
+        "value": 325.5,
+        "raw": "325.5",
+        "label": "Lwl (m)",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lwl",
+        "value": 325.5,
+        "raw": "325.5",
+        "label": "Lwl (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "length_pp": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "JASNAOE-2016",
+       "value": 320.0
+      },
+      {
+       "family": "JSR-2017",
+       "value": 320.0
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 320.0
+      }
+     ],
+     "independent_families": 3,
+     "family_values": {
+      "JASNAOE-2016": 320.0,
+      "JSR-2017": 320.0,
+      "SIMMAN-SERIES": 320.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 320.0,
+        "raw": "320.0",
+        "label": ", Su-Jeong Kim, Kwang-Jun Paik 3 Table 1 Principal dimensions of KVLCC2 (SIMMAN2008) pp L 320.0 m B 58.0 m D 30.0 m T 20.8 m \uf0d1 312622 3 m B C 0.8098 0 U 15.5 knots (7.973m",
+        "source": "kvlcc2_hrcak",
+        "url": "https://hrcak.srce.hr/file/274163",
+        "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "JASNAOE-2016",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 320.0,
+        "raw": "320",
+        "label": "Fig. 1. Table 1 KVLCC2 particulars Full Scale OU INSEAN scale 1 100 45.714 Ship Lpp 320 m 3.2 m 7 m Depth 30 m 0.3 m 0.6563 m Draft 20.8 m 0.208 m 0.455 m Propeller No",
+        "source": "kvlcc2_jstage",
+        "url": "https://www.jstage.jst.go.jp/article/jjasnaoe/23/0/23_1/_pdf",
+        "sha256": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 2"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 320.0,
+        "raw": "320.0",
+        "label": "for the KVLCC2 and DTC (all values refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 320.0,
+        "raw": "320.0",
+        "label": "Lpp (m)",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "length_pp",
+        "value": 320.0,
+        "raw": "320",
+        "label": "Lpp (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "beam": {
+     "verdict": "CONFLICT",
+     "disputed": true,
+     "published_values": [
+      {
+       "family": "JSR-2017",
+       "value": 58.0
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 580.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "JSR-2017": 58.0,
+      "SIMMAN-SERIES": 580.0
+     },
+     "family_disagreement": {
+      "SIMMAN-SERIES": {
+       "chosen": 580.0,
+       "cluster_size": 2,
+       "values": [
+        58.0,
+        580.0,
+        580.0
+       ],
+       "dissent": [
+        58.0
+       ],
+       "rule": "majority cluster; never the mean of disagreeing entries"
+      }
+     },
+     "range": 522.0,
+     "range_relative": 1.6363636363636365,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 58.0,
+        "raw": "58.0",
+        "label": "Kwang-Jun Paik 3 Table 1 Principal dimensions of KVLCC2 (SIMMAN2008) pp L 320.0 m B 58.0 m D 30.0 m T 20.8 m \uf0d1 312622 3 m B C 0.8098 0 U 15.5 knots (7.973m/s) pp zz",
+        "source": "kvlcc2_hrcak",
+        "url": "https://hrcak.srce.hr/file/274163",
+        "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "beam",
+        "value": 58.0,
+        "raw": "58.0",
+        "label": "DTC (all values refer to the origin located at [AP/CL/BL]) KVLCC2 DTC Lpp (m) 320.0 355.0 B (m) 58.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light ballast TFP/TAP",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 580.0,
+        "raw": "580",
+        "label": "Bwl (m)",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 580.0,
+        "raw": "580",
+        "label": "Bwl (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "draft": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "JASNAOE-2016",
+       "value": 20.8
+      },
+      {
+       "family": "JSR-2017",
+       "value": 20.8
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 20.8
+      }
+     ],
+     "independent_families": 3,
+     "family_values": {
+      "JASNAOE-2016": 20.8,
+      "JSR-2017": 20.8,
+      "SIMMAN-SERIES": 20.8
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 20.8,
+        "raw": "20.8",
+        "label": "Table 1 Principal dimensions of KVLCC2 (SIMMAN2008) pp L 320.0 m B 58.0 m D 30.0 m T 20.8 m \uf0d1 312622 3 m B C 0.8098 0 U 15.5 knots (7.973m/s) pp zz L / k 0.25 ' xG 0",
+        "source": "kvlcc2_hrcak",
+        "url": "https://hrcak.srce.hr/file/274163",
+        "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 3"
+       }
+      },
+      {
+       "family": "JASNAOE-2016",
+       "cell": {
+        "quantity": "draft",
+        "value": 20.8,
+        "raw": "20.8",
+        "label": "NSEAN scale 1 100 45.714 Ship Lpp 320 m 3.2 m 7 m Depth 30 m 0.3 m 0.6563 m Draft 20.8 m 0.208 m 0.455 m Propeller No. of blades 4 4 4 Diameter 9.86 m 0.0986 m 0.21656",
+        "source": "kvlcc2_jstage",
+        "url": "https://www.jstage.jst.go.jp/article/jjasnaoe/23/0/23_1/_pdf",
+        "sha256": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 2"
+       }
+      },
+      {
+       "family": "JSR-2017",
+       "cell": {
+        "quantity": "draft",
+        "value": 20.8,
+        "raw": "20.8",
+        "label": "8.0 51.0 CB [-] 0.8098 0.661 Scantling draught Heavy ballast Design draught Light ballast TFP/TAP (m) 20.8/20.8 8.2/11.5 14.5/14.5 7.8/11.0 \u2207 (t) 320,438 133,186 173,468 104,102 LCG (m) 171.1 169.0",
+        "source": "kvlcc2_ugent",
+        "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+        "column": 0,
+        "unit_basis": "volume",
+        "note": "page 4"
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 20.8,
+        "raw": "20.8",
+        "label": "T (m)",
+        "source": "simman2014_kvlcc2",
+        "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+        "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 20.8,
+        "raw": "20.8",
+        "label": "T (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    }
+   },
+   "cross_verified": 4,
+   "single_source": 2,
+   "conflict": 1,
+   "missing": 0,
+   "corroborated_by_repeat_family": 7,
+   "disputed_quantities": [
+    "beam"
+   ]
+  },
+  "ONRT": {
+   "quantities": {
+    "displacement_volume": {
+     "verdict": "CONFLICT",
+     "disputed": true,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 8299.5
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 8507.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 8299.5,
+      "SIMMAN-SERIES": 8507.0
+     },
+     "family_disagreement": {},
+     "range": 207.5,
+     "range_relative": 0.024692827179960134,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 8507.0,
+        "raw": "8507",
+        "label": "Displacement (m3)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "displacement_volume",
+        "value": 8299.5,
+        "raw": "8507 ton",
+        "label": "Displacement",
+        "source": "t2015_onrt",
+        "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+        "column": 3,
+        "unit_basis": "mass",
+        "note": "mass 8507 ton converted at 1.025 t/m3"
+       }
+      }
+     ]
+    },
+    "cb": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 0.535
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 0.535
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 0.535,
+      "SIMMAN-SERIES": 0.535
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.535,
+        "raw": "0.535",
+        "label": "CB",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "cb",
+        "value": 0.535,
+        "raw": "0.535",
+        "label": "Block coefficient (CB)",
+        "source": "t2015_onrt",
+        "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+        "column": 3,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "lcb_percent": {
+     "verdict": "SINGLE_SOURCE",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "SIMMAN-SERIES",
+       "value": -1.68
+      }
+     ],
+     "independent_families": 1,
+     "family_values": {
+      "SIMMAN-SERIES": -1.68
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.02,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lcb_percent",
+        "value": -1.68,
+        "raw": "-1.68",
+        "label": "LCB (%), fwd+",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "lwl": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 154.0
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 154.0
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 154.0,
+      "SIMMAN-SERIES": 154.0
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "lwl",
+        "value": 154.0,
+        "raw": "154",
+        "label": "Lwl (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "lwl",
+        "value": 154.0,
+        "raw": "154.0",
+        "label": "Length of waterline",
+        "source": "t2015_onrt",
+        "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+        "column": 3,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "length_pp": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "beam": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 18.78
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 18.78
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 18.78,
+      "SIMMAN-SERIES": 18.78
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "beam",
+        "value": 18.78,
+        "raw": "18.78",
+        "label": "Bwl (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "beam",
+        "value": 18.78,
+        "raw": "18.78",
+        "label": "Maximum beam of waterline",
+        "source": "t2015_onrt",
+        "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+        "column": 3,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    },
+    "draft": {
+     "verdict": "CROSS_VERIFIED",
+     "disputed": false,
+     "published_values": [
+      {
+       "family": "NMRI-T2015",
+       "value": 5.494
+      },
+      {
+       "family": "SIMMAN-SERIES",
+       "value": 5.494
+      }
+     ],
+     "independent_families": 2,
+     "family_values": {
+      "NMRI-T2015": 5.494,
+      "SIMMAN-SERIES": 5.494
+     },
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": [
+      {
+       "family": "SIMMAN-SERIES",
+       "cell": {
+        "quantity": "draft",
+        "value": 5.494,
+        "raw": "5.494",
+        "label": "T (m)",
+        "source": "simman2020_summary",
+        "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+        "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+        "column": 1,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      },
+      {
+       "family": "NMRI-T2015",
+       "cell": {
+        "quantity": "draft",
+        "value": 5.494,
+        "raw": "5.494",
+        "label": "Draft",
+        "source": "t2015_onrt",
+        "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+        "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+        "column": 3,
+        "unit_basis": "volume",
+        "note": ""
+       }
+      }
+     ]
+    }
+   },
+   "cross_verified": 4,
+   "single_source": 1,
+   "conflict": 1,
+   "missing": 1,
+   "corroborated_by_repeat_family": 0,
+   "disputed_quantities": [
+    "displacement_volume"
+   ]
+  },
+  "Series60": {
+   "quantities": {
+    "displacement_volume": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "cb": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "lcb_percent": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.02,
+     "entries": []
+    },
+    "lwl": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "length_pp": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "beam": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    },
+    "draft": {
+     "verdict": "MISSING",
+     "disputed": false,
+     "published_values": [],
+     "independent_families": 0,
+     "family_values": {},
+     "family_disagreement": {},
+     "range": 0.0,
+     "range_relative": 0.0,
+     "tolerance": 0.005,
+     "entries": []
+    }
+   },
+   "cross_verified": 0,
+   "single_source": 0,
+   "conflict": 0,
+   "missing": 7,
+   "corroborated_by_repeat_family": 0,
+   "disputed_quantities": []
+  }
+ },
+ "coverage": {
+  "ships": [
+   "DTC",
+   "JBC",
+   "KCS",
+   "KVLCC2",
+   "ONRT",
+   "Series60"
+  ],
+  "cells": 42,
+  "cross_verified": 20,
+  "single_source": 10,
+  "conflict": 2,
+  "missing": 10,
+  "ships_fully_cross_verified": [
+   "KCS"
+  ],
+  "ships_failing_min_two_sources": [
+   "DTC",
+   "JBC",
+   "KVLCC2",
+   "ONRT",
+   "Series60"
   ]
+ },
+ "adjudication": {
+  "closure_tolerance": 0.01,
+  "scale_factors": [
+   10.0,
+   100.0,
+   0.1,
+   0.01
+  ],
+  "ships": {
+   "JBC": {
+    "closure": {
+     "NMRI-T2015": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 178378.2,
+      "published_volume_m3": 178369.9,
+      "rel_error": 4.653251473496489e-05,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     }
+    },
+    "conflicts": {}
+   },
+   "KCS": {
+    "closure": {
+     "NMRI-T2015": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 52030.112400000005,
+      "published_volume_m3": 52030.0,
+      "rel_error": 2.160292139175013e-06,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     },
+     "SIMMAN-SERIES": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 52070.104800000016,
+      "published_volume_m3": 52030.0,
+      "rel_error": 0.000770801460695969,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     }
+    },
+    "conflicts": {}
+   },
+   "KVLCC2": {
+    "closure": {
+     "SIMMAN-SERIES": {
+      "length_basis": "length_pp",
+      "implied_volume_m3": 3126216.7039999994,
+      "published_volume_m3": 312622.0,
+      "rel_error": 8.999989456916019,
+      "consistent": false,
+      "explained_by_scale_slip": {
+       "quantity": "beam",
+       "printed": 580.0,
+       "divide_by": 10.0,
+       "corrected": 58.0,
+       "raw_residual": 8.999989456916019,
+       "corrected_residual": -1.0543083980296686e-06
+      }
+     }
+    },
+    "conflicts": {}
+   },
+   "ONRT": {
+    "closure": {
+     "NMRI-T2015": {
+      "length_basis": "lwl",
+      "implied_volume_m3": 8500.7793948,
+      "published_volume_m3": 8299.5,
+      "rel_error": 0.024251990457256456,
+      "consistent": false,
+      "explained_by_scale_slip": null
+     },
+     "SIMMAN-SERIES": {
+      "length_basis": "lwl",
+      "implied_volume_m3": 8500.7793948,
+      "published_volume_m3": 8507.0,
+      "rel_error": -0.0007312337134125491,
+      "consistent": true,
+      "explained_by_scale_slip": null
+     }
+    },
+    "conflicts": {
+     "displacement_volume": {
+      "families": [
+       "NMRI-T2015",
+       "SIMMAN-SERIES"
+      ],
+      "family_values": {
+       "NMRI-T2015": 8299.5,
+       "SIMMAN-SERIES": 8507.0
+      },
+      "closure_residual_by_family": {
+       "NMRI-T2015": 0.024251990457256456,
+       "SIMMAN-SERIES": -0.0007312337134125491
+      },
+      "consistent_families": [
+       "SIMMAN-SERIES"
+      ],
+      "preferred_family": "SIMMAN-SERIES",
+      "resolution": "resolved_by_closure",
+      "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
+     }
+    }
+   }
+  },
+  "scale_typos": [
+   {
+    "ship": "KVLCC2",
+    "family": "SIMMAN-SERIES",
+    "quantity": "beam",
+    "printed": 580.0,
+    "divide_by": 10.0,
+    "corrected": 58.0,
+    "raw_residual": 8.999989456916019,
+    "corrected_residual": -1.0543083980296686e-06
+   }
+  ],
+  "conflicts": {
+   "ONRT/displacement_volume": {
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "family_values": {
+     "NMRI-T2015": 8299.5,
+     "SIMMAN-SERIES": 8507.0
+    },
+    "closure_residual_by_family": {
+     "NMRI-T2015": 0.024251990457256456,
+     "SIMMAN-SERIES": -0.0007312337134125491
+    },
+    "consistent_families": [
+     "SIMMAN-SERIES"
+    ],
+    "preferred_family": "SIMMAN-SERIES",
+    "resolution": "resolved_by_closure",
+    "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
+   }
+  },
+  "conflicts_resolved": 1,
+  "conflicts_unresolved": 0
+ },
+ "comparisons": {
+  "JBC": {
+   "reference_volume_m3": 178369.9,
+   "reference_verdict": "SINGLE_SOURCE",
+   "reference_families": {
+    "NMRI-T2015": 178369.9
+   },
+   "got_volume_m3": 145769.0490375513,
+   "rel_error_percent": -18.277103346724246,
+   "benchmark_verdict": "WITHHELD",
+   "benchmark_reasons": [
+    "volume 145769 m3 is -18.28% off the published 178370 m3 (tolerance 1%)"
+   ],
+   "comparability": "full_scale",
+   "within_1_percent": false
+  },
+  "KCS": {
+   "reference_volume_m3": 52030.0,
+   "reference_verdict": "CROSS_VERIFIED",
+   "reference_families": {
+    "NMRI-T2015": 52030.0,
+    "SIMMAN-SERIES": 52030.0
+   },
+   "got_volume_m3": 52187.979152265085,
+   "rel_error_percent": 0.3036308903807128,
+   "benchmark_verdict": "VERIFIED",
+   "benchmark_reasons": [],
+   "comparability": "full_scale",
+   "within_1_percent": true
+  },
+  "KVLCC2": {
+   "reference_volume_m3": 312622.0,
+   "reference_verdict": "SINGLE_SOURCE",
+   "reference_families": {
+    "SIMMAN-SERIES": 312622.0
+   },
+   "got_volume_m3": null,
+   "rel_error_percent": null,
+   "benchmark_verdict": "WITHHELD",
+   "benchmark_reasons": [
+    "ValueError: field produced fewer than two usable waterline slices"
+   ],
+   "comparability": "full_scale",
+   "within_1_percent": null
+  },
+  "ONRT": {
+   "reference_volume_m3": 8299.5,
+   "reference_verdict": "CONFLICT",
+   "reference_families": {
+    "NMRI-T2015": 8299.5,
+    "SIMMAN-SERIES": 8507.0
+   },
+   "got_volume_m3": 92.94890171498025,
+   "rel_error_percent": null,
+   "benchmark_verdict": "WITHHELD",
+   "benchmark_reasons": [
+    "volume 93 m3 is -98.91% off the published 8501 m3 (tolerance 1%)",
+    "geometry extent 42.499 m vs published L_PP 154.0 m (ratio 0.2760): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 3.624^3 would give 4422.6 m3"
+   ],
+   "comparability": "not_comparable_scale_or_units",
+   "within_1_percent": null
+  }
+ },
+ "closure": {
+  "DTC": {},
+  "JBC": {
+   "NMRI-T2015": {
+    "cb_lpp_bwl_t_m3": 178378.2,
+    "published_volume_m3": 178369.9,
+    "rel_error": 4.653251473492704e-05,
+    "consistent": true,
+    "implied_beam_m": 44.99790613426977
+   }
+  },
+  "KCS": {
+   "NMRI-T2015": {
+    "cb_lpp_bwl_t_m3": 52030.112400000005,
+    "published_volume_m3": 52030.0,
+    "rel_error": 2.1602921392549796e-06,
+    "consistent": true,
+    "implied_beam_m": 32.199930438743394
+   },
+   "SIMMAN-SERIES": {
+    "cb_lpp_bwl_t_m3": 52070.104800000016,
+    "published_volume_m3": 52030.0,
+    "rel_error": 0.000770801460696051,
+    "consistent": true,
+    "implied_beam_m": 32.17519930937415
+   }
+  },
+  "KVLCC2": {
+   "SIMMAN-SERIES": {
+    "cb_lpp_bwl_t_m3": 3126216.7039999994,
+    "published_volume_m3": 312622.0,
+    "rel_error": 8.999989456916019,
+    "consistent": false,
+    "implied_beam_m": 58.00006114995156
+   }
+  },
+  "ONRT": {},
+  "Series60": {}
+ },
+ "probes": [
+  {
+   "want": "DTC particulars (originator page)",
+   "url": "https://www.uni-due.de/ship/dtc.php",
+   "outcome": "HTTP 404 (page retired); the institute's INAM pages carry only igs_ordner.zip (geometry, no particulars)",
+   "observed": "HTTPError: HTTP Error 404: Not Found"
+  },
+  {
+   "want": "DTC particulars (peer-reviewed)",
+   "url": "https://koreascience.kr/article/JAKO201319850774702.pdf",
+   "outcome": "TCP closed without response (RemoteDisconnected) from this host",
+   "observed": "RemoteDisconnected: Remote end closed connection without response"
+  },
+  {
+   "want": "Series 60 primary tables (Todd, DTMB Report 1258/1963)",
+   "url": "https://www.biodiversitylibrary.org/itempdf/102062",
+   "outcome": "HTTP 403 for programmatic clients",
+   "observed": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  {
+   "want": "arXiv full text (JBC/DTC case papers)",
+   "url": "https://arxiv.org/pdf/2411.09725v1",
+   "outcome": "PDF delivery stalls (connection accepted, body never completes); only /abs metadata is reachable",
+   "http_status": 200,
+   "bytes": 44179792
+  },
+  {
+   "want": "Open-access JBC paper (University of Edinburgh MARINE2021)",
+   "url": "http://journals.ed.ac.uk/MARINE2021/article/download/6788/8985",
+   "outcome": "request hangs until timeout",
+   "http_status": 200,
+   "bytes": 13628196
+  },
+  {
+   "want": "SIMMAN 2008 archive (KVLCC2 page, original FORCE edition)",
+   "url": "https://www.simman2008.dk/",
+   "outcome": "domain no longer serves the workshop; archived copies unreachable (web.archive.org egress blocked)",
+   "http_status": 200,
+   "bytes": 378529
+  },
+  {
+   "want": "DTC particulars (Korean Society of Ocean Engineers, IJOSE 2013)",
+   "url": "https://koreascience.kr/article/JAKO201319850774702.pdf",
+   "outcome": "TCP reset (RemoteDisconnected) on this egress; the host answers HTML headers only for browsers, so the numerals cannot be read programmatically",
+   "observed": "RemoteDisconnected: Remote end closed connection without response"
+  },
+  {
+   "want": "Series 60 primary tables (Todd, DTMB, Biodiversity Heritage Library mirror)",
+   "url": "https://www.biodiversitylibrary.org/itempdf/102062",
+   "outcome": "HTTP 403 for programmatic clients (same as the 2026-11-14 round)",
+   "observed": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  {
+   "want": "Series 60 seakeeping tables (Procedia Engineering 2017, ScienceDirect)",
+   "url": "https://www.sciencedirect.com/science/article/pii/S1877705817332848/pdf",
+   "outcome": "HTTP 403 \u2014 publisher blocks non-browser fetches",
+   "observed": "HTTPError: HTTP Error 403: Forbidden"
+  },
+  {
+   "want": "DTC / JBC particulars via repository search (TU Delft, NTNU Open, J-STAGE)",
+   "url": "https://repository.tudelft.nl/search?q=Duisburg%20Test%20Case",
+   "outcome": "search pages are client-rendered JavaScript apps: the HTML carries no result list, and no public search API is reachable from here (DuckDuckGo/Bing blocked, OpenAlex has metadata only)",
+   "http_status": 200,
+   "bytes": 15459
+  },
+  {
+   "want": "KVLCC2 particulars from the NMRI Tokyo 2015 geometry page",
+   "url": "https://www.t2015.nmri.go.jp/kvlcc2.html",
+   "outcome": "HTTP 404 \u2014 the workshop index still links the page but the file is gone (the KCS/JBC/ONRT siblings are intact and re-fetch with matching digests)",
+   "observed": "HTTPError: HTTP Error 404: Not Found"
+  },
+  {
+   "want": "Wageningen 2022 workshop (KCS data)",
+   "url": "https://www.w2022.nl/",
+   "outcome": "placeholder page: 'Please stand by while configuration is in progress.'",
+   "http_status": 200,
+   "bytes": 52
+  }
+ ],
+ "lineage": {
+  "DTC": {
+   "displacement_volume": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "lineages": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "sources": [
+     "dtc_strath",
+     "dtc_ugent"
+    ],
+    "published_values": [
+     {
+      "family": "DTC-PRIMARY",
+      "value": 173467.0
+     },
+     {
+      "family": "JSR-2017",
+      "value": 173468.0
+     }
+    ],
+    "distinct_values": [
+     173467.0,
+     173468.0
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "lineages": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "sources": [
+     "dtc_strath",
+     "dtc_ugent"
+    ],
+    "published_values": [
+     {
+      "family": "DTC-PRIMARY",
+      "value": 0.661
+     },
+     {
+      "family": "JSR-2017",
+      "value": 0.661
+     }
+    ],
+    "distinct_values": [
+     0.661
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "lineages": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "sources": [
+     "dtc_strath",
+     "dtc_ugent"
+    ],
+    "published_values": [
+     {
+      "family": "DTC-PRIMARY",
+      "value": 355.0
+     },
+     {
+      "family": "JSR-2017",
+      "value": 355.0
+     }
+    ],
+    "distinct_values": [
+     355.0
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "lineages": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "sources": [
+     "dtc_strath",
+     "dtc_ugent"
+    ],
+    "published_values": [
+     {
+      "family": "DTC-PRIMARY",
+      "value": 51.0
+     },
+     {
+      "family": "JSR-2017",
+      "value": 51.0
+     }
+    ],
+    "distinct_values": [
+     51.0
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "lineages": [
+     "DTC-PRIMARY",
+     "JSR-2017"
+    ],
+    "sources": [
+     "dtc_strath",
+     "dtc_ugent"
+    ],
+    "published_values": [
+     {
+      "family": "DTC-PRIMARY",
+      "value": 14.5
+     },
+     {
+      "family": "JSR-2017",
+      "value": 14.5
+     }
+    ],
+    "distinct_values": [
+     14.5
+    ],
+    "disputed": false
+   }
+  },
+  "JBC": {
+   "displacement_volume": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_cfdletters",
+     "jbc_memorial",
+     "jbc_scse",
+     "t2015_jbc"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 178369.92500000002
+     }
+    ],
+    "distinct_values": [
+     178369.9,
+     178370.0
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_cfdletters",
+     "jbc_scse",
+     "t2015_jbc"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 0.858
+     }
+    ],
+    "distinct_values": [
+     0.858
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_scse"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 2.5475
+     }
+    ],
+    "distinct_values": [
+     2.5475
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_cfdletters",
+     "jbc_memorial",
+     "jbc_scse",
+     "t2015_jbc"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 285.0
+     }
+    ],
+    "distinct_values": [
+     285.0
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_cfdletters",
+     "jbc_memorial",
+     "jbc_scse",
+     "t2015_jbc"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 280.0
+     }
+    ],
+    "distinct_values": [
+     280.0
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_cfdletters",
+     "jbc_memorial",
+     "jbc_scse",
+     "t2015_jbc"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 45.0
+     }
+    ],
+    "distinct_values": [
+     45.0
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "sources": [
+     "jbc_cfdletters",
+     "jbc_memorial",
+     "jbc_scse",
+     "t2015_jbc"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 16.5
+     }
+    ],
+    "distinct_values": [
+     16.5
+    ],
+    "disputed": false
+   }
+  },
+  "KCS": {
+   "displacement_volume": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 52030.0
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 52030.0
+     }
+    ],
+    "distinct_values": [
+     52030.0
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 0.6505
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 0.651
+     }
+    ],
+    "distinct_values": [
+     0.6505,
+     0.651
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": -1.48
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": -1.48
+     }
+    ],
+    "distinct_values": [
+     -1.48
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 232.5
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 232.5
+     }
+    ],
+    "distinct_values": [
+     232.5
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 230.0
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 230.0
+     }
+    ],
+    "distinct_values": [
+     230.0
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 32.2
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 32.2
+     }
+    ],
+    "distinct_values": [
+     32.2
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kcs",
+     "simman2020_summary",
+     "t2015_kcs"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 10.8
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 10.8
+     }
+    ],
+    "distinct_values": [
+     10.8
+    ],
+    "disputed": false
+   }
+  },
+  "KVLCC2": {
+   "displacement_volume": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "kvlcc2_hrcak",
+     "kvlcc2_ugent",
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "JSR-2017",
+      "value": 312622.439
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 312622.0
+     }
+    ],
+    "distinct_values": [
+     312622.0
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "kvlcc2_hrcak",
+     "kvlcc2_ugent",
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "JSR-2017",
+      "value": 0.8098
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 0.8098
+     }
+    ],
+    "distinct_values": [
+     0.8098
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 3.48
+     }
+    ],
+    "distinct_values": [
+     3.48
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 325.5
+     }
+    ],
+    "distinct_values": [
+     325.5
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "kvlcc2_hrcak",
+     "kvlcc2_jstage",
+     "kvlcc2_ugent",
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "JASNAOE-2016",
+      "value": 320.0
+     },
+     {
+      "family": "JSR-2017",
+      "value": 320.0
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 320.0
+     }
+    ],
+    "distinct_values": [
+     320.0
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CONFLICT",
+    "core_verdict": "CONFLICT",
+    "families": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "kvlcc2_hrcak",
+     "kvlcc2_ugent",
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "JSR-2017",
+      "value": 58.0
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 580.0
+     }
+    ],
+    "distinct_values": [
+     58.0,
+     580.0
+    ],
+    "disputed": true
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "kvlcc2_hrcak",
+     "kvlcc2_jstage",
+     "kvlcc2_ugent",
+     "simman2014_kvlcc2",
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "JASNAOE-2016",
+      "value": 20.8
+     },
+     {
+      "family": "JSR-2017",
+      "value": 20.8
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 20.8
+     }
+    ],
+    "distinct_values": [
+     20.8
+    ],
+    "disputed": false
+   }
+  },
+  "ONRT": {
+   "displacement_volume": {
+    "verdict": "CONFLICT",
+    "core_verdict": "CONFLICT",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2020_summary",
+     "t2015_onrt"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 8299.5
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 8507.0
+     }
+    ],
+    "distinct_values": [
+     8507.0
+    ],
+    "disputed": true
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2020_summary",
+     "t2015_onrt"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 0.535
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 0.535
+     }
+    ],
+    "distinct_values": [
+     0.535
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "SINGLE_SOURCE",
+    "core_verdict": "SINGLE_SOURCE",
+    "families": [
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2020_summary"
+    ],
+    "published_values": [
+     {
+      "family": "SIMMAN-SERIES",
+      "value": -1.68
+     }
+    ],
+    "distinct_values": [
+     -1.68
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2020_summary",
+     "t2015_onrt"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 154.0
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 154.0
+     }
+    ],
+    "distinct_values": [
+     154.0
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2020_summary",
+     "t2015_onrt"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 18.78
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 18.78
+     }
+    ],
+    "distinct_values": [
+     18.78
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "core_verdict": "CROSS_VERIFIED",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "sources": [
+     "simman2020_summary",
+     "t2015_onrt"
+    ],
+    "published_values": [
+     {
+      "family": "NMRI-T2015",
+      "value": 5.494
+     },
+     {
+      "family": "SIMMAN-SERIES",
+      "value": 5.494
+     }
+    ],
+    "distinct_values": [
+     5.494
+    ],
+    "disputed": false
+   }
+  },
+  "Series60": {
+   "displacement_volume": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "MISSING",
+    "core_verdict": "MISSING",
+    "families": [],
+    "lineages": [],
+    "sources": [],
+    "published_values": [],
+    "distinct_values": [],
+    "disputed": false
+   }
+  }
+ },
+ "oa_sources": {
+  "kvlcc2_ugent": {
+   "status": "read",
+   "file": "kvlcc2_ugent.pdf",
+   "bytes": 2944401,
+   "pages": 23,
+   "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp"
+   ]
+  },
+  "dtc_ugent": {
+   "status": "read",
+   "file": "kvlcc2_ugent.pdf",
+   "bytes": 2944401,
+   "pages": 23,
+   "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp"
+   ]
+  },
+  "kvlcc2_hrcak": {
+   "status": "read",
+   "file": "kvlcc2_hrcak.pdf",
+   "bytes": 1207162,
+   "pages": 22,
+   "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp"
+   ]
+  },
+  "kvlcc2_jstage": {
+   "status": "read",
+   "file": "kvlcc2_jstage.pdf",
+   "bytes": 3966527,
+   "pages": 11,
+   "sha256": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "quantities_read": [
+    "draft",
+    "length_pp"
+   ]
+  },
+  "jbc_cfdletters": {
+   "status": "read",
+   "file": "jbc_semarak.pdf",
+   "bytes": 1784895,
+   "pages": 14,
+   "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp",
+    "lwl"
+   ]
+  },
+  "jbc_scse": {
+   "status": "read",
+   "file": "jbc_scienpg.pdf",
+   "bytes": 576159,
+   "pages": 6,
+   "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "lcb_percent",
+    "length_pp",
+    "lwl"
+   ]
+  },
+  "jbc_memorial": {
+   "status": "read",
+   "file": "jbc_kabonge.pdf",
+   "bytes": 4702195,
+   "pages": 88,
+   "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "quantities_read": [
+    "beam",
+    "displacement_volume",
+    "draft",
+    "length_pp",
+    "lwl"
+   ]
+  },
+  "dtc_strath": {
+   "status": "read",
+   "file": "dtc_strath.pdf",
+   "bytes": 836896,
+   "pages": 15,
+   "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "quantities_read": [
+    "beam",
+    "cb",
+    "displacement_volume",
+    "draft",
+    "length_pp"
+   ]
+  }
+ },
+ "oa_cells_added": 40,
+ "closure_oa": {
+  "DTC": {
+   "DTC-PRIMARY": {
+    "cb_lpp_bwl_t_m3": 173527.3725,
+    "published_volume_m3": 173467.0,
+    "rel_error": 0.0003480344964748204,
+    "consistent": true,
+    "implied_beam_m": 50.98225641605909
+   },
+   "JSR-2017": {
+    "cb_lpp_bwl_t_m3": 173527.3725,
+    "published_volume_m3": 173468.0,
+    "rel_error": 0.00034226773814189173,
+    "consistent": true,
+    "implied_beam_m": 50.98255031781802
+   }
+  },
+  "JBC": {
+   "NMRI-T2015": {
+    "cb_lpp_bwl_t_m3": 178378.2,
+    "published_volume_m3": 178369.92500000002,
+    "rel_error": 4.6392350055617155e-05,
+    "consistent": true,
+    "implied_beam_m": 44.997912441094265
+   }
+  },
+  "KCS": {
+   "NMRI-T2015": {
+    "cb_lpp_bwl_t_m3": 52030.112400000005,
+    "published_volume_m3": 52030.0,
+    "rel_error": 2.1602921392549796e-06,
+    "consistent": true,
+    "implied_beam_m": 32.199930438743394
+   },
+   "SIMMAN-SERIES": {
+    "cb_lpp_bwl_t_m3": 52070.104800000016,
+    "published_volume_m3": 52030.0,
+    "rel_error": 0.000770801460696051,
+    "consistent": true,
+    "implied_beam_m": 32.17519930937415
+   }
+  },
+  "KVLCC2": {
+   "JSR-2017": {
+    "cb_lpp_bwl_t_m3": 312621.6704,
+    "published_volume_m3": 312622.439,
+    "rel_error": -2.458556725706876e-06,
+    "consistent": true,
+    "implied_beam_m": 58.000142596640686
+   },
+   "SIMMAN-SERIES": {
+    "cb_lpp_bwl_t_m3": 3126216.7039999994,
+    "published_volume_m3": 312622.0,
+    "rel_error": 8.999989456916019,
+    "consistent": false,
+    "implied_beam_m": 58.00006114995156
+   }
+  },
+  "ONRT": {},
+  "Series60": {}
+ },
+ "fleet_backfill": {
+  "KCS": {
+   "displacement_volume": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   }
+  },
+  "KVLCC2": {
+   "displacement_volume": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CONFLICT",
+    "families": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": true
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "JASNAOE-2016",
+     "JSR-2017",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   }
+  },
+  "JBC": {
+   "displacement_volume": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   },
+   "cb": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   },
+   "length_pp": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "NMRI-T2015"
+    ],
+    "lineages": [
+     "NMRI-T2015"
+    ],
+    "disputed": false
+   }
+  },
+  "ONRT": {
+   "displacement_volume": {
+    "verdict": "CONFLICT",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": true
+   },
+   "cb": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "lcb_percent": {
+    "verdict": "SINGLE_SOURCE",
+    "families": [
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "lwl": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "beam": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   },
+   "draft": {
+    "verdict": "CROSS_VERIFIED_LINEAGE",
+    "families": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "lineages": [
+     "NMRI-T2015",
+     "SIMMAN-SERIES"
+    ],
+    "disputed": false
+   }
+  }
+ }
 }
