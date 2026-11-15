@@ -47,6 +47,7 @@ from tensorcad.fleet.crossref import (  # noqa: E402
     Cell,
     closure_check,
     coverage_summary,
+    refresh_derived,
     cross_reference,
     lineage_of,
     parse_pdf_text,
@@ -231,6 +232,11 @@ def merge_into(payload: dict[str, Any], ingest: Mapping[str, Any], fleet_specs: 
     }
     payload["oa_cells_added"] = added
     payload["closure_oa"] = closure_check(report)
+    # The cached closure/adjudication blocks are functions of ``report``: a merge that rewrote
+    # the report without rewriting them left a library that contradicted itself (the round-1
+    # KVLCC2 ``Bwl 580`` defect stayed in ``closure`` for a whole round after the numerals had
+    # been repaired).  Refresh both here rather than trusting the caller to remember.
+    refresh_derived(payload, ("closure", "adjudication"))
     if fleet_specs is not None:
         payload["fleet_backfill"] = backfill(fleet_specs, payload["lineage"], report)
     return payload

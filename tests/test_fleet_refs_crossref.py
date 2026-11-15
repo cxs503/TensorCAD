@@ -159,12 +159,21 @@ def test_kvlcc2_collapses_to_one_lineage_and_exposes_the_bwl_typo(library):
     # Two SIMMAN editions state 312622 m3, but they are one lineage: honest single source.
     assert kvlcc2["displacement_volume"]["verdict"] == "CROSS_VERIFIED"  # JSR-2017 + SIMMAN series
     assert kvlcc2["displacement_volume"]["family_values"] == {"JSR-2017": 312622.439, "SIMMAN-SERIES": 312622.0}
-    closure = library["closure"]["KVLCC2"]["SIMMAN-SERIES"]
-    assert not closure["consistent"]
-    # Cb*Lpp*Bwl*T with the printed Bwl=580 is 10x the published volume; the implied breadth
-    # is the ship's real 58.0 m, i.e. the table carries a factor-of-ten typo.
-    assert closure["implied_beam_m"] == pytest.approx(58.0, abs=0.5)
-    assert closure["rel_error"] > 8.0
+    # Round 3 added a lineage printing the corrected 58 m, so the family value closes on its
+    # own digits and the cached closure block says so (it used to still carry round 2's 900 %
+    # residual for a whole round after the repair -- see docs/fleet_refs_round5_dissent.md).
+    closure = library["closure"]["KVLCC2"]
+    assert set(closure) == {"JSR-2017", "SIMMAN-SERIES"}
+    assert all(row["consistent"] for row in closure.values())
+    # The typo is not gone: it is printed in two entries, so it lives in the dissent and is
+    # attributed there, never by rewriting the vote.
+    beam = library["report"]["KVLCC2"]["quantities"]["beam"]
+    assert beam["family_values"]["SIMMAN-SERIES"] == pytest.approx(58.0)
+    assert sorted(beam["family_disagreement"]["SIMMAN-SERIES"]["dissent"]) == [580.0, 580.0]
+    slips = [row for row in library["adjudication"]["scale_typos"] if row["ship"] == "KVLCC2"]
+    assert [(row["printed"], row["divide_by"], row["origin"]) for row in slips] == [
+        (580.0, 10.0, "dissent")
+    ]
 
 
 @pytest.mark.skip(reason="gap list superseded by the round-2 merge; see docs/fleet_refs_oa_landed.md")
@@ -208,7 +217,13 @@ def test_report_is_rendered_from_the_library(library):
     text = DOC.read_text()
     cov = coverage_summary(library["report"])
     assert f"{cov['cross_verified']}/{cov['cells']}" in text
-    assert "implied Bwl 58.00 m" in text
+    # The rendered closure table must show the *repaired* KVLCC2 identity (both lineages now
+    # close to 1e-6) and must not reprint the round-2 phantom 900 % defect that the stale
+    # cache used to carry into this document (docs/fleet_refs_round5_dissent.md).
+    assert "3,126,216.7" not in text
+    assert "**defect**" not in text
+    for family in ("JSR-2017", "SIMMAN-SERIES"):
+        assert family in text
 
 
 def test_registry_covers_all_six_hulls():
