@@ -111,16 +111,18 @@ def test_kcs_workshop_geometry_matches_published_particulars():
     assert got.beam == pytest.approx(particulars["beam"], rel=0.02)
     # Published Cb is on Lpp; the validation row puts the measured value on that basis.
     assert abs(report["quantities"]["cb"]["error_percent"]) <= 3.0, report["quantities"]["cb"]
-    # `passed` is the conjunction over volume / wetted area / Cb, and it is
-    # **false**: the wetted area of this patch soup overshoots by ~19 %.  The hull
-    # skin is described by overlapping/duplicated patches, so summing triangle
-    # areas counts the same skin twice, while the envelope breadth (and hence the
-    # volume) is immune because it takes the outermost surface.  Pinned here as a
-    # measured limitation, not hidden: any future de-duplication flips this test.
+    # `passed` is the conjunction over volume / wetted area / Cb, and it is now
+    # **true**: `hull_characteristics` removes the sheets that hide under an
+    # overlapping patch before summing (see `wetted_area` and
+    # `test_hull_surface_dedup.py`).  The raw soup sum stays on record -- it is
+    # what a naive triangle sum reports, +19.4 % on this file -- so the defect
+    # remains measured rather than forgotten.
     area_row = report["quantities"]["s_wetted"]
-    assert 10.0 < area_row["error_percent"] < 30.0, area_row
-    assert area_row["passed"] is False
-    assert report["passed"] is False
+    assert abs(area_row["error_percent"]) <= 3.0, area_row
+    assert area_row["passed"] is True
+    assert got.s_wetted_naive > 1.15 * particulars["s_wetted"]
+    assert got.s_wetted_discarded > 0.0
+    assert report["passed"] is True
 
 
 @pytest.mark.skipif(not KCS.exists(), reason=f"workshop asset absent: {KCS}")
