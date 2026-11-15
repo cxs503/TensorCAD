@@ -48,6 +48,15 @@ Z_DOWN_RATIO = 3.0
 #: at its own origin, and a 1e-9 m shift is round-off, not a policy).
 X_TOLERANCE = 1e-6
 
+#: When a file's own ``x = 0`` sits *inside* its model, the share of the extent that lies
+#: aft of the origin decides whether that origin is the aft perpendicular or the forward
+#: end of a stern-negative export.  The two published exports are unambiguous: KCS keeps
+#: 2.5 % of its 243.8 m extent aft of ``x = 0`` (the transom overhang; the origin *is* the
+#: AP), KVLCC2 keeps 98.3 % of its 333.6 m extent aft of it (the origin is at the bow).
+#: Any split between the two decides the same way; 0.5 is used because it is the point
+#: where "the origin is nearer the forward end" becomes literally true.
+X_ORIGIN_SPLIT = 0.5
+
 #: Frame string written next to a normalised build.
 NORMALISED_FRAME = "x from 0 at the aft-most point, y to starboard, z up from the design waterline (m)"
 
@@ -190,6 +199,7 @@ class FrameReport:
     evidence: FrameEvidence
     z_flip: bool
     x_shift: float
+    x_origin_reason: str = ""
 
     @property
     def frame(self) -> str:
@@ -201,12 +211,52 @@ class FrameReport:
             "evidence": self.evidence.as_dict(),
             "z_flip": self.z_flip,
             "x_shift": round(self.x_shift, 6),
+            "x_origin_reason": self.x_origin_reason,
             "frame": self.frame,
             "note": (
                 "detected from the sampled surface, not assumed: a z-down, stern-negative file "
                 "is reflected and translated before it reaches the half-breadth field"
             ),
         }
+
+
+def _x_origin_decision(evidence: FrameEvidence) -> tuple[float, str]:
+    """Decide the ``x`` translation for the ``auto`` policy, and say why.
+
+    ``x = 0`` is the fleet frame's aft end, so the question is *where the file's own origin
+    is*, not simply *where the model starts*.  Always translating the aft-most point to 0
+    is wrong for a file that is already AP-origin: the published KCS model runs from
+    ``-6.0`` (transom overhang) to ``237.84`` m (bulb) around an origin that *is* the aft
+    perpendicular, so a 6 m shift slides the hull into the Lpp window and the forebody is
+    cut off by it -- measured length 227 m against a declared 230 m, which the fleet's
+    principal-dimension gate refuses.  The three cases are therefore treated separately.
+    """
+    extent = evidence.x_extent
+    if evidence.x_min >= -X_TOLERANCE:
+        # Nothing aft of the file's own origin: the model is authored forward of it, so the
+        # aft-most point has to be brought to 0 or the Lpp window would start mid-hull.
+        shift = -evidence.x_min
+        return shift, (
+            f"model starts forward of its own x = 0 (x_min = {evidence.x_min:.3f} m); "
+            f"translated by {shift:+.3f} m so the aft-most point is at x = 0"
+        )
+    if evidence.x_max <= X_TOLERANCE or extent <= 0.0:
+        shift = -evidence.x_min
+        return shift, (
+            f"stern-negative export (x in [{evidence.x_min:.3f}, {evidence.x_max:.3f}] m, fully "
+            f"aft of its own origin); translated by {shift:+.3f} m"
+        )
+    aft_fraction = abs(evidence.x_min) / extent
+    if aft_fraction > X_ORIGIN_SPLIT:
+        shift = -evidence.x_min
+        return shift, (
+            f"origin sits near the forward end ({aft_fraction:.1%} of the {extent:.1f} m extent is "
+            f"aft of x = 0); translated by {shift:+.3f} m"
+        )
+    return 0.0, (
+        f"origin is the aft perpendicular: only {aft_fraction:.1%} of the {extent:.1f} m extent "
+        f"({abs(evidence.x_min):.3f} m) is aft of x = 0, so no translation is applied"
+    )
 
 
 def normalise(
@@ -219,15 +269,20 @@ def normalise(
     evidence = detect(cloud)
     z_axis = evidence.z_axis if pol.z_axis == "auto" else pol.z_axis
     z_flip = z_axis == "down"
-    x_shift = 0.0
-    if pol.x_origin == "auto" and abs(evidence.x_min) > X_TOLERANCE:
-        x_shift = -evidence.x_min
+    if pol.x_origin == "auto":
+        x_shift, reason = _x_origin_decision(evidence)
+        if abs(x_shift) <= X_TOLERANCE:
+            x_shift = 0.0
+    else:
+        x_shift, reason = 0.0, "policy x_origin = 'as_is': the file's own origin is kept"
     out = [(x + x_shift, y, (-z if z_flip else z)) for x, y, z in cloud]
-    return out, FrameReport(policy=pol, evidence=evidence, z_flip=z_flip, x_shift=x_shift)
+    return out, FrameReport(policy=pol, evidence=evidence, z_flip=z_flip, x_shift=x_shift,
+                            x_origin_reason=reason)
 
 
 __all__ = [
     "NORMALISED_FRAME",
+    "X_ORIGIN_SPLIT",
     "X_TOLERANCE",
     "Z_DOWN_RATIO",
     "FrameEvidence",

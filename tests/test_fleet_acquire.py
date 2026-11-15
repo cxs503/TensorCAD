@@ -37,9 +37,11 @@ from tensorcad.fleet.acquire import (
     acquire_ship,
     fetch,
     load_plan,
+    main,
     read_custodian,
     self_audit,
     selftest,
+    verify_pins,
 )
 from tensorcad.fleet.build import build_ship_geometry, write_binary_stl
 from tensorcad.fleet.manifest import load_manifest
@@ -346,3 +348,92 @@ def test_packaged_plan_is_a_real_plan_object():
     assert plan.for_ship("KCS") is not None
     assert plan.missing_for(["KCS", "KVLCC2", "ONRT", "JBC", "DTC", "Series60"]) == []
     assert plan.for_ship("KVLCC1") is None
+
+# ------------------------------------------------------------- pin re-verification
+#
+# A pinned digest is trust-on-first-use: it records what one retrieval hashed to. The only
+# part of that claim a machine can test later is whether the pin *reproduces*, so these
+# tests pin the four outcomes that re-check must distinguish -- and the property that a
+# mismatch is an alarm rather than a warning.
+
+
+def _pin_plan(tmp_path, entries):
+    document = {"schema": PLAN_SCHEMA, "ships": entries}
+    path = tmp_path / "pin_plan.json"
+    path.write_text(json.dumps(document))
+    return path
+
+
+def test_verify_pins_separates_reproduced_mismatch_unpinned_and_unavailable(tmp_path):
+    payload = b"official-ish hull bytes\n" * 3
+    source = tmp_path / "hull.igs"
+    source.write_bytes(payload)
+    digest = _digest(payload)
+    plan_path = _pin_plan(tmp_path, [
+        {"ship": "KCS", "file_format": "iges", "url": source.as_uri(), "sha256": digest},
+        {"ship": "KVLCC2", "file_format": "iges", "url": source.as_uri(), "sha256": _digest(b"other")},
+        {"ship": "ONRT", "file_format": "iges", "url": source.as_uri()},
+        {"ship": "JBC", "file_format": "iges", "sha256": digest},
+        {"ship": "DTC", "file_format": "iges", "url": (tmp_path / "absent.igs").as_uri(), "sha256": digest},
+    ])
+    report = verify_pins(plan_path=plan_path)
+    status = {check["ship"]: check["status"] for check in report["checks"]}
+    assert status == {
+        "KCS": "reproduced",
+        "KVLCC2": "mismatch",
+        "ONRT": "unpinned",
+        "JBC": "no_source",
+        "DTC": "unavailable",
+    }
+    summary = report["summary"]
+    assert summary["pins_checked"] == 2          # reproduced + mismatch; nothing else is a check
+    assert summary["pins_reproduced"] == 1
+    assert summary["pins_mismatched"] == 1
+    assert summary["mismatched"] == ["KVLCC2"]
+    assert summary["ok"] is False                # a mismatch is not allowed to look healthy
+    reproduced = next(c for c in report["checks"] if c["ship"] == "KCS")
+    assert reproduced["observed_sha256"] == digest
+    assert reproduced["bytes"] == len(payload)
+    assert reproduced["pin_source"] == "plan"
+    assert reproduced["transport"]["scheme"] == "file"
+    mismatch = next(c for c in report["checks"] if c["ship"] == "KVLCC2")
+    assert mismatch["expected_sha256"] == _digest(b"other")
+    assert mismatch["observed_sha256"] == digest
+    assert mismatch["reason"] == "digest_mismatch"
+    assert "not the file the pin was taken from" in mismatch["reason_detail"]
+
+
+def test_verify_pins_reports_a_custodian_file_without_transport(tmp_path):
+    payload = b"custodian-supplied hull\n"
+    source = tmp_path / "handover.igs"
+    source.write_bytes(payload)
+    plan_path = _pin_plan(tmp_path, [{"ship": "KCS", "file_format": "iges"}])
+    report = verify_pins(plan_path=plan_path, custodians=[f"KCS={source}"],
+                         pins=[f"KCS={_digest(payload)}"])
+    check = report["checks"][0]
+    assert check["status"] == "reproduced"
+    assert check["pin_source"] == "command_line"
+    assert check["transport"]["custody"] == "custodian_file"
+    assert report["summary"]["ok"] is True
+
+
+def test_verify_pins_refuses_overrides_for_ships_outside_the_plan(tmp_path):
+    plan_path = _pin_plan(tmp_path, [{"ship": "KCS", "file_format": "iges"}])
+    with pytest.raises(PlanError):
+        verify_pins(plan_path=plan_path, pins=["KVLCC1=deadbeef"])
+
+
+def test_verify_pins_cli_fails_the_command_on_a_mismatch(tmp_path):
+    payload = b"hull\n"
+    source = tmp_path / "hull.igs"
+    source.write_bytes(payload)
+    good = _pin_plan(tmp_path, [
+        {"ship": "KCS", "file_format": "iges", "url": source.as_uri(), "sha256": _digest(payload)},
+    ])
+    assert main(["--verify-pins", "--plan", str(good), "--out-dir", str(tmp_path / "a")]) == 0
+    report = json.loads((tmp_path / "a" / "pin_reverification.json").read_text())
+    assert report["summary"]["pins_reproduced"] == 1
+    bad = _pin_plan(tmp_path, [
+        {"ship": "KCS", "file_format": "iges", "url": source.as_uri(), "sha256": _digest(b"drifted")},
+    ])
+    assert main(["--verify-pins", "--plan", str(bad), "--out-dir", str(tmp_path / "b")]) == 1
