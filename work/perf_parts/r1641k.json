@@ -1,0 +1,113 @@
+{
+  "schema": "tensorcad.perf_benchmark/2",
+  "passed": true,
+  "verdict": "not_run",
+  "gates_checked": 0,
+  "gates_not_run": 3,
+  "seconds": 115.765,
+  "command": "",
+  "environment": {
+    "tensorcad": "0.23.0",
+    "python": "3.11.6",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "machine": "loongarch64",
+    "cpu_count": 128,
+    "loadavg": {
+      "load1": 109.43,
+      "load5": 70.78,
+      "load15": 67.02
+    }
+  },
+  "cluster_warnings": [],
+  "gates": [
+    {
+      "name": "scaling_load",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "baseline_seconds": null,
+      "measured_seconds": null,
+      "ratio": null
+    },
+    {
+      "name": "scaling_point_locate_accel",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "baseline_seconds": null,
+      "measured_seconds": null,
+      "ratio": null
+    },
+    {
+      "name": "scaling_volume",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "baseline_seconds": null,
+      "measured_seconds": null,
+      "ratio": null
+    }
+  ],
+  "results": [
+    {
+      "subtask": "load",
+      "copies": 1,
+      "nx": 1281,
+      "nz": 321,
+      "triangles": 1640958,
+      "vertices": 820481,
+      "grid_cells": 0,
+      "seconds": 101.31111,
+      "status": "measured",
+      "throughput": 16197.2,
+      "note": "",
+      "build_seconds": null,
+      "index_cells": 0,
+      "index_entries": 0,
+      "index_bytes": 0,
+      "peak_rss_mb": 2352.046875,
+      "rss_mb": 432.78125,
+      "mesh_mb": 356.80655670166016
+    },
+    {
+      "subtask": "point_locate_accel",
+      "copies": 1,
+      "nx": 1281,
+      "nz": 321,
+      "triangles": 1640958,
+      "vertices": 820481,
+      "grid_cells": 417720,
+      "seconds": 0.692124,
+      "status": "measured",
+      "throughput": 2889.7,
+      "note": "hits=346/2000, grid=(295, 59, 24), entries/tri=1.51, build=13.003s, bodies=1",
+      "build_seconds": 13.002784,
+      "index_cells": 417720,
+      "index_entries": 2477756,
+      "index_bytes": 131401764,
+      "peak_rss_mb": 2352.046875,
+      "rss_mb": 544.8125,
+      "mesh_mb": 356.80655670166016
+    },
+    {
+      "subtask": "volume",
+      "copies": 1,
+      "nx": 1281,
+      "nz": 321,
+      "triangles": 1640958,
+      "vertices": 820481,
+      "grid_cells": 0,
+      "seconds": 0.736746,
+      "status": "measured",
+      "throughput": 2227304.2,
+      "note": "volume=7.512257 m^3, analytic=7.512698 m^3, rel_err=-0.006%, bodies=1",
+      "build_seconds": null,
+      "index_cells": 0,
+      "index_entries": 0,
+      "index_bytes": 0,
+      "peak_rss_mb": 2352.046875,
+      "rss_mb": 432.8125,
+      "mesh_mb": 356.80655670166016
+    }
+  ]
+}

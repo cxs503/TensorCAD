@@ -1115,6 +1115,41 @@ def scaling_gates(
     return tuple(gates)
 
 
+#: Environment fields that make two wall-clock measurements incomparable.  A
+#: stored baseline is a *time*, and time only means something on the machine it
+#: was taken on, so a baseline recorded on another architecture must not be
+#: allowed to flag RED (or, worse, to pass) on this one.
+ENV_HARD_KEYS = ("machine", "platform")
+#: Environment fields that bias a comparison but do not invalidate it; they are
+#: surfaced in the gate detail instead of silently skewing the ratio.
+ENV_SOFT_KEYS = ("cpu_count", "python")
+
+
+def environment_compat(
+    baseline_env: dict[str, Any] | None,
+    current_env: dict[str, Any] | None,
+) -> tuple[bool, str]:
+    """Can wall-clock times from ``baseline_env`` be compared with ``current_env``?
+
+    Returns ``(comparable, reason)``.  A baseline without an environment record
+    (older baselines) is assumed comparable and said so in ``reason``; a
+    different architecture / OS is a hard mismatch; core count and interpreter
+    version only annotate the result.
+    """
+    if not baseline_env or not current_env:
+        return True, "no environment record on one side (assumed comparable)"
+    for key in ENV_HARD_KEYS:
+        b, c = baseline_env.get(key), current_env.get(key)
+        if b and c and b != c:
+            return False, f"{key} differs: measured {c!r} vs baseline {b!r}"
+    notes = []
+    for key in ENV_SOFT_KEYS:
+        b, c = baseline_env.get(key), current_env.get(key)
+        if b and c and b != c:
+            notes.append(f"{key} {c} vs baseline {b}")
+    return True, "; ".join(notes) if notes else "environment matches baseline"
+
+
 def evaluate_gates(
     result: PerfBenchmarkResult,
     baseline_path: str | Path | None = None,
@@ -1127,10 +1162,12 @@ def evaluate_gates(
     produces a RED gate.
     """
     baseline: dict[str, float] = {}
+    baseline_env: dict[str, Any] | None = None
     if baseline_path is not None:
         bp = Path(baseline_path)
         if bp.exists():
             data = json.loads(bp.read_text(encoding="utf-8"))
+            baseline_env = data.get("environment")
             for entry in data.get("results", []):
                 key = measurement_key(
                     entry["subtask"], entry["nx"], entry["nz"], entry.get("copies", 1)
@@ -1139,6 +1176,19 @@ def evaluate_gates(
                     baseline[key] = entry["seconds"]
 
     gates: list[GateVerdict] = []
+    comparable, env_reason = environment_compat(baseline_env, result.environment)
+    if baseline and not comparable:
+        # Refuse the comparison instead of inventing a RED/pass number: a
+        # wall-clock baseline is machine-specific.  status=not_run (never a
+        # pass) so the verdict cannot be reported as green.
+        scaling_only = tuple(g for g in result.gates if g.name.startswith(SCALING_GATE_PREFIX))
+        refusal = GateVerdict(
+            name="regression_environment",
+            passed=True,
+            status=NOT_RUN,
+            detail=f"not_run: baseline not comparable ({env_reason})",
+        )
+        return replace(result, gates=scaling_only + (refusal,)), []
     for r in result.results:
         if r.seconds is None:
             continue
@@ -1151,7 +1201,10 @@ def evaluate_gates(
         gates.append(GateVerdict(
             name=f"regression_{key}",
             passed=passed,
-            detail=f"{r.seconds:.4f}s vs {bl:.4f}s baseline (ratio={ratio:.2f}x, limit={regression_factor}x)",
+            detail=(
+                f"{r.seconds:.4f}s vs {bl:.4f}s baseline (ratio={ratio:.2f}x, "
+                f"limit={regression_factor}x; env: {env_reason})"
+            ),
             baseline_seconds=bl,
             measured_seconds=r.seconds,
             ratio=round(ratio, 3),
