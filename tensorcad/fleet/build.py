@@ -22,10 +22,11 @@ import math
 import struct
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from tensorcad import mesh as meshlib
 from tensorcad.geometry import Mesh, MeshBuilder
+from tensorcad.fleet.frames import FramePolicy, normalise
 from tensorcad.fleet.manifest import ShipRecord
 
 #: Window in which the Series-60 section law has been verified (``tensorcad.series60``).
@@ -442,6 +443,22 @@ def stl_mesh(record: ShipRecord, path: str | Path, *, weld_tolerance: float = 1e
 IGES_FRAME = "x aft->fwd, y positive to starboard, z up from keel (m)"
 
 
+def resolve_geometry_path(pointer: str | Path, *, sha256: str | None = None) -> str:
+    """Resolve an ``asset://`` URI (or plain path) to a readable file.
+
+    The geometry bytes are publisher material and stay out of the repository, so a
+    manifest points at ``asset://geometry/hulls/<hull>/<file>`` and the asset store
+    (``$TENSORCAD_ASSET_ROOT``, default from the registry) holds the bytes.  A plain
+    path is returned unchanged so every existing caller keeps working.
+    """
+    text = str(pointer)
+    if not text.startswith("asset://"):
+        return text
+    from tensorcad.assetlib.consumer import resolve_pointer
+
+    return str(resolve_pointer(text, sha256 or ""))
+
+
 def iges_field_mesh(
     record: ShipRecord,
     iges_path: str | Path,
@@ -450,6 +467,8 @@ def iges_field_mesh(
     dz: float = 0.1,
     ring_points: int = 240,
     samples_per_metre: float = 8.0,
+    frame: Mapping[str, Any] | FramePolicy | None = None,
+    x_extent: str = "record",
 ) -> BuiltGeometry:
     """Build a watertight hull mesh from an IGES file via the half-breadth field route.
 
@@ -460,6 +479,14 @@ def iges_field_mesh(
 
     The cost is explicit: the ``max`` binning biases the surface outwards by
     O(cell^2 / radius), which is bounded by the reported ``field_cover`` metric.
+
+    ``frame`` is the declarative file-frame policy of :mod:`tensorcad.fleet.frames`.
+    It is *measured*, not assumed: the sampled surface is inspected for a waterline-origin
+    z-down export and for an x origin at the forward rather than the aft end, and the
+    applied flip/shift is written into ``details["frame_normalisation"]``.  ``x_extent``
+    chooses the field's x window: ``"record"`` keeps ``0 ... Lpp`` (the historical
+    behaviour), ``"geometry"`` uses the model's own extent -- required when the hull
+    overhangs its perpendiculars, because clipping to ``Lpp`` would slice the ends off.
     """
     from tensorcad.fleet_baseline import (
         build_solid,
@@ -468,7 +495,7 @@ def iges_field_mesh(
     )
     from tensorcad.iges import read_iges
 
-    iges_path = Path(iges_path)
+    iges_path = Path(resolve_geometry_path(str(iges_path)))
     if not iges_path.exists():
         raise RouteRefusal(f"IGES file not found: {iges_path}")
 
@@ -483,15 +510,25 @@ def iges_field_mesh(
         raise RouteRefusal(f"no B-spline surfaces found in {iges_path}")
 
     spacing = 1.0 / samples_per_metre
-    points = sample_patches(surfaces, spacing=spacing)
+    raw_points = sample_patches(surfaces, spacing=spacing)
+
+    # Frame first: a waterline-origin, z-down file keeps nothing under ``0 <= z <= draft``.
+    points, frame_report = normalise(raw_points, frame)
+    if x_extent == "geometry":
+        min_x = min(p[0] for p in points)
+        max_x = max(p[0] for p in points)
+    elif x_extent == "record":
+        min_x, max_x = 0.0, record.length
+    else:
+        raise RouteRefusal(f"x_extent must be 'record' or 'geometry', got {x_extent!r}")
 
     field = field_from_points(
         points,
         draft=record.draft,
         dx=dx,
         dz=dz,
-        min_x=0.0,
-        max_x=record.length,
+        min_x=min_x,
+        max_x=max_x,
     )
 
     mesh, loft_info = build_solid(field, ring_points=ring_points, draft=record.draft)
@@ -503,6 +540,9 @@ def iges_field_mesh(
             "source_path": str(iges_path),
             "num_surfaces": len(surfaces),
             "num_sample_points": len(points),
+            "num_raw_sample_points": len(raw_points),
+            "frame_normalisation": frame_report.as_dict(),
+            "x_extent": x_extent,
             "field": field.to_dict(),
             "loft": loft_info,
             "dx": dx,
@@ -600,6 +640,14 @@ def build_ship_geometry(
         target = iges_path or record.geometry_path
         if target is None:
             raise RouteRefusal("iges_field route needs a path (record.geometry_path or iges_path)")
-        return iges_field_mesh(record, target, dx=dx, dz=dz, ring_points=ring_points,
-                               samples_per_metre=samples_per_metre)
+        return iges_field_mesh(
+            record,
+            target,
+            dx=dx,
+            dz=dz,
+            ring_points=ring_points,
+            samples_per_metre=samples_per_metre,
+            frame=record.geometry_frame,
+            x_extent=(record.geometry_frame or {}).get("x_extent", "record"),
+        )
     raise RouteRefusal(f"unknown geometry route {route!r}")
