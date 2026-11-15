@@ -1,0 +1,112 @@
+# Geometry golden-regression gate (GAP-CAD-D2-GOLDEN-REGRESSION), library-agnostic arm.
+#
+# PROVENANCE.  This workflow is the drop-in authored in the TensorPapers repository at
+# papers/gap-cad-d2-golden-regression/ci/tensorcad-geometry-golden.yml, installed here
+# verbatim except for three deliberate, documented edits:
+#
+#   1. runs-on: ci-loong64 (the runner this repository's other gates use) instead of
+#      ubuntu-latest, so the job is actually dispatched in this ecosystem's CI.
+#   2. the TensorPapers checkout carries a token fallback, so the second repository can
+#      be fetched whether or not a dedicated read token is provisioned.
+#   3. an assertion step binds the acceptance criteria (control arm 8/8, detection power
+#      1.0, zero false alarms, WITHHELD still refused) to the report the run produced,
+#      instead of trusting only the process exit code.  The workflow file itself was also
+#      added to the pull_request path filter so a change to this gate is self-tested.
+#
+# WHY A SECOND GATE.  .github/workflows/golden-geometry.yml guards the repository's own
+# committed baseline (tensorcad.golden, four hulls, FROZEN-anchored).  This workflow runs
+# the independent, dual-derived reference suite that lives in TensorPapers: every
+# reference number is produced by two structurally different derivations before it may
+# judge anything, and the judging code is not shipped by the repository it judges.  A
+# change that satisfies one gate but not the other is exactly the failure mode the pair
+# is meant to catch.
+#
+# What it gates: any change that can move geometry or hydrostatics -- hull family
+# modules, the mesh/integrator, the topology audit, the STL exchange -- runs the
+# golden suite.  Documentation-only changes do not.
+name: geometry-golden
+
+on:
+  push:
+    paths:
+      - "tensorcad/hull.py"
+      - "tensorcad/wigley.py"
+      - "tensorcad/series60.py"
+      - "tensorcad/dtmb5415.py"
+      - "tensorcad/hydrostatics.py"
+      - "tensorcad/hydrostatics_analytic.py"
+      - "tensorcad/mesh.py"
+      - "tensorcad/topology.py"
+      - "tensorcad/exchange.py"
+      - "tensorcad/geometry_audit.py"
+      - "tensorcad/voxel.py"
+      - ".github/workflows/geometry-golden.yml"
+  pull_request:
+    paths:
+      - "tensorcad/hull.py"
+      - "tensorcad/wigley.py"
+      - "tensorcad/series60.py"
+      - "tensorcad/dtmb5415.py"
+      - "tensorcad/hydrostatics.py"
+      - "tensorcad/hydrostatics_analytic.py"
+      - "tensorcad/mesh.py"
+      - "tensorcad/topology.py"
+      - "tensorcad/exchange.py"
+      - "tensorcad/geometry_audit.py"
+      - "tensorcad/voxel.py"
+      - ".github/workflows/geometry-golden.yml"
+  workflow_dispatch:
+
+jobs:
+  golden:
+    runs-on: ci-loong64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: TensorCAD
+
+      - uses: actions/checkout@v4
+        with:
+          repository: cxs503/TensorPapers
+          path: TensorPapers
+          token: ${{ secrets.TENSORPAPERS_READ_TOKEN || github.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --quiet pytest
+
+      - name: Golden suite (dual-derived criteria, zero hand-copy)
+        env:
+          TENSORCAD_PATH: ${{ github.workspace }}/TensorCAD
+          PYTHONPATH: ${{ github.workspace }}/TensorCAD
+        working-directory: ${{ github.workspace }}/TensorPapers/papers/gap-cad-d2-golden-regression
+        run: python suite.py
+
+      - name: Detection power (mutants must be caught, no false alarms)
+        env:
+          TENSORCAD_PATH: ${{ github.workspace }}/TensorCAD
+          PYTHONPATH: ${{ github.workspace }}/TensorCAD
+        working-directory: ${{ github.workspace }}/TensorPapers/papers/gap-cad-d2-golden-regression
+        run: python mutants.py
+
+      - name: Assert the acceptance criteria against this run's own report
+        # Exit code 0 only says "nothing failed": suite.py still exits 0 when a case
+        # stops being measured (SKIP/UNAVAILABLE -- measured with a +3% beam regression
+        # in tensorcad/wigley.py) and the mutation arm's contract is its rates, not its
+        # status.  One script, also used by the pre-commit hook, reads the reports.
+        working-directory: ${{ github.workspace }}/TensorCAD
+        run: |
+          python tools/golden/gap_d2_assert_report.py \
+            "${{ github.workspace }}/TensorPapers/papers/gap-cad-d2-golden-regression"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geometry-golden-evidence
+          path: |
+            TensorPapers/papers/gap-cad-d2-golden-regression/outputs/golden_suite.json
+            TensorPapers/papers/gap-cad-d2-golden-regression/outputs/mutation_report.json
+            TensorPapers/papers/gap-cad-d2-golden-regression/outputs/series60_convergence.json
