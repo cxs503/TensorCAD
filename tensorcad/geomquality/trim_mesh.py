@@ -461,10 +461,20 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
         try:
             uv_loops: list[list[tuple[float, float]]] = []
             face_residual = 0.0
-            for loop in face.loops:
+            routes = {"parametric": 0, "inverted": 0}
+            for index, loop in enumerate(face.loops):
+                provided = face.uv_loops[index] if index < len(face.uv_loops) else None
+                if provided is not None:
+                    # The file carried the trim in the surface's own parameter space and the
+                    # reader cross-checked it against the 3-D curve.  Using it is exact:
+                    # no inversion means no branch ambiguity and no residual to gate.
+                    uv_loops.append(list(provided))
+                    routes["parametric"] += 1
+                    continue
                 parameters, residual = _loop_to_uv(face.surface, loop, tolerance)
                 face_residual = max(face_residual, residual)
                 uv_loops.append(parameters)
+                routes["inverted"] += 1
             if face_residual > tolerance:
                 raise IgesError(
                     f"trim loop does not lie on its surface: inversion residual "
@@ -499,6 +509,10 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
                 "loop_points": sum(len(loop) for loop in uv_loops),
                 "triangles": len(face_triangles),
                 "inversion_residual": face_residual,
+                "trim_routes": dict(routes),
+                "parametric_cross_check": max(
+                    (value for value in face.cross_checks if value is not None), default=None
+                ),
                 "chord_tolerance": chord,
                 "surface_vertices": len(flat),
                 "parametric_area": polygon_area,
