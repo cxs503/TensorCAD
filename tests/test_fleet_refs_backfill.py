@@ -34,8 +34,13 @@ def specs() -> dict:
 def test_every_pinned_digest_is_a_digest_not_a_placeholder():
     for spec in SOURCES:
         assert DIGEST_PATTERN.match(spec.sha256), f"{spec.key} carries no real digest"
-    # The registry has seven documents; six feeds four hulls and ITTC is bibliographic.
-    assert len({spec.sha256 for spec in SOURCES}) == len(SOURCES)
+    # One document may serve two hulls (the Ghent Table 1 prints KVLCC2 and DTC side by side),
+    # so a repeated digest is only legal between specs that point at the same URL.
+    by_digest: dict[str, set[str]] = {}
+    for spec in SOURCES:
+        by_digest.setdefault(spec.sha256, set()).add(spec.url)
+    for digest, urls in by_digest.items():
+        assert len(urls) == 1, f"digest {digest[:12]} claimed by different documents: {urls}"
 
 
 def test_pinned_digests_reproduce_from_the_fetched_bytes():
