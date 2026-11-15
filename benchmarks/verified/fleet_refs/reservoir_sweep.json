@@ -1,0 +1,1792 @@
+{
+ "schema": "tensorcad.fleet_refs.reservoir_sweep/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "generated_utc": "2026-11-15T12:02:30+00:00",
+ "generated_by": "python tools/baseline_fleet/refs_reservoir_sweep.py",
+ "library": "benchmarks/verified/fleet_refs/crossref.json",
+ "reservoirs": [
+  "artifacts/fleet_refs/raw",
+  "/tmp/hunt",
+  "/tmp/refs",
+  "/tmp/oa",
+  "/tmp/xref/raw"
+ ],
+ "policy": "a candidate is a lead with a pinned digest and a quoted line; it is never an admitted value and never changes a library verdict",
+ "quantities_scanned": [
+  "beam",
+  "cb",
+  "displacement_volume",
+  "draft",
+  "lcb_percent",
+  "length_pp",
+  "lwl"
+ ],
+ "summary": {
+  "documents_scanned": 38,
+  "documents_in_library": 8,
+  "documents_outside_library": 30,
+  "blocking_cells": 20,
+  "by_verdict": {
+   "SOURCE_GAP_CONFIRMED": 6,
+   "CANDIDATE_FIELD": 14
+  },
+  "by_hull": {
+   "DTC": {
+    "SOURCE_GAP_CONFIRMED": 2
+   },
+   "JBC": {
+    "SOURCE_GAP_CONFIRMED": 1,
+    "CANDIDATE_FIELD": 6
+   },
+   "KVLCC2": {
+    "CANDIDATE_FIELD": 1,
+    "SOURCE_GAP_CONFIRMED": 1
+   },
+   "ONRT": {
+    "CANDIDATE_FIELD": 1,
+    "SOURCE_GAP_CONFIRMED": 1
+   },
+   "Series60": {
+    "SOURCE_GAP_CONFIRMED": 1,
+    "CANDIDATE_FIELD": 6
+   }
+  },
+  "candidate_cells": [
+   "JBC/cb",
+   "JBC/displacement_volume",
+   "JBC/draft",
+   "JBC/lcb_percent",
+   "JBC/length_pp",
+   "JBC/lwl",
+   "KVLCC2/lcb_percent",
+   "ONRT/lcb_percent",
+   "Series60/cb",
+   "Series60/displacement_volume",
+   "Series60/draft",
+   "Series60/lcb_percent",
+   "Series60/length_pp",
+   "Series60/lwl"
+  ]
+ },
+ "errors": [
+  {
+   "name": "jbc_iop.pdf",
+   "sha256": "ea487058a7a66fee781c1b199ab100158436f7f95cf9022b9c2aaa3bd4d87a3d",
+   "error": "FileDataError: Failed to open file '/tmp/oa/jbc_iop.pdf'."
+  },
+  {
+   "name": "jbc_maasch.pdf.txt",
+   "sha256": "20a8ed9016e00dab0d380e6a86254ccb35da8b1e861c10717efb1196059178d5",
+   "error": "duplicate of jbc_maasch.pdf"
+  },
+  {
+   "name": "jbc_upmc.pdf.txt",
+   "sha256": "1f2332437cdb2b9a66b91b768ee559c2a7ee4c701049d0ed9c541bb1242da21c",
+   "error": "duplicate of jbc_upmc.pdf"
+  },
+  {
+   "name": "s60_iowa.bin",
+   "sha256": "9a7cab631fdfed6c6b43162a7885cb0abb48d4cb35b5f9bd10b59b4c3c7186c5",
+   "error": "not text (printable < 90 %)"
+  },
+  {
+   "name": "s60_jstage1979.pdf.txt",
+   "sha256": "4e4ac59ee0b75c5a78008517c630d2aa5028a228eef2a448d4330431a6d580a2",
+   "error": "duplicate of s60_jstage1979.pdf"
+  },
+  {
+   "name": "s60_jstage1999.pdf.txt",
+   "sha256": "2b3b2b4f115da2e16600e86c1a4eb9524539cd2e29edf50f3b8366ac8cf532e1",
+   "error": "duplicate of s60_jstage1999.pdf"
+  },
+  {
+   "name": "s60_semarak.pdf.txt",
+   "sha256": "a47ec33ad1b17900eb89bfc14d3ab1475e98b0ee6924cdefe9607b18ff379edd",
+   "error": "duplicate of s60_semarak.pdf"
+  },
+  {
+   "name": "s60_simman2008.pdf.txt",
+   "sha256": "1973bf3faa9c890923bbcdf53f9400fafc1c1affec56829850522cd0750ae14c",
+   "error": "duplicate of s60_simman2008.pdf"
+  },
+  {
+   "name": "dtc_ugent8624655.pdf",
+   "sha256": "4da908e5333b5412aae1b9171feb7b2f2c478271cda8614b1f3838c669f0d506",
+   "error": "not text (printable < 90 %)"
+  },
+  {
+   "name": "kvlcc2_strath.pdf",
+   "sha256": "e87275263d86e0d47220ee4430662114c5809cc178aab294f620e50f4230e9d6",
+   "error": "duplicate of kvlcc2_strath.pdf.txt"
+  },
+  {
+   "name": "onrt_iop.pdf",
+   "sha256": "3c0e5c4cac8a7f6202226f85e9f6ed04a8646be9727a06c657025f7cbace71c7",
+   "error": "FileDataError: Failed to open file '/tmp/refs/onrt_iop.pdf'."
+  },
+  {
+   "name": "s60_jstage.bin",
+   "sha256": "fdf7eee6d42479a39c673093e938ff77b5098ece6ed52cb8f87807df658010a3",
+   "error": "not text (printable < 90 %)"
+  },
+  {
+   "name": "dtc_strath.pdf",
+   "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "error": "duplicate of dtc_strath.pdf.txt"
+  },
+  {
+   "name": "dtc_ugent.pdf",
+   "sha256": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "error": "duplicate of kvlcc2_ugent.pdf.txt"
+  },
+  {
+   "name": "ittc_benchmarks.pdf",
+   "sha256": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "error": "duplicate of ittc_list.txt"
+  },
+  {
+   "name": "jbc_cfdletters.pdf",
+   "sha256": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "error": "duplicate of jbc_semarak.pdf.txt"
+  },
+  {
+   "name": "jbc_memorial.pdf",
+   "sha256": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "error": "duplicate of jbc_kabonge.pdf.txt"
+  },
+  {
+   "name": "jbc_scse.pdf",
+   "sha256": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "error": "duplicate of jbc_scienpg.pdf.txt"
+  },
+  {
+   "name": "kvlcc2_hrcak.pdf",
+   "sha256": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "error": "duplicate of kvlcc2_hrcak.pdf.txt"
+  },
+  {
+   "name": "kvlcc2_jstage.pdf",
+   "sha256": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "error": "duplicate of kvlcc2_jstage.pdf.txt"
+  },
+  {
+   "name": "kvlcc2_osaka.pdf",
+   "sha256": "68f9f5c825d1d4054bff8bf3ff8ab0b12f7fa7b62f572bcbb63179c77becfc68",
+   "error": "duplicate of kvlcc2_osaka.pdf"
+  }
+ ],
+ "documents": [
+  {
+   "name": "d8991e.pdf",
+   "sha256": "61c19a141ad9552040ed8a6307216e25feb662cf5daa5a095f2a6b3387cd64b1",
+   "bytes": 2039607,
+   "in_library": false,
+   "chars": 10723,
+   "hulls": {
+    "JBC": "Numerical Simulation with Overset Approach for a Bulk Carrier(JBC) in Shallow Water by Hiroshi Kobayashi*, Member Jyun-ichi Fujisawa*, Ryouhei Fukasawa*,"
+   },
+   "mentions": {
+    "lcb_percent": [
+     {
+      "line": 94,
+      "numeral": "2.5475",
+      "quote": "𝐿𝐿+)(%𝐿𝐿\"\"), fwd + 2.5475"
+     }
+    ]
+   }
+  },
+  {
+   "name": "ee5e55.pdf",
+   "sha256": "14a51c48e5327decd9c5ed91d02c5f13d3b6ebc3885bb6d313ee98a89b3545bc",
+   "bytes": 969503,
+   "in_library": false,
+   "chars": 23741,
+   "hulls": {
+    "JBC": "Numerical Towing Tank Procedure for JBC in Self-propulsion with Rotating Propeller and Energy Saving Duct by Nobuaki Sakamoto*, Member Ke"
+   },
+   "mentions": {
+    "length_pp": [
+     {
+      "line": 147,
+      "numeral": "7.49",
+      "quote": "(Fn=U0/√gLpp) based on Lpp as Rn=7.49E+06 and Fn=0.142,"
+     },
+     {
+      "line": 317,
+      "numeral": "0.9843",
+      "quote": "measured at propeller plane (x/Lpp=0.9843) via particle image"
+     }
+    ]
+   }
+  },
+  {
+   "name": "kvlcc2_les2012.pdf",
+   "sha256": "fe3bb39390d8ccd9bcb7a8dd9ffa89f70a2393cd354ab9e37b185af3bf2d566a",
+   "bytes": 2274302,
+   "in_library": false,
+   "chars": 34725,
+   "hulls": {
+    "KVLCC2": "Application of Fully-resolved Large Eddy Simulation to KVLCC2 －Bare Hull Double Model at Model Ship Reynolds Number－ by Tatsuo Nishikawa*, Member"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "s60_1975.pdf",
+   "sha256": "f4d0d6b0ddd2373333a0c9e48daef476c180c8545211afd75509ded74576ca4b",
+   "bytes": 1713909,
+   "in_library": false,
+   "chars": 13099,
+   "hulls": {
+    "Series60": ",ハ ソプとなる速度域よりホローとなる速度域で実験結果と良く一致する傾向であ る｡こ のことは, 扱う船型によって異なると思われる｡た とえば実用的な船型であるSeries 60 の結果5) では, 定性的傾向は似ているが,定 量的にはホローとなる速度域でも理論値が大きくなっている｡前報でも述べたよう に排水量長さ比シリーズでL/β が大きくなればなるほど理論と実験との一致が"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "s60_1996.pdf",
+   "sha256": "c871e6f81bc60612db4df16e4baa2e32e43afa4cb877281479bb951de5d196f0",
+   "bytes": 2053107,
+   "in_library": false,
+   "chars": 14957,
+   "hulls": {
+    "Series60": "明 ** Numerical Computation of Viscous Flows with Free Surface around a Series 60 Model by Shigeaki Shiotani, Member Yoshiaki Kodama, Member Summary This paper deals with"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "s60_2002.pdf",
+   "sha256": "80ad1740968765c5feaf6cb9c9f35f60ebe823b430a20aa721df2dc6632828fa",
+   "bytes": 1514907,
+   "in_library": false,
+   "chars": 35453,
+   "hulls": {
+    "Series60": "Ship Flow In this section, results for full-scale ship flow are discussed. Series60 Ci0.6 ship model was selected for the present test case, because the model has been used for ma"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "simman_summary.html",
+   "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "bytes": 35030,
+   "in_library": true,
+   "chars": 34630,
+   "hulls": {
+    "KCS": "a href=\"/contents/test_case_3.1.php\" target=\"_self\" class=\"gnb_2da\">- Case 3.1: KCS Deep water, forces & moments</a></li> <li class=\"gnb_2dli\"><a href=\"/contents/t",
+    "KVLCC2": "a href=\"/contents/test_case_1.1.php\" target=\"_self\" class=\"gnb_2da\">- Case 1.1: KVLCC2 Deep water, forces & moments</a></li> <li class=\"gnb_2dli\"><a href=\"/contents/t",
+    "ONRT": "a href=\"/contents/test_case_5.1.php\" target=\"_self\" class=\"gnb_2da\">- Case 5.1: ONRT, forces & moments</a></li> <li class=\"gnb_2dli\"><a href=\"/contents/test_case_5."
+   },
+   "mentions": {
+    "lcb_percent": [
+     {
+      "line": 342,
+      "numeral": "3.48",
+      "quote": "<td>LCB (%), fwd+</td> <td>3.48</td>"
+     },
+     {
+      "line": 579,
+      "numeral": "-1.48",
+      "quote": "<td>LCB (%), fwd+</td> <td>-1.48</td>"
+     },
+     {
+      "line": 809,
+      "numeral": "-1.68",
+      "quote": "<td>LCB (%), fwd+</td> <td>-1.68</td>"
+     }
+    ]
+   }
+  },
+  {
+   "name": "cimec_view.html",
+   "sha256": "e0ed0354419e61a5ed29642ecf707519e4e06435a86310bf2ca1683ef9bc27dc",
+   "bytes": 17777,
+   "in_library": false,
+   "chars": 17678,
+   "hulls": {},
+   "mentions": {}
+  },
+  {
+   "name": "dtc_strath.pdf.txt",
+   "sha256": "e13521d0ab59eeb6bcff2157b583705b049372dc9e3add72c762d0877e1baa84",
+   "bytes": 29014,
+   "in_library": false,
+   "chars": 28666,
+   "hulls": {
+    "KCS": "ion performance of the well-known benchmark case KRISO - 829 - container ship (KCS) by using both potential flow solver and a RANS solver. A hybrid URANS-LES model has been applied t",
+    "KVLCC2": "been applied to compute the unsteady loadings on a marine propeller behind the KVLCC2 tanker model by Abbas et al. (2015). The numerical results have been compared with different empir",
+    "DTC": "Uncertainty Assessment and Self-Propulsion Estimation of Duisburg Test Case Ali Dogrul*, Yavuz Hakan Ozdemir**, Savas Sezen*, Baris Barlas*** *Yildiz Technical Universi",
+    "Series60": "rmance. The research of Win et al. (2013) is focused on the interaction between Series 60 hull and a 5 bladed fixed pitch propeller using a CFD code coupled with a quasi-steady blade eleme"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "jbc_jstage_search.html",
+   "sha256": "69b272626361191b819ea3bd337f3b697d269f17b78fcd08d5a119faed7b1c3c",
+   "bytes": 35029,
+   "in_library": false,
+   "chars": 34566,
+   "hulls": {},
+   "mentions": {}
+  },
+  {
+   "name": "jbc_kabonge.pdf.txt",
+   "sha256": "8d30588f4cd93a25ad04edfd830d6733363152401e7eb8cb18c28717983ba214",
+   "bytes": 138574,
+   "in_library": false,
+   "chars": 137678,
+   "hulls": {
+    "KVLCC2": "r three ship hull models, including two containers (KTC and DTC) and a tanker (KVLCC2), to results from three empirical methods, 10 including the series 60, Holtrop and Mennen, a",
+    "JBC": "hull forms as a decarbonisation pathway for bulk carriers, by focusing on the Japan Bulk Carrier (JBC). The research developed a workflow for hull form optimisation using open-source tools, incl",
+    "DTC": "AD and OpenFOAM, for three ship hull models, including two containers (KTC and DTC) and a tanker (KVLCC2), to results from three empirical methods, 10 including the series 60,",
+    "Series60": "nker (KVLCC2), to results from three empirical methods, 10 including the series 60, Holtrop and Mennen, and Andersen. The results from empirical methods were very close to the resul"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 291,
+      "numeral": "41 ",
+      "quote": "Table 8: Calculated displacement of model ship versus NMRI displacement results..............41"
+     },
+     {
+      "line": 333,
+      "numeral": "42 ",
+      "quote": "Figure 26: Impact of change in bulb depth (Zb) on resistance and displacement......................42"
+     },
+     {
+      "line": 2222,
+      "numeral": "5.5",
+      "quote": "At the mesh volume dimensions (30*5.5*10) and divisions (100, 60, 60), the reliability and"
+     },
+     {
+      "line": 2229,
+      "numeral": "5.5",
+      "quote": "divergence. This indicated that the option of volume dimensions (30*5.5*10) and divisions"
+     }
+    ],
+    "draft": [
+     {
+      "line": 1537,
+      "numeral": "1,",
+      "quote": "for mesh below draught line were gx = 1, gy =1, and gz = 0.2, to ensure that the cells are finer"
+     }
+    ]
+   }
+  },
+  {
+   "name": "jbc_maasch.pdf",
+   "sha256": "9a11aae106f4611adbcfa243411e0746fb5b0b784c2032c045ae99272132e7dd",
+   "bytes": 3984891,
+   "in_library": false,
+   "chars": 68182,
+   "hulls": {
+    "JBC": "A GENERIC WAKE ANALYSIS TOOL AND ITS APPLICATION TO THE JAPAN BULK CARRIER TEST CASE Matthias Maasch, Kurt Mizzi, Mehmet Atlar, Patrick Fitzsimmons, Osman Turan Departmen"
+   },
+   "mentions": {
+    "draft": [
+     {
+      "line": 1549,
+      "numeral": "16.5",
+      "quote": "conditions. Furthermore, the WAT B.S.R.A. analysis showed that by lowering the draft from TA = 16.5m"
+     }
+    ]
+   }
+  },
+  {
+   "name": "jbc_scienpg.pdf.txt",
+   "sha256": "71340236f9dac1f08a5f821583360cee6de8cc106b2e569a8a608844323cda53",
+   "bytes": 20479,
+   "in_library": false,
+   "chars": 20227,
+   "hulls": {
+    "JBC": "dy, Computational Fluid Dynamics analysis is conducted on the test case of the JBC (Japan Bulk Carrier) model introduced in the Tokyo Workshop 2015 on ship hydrodynamics. The test c"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "jbc_semarak.pdf.txt",
+   "sha256": "5702a34d4eb0df1f54dc4d097c1cfc2d98f87503c9feff38340008a44aab02f7",
+   "bytes": 30877,
+   "in_library": false,
+   "chars": 30841,
+   "hulls": {
+    "JBC": "ar pre-duct on the hull-propeller interaction. A numerical simulation uses the Japan bulk carrier (JBC) standard model for the hull and propeller. A circular pre-duct was applied to the ship with",
+    "Series60": "dy on the effects of different pre-swirl ducts on propulsion performance of series 60 ship.\" Ocean Engineering 173 (2019): 491-509. https://doi.org/10.1016/j.oceaneng.2019.01.007"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 70,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 4 (2023) 17-30"
+     },
+     {
+      "line": 122,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 4 (2023) 17-30"
+     },
+     {
+      "line": 157,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 4 (2023) 17-30"
+     },
+     {
+      "line": 246,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 4 (2023) 17-30"
+     }
+    ],
+    "lwl": [
+     {
+      "line": 137,
+      "numeral": "1.3",
+      "quote": "vertical size, it has a value of 2 LWL with a size of 1.3 LWL on the top side and 1.7 LWL on the"
+     }
+    ]
+   }
+  },
+  {
+   "name": "jbc_upmc.pdf",
+   "sha256": "a1ff2c2c72892c4a0e415c42c9d337637c741a96ae7a3bb22fd83a1c2d51d065",
+   "bytes": 3060203,
+   "in_library": false,
+   "chars": 24055,
+   "hulls": {
+    "KCS": "he results obtained from a CFD simulation on the self-propulsion performance of KCS hull. The CFD results were consistent with the resistance and free surface elevation data of the be",
+    "JBC": "t al. carried out self-propulsion simulations using their in-house CFD code for JBC (Japan Bulk Carrier) in model and full scale with body force method and detailed propeller method b"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "kvlcc2_hrcak.pdf.txt",
+   "sha256": "161e9fd248473dcf1b4e20425a95688dd7ec0c7915af4dd358910f2e57be0fb7",
+   "bytes": 43657,
+   "in_library": false,
+   "chars": 42862,
+   "hulls": {
+    "KVLCC2": "ENSITIVITY ANALYSIS OF THE HYDRODYNAMIC DERIVATIVES ON THE MANEUVERABILITY OF KVLCC2 IN SHALLOW WATER UDC 629.5.17.3: UDC 629.5.17.2 Original scientific paper Summary To assess the"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 3,
+      "numeral": "68 ",
+      "quote": "Volume 68 Number 4, 2017"
+     }
+    ]
+   }
+  },
+  {
+   "name": "kvlcc2_jstage.pdf.txt",
+   "sha256": "52d1290bf2f4cc1d2f9f26a39a1ed7967d9e5981577c0b15096379d8f9fd91f4",
+   "bytes": 43940,
+   "in_library": false,
+   "chars": 43550,
+   "hulls": {
+    "KVLCC2": "1 RANS Simulation of KVLCC2 using Simple Body-Force Propeller Model With Rudder and Without Rudder by Yan Naing Win* , Memb",
+    "JBC": "., Huang, Z., and Kawamura, T.: Comparative self-propulsion simulations of the JBC bulk carrier, Journal of Japan Association of Naval Architects and Ocean Engineers, Vol. 20, pp 2",
+    "Series60": "f Propeller-Hull Interaction using Simple Body-Force Distribution Model around Series 60 CB 0.6, Journal of Japan Association of Naval Architects and Ocean Engineers (JASNAOE), Vol. 18,"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "kvlcc2_osaka.pdf",
+   "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "bytes": 8079863,
+   "in_library": true,
+   "chars": 163423,
+   "hulls": {
+    "KCS": "teady numerical investigation of the turbulent flow around the container model (KCS) with and without propeller: Proc Workshop on Numerical Ship Hydrodynamics, Workshops on Numerical",
+    "KVLCC2": "…………………... 25 2.3.1 S60 Case………………………………………………………………………… 25 2.3.2 KVLCC2 Case…………………………………………………………………. 28 2.4 Propeller Model……………………………………………………………………... 32 2.5 E",
+    "Series60": "ct of hub in the computation of propeller force For the current research, the Series 60 CB=0.6 hull form (which will be abbreviated as S60 throughout this thesis) is selected as a repres"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 5946,
+      "numeral": "66, ",
+      "quote": "Teknologi, Volume 66, No.2 pp77-84, 2013)"
+     },
+     {
+      "line": 5949,
+      "numeral": "18, ",
+      "quote": "Model around Series 60 CB=0.6 (JASNAOE, Volume 18, pp17-27, 2013)"
+     }
+    ],
+    "lcb_percent": [
+     {
+      "line": 1683,
+      "numeral": "3.48",
+      "quote": "LCB (%), fwd + 3.48"
+     }
+    ],
+    "length_pp": [
+     {
+      "line": 3449,
+      "numeral": "2",
+      "quote": "103*RT/ρ∙u2∙LPP 2"
+     },
+     {
+      "line": 3450,
+      "numeral": "2",
+      "quote": "103*T/ρ∙u2∙LPP 2"
+     }
+    ]
+   }
+  },
+  {
+   "name": "kvlcc2_strath.pdf.txt",
+   "sha256": "225f96e407c2ade8e260de43d50d2bf784c8ddf8e028a097f091d8dd8ca9d243",
+   "bytes": 26966,
+   "in_library": false,
+   "chars": 26419,
+   "hulls": {
+    "KVLCC2": "Numerical study on a KVLCC2 model advancing in shallow water Zhi-Ming Yuan, Paula Kellett Department of Naval Architecture,",
+    "Series60": "predict ship squat in restricted waterways. Calculations were performed for a Series 60 (CB=0.6) ship in a shallow channel. Their method was verified by comparisons between the calculate"
+   },
+   "mentions": {
+    "length_pp": [
+     {
+      "line": 690,
+      "numeral": "2",
+      "quote": "6Lpp long with 2Lpp ahead of the vessel, and 4Lpp wide. The depth varies as described below. In order to"
+     }
+    ],
+    "draft": [
+     {
+      "line": 27,
+      "numeral": "2,",
+      "quote": "less than 4 times the draft of the vessel. When the ratio of water depth to draft is less than 2, the effect of the"
+     },
+     {
+      "line": 852,
+      "numeral": "1.35",
+      "quote": "shallow water effects on the present KVLCC2 model, we fix the water depth to draft ratio at d/T = 1.35 (d"
+     }
+    ]
+   }
+  },
+  {
+   "name": "kvlcc2_ugent.pdf.txt",
+   "sha256": "647e45e3fa03e39c6d44c9abc45870c8e30cda85d663dfbf37a7a668df40228f",
+   "bytes": 95960,
+   "in_library": false,
+   "chars": 95180,
+   "hulls": {
+    "KVLCC2": "ope of the SHOPERA model test program for the two public domain hull models—the KVLCC2 and the DTC. The main particulars and loading conditions for the two vessels as well as the experim",
+    "DTC": "efer to two public domain designs, namelytheKVLCC2tankerand theDuisburg TestCase(DTC)containership, aswell asto a small RoPax ferry design, which is a proprietary hull design of a membe",
+    "Series60": "ons. Experimental data for the added resistance were publicly available for the Series 60 hull forms and a destroyer hull (Strom-Tejsen et al. 1973), the S175 standard con- tainer ship and"
+   },
+   "mentions": {
+    "length_pp": [
+     {
+      "line": 339,
+      "numeral": "1.2",
+      "quote": "makers in a range of 0.1 ≤λ/Lpp ≤1.2. Individual adjustments of"
+     },
+     {
+      "line": 398,
+      "numeral": "2",
+      "quote": "was mounted on deck at Lpp/2 and the connection point for the"
+     },
+     {
+      "line": 599,
+      "numeral": "0.5",
+      "quote": "in the tank for an exemplary test wave (No. 3, λ/Lpp ¼ 0.5) at gauges"
+     },
+     {
+      "line": 638,
+      "numeral": "0.5",
+      "quote": "Quality check of undisturbed wave λ/Lpp ¼ 0.5"
+     }
+    ],
+    "draft": [
+     {
+      "line": 720,
+      "numeral": "0.052",
+      "quote": "draught and Fn 0.052 and 0.139."
+     },
+     {
+      "line": 769,
+      "numeral": "0.052",
+      "quote": "Comparison of normalized added resistance data measured with the DTC model at design draught at Fn ¼ 0.052 (left) and Fn ¼ 0.139"
+     },
+     {
+      "line": 810,
+      "numeral": "15.",
+      "quote": "design draught) is shown in Fig. 15. As can be seen, the model could"
+     },
+     {
+      "line": 843,
+      "numeral": "0.069",
+      "quote": "model at light ballast draught at Fn ¼ 0.069 and Fn ¼ 0.139 in in-"
+     }
+    ]
+   }
+  },
+  {
+   "name": "s60_cimec2.pdf",
+   "sha256": "6fdecadfe1842223207c36acd8e9ea2399756f106f2d0652578d5dfba482392b",
+   "bytes": 17780,
+   "in_library": false,
+   "chars": 1916,
+   "hulls": {},
+   "mentions": {}
+  },
+  {
+   "name": "s60_jstage1979.pdf",
+   "sha256": "bc7b347e6557399e7299157822fee7b21631317b18eb34b654823df06c4647c1",
+   "bytes": 882753,
+   "in_library": false,
+   "chars": 10344,
+   "hulls": {
+    "Series60": "lank friction both of which are multiplied by suitable weighting factors. Series 60 model is employed as the basis of a numerical example. The fore body shape is improved by the pr"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "s60_jstage1999.pdf",
+   "sha256": "7972749a27f39a00f385c41e56c4d1cc0ce74c5ab2b23cb9f7571e9246b9428a",
+   "bytes": 910801,
+   "in_library": false,
+   "chars": 9372,
+   "hulls": {
+    "Series60": "ns of the present method, improvement of fore ship form is introduced for Series 60 (Cb =0.6) hull. As a result, the wave resistance is reduced about 25% at Fn=0.3 by modi"
+   },
+   "mentions": {
+    "length_pp": [
+     {
+      "line": 376,
+      "numeral": "150",
+      "quote": "長Lpp=150mと"
+     }
+    ]
+   }
+  },
+  {
+   "name": "s60_semarak.pdf",
+   "sha256": "af9c215100d856d72d84927d7fad781161c69c660f65a41144b9cc9519efa6e4",
+   "bytes": 1583901,
+   "in_library": false,
+   "chars": 28064,
+   "hulls": {
+    "Series60": ", Pouya Molana, and Mohammad Ali Badri. \"Determining resistance coefficient for series 60 vessels using numerical and experimental modelling.\" Ships and Offshore Structures 11, no. 8 (2016"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 67,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 10 (2023) 1-11"
+     },
+     {
+      "line": 151,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 10 (2023) 1-11"
+     },
+     {
+      "line": 222,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 10 (2023) 1-11"
+     },
+     {
+      "line": 247,
+      "numeral": "15, ",
+      "quote": "Volume 15, Issue 10 (2023) 1-11"
+     }
+    ]
+   }
+  },
+  {
+   "name": "s60_simman2008.pdf",
+   "sha256": "d553a2da216d89c18328995ab37004f69ff12ad4ee50aab8b094f2b5bf062f48",
+   "bytes": 1190391,
+   "in_library": false,
+   "chars": 110788,
+   "hulls": {
+    "Series60": "FD validation. 4.1 Geometry, Conditions, and Benchmark Data The geometry is the Series 60 cargo/container ship. The Series 60 was used for two of the three test cases at the last internati"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "s60_toms.pdf",
+   "sha256": "c571e93d671fa6ac4ab584f6aca5b3eacc2186d8df7e81580f5f797e0affde65",
+   "bytes": 1187287,
+   "in_library": false,
+   "chars": 48412,
+   "hulls": {
+    "Series60": "009; Lye, 2002; Hakim, Nugroho, et al., 2021). As an object research model, the Series 60 hull model was employed. A statistical technique called analysis of variance was performed to inve"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "dtc_springer.pdf",
+   "sha256": "40dadc0ea444a4d3dadb19ef51bf9da4e77eead9da40b0c60ecd9c7a18ccb81c",
+   "bytes": 1732077,
+   "in_library": false,
+   "chars": 65105,
+   "hulls": {},
+   "mentions": {}
+  },
+  {
+   "name": "ittc_list.txt",
+   "sha256": "a2fa72346c8a270210456f79e0de83a97e431d7866816d4244506d48930f5fe2",
+   "bytes": 16042,
+   "in_library": false,
+   "chars": 15811,
+   "hulls": {
+    "KCS": "se–,” Proceedings of the Kansai Society of Naval Architects, No. 10, pp. 1-4. KRISO 3600 TEU (KCS) The KCS was con- ceived to provide data for both expli- cation of flow phys- ics and C",
+    "KVLCC2": "on Ship Viscous Flow, Osaka, Japan, pp. 432- 449. KRISO 300K VLCC (KVLCC or KVLCC2) The MOERI KVLCC2 was con- ceived to provide data for both expli- cation of flow phys- ics and C",
+    "JBC": "2010 workshop. Springer Science & Business Media, 2013. Japan Bulk Car- rier (JBC) JBC (Japan Bulk Carrier) is a capesize bulk car- rier equipped with a stern duct as an energy",
+    "ONRT": "Floating Structures (PRADS), Copenhagen, Denmark, 2016 ONR Tumble- home Ship (ONRT) The ONR Tumble- home model 5613 is a preliminary de- sign of a modern surface combatant, which",
+    "DTC": "Technology, Vol. 24, No. 3, 2019, doi:10.1007/s00773-018-0598-3 7 / 7 Duisburg Test Case (DTC) Duisburg Test Case (DTC) is a hull design of a typ- ical 14000 TEU container ship, de- v",
+    "Series60": "1 / 7 Ship Name Short De- scription Links References Series 60 (S60) Single-screw mer- chant ship, part of a Systematic series of ships. - Todd, F.H. 1963"
+   },
+   "mentions": {
+    "cb": [
+     {
+      "line": 27,
+      "numeral": "0.60",
+      "quote": "urements in the Boundary Layer and Wake of a Series 60 C B =0.60 Model"
+     },
+     {
+      "line": 38,
+      "numeral": "0.60",
+      "quote": "Boundary Layer and Wake and Wave Field of a Series 60 C B =0.60 Ship"
+     },
+     {
+      "line": 42,
+      "numeral": "0.60",
+      "quote": "Boundary Layer and Wake and Wave Field of a Series 60 C B =0.60 Ship"
+     }
+    ]
+   }
+  },
+  {
+   "name": "jbc_gc.html.bin",
+   "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "bytes": 13694,
+   "in_library": true,
+   "chars": 13694,
+   "hulls": {
+    "JBC": "> <body> <div align=\"center\"> <div>|<a href=\"index.html\">Home</a>|<a href=\"jbc.html\">Description</a> |<a href=\"Instructions_JBC/instruction_JBC.html\">Instructions to participants"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 107,
+      "numeral": "34234",
+      "quote": "<TD COLSPAN=\"2\">Displacement volume of a rudder<sup style=\"color:#e34234\">*2</sup></TD>"
+     }
+    ]
+   }
+  },
+  {
+   "name": "jbc_researchsquare.pdf",
+   "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+   "bytes": 1816089,
+   "in_library": false,
+   "chars": 53611,
+   "hulls": {
+    "KCS": "Scale Effects on Bare-Hull Resistance of KCS and JBC: A RANS-Based Investigation with Veri«cation and Validation Md. Shahjada Tarafder Banglade",
+    "JBC": "Scale Effects on Bare-Hull Resistance of KCS and JBC: A RANS-Based Investigation with Veri«cation and Validation Md. Shahjada Tarafder Bangladesh Unive"
+   },
+   "mentions": {
+    "length_pp": [
+     {
+      "line": 628,
+      "numeral": "2.5",
+      "quote": "schematically in Figure 4. As can be seen, the inlet is at +2.5 LPP, outlet at −2.5 LPP, top at +1.25 LPP, bottom at −2.5 LPP,"
+     },
+     {
+      "line": 628,
+      "numeral": "1.25",
+      "quote": "schematically in Figure 4. As can be seen, the inlet is at +2.5 LPP, outlet at −2.5 LPP, top at +1.25 LPP, bottom at −2.5 LPP,"
+     },
+     {
+      "line": 1409,
+      "numeral": "0.75",
+      "quote": "0.65LPP-0.75LPP range."
+     }
+    ]
+   }
+  },
+  {
+   "name": "kvlcc2_springer_bank.pdf",
+   "sha256": "c8803b6e658019ce9b2f97574b5c27879167eec8398782d3480ba628f442cbfd",
+   "bytes": 7854748,
+   "in_library": false,
+   "chars": 74888,
+   "hulls": {
+    "KCS": "ns. Lo et al. [15] applied FLOW- 3D CFD software to simulate bank effect on the KRISO 3600 TEU container ship model. Their results state that CFD modelling has achieved high precision to si",
+    "KVLCC2": "https://doi.org/10.1007/s00773-018-0545-3 1 3 ORIGINAL ARTICLE Bank effects for KVLCC2 Wim Van Hoydonck1 · Serge Toxopeus2 · Katrien Eloot1 · Karan Bhawsinka2 · Patrick Queutey3 · Mich"
+   },
+   "mentions": {
+    "length_pp": [
+     {
+      "line": 226,
+      "numeral": "4.2667",
+      "quote": "was V = 0.356 m/s, the reference length is Lpp = 4.2667 m"
+     },
+     {
+      "line": 314,
+      "numeral": "2",
+      "quote": "qLppT2"
+     },
+     {
+      "line": 625,
+      "numeral": "4",
+      "quote": "ship length, but shows a peak near Lpp∕4 ahead of the mid-"
+     },
+     {
+      "line": 1028,
+      "numeral": "4",
+      "quote": "cal wall extends from x∕Lpp = −4 to x∕Lpp = 4 . The hull is"
+     }
+    ]
+   }
+  },
+  {
+   "name": "onrt_gc.html.bin",
+   "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "bytes": 8689,
+   "in_library": true,
+   "chars": 8435,
+   "hulls": {
+    "ONRT": "d> <body> <div align=\"center\"> <div>| <a href=\"index.html\">Home </a>| <a href=\"onrt.html\">Description</a> | <a href=\"Instructions_ONRT/instruction_ONRT.html\">Instructions to participa"
+   },
+   "mentions": {
+    "lcb_percent": [
+     {
+      "line": 84,
+      "numeral": "1.625",
+      "quote": "<TD>LCB (m) aft of FP</TD> <TD>1.625</TD>"
+     }
+    ]
+   }
+  },
+  {
+   "name": "simman2014_onrt.html",
+   "sha256": "d403d918bde2571e2d0a7d73473f28e629faa3149d9892fe8184282fec4cd25c",
+   "bytes": 67058,
+   "in_library": false,
+   "chars": 67011,
+   "hulls": {
+    "KVLCC2": "e heading-color av-special-font'><a href='https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/'>MOERI KVLCC2 Tanker</a></span> <ul class=\"sub-menu\"> <li role=\"menuitem\" id=\"menu-item-"
+   },
+   "mentions": {
+    "lcb_percent": [
+     {
+      "line": 381,
+      "numeral": "-0.683",
+      "quote": "<td><strong>LCB (%), fwd+</strong></td> <td>-0.683</td>"
+     }
+    ]
+   }
+  },
+  {
+   "name": "t2015_kcs.bin",
+   "sha256": "c8ff98f5284effe7800c2581c2dc41b0e759a06850243b3ba7ade82158afefef",
+   "bytes": 3430,
+   "in_library": false,
+   "chars": 3357,
+   "hulls": {
+    "KCS": "ta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <title>T2015 - kcs</title> <style type=\"text/css\"> <!-- body,td,th { font-family: Arial, Helvetica, sans-serif;"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "simman2014_kcs.html",
+   "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+   "bytes": 68248,
+   "in_library": true,
+   "chars": 68202,
+   "hulls": {
+    "KCS": "e downloaded using the links below:</p> <p><a href=\"/wp-content/uploads/2015/07/KCS-Hull.zip\" target=\"_blank\" rel=\"noopener\">KCS Hull</a><br /> <a href=\"/wp-content/uploads/2015/07/KC",
+    "KVLCC2": "e heading-color av-special-font'><a href='https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/'>MOERI KVLCC2 Tanker</a></span> <ul class=\"sub-menu\"> <li role=\"menuitem\" id=\"menu-item-"
+   },
+   "mentions": {
+    "lcb_percent": [
+     {
+      "line": 416,
+      "numeral": "-1.48",
+      "quote": "<td><strong>LCB (%), fwd+</strong></td> <td>-1.48</td>"
+     }
+    ]
+   }
+  },
+  {
+   "name": "simman2014_kvlcc2.html",
+   "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+   "bytes": 66359,
+   "in_library": true,
+   "chars": 66310,
+   "hulls": {
+    "KVLCC2": "4.dk</title> <link rel=\"canonical\" href=\"https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/\" /> <meta property=\"og:locale\" content=\"en_US\""
+   },
+   "mentions": {
+    "lcb_percent": [
+     {
+      "line": 404,
+      "numeral": "3.48",
+      "quote": "<td><strong>LCB (%), fwd+</strong></td> <td>3.48</td>"
+     }
+    ]
+   }
+  },
+  {
+   "name": "t2015_kcs.html",
+   "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "bytes": 12978,
+   "in_library": true,
+   "chars": 12651,
+   "hulls": {
+    "KCS": "d> <body> <div align=\"center\"> <div>| <a href=\"index.html\">Home </a>| <a href=\"kcs.html\">Description</a> | <a href=\"Instructions_KCS/instruction_KCS.html\">Instructions to participant"
+   },
+   "mentions": {}
+  },
+  {
+   "name": "dtc_ije.pdf",
+   "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "bytes": 3133493,
+   "in_library": true,
+   "chars": 69219,
+   "hulls": {
+    "KCS": "standard hull forms for merchant ships, including Wigley, DTMB, the S175, and KCS hulls. More recently, the Duisburg Test Case (DTC) containership was introduced to the public (2)",
+    "KVLCC2": "ducted some experimental tests on motion response and added resistance for the KVLCC2 hull in head waves. They highlighted the fundamental uncertainties in their experimental measurem",
+    "JBC": "calm water - Free surface Islam and Soares (23) 2019 CFD KCS DTC KVLCC2 JBC - Resistance in calm water - Sinkage and trim Martic et al. (24) 2019 CFD (RANS) DTC - Added",
+    "DTC": "Ahmadi M, Yousefifard M, Nowruzi H. Dynamic Performance and Added Resistance of Duisburg Test Case Ship Using Hybrid CFD- Strip Theory Method. International Journal of Engineering, Transactions B:"
+   },
+   "mentions": {
+    "displacement_volume": [
+     {
+      "line": 2062,
+      "numeral": "2021. ",
+      "quote": "and Engineering 5 Volume 2: CRC Press; 2021. p. 75-80."
+     }
+    ],
+    "draft": [
+     {
+      "line": 56,
+      "numeral": "12",
+      "quote": "resistance is achieved at the head sea for the small draft of T= 12 m and trim by bow 0.6 ° in case of"
+     },
+     {
+      "line": 1499,
+      "numeral": "10,",
+      "quote": "five different drafts (10, 12, 14.5, 17, and 19 m) have"
+     },
+     {
+      "line": 1525,
+      "numeral": "12",
+      "quote": "wave directions. Moreover, a change in the draft from 12"
+     },
+     {
+      "line": 1584,
+      "numeral": "10",
+      "quote": "resistance for drafts of 10 and 12 m is significantly"
+     }
+    ]
+   }
+  }
+ ],
+ "cells": [
+  {
+   "hull": "DTC",
+   "quantity": "lcb_percent",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "SOURCE_GAP_CONFIRMED",
+   "documents_mentioning_hull": 5,
+   "documents_stating_quantity": 0,
+   "candidates": []
+  },
+  {
+   "hull": "DTC",
+   "quantity": "lwl",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "SOURCE_GAP_CONFIRMED",
+   "documents_mentioning_hull": 5,
+   "documents_stating_quantity": 0,
+   "candidates": []
+  },
+  {
+   "hull": "JBC",
+   "quantity": "beam",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "SOURCE_GAP_CONFIRMED",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 0,
+   "candidates": []
+  },
+  {
+   "hull": "JBC",
+   "quantity": "cb",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 1,
+   "candidates": [
+    {
+     "document": "ittc_list.txt",
+     "sha256": "a2fa72346c8a270210456f79e0de83a97e431d7866816d4244506d48930f5fe2",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 27,
+       "numeral": "0.60",
+       "quote": "urements in the Boundary Layer and Wake of a Series 60 C B =0.60 Model"
+      },
+      {
+       "line": 38,
+       "numeral": "0.60",
+       "quote": "Boundary Layer and Wake and Wave Field of a Series 60 C B =0.60 Ship"
+      },
+      {
+       "line": 42,
+       "numeral": "0.60",
+       "quote": "Boundary Layer and Wake and Wave Field of a Series 60 C B =0.60 Ship"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "JBC",
+   "quantity": "displacement_volume",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 4,
+   "candidates": [
+    {
+     "document": "jbc_kabonge.pdf.txt",
+     "sha256": "8d30588f4cd93a25ad04edfd830d6733363152401e7eb8cb18c28717983ba214",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 291,
+       "numeral": "41 ",
+       "quote": "Table 8: Calculated displacement of model ship versus NMRI displacement results..............41"
+      },
+      {
+       "line": 333,
+       "numeral": "42 ",
+       "quote": "Figure 26: Impact of change in bulb depth (Zb) on resistance and displacement......................42"
+      },
+      {
+       "line": 2222,
+       "numeral": "5.5",
+       "quote": "At the mesh volume dimensions (30*5.5*10) and divisions (100, 60, 60), the reliability and"
+      },
+      {
+       "line": 2229,
+       "numeral": "5.5",
+       "quote": "divergence. This indicated that the option of volume dimensions (30*5.5*10) and divisions"
+      }
+     ]
+    },
+    {
+     "document": "jbc_semarak.pdf.txt",
+     "sha256": "5702a34d4eb0df1f54dc4d097c1cfc2d98f87503c9feff38340008a44aab02f7",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 70,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      },
+      {
+       "line": 122,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      },
+      {
+       "line": 157,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      },
+      {
+       "line": 246,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      }
+     ]
+    },
+    {
+     "document": "jbc_gc.html.bin",
+     "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 107,
+       "numeral": "34234",
+       "quote": "<TD COLSPAN=\"2\">Displacement volume of a rudder<sup style=\"color:#e34234\">*2</sup></TD>"
+      }
+     ]
+    },
+    {
+     "document": "dtc_ije.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 2062,
+       "numeral": "2021. ",
+       "quote": "and Engineering 5 Volume 2: CRC Press; 2021. p. 75-80."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "JBC",
+   "quantity": "draft",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 3,
+   "candidates": [
+    {
+     "document": "jbc_kabonge.pdf.txt",
+     "sha256": "8d30588f4cd93a25ad04edfd830d6733363152401e7eb8cb18c28717983ba214",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 1537,
+       "numeral": "1,",
+       "quote": "for mesh below draught line were gx = 1, gy =1, and gz = 0.2, to ensure that the cells are finer"
+      }
+     ]
+    },
+    {
+     "document": "jbc_maasch.pdf",
+     "sha256": "9a11aae106f4611adbcfa243411e0746fb5b0b784c2032c045ae99272132e7dd",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 1549,
+       "numeral": "16.5",
+       "quote": "conditions. Furthermore, the WAT B.S.R.A. analysis showed that by lowering the draft from TA = 16.5m"
+      }
+     ]
+    },
+    {
+     "document": "dtc_ije.pdf",
+     "sha256": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 56,
+       "numeral": "12",
+       "quote": "resistance is achieved at the head sea for the small draft of T= 12 m and trim by bow 0.6 ° in case of"
+      },
+      {
+       "line": 1499,
+       "numeral": "10,",
+       "quote": "five different drafts (10, 12, 14.5, 17, and 19 m) have"
+      },
+      {
+       "line": 1525,
+       "numeral": "12",
+       "quote": "wave directions. Moreover, a change in the draft from 12"
+      },
+      {
+       "line": 1584,
+       "numeral": "10",
+       "quote": "resistance for drafts of 10 and 12 m is significantly"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "JBC",
+   "quantity": "lcb_percent",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_SINGLE_DOCUMENT",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 1,
+   "candidates": [
+    {
+     "document": "d8991e.pdf",
+     "sha256": "61c19a141ad9552040ed8a6307216e25feb662cf5daa5a095f2a6b3387cd64b1",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 94,
+       "numeral": "2.5475",
+       "quote": "𝐿𝐿+)(%𝐿𝐿\"\"), fwd + 2.5475"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "JBC",
+   "quantity": "length_pp",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 2,
+   "candidates": [
+    {
+     "document": "ee5e55.pdf",
+     "sha256": "14a51c48e5327decd9c5ed91d02c5f13d3b6ebc3885bb6d313ee98a89b3545bc",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 147,
+       "numeral": "7.49",
+       "quote": "(Fn=U0/√gLpp) based on Lpp as Rn=7.49E+06 and Fn=0.142,"
+      },
+      {
+       "line": 317,
+       "numeral": "0.9843",
+       "quote": "measured at propeller plane (x/Lpp=0.9843) via particle image"
+      }
+     ]
+    },
+    {
+     "document": "jbc_researchsquare.pdf",
+     "sha256": "4016a43201d350afe59c63bedd221e55e7241ed078b9b3e60c46548177fc5b3d",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 628,
+       "numeral": "2.5",
+       "quote": "schematically in Figure 4. As can be seen, the inlet is at +2.5 LPP, outlet at −2.5 LPP, top at +1.25 LPP, bottom at −2.5 LPP,"
+      },
+      {
+       "line": 628,
+       "numeral": "1.25",
+       "quote": "schematically in Figure 4. As can be seen, the inlet is at +2.5 LPP, outlet at −2.5 LPP, top at +1.25 LPP, bottom at −2.5 LPP,"
+      },
+      {
+       "line": 1409,
+       "numeral": "0.75",
+       "quote": "0.65LPP-0.75LPP range."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "JBC",
+   "quantity": "lwl",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 12,
+   "documents_stating_quantity": 1,
+   "candidates": [
+    {
+     "document": "jbc_semarak.pdf.txt",
+     "sha256": "5702a34d4eb0df1f54dc4d097c1cfc2d98f87503c9feff38340008a44aab02f7",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 137,
+       "numeral": "1.3",
+       "quote": "vertical size, it has a value of 2 LWL with a size of 1.3 LWL on the top side and 1.7 LWL on the"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "KVLCC2",
+   "quantity": "lcb_percent",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 15,
+   "documents_stating_quantity": 5,
+   "candidates": [
+    {
+     "document": "simman_summary.html",
+     "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 342,
+       "numeral": "3.48",
+       "quote": "<td>LCB (%), fwd+</td> <td>3.48</td>"
+      },
+      {
+       "line": 579,
+       "numeral": "-1.48",
+       "quote": "<td>LCB (%), fwd+</td> <td>-1.48</td>"
+      },
+      {
+       "line": 809,
+       "numeral": "-1.68",
+       "quote": "<td>LCB (%), fwd+</td> <td>-1.68</td>"
+      }
+     ]
+    },
+    {
+     "document": "kvlcc2_osaka.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 1683,
+       "numeral": "3.48",
+       "quote": "LCB (%), fwd + 3.48"
+      }
+     ]
+    },
+    {
+     "document": "simman2014_onrt.html",
+     "sha256": "d403d918bde2571e2d0a7d73473f28e629faa3149d9892fe8184282fec4cd25c",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 381,
+       "numeral": "-0.683",
+       "quote": "<td><strong>LCB (%), fwd+</strong></td> <td>-0.683</td>"
+      }
+     ]
+    },
+    {
+     "document": "simman2014_kcs.html",
+     "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 416,
+       "numeral": "-1.48",
+       "quote": "<td><strong>LCB (%), fwd+</strong></td> <td>-1.48</td>"
+      }
+     ]
+    },
+    {
+     "document": "simman2014_kvlcc2.html",
+     "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 404,
+       "numeral": "3.48",
+       "quote": "<td><strong>LCB (%), fwd+</strong></td> <td>3.48</td>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "KVLCC2",
+   "quantity": "lwl",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_TRANSCRIPTION",
+   "verdict": "SOURCE_GAP_CONFIRMED",
+   "documents_mentioning_hull": 15,
+   "documents_stating_quantity": 0,
+   "candidates": []
+  },
+  {
+   "hull": "ONRT",
+   "quantity": "lcb_percent",
+   "library_verdict": "SINGLE_SOURCE",
+   "class": "SINGLE_LINEAGE_SINGLE_DOCUMENT",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 3,
+   "documents_stating_quantity": 2,
+   "candidates": [
+    {
+     "document": "simman_summary.html",
+     "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 342,
+       "numeral": "3.48",
+       "quote": "<td>LCB (%), fwd+</td> <td>3.48</td>"
+      },
+      {
+       "line": 579,
+       "numeral": "-1.48",
+       "quote": "<td>LCB (%), fwd+</td> <td>-1.48</td>"
+      },
+      {
+       "line": 809,
+       "numeral": "-1.68",
+       "quote": "<td>LCB (%), fwd+</td> <td>-1.68</td>"
+      }
+     ]
+    },
+    {
+     "document": "onrt_gc.html.bin",
+     "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 84,
+       "numeral": "1.625",
+       "quote": "<TD>LCB (m) aft of FP</TD> <TD>1.625</TD>"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "ONRT",
+   "quantity": "length_pp",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "SOURCE_GAP_CONFIRMED",
+   "documents_mentioning_hull": 3,
+   "documents_stating_quantity": 0,
+   "candidates": []
+  },
+  {
+   "hull": "Series60",
+   "quantity": "beam",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "SOURCE_GAP_CONFIRMED",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 0,
+   "candidates": []
+  },
+  {
+   "hull": "Series60",
+   "quantity": "cb",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 1,
+   "candidates": [
+    {
+     "document": "ittc_list.txt",
+     "sha256": "a2fa72346c8a270210456f79e0de83a97e431d7866816d4244506d48930f5fe2",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 27,
+       "numeral": "0.60",
+       "quote": "urements in the Boundary Layer and Wake of a Series 60 C B =0.60 Model"
+      },
+      {
+       "line": 38,
+       "numeral": "0.60",
+       "quote": "Boundary Layer and Wake and Wave Field of a Series 60 C B =0.60 Ship"
+      },
+      {
+       "line": 42,
+       "numeral": "0.60",
+       "quote": "Boundary Layer and Wake and Wave Field of a Series 60 C B =0.60 Ship"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "Series60",
+   "quantity": "displacement_volume",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 4,
+   "candidates": [
+    {
+     "document": "jbc_kabonge.pdf.txt",
+     "sha256": "8d30588f4cd93a25ad04edfd830d6733363152401e7eb8cb18c28717983ba214",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 291,
+       "numeral": "41 ",
+       "quote": "Table 8: Calculated displacement of model ship versus NMRI displacement results..............41"
+      },
+      {
+       "line": 333,
+       "numeral": "42 ",
+       "quote": "Figure 26: Impact of change in bulb depth (Zb) on resistance and displacement......................42"
+      },
+      {
+       "line": 2222,
+       "numeral": "5.5",
+       "quote": "At the mesh volume dimensions (30*5.5*10) and divisions (100, 60, 60), the reliability and"
+      },
+      {
+       "line": 2229,
+       "numeral": "5.5",
+       "quote": "divergence. This indicated that the option of volume dimensions (30*5.5*10) and divisions"
+      }
+     ]
+    },
+    {
+     "document": "jbc_semarak.pdf.txt",
+     "sha256": "5702a34d4eb0df1f54dc4d097c1cfc2d98f87503c9feff38340008a44aab02f7",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 70,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      },
+      {
+       "line": 122,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      },
+      {
+       "line": 157,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      },
+      {
+       "line": 246,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 4 (2023) 17-30"
+      }
+     ]
+    },
+    {
+     "document": "kvlcc2_osaka.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 5946,
+       "numeral": "66, ",
+       "quote": "Teknologi, Volume 66, No.2 pp77-84, 2013)"
+      },
+      {
+       "line": 5949,
+       "numeral": "18, ",
+       "quote": "Model around Series 60 CB=0.6 (JASNAOE, Volume 18, pp17-27, 2013)"
+      }
+     ]
+    },
+    {
+     "document": "s60_semarak.pdf",
+     "sha256": "af9c215100d856d72d84927d7fad781161c69c660f65a41144b9cc9519efa6e4",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 67,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 10 (2023) 1-11"
+      },
+      {
+       "line": 151,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 10 (2023) 1-11"
+      },
+      {
+       "line": 222,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 10 (2023) 1-11"
+      },
+      {
+       "line": 247,
+       "numeral": "15, ",
+       "quote": "Volume 15, Issue 10 (2023) 1-11"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "Series60",
+   "quantity": "draft",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 3,
+   "candidates": [
+    {
+     "document": "jbc_kabonge.pdf.txt",
+     "sha256": "8d30588f4cd93a25ad04edfd830d6733363152401e7eb8cb18c28717983ba214",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 1537,
+       "numeral": "1,",
+       "quote": "for mesh below draught line were gx = 1, gy =1, and gz = 0.2, to ensure that the cells are finer"
+      }
+     ]
+    },
+    {
+     "document": "kvlcc2_strath.pdf.txt",
+     "sha256": "225f96e407c2ade8e260de43d50d2bf784c8ddf8e028a097f091d8dd8ca9d243",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 27,
+       "numeral": "2,",
+       "quote": "less than 4 times the draft of the vessel. When the ratio of water depth to draft is less than 2, the effect of the"
+      },
+      {
+       "line": 852,
+       "numeral": "1.35",
+       "quote": "shallow water effects on the present KVLCC2 model, we fix the water depth to draft ratio at d/T = 1.35 (d"
+      }
+     ]
+    },
+    {
+     "document": "kvlcc2_ugent.pdf.txt",
+     "sha256": "647e45e3fa03e39c6d44c9abc45870c8e30cda85d663dfbf37a7a668df40228f",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 720,
+       "numeral": "0.052",
+       "quote": "draught and Fn 0.052 and 0.139."
+      },
+      {
+       "line": 769,
+       "numeral": "0.052",
+       "quote": "Comparison of normalized added resistance data measured with the DTC model at design draught at Fn ¼ 0.052 (left) and Fn ¼ 0.139"
+      },
+      {
+       "line": 810,
+       "numeral": "15.",
+       "quote": "design draught) is shown in Fig. 15. As can be seen, the model could"
+      },
+      {
+       "line": 843,
+       "numeral": "0.069",
+       "quote": "model at light ballast draught at Fn ¼ 0.069 and Fn ¼ 0.139 in in-"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "Series60",
+   "quantity": "lcb_percent",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 1,
+   "candidates": [
+    {
+     "document": "kvlcc2_osaka.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 1683,
+       "numeral": "3.48",
+       "quote": "LCB (%), fwd + 3.48"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "Series60",
+   "quantity": "length_pp",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 4,
+   "candidates": [
+    {
+     "document": "kvlcc2_osaka.pdf",
+     "sha256": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+     "in_library": true,
+     "mentions": [
+      {
+       "line": 3449,
+       "numeral": "2",
+       "quote": "103*RT/ρ∙u2∙LPP 2"
+      },
+      {
+       "line": 3450,
+       "numeral": "2",
+       "quote": "103*T/ρ∙u2∙LPP 2"
+      }
+     ]
+    },
+    {
+     "document": "kvlcc2_strath.pdf.txt",
+     "sha256": "225f96e407c2ade8e260de43d50d2bf784c8ddf8e028a097f091d8dd8ca9d243",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 690,
+       "numeral": "2",
+       "quote": "6Lpp long with 2Lpp ahead of the vessel, and 4Lpp wide. The depth varies as described below. In order to"
+      }
+     ]
+    },
+    {
+     "document": "kvlcc2_ugent.pdf.txt",
+     "sha256": "647e45e3fa03e39c6d44c9abc45870c8e30cda85d663dfbf37a7a668df40228f",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 339,
+       "numeral": "1.2",
+       "quote": "makers in a range of 0.1 ≤λ/Lpp ≤1.2. Individual adjustments of"
+      },
+      {
+       "line": 398,
+       "numeral": "2",
+       "quote": "was mounted on deck at Lpp/2 and the connection point for the"
+      },
+      {
+       "line": 599,
+       "numeral": "0.5",
+       "quote": "in the tank for an exemplary test wave (No. 3, λ/Lpp ¼ 0.5) at gauges"
+      },
+      {
+       "line": 638,
+       "numeral": "0.5",
+       "quote": "Quality check of undisturbed wave λ/Lpp ¼ 0.5"
+      }
+     ]
+    },
+    {
+     "document": "s60_jstage1999.pdf",
+     "sha256": "7972749a27f39a00f385c41e56c4d1cc0ce74c5ab2b23cb9f7571e9246b9428a",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 376,
+       "numeral": "150",
+       "quote": "長Lpp=150mと"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "hull": "Series60",
+   "quantity": "lwl",
+   "library_verdict": "MISSING",
+   "class": "NO_DETERMINATION",
+   "verdict": "CANDIDATE_FIELD",
+   "documents_mentioning_hull": 16,
+   "documents_stating_quantity": 1,
+   "candidates": [
+    {
+     "document": "jbc_semarak.pdf.txt",
+     "sha256": "5702a34d4eb0df1f54dc4d097c1cfc2d98f87503c9feff38340008a44aab02f7",
+     "in_library": false,
+     "mentions": [
+      {
+       "line": 137,
+       "numeral": "1.3",
+       "quote": "vertical size, it has a value of 2 LWL with a size of 1.3 LWL on the top side and 1.7 LWL on the"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
