@@ -91,6 +91,9 @@ class ShipRecord:
     geometry_path: str | None = None
     #: Multi-source reference cells from ``fleet_specs.json`` (library cross-reference).
     published_refs: dict[str, Any] | None = None
+    #: Declarative file-frame policy for an imported geometry (see ``fleet.frames``):
+    #: ``{"z_axis": "auto|up|down", "x_origin": "auto|as_is", "x_extent": "record|geometry"}``.
+    geometry_frame: dict[str, Any] | None = None
 
     # -- derived quantities -------------------------------------------------
     def closed_form_volume(self) -> float:
@@ -183,6 +186,7 @@ class ShipRecord:
             "geometry_route": self.geometry_route,
             "geometry_path": self.geometry_path,
             "geometry_sha256": self.geometry_sha256,
+            "geometry_frame": self.geometry_frame,
             "provenance": self.provenance.as_dict(),
             "notes": self.notes,
         }
@@ -263,6 +267,7 @@ def record_from_dict(payload: Mapping[str, Any], *, where: str = "ship") -> Ship
         geometry_sha256=payload.get("geometry_sha256"),
         geometry_path=payload.get("geometry_path"),
         published_refs=dict(payload.get("published_references") or {}),
+        geometry_frame=dict(payload["geometry_frame"]) if payload.get("geometry_frame") else None,
     )
 
 
