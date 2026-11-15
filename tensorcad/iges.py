@@ -117,11 +117,11 @@ def _tokens(payload: str) -> list[str]:
 # --------------------------------------------------------------------------- #
 def _find_span(n: int, degree: int, knots: Sequence[float], value: float) -> int:
     """Index of the knot span containing ``value`` (The NURBS Book, A2.1)."""
-    lo, hi = degree, n  # n = count-1
-    if value >= knots[hi]:
-        return hi - 1
-    if value <= knots[lo]:
-        return lo
+    lo, hi = degree, n + 1  # n = count-1; the span index runs degree .. n
+    if value >= knots[n + 1]:
+        return n
+    if value <= knots[degree]:
+        return degree
     while hi - lo > 1:
         mid = (lo + hi) // 2
         if value < knots[mid]:
