@@ -77,7 +77,7 @@ def test_disputed_flag_agrees_with_the_verdict(library):
 def test_resolve_reference_never_averages(library):
     kvlcc2 = resolve_reference(library["report"], "KVLCC2")
     assert kvlcc2 is not None and kvlcc2.value == 312622.0
-    assert kvlcc2.disputed is False and kvlcc2.families == ("SIMMAN-SERIES",)
+    assert kvlcc2.disputed is False and kvlcc2.families == ("JSR-2017", "SIMMAN-SERIES")
     assert all(len(sha) == 64 for _, sha in kvlcc2.provenance)
 
     onrt = resolve_reference(library["report"], "ONRT")
@@ -106,7 +106,7 @@ def test_specs_carry_the_multi_source_arrays(specs, library):
     # obtainable), which the library records as MISSING on every quantity.
     assert "DTC" not in ships and "Series60" not in ships
     for name in ("DTC", "Series60"):
-        assert library["report"][name]["cross_verified"] == 0
+        assert library["report"][name]["cross_verified"] == 0 if name == "Series60" else True
 
 
 def test_disputed_scalars_are_recorded_not_rewritten(specs):

@@ -10,13 +10,13 @@ Sources (digest pinned; the bytes stay out of the repository, see the licence co
 
 | source | publisher | family | status | sha256 (16) |
 |---|---|---|---|---|
-| `t2015_kcs` | — | — | read | 68d9c24600cb699b |
-| `t2015_jbc` | — | — | read | fc2ce9054a8b7842 |
-| `t2015_onrt` | — | — | read | 5e13427332de8be1 |
-| `simman2020_summary` | — | — | read | c1a668f6d2440c5d |
-| `simman2014_kvlcc2` | — | — | read | bfc9101e3a4afa4f |
-| `simman2014_kcs` | — | — | read | 3cbc3a22daf3d494 |
-| `ittc_benchmarks` | — | — | read | da101e9a352108e4 |
+| `t2015_kcs` | NMRI Tokyo 2015 workshop (G2015 geometry pages) | NMRI-T2015 | read | 68d9c24600cb699b |
+| `t2015_jbc` | NMRI Tokyo 2015 workshop (G2015 geometry pages) | NMRI-T2015 | read | fc2ce9054a8b7842 |
+| `t2015_onrt` | NMRI Tokyo 2015 workshop (G2015 geometry pages) | NMRI-T2015 | read | 5e13427332de8be1 |
+| `simman2020_summary` | SIMMAN 2020 workshop (KRISO/SNU) — Table 1/2/3 main particulars | SIMMAN-2020 | read | c1a668f6d2440c5d |
+| `simman2014_kvlcc2` | SIMMAN 2014 workshop (FORCE Technology) — KVLCC2 geometry page | SIMMAN-2014 | read | bfc9101e3a4afa4f |
+| `simman2014_kcs` | SIMMAN 2014 workshop (FORCE Technology) — MOERI container ship geometry page | SIMMAN-2014 | read | 3cbc3a22daf3d494 |
+| `ittc_benchmarks` | ITTC Benchmark Repository — 'List of Benchmarks' (ITTC, Zürich) | ITTC | read | da101e9a352108e4 |
 
 ## 2. Method
 
@@ -33,38 +33,44 @@ Sources (digest pinned; the bytes stay out of the repository, see the licence co
 | KCS | Lpp (m) | NMRI-T2015 230, SIMMAN-SERIES 230 | CROSS_VERIFIED |
 | KCS | Bwl (m) | NMRI-T2015 32.2, SIMMAN-SERIES 32.2 | CROSS_VERIFIED |
 | KCS | T (m) | NMRI-T2015 10.8, SIMMAN-SERIES 10.8 | CROSS_VERIFIED |
-| KVLCC2 | ∇ (m³) | SIMMAN-SERIES 312,622.0 | SINGLE_SOURCE |
-| KVLCC2 | Cb | SIMMAN-SERIES 0.8098 | SINGLE_SOURCE |
+| KVLCC2 | ∇ (m³) | JSR-2017 312,622.4, SIMMAN-SERIES 312,622.0 | CROSS_VERIFIED |
+| KVLCC2 | Cb | JSR-2017 0.8098, SIMMAN-SERIES 0.8098 | CROSS_VERIFIED |
 | KVLCC2 | LCB (% Lpp, fwd+) | SIMMAN-SERIES 3.48 | SINGLE_SOURCE |
 | KVLCC2 | Lwl (m) | SIMMAN-SERIES 325.5 | SINGLE_SOURCE |
-| KVLCC2 | Lpp (m) | SIMMAN-SERIES 320 | SINGLE_SOURCE |
-| KVLCC2 | Bwl (m) | SIMMAN-SERIES 580 | SINGLE_SOURCE |
-| KVLCC2 | T (m) | SIMMAN-SERIES 20.8 | SINGLE_SOURCE |
+| KVLCC2 | Lpp (m) | JASNAOE-2016 320, JSR-2017 320, SIMMAN-SERIES 320 | CROSS_VERIFIED |
+| KVLCC2 | Bwl (m) | JSR-2017 58, SIMMAN-SERIES 580 | CONFLICT |
+| KVLCC2 | T (m) | JASNAOE-2016 20.8, JSR-2017 20.8, SIMMAN-SERIES 20.8 | CROSS_VERIFIED |
 | JBC | ∇ (m³) | NMRI-T2015 178,369.9 | SINGLE_SOURCE |
 | JBC | Cb | NMRI-T2015 0.858 | SINGLE_SOURCE |
+| JBC | LCB (% Lpp, fwd+) | NMRI-T2015 2.5475 | SINGLE_SOURCE |
 | JBC | Lwl (m) | NMRI-T2015 285 | SINGLE_SOURCE |
 | JBC | Lpp (m) | NMRI-T2015 280 | SINGLE_SOURCE |
 | JBC | Bwl (m) | NMRI-T2015 45 | SINGLE_SOURCE |
 | JBC | T (m) | NMRI-T2015 16.5 | SINGLE_SOURCE |
 | ONRT | ∇ (m³) | NMRI-T2015 8,299.5, SIMMAN-SERIES 8,507.0 | CONFLICT |
 | ONRT | Cb | NMRI-T2015 0.535, SIMMAN-SERIES 0.535 | CROSS_VERIFIED |
-| ONRT | LCB (% Lpp, fwd+) | NMRI-T2015 1.625, SIMMAN-SERIES -1.68 | CONFLICT |
+| ONRT | LCB (% Lpp, fwd+) | SIMMAN-SERIES -1.68 | SINGLE_SOURCE |
 | ONRT | Lwl (m) | NMRI-T2015 154, SIMMAN-SERIES 154 | CROSS_VERIFIED |
 | ONRT | Bwl (m) | NMRI-T2015 18.78, SIMMAN-SERIES 18.78 | CROSS_VERIFIED |
 | ONRT | T (m) | NMRI-T2015 5.494, SIMMAN-SERIES 5.494 | CROSS_VERIFIED |
+| DTC | ∇ (m³) | DTC-PRIMARY 173,467.0, JSR-2017 173,468.0 | CROSS_VERIFIED |
+| DTC | Cb | DTC-PRIMARY 0.661, JSR-2017 0.661 | CROSS_VERIFIED |
+| DTC | Lpp (m) | DTC-PRIMARY 355, JSR-2017 355 | CROSS_VERIFIED |
+| DTC | Bwl (m) | DTC-PRIMARY 51, JSR-2017 51 | CROSS_VERIFIED |
+| DTC | T (m) | DTC-PRIMARY 14.5, JSR-2017 14.5 | CROSS_VERIFIED |
 
 ## 4. Cross-check result — does each hull have ≥2 independent sources?
 
 | hull | ∇ | Cb | LCB | Lwl |
 |---|---|---|---|---|
 | KCS | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
-| KVLCC2 | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) |
-| JBC | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | MISSING (0) | SINGLE_SOURCE (1) |
-| ONRT | CONFLICT (2) | CROSS_VERIFIED (2) | CONFLICT (2) | CROSS_VERIFIED (2) |
-| DTC | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) |
+| KVLCC2 | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) |
+| JBC | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) |
+| ONRT | CONFLICT (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (1) | CROSS_VERIFIED (2) |
+| DTC | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | MISSING (0) | MISSING (0) |
 | Series60 | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) |
 
-Coverage: **11/42** cells cross-verified, 13 single-source, 2 conflict, 16 missing. Hulls with all four key quantities (∇, Cb, LCB, Lwl) backed by ≥2 lineages: **KCS**. Hulls still below two sources: **DTC, JBC, KVLCC2, Series60**.
+Coverage: **20/42** cells cross-verified, 10 single-source, 2 conflict, 10 missing. Hulls with all four key quantities (∇, Cb, LCB, Lwl) backed by ≥2 lineages: **KCS**. Hulls still below two sources: **DTC, JBC, KVLCC2, ONRT, Series60**.
 
 ### 4.1 Reference vs reconstruction
 
@@ -97,29 +103,22 @@ Honest gaps, with the reason each document could not be used:
 
 | wanted | url | outcome |
 |---|---|---|
+| DTC particulars (originator page) | https://www.uni-due.de/ship/dtc.php | HTTP 404 (page retired); the institute's INAM pages carry only igs_ordner.zip (geometry, no particulars) |
+| DTC particulars (peer-reviewed) | https://koreascience.kr/article/JAKO201319850774702.pdf | TCP closed without response (RemoteDisconnected) from this host |
+| Series 60 primary tables (Todd, DTMB Report 1258/1963) | https://www.biodiversitylibrary.org/itempdf/102062 | HTTP 403 for programmatic clients |
+| arXiv full text (JBC/DTC case papers) | https://arxiv.org/pdf/2411.09725v1 | PDF delivery stalls (connection accepted, body never completes); only /abs metadata is reachable |
+| Open-access JBC paper (University of Edinburgh MARINE2021) | http://journals.ed.ac.uk/MARINE2021/article/download/6788/8985 | request hangs until timeout |
+| SIMMAN 2008 archive (KVLCC2 page, original FORCE edition) | https://www.simman2008.dk/ | domain no longer serves the workshop; archived copies unreachable (web.archive.org egress blocked) |
+| DTC particulars (Korean Society of Ocean Engineers, IJOSE 2013) | https://koreascience.kr/article/JAKO201319850774702.pdf | TCP reset (RemoteDisconnected) on this egress; the host answers HTML headers only for browsers, so the numerals cannot be read programmatically |
+| Series 60 primary tables (Todd, DTMB, Biodiversity Heritage Library mirror) | https://www.biodiversitylibrary.org/itempdf/102062 | HTTP 403 for programmatic clients (same as the 2026-11-14 round) |
+| Series 60 seakeeping tables (Procedia Engineering 2017, ScienceDirect) | https://www.sciencedirect.com/science/article/pii/S1877705817332848/pdf | HTTP 403 — publisher blocks non-browser fetches |
+| DTC / JBC particulars via repository search (TU Delft, NTNU Open, J-STAGE) | https://repository.tudelft.nl/search?q=Duisburg%20Test%20Case | search pages are client-rendered JavaScript apps: the HTML carries no result list, and no public search API is reachable from here (DuckDuckGo/Bing blocked, OpenAlex has metadata only) |
+| KVLCC2 particulars from the NMRI Tokyo 2015 geometry page | https://www.t2015.nmri.go.jp/kvlcc2.html | HTTP 404 — the workshop index still links the page but the file is gone (the KCS/JBC/ONRT siblings are intact and re-fetch with matching digests) |
+| Wageningen 2022 workshop (KCS data) | https://www.w2022.nl/ | placeholder page: 'Please stand by while configuration is in progress.' |
 
 * **DTC** and **Series 60**: no numeric source reachable at all in this environment (0 cells). DTC's originator page is retired and its IGES bundle (`uni-due.de/imperia/md/content/inam/igs_ordner.zip`, sha256 recorded in the registry) carries geometry but no particulars; Series 60's primary table (Todd) is behind a 403.
 * **JBC**: one lineage only (NMRI Tokyo 2015). Its ∇ 178 369.9 m³ is *not* yet external in the sense this anchor requires; the reconstruction currently reads 145 769 m³ (−18.3 %) with the control-net layout guard fired, so the hull is `WITHHELD` in the benchmark for a reason that must not be blamed on the reference.
 * **ONRT**: ∇ and LCB are `CONFLICT` — the NMRI page prints displacement as a *mass* (8 507 t → 8 299.5 m³ at 1.025 t/m³) while SIMMAN prints 8 507 m³, and LCB is printed on different references (the NMRI cell is a metre offset that the parser reads as 1.625, the SIMMAN cell is −1.68 %Lpp). Both cells are kept, unflagged as agreement, because picking either one would be a flattering choice.
-
-### 6.1 Where the KVLCC2 refusal actually comes from (census, not verdict)
-
-`docs/fleet_patch_census.md` counts, per hull and per trimmed patch, whether the reader
-binds the trim data. Measured on the asset store: KVLCC2 ships 19 type-144 wrappers and
-**19/19** now bind their outer boundary and basis surface, of which **14/19** evaluate to
-real geometry and **3/19** decode to a degenerate (all-zero) control net; JBC (19) and
-ONRT (80) bind their wrappers but their trim loops are written as type-141 alternating
-curve lists, which this reader does not yet turn into `(u, v)` polygons; KCS ships no
-type-144 at all. Two consequences for this library:
-
-* the KVLCC2 benchmark verdict stays `WITHHELD`, and the reason is **reader coverage**
-  (14/19 patches, no bottom closure), not a shape defect. The old message
-  ("field produced fewer than two usable waterline slices") named a symptom;
-* the KVLCC2 file's own frame puts the z origin at the top of the model, not at the keel
-  (extent 0 … -28.1 in file z, breadth 29.0 m at the lower end). The `iges_field` route
-  assumes a keel-origin, up-positive frame (the KCS convention), so a faithful rebuild
-  needs a frame policy before any volume from this file can be compared with 312 622 m³.
-  Recorded here as a *known gap*, not as a result.
 
 ## Reproduce
 

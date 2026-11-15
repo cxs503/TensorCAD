@@ -537,6 +537,47 @@ def spread(values: Sequence[float]) -> tuple[float, float]:
     return hi - lo, rel
 
 
+def _cluster_relative(values: Sequence[float], tolerance: float) -> list[list[float]]:
+    """Greedy tolerance clusters of published numerals (deterministic in input order)."""
+    clusters: list[list[float]] = []
+    for value in values:
+        for cluster in clusters:
+            if spread(cluster + [value])[1] <= tolerance:
+                cluster.append(value)
+                break
+        else:
+            clusters.append([value])
+    return clusters
+
+
+def _family_value(values: Sequence[float], tolerance: float) -> tuple[float, dict[str, Any] | None]:
+    """One family's value for a quantity, without ever averaging a disagreement.
+
+    A family that states the same numeral several times (two workshop editions, an article
+    that reprints the workshop table) agrees with itself and the value is that numeral.  A
+    family whose own entries disagree by more than ``tolerance`` is *not* averaged: the mean of
+    a correct number and a decimal-slip typo is a number no publisher ever printed.  The
+    majority cluster wins and the dissent is returned so the report can show it; a tie keeps
+    the cluster of the first entry (entries arrive in sorted-source order, so the rule is
+    reproducible).
+    """
+    if not values:
+        raise ValueError("a family needs at least one value")
+    if len(values) == 1 or spread(values)[1] <= tolerance:
+        return sum(values) / len(values), None
+    clusters = _cluster_relative(list(values), tolerance)
+    best = max(clusters, key=len)  # max() keeps the first cluster on a tie
+    chosen = sum(best) / len(best)
+    dissent = [v for v in values if not any(abs(v - c) <= tolerance * max(abs(c), 1e-12) for c in best)]
+    return chosen, {
+        "chosen": chosen,
+        "cluster_size": len(best),
+        "values": list(values),
+        "dissent": dissent,
+        "rule": "majority cluster; never the mean of disagreeing entries",
+    }
+
+
 def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]]) -> dict[str, Any]:
     """Per ship, per quantity: the independent families that state it and whether they agree.
 
@@ -565,7 +606,13 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                 if entry["cell"]["unit_basis"].startswith("fallback_column"):
                     continue
                 families.setdefault(entry["family"], []).append(entry["cell"]["value"])
-            family_values = {fam: sum(vals) / len(vals) for fam, vals in sorted(families.items())}
+            family_values: dict[str, float] = {}
+            family_disagreement: dict[str, dict[str, Any]] = {}
+            for fam, vals in sorted(families.items()):
+                value, note = _family_value(vals, TOLERANCE[quantity])
+                family_values[fam] = value
+                if note is not None:
+                    family_disagreement[fam] = note
             if len(family_values) >= 2:
                 delta, rel = spread(list(family_values.values()))
                 tol = TOLERANCE[quantity]
@@ -585,6 +632,9 @@ def cross_reference(extractions: Mapping[str, Mapping[str, Mapping[str, Cell]]])
                 "published_values": ordered,
                 "independent_families": len(family_values),
                 "family_values": family_values,
+                #: Families whose own entries disagree beyond the tolerance: the value above is
+                #: the majority reading, and every dissenting numeral is listed here.
+                "family_disagreement": family_disagreement,
                 "range": delta,
                 "range_relative": rel,
                 "tolerance": TOLERANCE[quantity],

@@ -144,7 +144,7 @@ def test_healthy_hull_is_left_alone(verdict: dict) -> None:
 
 def test_hulls_without_published_cells_are_not_invented(verdict: dict) -> None:
     """DTC and Series 60 have no source: no closure, no dispute, no fabricated number."""
-    for ship in ("DTC", "Series60"):
+    for ship in ("Series60",):
         assert verdict["ships"][ship]["closure"] == {}
         assert verdict["ships"][ship]["conflicts"] == {}
 
