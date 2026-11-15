@@ -1,0 +1,785 @@
+{
+ "schema": "tensorcad.fleet_refs.blockers/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "generated_utc": "2026-11-15T22:54:25+00:00",
+ "library": "benchmarks/verified/fleet_refs/crossref.json",
+ "summary": {
+  "cells_checked": 42,
+  "cells_cross_verified": 21,
+  "cells_blocked": 21,
+  "ships_failing_min_two_sources": [
+   "DTC",
+   "JBC",
+   "KVLCC2",
+   "ONRT",
+   "Series60"
+  ],
+  "blockers_by_kind": {
+   "CONVERTED_ONLY": 1,
+   "DISPUTED": 1,
+   "NO_DOCUMENT": 9,
+   "SINGLE_LINEAGE": 10
+  }
+ },
+ "note": "This dossier states no reference value of its own. Every numeral behind a classification comes from crossref.json (itself written by the fetch/parse pipeline); the classification only names *why* a cell is still open and which external document would close it.",
+ "ships": {
+  "DTC": {
+   "named_quantities_short": [
+    "lcb_percent",
+    "lwl"
+   ],
+   "passes_min_two_sources": false,
+   "blockers": [
+    "CONVERTED_ONLY",
+    "NO_DOCUMENT"
+   ]
+  },
+  "JBC": {
+   "named_quantities_short": [
+    "displacement_volume",
+    "cb",
+    "lcb_percent",
+    "lwl"
+   ],
+   "passes_min_two_sources": false,
+   "blockers": [
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE"
+   ]
+  },
+  "KCS": {
+   "named_quantities_short": [],
+   "passes_min_two_sources": true,
+   "blockers": []
+  },
+  "KVLCC2": {
+   "named_quantities_short": [
+    "lcb_percent",
+    "lwl"
+   ],
+   "passes_min_two_sources": false,
+   "blockers": [
+    "SINGLE_LINEAGE",
+    "SINGLE_LINEAGE"
+   ]
+  },
+  "ONRT": {
+   "named_quantities_short": [
+    "displacement_volume",
+    "lcb_percent"
+   ],
+   "passes_min_two_sources": false,
+   "blockers": [
+    "DISPUTED",
+    "SINGLE_LINEAGE",
+    "NO_DOCUMENT"
+   ]
+  },
+  "Series60": {
+   "named_quantities_short": [
+    "displacement_volume",
+    "cb",
+    "lcb_percent",
+    "lwl"
+   ],
+   "passes_min_two_sources": false,
+   "blockers": [
+    "NO_DOCUMENT",
+    "NO_DOCUMENT",
+    "NO_DOCUMENT",
+    "NO_DOCUMENT",
+    "NO_DOCUMENT",
+    "NO_DOCUMENT",
+    "NO_DOCUMENT"
+   ]
+  }
+ },
+ "blockers": [
+  {
+   "ship": "DTC",
+   "quantity": "lcb_percent",
+   "verdict": "MISSING",
+   "blocker": "CONVERTED_ONLY",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [
+    "kvlcc2_ugent"
+   ],
+   "converted_corroboration": true,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a converted only reading of lcb_percent for DTC from a publisher outside the pinned set",
+   "target_documents": [
+    "El Moctar, Shigunov & Zorn (2012), 'Duisburg Test Case: Post-Panamax Container Ship for Benchmarking', Ship Technology Research 59(3) - the DTC primary description; states the design-condition LCB/LCG.",
+    "A thesis that tabulates DTC including LCB and Lwl (e.g. the Ghent record biblio.ugent.be/publication/8516555 noted by the previous round)."
+   ],
+   "why_pinned_set_is_not_enough": "both pinned DTC papers were re-read this round: dtc_strath Table 1 and dtc_ije 'Geometrical Characteristics' print Lpp / Bwl / T / volume / CB / WSA only - neither prints LCB or Lwl; dtc_ugent (JSR-2017) prints LCG for the DTC design condition, i.e. a converted reading, not a stated LCB.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "dtc_strath: Table 1 'Main particulars of DTC hull' = lambda, Lpp 355.0, Bwl 51.0, T 14.5, volume 173467.0, CB 0.661, WSA 22032.0 (no LCB, no Lwl)",
+    "dtc_ije: 'Geometrical Characteristics' table = Lpp 355, Bwl 51, T 14.5, volume 173468, CB 0.661, WSA 22032 (no LCB, no Lwl)"
+   ]
+  },
+  {
+   "ship": "DTC",
+   "quantity": "lwl",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of lwl for DTC from a publisher outside the pinned set",
+   "target_documents": [
+    "DTC primary description (El Moctar et al. 2012) - waterline length at design draft.",
+    "DTC hull description published with the geometry package (INAM / uni-due)."
+   ],
+   "why_pinned_set_is_not_enough": "no pinned DTC document prints Lwl; the Lwl would have to be measured off the geometry file, which is a different kind of statement from a published cell.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "same two Table 1 reads as DTC/lcb_percent"
+   ]
+  },
+  {
+   "ship": "JBC",
+   "quantity": "displacement_volume",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_cfdletters",
+    "jbc_memorial",
+    "jbc_scse",
+    "t2015_jbc"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of displacement_volume for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "JBC",
+   "quantity": "cb",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_cfdletters",
+    "jbc_scse",
+    "t2015_jbc"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of cb for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "JBC",
+   "quantity": "lcb_percent",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_scse"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of lcb_percent for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "NMRI Tokyo 2015 JBC geometry page (or the NMRI report behind it) - the page as pinned does not print LCB.",
+    "A JBC paper that prints LCB from its own source: the three JBC PDFs pinned this round all carry lineage NMRI-T2015, so they cannot break the single lineage."
+   ],
+   "why_pinned_set_is_not_enough": "jbc_cfdletters / jbc_scse / jbc_memorial reproduce the NMRI table (lineage NMRI-T2015), so their agreement is transcription, not independence; a document from a different upstream (e.g. the JBC CFD workshop's own outcome report) is needed.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "crossref documents: jbc_cfdletters, jbc_scse, jbc_memorial all lineage=NMRI-T2015",
+    "t2015_jbc quantities_read has no lcb_percent"
+   ]
+  },
+  {
+   "ship": "JBC",
+   "quantity": "lwl",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_cfdletters",
+    "jbc_memorial",
+    "jbc_scse",
+    "t2015_jbc"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of lwl for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "JBC",
+   "quantity": "length_pp",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_cfdletters",
+    "jbc_memorial",
+    "jbc_scse",
+    "t2015_jbc"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of length_pp for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "JBC",
+   "quantity": "beam",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_cfdletters",
+    "jbc_memorial",
+    "jbc_scse",
+    "t2015_jbc"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of beam for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "JBC",
+   "quantity": "draft",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "jbc_cfdletters",
+    "jbc_memorial",
+    "jbc_scse",
+    "t2015_jbc"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "t2015_jbc"
+   ],
+   "printed_by": {
+    "t2015_jbc": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of draft for JBC from a publisher outside ['NMRI-T2015']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "KVLCC2",
+   "quantity": "lcb_percent",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "kvlcc2_osaka",
+    "simman2014_kvlcc2",
+    "simman2020_summary"
+   ],
+   "derived_sources": [
+    "kvlcc2_ugent"
+   ],
+   "converted_corroboration": true,
+   "documents_for_ship": [
+    "simman2014_kvlcc2",
+    "simman2020_summary"
+   ],
+   "printed_by": {
+    "simman2020_summary": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ],
+    "simman2014_kvlcc2": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of lcb_percent for KVLCC2 from a publisher outside ['SIMMAN-SERIES']",
+   "target_documents": [
+    "A second explicitly printed LCB (%Lpp, fwd+) for KVLCC2 from a lineage other than the SIMMAN series."
+   ],
+   "why_pinned_set_is_not_enough": "all printed values are SIMMAN series copies (3.48); the JSR-2017 paper prints LCG 171.1 m, which converts to 3.4688 %Lpp - agreement at 0.32 %, but a converted numeral.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "simman2014_kvlcc2 / simman2020_summary / kvlcc2_osaka: 3.48 (one lineage)",
+    "kvlcc2_ugent (JSR-2017): LCG 171.1 m -> 3.46875 %Lpp (unit_basis=derived)"
+   ]
+  },
+  {
+   "ship": "KVLCC2",
+   "quantity": "lwl",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "kvlcc2_osaka",
+    "simman2014_kvlcc2",
+    "simman2020_summary"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "simman2014_kvlcc2",
+    "simman2020_summary"
+   ],
+   "printed_by": {
+    "simman2020_summary": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ],
+    "simman2014_kvlcc2": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "length_pp",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of lwl for KVLCC2 from a publisher outside ['SIMMAN-SERIES']",
+   "target_documents": [
+    "A second printed Lwl (m) for KVLCC2 from outside the SIMMAN series."
+   ],
+   "why_pinned_set_is_not_enough": "every pinned Lwl reading is 325.5 m from the SIMMAN series (2014 page, 2020 summary, Osaka reprint); they are one upstream table.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "crossref: KVLCC2/lwl entries all family SIMMAN-SERIES, value 325.5"
+   ]
+  },
+  {
+   "ship": "ONRT",
+   "quantity": "displacement_volume",
+   "verdict": "CONFLICT",
+   "blocker": "DISPUTED",
+   "independent_families": 2,
+   "lineages_missing": 0,
+   "voting_sources": [
+    "simman2020_summary",
+    "t2015_onrt"
+   ],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "simman2020_summary",
+    "t2015_onrt"
+   ],
+   "printed_by": {
+    "t2015_onrt": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ],
+    "simman2020_summary": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a disputed reading of displacement_volume for ONRT from a publisher outside ['NMRI-T2015', 'SIMMAN-SERIES']",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "ONRT",
+   "quantity": "lcb_percent",
+   "verdict": "SINGLE_SOURCE",
+   "blocker": "SINGLE_LINEAGE",
+   "independent_families": 1,
+   "lineages_missing": 1,
+   "voting_sources": [
+    "simman2020_summary"
+   ],
+   "derived_sources": [
+    "t2015_onrt"
+   ],
+   "converted_corroboration": true,
+   "documents_for_ship": [
+    "simman2020_summary",
+    "t2015_onrt"
+   ],
+   "printed_by": {
+    "t2015_onrt": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ],
+    "simman2020_summary": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a single lineage reading of lcb_percent for ONRT from a publisher outside ['SIMMAN-SERIES']",
+   "target_documents": [
+    "A second *printed* LCB for ONRT (the T2015 page states LCB as a distance aft of FP, which the library converts to -1.7045 %Lpp)."
+   ],
+   "why_pinned_set_is_not_enough": "one publisher (SIMMAN 2020) prints LCB directly; the NMRI reading is a converted distance aft of FP, and a converted numeral is corroboration, never a vote.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "t2015_onrt cell: 'LCB (m) aft of FP 1.625' -> -1.704545 %Lpp (unit_basis=derived)",
+    "simman2020_summary: LCB (%) fwd+ = -1.68 (votes); residual 1.4 % relative, inside the 2 % LCB tolerance, so this is corroboration pending a printed second value"
+   ]
+  },
+  {
+   "ship": "ONRT",
+   "quantity": "length_pp",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [
+    "simman2020_summary",
+    "t2015_onrt"
+   ],
+   "printed_by": {
+    "t2015_onrt": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ],
+    "simman2020_summary": [
+     "beam",
+     "cb",
+     "displacement_volume",
+     "draft",
+     "lcb_percent",
+     "lwl"
+    ]
+   },
+   "next_action": "pin a no document reading of length_pp for ONRT from a publisher outside the pinned set",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "Series60",
+   "quantity": "displacement_volume",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of displacement_volume for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "Todd, F.H. (1963), 'Series 60 Methodical Experiments with Models of Single-Screw Merchant Ships', David Taylor Model Basin Report 1712 - the parent-form tables.",
+    "ITTC 7.5-02-06-06 benchmark-data appendix (the pinned ITTC document is the procedure index and yields no numeral)."
+   ],
+   "why_pinned_set_is_not_enough": "the library holds no Series 60 document at all; three Series-60 PDFs present in this environment's scratch cache (digests recorded in the dossier) were opened this round and print no parent-hull particulars - they are CFD papers about a Cb=0.6 model, not the series description.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "crossref documents: no source with ship Series60 except the ITTC index (0 cells)",
+    "scratch-cache PDFs read this round: no 'LCB' / 'particulars' table for the parent form"
+   ]
+  },
+  {
+   "ship": "Series60",
+   "quantity": "cb",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of cb for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "Todd (1963) DTMB Report 1712 parent-form table (Cb = 0.60 parent)."
+   ],
+   "why_pinned_set_is_not_enough": "no pinned Series 60 document states any numeral.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "same as Series60/displacement_volume"
+   ]
+  },
+  {
+   "ship": "Series60",
+   "quantity": "lcb_percent",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of lcb_percent for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "Todd (1963) DTMB Report 1712 - LCB (%Lpp) of the parent form.",
+    "Validation studies of the Series 60 parent hull that tabulate LCB (e.g. towing-tank papers) as a *second lineage*."
+   ],
+   "why_pinned_set_is_not_enough": "no pinned Series 60 document states any numeral.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "same as Series60/displacement_volume"
+   ]
+  },
+  {
+   "ship": "Series60",
+   "quantity": "lwl",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of lwl for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "Todd (1963) DTMB Report 1712 - waterline length of the parent form at design draught."
+   ],
+   "why_pinned_set_is_not_enough": "no pinned Series 60 document states any numeral.",
+   "reachable_from_this_environment": false,
+   "evidence": [
+    "same as Series60/displacement_volume"
+   ]
+  },
+  {
+   "ship": "Series60",
+   "quantity": "length_pp",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of length_pp for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "Series60",
+   "quantity": "beam",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of beam for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  },
+  {
+   "ship": "Series60",
+   "quantity": "draft",
+   "verdict": "MISSING",
+   "blocker": "NO_DOCUMENT",
+   "independent_families": 0,
+   "lineages_missing": 2,
+   "voting_sources": [],
+   "derived_sources": [],
+   "converted_corroboration": false,
+   "documents_for_ship": [],
+   "printed_by": {},
+   "next_action": "pin a no document reading of draft for Series60 from a publisher outside the pinned set",
+   "target_documents": [
+    "a second independent publisher stating this quantity"
+   ],
+   "why_pinned_set_is_not_enough": "only one lineage states the quantity in the pinned set",
+   "reachable_from_this_environment": false,
+   "evidence": []
+  }
+ ]
+}
