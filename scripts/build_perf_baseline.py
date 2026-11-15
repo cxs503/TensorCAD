@@ -52,8 +52,18 @@ def main(argv: list[str] | None = None) -> int:
                          "(cluster-tier project: minutes, several GB)")
     ap.add_argument("--max-triangles", type=int, default=None)
     ap.add_argument("--max-naive-triangles", type=int, default=300_000)
+    ap.add_argument("--subtasks", type=str, default=None,
+                    help="comma-separated sub-tasks (default: the runner's set; "
+                         "use e.g. load,obj_write,obj_read to add the file-import keys)")
+    ap.add_argument("--merge", action="store_true",
+                    help="keep the seconds already recorded in the existing --output baseline "
+                         "and only add keys that are missing; without it the file is replaced")
     ap.add_argument("--output", type=str, default="benchmarks/perf_scale/baseline.json")
     args = ap.parse_args(argv)
+
+    subtasks = None
+    if args.subtasks:
+        subtasks = tuple(name.strip() for name in args.subtasks.split(",") if name.strip())
 
     ladder = DEFAULT_LADDER if args.full else QUICK_LADDER
     voxel_ladder = VOXEL_LADDER if args.full else QUICK_VOXEL_LADDER
@@ -70,12 +80,16 @@ def main(argv: list[str] | None = None) -> int:
                 max_triangles=args.max_triangles,
             )
         else:
+            kwargs = {}
+            if subtasks is not None:
+                kwargs["subtasks"] = subtasks
             result = run_perf_benchmark(
                 ladder=ladder,
                 voxel_ladder=voxel_ladder,
                 n_queries=args.n_queries,
                 max_triangles=args.max_triangles,
                 max_naive_triangles=args.max_naive_triangles,
+                **kwargs,
             )
         for record in result.to_dict()["results"]:
             key = measurement_key(
@@ -90,6 +104,24 @@ def main(argv: list[str] | None = None) -> int:
             merged[key] = record
         print(f"run {run_index + 1}/{args.runs}: {len(result.results)} measurements", flush=True)
 
+    preserved: list[dict] = []
+    out_path = Path(args.output)
+    if not out_path.is_absolute():
+        out_path = ROOT / out_path
+    if args.merge and out_path.exists():
+        existing = json.loads(out_path.read_text(encoding="utf-8"))
+        for record in existing.get("results", []):
+            key = measurement_key(
+                record["subtask"], record["nx"], record["nz"], record.get("copies", 1)
+            )
+            if key not in merged:
+                preserved.append(record)
+        if preserved:
+            print(
+                f"merge: kept {len(preserved)} existing measurement(s) not re-measured",
+                flush=True,
+            )
+
     payload = {
         "schema": BENCHMARK_SCHEMA,
         "passed": True,
@@ -102,16 +134,17 @@ def main(argv: list[str] | None = None) -> int:
         ),
         "cluster_warnings": [],
         "gates": [],
-        "results": [merged[k] for k in sorted(merged)],
+        "results": [merged[k] for k in sorted(merged)] + preserved,
     }
     if args.fleet and args.output == "benchmarks/perf_scale/baseline.json":
-        args.output = "benchmarks/perf_scale/baseline_fleet.json"
-    out = Path(args.output)
-    if not out.is_absolute():
-        out = ROOT / out
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(f"baseline ({len(payload['results'])} records) written to {out}")
+        out_path = ROOT / "benchmarks" / "perf_scale" / "baseline_fleet.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if args.merge and preserved:
+        payload["baseline_policy"] += (
+            f"; --merge kept {len(preserved)} key(s) recorded by an earlier run"
+        )
+    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"baseline ({len(payload['results'])} records) written to {out_path}")
     return 0
 
 
