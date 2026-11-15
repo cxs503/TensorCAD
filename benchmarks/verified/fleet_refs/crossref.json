@@ -1,7 +1,7 @@
 {
   "schema": "tensorcad.fleet_refs.crossref/1.0",
   "anchor": "REPRO-GEOM-FLEET-REFS",
-  "generated_utc": "2026-11-14T18:42:34+00:00",
+  "generated_utc": "2026-11-15T00:59:10+00:00",
   "quantity_labels": {
     "displacement_volume": "\u2207 (m\u00b3)",
     "cb": "Cb",
@@ -24,7 +24,7 @@
       "http_status": 200,
       "bytes": 12978,
       "sha256": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
-      "retrieved_utc": "2026-11-14T18:36:09+00:00",
+      "retrieved_utc": "2026-11-15T00:55:53+00:00",
       "digest_matches_registry": true,
       "status": "read",
       "quantities_read": {
@@ -51,8 +51,8 @@
       "http_status": 200,
       "bytes": 13694,
       "sha256": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
-      "retrieved_utc": "2026-11-14T18:36:10+00:00",
-      "digest_matches_registry": false,
+      "retrieved_utc": "2026-11-15T00:55:54+00:00",
+      "digest_matches_registry": true,
       "status": "read",
       "quantities_read": {
         "JBC": [
@@ -77,8 +77,8 @@
       "http_status": 200,
       "bytes": 8689,
       "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
-      "retrieved_utc": "2026-11-14T18:36:10+00:00",
-      "digest_matches_registry": false,
+      "retrieved_utc": "2026-11-15T00:55:57+00:00",
+      "digest_matches_registry": true,
       "status": "read",
       "quantities_read": {
         "ONRT": [
@@ -103,7 +103,8 @@
       "http_status": 200,
       "bytes": 35030,
       "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
-      "retrieved_utc": "2026-11-14T18:36:11+00:00",
+      "retrieved_utc": "2026-11-15T00:55:58+00:00",
+      "digest_matches_registry": true,
       "status": "read",
       "quantities_read": {
         "KVLCC2": [
@@ -146,7 +147,8 @@
       "http_status": 200,
       "bytes": 66359,
       "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
-      "retrieved_utc": "2026-11-14T18:36:13+00:00",
+      "retrieved_utc": "2026-11-15T00:56:00+00:00",
+      "digest_matches_registry": true,
       "status": "read",
       "quantities_read": {
         "KVLCC2": [
@@ -172,7 +174,8 @@
       "http_status": 200,
       "bytes": 68248,
       "sha256": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
-      "retrieved_utc": "2026-11-14T18:36:14+00:00",
+      "retrieved_utc": "2026-11-15T00:56:02+00:00",
+      "digest_matches_registry": true,
       "status": "read",
       "quantities_read": {
         "KCS": [
@@ -198,7 +201,8 @@
       "http_status": 200,
       "bytes": 121652,
       "sha256": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
-      "retrieved_utc": "2026-11-14T18:36:18+00:00",
+      "retrieved_utc": "2026-11-15T00:56:03+00:00",
+      "digest_matches_registry": true,
       "status": "read",
       "pages": 1,
       "bibliography_mentions": {
@@ -1206,7 +1210,14 @@
                 "sha256": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
                 "column": 1,
                 "unit_basis": "volume",
-                "note": ""
+                "note": "",
+                "closure_defect": {
+                  "quantity": "beam",
+                  "printed": 580.0,
+                  "divide_by": 10.0,
+                  "corrected": 58.0,
+                  "corrected_residual": -1.0543083980296686e-06
+                }
               }
             },
             {
@@ -1221,7 +1232,14 @@
                 "sha256": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
                 "column": 1,
                 "unit_basis": "volume",
-                "note": ""
+                "note": "",
+                "closure_defect": {
+                  "quantity": "beam",
+                  "printed": 580.0,
+                  "divide_by": 10.0,
+                  "corrected": 58.0,
+                  "corrected_residual": -1.0543083980296686e-06
+                }
               }
             }
           ]
@@ -1629,6 +1647,8 @@
       "quantities": {
         "displacement_volume": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1638,6 +1658,8 @@
         },
         "cb": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1647,6 +1669,8 @@
         },
         "lcb_percent": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1656,6 +1680,8 @@
         },
         "lwl": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1665,6 +1691,8 @@
         },
         "length_pp": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1674,6 +1702,8 @@
         },
         "beam": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1683,6 +1713,8 @@
         },
         "draft": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1701,6 +1733,8 @@
       "quantities": {
         "displacement_volume": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1710,6 +1744,8 @@
         },
         "cb": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1719,6 +1755,8 @@
         },
         "lcb_percent": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1728,6 +1766,8 @@
         },
         "lwl": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1737,6 +1777,8 @@
         },
         "length_pp": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1746,6 +1788,8 @@
         },
         "beam": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1755,6 +1799,8 @@
         },
         "draft": {
           "verdict": "MISSING",
+          "disputed": false,
+          "published_values": [],
           "independent_families": 0,
           "family_values": {},
           "range": 0.0,
@@ -1794,6 +1840,149 @@
       "ONRT",
       "Series60"
     ]
+  },
+  "adjudication": {
+    "closure_tolerance": 0.01,
+    "scale_factors": [
+      10.0,
+      100.0,
+      0.1,
+      0.01
+    ],
+    "ships": {
+      "JBC": {
+        "closure": {
+          "NMRI-T2015": {
+            "length_basis": "length_pp",
+            "implied_volume_m3": 178378.2,
+            "published_volume_m3": 178369.9,
+            "rel_error": 4.653251473496489e-05,
+            "consistent": true,
+            "explained_by_scale_slip": null
+          }
+        },
+        "conflicts": {}
+      },
+      "KCS": {
+        "closure": {
+          "NMRI-T2015": {
+            "length_basis": "length_pp",
+            "implied_volume_m3": 52030.112400000005,
+            "published_volume_m3": 52030.0,
+            "rel_error": 2.160292139175013e-06,
+            "consistent": true,
+            "explained_by_scale_slip": null
+          },
+          "SIMMAN-SERIES": {
+            "length_basis": "length_pp",
+            "implied_volume_m3": 52070.104800000016,
+            "published_volume_m3": 52030.0,
+            "rel_error": 0.000770801460695969,
+            "consistent": true,
+            "explained_by_scale_slip": null
+          }
+        },
+        "conflicts": {}
+      },
+      "KVLCC2": {
+        "closure": {
+          "SIMMAN-SERIES": {
+            "length_basis": "length_pp",
+            "implied_volume_m3": 3126216.7039999994,
+            "published_volume_m3": 312622.0,
+            "rel_error": 8.999989456916019,
+            "consistent": false,
+            "explained_by_scale_slip": {
+              "quantity": "beam",
+              "printed": 580.0,
+              "divide_by": 10.0,
+              "corrected": 58.0,
+              "raw_residual": 8.999989456916019,
+              "corrected_residual": -1.0543083980296686e-06
+            }
+          }
+        },
+        "conflicts": {}
+      },
+      "ONRT": {
+        "closure": {
+          "NMRI-T2015": {
+            "length_basis": "lwl",
+            "implied_volume_m3": 8500.7793948,
+            "published_volume_m3": 8299.5,
+            "rel_error": 0.024251990457256456,
+            "consistent": false,
+            "explained_by_scale_slip": null
+          },
+          "SIMMAN-SERIES": {
+            "length_basis": "lwl",
+            "implied_volume_m3": 8500.7793948,
+            "published_volume_m3": 8507.0,
+            "rel_error": -0.0007312337134125491,
+            "consistent": true,
+            "explained_by_scale_slip": null
+          }
+        },
+        "conflicts": {
+          "displacement_volume": {
+            "families": [
+              "NMRI-T2015",
+              "SIMMAN-SERIES"
+            ],
+            "family_values": {
+              "NMRI-T2015": 8299.5,
+              "SIMMAN-SERIES": 8507.0
+            },
+            "closure_residual_by_family": {
+              "NMRI-T2015": 0.024251990457256456,
+              "SIMMAN-SERIES": -0.0007312337134125491
+            },
+            "consistent_families": [
+              "SIMMAN-SERIES"
+            ],
+            "preferred_family": "SIMMAN-SERIES",
+            "resolution": "resolved_by_closure",
+            "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
+          }
+        }
+      }
+    },
+    "scale_typos": [
+      {
+        "ship": "KVLCC2",
+        "family": "SIMMAN-SERIES",
+        "quantity": "beam",
+        "printed": 580.0,
+        "divide_by": 10.0,
+        "corrected": 58.0,
+        "raw_residual": 8.999989456916019,
+        "corrected_residual": -1.0543083980296686e-06
+      }
+    ],
+    "conflicts": {
+      "ONRT/displacement_volume": {
+        "families": [
+          "NMRI-T2015",
+          "SIMMAN-SERIES"
+        ],
+        "family_values": {
+          "NMRI-T2015": 8299.5,
+          "SIMMAN-SERIES": 8507.0
+        },
+        "closure_residual_by_family": {
+          "NMRI-T2015": 0.024251990457256456,
+          "SIMMAN-SERIES": -0.0007312337134125491
+        },
+        "consistent_families": [
+          "SIMMAN-SERIES"
+        ],
+        "preferred_family": "SIMMAN-SERIES",
+        "resolution": "resolved_by_closure",
+        "basis": "SIMMAN-SERIES closes on its own Cb\u00b7Lpp\u00b7Bwl\u00b7T within 1%; the other family does not"
+      }
+    },
+    "conflicts_resolved": 1,
+    "conflicts_unresolved": 0
   },
   "comparisons": {
     "JBC": {
@@ -1935,7 +2124,38 @@
       "url": "https://www.simman2008.dk/",
       "outcome": "domain no longer serves the workshop; archived copies unreachable (web.archive.org egress blocked)",
       "http_status": 200,
-      "bytes": 378486
+      "bytes": 378529
+    },
+    {
+      "want": "DTC particulars (Korean Society of Ocean Engineers, IJOSE 2013)",
+      "url": "https://koreascience.kr/article/JAKO201319850774702.pdf",
+      "outcome": "TCP reset (RemoteDisconnected) on this egress; the host answers HTML headers only for browsers, so the numerals cannot be read programmatically",
+      "observed": "RemoteDisconnected: Remote end closed connection without response"
+    },
+    {
+      "want": "Series 60 primary tables (Todd, DTMB, Biodiversity Heritage Library mirror)",
+      "url": "https://www.biodiversitylibrary.org/itempdf/102062",
+      "outcome": "HTTP 403 for programmatic clients (same as the 2026-11-14 round)",
+      "observed": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "want": "Series 60 seakeeping tables (Procedia Engineering 2017, ScienceDirect)",
+      "url": "https://www.sciencedirect.com/science/article/pii/S1877705817332848/pdf",
+      "outcome": "HTTP 403 \u2014 publisher blocks non-browser fetches",
+      "observed": "HTTPError: HTTP Error 403: Forbidden"
+    },
+    {
+      "want": "DTC / JBC particulars via repository search (TU Delft, NTNU Open, J-STAGE)",
+      "url": "https://repository.tudelft.nl/search?q=Duisburg%20Test%20Case",
+      "outcome": "search pages are client-rendered JavaScript apps: the HTML carries no result list, and no public search API is reachable from here (DuckDuckGo/Bing blocked, OpenAlex has metadata only)",
+      "http_status": 200,
+      "bytes": 15459
+    },
+    {
+      "want": "KVLCC2 particulars from the NMRI Tokyo 2015 geometry page",
+      "url": "https://www.t2015.nmri.go.jp/kvlcc2.html",
+      "outcome": "HTTP 404 \u2014 the workshop index still links the page but the file is gone (the KCS/JBC/ONRT siblings are intact and re-fetch with matching digests)",
+      "observed": "HTTPError: HTTP Error 404: Not Found"
     },
     {
       "want": "Wageningen 2022 workshop (KCS data)",
