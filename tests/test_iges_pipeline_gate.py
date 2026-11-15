@@ -104,11 +104,23 @@ class TestFleetBaselineGate:
         error_pct = abs(vol - ref) / ref * 100
         assert error_pct < 1.0, f"KCS volume {vol} vs ref {ref}: {error_pct:.2f}%"
 
-    def test_kvlcc2_fleet_baseline_status(self):
-        """KVLCC2: documents the waterline-slice bug (WITHHELD)."""
+            def test_kvlcc2_fleet_baseline_status(self):
+        """KVLCC2 is no longer withheld: measured unit gate + trim-loop intake.
+
+        The previous expectation here was the honest refusal ("fewer than two usable
+        waterline slices").  Two intake defects kept it there: the millimetre global unit
+        flag over metre coordinates, and a patch set whose 19/19 surfaces are trimmed so
+        its untrimmed domains describe sheet 7 m below the keel.  See
+        docs/baseline_fleet_trim_intake.md.
+        """
         _skip_if_missing(KVLCC2_SPEC)
-        with pytest.raises(ValueError, match="fewer than two usable waterline slices"):
-            build_ship(KVLCC2_SPEC)
+        _, report = build_ship(KVLCC2_SPEC, dx=1.0, dz=0.1)
+        assert report["source"]["unit_gate"]["verdict"] == "declared_contradicted_by_geometry"
+        assert report["source"]["route"] == "trimmed_patch_loops"
+        assert report["checks"]["watertight"] is True
+        assert report["checks"]["edge_manifold"] is True
+        assert abs(report["derived"]["published_volume_rel_error_percent"]) < 3.0
+        assert report["verdict"] == "VERIFIED"
 
     def test_jbc_fleet_baseline_status(self):
         """JBC: the remaining refusal is a frame/units one, not a degenerate reader.
