@@ -33,39 +33,13 @@ from pathlib import Path
 import numpy as np
 
 from tensorcad.dtmb5415 import (DATASET, DRAFT_M, SCALE_LAMBDA, WATERLINE_Z,
-                                DTMB5415Space)
+                                DTMB5415Space, readme_reference)
 
 #: Tolerances, declared before looking at the numbers: the platform standard rejects
 #: >15 %; this anchor holds itself to 3 % because the reference is a principal-particulars
 #: table (four significant figures) rather than an experiment.
 GATE_PCT = 3.0
 REJECT_PCT = 15.0
-
-#: Full-scale Lpp of the shipped geometry (dataset ``geometry_scale``, Lpp = 142 m).
-LPP_M = 142.0
-
-
-def readme_reference() -> dict:
-    """Full-scale reference particulars implied by the README model-scale table."""
-    t = DATASET["readme_model_scale_table"]
-    lam = SCALE_LAMBDA
-    # 0.549 t of sea water at 998.5 kg/m^3 = 0.5500 m^3 of displacement volume; the round-0
-    # slip was to divide 0.549 by 998.5 (kg/m^3) without converting tonnes -> m^3.
-    vol_model = (t["displacement_t"] * 1000.0) / t["rho_kg_m3"]        # m^3
-    ref = {
-        "lambda": lam,
-        "Lpp_m": LPP_M,
-        "beam_m": t["beam_m"] * lam,
-        "draft_m": t["draft_m"] * lam,
-        "displacement_volume_m3": vol_model * lam ** 3,
-        "model_scale": {"Lpp_m": t["Lpp_m"], "beam_m": t["beam_m"], "draft_m": t["draft_m"],
-                        "displacement_t": t["displacement_t"], "rho_kg_m3": t["rho_kg_m3"],
-                        "displacement_volume_model_m3": vol_model},
-        "source": "DATASET.readme_model_scale_table (dataset README, quoted verbatim)",
-    }
-    ref["cb"] = ref["displacement_volume_m3"] / (ref["Lpp_m"] * ref["beam_m"]
-                                                 * ref["draft_m"])
-    return ref
 
 
 def main() -> None:
