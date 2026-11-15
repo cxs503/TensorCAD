@@ -106,6 +106,12 @@ class SourceSpec:
     column: int | None = None
     #: For multi-ship pages: the sub-table heading that starts this ship's block.
     section: str | None = None
+    #: Origin of the numerals *as the document itself declares it*; ``None`` = the document's
+    #: own publisher.  Two documents that reproduce one upstream table are one lineage.
+    lineage: str | None = None
+    #: For ``kind="pdf"`` documents: ``(quantity, regex, basis)`` triples.  ``regex`` must have
+    #: exactly one capture group around the numeral; ``basis`` is ``"volume" | "mass"``.
+    quotes: tuple[tuple[str, str, str], ...] = ()
 
 
 #: The document set.  Digests are filled in by ``tools/baseline_fleet/fetch_crossref.py --pin``.
@@ -184,6 +190,168 @@ SOURCES: tuple[SourceSpec, ...] = (
         licence="ITTC publication; bibliographic endorsement of the hull set (no numerals read)",
     ),
 )
+
+
+#: Second-round documents: open-access full texts obtained from third-party repositories when
+#: the publishers' own pages were unreachable (see ``PROBES``).  Each carries the digit-level
+#: quote it was read from, the digest of the fetched bytes, and the *lineage* it declares when
+#: the text says it is reproducing another body's table.
+_OA_SOURCES: tuple[SourceSpec, ...] = (
+    SourceSpec(
+        key="kvlcc2_ugent",
+        ship="KVLCC2",
+        publisher="Journal of Ship Research 61(3) 2017 (Ghent University) - Table 1",
+        family="JSR-2017",
+        lineage="JSR-2017",
+        url="https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        kind="pdf",
+        sha256="",
+        licence="INSTITUTIONAL REPOSITORY; digests + quoted cells only, bytes not redistributed",
+        note="Table 1 columns: KVLCC2 | DTC heavy ballast | DTC design draught | DTC light ballast; displacement printed in tonnes",
+        quotes=(
+            ("length_pp", r"Lpp\s*\(\s*m\s*\)\s*([0-9.]+)\s*[0-9.]+", "volume"),
+            ("beam", r"\bB\s*\(\s*m\s*\)\s*([0-9.]+)\s*[0-9.]+", "volume"),
+            ("draft", r"TFP\s*/\s*TAP\s*\(\s*m\s*\)\s*([0-9.]+)\s*/", "volume"),
+            ("displacement_volume", r"\(t\)\s*([0-9,]{6,})", "mass"),
+            ("cb", r"CB\s*\[\s*-\s*\]\s*([0-9.]+)\s*[0-9.]+", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="dtc_ugent",
+        ship="DTC",
+        publisher="Journal of Ship Research 61(3) 2017 (Ghent University) - Table 1 (design-draught column)",
+        family="JSR-2017",
+        lineage="JSR-2017",
+        url="https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+        kind="pdf",
+        sha256="",
+        licence="INSTITUTIONAL REPOSITORY; digests + quoted cells only",
+        note="the column is labelled '(t)' but the numeral 173468 equals the volume in m3 (Cb closure 173467.4), so the basis is volume; a mass reading would be 2.4 % off",
+        quotes=(
+            ("length_pp", r"Lpp\s*\(\s*m\s*\)\s*[0-9.]+\s*([0-9.]+)", "volume"),
+            ("beam", r"\bB\s*\(\s*m\s*\)\s*[0-9.]+\s*([0-9.]+)", "volume"),
+            ("draft", r"TFP\s*/\s*TAP\s*\(\s*m\s*\)\s*[0-9.]+/[0-9.]+\s*[0-9.]+/[0-9.]+\s*([0-9.]+)/", "volume"),
+            ("displacement_volume", r"\(t\)\s*[0-9,]+\s*[0-9,]+\s*([0-9,]{6,})", "volume"),
+            ("cb", r"CB\s*\[\s*-\s*\]\s*[0-9.]+\s*([0-9.]+)", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="kvlcc2_hrcak",
+        ship="KVLCC2",
+        publisher="Brodogradnja 68(4) 2017, Table 1 'Principal dimensions of KVLCC2 (SIMMAN2008)'",
+        family="BRODOGRADNJA-2017",
+        lineage="SIMMAN-SERIES",
+        url="https://hrcak.srce.hr/file/274163",
+        kind="pdf",
+        sha256="",
+        licence="OA journal (CC BY-NC); digests + quoted cells only",
+        note="the table caption names SIMMAN 2008, so this document reproduces the SIMMAN table and never counts as an independent origin",
+        quotes=(
+            ("length_pp", r"pp\s*L\s*([0-9.]+) m", "volume"),
+            ("beam", r"\nB\s*\n([0-9.]+) m", "volume"),
+            ("draft", r"\nT\s*\n([0-9.]+) m", "volume"),
+            ("displacement_volume", r"\n(312622)", "volume"),
+            ("cb", r"\nB\s*\nC\s*\n([0-9.]+)", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="kvlcc2_jstage",
+        ship="KVLCC2",
+        publisher="JASNAOE 23 (2016) - RANS KVLCC2 with body-force propeller, Table 1",
+        family="JASNAOE-2016",
+        lineage="JASNAOE-2016",
+        url="https://www.jstage.jst.go.jp/article/jjasnaoe/23/0/23_1/_pdf",
+        kind="pdf",
+        sha256="",
+        licence="J-STAGE OA; digests + quoted cells only",
+        note="states Lpp and draft only (propeller-focused paper)",
+        quotes=(
+            ("length_pp", r"Lpp\s*([0-9.]+) m", "volume"),
+            ("draft", r"Draft\s*\n?([0-9.]+) m", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="jbc_cfdletters",
+        ship="JBC",
+        publisher="CFD Letters 15(4) 2023 - Table 1 General Parameters of the JBC at full scale",
+        family="CFDLETTERS-2023",
+        lineage="NMRI-T2015",
+        url="https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+        kind="pdf",
+        sha256="",
+        licence="OA journal; digests + quoted cells only",
+        note="workshop reproduction: the paper states the case comes from the Tokyo 2015 workshop",
+        quotes=(
+            ("length_pp", r"perpendiculars\s+LPP\s*\(\s*m\s*\)\s*([0-9.]+)", "volume"),
+            ("lwl", r"waterline\s+LWL\s*\(\s*m\s*\)\s*([0-9.]+)", "volume"),
+            ("beam", r"waterline\s+BWL\s*\(\s*m\s*\)\s*([0-9.]+)", "volume"),
+            ("draft", r"Draft\s*\nT\s*\(\s*m\s*\)\s*([0-9.]+)", "volume"),
+            ("displacement_volume", r"volume\s*.{1,4}\s*\(\s*m3\s*\)\s*([0-9.]+)", "volume"),
+            ("cb", r"coefficient\s*\nCb\s*\n([0-9.]+)", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="jbc_scse",
+        ship="JBC",
+        publisher="Sustainable Chemical Engineering 3 (2025) - Table 2 Principal Particulars of JBC Hull",
+        family="SCSE-2025",
+        lineage="NMRI-T2015",
+        url="https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+        kind="pdf",
+        sha256="",
+        licence="OA journal; digests + quoted cells only",
+        note="workshop reproduction carrying LCB and Cm columns",
+        quotes=(
+            ("length_pp", r"perpendicular\s+\S+\s+([0-9.]+)\s+[0-9.]+", "volume"),
+            ("lwl", r"Length\s+waterline\s+\S+\s+([0-9.]+)\s+[0-9.]+", "volume"),
+            ("beam", r"Beam\s+\S+\s+([0-9.]+)\s+[0-9.]+", "volume"),
+            ("draft", r"Draft\s+\S+\s+([0-9.]+)\s+[0-9.]+", "volume"),
+            ("displacement_volume", r"Displacement\s+volume\s+\S+\s+([0-9.]+)\s+[0-9.]+", "volume"),
+            ("cb", r"efficient\s+\S+\s+([0-9.]+)\s+[0-9.]+", "volume"),
+            ("lcb_percent", r"(?s)center of\s+buoy.{0,80}?([0-9]+\.[0-9]+)", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="jbc_memorial",
+        ship="JBC",
+        publisher="Memorial University of Newfoundland thesis 2025 - Table 3 JBC hull data",
+        family="MEMORIAL-2025",
+        lineage="NMRI-T2015",
+        url="https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+        kind="pdf",
+        sha256="",
+        licence="INSTITUTIONAL REPOSITORY; digests + quoted cells only",
+        note="the table's own source line cites NMRI (2015a) / Nobuyuki (2015)",
+        quotes=(
+            ("length_pp", r"3\.\s*LPP\s+([0-9.]+)", "volume"),
+            ("lwl", r"4\.\s*LWL\s+([0-9.]+)", "volume"),
+            ("beam", r"2\.\s*Beam,\s*B\s+([0-9.]+)", "volume"),
+            ("draft", r"5\.\s*Draught\s+([0-9.]+)", "volume"),
+            ("displacement_volume", r"6\.\s*Displacement\s+([0-9.]+)", "volume"),
+        ),
+    ),
+    SourceSpec(
+        key="dtc_strath",
+        ship="DTC",
+        publisher="ISNAM 2018 (Strathclyde repository) - Table 1 Main particulars of DTC hull",
+        family="STRATH-ISNAM2018",
+        lineage="DTC-PRIMARY",
+        url="https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+        kind="pdf",
+        sha256="",
+        licence="INSTITUTIONAL REPOSITORY; digests + quoted cells only",
+        note="full-scale column of the DTC particulars table",
+        quotes=(
+            ("length_pp", r"Lpp\s*\(\s*m\s*\)\s*[0-9.]+\s*([0-9.]+)", "volume"),
+            ("beam", r"Bwl\s*\(\s*m\s*\)\s*[0-9.]+\s*([0-9.]+)", "volume"),
+            ("draft", r"T\s*\(\s*m\s*\)\s*[0-9.]+\s*([0-9.]+)", "volume"),
+            ("displacement_volume", r"\(m3\)\s*[0-9.]+\s*([0-9.]+)", "volume"),
+            ("cb", r"CB\s+[0-9.]+\s+([0-9.]+)", "volume"),
+        ),
+    ),
+)
+
+SOURCES = SOURCES + _OA_SOURCES
 
 
 @dataclass
@@ -310,6 +478,57 @@ def parse_source(spec: SourceSpec, payload: bytes | str) -> dict[str, Cell]:
     return out
 
 
+def parse_pdf_text(spec: SourceSpec, text: str) -> dict[str, Cell]:
+    """Read ``spec.quotes`` out of a PDF's extracted text (page breaks marked by ``\f``).
+
+    A PDF has no cells to address, so the *quote* is the address: each pattern must match the
+    table caption and its numeral together, and the matched text is stored verbatim as the
+    cell's ``raw`` value together with the 1-based page it was found on.  A pattern that does
+    not match yields no cell -- the document simply does not state that quantity.
+    """
+    out: dict[str, Cell] = {}
+    if spec.kind != "pdf":
+        return out
+    pages = text.split("\f")
+    for quantity, pattern, basis in spec.quotes:
+        found = None
+        for index, page in enumerate(pages, start=1):
+            match = re.search(pattern, page)
+            if match is not None:
+                found = (index, match)
+                break
+        if found is None:
+            continue
+        page_no, match = found
+        if match.re.groups < 1:  # a quote must capture the numeral, never accept the whole match
+            continue
+        raw = match.group(1)
+        value = float(raw.replace(",", ""))
+        note = ""
+        if basis == "mass":
+            value = value / SEAWATER_DENSITY
+            note = f"mass {raw} t converted at {SEAWATER_DENSITY} t/m3"
+        out[quantity] = Cell(
+            quantity=quantity,
+            value=round(value, 4),
+            raw=raw,
+            label=_quote_context(pages[page_no - 1], match).strip(),
+            source=spec.key,
+            url=spec.url,
+            sha256=spec.sha256,
+            column=0,
+            unit_basis=basis,
+            note=f"page {page_no}; {note}".strip("; "),
+        )
+    return out
+
+
+def _quote_context(page: str, match: "re.Match[str]", width: int = 90) -> str:
+    """Whitespace-collapsed text around a quote, so a reader can see the table it came from."""
+    start = max(0, match.start() - width)
+    end = min(len(page), match.end() + width)
+    return re.sub(r"\s+", " ", page[start:end])
+
 def spread(values: Sequence[float]) -> tuple[float, float]:
     """Absolute range and range relative to the mean (guard for a zero mean)."""
     lo, hi = min(values), max(values)
@@ -410,6 +629,24 @@ LINEAGE: dict[str, str] = {
     "simman2014_kcs": "SIMMAN-SERIES",
     "ittc_benchmarks": "ITTC",
 }
+
+LINEAGE.update(
+    {
+        "kvlcc2_ugent": "JSR-2017",
+        "dtc_ugent": "JSR-2017",
+        "kvlcc2_hrcak": "SIMMAN-SERIES",
+        "kvlcc2_jstage": "JASNAOE-2016",
+        "jbc_cfdletters": "NMRI-T2015",
+        "jbc_scse": "NMRI-T2015",
+        "jbc_memorial": "NMRI-T2015",
+        "dtc_strath": "DTC-PRIMARY",
+    }
+)
+
+
+def lineage_of(key: str) -> str:
+    """Independence lineage of a source key (falls back to its publisher family)."""
+    return LINEAGE.get(key, FAMILIES.get(key, key))
 
 
 def closure_check(report: Mapping[str, Any], ships: Sequence[str] | None = None) -> dict[str, Any]:
