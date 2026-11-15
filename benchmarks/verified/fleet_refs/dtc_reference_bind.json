@@ -1,0 +1,295 @@
+{
+ "schema": "tensorcad.fleet_refs.dtc_reference_bind/1.0",
+ "anchor": "GAP-CAD-T1-SOURCE-HUNT",
+ "generated_utc": "2026-11-15T12:36:50+00:00",
+ "reference_record": "benchmarks/verified/fleet_refs/dtc_hull_measured.json",
+ "reference_record_sha256": "3bf97706ee38cb60a5f2b37a7e68eb127be819a88a0023c8d634a5f7a9a8a282",
+ "documents": {
+  "institute_page": {
+   "key": "institute_page",
+   "url": "https://www.uni-due.de/ist/",
+   "final_url": "https://www.uni-due.de/inam/",
+   "publisher": "University of Duisburg-Essen (INAM, formerly /ship/)",
+   "why": "current institute landing page; still advertises the DTC archive as the 'Duisburg Test Case (DTC)' download",
+   "kind": "html",
+   "http_status": 200,
+   "bytes": 25666,
+   "sha256": "25269c51ef2899d965fa4c0176f10a96a66cbcd49aca5d7881bc9ee7721af508",
+   "outcome": "no_particulars_block"
+  },
+  "legacy_page": {
+   "key": "legacy_page",
+   "url": "https://www.uni-due.de/ship/dtc.php",
+   "final_url": "https://www.uni-due.de/ship/dtc.php",
+   "publisher": "University of Duisburg-Essen",
+   "why": "the URL the DTC paper names; kept as a digested dead end, not a source",
+   "kind": "html",
+   "http_status": 404,
+   "bytes": 11672,
+   "sha256": "a10ad3f53c6b474b6c731d7e1a6072b68a70a230a5ddd74537f2b51d22a73c53",
+   "outcome": "unreachable",
+   "body_head": "\n<!DOCTYPE html>\n<html lang=\"de-1996\">\n    <head>\n        <meta name=\"GENERATOR\" content=\"IMPERIA 9.2.14\" />\n\n        <meta charset=\"utf-8\">\n        <title>Fehler / Error 404</title>\n        <meta nam"
+  },
+  "dogrul2018": {
+   "key": "dogrul2018",
+   "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+   "final_url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+   "publisher": "University of Strathclyde repository (ISNAM 2018, Dogrul, Song, Aktas)",
+   "why": "open-access peer-reviewed paper whose Table 1 tabulates the full-scale DTC particulars (Lpp, Bwl, T, gradient, Cb) next to the model column",
+   "kind": "pdf",
+   "http_status": 200,
+   "bytes": 836896,
+   "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "outcome": "particulars_block",
+   "block": {
+    "page": 5,
+    "first_140_chars": "Table 1. Main particulars of DTC hull DTC Model DTC λ 1/59.407 1 Lpp (m) 5.976 355.0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 (m3) 0.827 173467.",
+    "digest_of_document": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33"
+   },
+   "fields": {
+    "length_pp": {
+     "value": 355.0,
+     "token": "355.0",
+     "column_index": 1,
+     "row": "Lpp (m) 5.976 355.0",
+     "page": 5
+    },
+    "beam": {
+     "value": 51.0,
+     "token": "51.0",
+     "column_index": 1,
+     "row": "Bwl (m) 0.859 51.0",
+     "page": 5
+    },
+    "draft": {
+     "value": 14.5,
+     "token": "14.5",
+     "column_index": 1,
+     "row": "T (m) 0.244 14.5 ",
+     "page": 5
+    },
+    "displacement_volume_m3": {
+     "value": 173467.0,
+     "token": "173467.0",
+     "column_index": 7,
+     "row": ".0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 (m3) 0.827 173467.0",
+     "page": 5
+    },
+    "cb": {
+     "value": 0.661,
+     "token": "0.661",
+     "column_index": 0,
+     "row": "CB 0.661 0.661 WSA (m2) 6.243 22032.0 Fig. 1. 3-D view of DTC hull Table 2. Main particulars of DTC propeller Model Propeller Propeller λ 1/59.407 1 D (m) 0.150 8.911 P/D (0.7R) 0.959 0.959 AE/A0 0.80",
+     "page": 5
+    }
+   }
+  }
+ },
+ "archive": {
+  "url": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip",
+  "final_url": "https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip",
+  "http_status": 200,
+  "bytes": 2343841,
+  "sha256": "7b18e40d783b670f226a55a7d3f0ccf13c0978e3d80a13a78eced65a7a852541",
+  "committed_sha256": "7b18e40d783b670f226a55a7d3f0ccf13c0978e3d80a13a78eced65a7a852541",
+  "committed_bytes": 2343841,
+  "reproduces_committed": true,
+  "cached_at": "/root/.cache/hull_sources/dtc_igs_ordner.zip",
+  "members": {
+   "DTC_bilgekeel.igs": {
+    "bytes": 1099948,
+    "sha256": "17ec321702f738f1ec9d9f9fd5f05c2a80304f14199139bafccac0f1fc8a1fc4"
+   },
+   "DTC_hull.igs": {
+    "bytes": 2309858,
+    "sha256": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274"
+   },
+   "DTC_propeller.igs": {
+    "bytes": 4858172,
+    "sha256": "8e3cf3fc8e3cd8b22606a85f25a1cd2a669da2abfe042a72b44c5afeb5138fac"
+   },
+   "DTC_propeller_hull_conection.igs": {
+    "bytes": 16892,
+    "sha256": "fdd3939835d8abbe989db1a9bc76f2d83636468e47e77dd6b04cb1907cf0244e"
+   },
+   "DTC_rudder_skeg.igs": {
+    "bytes": 516354,
+    "sha256": "af257520b304c0f5dbf609ed9456121db49fdca555fd6e123ffbd57978de065a"
+   }
+  }
+ },
+ "registry_chain": {
+  "registry": "assets/geometry_registry.json",
+  "license_note": "Fingerprints and pointers only: the geometry bytes are publisher material without a redistribution grant and are NOT stored in this repository.",
+  "members": {
+   "DTC_bilgekeel.igs": {
+    "in_registry": true,
+    "registry_sha256": "17ec321702f738f1ec9d9f9fd5f05c2a80304f14199139bafccac0f1fc8a1fc4",
+    "registry_bytes": 1099948,
+    "match": true
+   },
+   "DTC_hull.igs": {
+    "in_registry": true,
+    "registry_sha256": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+    "registry_bytes": 2309858,
+    "match": true
+   },
+   "DTC_propeller.igs": {
+    "in_registry": false,
+    "registry_sha256": null,
+    "registry_bytes": null,
+    "match": false
+   },
+   "DTC_propeller_hull_conection.igs": {
+    "in_registry": false,
+    "registry_sha256": null,
+    "registry_bytes": null,
+    "match": false
+   },
+   "DTC_rudder_skeg.igs": {
+    "in_registry": true,
+    "registry_sha256": "af257520b304c0f5dbf609ed9456121db49fdca555fd6e123ffbd57978de065a",
+    "registry_bytes": 516354,
+    "match": true
+   }
+  },
+  "members_registered": [
+   "DTC_bilgekeel.igs",
+   "DTC_hull.igs",
+   "DTC_rudder_skeg.igs"
+  ],
+  "members_unregistered": [
+   "DTC_propeller.igs",
+   "DTC_propeller_hull_conection.igs"
+  ],
+  "all_registered_match": true,
+  "all_match": true
+ },
+ "fields": {
+  "length_pp": {
+   "reference_value": 355.0,
+   "unit": "m",
+   "tolerance_percent": 0.5,
+   "sources": [
+    {
+     "document": "dogrul2018",
+     "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+     "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+     "page": 5,
+     "token": "355.0",
+     "value": 355.0,
+     "row": "Lpp (m) 5.976 355.0",
+     "deviation_percent": 0.0
+    }
+   ],
+   "independent_documents": 1,
+   "status": "BOUND"
+  },
+  "beam": {
+   "reference_value": 51.0,
+   "unit": "m",
+   "tolerance_percent": 0.5,
+   "sources": [
+    {
+     "document": "dogrul2018",
+     "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+     "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+     "page": 5,
+     "token": "51.0",
+     "value": 51.0,
+     "row": "Bwl (m) 0.859 51.0",
+     "deviation_percent": 0.0
+    }
+   ],
+   "independent_documents": 1,
+   "status": "BOUND"
+  },
+  "draft": {
+   "reference_value": 14.5,
+   "unit": "m",
+   "tolerance_percent": 0.5,
+   "sources": [
+    {
+     "document": "dogrul2018",
+     "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+     "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+     "page": 5,
+     "token": "14.5",
+     "value": 14.5,
+     "row": "T (m) 0.244 14.5 ",
+     "deviation_percent": 0.0
+    }
+   ],
+   "independent_documents": 1,
+   "status": "BOUND"
+  },
+  "displacement_volume_m3": {
+   "reference_value": 173467.0,
+   "unit": "m3",
+   "tolerance_percent": 0.5,
+   "sources": [
+    {
+     "document": "dogrul2018",
+     "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+     "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+     "page": 5,
+     "token": "173467.0",
+     "value": 173467.0,
+     "row": ".0 Bwl (m) 0.859 51.0 T (m) 0.244 14.5 (m3) 0.827 173467.0",
+     "deviation_percent": 0.0
+    }
+   ],
+   "independent_documents": 1,
+   "status": "BOUND"
+  },
+  "cb": {
+   "reference_value": 0.661,
+   "unit": "-",
+   "tolerance_percent": 0.5,
+   "sources": [
+    {
+     "document": "dogrul2018",
+     "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+     "sha256": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+     "page": 5,
+     "token": "0.661",
+     "value": 0.661,
+     "row": "CB 0.661 0.661 WSA (m2) 6.243 22032.0 Fig. 1. 3-D view of DTC hull Table 2. Main particulars of DTC propeller Model Propeller Propeller λ 1/59.407 1 D (m) 0.150 8.911 P/D (0.7R) 0.959 0.959 AE/A0 0.80",
+     "deviation_percent": 0.0
+    }
+   ],
+   "independent_documents": 1,
+   "status": "BOUND"
+  }
+ },
+ "summary": {
+  "fields_total": 5,
+  "fields_bound": 5,
+  "fields_unbound": [],
+  "documents_probed": 3,
+  "documents_with_particulars": [
+   "dogrul2018"
+  ],
+  "archive_reproduces_committed": true,
+  "registry_chain_all_match": true,
+  "archive_members_unregistered": [
+   "DTC_propeller.igs",
+   "DTC_propeller_hull_conection.igs"
+  ]
+ },
+ "supersedes": {
+  "record": "benchmarks/verified/fleet_refs/dtc_hull_measured.json",
+  "pointer": "published_reference.manifest_provenance",
+  "was": {
+   "retrieval": "offline_recollection",
+   "verified": false
+  },
+  "now": {
+   "retrieval": "document_bound",
+   "verified": true
+  },
+  "basis": "every field is bound to the token quoted from a digested document, and the publisher archive re-fetches byte-identically; see fields[*].sources"
+ },
+ "license": "publisher archive and the citable paper state no redistribution grant; bytes are digested and cached locally, never copied into this repository",
+ "verdict": "BOUND"
+}

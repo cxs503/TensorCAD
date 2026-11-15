@@ -133,3 +133,20 @@ curve does not, so the surface method reads a marginally longer beam.
   no geometry archive in this cache, so they are recorded as WITHHELD rather than inferred.
 * **One archive per hull.** A single archive cannot prove a publisher's whole distribution;
   the ledger records exactly which member was measured, by digest.
+
+---
+
+## Addendum (m21875, 2026-11-25) — the DTC row above is superseded
+
+The `DTC hull geometry (publisher copy)` row in §"residuals" records `WITHHELD` on the strength of
+`uni-due.de/ship/dtc.php` answering 404. That page *is* dead, but the file it pointed at is not:
+`https://www.uni-due.de/imperia/md/content/inam/igs_ordner.zip` answers 200 with 2 343 841 bytes,
+SHA-256 `7b18e40d783b670f226a55a7d3f0ccf13c0978e3d80a13a78eced65a7a852541`, and the institute's
+current landing page (`uni-due.de/ist/` → `/inam/`) still advertises it as the *Duisburg Test Case
+(DTC)* download. The hull inside that archive measures to the published displacement at −0.005 %
+(record `benchmarks/verified/fleet_refs/dtc_hull_measured.json`), and the published particulars
+themselves are no longer hand-copied: they are bound field-by-field to a digested open-access table
+(record `benchmarks/verified/fleet_refs/dtc_reference_bind.json`, report
+`docs/dtc_reference_binding.md`). **DTC geometry: CLOSED** — retire the WITHHELD above rather than
+re-litigating it. The dead-end table in §3 stays valid as history: those probes are what made the
+landing page the right place to look.
