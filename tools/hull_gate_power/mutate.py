@@ -471,7 +471,13 @@ def main() -> int:
     for _sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
         signal.signal(_sig, _on_signal)
 
-    selected = [m for m in MUTANTS if not args.only or m["id"] in args.only.split(",")]
+    # ``--only`` accepts either a full mutant id or a prefix (``S60-1-`` matches
+    # ``S60-1-transom-blend-area``); the prefix form is what the regeneration
+    # command in the guard test quotes, so it must actually select the mutants.
+    _only = [tok for tok in args.only.split(",") if tok]
+    selected = [m for m in MUTANTS
+                if not _only or any(m["id"] == tok or m["id"].startswith(tok)
+                                    for tok in _only)]
     for mutant in selected:
         mid = mutant["id"]
         if mid in results:
