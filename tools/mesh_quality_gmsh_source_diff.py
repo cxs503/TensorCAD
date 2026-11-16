@@ -37,11 +37,29 @@ import mesh_quality_external_diff as drv  # noqa: E402
 
 TOLERANCE = 1.0e-6
 
-#: our metric -> Gmsh measure name, for the measures qualityMeasures.cpp computes.
+#: our metric -> Gmsh measure name, for the measures Gmsh actually computes.
+#:
+#: ``hex`` is deliberately absent: measured, not assumed. In Gmsh 4.15.2 ``MHexahedron``
+#: overrides neither ``gammaShapeMeasure()`` nor ``etaShapeMeasure()`` (base
+#: ``MElement`` returns 0.), ``MElement::getVolume()`` returns 0 for a hexahedron, and
+#: ``minSICNShapeMeasure()``/``minSIGEShapeMeasure()`` return 0. / DBL_MAX on the same
+#: elements. So there is no hexagonal number in this Gmsh build to compare against --
+#: the hex arm's external reference is the Verdict/VTK oracle (``meshmagick``'s own
+#: definitions), which ``tools/mesh_quality_external_diff.py`` already drives.
 MAPPING: dict[str, dict[str, str]] = {
     "tri": {"gamma": "gamma", "eta": "eta"},
-    "quad": {"eta": "eta"},
+    "quad": {"eta": "eta", "area": "area"},
     "tet": {"gamma": "gamma", "eta": "eta", "volume": "volume"},
+}
+
+#: Measures whose Gmsh arm is measured to be unusable on directly-constructed elements,
+#: with the observed value, so the gap is evidence rather than silence.
+NOT_COMPARABLE: dict[str, str] = {
+    "minSICN": "Gmsh 4.15.2 minSICNShapeMeasure() returns nan on the tri/quad corpora and "
+               "0 on the tet corpora (CondNumBasis path); no usable Gmsh number to "
+               "compare against, so our min_sicn/gmsh_icn stay backed by the analytic "
+               "reference cases only",
+    "gamma/eta (hex)": "MHexahedron overrides neither; Gmsh itself reports 0",
 }
 
 ARTIFACT = REPO / "artifacts" / "mesh_quality_external_diff" / "gmsh_source_diff.json"
@@ -87,13 +105,15 @@ def main(argv: list[str] | None = None) -> int:
     for name, (kind, points, elems) in sorted(drv.meshes().items()):
         if kind not in MAPPING:
             report["meshes"][name] = {"kind": kind, "status": "SKIPPED",
-                                      "why": "kind not computed by qualityMeasures.cpp"}
+                                      "why": ("Gmsh 4.15.2 computes no measure for this kind; "
+                            "see NOT_COMPARABLE in this driver")}
             continue
         mesh_file = tmpdir / f"_{name}.mkm"
         drv.write_mesh_file(mesh_file, kind, points, elems)
         status, external = drv.run_oracle(args.oracle, mesh_file, "W")
         mesh_file.unlink(missing_ok=True)
-        entry: dict = {"kind": kind, "elements": len(elems), "status": status}
+        entry: dict = {"kind": kind, "elements": len(elems), "status": status,
+                       "not_comparable": dict(NOT_COMPARABLE)}
         if status != "RAN" or kind not in external:
             entry["why"] = "oracle did not run"
             report["meshes"][name] = entry
@@ -104,17 +124,16 @@ def main(argv: list[str] | None = None) -> int:
         entry["metrics"] = cmp
         worst = 0.0
         for metric, info in cmp.items():
-            if info.get("status") != "COMPARED":
+            if info.get("status") not in ("AGREE", "DIFFER"):
                 continue
             compared_pairs += 1
-            worst = max(worst, info.get("max_abs_diff_rel", 0.0) or 0.0)
-            if (info.get("beyond_tolerance", 0) or 0) > 0:
-                disagreed += 1
+            worst = max(worst, info.get("max_rel_diff", 0.0) or 0.0)
+            disagreed += int(info.get("n_beyond_tol", 0) or 0)
         entry["worst_rel_diff"] = worst
         report["meshes"][name] = entry
 
     report["pairs_compared"] = compared_pairs
-    report["pairs_beyond_tolerance"] = disagreed
+    report["elements_beyond_tolerance"] = disagreed
     report["oracle_ran"] = ran_any
     Path(args.artifact).parent.mkdir(parents=True, exist_ok=True)
     Path(args.artifact).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
@@ -125,8 +144,8 @@ def main(argv: list[str] | None = None) -> int:
             continue
         for metric, info in entry.get("metrics", {}).items():
             print(f"{name:16s} {metric:10s} {info.get('status'):9s} "
-                  f"worst_rel={info.get('max_abs_diff_rel', float('nan')):.3e} "
-                  f"beyond_tol={info.get('beyond_tolerance', 0)}/{entry['elements']}")
+                  f"worst_rel={info.get('max_rel_diff', float('nan')):.3e} "
+                  f"beyond_tol={info.get('n_beyond_tol', 0)}/{entry['elements']}")
     print(f"pairs compared {compared_pairs}, beyond {args.tolerance:g}: {disagreed}")
 
     if not ran_any:

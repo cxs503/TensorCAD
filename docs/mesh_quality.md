@@ -156,7 +156,7 @@ surface and the hexahedral faces of both box meshes and the hull volume mesh).
 
 ## 5. Not run, and why
 
-* **gmsh**: not installed: the gmsh wheel is published for x86_64/aarch64 only and this host is loongarch64 (pip download gmsh -> 'no matching distribution'). Run `python -c "from tensorcad.meshquality.reference import gmsh_element_qualities as g"` on a host with gmsh to compare gmsh_icn against getElementQualities('minSICN').
+* **gmsh**: the wheel does not exist for loongarch64, so the `libgmsh` arm cannot run here. The **source** arm does: `tools/mesh_quality_oracles/build_gmsh_source_oracle.sh` compiles Gmsh's own `mesh/qualityMeasures.cpp` and the element classes, and `tools/mesh_quality_gmsh_source_diff.py` compares against it — 10 metric groups over 4 meshes, worst relative difference 5.95e-16 (tri `gamma`/`eta`, quad `eta`/`area`, tet `gamma`/`eta`/`volume`). Hexagonal measures have no Gmsh counterpart to compare with (measured, not assumed). Numbers, the two defects that kept this arm silent, and the non-comparable measures: `docs/mesh_quality_gmsh_have_mesh_switch.md`.
 * **meshmagick**: not on the package index and GPL-3.0; its print_quality() delegates to vtk.vtkMeshQuality, whose Verdict definitions the metric module mirrors. A VTK wheel for loongarch64 does not exist, so the runtime comparison cannot run here.
 
 ## 6. Reproduction

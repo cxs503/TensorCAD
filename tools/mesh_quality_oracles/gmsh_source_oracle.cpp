@@ -10,6 +10,10 @@
 // which dispatch into `src/mesh/qualityMeasures.cpp` (`qmTriangle::gamma`,
 // `qmTriangle::eta`, `qmQuadrangle::eta`, `qmTetrahedron::qm(..., QMTET_GAMMA|ETA)`).
 //
+// The measures are guarded by `#if defined(HAVE_MESH)`; `build_gmsh_source_oracle.sh`
+// defines HAVE_MESH in the generated GmshConfig.h, without which every measure returns
+// 0.0 (Gmsh's `#else return 0.;`) and the oracle would "agree" with nothing.
+//
 // This harness compiles *those Gmsh sources verbatim* -- nothing is re-typed and
 // no formula is transcribed -- together with the element classes they operate on
 // (`MTriangle`, `MQuadrangle`, `MTetrahedron`, `MHexahedron`, `MElement`,
@@ -138,11 +142,14 @@ int main(int argc, char **argv)
         MTriangle el(verts[n[0]], verts[n[1]], verts[n[2]], idx, 0);
         emit("tri", "gamma", idx, el.gammaShapeMeasure());
         emit("tri", "eta", idx, el.etaShapeMeasure());
+        emit("tri", "minSICN", idx, el.minSICNShapeMeasure());
       }
       else if(kind == "quad" && n.size() >= 4) {
         MQuadrangle el(verts[n[0]], verts[n[1]], verts[n[2]], verts[n[3]], idx,
                        0);
         emit("quad", "eta", idx, el.etaShapeMeasure());
+        emit("quad", "minSICN", idx, el.minSICNShapeMeasure());
+        emit("quad", "area", idx, el.getVolume());
       }
       else if(kind == "tet" && n.size() >= 4) {
         MTetrahedron el(verts[n[0]], verts[n[1]], verts[n[2]], verts[n[3]], idx,
@@ -150,6 +157,20 @@ int main(int argc, char **argv)
         emit("tet", "gamma", idx, el.gammaShapeMeasure());
         emit("tet", "eta", idx, el.etaShapeMeasure());
         emit("tet", "volume", idx, el.getVolume());
+        emit("tet", "minSICN", idx, el.minSICNShapeMeasure());
+      }
+      else if(kind == "hex" && n.size() >= 8) {
+        MHexahedron el(verts[n[0]], verts[n[1]], verts[n[2]], verts[n[3]],
+                       verts[n[4]], verts[n[5]], verts[n[6]], verts[n[7]], idx,
+                       0);
+        // Gmsh has no hexagonal gamma/eta: MHexahedron does not override them, so the
+        // virtual dispatch Gmsh itself uses (gmsh.cpp getElementQualities) falls through
+        // to MElement's `return 0.;`. Emitted so the fact is measured, not assumed.
+        emit("hex", "gamma", idx, el.gammaShapeMeasure());
+        emit("hex", "eta", idx, el.etaShapeMeasure());
+        emit("hex", "minSICN", idx, el.minSICNShapeMeasure());
+        emit("hex", "minSIGE", idx, el.minSIGEShapeMeasure());
+        emit("hex", "volume", idx, el.getVolume());
       }
       else {
         std::fprintf(stderr, "unsupported block kind '%s' (%zu nodes)\n",
