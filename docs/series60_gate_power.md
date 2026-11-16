@@ -12,6 +12,8 @@ python3 tools/hull_gate_power/mutate.py --out runs/m17252_series60_family/gate_p
   --only S60-1-transom-blend-area,S60-10-bulb-centroid-k,S60-11-bulb-fp-segment,S60-12-bulb-waterplane,S60-13-bulb-wetted-arc,S60-14-bulb-wetted-stretch,S60-2-transom-blend-keep,S60-3-transom-first-moment,S60-4-transom-square-moment,S60-5-deck-taper-half,S60-6-transom-area-factor,S60-7-single-exponent-bracket,S60-8-bulb-volume-cubic,S60-9-bulb-submerged-clip
 ```
 
+**Round 2 (m23207).** The seven mutants this page's first round left unexecuted (`S60-15` .. `S60-21`, the entry and family-comparison claims) have now been run together with the other fourteen: 21/21 killed, recorded in `artifacts/series60_gate_power/gate_power_series60.json` and published, number for number, in `docs/series60_gate_power_record.md`.
+
 ## Result: 14/14 mutants killed (100 %)
 
 | mutant | claim it breaks | verdict | wall |
