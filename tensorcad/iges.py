@@ -40,6 +40,7 @@ build or heal surfaces.
 
 from __future__ import annotations
 
+import hashlib
 import math
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Sequence
@@ -397,6 +398,43 @@ def _uniform_weights(weights: Sequence[float], tol: float = 1e-9) -> bool:
     return (hi - lo) <= tol * max(1.0, hi)
 
 
+def layout_candidates(
+    body: Sequence[float], points: int, rational: bool
+) -> list[tuple[str, list[tuple[float, float, float]], list[float]]]:
+    """Every control-point reading a type-128 tail admits, before any scoring.
+
+    ``[(layout, control, weights), ...]`` in a fixed order -- ``interleaved``
+    (``x, y, z, w`` quadruples), ``weight_block`` (``n`` weights then ``3n``
+    coordinates, the NMRI / Tokyo-2015 writer), ``polynomial`` (bare triples,
+    only when PROP3 declares polynomial data or the tail cannot hold quadruples).
+    The tail is matched from the front because these writers append trailing
+    values that are not control data.
+
+    This is separated from :func:`_split_control` for diagnosability: a reviewer
+    of a geometry report can ask *which* readings the record supports and reject
+    the implausible ones on evidence (a non-positive weight means the tail was
+    split at the wrong offset), instead of having to trust the layout the reader
+    reports.  :mod:`tools.baseline_fleet.diagnose_sources` publishes exactly that
+    per patch.
+    """
+    needed = 4 * points
+    candidates: list[tuple[str, list[tuple[float, float, float]], list[float]]] = []
+    if len(body) >= needed:
+        interleaved = []
+        weights_interleaved = []
+        for index in range(points):
+            x, y, z, w = body[4 * index:4 * index + 4]
+            interleaved.append((x, y, z))
+            weights_interleaved.append(w)
+        candidates.append(("interleaved", interleaved, weights_interleaved))
+        block = [tuple(body[points + 3 * index:points + 3 * index + 3]) for index in range(points)]
+        candidates.append(("weight_block", block, list(body[:points])))  # type: ignore[arg-type]
+    if len(body) >= 3 * points and (not rational or len(body) < needed):
+        plain = [tuple(body[3 * index:3 * index + 3]) for index in range(points)]
+        candidates.append(("polynomial", plain, [1.0] * points))  # type: ignore[arg-type]
+    return candidates
+
+
 def _split_control(
     body: Sequence[float], points: int, rational: bool, count_u: int, count_v: int
 ) -> tuple[list[tuple[float, float, float]], list[float], str, bool]:
@@ -432,21 +470,7 @@ def _split_control(
     of four, so the caller (:func:`tensorcad.fleet_baseline.partition_surfaces`)
     may quarantine the patch instead of meshing a possibly mis-read net.
     """
-    needed = 4 * points
-    candidates: list[tuple[str, list[tuple[float, float, float]], list[float]]] = []
-    if len(body) >= needed:
-        interleaved = []
-        weights_interleaved = []
-        for index in range(points):
-            x, y, z, w = body[4 * index:4 * index + 4]
-            interleaved.append((x, y, z))
-            weights_interleaved.append(w)
-        candidates.append(("interleaved", interleaved, weights_interleaved))
-        block = [tuple(body[points + 3 * index:points + 3 * index + 3]) for index in range(points)]
-        candidates.append(("weight_block", block, list(body[:points])))  # type: ignore[arg-type]
-    if len(body) >= 3 * points and (not rational or len(body) < needed):
-        plain = [tuple(body[3 * index:3 * index + 3]) for index in range(points)]
-        candidates.append(("polynomial", plain, [1.0] * points))  # type: ignore[arg-type]
+    candidates = layout_candidates(body, points, rational)
     if not candidates:
         raise IgesError(
             f"control-point tail has {len(body)} values, too short for {points} points"
@@ -633,6 +657,10 @@ class IgesFile:
     #: real-space lengths.  IGES writes it in front of the units flag.
     model_scale: float = 1.0
     unit_warnings: tuple[str, ...] = ()
+    #: SHA-256 of the bytes this model was parsed from, so a report that cites the
+    #: file (a diagnostics table, a fleet manifest) can be tied back to the exact
+    #: bytes it was measured on.  Empty only for a model assembled by hand.
+    sha256: str = ""
     #: Metres per model unit, model-space scale included.
     @property
     def metres_per_unit(self) -> float:
@@ -1062,8 +1090,9 @@ def _unit_flag(fields: Sequence[str]) -> int:
 
 def read_iges(path: str) -> IgesFile:
     """Read ``path`` and return the parsed model."""
-    with open(path, "r", errors="replace") as handle:
-        lines = handle.read().splitlines()
+    with open(path, "rb") as handle:
+        source_bytes = handle.read()
+    lines = source_bytes.decode("utf-8", errors="replace").splitlines()
     sections = _split_sections(lines)
 
     global_payload = "".join(line[0:72] for line in sections["G"])
@@ -1136,6 +1165,7 @@ def read_iges(path: str) -> IgesFile:
 
     return IgesFile(
         path=path,
+        sha256=hashlib.sha256(source_bytes).hexdigest(),
         global_fields=global_fields,
         entries=entries,
         raw_parameters=raw_parameters,
