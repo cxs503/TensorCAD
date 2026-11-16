@@ -932,3 +932,314 @@ SINGLE10M_TABLE_NAMES: tuple[str, ...] = tuple(SINGLE10M_SPECS)
 
 
 _register(SINGLE10M_SPECS)
+
+
+# ---------------------------------------------------------------------------
+# docs/perf_scale_reference.md -- the anchor's synthesis document
+#
+# This document joins *every* committed ladder, so its tables cannot be a copy of
+# one artifact's renderer: the questions it answers are cross-artifact ("is the
+# file path covered at 10^7", "which sub-task is still short of 10^6").  It used
+# to carry four hand-written tables under the same ``perf-evidence`` markers --
+# i.e. the markers promised programmatic injection while nothing rendered them.
+# Registering the names here is what makes the promise checkable.
+# ---------------------------------------------------------------------------
+
+#: Artifact keys of the reference document, in the order the coverage renderer
+#: receives them.  ``render_block`` splats the artifacts positionally, so this
+#: tuple and ``REFERENCE_SPECS['ref-coverage-table']`` must stay in step (the
+#: test suite asserts the two agree).
+REFERENCE_ARTIFACT_ORDER: tuple[str, ...] = (
+    "mesh", "voxel", "fleet3pt", "single10m", "import_single10m", "import_fleet",
+)
+
+#: Short provenance label per artifact key, used by the coverage table.
+REFERENCE_SOURCE_LABEL = {
+    "mesh": "ladder_mesh",
+    "voxel": "ladder_voxel",
+    "fleet3pt": "ladder_fleet_10m_3pt",
+    "single10m": "ladder_single_10m",
+    "import_single10m": "ladder_import_single_10m",
+    "import_fleet": "ladder_import_fleet_10m",
+}
+
+#: Sub-task display order for the reference document (mesh, fleet, file, voxel).
+REFERENCE_ORDER: tuple[str, ...] = (
+    "load", "obj_write", "obj_read", "subdivide", "fleet_assemble",
+    "point_locate", "point_locate_accel", "volume", "voxelize",
+)
+
+
+def _row_scale(row: Mapping[str, Any]) -> int:
+    """Size of one measurement on its own axis (triangle or voxel count)."""
+    return int(row.get("triangles") or row.get("grid_cells") or 0)
+
+
+def render_reference_import_table(
+    single: Mapping[str, Any], fleet: Mapping[str, Any]
+) -> str:
+    """Markdown table of the **file** path (OBJ write / parse / verify), merged.
+
+    The reader's question is "is *loading a file* covered at 10^7 triangles", and
+    that answer lives in the join of two ladders: the generator ceiling pins a
+    single body at 8.2e6, so only the multi-body ladder crosses 1.0e7.  Neither
+    artifact answers it alone, which is why this is a join and not two tables.
+
+    Every column is a structured field (``file_bytes``, ``file_mb_per_s``,
+    ``volume_rel_err``), so the throughput can be recomputed from the JSON;
+    ``not_run`` rows keep their reason verbatim and are never shown as zeros.
+    """
+    order = {name: i for i, name in enumerate(IMPORT_ORDER)}
+
+    def rows_for(artifact: Mapping[str, Any], scenario: str) -> list[tuple]:
+        out = []
+        for r in _results(artifact):
+            out.append((scenario, order.get(r.get("subtask"), len(order)),
+                        r.get("copies", 1), _row_scale(r), r))
+        return out
+
+    rows = rows_for(single, "单体") + rows_for(fleet, "多体")
+    rows.sort(key=lambda t: (0 if t[0] == "单体" else 1, t[1], t[2], t[3]))
+
+    lines = [
+        "| 场景 | 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 文件 B/tri | 峰值 RSS MiB | 导入体积误差 |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for scenario, _, copies, _scale, r in rows:
+        subtask = r.get("subtask", "?")
+        if r.get("status") != "measured":
+            cells = [scenario, subtask, _int(copies), _int(_scale), "not_run",
+                     r.get("note") or "", DASH, DASH, DASH, DASH, DASH]
+        else:
+            file_mb = (r.get("file_bytes") or 0) / (1024.0 * 1024.0)
+            cells = [
+                scenario,
+                subtask,
+                _int(copies),
+                _int(_scale),
+                _num(r.get("seconds"), ".3f"),
+                _num(r.get("throughput"), ",.0f"),
+                _num(file_mb, ",.1f") if file_mb else DASH,
+                _num(r.get("file_mb_per_s"), ",.1f"),
+                _bytes_per_triangle(r),
+                _num(r.get("peak_rss_mb"), ",.0f"),
+                (
+                    f"{100.0 * r['volume_rel_err']:+.3e} %"
+                    if r.get("volume_rel_err") is not None else DASH
+                ),
+            ]
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
+def render_reference_coverage_table(*artifacts: Mapping[str, Any]) -> str:
+    """Coverage matrix: deepest measured scale per sub-task, across all ladders.
+
+    This is the acceptance-relevant table of the anchor.  It answers "is there a
+    measurement for load / point location / voxelisation / volume integration in
+    the 10^6--10^7 band, and where is it" **from the artifacts**, so a rung that
+    moves or an artifact that is added cannot leave the claim behind.  The two
+    band columns are computed (>=10^6, >=10^7), not asserted in prose: the
+    generator ceiling means ``load`` is short of 10^7 on its own and only the
+    file path (``obj_read``) crosses it, which the table makes visible instead of
+    papering over.
+    """
+    if len(artifacts) != len(REFERENCE_ARTIFACT_ORDER):  # pragma: no cover - misuse
+        raise ValueError(
+            f"coverage table needs {len(REFERENCE_ARTIFACT_ORDER)} artifacts, "
+            f"got {len(artifacts)}"
+        )
+    best: dict[str, tuple[int, str]] = {}
+    for key, artifact in zip(REFERENCE_ARTIFACT_ORDER, artifacts):
+        label = REFERENCE_SOURCE_LABEL[key]
+        for r in _measured(artifact):
+            scale = _row_scale(r)
+            if not scale:
+                continue
+            subtask = r.get("subtask", "?")
+            if subtask not in best or scale > best[subtask][0]:
+                best[subtask] = (scale, label)
+
+    order = {name: i for i, name in enumerate(REFERENCE_ORDER)}
+    lines = [
+        "| 子任务 | 规模轴 | 最大已测规模 | 出处工件 | 达 10⁶ | 达 10⁷ |",
+        "|---|---|---:|---|---|---|",
+    ]
+    for subtask in sorted(best, key=lambda s: (order.get(s, len(order)), s)):
+        scale, label = best[subtask]
+        axis = AXIS_LABEL.get(subtask, ("三角面", ""))[0]
+        lines.append(
+            "| `{}` | {} | {} | `{}` | {} | {} |".format(
+                subtask, axis, _int(scale), label,
+                "✅" if scale >= 10**6 else DASH,
+                "✅" if scale >= 10**7 else DASH,
+            )
+        )
+    return "\n".join(lines)
+
+
+#: Tables of ``docs/perf_scale_reference.md``.
+REFERENCE_SPECS: dict[str, tuple[tuple[str, ...], Any]] = {
+    "ref-mesh-table": (("mesh",), render_mesh_table),
+    "ref-voxel-table": (("voxel",), render_voxel_table),
+    "ref-fleet-table": (("fleet3pt",), render_fleet3pt_table),
+    "ref-single-table": (("single10m",), render_single10m_table),
+    "ref-import-table": (("import_single10m", "import_fleet"), render_reference_import_table),
+    "ref-coverage-table": (REFERENCE_ARTIFACT_ORDER, render_reference_coverage_table),
+}
+
+#: Table names ``docs/perf_scale_reference.md`` must embed, in display order.
+REFERENCE_TABLE_NAMES: tuple[str, ...] = tuple(REFERENCE_SPECS)
+
+
+_register(REFERENCE_SPECS)
+
+
+#: Per-sub-task complexity limits, as enforced by ``perf_benchmark.scaling_gates``.
+#: Duplicated here only as the *documented* limit of the slope table; the gate
+#: itself keeps its own copy and the test suite asserts the two agree.
+REFERENCE_SLOPE_LIMITS: dict[str, float] = {
+    "point_locate_accel": 0.80,
+}
+
+
+def render_reference_exponents_table(*artifacts: Mapping[str, Any]) -> str:
+    """log-log slope of seconds vs scale, per (ladder, sub-task).
+
+    The reference document's slope table used to be typed by hand and had drifted
+    (``load`` was stated as 1.17 while the committed ladder measures 1.08).  It is
+    rendered here so the claim moves with the artifact.  Slopes are reported with
+    R² because a slope through scattered points is only meaningful with a fit
+    quality; fewer than two measured rungs prints ``not_run`` rather than a slope.
+    """
+    from .perf_benchmark import _loglog_slope
+
+    if len(artifacts) != len(REFERENCE_ARTIFACT_ORDER):  # pragma: no cover - misuse
+        raise ValueError(
+            f"exponent table needs {len(REFERENCE_ARTIFACT_ORDER)} artifacts, "
+            f"got {len(artifacts)}"
+        )
+    order = {name: i for i, name in enumerate(REFERENCE_ORDER)}
+    lines = [
+        "| 阶梯 | 子任务 | 规模点 | 规模范围 | 指数 | R² | 限值 | 判定 |",
+        "|---|---|---:|---|---:|---:|---:|---|",
+    ]
+    for key, artifact in zip(REFERENCE_ARTIFACT_ORDER, artifacts):
+        label = REFERENCE_SOURCE_LABEL[key]
+        groups: dict[tuple[str, int], list[dict[str, Any]]] = {}
+        for r in _measured(artifact):
+            if not _row_scale(r) or not r.get("seconds"):
+                continue
+            groups.setdefault((r.get("subtask", "?"), r.get("copies", 1)), []).append(r)
+        for subtask, copies in sorted(groups, key=lambda k: (order.get(k[0], len(order)), k[1])):
+            rows = sorted(groups[(subtask, copies)], key=_row_scale)
+            points = [(float(_row_scale(r)), float(r["seconds"])) for r in rows]
+            name = subtask if copies == 1 else f"{subtask} ×{copies}"
+            span = f"{_int(points[0][0])} → {_int(points[-1][0])}"
+            if len(points) < 3:
+                # Two points always fit a line perfectly: no slope is claimed.
+                lines.append(
+                    f"| {label} | {name} | {len(points)} | {span} | not_run | — | — | 规模点不足 |"
+                )
+                continue
+            slope, r2 = _loglog_slope(points)
+            limit = REFERENCE_SLOPE_LIMITS.get(subtask, 1.50)
+            lines.append(
+                "| {} | {} | {} | {} | {:.2f} | {:.3f} | ≤{:.2f} | {} |".format(
+                    label, name, len(points), span, slope, r2, limit,
+                    "✅" if slope <= limit else "RED",
+                )
+            )
+    return "\n".join(lines)
+
+
+#: Volume relative error is a structured field only on the file-import ladders;
+#: the generated ladders carry it in ``note`` (``rel_err=...``), so the error
+#: table reads the note when the field is absent and says so in the row.
+def _volume_rel_err(row: Mapping[str, Any]) -> float | None:
+    """Absolute volume relative error as a fraction (0.03 means 3%).
+
+    ``rel_err`` is recorded as a **percentage** in the generated ladders
+    (``rel_err=-1.842%``), so the unit is read from the note instead of assumed:
+    taking ``1.842`` as a fraction would report 184% and turn a healthy ladder
+    RED.  The structured field, when present, is already a fraction.
+    """
+    value = row.get("volume_rel_err")
+    if value is not None:
+        return abs(float(value))
+    import re
+
+    note = row.get("note") or ""
+    m = re.search(r"rel_err\s*=\s*([-+]?[0-9]+(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?)\s*(%?)", note)
+    if not m:
+        return None
+    try:
+        number = abs(float(m.group(1)))
+    except ValueError:  # pragma: no cover - malformed note
+        return None
+    return number / 100.0 if m.group(2) == "%" else number
+
+
+#: Accuracy standard of the platform: a key quantity off its reference by more
+#: than this is not acceptable.  Stated once, used by the error table's verdict.
+REFERENCE_ERROR_LIMIT = 0.03
+
+
+def render_reference_error_table(*artifacts: Mapping[str, Any]) -> str:
+    """Worst measured volume error per ladder, judged against the 3% standard.
+
+    Acceptance for the anchor is a performance table, but a fast wrong answer is
+    worthless, so every ladder is required to carry its own accuracy verdict.  The
+    error is taken from the structured field when the ladder records one and from
+    the recorded ``rel_err`` in ``note`` otherwise -- never re-derived from a
+    different run, which is how the hand-kept number had drifted before.
+    """
+    if len(artifacts) != len(REFERENCE_ARTIFACT_ORDER):  # pragma: no cover - misuse
+        raise ValueError(
+            f"error table needs {len(REFERENCE_ARTIFACT_ORDER)} artifacts, "
+            f"got {len(artifacts)}"
+        )
+    lines = [
+        "| 阶梯 | 体积测量档数 | 最大相对误差 | 判定（<3%） | 基准 |",
+        "|---|---:|---:|---|---|",
+    ]
+    for key, artifact in zip(REFERENCE_ARTIFACT_ORDER, artifacts):
+        label = REFERENCE_SOURCE_LABEL[key]
+        errs = []
+        for r in _measured(artifact):
+            if r.get("subtask") != "volume":
+                continue
+            err = _volume_rel_err(r)
+            if err is not None:
+                errs.append(err)
+        if not errs:
+            # No volume rung at all (the voxel ladder integrates cells, not
+            # triangles): ``not_run`` goes in the verdict column so a reader
+            # filtering on that column sees the non-answer, not a blank.
+            lines.append(
+                f"| {label} | 0 | not_run | not_run | 该阶梯不积分体积（无双路径基准） |"
+            )
+            continue
+        worst = max(errs)
+        source = "structured `volume_rel_err`" if any(
+            r.get("volume_rel_err") is not None
+            for r in _measured(artifact) if r.get("subtask") == "volume"
+        ) else "`note` 中的 rel_err"
+        lines.append(
+            "| {} | {} | {:.3e} | {} | {} |".format(
+                label, len(errs), worst,
+                "✅" if worst < REFERENCE_ERROR_LIMIT else "RED",
+                f"`analytic_volume` 闭式解（{source}）",
+            )
+        )
+    return "\n".join(lines)
+
+
+REFERENCE_SPECS["ref-exponents-table"] = (REFERENCE_ARTIFACT_ORDER, render_reference_exponents_table)
+REFERENCE_SPECS["ref-error-table"] = (REFERENCE_ARTIFACT_ORDER, render_reference_error_table)
+REFERENCE_TABLE_NAMES = tuple(REFERENCE_SPECS)
+
+
+# The two cross-ladder tables are defined after the registry is first registered,
+# so refresh it here: ``ALL_TABLE_SPECS`` is filled by ``update`` at call time.
+_register(REFERENCE_SPECS)
