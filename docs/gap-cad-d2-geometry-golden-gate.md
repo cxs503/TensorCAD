@@ -27,18 +27,18 @@ committed 的基线**：四个金标 case、`FROZEN` 档判"是否漂移"。它�
 
 | 路径 | push 触发 | PR 触发 | pre-commit 钩子 |
 |---|---|---|---|
-| `tensorcad/hull.py` | yes | yes | yes |
-| `tensorcad/wigley.py` | yes | yes | yes |
-| `tensorcad/series60.py` | yes | yes | yes |
-| `tensorcad/dtmb5415.py` | yes | yes | yes |
-| `tensorcad/hydrostatics.py` | yes | yes | yes |
-| `tensorcad/hydrostatics_analytic.py` | yes | yes | yes |
-| `tensorcad/mesh.py` | yes | yes | yes |
-| `tensorcad/topology.py` | yes | yes | yes |
-| `tensorcad/exchange.py` | yes | yes | yes |
-| `tensorcad/geometry_audit.py` | yes | yes | yes |
-| `tensorcad/voxel.py` | yes | yes | yes |
+| `tensorcad/**` | yes | yes | yes |
+| `docs/data/**` | yes | yes | yes（前缀同样命中；数据编辑与本钩子同属"能移动金标数字的改动"） |
 | `.github/workflows/geometry-golden.yml` | yes | yes | no (CI only) |
+
+**为什么是整包而不是模块清单**：这张表的第一版是一份 11 个模块的白名单。白名单等于一个断言
+——"被列的这些才是能移动金标数字的代码"。运行时导入迹否证了它：四个金标 case 测量时实际执行了
+**80 个** `tensorcad` 模块（`tests/test_geometry_golden_gate.py::test_every_module_the_measurement_imports_is_watched`
+每次运行重新推导这个集合，不抄任何清单），旧白名单漏掉 69 个，其中包括 `loft.py`（Wigley 的放样路径）
+与 `geometry_field.py`（球/椭球的 SDF 采样）。实测代价：把 `SphereField.numpy_callable` 的半径乘 1.02
+（一次真实几何回归，套件判 FAIL、退出 1），用旧钩子提交 `tensorcad/geometry_field.py` 得到退出码 0、
+无任何提示，CI 那条路的路径过滤器也没点它。现在两侧都按前缀/通配覆盖整包；详见
+`docs/gap-cad-d2-trigger-envelope.md` 与 `artifacts/gap-cad-d2-golden/trigger_envelope.json`。
 
 **不触发的改动**：只改 `docs/**`、`README.md`、`CHANGELOG.md`、`tests/**` 等文档/测试文件时，
 push/PR 路径过滤器不命中，pre-commit 钩子也在路径判断上直接退出（实测 0.02 s，见 §6）。
