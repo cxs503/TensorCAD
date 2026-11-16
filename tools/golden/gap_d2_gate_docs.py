@@ -60,13 +60,23 @@ def workflow_paths() -> dict[str, list[str]]:
 
 
 def hook_watched() -> list[str]:
+    """Paths the pre-commit hook triggers on, as globs.
+
+    The hook watches the package by prefix (``WATCHED='^tensorcad/'``), not by listing
+    modules: a list is a claim about which files can move a golden number, and the runtime
+    import trace of the four golden cases names 80 modules, so the previous 11-name list
+    left ~69 of them ungated (measured: a +2 % radius regression in ``geometry_field.py``
+    turned the suite red and committed through the hook untouched).  The prefix renders
+    as the same glob the workflow's path filter uses.
+    """
     with open(HOOK, encoding="utf-8") as handle:
         source = handle.read()
-    match = re.search(r"^WATCHED='\^\((?P<body>.+)\)'$", source, re.MULTILINE)
+    match = re.search(r"^WATCHED='(?P<pattern>.+)'$", source, re.MULTILINE)
     assert match, "WATCHED pattern not found"
-    body = match.group("body")
-    prefix, suffix = "tensorcad/(", r")\.py"
-    return [f"tensorcad/{name}.py" for name in body[len(prefix):-len(suffix)].split("|")]
+    pattern = match.group("pattern")
+    if pattern in ("^tensorcad/", "^tensorcad/.*"):
+        return ["tensorcad/**"]
+    raise AssertionError(f"unrecognised WATCHED form: {pattern!r}")
 
 
 HOOK_MODES = {
@@ -362,6 +372,15 @@ committed 的基线**：四个金标 case、`FROZEN` 档判"是否漂移"。它�
 ## 2. 触发路径（程序化取自 `geometry-golden.yml` 与 `.githooks/pre-commit-geometry-golden.sh`）
 
 {trigger_table()}
+
+**为什么是整包而不是模块清单**：这张表的第一版是一份 11 个模块的白名单。白名单等于一个断言
+——"被列的这些才是能移动金标数字的代码"。运行时导入迹否证了它：四个金标 case 测量时实际执行了
+**80 个** `tensorcad` 模块（`tests/test_geometry_golden_gate.py::test_every_module_the_measurement_imports_is_watched`
+每次运行重新推导这个集合，不抄任何清单），旧白名单漏掉 69 个，其中包括 `loft.py`（Wigley 的放样路径）
+与 `geometry_field.py`（球/椭球的 SDF 采样）。实测代价：把 `SphereField.numpy_callable` 的半径乘 1.02
+（一次真实几何回归，套件判 3 项 FAIL、退出 1，见 `artifacts/gap-cad-d2-golden/trigger_envelope.json`），
+用旧钩子提交 `tensorcad/geometry_field.py` 得到退出码 0、无任何提示，CI 那条路的路径过滤器也没点它。
+现在两侧都按前缀/通配覆盖整包：多触发的代价是一档粗网格（~11 s），漏触发的代价是门本身。
 
 **不触发的改动**：只改 `docs/**`、`README.md`、`CHANGELOG.md`、`tests/**` 等文档/测试文件时，
 push/PR 路径过滤器不命中，pre-commit 钩子也在路径判断上直接退出（实测 {chain_docs_wall}，见 §6）。

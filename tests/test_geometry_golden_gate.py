@@ -3,18 +3,21 @@
 The gate installed here has two independent carriers: the CI workflow
 ``.github/workflows/geometry-golden.yml`` (authoritative, fails closed) and the
 husky-style pre-commit step ``.githooks/pre-commit-geometry-golden.sh`` (local, ~35 s).
-Both encode "which edits can move a golden number" as a hard-coded list, and the lists
-are maintained in different files by different mechanisms -- a path filter in YAML and a
-regex in shell.  Drift between them is silent in both directions: a path only CI watches
-gives no local warning, a path only the hook watches is unenforced for anyone who did
-not install it.  These tests make the drift loud, and pin the two acceptance properties
-that are cheap to check without running the 35 s suite: documentation-only edits do not
-trigger the gate, and the workflow asserts the suite's own report rather than only its
-exit code.
+Both encode "which edits can move a golden number" as a path filter, maintained in
+different files by different mechanisms -- a YAML list and a shell regex.  Drift between
+them is silent in both directions: a path only CI watches gives no local warning, a path
+only the hook watches is unenforced for anyone who did not install it.  These tests make
+the drift loud, and pin three acceptance properties: documentation-only edits do not
+trigger the gate, the workflow asserts the suite's own report rather than only its exit
+code, and **the watched set covers every module the golden measurement actually imports**
+-- derived from a real run, never from a list, because the first version of this gate was
+an 11-module list and the run executes 80 modules (a +2 % radius regression in
+``geometry_field.py`` went through it untouched).
 """
 
 from __future__ import annotations
 
+import fnmatch
 import importlib.util
 import json
 import os
@@ -69,20 +72,39 @@ def _workflow_paths() -> dict[str, list[str]]:
     return sections
 
 
-def _hook_watched() -> set[str]:
-    """Expand the shell hook's WATCHED regex into the file list it covers."""
+def _hook_pattern() -> str:
+    """The shell hook's WATCHED regex, as written."""
     with open(HOOK, encoding="utf-8") as handle:
         source = handle.read()
-    match = re.search(r"^WATCHED='\^\((?P<body>.+)\)'$", source, re.MULTILINE)
+    match = re.search(r"^WATCHED='(?P<pattern>.+)'$", source, re.MULTILINE)
     assert match, "WATCHED pattern not found in the pre-commit hook"
-    body = match.group("body")
-    prefix, suffix = "tensorcad/(", r")\.py"
-    assert body.startswith(prefix) and body.endswith(suffix), (
-        f"unrecognised WATCHED form: {body!r}"
-    )
-    alternatives = body[len(prefix):-len(suffix)].split("|")
-    assert all(re.fullmatch(r"[A-Za-z0-9_]+", name) for name in alternatives), alternatives
-    return {f"tensorcad/{name}.py" for name in alternatives}
+    return match.group("pattern")
+
+
+def _covers(patterns: list[str], path: str) -> bool:
+    """Does any trigger pattern (shell regex or YAML glob) cover ``path``?
+
+    The hook's pattern is a regex (``^tensorcad/``), the workflow's is a glob
+    (``tensorcad/**``); the two are not interchangeable and each is applied as what it is.
+    """
+    for pattern in patterns:
+        if pattern.startswith("^"):
+            if re.search(pattern, path):
+                return True
+        elif fnmatch.fnmatch(path, pattern):
+            return True
+    return False
+
+
+def _package_modules() -> list[str]:
+    """Every module file in the package, as repository-relative POSIX paths."""
+    found = []
+    for dirpath, _dirnames, filenames in os.walk(os.path.join(REPO_ROOT, "tensorcad")):
+        for name in filenames:
+            if name.endswith(".py"):
+                full = os.path.join(dirpath, name)
+                found.append(os.path.relpath(full, REPO_ROOT).replace(os.sep, "/"))
+    return sorted(found)
 
 
 @pytest.fixture(scope="module")
@@ -90,21 +112,85 @@ def workflow_paths():
     return _workflow_paths()
 
 
-@pytest.fixture(scope="module")
-def hook_watched():
-    return _hook_watched()
+def test_hook_and_workflow_watch_the_same_paths(workflow_paths):
+    """The two carriers must cover the same set -- both the package, both the data."""
+    hook = _hook_pattern()
+    assert _covers([hook], "tensorcad/hull.py"), hook
+    assert _covers([hook], "tensorcad/geomquality/pipeline.py"), hook
+    assert _covers(workflow_paths["push"], "tensorcad/hull.py"), workflow_paths["push"]
+    assert _covers(workflow_paths["push"], "tensorcad/geomquality/pipeline.py"), workflow_paths["push"]
+    # a docs-only path is covered by neither (otherwise every commit pays for the gate)
+    assert not _covers([hook], "docs/gap-cad-d2-geometry-golden-gate.md")
+    assert not _covers(workflow_paths["push"], "README.md")
 
 
-def test_hook_and_workflow_watch_the_same_geometry_modules(workflow_paths, hook_watched):
-    watched_by_workflow = {
-        path for path in workflow_paths["push"] if path.startswith("tensorcad/")
-    }
-    assert watched_by_workflow == hook_watched, (
-        "CI and the pre-commit hook disagree about which modules can move a golden "
-        f"number; CI-only: {sorted(watched_by_workflow - hook_watched)}, "
-        f"hook-only: {sorted(hook_watched - watched_by_workflow)}"
+def test_every_package_module_is_watched(workflow_paths):
+    """Static half of the coverage property: nothing in the package is outside the gate."""
+    hook, ci = [_hook_pattern()], workflow_paths["push"]
+    modules = _package_modules()
+    assert len(modules) >= 60, modules
+    missed_hook = [p for p in modules if not _covers(hook, p)]
+    missed_ci = [p for p in modules if not _covers(ci, p)]
+    assert not missed_hook, f"hook does not fire on {missed_hook[:5]}"
+    assert not missed_ci, f"CI does not fire on {missed_ci[:5]}"
+
+
+PROBE = '''
+import json, os, sys
+import tensorcad.golden as golden
+
+try:
+    golden.main(["--check", "--quick", "--json", sys.argv[1]])
+except SystemExit:
+    pass
+root = os.path.dirname(os.path.dirname(os.path.abspath(golden.__file__)))
+modules = sorted({
+    os.path.relpath(os.path.abspath(module.__file__), root).replace(os.sep, "/")
+    for name, module in list(sys.modules.items())
+    if name.split(".")[0] == "tensorcad" and getattr(module, "__file__", None)
+})
+with open(sys.argv[2], "w", encoding="utf-8") as handle:
+    json.dump(modules, handle)
+'''
+
+
+def test_every_module_the_measurement_imports_is_watched(tmp_path, workflow_paths):
+    """Dynamic half: the set is derived from a real measurement, not from a list.
+
+    ``tensorcad/golden.py`` measures its four cases in-process, so the modules in
+    ``sys.modules`` when it returns are the code that produced the numbers.  Any of them
+    outside the trigger set is a hole in the gate; the previous 11-name list had 69.
+    """
+    script = tmp_path / "probe.py"
+    script.write_text(PROBE, encoding="utf-8")
+    report = tmp_path / "golden.json"
+    modules_json = tmp_path / "modules.json"
+    env = dict(os.environ, PYTHONPATH=REPO_ROOT)
+    result = subprocess.run(
+        [sys.executable, str(script), str(report), str(modules_json)],
+        cwd=REPO_ROOT, env=env, capture_output=True, text=True, timeout=600,
     )
-    assert len(hook_watched) >= 11
+    assert modules_json.exists(), result.stdout[-2000:] + result.stderr[-2000:]
+    modules = json.loads(modules_json.read_text(encoding="utf-8"))
+    assert len(modules) >= 40, modules
+
+    hook, ci = [_hook_pattern()], workflow_paths["push"]
+    missed_hook = [p for p in modules if not _covers(hook, p)]
+    missed_ci = [p for p in modules if not _covers(ci, p)]
+    assert not missed_hook, f"measurement imports ungated modules: {missed_hook[:5]}"
+    assert not missed_ci, f"measurement imports CI-ungated modules: {missed_ci[:5]}"
+
+
+def test_the_hook_now_fires_on_a_module_the_whitelist_missed():
+    """Regression probe for this defect: geometry_field.py used to be invisible.
+
+    On the 11-name list the hook returned 0 (``no geometry change detected``) for a staged
+    ``tensorcad/geometry_field.py`` while a +2 % radius change there turns the suite red.
+    """
+    result = _run_hook(["tensorcad/geometry_field.py"], golden_dir="/nonexistent-suite")
+    assert "geometry-affecting change detected" in result.stdout, result.stdout
+    assert "tensorcad/geometry_field.py" in result.stdout
+    assert result.returncode != 0
 
 
 def test_push_and_pull_request_filters_agree(workflow_paths):
@@ -118,15 +204,23 @@ def test_gate_self_tests_its_own_workflow_file(workflow_paths):
         assert ".github/workflows/geometry-golden.yml" in workflow_paths[trigger]
 
 
-def test_every_watched_path_exists(hook_watched):
-    missing = sorted(path for path in hook_watched if not os.path.isfile(
-        os.path.join(REPO_ROOT, path)))
-    assert not missing, f"the gate watches paths that do not exist: {missing}"
+def test_every_watched_path_exists():
+    """A trigger that names a file nobody has is a trigger that never fires.
+
+    The 11-name whitelist this replaces listed modules of a package layout that has since
+    moved on; nothing checked that the named files were real.  The hook now watches the
+    package by prefix, so the property to hold is the converse: every module that exists is
+    covered, and the two paths the probe exercises are real files.
+    """
+    for path in ("tensorcad/hull.py", "tensorcad/geometry_field.py"):
+        assert os.path.isfile(os.path.join(REPO_ROOT, path)), path
+    hook = [_hook_pattern()]
+    assert all(_covers(hook, path) for path in _package_modules())
 
 
-def test_documentation_only_edits_are_not_watched(workflow_paths, hook_watched):
-    watched = set(workflow_paths["push"]) | set(workflow_paths["pull_request"]) | hook_watched
-    triggered = sorted(path for path in DOC_ONLY if path in watched)
+def test_documentation_only_edits_are_not_watched(workflow_paths):
+    watched = [_hook_pattern(), *workflow_paths["push"], *workflow_paths["pull_request"]]
+    triggered = sorted(path for path in DOC_ONLY if _covers(watched, path))
     assert not triggered, f"documentation-only paths would trigger the gate: {triggered}"
 
 
