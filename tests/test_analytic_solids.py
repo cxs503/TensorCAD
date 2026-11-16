@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import pytest
 
 from tensorcad import analytic_solids as solids
@@ -91,13 +92,100 @@ def test_a_non_converged_integral_raises_instead_of_returning() -> None:
 
 
 def test_a_body_beyond_the_cap_raises_rather_than_returning_a_truncated_area() -> None:
-    """A 200:1 disc needs a far higher order than the cap; the reference refuses, loudly.
+    """A 200:1 disc needs more than the panel ladder is allowed to spend; it refuses, loudly.
 
-    This is the documented applicability limit of the tensor rule, asserted so it stays a
-    known refusal rather than becoming a silent loss of digits on a slender body.
+    This is the documented applicability limit, asserted so it stays a known refusal rather
+    than becoming a silent loss of digits on a slender body.
     """
     with pytest.raises(ArithmeticError, match="not converged"):
-        solids.ellipsoid_surface_area([10.0, 10.0, 0.05], max_order=128)
+        solids.ellipsoid_surface_area([10.0, 10.0, 0.05], max_order=128, max_panels=2)
+
+
+def test_the_unsplit_rule_alone_still_refuses_a_slender_body() -> None:
+    """The historical limit is real and stays visible: one tensor block cannot do 20:1."""
+    with pytest.raises(ArithmeticError, match="not converged"):
+        solids.ellipsoid_surface_area([20.0, 20.0, 1.0], max_panels=1)
+
+
+# --------------------------------------------------------------------------------------
+# panel splitting: the corner in the area element, and what removing it buys
+# --------------------------------------------------------------------------------------
+@pytest.mark.parametrize("ratio", [20.0, 100.0])
+def test_panel_splitting_reaches_the_slender_discs_the_unsplit_rule_refused(ratio: float) -> None:
+    """Splitting ``u`` at its corner restores geometric convergence where order alone stalls.
+
+    The check is still the elementary oblate closed form, i.e. the same independent route
+    the rest of this file uses; the panel count only changes how the integral is evaluated.
+    """
+    area = solids.ellipsoid_surface_area([ratio, ratio, 1.0])
+    expected = solids.spheroid_surface_area(ratio, 1.0)
+    assert abs(area - expected) / expected < 1e-12
+
+
+def test_panel_splitting_handles_a_body_that_corners_in_both_directions() -> None:
+    """(8, 1, 0.1) has a corner in ``cos u`` and another in ``sin v``: no closed form exists,
+    so it is checked against a different quadrature family (cell midpoint rule) at 1e-5."""
+    area = solids.ellipsoid_surface_area([8.0, 1.0, 0.1])
+    assert abs(_midpoint_area([8.0, 1.0, 0.1]) - area) / area < 1e-5
+
+
+def test_the_committed_reference_value_is_unmoved_by_the_panel_refactor() -> None:
+    """The suite's blessed number must not drift: ``panels=1`` is the historical rule and it
+    still returns the bit-identical area that ``docs/golden`` was generated from."""
+    assert solids.ellipsoid_surface_area([2.0, 1.5, 0.5]) == 22.076658276751232
+
+
+def _midpoint_area(semi_axes: tuple[float, float, float], cells: int = 800) -> float:
+    """Area element summed on a cell-centre grid: shares no nodes with the Gauss rule."""
+    a, b, c = semi_axes
+    u = (np.arange(cells) + 0.5) * math.pi / cells
+    v = (np.arange(cells) + 0.5) * 2.0 * math.pi / cells
+    sin_u, cos_u = np.sin(u)[:, None], np.cos(u)[:, None]
+    sin_v, cos_v = np.sin(v)[None, :], np.cos(v)[None, :]
+    element = sin_u * np.sqrt(
+        a * a * b * b * cos_u**2 + c * c * sin_u**2 * (b * b * cos_v**2 + a * a * sin_v**2)
+    )
+    return float(element.sum()) * (math.pi / cells) * (2.0 * math.pi / cells)
+
+
+# --------------------------------------------------------------------------------------
+# the elementary spheroid forms: the flat limit and the near-spherical digits
+# --------------------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    ("polar", "tolerance"),
+    # the residual is k^2 log(2/k) with k = polar / equatorial: 1.4e-11 at k = 1e-6 and
+    # 2e-17 at k = 1e-9, so the tolerance is the size of the next term, not a fudge
+    [(1e-6, 1e-10), (1e-9, 1e-15), (1e-12, 1e-15), (1e-300, 1e-15)],
+)
+def test_the_flat_spheroid_limit_is_the_disc_area(polar: float, tolerance: float) -> None:
+    """A spheroid flattened without limit tends to a disc of area ``2 pi a^2``.
+
+    Regression: the old ``atanh(e)`` branch was handed ``atanh(1.0)`` once ``e`` rounded to
+    one, and raised a domain error on a perfectly well-posed limit.
+    """
+    assert solids.spheroid_surface_area(1.0, polar) == pytest.approx(
+        2.0 * math.pi, rel=tolerance
+    )
+
+
+@pytest.mark.parametrize("delta", [1e-3, 1e-6, 1e-9, 1e-12])
+def test_the_closed_forms_agree_with_the_quadrature_near_the_sphere(delta: float) -> None:
+    """Digits near ``a = c`` are where a cancelling eccentricity shows up: both branches must
+    still meet the quadrature to 1e-13 relative."""
+    for polar in (1.0 - delta, 1.0 + delta):
+        quadrature = solids.ellipsoid_surface_area([1.0, 1.0, polar])
+        closed_form = solids.spheroid_surface_area(1.0, polar)
+        assert abs(closed_form - quadrature) / quadrature < 1e-13
+
+
+@pytest.mark.parametrize("ratio", [1e3, 1e6, 1e9])
+def test_the_needle_limit_keeps_its_precision(ratio: float) -> None:
+    """``asin(e)`` is a subtraction from ``pi/2`` for a needle, and the old branch paid for
+    it: 2.8e-11 at 1e6:1 and 6.4e-10 at 1e9:1 against the quadrature. Reflecting the arcsine
+    keeps it at 1e-14, checked against the quadrature, which converges here."""
+    quadrature = solids.ellipsoid_surface_area([1.0, 1.0, ratio])
+    closed_form = solids.spheroid_surface_area(1.0, ratio)
+    assert abs(closed_form - quadrature) / quadrature < 1e-13
 
 
 @pytest.mark.parametrize(
