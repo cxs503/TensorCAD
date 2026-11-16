@@ -1,4 +1,4 @@
-"""Offset tables of three published hull forms, with provenance and closed forms.
+"""Offset tables of published hull forms, with provenance and closed forms.
 
 Why this exists
 ---------------
@@ -21,8 +21,8 @@ form that keeps the distinction visible:
   function itself, so the loft can be judged against the hull and not only against the
   table it came from.
 
-The three forms
----------------
+The forms
+---------
 ``wigley_iii``
     Parabolic hull ``y = (B/2)(1-(2x/L)^2)(1-(z/T-1)^2)``; ``Cb = 4/9``,
     ``Cwp = 2/3``, ``VCB = 5T/8`` exactly.  Polynomial in ``x`` and ``z``, so both the
@@ -40,6 +40,14 @@ The three forms
     so this is a class hull: the ``Cb``/``LCB`` agreement is a consistency check of the
     representation, not an independent KVLCC2 validation.  It contributes what the other
     two cannot: a full-scale hull with a fine, transom-free run and ``L/B = 5.5``.
+``dtmb5415``
+    DTMB 5415 surface combatant (``L = 142 m``, ``B = 10.27 m``, ``T = 6.16 m``,
+    ``Cb ~ 0.511``): the ITTC standard validation hull for resistance and seakeeping.
+    Sampled from the baseline (v=0) parametric reconstruction of the Zenodo design-space
+    database (Serani et al. 2025).  This is the only form with a bulbous bow, flare,
+    and a transom stern -- the features a real ship has that the analytic forms lack.
+    No closed-form reference exists; hydrostatics are compared against the parametric
+    model's own volume computation.
 
 Usage
 -----
@@ -71,21 +79,22 @@ class HullForm:
     """A published hull whose half-breadths are a documented function of ``(x, z)``."""
 
     key: str
-    specimen_factory: Callable[[], HullSpecimen]
+    specimen_factory: Callable[[], HullSpecimen] | None
     provenance: OffsetProvenance
+    table_factory: Callable[..., ShipOffsetTable] | None = None
 
-    def specimen(self) -> HullSpecimen:
+    def specimen(self) -> HullSpecimen | None:
+        if self.specimen_factory is None:
+            return None
         return self.specimen_factory()
 
-    def reference(self) -> dict[str, Any]:
+    def reference(self) -> dict[str, Any] | None:
         """Analytic integrals of the hull itself, keyed like the table integrals.
 
-        ``vcb`` is converted from the specimen's "negative depth" convention
-        (``-z`` from the waterline, which is how the closed forms are written) to height
-        above the keel, and ``lcb`` from midship to the aft perpendicular, so the numbers
-        line up with :class:`~tensorcad.offset_loft.TableIntegrals` without anybody
-        re-deriving the sign by hand.
+        Returns None for forms without a closed-form reference (e.g. DTMB 5415).
         """
+        if self.specimen_factory is None:
+            return None
         specimen = self.specimen()
         reference = dict(specimen.reference)
         draft = specimen.draft
@@ -108,6 +117,15 @@ class HullForm:
         waterline_exponent: float = 1.0,
         name: str | None = None,
     ) -> ShipOffsetTable:
+        if self.table_factory is not None:
+            return self.table_factory(
+                n_stations=n_stations,
+                n_waterlines=n_waterlines,
+                waterline_exponent=waterline_exponent,
+                name=name or self.key,
+            )
+        if self.specimen_factory is None:
+            raise OffsetTableError(f"form {self.key!r} has no table factory or specimen")
         return sample_offset_table(
             self.specimen(),
             provenance=self.provenance,
@@ -171,8 +189,15 @@ def sample_offset_table(
 
 _CAD_CODE_URL = "https://github.com/cxs503/TensorCAD/blob/main/tensorcad/geomquality/baselines.py"
 
-_FORMS: dict[str, HullForm] = {
-    "wigley_iii": HullForm(
+_FORMS: dict[str, HullForm] = {}
+
+
+def _register_forms() -> None:
+    """Register all hull forms.  Called at import time."""
+    global _FORMS
+
+    # Analytic forms (with closed-form reference)
+    _FORMS["wigley_iii"] = HullForm(
         key="wigley_iii",
         specimen_factory=wigley_iii,
         provenance=OffsetProvenance(
@@ -193,8 +218,8 @@ _FORMS: dict[str, HullForm] = {
                 "used to pin the method because Cb = 4/9, Cwp = 2/3 and VCB = 5T/8 are exact"
             ),
         ),
-    ),
-    "series60_cb060": HullForm(
+    )
+    _FORMS["series60_cb060"] = HullForm(
         key="series60_cb060",
         specimen_factory=series60,
         provenance=OffsetProvenance(
@@ -217,8 +242,8 @@ _FORMS: dict[str, HullForm] = {
                 "function, not against measured Series 60 ship data"
             ),
         ),
-    ),
-    "kvlcc2_class": HullForm(
+    )
+    _FORMS["kvlcc2_class"] = HullForm(
         key="kvlcc2_class",
         specimen_factory=kvlcc2_class,
         provenance=OffsetProvenance(
@@ -241,12 +266,25 @@ _FORMS: dict[str, HullForm] = {
                 "build sandbox; Cb/LCB agreement is a representation consistency check"
             ),
         ),
-    ),
-}
+    )
+
+    # DTMB 5415: sampled from parametric mesh, no closed-form reference
+    from .dtmb5415_offsets import dtmb5415_offset_table as _dtmb5415_table
+    from .dtmb5415_offsets import dtmb5415_provenance as _dtmb5415_prov
+
+    _FORMS["dtmb5415"] = HullForm(
+        key="dtmb5415",
+        specimen_factory=None,
+        provenance=_dtmb5415_prov(),
+        table_factory=_dtmb5415_table,
+    )
+
+
+_register_forms()
 
 
 def builtin_forms() -> dict[str, HullForm]:
-    """The three published forms this module can tabulate."""
+    """The published forms this module can tabulate."""
     return dict(_FORMS)
 
 
@@ -273,8 +311,11 @@ def offset_table(
     )
 
 
-def reference_for(key: str) -> dict[str, Any]:
-    """Analytic reference integrals (volume, waterplane, LCB, VCB) of a builtin form."""
+def reference_for(key: str) -> dict[str, Any] | None:
+    """Analytic reference integrals (volume, waterplane, LCB, VCB) of a builtin form.
+
+    Returns None for forms without a closed-form reference (e.g. DTMB 5415).
+    """
     try:
         form = _FORMS[key]
     except KeyError as error:
