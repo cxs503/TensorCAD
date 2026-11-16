@@ -29,26 +29,32 @@ integrates at order `n` and `2n` and refuses to return until the two agree to 1e
 relative, doubling `n` up to a cap first: the order is a convergence parameter, not a
 magic number, exactly as the suite's tolerances are derived rather than chosen.
 
+`smooth` is doing real work in that sentence, and it is false for a flat or slender
+body: the element then behaves like `|cos u|` (or `|sin v|`), which has a corner and
+converges only algebraically, at any order. So if the order cap is exhausted the
+interval is split into panels -- splitting is what removes the corner -- and the
+search restarts; a split value is returned only when the next panel count agrees.
+
 ## 3. Three routes to the same number
 
 | aspect ratio | kind | quadrature (m^2) | closed form (m^2) | relative difference |
 |---:|---|---:|---:|---:|
 | 1.1 | oblate | 14.292611784040 | 14.292611784040 | 1.094e-14 |
-| 1.1 | prolate | 13.412053870157 | 13.412053870158 | 1.086e-14 |
+| 1.1 | prolate | 13.412053870157 | 13.412053870158 | 1.073e-14 |
 | 1.5 | oblate | 22.250184342985 | 22.250184342985 | 1.022e-14 |
 | 1.5 | prolate | 16.918218163460 | 16.918218163460 | 1.113e-14 |
 | 2 | oblate | 34.687530813380 | 34.687530813380 | 1.024e-14 |
-| 2 | prolate | 21.478435327884 | 21.478435327884 | 1.026e-14 |
+| 2 | prolate | 21.478435327884 | 21.478435327884 | 1.009e-14 |
 | 3 | oblate | 68.296186780353 | 68.296186780354 | 1.061e-14 |
-| 3 | prolate | 30.893723975088 | 30.893723975089 | 1.115e-14 |
-| 4 | oblate | 113.921115416056 | 113.921115416058 | 1.010e-14 |
+| 3 | prolate | 30.893723975088 | 30.893723975089 | 1.138e-14 |
+| 4 | oblate | 113.921115416056 | 113.921115416058 | 1.023e-14 |
 | 4 | prolate | 40.497502464732 | 40.497502464732 | 1.105e-14 |
-| 6 | oblate | 241.984553514868 | 241.984553514868 | 3.406e-15 |
-| 6 | prolate | 59.938630615328 | 59.938630615329 | 1.079e-14 |
+| 6 | oblate | 241.984553514868 | 241.984553514868 | 3.171e-15 |
+| 6 | prolate | 59.938630615328 | 59.938630615329 | 1.067e-14 |
 | 10 | oblate | 647.220250585483 | 647.220250585483 | 8.783e-16 |
-| 10 | prolate | 99.151030544091 | 99.151030544092 | 1.061e-14 |
+| 10 | prolate | 99.151030544091 | 99.151030544092 | 1.046e-14 |
 
-Worst disagreement over the sweep: **1.115e-14** relative
+Worst disagreement over the sweep: **1.138e-14** relative
 (prolate, aspect ratio 3). The sphere is exact:
 `12.566370614359037` against `4 pi = 12.566370614359172`.
 
@@ -66,6 +72,71 @@ See `artifacts/golden_ellipsoid_area/verification.png`.
 | 64 | 12.566370614359 | 22.076658276764 |
 | 128 | 12.566370614359 | 22.076658276751 |
 | 256 | 12.566370614359 | 22.076658276751 |
+
+### Reach: one tensor block against panel splitting
+
+Discs of increasing aspect ratio, both columns from the public API. `unsplit` is
+`max_panels=1`, i.e. the rule as it was first written. `panel cap` is the smallest
+`max_panels` that returns a value: the split rung a body needs, plus the rung that
+corroborates it -- a split value is never returned on its own word.
+
+| aspect ratio | unsplit rule | panel cap | area (split, m^2) | closed form (m^2) | relative difference |
+|---:|---|---:|---:|---:|---:|
+| 10 | 647.220250585 | 1 | 647.220250585 | 647.220250585 | 8.783e-16 |
+| 15 | 1435.127687519 | 1 | 1435.127687519 | 1435.127687519 | 1.109e-15 |
+| 20 | **refused** | 4 | 2536.477127286 | 2536.477127286 | 2.151e-15 |
+| 50 | **refused** | 4 | 15736.903565824 | 15736.903565824 | 2.774e-15 |
+| 100 | **refused** | 4 | 62865.144889173 | 62865.144889173 | 2.315e-15 |
+
+The refusal column is the point: the unsplit rule gives up where the corner
+dominates, and the split rule returns the same number as the elementary closed form.
+Both refusals are still refusals -- `ArithmeticError`, never a truncated area -- and
+`tests/test_analytic_solids.py` asserts one of each.
+
+### The elementary forms at their two ends
+
+The closed forms are the independent check, so their own limits matter. Flattening a
+spheroid tends to a disc of area `2 pi a^2`; the residual is `k^2 log(2/k)` with
+`k = polar / equatorial`, which is why that column is non-zero above 1e-9 and
+zero below it: at that point the residual is smaller than the last bit.
+
+| polar (equatorial = 1) | closed form (m^2) | old branch (m^2) | 2 pi a^2 (m^2) | relative difference | before the fix |
+|---:|---:|---:|---:|---:|---:|
+| 0.001 | 6.283233065080549 | 6.283233065080546 | 6.283185307179586 | 7.601e-06 | 7.601e-06 |
+| 1e-06 | 6.283185307270746 | 6.283185307270755 | 6.283185307179586 | 1.451e-11 | 1.451e-11 |
+| 1e-09 | 6.283185307179586 | **raises** | 6.283185307179586 | 0.000e+00 | -- |
+| 1e-12 | 6.283185307179586 | **raises** | 6.283185307179586 | 0.000e+00 | -- |
+| 1e-300 | 6.283185307179586 | **raises** | 6.283185307179586 | 0.000e+00 | -- |
+
+Near `a = c` the eccentricity cancels, which is where an elementary form *could*
+lose digits. The table shows it does not, before or after the fix -- which is the
+point of keeping the `before` column: those digits were already right, and the
+rewrite had to preserve them. The quadrature is a different route to the number.
+
+| polar/equatorial - 1 | kind | closed form (m^2) | old branch (m^2) | quadrature (m^2) | relative difference | before the fix |
+|---:|---|---:|---:|---:|---:|---:|
+| 0.001 | oblate | 12.557993872186639 | 12.557993872186639 | 12.557993872186499 | 1.117e-14 | 1.117e-14 |
+| 0.001 | prolate | 12.574749032048343 | 12.574749032048347 | 12.574749032048210 | 1.059e-14 | 1.088e-14 |
+| 1e-06 | oblate | 12.566362236779602 | 12.566362236779602 | 12.566362236779465 | 1.088e-14 | 1.088e-14 |
+| 1e-06 | prolate | 12.566378991940420 | 12.566378991940420 | 12.566378991940281 | 1.103e-14 | 1.103e-14 |
+| 1e-09 | oblate | 12.566370605981591 | 12.566370605981591 | 12.566370605981456 | 1.074e-14 | 1.074e-14 |
+| 1e-09 | prolate | 12.566370622736754 | 12.566370622736754 | 12.566370622736622 | 1.046e-14 | 1.046e-14 |
+| 1e-12 | oblate | 12.566370614350795 | 12.566370614350795 | 12.566370614350660 | 1.074e-14 | 1.074e-14 |
+| 1e-12 | prolate | 12.566370614367550 | 12.566370614367550 | 12.566370614367418 | 1.046e-14 | 1.046e-14 |
+
+
+The other end, where `asin(e)` is a subtraction from `pi/2`: the needle. The
+quadrature converges there (the prolate element has no corner), so it is again the
+witness rather than the accused.
+
+| aspect ratio (prolate) | closed form (m^2) | old branch (m^2) | quadrature (m^2) | relative difference | before the fix |
+|---:|---:|---:|---:|---:|---:|
+| 1000 | 9869.609331706 | 9869.609331707 | 9869.609331706 | 2.396e-15 | 2.156e-14 |
+| 1e+06 | 9869604.401094293 | 9869604.400815010 | 9869604.401094180 | 1.151e-14 | 2.829e-11 |
+| 1e+09 | 9869604401.089357376 | 9869604407.372543335 | 9869604401.089254379 | 1.044e-14 | 6.366e-10 |
+
+See `artifacts/golden_ellipsoid_area/verification_limits.png`.
+
 
 ## 4. What the gate now asserts
 
@@ -90,14 +161,26 @@ per axis -- the analytic reference is exact to ~1e-13 by construction (see secti
 
 ## 6. Applicability and limits
 
-* The tensor rule needs an order proportional to the equatorial-to-polar axis ratio
-  (the area element develops a boundary layer of width ~c/a) and cost grows as
-  order^2, so the default cap is 512. The golden body (2, 1.5, 0.5) converges at
-  order 128 in 0.04 s.
-* A body more slender than roughly 10:1 can exhaust the cap; the function then raises
-  `ArithmeticError` instead of returning a truncated area. `max_order` raises the cap
-  explicitly for such a caller. This refusal is asserted in
-  `tests/test_analytic_solids.py` so it stays visible.
+* The golden body (2, 1.5, 0.5) is answered by the unsplit rule at order 128, and
+  `panels=1` is still the first thing tried and still decides whenever it converges:
+  the panel route does not move the suite's blessed number by a single bit.
+* The unsplit rule runs out at an axis ratio of about 15:1 (15:1 answers, 20:1
+  raises), which the section above measures rather than asserts. Panel splitting
+  extends that to at least 100:1 by removing the corner, at 0.1-2 s per call; a body
+  beyond the whole ladder raises `ArithmeticError` instead of returning a truncated
+  area. `max_order` and `max_panels` raise the two caps explicitly for a caller who
+  needs them, and both refusals are asserted in `tests/test_analytic_solids.py` so
+  they stay visible.
+* The elementary spheroid forms are exact in the flat limit (`2 pi a^2`, the disc)
+  and agree with the quadrature to ~1e-14 near `a = c` and over the needle ratios
+  above. The `before the fix` columns -- generated by re-running the old formulas,
+  not typed -- say what was actually broken, which is narrower than it looked. The
+  oblate branch asked for `atanh(1.0)` and had nothing to return on a flat body; the
+  prolate branch's `asin(e)` lost digits as the eccentricity approached one, visible
+  as the red curve in the needle table; and near `a = c` nothing was broken at all --
+  those digits were already there and the rewrite had to keep them, which is why that
+  table exists. The quadrature is the witness throughout.
 * The quadrature is independent of the mesher, but it is *not* independent of this
   module's own transcription of the area element. That risk is bounded by the
-  closed-form agreement above, which is what the sweep is for.
+  closed-form agreement above and by a cell-centre midpoint rule in the tests, which
+  shares no nodes with the Gauss rule.
