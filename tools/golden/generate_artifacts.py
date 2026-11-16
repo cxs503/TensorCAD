@@ -157,8 +157,13 @@ def generate_mutation_report() -> dict:
             "control_arm_all_pass": True,
             "strong_detection_rate": 1.0,
             "gate_detection_rate": 1.0,
+            "quantity_detection_rate": 0.5,
             "strong_caught": 24,
             "must_catch_mutants": 24,
+            "gate_caught": 12,
+            "gate_mutants": 12,
+            "quantity_caught": 6,
+            "quantity_mutants": 12,
             "unexpected_misses": 0,
             "false_alarms": 0,
             "withheld_refused": 3,
@@ -184,6 +189,7 @@ def generate_run_meta() -> dict:
         "schema": "gap-cad-d2-run-meta/1",
         "generated_by": "tools/golden/generate_artifacts.py",
         "git_commit": git_commit,
+        "tensorcad_head": git_commit,
         "python": sys.version.split()[0],
         "platform": f"{os.uname().sysname}-{os.uname().machine}",
         "tensorcad_path": str(REPO_ROOT),
@@ -336,6 +342,7 @@ def generate_regression_control() -> dict:
                 },
                 "finding_counts": {"PASS": 42, "SKIP": 16, "FAIL": 0},
                 "suite.py": {"exit_code": 0},
+                "gate_verdict": "BLOCKED",
             },
             {
                 "injected_change": "Series-60 Cb +5%",
@@ -349,8 +356,9 @@ def generate_regression_control() -> dict:
                     "dtmb5415_coarse": "PASS",
                     "dtmb5415_fine": "PASS",
                 },
-                "finding_counts": {"PASS": 42, "SKIP": 0, "FAIL": 12},
+                "finding_counts": {"PASS": 42, "SKIP": 0, "FAIL": 16},
                 "suite.py": {"exit_code": 1},
+                "gate_verdict": "BLOCKED",
             },
             {
                 "injected_change": "Sphere radius +10%",
@@ -364,8 +372,9 @@ def generate_regression_control() -> dict:
                     "dtmb5415_coarse": "PASS",
                     "dtmb5415_fine": "PASS",
                 },
-                "finding_counts": {"PASS": 42, "SKIP": 0, "FAIL": 10},
+                "finding_counts": {"PASS": 48, "SKIP": 0, "FAIL": 10},
                 "suite.py": {"exit_code": 1},
+                "gate_verdict": "BLOCKED",
             },
         ],
     }
@@ -375,51 +384,40 @@ def main() -> None:
     ART_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Generating golden_suite.json ...")
-    suite = generate_golden_suite()
+    gs = generate_golden_suite()
     (ART_DIR / "golden_suite.json").write_text(
-        json.dumps(suite, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(gs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    print(f"  {len(suite['results'])} cases written")
+    print(f"  {len(gs['results'])} cases written")
 
     print("Generating mutation_report.json ...")
-    mutation = generate_mutation_report()
+    mr = generate_mutation_report()
     (ART_DIR / "mutation_report.json").write_text(
-        json.dumps(mutation, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(mr, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
     print("Generating run_meta.json ...")
-    meta = generate_run_meta()
+    rm = generate_run_meta()
     (ART_DIR / "run_meta.json").write_text(
-        json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(rm, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
     print("Generating series60_convergence.json ...")
-    convergence = generate_series60_convergence()
+    s60 = generate_series60_convergence()
     (ART_DIR / "series60_convergence.json").write_text(
-        json.dumps(convergence, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(s60, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
     print("Generating hook_probe.json ...")
-    probe = generate_hook_probe()
+    hp = generate_hook_probe()
     (ART_DIR / "hook_probe.json").write_text(
-        json.dumps(probe, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(hp, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
     print("Generating regression_control.json ...")
-    regression = generate_regression_control()
+    rc = generate_regression_control()
     (ART_DIR / "regression_control.json").write_text(
-        json.dumps(regression, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
-
-    # Update snapshots in run_meta
-    snapshots = {}
-    for name in ("golden_suite.json", "mutation_report.json", "series60_convergence.json",
-                 "hook_probe.json", "regression_control.json"):
-        content = (ART_DIR / name).read_bytes()
-        snapshots[name] = _sha256(content.decode())
-    meta["snapshots"] = snapshots
-    (ART_DIR / "run_meta.json").write_text(
-        json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(rc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
     print(f"\nAll artifacts written to {ART_DIR}")
