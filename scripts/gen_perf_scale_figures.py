@@ -1,210 +1,514 @@
-"""Figures for GAP-CAD-D4-PERF-SCALE: 10^6--10^7 triangle performance regime.
+#!/usr/bin/env python3
+"""Generate all 12 figures for GAP-CAD-D4-PERF-SCALE from committed artifact JSON.
 
-Reads the benchmark JSON produced by :mod:`tensorcad.perf_benchmark` and writes
-PNGs into ``benchmarks/perf_scale/figures/``.  Every number plotted comes from
-the JSON (no hand-typed data).
+Reads from benchmarks/perf_scale/artifacts/*.json and
+benchmarks/perf_scale/ladder_fleet_10m_3pt.json, writes PNGs to
+benchmarks/perf_scale/figures/.
 
-Usage::
-
-    python scripts/gen_perf_scale_figures.py \
-        --mesh artifacts/perf_scale/ladder_mesh.json \
-        --voxel artifacts/perf_scale/ladder_voxel.json \
-        --out benchmarks/perf_scale/figures
+Usage:
+    python scripts/gen_perf_scale_figures.py
 """
 from __future__ import annotations
 
-import argparse
 import json
+import sys
 from pathlib import Path
 
-import matplotlib
+ROOT = Path(__file__).resolve().parents[1]
+ARTIFACTS = ROOT / "benchmarks" / "perf_scale" / "artifacts"
+FIGURES = ROOT / "benchmarks" / "perf_scale" / "figures"
 
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-COLORS = {
-    "load": "#1f77b4",
-    "point_locate": "#d62728",
-    "point_locate_accel": "#2ca02c",
-    "volume": "#9467bd",
-    "voxelize": "#ff7f0e",
-}
-LABELS = {
-    "load": "load (hull generation)",
-    "point_locate": "point_locate (brute force, O(N))",
-    "point_locate_accel": "point_locate_accel (grid + DDA)",
-    "volume": "volume (divergence theorem)",
-    "voxelize": "voxelize (SDF sampling)",
-}
+def load_json(path: Path) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
 
 
-def _load(path: str | None) -> dict:
-    if not path:
-        return {}
-    p = Path(path)
-    if not p.exists():
-        print(f"[skip] {p} not found")
-        return {}
-    return json.loads(p.read_text())
+def fmt(n: float | int) -> str:
+    """Format a number for axis labels."""
+    if n >= 1e6:
+        return f"{n/1e6:.1f}M"
+    if n >= 1e3:
+        return f"{n/1e3:.0f}k"
+    return str(n)
 
 
-def _series(data: dict, subtask: str) -> tuple[list[float], list[float], list[float]]:
-    xs, secs, tput = [], [], []
-    for r in data.get("results", []):
-        if r["subtask"] != subtask or r["seconds"] is None:
-            continue
-        if r["status"] != "measured":
-            continue
-        x = r["triangles"] if r["triangles"] else r["grid_cells"]
-        if not x:
-            continue
-        xs.append(float(x))
-        secs.append(float(r["seconds"]))
-        tput.append(float(r["throughput"]) if r["throughput"] else 0.0)
-    order = sorted(range(len(xs)), key=lambda i: xs[i])
-    return [xs[i] for i in order], [secs[i] for i in order], [tput[i] for i in order]
+def setup_ax(ax, xlabel: str, ylabel: str, title: str, logx: bool = False, logy: bool = False) -> None:
+    import matplotlib
+    matplotlib.rcParams.update({
+        "font.size": 10,
+        "axes.titlesize": 11,
+        "axes.labelsize": 10,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "legend.fontsize": 9,
+    })
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    if logx:
+        ax.set_xscale("log")
+    if logy:
+        ax.set_yscale("log")
+    ax.grid(True, alpha=0.3)
 
 
-def fig_scaling(mesh: dict, out: Path) -> Path | None:
-    fig, ax = plt.subplots(figsize=(8.0, 5.4))
-    plotted = False
-    for task in ("load", "point_locate", "point_locate_accel", "volume"):
-        xs, secs, _ = _series(mesh, task)
-        if not xs:
-            continue
-        ax.plot(xs, secs, "o-", color=COLORS[task], label=LABELS[task], linewidth=1.6, markersize=4)
-        plotted = True
-    if not plotted:
-        return None
-    for scale, name in ((1e6, "10^6"), (1e7, "10^7")):
-        ax.axvline(scale, color="grey", linestyle=":", linewidth=1.0)
-        ax.text(scale, ax.get_ylim()[1], f" {name}", va="top", fontsize=8, color="grey")
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xlabel("problem size (triangles for mesh tasks)")
-    ax.set_ylabel("wall-clock seconds")
-    ax.set_title("TensorCAD geometry sub-task cost, 6.4e2 - 1.0e7 triangles")
-    ax.grid(True, which="both", alpha=0.3)
-    ax.legend(fontsize=8)
-    fig.tight_layout()
-    path = out / "scaling.png"
-    fig.savefig(path, dpi=140)
+# ---------------------------------------------------------------------------
+# Figure generators
+# ---------------------------------------------------------------------------
+
+def gen_scaling(artifact: dict) -> Path:
+    """scaling.png: wall-clock vs size log-log for 4 sub-tasks."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    subtasks = {"load": [], "point_locate": [], "point_locate_accel": [], "volume": []}
+    for r in results:
+        st = r["subtask"]
+        if st in subtasks and r.get("status") == "measured" and r.get("seconds"):
+            subtasks[st].append((r["triangles"], r["seconds"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = {"load": "#1f77b4", "point_locate": "#ff7f0e",
+              "point_locate_accel": "#2ca02c", "volume": "#d62728"}
+    markers = {"load": "o", "point_locate": "s", "point_locate_accel": "^", "volume": "D"}
+    labels = {"load": "load (generate)", "point_locate": "point_locate (brute-force)",
+              "point_locate_accel": "point_locate (accel)", "volume": "volume"}
+
+    for st, pts in subtasks.items():
+        if pts:
+            xs, ys = zip(*sorted(pts))
+            ax.plot(xs, ys, marker=markers[st], color=colors[st], label=labels[st], linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Wall-clock (s)",
+             "Scaling: wall-clock vs mesh size (log-log)", logx=True, logy=True)
+    ax.legend(loc="upper left")
+    ax.set_xticks([1e3, 1e4, 1e5, 1e6, 1e7])
+    ax.set_xticklabels(["1k", "10k", "100k", "1M", "10M"])
+
+    out = FIGURES / "scaling.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    return path
+    return out
 
 
-def fig_point_locate(mesh: dict, out: Path) -> Path | None:
-    """Throughput of brute force vs indexed, plus the speed-up factor."""
-    xs_n, _, tp_n = _series(mesh, "point_locate")
-    xs_a, _, tp_a = _series(mesh, "point_locate_accel")
-    if not xs_a:
-        return None
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.0, 4.6))
-    if xs_n:
-        ax1.plot(xs_n, tp_n, "o-", color=COLORS["point_locate"], label="brute force (no index)")
-    ax1.plot(xs_a, tp_a, "s-", color=COLORS["point_locate_accel"], label="uniform grid + DDA")
-    ax1.set_xscale("log")
-    ax1.set_yscale("log")
-    ax1.set_xlabel("triangles")
-    ax1.set_ylabel("ray queries / second")
-    ax1.set_title("Point-location throughput")
-    ax1.grid(True, which="both", alpha=0.3)
-    ax1.legend(fontsize=8)
+def gen_point_locate(artifact: dict) -> Path:
+    """point_locate.png: brute-force vs accel throughput comparison."""
+    import matplotlib.pyplot as plt
 
-    # Speed-up where both paths were measured on the same rung.
-    naive = {r["triangles"]: r["throughput"] for r in mesh.get("results", [])
-             if r["subtask"] == "point_locate" and r["status"] == "measured" and r["throughput"]}
-    ax2.plot(xs_a, tp_a, "s-", color=COLORS["point_locate_accel"], label="indexed throughput")
-    common_x = [x for x in xs_a if int(x) in naive]
-    if common_x:
-        speed = [naive[int(x)] for x in common_x]
-        ax2.plot(common_x, speed, "o--", color="#7f7f7f", label="brute force (same rungs)")
-    ax2.set_xscale("log")
-    ax2.set_yscale("log")
-    ax2.set_xlabel("triangles")
-    ax2.set_ylabel("ray queries / second")
-    ax2.set_title("Indexed path reaches the 10^6 band; brute force does not")
-    ax2.grid(True, which="both", alpha=0.3)
-    ax2.legend(fontsize=8)
-    fig.tight_layout()
-    path = out / "point_locate.png"
-    fig.savefig(path, dpi=140)
+    results = artifact["results"]
+    naive = []
+    accel = []
+    for r in results:
+        if r.get("status") != "measured" or not r.get("throughput"):
+            continue
+        if r["subtask"] == "point_locate":
+            naive.append((r["triangles"], r["throughput"]))
+        elif r["subtask"] == "point_locate_accel":
+            accel.append((r["triangles"], r["throughput"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if naive:
+        xs, ys = zip(*sorted(naive))
+        ax.plot(xs, ys, "s-", color="#ff7f0e", label="brute-force O(N·Q)", linewidth=1.5)
+    if accel:
+        xs, ys = zip(*sorted(accel))
+        ax.plot(xs, ys, "^-", color="#2ca02c", label="TriangleGrid accel", linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Throughput (query/s)",
+             "Point locate: brute-force vs accelerated throughput", logx=True, logy=True)
+    ax.legend()
+    ax.set_xticks([1e3, 1e4, 1e5, 1e6, 1e7])
+    ax.set_xticklabels(["1k", "10k", "100k", "1M", "10M"])
+
+    out = FIGURES / "point_locate.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    return path
+    return out
 
 
-def fig_index_cost(mesh: dict, out: Path) -> Path | None:
-    """Index build time and memory footprint vs triangles."""
-    rows = [r for r in mesh.get("results", [])
-            if r["subtask"] == "point_locate_accel" and r["status"] == "measured"
-            and r.get("build_seconds") is not None]
-    if not rows:
-        return None
-    rows.sort(key=lambda r: r["triangles"])
-    xs = [r["triangles"] for r in rows]
-    build = [r["build_seconds"] for r in rows]
-    mem = [r["index_bytes"] / 1e6 for r in rows]
-    fig, ax1 = plt.subplots(figsize=(8.0, 5.0))
-    ax1.plot(xs, build, "o-", color="#2ca02c", label="index build time (s)")
-    ax1.set_xscale("log")
-    ax1.set_yscale("log")
-    ax1.set_xlabel("triangles")
-    ax1.set_ylabel("index build time (s)", color="#2ca02c")
-    ax1.tick_params(axis="y", labelcolor="#2ca02c")
-    ax1.grid(True, which="both", alpha=0.3)
-    ax2 = ax1.twinx()
-    ax2.plot(xs, mem, "s--", color="#8c564b", label="index size (MB)")
-    ax2.set_ylabel("index size (MB)", color="#8c564b")
-    ax2.tick_params(axis="y", labelcolor="#8c564b")
-    ax1.set_title("Spatial-index construction cost (one-off) vs mesh size")
-    fig.tight_layout()
-    path = out / "index_cost.png"
-    fig.savefig(path, dpi=140)
+def gen_index_cost(artifact: dict) -> Path:
+    """index_cost.png: index build time and size vs triangle count."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    build_times = []
+    index_sizes = []
+    for r in results:
+        if r["subtask"] != "point_locate_accel" or r.get("status") != "measured":
+            continue
+        tri = r["triangles"]
+        if r.get("build_seconds"):
+            build_times.append((tri, r["build_seconds"]))
+        if r.get("index_bytes"):
+            index_sizes.append((tri, r["index_bytes"] / (1024 * 1024)))
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    if build_times:
+        xs, ys = zip(*sorted(build_times))
+        ax1.plot(xs, ys, "o-", color="#1f77b4", linewidth=1.5)
+    setup_ax(ax1, "Triangle count", "Build time (s)",
+             "Spatial index build time", logx=True, logy=False)
+    ax1.set_xticks([1e3, 1e4, 1e5, 1e6, 1e7])
+    ax1.set_xticklabels(["1k", "10k", "100k", "1M", "10M"])
+
+    if index_sizes:
+        xs, ys = zip(*sorted(index_sizes))
+        ax2.plot(xs, ys, "s-", color="#ff7f0e", linewidth=1.5)
+    setup_ax(ax2, "Triangle count", "Index size (MiB)",
+             "Spatial index memory footprint", logx=True, logy=False)
+    ax2.set_xticks([1e3, 1e4, 1e5, 1e6, 1e7])
+    ax2.set_xticklabels(["1k", "10k", "100k", "1M", "10M"])
+
+    fig.suptitle("Spatial index: build cost and memory", fontsize=12, fontweight="bold")
+    out = FIGURES / "index_cost.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    return path
+    return out
 
 
-def fig_voxel(voxel: dict, out: Path) -> Path | None:
-    xs, secs, tput = _series(voxel, "voxelize")
-    if not xs:
-        return None
-    fig, ax = plt.subplots(figsize=(8.0, 5.0))
-    ax.plot(xs, secs, "o-", color=COLORS["voxelize"], label="voxelize wall clock (s)")
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xlabel("grid cells")
-    ax.set_ylabel("seconds")
-    ax.set_title("SDF voxelization: NumPy path, 3.3e4 - 5.7e7 cells")
-    ax.grid(True, which="both", alpha=0.3)
-    ax.legend(fontsize=8)
-    fig.tight_layout()
-    path = out / "voxelize.png"
-    fig.savefig(path, dpi=140)
+def gen_voxelize(artifact: dict) -> Path:
+    """voxelize.png: voxelisation scaling (32³ → 384³)."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    pts = [(r["grid_cells"], r["seconds"]) for r in results
+           if r["subtask"] == "voxelize" and r.get("status") == "measured" and r.get("seconds")]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if pts:
+        xs, ys = zip(*sorted(pts))
+        ax.plot(xs, ys, "o-", color="#9467bd", linewidth=1.5)
+        # Add resolution labels
+        for tri, sec in pts:
+            res = round(tri ** (1/3))
+            ax.annotate(f"{res}³", (tri, sec), textcoords="offset points",
+                        xytext=(0, 8), ha="center", fontsize=8)
+
+    setup_ax(ax, "Voxel grid cells", "Wall-clock (s)",
+             "Voxelisation scaling (SUBOFF SDF)", logx=True, logy=True)
+
+    out = FIGURES / "voxelize.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    return path
+    return out
 
 
-def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--mesh", default="artifacts/perf_scale/ladder_mesh.json")
-    ap.add_argument("--voxel", default="artifacts/perf_scale/ladder_voxel.json")
-    ap.add_argument("--out", default="benchmarks/perf_scale/figures")
-    args = ap.parse_args(argv)
+def gen_fig3pt_scaling(artifact: dict) -> Path:
+    """fig3pt_scaling.png: fleet 3-point ladder scaling with fitted exponents."""
+    import matplotlib.pyplot as plt
 
-    mesh = _load(args.mesh)
-    voxel = _load(args.voxel)
-    out = Path(args.out)
-    out.mkdir(parents=True, exist_ok=True)
-    made = []
-    for fn, data in ((fig_scaling, mesh), (fig_point_locate, mesh),
-                     (fig_index_cost, mesh), (fig_voxel, voxel)):
-        path = fn(data, out)
-        if path:
-            made.append(path)
-            print(f"wrote {path}")
-    if not made:
-        print("no data; nothing written")
-        return 1
+    results = artifact["results"]
+    groups: dict[str, list] = {}
+    for r in results:
+        if r.get("status") != "measured" or not r.get("seconds"):
+            continue
+        st = r["subtask"]
+        groups.setdefault(st, []).append((r["triangles"], r["seconds"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = {"load": "#1f77b4", "fleet_assemble": "#ff7f0e",
+              "point_locate_accel": "#2ca02c", "volume": "#d62728"}
+    labels = {"load": "load", "fleet_assemble": "fleet_assemble",
+              "point_locate_accel": "point_locate_accel", "volume": "volume"}
+
+    for st, pts in groups.items():
+        if len(pts) >= 2:
+            xs, ys = zip(*sorted(pts))
+            ax.plot(xs, ys, "o-", color=colors.get(st, "#333"),
+                    label=f"{labels.get(st, st)}", linewidth=1.5)
+
+    # Add gate info from artifact
+    gates = artifact.get("gates", [])
+    gate_text = ""
+    for g in gates:
+        if g.get("detail"):
+            gate_text += f"{g['name']}: {g['detail']}\n"
+
+    setup_ax(ax, "Triangle count", "Wall-clock (s)",
+             "10⁶–10⁷ fleet 3-point ladder scaling", logx=True, logy=True)
+    ax.legend()
+    if gate_text:
+        ax.text(0.02, 0.02, gate_text.strip(), transform=ax.transAxes,
+                fontsize=7, va="bottom", family="monospace",
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+
+    out = FIGURES / "fig3pt_scaling.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_fig3pt_memory(artifact: dict) -> Path:
+    """fig3pt_memory.png: fleet memory (mesh footprint, index, live RSS)."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    mesh_mb = []
+    index_mb = []
+    rss_mb = []
+    for r in results:
+        if r.get("status") != "measured":
+            continue
+        tri = r["triangles"]
+        if r.get("mesh_mb"):
+            mesh_mb.append((tri, r["mesh_mb"]))
+        if r.get("index_bytes"):
+            index_mb.append((tri, r["index_bytes"] / (1024 * 1024)))
+        if r.get("rss_mb"):
+            rss_mb.append((tri, r["rss_mb"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if mesh_mb:
+        xs, ys = zip(*sorted(mesh_mb))
+        ax.plot(xs, ys, "o-", color="#1f77b4", label="mesh footprint (MiB)", linewidth=1.5)
+    if index_mb:
+        xs, ys = zip(*sorted(index_mb))
+        ax.plot(xs, ys, "s-", color="#ff7f0e", label="spatial index (MiB)", linewidth=1.5)
+    if rss_mb:
+        xs, ys = zip(*sorted(rss_mb))
+        ax.plot(xs, ys, "^-", color="#2ca02c", label="live RSS (MiB)", linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Memory (MiB)",
+             "10⁶–10⁷ fleet memory breakdown", logx=True, logy=False)
+    ax.legend()
+
+    out = FIGURES / "fig3pt_memory.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_import_scaling(artifact: dict) -> Path:
+    """import_scaling.png: OBJ import/export wall-clock vs size."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    groups: dict[str, list] = {}
+    for r in results:
+        if r.get("status") != "measured" or not r.get("seconds"):
+            continue
+        groups.setdefault(r["subtask"], []).append((r["triangles"], r["seconds"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = {"load": "#1f77b4", "obj_write": "#ff7f0e", "obj_read": "#2ca02c", "volume": "#d62728"}
+    for st, pts in groups.items():
+        if pts:
+            xs, ys = zip(*sorted(pts))
+            ax.plot(xs, ys, "o-", color=colors.get(st, "#333"), label=st, linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Wall-clock (s)",
+             "OBJ import/export scaling", logx=True, logy=True)
+    ax.legend()
+
+    out = FIGURES / "import_scaling.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_import_throughput(artifact: dict) -> Path:
+    """import_throughput.png: OBJ import/export throughput vs size."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    groups: dict[str, list] = {}
+    for r in results:
+        if r.get("status") != "measured" or not r.get("throughput"):
+            continue
+        groups.setdefault(r["subtask"], []).append((r["triangles"], r["throughput"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = {"load": "#1f77b4", "obj_write": "#ff7f0e", "obj_read": "#2ca02c", "volume": "#d62728"}
+    for st, pts in groups.items():
+        if pts:
+            xs, ys = zip(*sorted(pts))
+            ax.plot(xs, ys, "o-", color=colors.get(st, "#333"), label=st, linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Throughput (tri/s)",
+             "OBJ import/export throughput", logx=True, logy=True)
+    ax.legend()
+
+    out = FIGURES / "import_throughput.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_import_volume_accuracy(artifact: dict) -> Path:
+    """import_volume_accuracy.png: OBJ round-trip volume error vs size."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    pts = []
+    for r in results:
+        if r["subtask"] == "volume" and r.get("volume_rel_err") is not None:
+            pts.append((r["triangles"], r["volume_rel_err"] * 100))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if pts:
+        xs, ys = zip(*sorted(pts))
+        ax.plot(xs, ys, "o-", color="#d62728", linewidth=1.5)
+        for tri, err in pts:
+            ax.annotate(f"{err:+.3f}%", (tri, err), textcoords="offset points",
+                        xytext=(0, 8), ha="center", fontsize=8)
+
+    # 3% threshold line
+    ax.axhline(y=-3.0, color="red", linestyle="--", alpha=0.5, label="3% threshold")
+    ax.axhline(y=0.0, color="gray", linestyle="-", alpha=0.3)
+
+    setup_ax(ax, "Triangle count", "Volume error (%)",
+             "OBJ round-trip volume accuracy (as-imported vs analytic)")
+    ax.legend()
+
+    out = FIGURES / "import_volume_accuracy.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_single10m_scaling(artifact: dict) -> Path:
+    """single10m_scaling.png: single-body 10⁷ subdivision scaling."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    groups: dict[str, list] = {}
+    for r in results:
+        if r.get("status") != "measured" or not r.get("seconds"):
+            continue
+        groups.setdefault(r["subtask"], []).append((r["triangles"], r["seconds"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    colors = {"load": "#1f77b4", "subdivide": "#ff7f0e",
+              "point_locate_accel": "#2ca02c", "volume": "#d62728"}
+    for st, pts in groups.items():
+        if pts:
+            xs, ys = zip(*sorted(pts))
+            ax.plot(xs, ys, "o-", color=colors.get(st, "#333"), label=st, linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Wall-clock (s)",
+             "Single-body 10⁷ subdivision scaling", logx=True, logy=True)
+    ax.legend()
+
+    out = FIGURES / "single10m_scaling.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_single10m_memory(artifact: dict) -> Path:
+    """single10m_memory.png: single-body 10⁷ memory breakdown."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    mesh_mb = []
+    index_mb = []
+    rss_mb = []
+    for r in results:
+        if r.get("status") != "measured":
+            continue
+        tri = r["triangles"]
+        if r.get("mesh_mb"):
+            mesh_mb.append((tri, r["mesh_mb"]))
+        if r.get("index_bytes"):
+            index_mb.append((tri, r["index_bytes"] / (1024 * 1024)))
+        if r.get("rss_mb"):
+            rss_mb.append((tri, r["rss_mb"]))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if mesh_mb:
+        xs, ys = zip(*sorted(mesh_mb))
+        ax.plot(xs, ys, "o-", color="#1f77b4", label="mesh footprint (MiB)", linewidth=1.5)
+    if index_mb:
+        xs, ys = zip(*sorted(index_mb))
+        ax.plot(xs, ys, "s-", color="#ff7f0e", label="spatial index (MiB)", linewidth=1.5)
+    if rss_mb:
+        xs, ys = zip(*sorted(rss_mb))
+        ax.plot(xs, ys, "^-", color="#2ca02c", label="live RSS (MiB)", linewidth=1.5)
+
+    setup_ax(ax, "Triangle count", "Memory (MiB)",
+             "Single-body 10⁷ memory breakdown", logx=True, logy=False)
+    ax.legend()
+
+    out = FIGURES / "single10m_memory.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+def gen_single10m_volume_accuracy(artifact: dict) -> Path:
+    """single10m_volume_accuracy.png: subdivision volume conservation."""
+    import matplotlib.pyplot as plt
+
+    results = artifact["results"]
+    pts = []
+    for r in results:
+        if r["subtask"] == "volume" and r.get("volume_rel_err") is not None:
+            pts.append((r["triangles"], r["volume_rel_err"] * 100))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if pts:
+        xs, ys = zip(*sorted(pts))
+        ax.plot(xs, ys, "o-", color="#d62728", linewidth=1.5)
+        for tri, err in pts:
+            ax.annotate(f"{err:+.4f}%", (tri, err), textcoords="offset points",
+                        xytext=(0, 8), ha="center", fontsize=7)
+
+    ax.axhline(y=0.0, color="gray", linestyle="-", alpha=0.3)
+    ax.axhline(y=-3.0, color="red", linestyle="--", alpha=0.5, label="3% threshold")
+
+    setup_ax(ax, "Triangle count", "Volume error (%)",
+             "Subdivision volume conservation (machine-precision drift)")
+    ax.legend()
+
+    out = FIGURES / "single10m_volume_accuracy.png"
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main() -> int:
+    FIGURES.mkdir(parents=True, exist_ok=True)
+
+    # Load artifacts
+    ladder_mesh = load_json(ARTIFACTS / "ladder_mesh.json")
+    ladder_voxel = load_json(ARTIFACTS / "ladder_voxel.json")
+    ladder_import = load_json(ARTIFACTS / "ladder_import.json")
+    ladder_single = load_json(ARTIFACTS / "ladder_single_10m.json")
+    ladder_fleet3pt = load_json(ROOT / "benchmarks" / "perf_scale" / "ladder_fleet_10m_3pt.json")
+
+    generators = [
+        ("scaling.png", lambda: gen_scaling(ladder_mesh)),
+        ("point_locate.png", lambda: gen_point_locate(ladder_mesh)),
+        ("index_cost.png", lambda: gen_index_cost(ladder_mesh)),
+        ("voxelize.png", lambda: gen_voxelize(ladder_voxel)),
+        ("fig3pt_scaling.png", lambda: gen_fig3pt_scaling(ladder_fleet3pt)),
+        ("fig3pt_memory.png", lambda: gen_fig3pt_memory(ladder_fleet3pt)),
+        ("import_scaling.png", lambda: gen_import_scaling(ladder_import)),
+        ("import_throughput.png", lambda: gen_import_throughput(ladder_import)),
+        ("import_volume_accuracy.png", lambda: gen_import_volume_accuracy(ladder_import)),
+        ("single10m_scaling.png", lambda: gen_single10m_scaling(ladder_single)),
+        ("single10m_memory.png", lambda: gen_single10m_memory(ladder_single)),
+        ("single10m_volume_accuracy.png", lambda: gen_single10m_volume_accuracy(ladder_single)),
+    ]
+
+    for name, gen in generators:
+        try:
+            path = gen()
+            print(f"  ✓ {name} → {path} ({path.stat().st_size:,} bytes)")
+        except Exception as e:
+            print(f"  ✗ {name}: {e}", file=sys.stderr)
+            return 1
+
+    print(f"\nAll 12 figures generated in {FIGURES}")
     return 0
 
 
