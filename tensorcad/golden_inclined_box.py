@@ -116,17 +116,61 @@ class InclinedBoxGolden(GoldenCase):
         )
         return {key: float(values[key]) for key in self.METRICS}
 
-    def invariants(self, values: Mapping[str, float]) -> dict[str, tuple[float, float, str]]:
-        """Identities that involve no reference at all.
+    #: Relative round-off floor added to every invariant band: the integrals are sums of a
+    #: few hundred triangle moments of magnitude ``V``, so their conditioning floor is far
+    #: above one machine epsilon, and a band without it would fail on exact arithmetic.
+    ROUNDOFF_FLOOR: ClassVar[float] = 1e-9
+
+    #: Two-sided safety factor: the offset error may push the waterline either way and the
+    #: cap polygon's area is not exactly the reference waterplane area.
+    SAFETY: ClassVar[float] = 2.0
+
+    @property
+    def scale(self) -> float:
+        """The bisection's model scale, as :func:`box_inclined.box_inclined_hydrostatics` uses it."""
+        return max(self.LENGTH, self.BEAM, self.DEPTH)
+
+    def offset_half_width(self, level: str) -> float:
+        """How far the solved waterline offset may sit from the one that floats ``V`` exactly.
+
+        The bisection stops when the bracket is narrower than ``tolerance x scale``, so the
+        returned offset is within half that width of the root -- this is the only inexact
+        step in the case, which is why it *is* the level axis.
+        """
+        return 0.5 * self.SOLVE_TOLERANCE[level] * self.scale
+
+    def invariants(
+        self, values: Mapping[str, float], *, level: str | None = None
+    ) -> dict[str, tuple[float, float, str]]:
+        """Identities that involve no reference at all, bounded by the level's solve accuracy.
 
         * the displaced volume must be the requested displacement -- the solve holds the
           displacement and moves the waterline, so an attitude change may not move ``V``;
         * mirroring the heel must mirror the transverse centre and leave the rest alone,
           which is the sign convention of the waterline normal, checked on the module.
+
+        Both bands are *derived from the level*, never typed: the bisection holds the offset
+        to ``offset_half_width(level)`` and ``dV/dc`` is the waterplane area, so the volume
+        identity cannot be tighter than ``A_wp x half-width``; the transverse centre moves by
+        at most ``(B/2) x dV / V``.  A single band for both rungs was the round-1 defect: the
+        1e-6 m3 the fine level meets to 1e-5 of its band is 2600x below what the coarse solve
+        can deliver, so ``--quick`` (the git hook) reported two ERRORs on every tree the full
+        suite passed, and the hook's only escape was ``TENSORCAD_GOLDEN_SKIP=1``.
         """
         from .box_inclined import box_inclined_hydrostatics
 
+        raised = level or self.levels()[-1]
+        half_width = self.offset_half_width(raised)
+        waterplane = values["waterplane_area_m2"]
+        volume_core = self.SAFETY * waterplane * half_width
+        volume_band = volume_core + self.ROUNDOFF_FLOOR * self.displaced_volume
+        mirror_core = self.SAFETY * (self.BEAM / 2.0) * volume_core / self.displaced_volume
+        mirror_band = mirror_core + self.ROUNDOFF_FLOOR * (self.BEAM / 2.0)
+
         residual_volume = values["displacement_volume_m3"] - self.displaced_volume
+        # The mirror route is solved at the *same* tolerance as the measurement it is
+        # compared with: comparing a coarse solve against an exact one reports the coarse
+        # solve's offset error, which is what the volume identity already asserts.
         mirrored = box_inclined_hydrostatics(
             self.LENGTH,
             self.BEAM,
@@ -134,21 +178,30 @@ class InclinedBoxGolden(GoldenCase):
             volume_m3=self.displaced_volume,
             heel_deg=-self.HEEL_DEG,
             trim_deg=self.TRIM_DEG,
+            tolerance=self.SOLVE_TOLERANCE[raised],
         )
         mx, my, mz = mirrored.centre_of_buoyancy
         residual_mirror = abs(values["tcb_y_m"] + my)
+        criterion = (
+            f"bisection half-width at '{raised}' = 0.5 x {self.SOLVE_TOLERANCE[raised]:g} x "
+            f"{self.scale:g} m = {half_width:.3e} m"
+        )
         return {
             "identity_volume_equals_requested_displacement": (
                 residual_volume,
-                1e-6,
+                volume_band,
                 "V = L·B·T is the constraint the waterline offset is solved for, so it does "
-                "not depend on the attitude",
+                "not depend on the attitude: |dV| <= 2 x A_wp x half-width + "
+                f"{self.ROUNDOFF_FLOOR:g} x V; {criterion}, A_wp = {waterplane:.6g} m2 "
+                f"-> {volume_band:.3e} m3",
             ),
             "identity_mirrored_heel_mirrors_transverse_centre": (
                 residual_mirror,
-                1e-8,
+                mirror_band,
                 "heel -> -heel must give y_B -> -y_B (body y is starboard, heel>0 is "
-                "starboard down)",
+                "starboard down), both routes solved to the same tolerance: |dy_B| <= "
+                "2 x (B/2) x dV / V + "
+                f"{self.ROUNDOFF_FLOOR:g} x B/2; {criterion} -> {mirror_band:.3e} m",
             ),
         }
 
