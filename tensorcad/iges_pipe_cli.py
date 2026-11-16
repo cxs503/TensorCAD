@@ -28,6 +28,26 @@ from .geometry import Mesh
 from .geomquality.trim_mesh import import_cad
 
 
+def _parse_planes(specs: list[str], default_tolerance: float | None) -> list[tuple]:
+    """Parse ``--closure-plane NAME=OX,OY,OZ,NX,NY,NZ[,TOL]`` into audit entries."""
+    planes: list[tuple] = []
+    for spec in specs:
+        if "=" not in spec:
+            raise ValueError(f"--closure-plane expects NAME=OX,OY,OZ,NX,NY,NZ[,TOL], got {spec!r}")
+        name, raw = spec.split("=", 1)
+        numbers = [piece.strip() for piece in raw.split(",")]
+        if len(numbers) not in (6, 7):
+            raise ValueError(f"--closure-plane {name!r} needs 6 or 7 numbers, got {len(numbers)}")
+        try:
+            values = [float(piece) for piece in numbers]
+        except ValueError as exc:
+            raise ValueError(f"--closure-plane {name!r}: {exc}") from exc
+        tolerance = values[6] if len(values) == 7 else (
+            default_tolerance if default_tolerance else 1e-6)
+        planes.append((name, (tuple(values[0:3]), tuple(values[3:6])), tolerance))
+    return planes
+
+
 def _gate_summary(report: dict) -> str:
     lines = []
     for name, verdict in report.get("gates", {}).items():
@@ -73,10 +93,26 @@ def main(argv: list[str] | None = None) -> int:
                         metavar="FRACTION",
                         help="Fraction of the open-boundary length the plane must carry "
                              "before it is accepted as the symmetry cut (default 0.5)")
+    parser.add_argument("--closure-tolerance", type=float, default=None,
+                        metavar="DIST",
+                        help="Classify the open boundary within DIST (seam / patch "
+                             "overlap / declared plane / unexplained) and record the "
+                             "length in metres per cause. Measurement only: the mesh is "
+                             "not changed.")
+    parser.add_argument("--closure-plane", action="append", default=[],
+                        metavar="NAME=OX,OY,OZ,NX,NY,NZ[,TOL]",
+                        help="Declare an opening plane (e.g. a half-hull symmetry cut). "
+                             "Boundary chords lying on it are reported as plane:<NAME>. "
+                             "TOL defaults to the closure tolerance. Repeatable.")
     parser.add_argument("--report", "-r", help="Save gate report as JSON")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Suppress stdout output")
     args = parser.parse_args(argv)
+    try:
+        closure_planes = _parse_planes(args.closure_plane, args.closure_tolerance)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 2
 
     source = Path(args.input)
     if not source.exists():
@@ -94,6 +130,8 @@ def main(argv: list[str] | None = None) -> int:
             seam_tolerance=args.seam_tolerance,
             symmetry_closure=args.symmetry_closure,
             symmetry_min_coverage=args.symmetry_min_coverage,
+            closure_tolerance=args.closure_tolerance,
+            closure_planes=closure_planes,
         )
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
@@ -142,6 +180,16 @@ def main(argv: list[str] | None = None) -> int:
         print()
         print("Gate verdicts:")
         print(_gate_summary(report))
+        closure = report.get("open_boundary") or {}
+        if closure:
+            family = closure.get("family", {})
+            print()
+            print(f"Open boundary by cause (tolerance {closure['tolerance']:g}, "
+                  f"{closure['free_edges']} chords, {closure['open_length']:.2f} total):")
+            for name in ("seam", "overlap", "declared_plane", "unexplained"):
+                entry = family.get(name, {})
+                print(f"  {name:<15} {entry.get('edges', 0):6d} chords "
+                      f"{entry.get('length', 0.0):10.2f}")
         print()
         if all_passed:
             print("Result: ALL GATES PASSED")
