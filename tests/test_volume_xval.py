@@ -15,7 +15,11 @@ The assertions are invariants, not smoke tests:
 
 from __future__ import annotations
 
+import importlib.metadata as _importlib_metadata
+import importlib.util as _importlib_util
 import math
+import sys as _sys
+from pathlib import Path
 
 import pytest
 
@@ -411,3 +415,114 @@ def test_revolved_suboff_solid_converges_to_the_published_offset_quadrature():
     order = xv.fit_order(rows)
     assert order is not None and 1.5 <= order <= 2.6, order
     assert rows[-1][1] < 3e-3
+
+
+# ---------------------------------------------------------------------------
+# the report's claim surface: toolchain versions and the Cb anchor (m23023)
+#
+# A cross-validation artifact is read by people who were not there.  Two of its
+# fields were wrong in a way no volume gate can catch: the second engine's version
+# was recorded as "unknown" although it ran, and "calibrated to Cb 0.6505" was
+# written as an identity although the calibration and the reported volume are
+# integrated at two different quadrature orders.  These tests pin the *reasoning*,
+# not just the numbers: the identity question must be answered by a measurement.
+# ---------------------------------------------------------------------------
+_REPORT_PATH = Path(__file__).resolve().parents[1] / "tools" / "volume_xval_report.py"
+
+
+def _load_report():
+    spec = _importlib_util.spec_from_file_location("volume_xval_report_m23023", _REPORT_PATH)
+    assert spec is not None and spec.loader is not None
+    module = _importlib_util.module_from_spec(spec)
+    _sys.modules[spec.name] = module  # dataclasses look their module up in sys.modules
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.fixture(scope="module")
+def report():
+    return _load_report()
+
+
+@pytest.fixture(scope="module")
+def kcs_anchor(report):
+    return report.kcs_geometry_anchor()
+
+
+def test_second_engine_version_comes_from_the_distribution_not_the_module(report):
+    """`numpy-stl` imports as `stl` and sets no `__version__`.
+
+    Reading the module attribute therefore recorded "unknown" for an engine that
+    did run, and a machine reading the artifact concluded the engine was missing.
+    The version must now be a real one and must match the installed distribution.
+    """
+    pytest.importorskip("stl")
+    version = report.distribution_version("numpy-stl", "stl")
+    assert version is not None and version != "unknown"
+    assert version == _importlib_metadata.version("numpy-stl")
+    assert version[0].isdigit()
+    engines = report.engine_versions()
+    assert engines["numpy-stl"] == version
+    assert isinstance(engines["version_disagreements"], dict)
+
+
+def test_absent_engine_is_none_but_unknown_version_is_not_unknown(report):
+    """Three states must stay distinguishable in a machine-read artifact."""
+    assert report.distribution_version("no-such-distribution-xyz", "no_such_module_xyz") is None
+
+    class _NoVersion:
+        pass
+
+    _sys.modules["engine_without_version_xyz"] = _NoVersion()
+    try:
+        value = report.distribution_version("no-such-distribution-xyz", "engine_without_version_xyz")
+    finally:
+        _sys.modules.pop("engine_without_version_xyz", None)
+    assert value == report.VERSION_NOT_REPORTED
+    assert value != "unknown"
+
+
+def test_cb_identity_is_measured_at_the_reporting_order_not_assumed(report, kcs_anchor):
+    anchor = kcs_anchor
+    lbt = anchor["principal_particulars"]["LBT_m3"]
+    # the achieved Cb is the reported volume over L B T, not a copy of the request
+    assert anchor["achieved_cb"] == pytest.approx(anchor["reported_volume_m3"] / lbt, rel=1e-12)
+    assert anchor["requested_volume_m3"] == pytest.approx(anchor["requested_cb"] * lbt, rel=1e-12)
+    # the calibration itself does hit the target at the order it bisects at ...
+    assert anchor["calibration_hits_target"]
+    assert abs(anchor["calibration_residual_rel"]) <= anchor["calibration_tolerance"]
+    # ... but that is a different number from the one reported, so the identity
+    # claim is false at the reporting order, by a factor that is computed here
+    residual = anchor["achieved_cb"] / anchor["requested_cb"] - 1.0
+    assert anchor["cb_residual_rel"] == pytest.approx(residual, rel=1e-12)
+    assert anchor["identity_within_calibration_tolerance"] is (
+        abs(residual) <= anchor["calibration_tolerance"]
+    )
+    assert anchor["identity_within_calibration_tolerance"] is False
+    assert anchor["residual_in_units_of_calibration_tolerance"] > 100.0
+    # the gap is still inside the platform's acceptance line: the row may pass, the
+    # label may not claim an identity
+    assert anchor["within_acceptance"] is True
+    assert abs(residual) < xv.ACCEPTANCE_TOLERANCE
+
+
+def test_anchor_order_ladder_is_converged_and_brackets_the_reported_number(report, kcs_anchor):
+    ladder = kcs_anchor["order_ladder"]
+    assert len(ladder) >= 3
+    for row in ladder:  # the order ladder is a refinement, not a random walk
+        assert abs(row["vs_reported"]) < 1e-4, row
+        assert row["cb"] == pytest.approx(row["volume_m3"] / kcs_anchor["principal_particulars"]["LBT_m3"])
+        assert row["volume_m3"] > 0.0
+    finest = max(ladder, key=lambda row: row["order"][0] * row["order"][1])
+    assert kcs_anchor["converged_volume_m3"] == pytest.approx(finest["volume_m3"], rel=1e-12)
+    # therefore the residual against the published volume is the calibration-order
+    # gap, not an unconverged quadrature
+    assert abs(finest["vs_reported"]) < 1e-5
+
+
+def test_full_scale_case_name_reports_the_achieved_cb(report, kcs_anchor):
+    case = report.nurbs_hull_case(full_scale=True, anchor=kcs_anchor)
+    assert "achieved Cb" in case.name
+    assert f"{kcs_anchor['achieved_cb']:.6f}" in case.name
+    assert "calibrated to" not in case.name  # the old wording asserted an identity
+    assert "identity" in case.caveat and "not an identity" in case.caveat
