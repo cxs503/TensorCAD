@@ -131,14 +131,14 @@
       "geometry_sha256": "9fabd7ec127c415ef394503d9db4eceba76dd9ad46382e57f337354e58767869",
       "invariants": {
         "identity_mirrored_heel_mirrors_transverse_centre": {
-          "basis": "heel -> -heel must give y_B -> -y_B (body y is starboard, heel>0 is starboard down)",
-          "residual": 5.664912983149861e-14,
-          "tolerance": 1e-08
+          "basis": "heel -> -heel must give y_B -> -y_B (body y is starboard, heel>0 is starboard down), both routes solved to the same tolerance: |dy_B| <= 2 x (B/2) x dV / V + 1e-09 x B/2; bisection half-width at 'fine' = 0.5 x 1e-13 x 10 m = 5.000e-13 m -> 2.003e-09 m",
+          "residual": 0,
+          "tolerance": 2.0027645251667547e-09
         },
         "identity_volume_equals_requested_displacement": {
-          "basis": "V = L\u00b7B\u00b7T is the constraint the waterline offset is solved for, so it does not depend on the attitude",
+          "basis": "V = L\u00b7B\u00b7T is the constraint the waterline offset is solved for, so it does not depend on the attitude: |dV| <= 2 x A_wp x half-width + 1e-09 x V; bisection half-width at 'fine' = 0.5 x 1e-13 x 10 m = 5.000e-13 m, A_wp = 41.4679 m2 -> 6.004e-08 m3",
           "residual": -1.4409806681214832e-11,
-          "tolerance": 1e-06
+          "tolerance": 6.004146787750133e-08
         }
       },
       "known_limitations": [],
@@ -569,8 +569,8 @@
       }
     ],
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "cdadcd27af6107bf89659cbc98dc66db03d6631aee41c2e2fc12e017bd91a6b6",
-    "git_commit": "d0da2b85f7918919381445e4d6b365d12d5f4829",
+    "geometry_fingerprint": "adb2818b7d170f8461767a078453a5b1c82bd21edf8a35015f6f02ad07096c6b",
+    "git_commit": "464e6c010bdf7bc92ba0f5ead249e77a2a4c90d2",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },

@@ -258,3 +258,115 @@ ERROR inclined_box invariant_violated identity_mirrored_heel_mirrors_transverse_
 恒等式残差（残差来自测量值，而重 bless 已证明测量值逐位不变）。建议的后续修法（本轮未做）：
 恒等式应在**最细档**断言（或按档位给容差），并让 `--quick` 与全量的通过集合一致，
 另补一个测试固定"quick 与 full 的 ERROR 集合相同"。
+
+---
+
+## 11. 重开第 3 轮（#655 第 3 轮）：`--quick` 门禁与全量梯级的一致化
+
+### 11.1 案例与问题
+
+`inclined_box`：驳船 L=10 m、B=4 m、型深 3 m，浮于 ∇=L·B·T=60 m³，横倾 15°、纵倾 3°。
+该 case 的**层级轴不是网格而是水线偏置二分求解的容差**（`SOLVE_TOLERANCE`：
+`coarse` = 3e-5 × scale、`fine` = 1e-13 × scale，scale = 10 m），两条恒等式
+（V 必须等于请求排水量；镜像横倾必须镜像 y_B）原先各自只声明**一个手写数字容差**
+（1e-6 m³ / 1e-8 m），而这两个数字只在 `fine` 档成立。结果是：
+
+```
+$ python -m tensorcad.golden --check --quick      # 提交钩子跑的就是这一档
+ERROR inclined_box invariant_violated identity_volume_equals_requested_displacement:
+      residual -3.868e-03 > 1e-06
+ERROR inclined_box invariant_violated identity_mirrored_heel_mirrors_transverse_centre:
+      residual 1.535e-05 > 1e-08
+```
+
+`--quick` 在**全量门禁为绿的树上**报 2 条 ERROR ⇒ 提交钩子把每一次触及几何/金标产物的
+提交都拦下，唯一出路是 `TENSORCAD_GOLDEN_SKIP=1`，也就是把本地门禁整体关掉——这恰恰是
+钩子存在的理由。该缺陷为上一轮（第 1 轮 §10.6）登记、本轮修掉。
+
+### 11.2 怎么做的
+
+1. **引擎把"被断言的那一档"交给 case**：`tensorcad/golden.py` 新增适配器
+   `_case_invariants()`，对签名里出现 `level` 的 case 传入验收档
+   （`--quick` → `coarse`；全量 → `fine`）；仍用单参数老签名的 case（含测试里的探针
+   case）照常工作。`GoldenCase.invariants` 的文档改为"residual 由网格噪声界的 case 可忽略
+   level，由自身求解精度界的 case 必须读 level"。
+2. **两条容差改为按档推导，不再手写**：`golden_inclined_box.py`
+   * 二分停止条件 ⇒ 水线偏置最多偏离真解 `half_width = 0.5 × tol(level) × scale`；
+   * `dV/dc` = 水线面积 A_wp ⇒ `|ΔV| ≤ 2 × A_wp × half_width + 1e-9 × V`
+     （2 = 双侧安全系数，1e-9 = 积分舍入地板）；
+   * `|Δy_B| ≤ 2 × (B/2) × (2 × A_wp × half_width) / V + 1e-9 × B/2`；
+   * 镜像路线改为**与测量同容差求解**：原来它用默认 1e-15，于是"镜像恒等式"实际在测
+     coarse 求解器的偏置误差（1.5e-5），而不是符号约定；
+   * 容差依据字符串里写明档位名、半宽数值与 A_wp，读者不必读代码即可复核。
+3. **顺手修掉一处 stale 测试**：`tests/test_golden_inclined_box.py` 里
+   `case.measure("exact")` 沿用了 m22879 之前的档名（现为 coarse/fine），在当前 main 上
+   直接 KeyError（**在 HEAD 上就失败**，与本 PR 无关），改为 `case.levels()[-1]`。
+4. **新增** `tests/test_golden_quick_full_parity.py`（8 项）：两档 ERROR 集合相同、
+   旧容差确实会在 coarse 档失败（证明缺陷真实存在）、容差随档位容差变化（放宽一档容差
+   10× ⇒ 该档容差界 10×）、2% 排水量回归仍被抓住、引擎确实把验收档交给 case、老签名 case
+   不被丢弃、提交的基线里记录的就是推导出来的界。
+5. **证据重放（程序化，不手抄）**：`python -m tensorcad.golden --bless`（5 case，49.7 s，
+   rc=0）→ `python tools/golden/render_evidence.py`（rc=0）。
+   基线 diff 只有 `inclined_box` 的两条 `invariants`（residual/tolerance/basis）与
+   provenance 的 `git_commit`/`geometry_fingerprint`，其余 4 个 case 的测量值逐位不变。
+
+### 11.3 计算结果（本树实测，程序化注入）
+
+| 档位 | 恒等式 | \|residual\| | 推导容差 | 容差占用 | 旧手写容差 | 旧容差下 |
+|---|---|---:|---:|---:|---:|---|
+| coarse | `identity_volume_equals_requested_displacement` | 3.8678e-03 | 1.2440e-02 | 31.1% | 1e-06 | **FAIL** |
+| coarse | `identity_mirrored_heel_mirrors_transverse_centre` | 8.3267e-17 | 8.2936e-04 | 0.0% | 1e-08 | **FAIL** |
+| fine | `identity_volume_equals_requested_displacement` | 1.4410e-11 | 6.0041e-08 | 0.0% | 1e-06 | PASS |
+| fine | `identity_mirrored_heel_mirrors_transverse_centre` | 0.0000e+00 | 2.0028e-09 | 0.0% | 1e-08 | PASS |
+
+注：上表“旧容差下”一列用**当前**（已同容差求解的）测量值对比旧手写容差；修复前 `--quick` 的实测是 mirror residual 1.535e-05（旧代码用默认 1e-15 求解镜像路线），故旧容差下 coarse 档实际是 **2 条 ERROR**，即第 1 轮登记的失败被本轮复现并修掉。
+
+门禁判定：`--check --quick` **rc=0，0 条 ERROR**；`--check`（全量）**rc=0，0 条 ERROR**。
+第 1 轮登记的 `--quick` 红、全量绿的分裂消失：两条梯级现在对同一棵树给出同一判决。
+
+副作用（同一处修复的可观测证据）：`tests/test_geometry_golden_gate.py` 中 4 项此前在
+当前 main 上**因钩子被拦**而失败的用例现在通过 ——
+`test_hook_detects_a_geometry_edit`、
+`test_hook_lets_a_documentation_only_commit_through_without_running_the_suite`、
+`test_hook_refuses_a_named_but_missing_suite_instead_of_downgrading`、
+`test_the_hook_now_fires_on_a_module_the_whitelist_missed`
+（对照：同一文件在 HEAD 干净导出上 15 failed / 10 passed，本树 11 failed / 14 passed）。
+
+图：`docs/golden/quick_mode_parity.png`（左：两档 residual vs 推导容差与旧手写容差；
+右：修复前后两档梯级的 ERROR 计数）。
+
+### 11.4 误差判定（关键量 vs 基准，是否 <3%）
+
+| 量 | 档位 | 测得 vs 独立基准（`tools/golden/inclined_box_oracle.py` 按列积分） | 相对误差 | <3% ? |
+|---|---|---|---|---|
+| identity_volume_equals_requested_displacement | coarse | -3.868e-03 m³ vs 0（V=60 m³ 为解约束） | 6.45e-05（0.0064%） | 是 |
+| identity_volume_equals_requested_displacement | fine | -1.441e-11 m³ vs 0 | 2.40e-13（2.4e-11%） | 是 |
+| identity_mirrored_heel_mirrors_transverse_centre | coarse | 8.33e-17 m vs 0 | 3.5e-16 | 是 |
+| identity_mirrored_heel_mirrors_transverse_centre | fine | 0.000e+00 m vs 0 | 0 | 是 |
+
+结论：两条恒等式在两档都远小于 3%；`--quick` 档的 3.87e-3 m³（0.0064%）不是模型误差，
+而是二分容差 3e-5×10 m 的**设计精度**，推导容差 1.24e-02 m³ 正是这个设计精度的解析上界
+（占用 31.1%）。
+
+### 11.5 注意点与残留（如实）
+
+| 项 | 状态 |
+|---|---|
+| `tests/test_geometry_golden_gate.py` 余下 11 项失败 | **既有环境缺口，非本 PR 引入**：它们读 `artifacts/gap-cad-d2-golden/*.json`，而该目录由 CI 检出的兄弟仓 TensorPapers 生成、本仓未跟踪（`git ls-files artifacts` 中 gap-cad-d2 = 0 项）；HEAD 干净导出上同样失败（15 failed / 10 passed） |
+| 全量 `pytest` / 全量门禁 / 变异审计 | 已递交集群作业 **cj4717**（`--check`、`--check --quick`、`mutation_audit --check`、6 个金标测试文件、全量 pytest）；本地 120 s shell 上限与集群队列拥塞（递交时排队 127 位）使然，结果未能在本报告定稿前回填 |
+| `docs/golden/mutation_audit.*` | 本轮未重放：审计读数只取决于基线测量载荷，而本轮基线 diff 只动了 `invariants` 两条的容差/依据字符串与 provenance，测量载荷逐位不变 |
+| series60 盲点 | 未动：`maximum_section_area_m2` 容差占用 0.756，仍是全套最紧的一项 |
+| `--quick` 档的检测力 | `--quick` 只测 coarse，恒等式容差随档放宽（volume 档 1.24e-02 m³ ≈ 0.02% 相对），故对 <0.02% 的排水量回归不敏感；这是**速度换灵敏度**的已知取舍，CI 全量档仍以 6.0e-08 m³（1e-9 相对量级）把关 |
+
+### 11.6 本单增量（文件）
+
+| 文件 | 改动 |
+|---|---|
+| `tensorcad/golden.py` | +`_case_invariants()` 适配器；`GoldenCase.invariants` 增 `level` 关键字与文档（热文件，按纪律在此声明：改动仅两处、无行为变更于其它 case） |
+| `tensorcad/golden_inclined_box.py` | 容差按档推导（`offset_half_width`/`scale`/`ROUNDOFF_FLOOR`/`SAFETY`），镜像路线同容差求解，依据字符串含档位与半宽 |
+| `tests/test_golden_quick_full_parity.py` | 新增 8 项（两档一致性、缺陷真实性、容差随档、回归仍被抓、引擎传档、老签名兼容、基线记录一致） |
+| `tests/test_golden_inclined_box.py` | stale 档名 `"exact"` → `levels()[-1]`（HEAD 上即 KeyError） |
+| `docs/golden/tensorcad_geometry_golden.json` | 重 bless：仅 inclined_box 两条 invariants + provenance |
+| `docs/golden/results.json`、`results.md` | 证据重放（`render_evidence.py`），含新容差与依据 |
+| `docs/golden/quick_mode_parity.png` | 新增本图 |
+| `docs/golden/verification_report.md` | 本节 |
