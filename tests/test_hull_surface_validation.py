@@ -152,7 +152,12 @@ def test_kcs_station_integral_converges():
 # BUT the frame fix does NOT make the volume green: mission m22903 measured the
 # KVLCC2 trim-mask patch set by exact divergence theorem and got 256 657-256 983 m3
 # vs the published 312 622 m3 (-17.9 %), with closure residual |∮n dA| = 11 272 m2
-# (z-residual 10 003 m2 = the waterline cap stored twice).  So KVLCC2 is WITHHELD:
+# (z-residual 10 003 m2 = the waterline cap stored twice).  The *arithmetic* of that
+# reading is contested and now pinned analytically: a hull-surface file is an open skin,
+# so a short ``(1/3)∮r·n dA`` is expected to be short by ``(1/3)·T·A_wl`` and says nothing
+# about the shape (tests/test_hull_surface_open_skin_cap.py).  The re-measurement of the
+# KVLCC2 caps themselves is queued, not done: docs/gap_cad_t1_iges_pipe_kvlcc2_routes_m23282.md.
+# So KVLCC2 stays WITHHELD on this route:
 # the root cause is patch orientation inconsistency + waterline-cap duplication,
 # not the frame.  These tests therefore pin the *frame* evidence (which is real and
 # reproducible) and record the honest WITHHELD status rather than pretend a 3 % gate
