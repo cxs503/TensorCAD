@@ -569,8 +569,8 @@
       }
     ],
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "f1edda3d5de44525675be668a0659fe0208def453996ba369fa07b8ec656e14c",
-    "git_commit": "9778a1050bb0bd6764dde0b2d0b8116338ed213b",
+    "geometry_fingerprint": "cdadcd27af6107bf89659cbc98dc66db03d6631aee41c2e2fc12e017bd91a6b6",
+    "git_commit": "d0da2b85f7918919381445e4d6b365d12d5f4829",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
   },
