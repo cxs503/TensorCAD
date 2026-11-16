@@ -61,6 +61,33 @@ def is_edge_manifold(mesh: Mesh) -> bool:
     return all(count <= 2 for count in edge_face_counts(mesh).values())
 
 
+def edge_winding_conflicts(mesh: Mesh) -> tuple[tuple[int, int], ...]:
+    """Undirected edges whose two incident faces traverse them in the same direction.
+
+    Consistent winding is the definition of a coherently oriented surface: on a
+    closed mesh every undirected edge must be walked low->high by one face and
+    high->low by the other. An edge shared by two faces that agree on its
+    direction is an orientation defect -- exactly one of the two is inverted, or
+    the two patches disagree. Edges used once (boundary) or more than twice
+    (non-manifold) carry no orientation information and are skipped.
+
+    This is the local test that a global signed-volume sign cannot replace: a
+    single flipped triangle moves the divergence-theorem sum by one tetrahedron
+    and leaves both the sign and the magnitude untouched at gate resolution.
+    """
+    directions: dict[tuple[int, int], list[int]] = defaultdict(list)
+    for face in mesh.faces:
+        for u, v in face_edges(face):
+            directions[undirected_edge((u, v))].append(1 if u < v else -1)
+    return tuple(sorted(key for key, dirs in directions.items()
+                        if len(dirs) == 2 and dirs[0] == dirs[1]))
+
+
+def is_consistently_oriented(mesh: Mesh) -> bool:
+    """True when no edge is traversed the same way by both of its faces."""
+    return not edge_winding_conflicts(mesh)
+
+
 def triangle_area(mesh: Mesh, face: Face) -> float:
     ax, ay, az = mesh.vertices[face[0]]
     bx, by, bz = mesh.vertices[face[1]]
