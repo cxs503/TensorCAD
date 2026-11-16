@@ -120,6 +120,114 @@ def _tet_volume(mesh: Mesh, face: Face) -> float:
     return ax * (by * cz - bz * cy) + ay * (bz * cx - bx * cz) + az * (bx * cy - by * cx)
 
 
+@dataclass(frozen=True)
+class PlaneVolume:
+    """Volume and planform area below a horizontal plane, measured on an *open* shell.
+
+    Returned by :func:`volume_below_plane`. ``orientation`` is +1 when the shell's face
+    winding points out of the enclosed column (the usual "outward" convention) and -1 when
+    it points into it; ``volume`` and ``waterplane_area`` are reported with the sign
+    already applied, so both are non-negative for any consistently wound shell.
+    """
+
+    volume: float
+    waterplane_area: float
+    submerged_surface_area: float
+    clipped_triangle_count: int
+    plane_z: float
+    orientation: int
+
+
+def _clip_below_plane(
+    points: tuple[Vec3, Vec3, Vec3], plane_z: float
+) -> list[Vec3]:
+    """Polygon (3 or 4 vertices) of a triangle's part with ``z <= plane_z``.
+
+    Sutherland-Hodgman against a single half-space. The polygon keeps the triangle's
+    winding, so every fan triangle below has the parent's normal direction.
+    """
+    polygon: list[Vec3] = []
+    for index in range(3):
+        current = points[index]
+        following = points[(index + 1) % 3]
+        current_in = current[2] <= plane_z
+        following_in = following[2] <= plane_z
+        if current_in:
+            polygon.append(current)
+        if current_in != following_in:
+            t = (plane_z - current[2]) / (following[2] - current[2])
+            polygon.append(
+                (
+                    current[0] + t * (following[0] - current[0]),
+                    current[1] + t * (following[1] - current[1]),
+                    plane_z,
+                )
+            )
+    return polygon
+
+
+def volume_below_plane(mesh: Mesh, plane_z: float) -> PlaneVolume:
+    """Volume and waterplane area below ``plane_z`` for a shell that is *open* at the top.
+
+    An open hull sheet has no divergence-theorem volume (:func:`total_signed_volume` on it
+    is the signed sum over a surface that does not bound anything). What it does bound, for
+    any height ``plane_z``, is the column of water below that plane -- provided the surface
+    is closed there. The closure is supplied analytically instead of by mesh repair:
+
+    * the part of the shell at ``z <= plane_z`` is the lateral/bottom boundary;
+    * the waterplane is the planar patch at ``z = plane_z`` (outward normal ``+e_z``);
+    * every other opening of the sheet (a transom plane, a longitudinal seam plane) is
+      *vertical*, so it contributes nothing to either integral below.
+
+    With ``g = integral(n_z dA)`` and ``h = integral(z n_z dA)`` over the clipped shell, the
+    divergence theorem on that closed surface gives ``A_waterplane = -g`` and
+    ``volume = h - plane_z * g`` (signs from the shell's winding); both are returned with
+    the sign resolved. The result is exact for the given tessellation up to the exact
+    clipping of the triangles the plane crosses: no volume estimate, no voxelisation, and
+    no assumption that the sheet is watertight.
+    """
+    if not math.isfinite(plane_z):
+        raise ValueError("plane_z must be finite")
+    normal_terms: list[float] = []
+    moment_terms: list[float] = []
+    area_terms: list[float] = []
+    clipped = 0
+    for face in mesh.faces:
+        points = tuple(mesh.vertices[index] for index in face)
+        if all(point[2] <= plane_z for point in points):
+            polygon = list(points)
+        elif all(point[2] > plane_z for point in points):
+            continue
+        else:
+            polygon = _clip_below_plane(points, plane_z)
+            clipped += 1
+        if len(polygon) < 3:
+            continue
+        origin = polygon[0]
+        for index in range(1, len(polygon) - 1):
+            b, c = polygon[index], polygon[index + 1]
+            ux, uy, uz = b[0] - origin[0], b[1] - origin[1], b[2] - origin[2]
+            vx, vy, vz = c[0] - origin[0], c[1] - origin[1], c[2] - origin[2]
+            # cross(u, v) is twice the area times the unit normal; n_z * dA is c_z / 2.
+            cx, cy, cz = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
+            area = 0.5 * math.sqrt(cx * cx + cy * cy + cz * cz)
+            mean_z = (origin[2] + b[2] + c[2]) / 3.0
+            normal_terms.append(0.5 * cz)
+            moment_terms.append(0.5 * cz * mean_z)
+            area_terms.append(area)
+    g = math.fsum(normal_terms)
+    h = math.fsum(moment_terms)
+    sign = -1 if g > 0.0 else 1
+    return PlaneVolume(
+        volume=sign * (h - plane_z * g),
+        waterplane_area=sign * -g,
+        submerged_surface_area=math.fsum(area_terms),
+        clipped_triangle_count=clipped,
+        plane_z=plane_z,
+        orientation=sign,
+    )
+
+
 def face_normal(mesh: Mesh, face: Face) -> Vec3:
     """Area-weighted normal (twice the area) pointing by the right-hand rule."""
     ax, ay, az = mesh.vertices[face[0]]
