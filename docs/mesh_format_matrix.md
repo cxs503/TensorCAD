@@ -63,7 +63,9 @@ TensorCAD 的格式交换分三层：
 
 2. **SU2/CGNS 是体积格式**: 这两个格式的本地单元是四面体，表面三角网格不能直接表达。通过星形三角剖分（star tessellation）将封闭表面转换为四面体后，才能在这两个格式中往返。
 
-3. **STL 精度损失可量化**: binary STL 使用 float32 存储坐标，相对误差上限为 `3 × eps32 ≈ 3.6e-7`。测试中 capsule 和 wigley_hull 的 binary STL 往返误差分别为 `3.62e-8` 和 `1.95e-9`，均在界限内。
+3. **STL 精度损失可量化**: binary STL 使用 float32 存储坐标。实测 capsule 和 wigley_hull 的 binary STL 往返体积误差分别为 `3.62e-8` 和 `1.95e-9`。
+   > **更正（m23297）**：原表述「相对误差上限 `3 × eps32 ≈ 3.6e-7`」**不成立**。`3·eps32` 是坐标的单位舍入，不是相对误差上限；float32 的误差是**绝对**的（`eps32·|coord|`），所以相对误差随坐标偏移增长：同一球体在 `x = 10^3 m` 处 binary 往返体积误差 `4.96e-6`（比该界大 28 倍），在 `x = 10^4 m` 处 `5.85e-5`。
+   > 另需注意：本文下表及后续各期的 **STL 行走的是 meshio 默认输出 = ASCII 编码**（精确，0 相对误差，但字节数是 binary 的 2–6 倍），而上面这组精度数字属于 **binary** 编码，二者是同一个格式名的两条腿。双编码矩阵、量化包络与面法向自洽性见 [`m23297_stl_encoding_verification.md`](m23297_stl_encoding_verification.md)。
 
 4. **取向不变性用 per-cell winding 签名**: 仅检查 `sign(volume)` 不够——两个相反的面翻转可以互相抵消。`oriented_signature` 为每个单元生成（坐标键, 方向符号）对，确保每个单元的缠绕方向都 preserved。
 

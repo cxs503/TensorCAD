@@ -100,6 +100,7 @@ from .geometry import Mesh
 __all__ = [
     "FORMATS_ALL",
     "FORMATS_SURFACE",
+    "STL_ENCODINGS",
     "FORMATS_VOLUME",
     "GMSH_SOLID_GROUP",
     "GMSH_VOLUME_VERSION",
@@ -118,6 +119,7 @@ __all__ = [
     "read_su2_markers",
     "round_trip_meshio",
     "surface_signed_volume",
+    "stl_quantisation_bound",
     "tetrahedral_volume",
     "tetrahedralise_surface",
     "volume_mesh_patches",
@@ -132,6 +134,18 @@ Tet = tuple[int, int, int, int]
 
 #: Formats that support surface triangle meshes.
 FORMATS_SURFACE: tuple[str, ...] = ("stl", "obj", "vtk", "gmsh")
+
+#: STL encodings.  ``stl`` is one format name but two wire encodings, and they
+#: do not behave alike: ASCII stores decimal text (exact round trip, ~5x the
+#: bytes), binary stores IEEE-754 float32 per coordinate (lossy, what CAD
+#: systems emit).  ``meshio`` 5.x writes **ASCII** when ``binary`` is not
+#: given, so the matrix leg "stl" is the ASCII leg unless the caller asks for
+#: :func:`write_meshio`'s ``stl_binary=True``.  See
+#: ``docs/m23297_stl_encoding_verification.md``.
+STL_ENCODINGS: tuple[str, ...] = ("ascii", "binary")
+
+#: IEEE-754 single precision unit roundoff (binary STL coordinate resolution).
+EPS32: float = 2.0 ** -24
 
 #: Formats that only support volume cells (require tetrahedralisation first).
 FORMATS_VOLUME: tuple[str, ...] = ("su2", "cgns")
@@ -179,6 +193,82 @@ def surface_signed_volume(mesh: Mesh) -> float:
             + az * (bx * cy - by * cx)
         )
     return total / 6.0
+
+
+def stl_quantisation_bound(
+    mesh: Mesh | TetrahedralMesh, *, encoding: str = "binary"
+) -> dict[str, object]:
+    """Screen what an STL encoding costs for *this* body, before writing it.
+
+    ASCII STL stores coordinates as decimal text and round-trips exactly.
+    Binary STL stores each coordinate as IEEE-754 float32, i.e. it rounds to
+    a grid whose spacing is ``EPS32 * |x|``.  The error is therefore
+    **absolute and offset dependent**: a body at the origin loses ~1e-8 relative
+    accuracy, the same body described in a ship-frame / global frame where
+    ``x ~ 1e3 m`` loses ~1e-5 relative accuracy.  The widely quoted "3.6e-7
+    relative error" is the *coordinate* unit roundoff, not a relative error
+    bound for translated geometry; see
+    ``docs/m23297_stl_encoding_verification.md``.
+
+    Parameters
+    ----------
+    mesh :
+        Body to screen (surface triangles or tetrahedra; only the vertices
+        matter).
+    encoding :
+        ``"binary"`` (float32, lossy) or ``"ascii"`` (exact).
+
+    Returns
+    -------
+    dict
+        ``encoding``, ``max_abs_coordinate``, ``max_coordinate_error``
+        (half-ulp bound per coordinate), ``min_edge_length``, ``bbox_diagonal``,
+        ``screening_volume_rel_error`` (``2*max_coordinate_error/diagonal``, a
+        conservative estimate validated in the tests, not a proof),
+        ``distinct_vertices_may_merge`` (binary only: quantization step is
+        larger than the finest edge, so two nodes can collapse and the
+        topology silently changes) and ``node_budget_exceeded`` set to whether
+        that flag is true.
+    """
+    if encoding not in STL_ENCODINGS:
+        raise MeshioFormatError(
+            f"unknown STL encoding '{encoding}'; expected one of {STL_ENCODINGS}"
+        )
+    vertices = list(mesh.vertices)
+    if not vertices:
+        raise MeshioFormatError("cannot screen an empty mesh for STL export")
+    extents = [
+        (min(v[i] for v in vertices), max(v[i] for v in vertices)) for i in range(3)
+    ]
+    diagonal = math.sqrt(sum((hi - lo) ** 2 for lo, hi in extents)) or 1.0
+    max_abs = max(abs(c) for v in vertices for c in v)
+    max_err = 0.0 if encoding == "ascii" else EPS32 * max_abs
+
+    # Finest edge in the cell connectivity: the length scale that must survive.
+    shortest = math.inf
+    cells = getattr(mesh, "faces", None)
+    if cells is None:
+        cells = getattr(mesh, "tets", ())
+    for cell in cells:
+        for i in range(len(cell)):
+            a, b = vertices[cell[i]], vertices[cell[(i + 1) % len(cell)]]
+            d = math.dist(a, b)
+            if d < shortest:
+                shortest = d
+    if not math.isfinite(shortest):
+        shortest = diagonal
+
+    merge = bool(encoding == "binary" and 2.0 * max_err >= shortest)
+    return {
+        "encoding": encoding,
+        "max_abs_coordinate": max_abs,
+        "max_coordinate_error": max_err,
+        "min_edge_length": shortest,
+        "bbox_diagonal": diagonal,
+        "screening_volume_rel_error": 2.0 * max_err / diagonal,
+        "distinct_vertices_may_merge": merge,
+        "node_budget_exceeded": merge,
+    }
 
 
 def _tet_signed_volume_from_points(p0: Vec3, p1: Vec3, p2: Vec3, p3: Vec3) -> float:
@@ -1445,7 +1535,13 @@ def _check_topology_supported(mesh: Mesh | TetrahedralMesh, file_format: str) ->
         )
 
 
-def write_meshio(path: str | Path, mesh: Mesh | TetrahedralMesh, *, file_format: str) -> Path:
+def write_meshio(
+    path: str | Path,
+    mesh: Mesh | TetrahedralMesh,
+    *,
+    file_format: str,
+    stl_binary: bool | None = None,
+) -> Path:
     """Write a TensorCAD mesh to a file using meshio.
 
     Parameters
@@ -1457,13 +1553,27 @@ def write_meshio(path: str | Path, mesh: Mesh | TetrahedralMesh, *, file_format:
         (SU2/CGNS).
     file_format :
         One of ``stl``, ``obj``, ``vtk``, ``gmsh``, ``su2``, ``cgns``.
+    stl_binary :
+        STL encoding switch, only valid for ``file_format="stl"``.  ``True``
+        writes the 80-byte-header binary dialect CAD systems emit (float32
+        coordinates, lossy); ``False`` writes ASCII (decimal text, exact);
+        ``None`` (default) leaves meshio's own default in force, which for
+        meshio 5.x is **ASCII**.  Use :func:`stl_quantisation_bound` to see
+        what float32 costs for a given body before choosing.
 
     Raises
     ------
     MeshioFormatError
-        If the format cannot carry the mesh's topology.
+        If the format cannot carry the mesh's topology, or if ``stl_binary``
+        is given for a format other than ``stl``.
     """
     _check_topology_supported(mesh, file_format)
+    if stl_binary is not None and file_format != "stl":
+        raise MeshioFormatError(
+            f"stl_binary only applies to file_format='stl', not '{file_format}': "
+            "the other formats are either text (obj/vtk) or have their own "
+            "encoding rules and must not silently inherit an STL switch"
+        )
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     if file_format == "cgns":
@@ -1476,7 +1586,10 @@ def write_meshio(path: str | Path, mesh: Mesh | TetrahedralMesh, *, file_format:
     import meshio
 
     mio = mesh_to_meshio(mesh)
-    meshio.write(str(target), mio, file_format=file_format)
+    kwargs: dict[str, object] = {}
+    if file_format == "stl" and stl_binary is not None:
+        kwargs["binary"] = stl_binary
+    meshio.write(str(target), mio, file_format=file_format, **kwargs)
     return target
 
 
@@ -1518,6 +1631,7 @@ def round_trip_meshio(
     *,
     file_format: str,
     tmpdir: str | Path | None = None,
+    stl_binary: bool | None = None,
 ) -> Mesh | TetrahedralMesh:
     """Write then read back a mesh via meshio, returning the round-tripped mesh.
 
@@ -1532,6 +1646,10 @@ def round_trip_meshio(
         Target format (stl/obj/vtk/gmsh/su2/cgns).
     tmpdir :
         Directory for temporary files.  If None, uses the system temp dir.
+    stl_binary :
+        STL encoding switch forwarded to :func:`write_meshio`; ``None`` keeps
+        meshio's default (ASCII).  Only the *write* side is switched -- the
+        reader auto-detects both dialects.
     """
     import meshio
 
@@ -1539,7 +1657,7 @@ def round_trip_meshio(
     ext = _EXT[file_format]
     with tempfile.TemporaryDirectory(dir=tmpdir) as td:
         path = Path(td) / f"roundtrip{ext}"
-        write_meshio(path, mesh, file_format=file_format)
+        write_meshio(path, mesh, file_format=file_format, stl_binary=stl_binary)
         back = meshio.read(str(path), file_format=file_format)
         if file_format in FORMATS_VOLUME:
             return meshio_to_tetrahedral(
