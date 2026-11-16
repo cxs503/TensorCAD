@@ -59,6 +59,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--seal-planarity", type=float, default=None,
                         help="Absolute planarity tolerance in model units for the seal "
                              "stage (default: 1e-3 of the model extent)")
+    parser.add_argument("--seam-tolerance", type=float, default=None,
+                        metavar="DIST",
+                        help="Seam coincidence budget in model units. Neighbouring patches "
+                             "exported within DIST of each other are stitched, moving the "
+                             "surface by at most DIST. Omit to measure the open boundary "
+                             "without changing the mesh.")
+    parser.add_argument("--symmetry-closure", action="store_true",
+                        help="Detect a symmetry plane carrying the open boundary (the "
+                             "publisher's half-hull centre plane), mirror the mesh across "
+                             "it and weld the seam, producing a full watertight hull")
+    parser.add_argument("--symmetry-min-coverage", type=float, default=0.5,
+                        metavar="FRACTION",
+                        help="Fraction of the open-boundary length the plane must carry "
+                             "before it is accepted as the symmetry cut (default 0.5)")
     parser.add_argument("--report", "-r", help="Save gate report as JSON")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Suppress stdout output")
@@ -77,6 +91,9 @@ def main(argv: list[str] | None = None) -> int:
             weld_tolerance=args.tolerance,
             seal_openings=args.seal_openings,
             seal_planarity=args.seal_planarity,
+            seam_tolerance=args.seam_tolerance,
+            symmetry_closure=args.symmetry_closure,
+            symmetry_min_coverage=args.symmetry_min_coverage,
         )
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
