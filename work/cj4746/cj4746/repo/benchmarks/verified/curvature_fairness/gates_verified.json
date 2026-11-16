@@ -1,0 +1,55 @@
+{
+  "all_gates_pass": true,
+  "campaign_node": "GAP-CAD-A3-CURVATURE-FAIRNESS",
+  "case": "curvature_fairness",
+  "diagnostics": {
+    "G7": {
+      "criterion": "three-case cross-check vs exact field / analytic flank",
+      "failing": [
+        "ellipsoid: median |Gaussian curvature K - exact| / |exact| over 40 probes"
+      ],
+      "rows": 6,
+      "scope": "diagnostic only: mesh-path pointwise estimates against the exact analytic field, resolution limited; meshmagick requested by the acceptance clause is not obtainable in this environment",
+      "verdict": "fail"
+    }
+  },
+  "gates": {
+    "G1 sphere principal curvature == 1/R (A3 clause, 1e-6 1/m)": {
+      "criterion": "G1 sphere principal curvature == 1/R (A3 clause, 1e-6 1/m)",
+      "failing": [],
+      "rows": 7,
+      "verdict": "pass"
+    },
+    "G2 sphere energies, field path (0.1 %)": {
+      "criterion": "G2 sphere energies, field path (0.1 %)",
+      "failing": [],
+      "rows": 3,
+      "verdict": "pass"
+    },
+    "G3 sphere energies, mesh path (6 %)": {
+      "criterion": "G3 sphere energies, mesh path (6 %)",
+      "failing": [],
+      "rows": 3,
+      "verdict": "pass"
+    },
+    "G4 Wigley integrals vs analytic flank (15 %)": {
+      "criterion": "G4 Wigley integrals vs analytic flank (15 %)",
+      "failing": [],
+      "rows": 2,
+      "verdict": "pass"
+    },
+    "G5 Wigley reference self-check + Richardson (0.5 %)": {
+      "criterion": "G5 Wigley reference self-check + Richardson (0.5 %)",
+      "failing": [],
+      "rows": 2,
+      "verdict": "pass"
+    },
+    "G6 invariance of E_bending (1e-12)": {
+      "criterion": "G6 invariance of E_bending (1e-12)",
+      "failing": [],
+      "rows": 3,
+      "verdict": "pass"
+    }
+  },
+  "schema": "tensorcad.fairness.benchmark/1#gates"
+}

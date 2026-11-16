@@ -1,0 +1,234 @@
+{
+  "cluster_warnings": [
+    "point_locate_accel at 2001x501 x2 bodies (8,007,996 triangles) took 1.285s, peak RSS 5770 MiB",
+    "volume at 2001x501 x2 bodies (8,007,996 triangles) took 4.010s, peak RSS 5770 MiB",
+    "point_locate_accel at 2001x501 x3 bodies (12,011,994 triangles) took 1.247s, peak RSS 5770 MiB",
+    "volume at 2001x501 x3 bodies (12,011,994 triangles) took 6.051s, peak RSS 5770 MiB"
+  ],
+  "command": "scripts/perf_scale_10m.py --base 2001:501 --copies 2,3 --n-queries 2000 --output artifacts/perf_scale/ladder_fleet_10m.json",
+  "environment": {
+    "cpu_count": 128,
+    "loadavg": {
+      "load1": 49.1,
+      "load15": 53.09,
+      "load5": 51.81
+    },
+    "machine": "loongarch64",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "python": "3.11.6",
+    "tensorcad": "0.23.0"
+  },
+  "gates": [
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_fleet_assemble[x2]",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    },
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_fleet_assemble[x3]",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    },
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_load",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    },
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_point_locate_accel[x2]",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    },
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_point_locate_accel[x3]",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    },
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_volume[x2]",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    },
+    {
+      "baseline_seconds": null,
+      "detail": "not_run: 1 distinct size(s), need 3 to fit an exponent",
+      "measured_seconds": null,
+      "name": "scaling_volume[x3]",
+      "passed": true,
+      "ratio": null,
+      "status": "not_run"
+    }
+  ],
+  "gates_checked": 0,
+  "gates_not_run": 7,
+  "passed": true,
+  "results": [
+    {
+      "build_seconds": null,
+      "copies": 1,
+      "grid_cells": 0,
+      "index_bytes": 0,
+      "index_cells": 0,
+      "index_entries": 0,
+      "note": "",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 321.138613,
+      "status": "measured",
+      "subtask": "load",
+      "throughput": 12468.1,
+      "triangles": 4003998,
+      "vertices": 2002001
+    },
+    {
+      "build_seconds": null,
+      "copies": 2,
+      "grid_cells": 0,
+      "index_bytes": 0,
+      "index_cells": 0,
+      "index_entries": 0,
+      "note": "bodies=2 x 4,003,998 tri from one generated body",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 6.516116,
+      "status": "measured",
+      "subtask": "fleet_assemble",
+      "throughput": 1228952.3,
+      "triangles": 8007996,
+      "vertices": 4004002
+    },
+    {
+      "build_seconds": 68.312175,
+      "copies": 2,
+      "grid_cells": 2030644,
+      "index_bytes": 636834220,
+      "index_cells": 2030644,
+      "index_entries": 11003338,
+      "note": "hits=377/2000, grid=(347, 209, 28), entries/tri=1.37, build=68.312s, bodies=2",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 1.284828,
+      "status": "measured",
+      "subtask": "point_locate_accel",
+      "throughput": 1556.6,
+      "triangles": 8007996,
+      "vertices": 4004002
+    },
+    {
+      "build_seconds": null,
+      "copies": 2,
+      "grid_cells": 0,
+      "index_bytes": 0,
+      "index_cells": 0,
+      "index_entries": 0,
+      "note": "volume=15.024947 m^3, analytic=15.025396 m^3, rel_err=-0.003%, bodies=2",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 4.00966,
+      "status": "measured",
+      "subtask": "volume",
+      "throughput": 1997176.0,
+      "triangles": 8007996,
+      "vertices": 4004002
+    },
+    {
+      "build_seconds": null,
+      "copies": 3,
+      "grid_cells": 0,
+      "index_bytes": 0,
+      "index_cells": 0,
+      "index_entries": 0,
+      "note": "bodies=3 x 4,003,998 tri from one generated body",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 9.502103,
+      "status": "measured",
+      "subtask": "fleet_assemble",
+      "throughput": 1264140.6,
+      "triangles": 12011994,
+      "vertices": 6006003
+    },
+    {
+      "build_seconds": 100.262754,
+      "copies": 3,
+      "grid_cells": 3030075,
+      "index_bytes": 954391516,
+      "index_cells": 3030075,
+      "index_entries": 16321836,
+      "note": "hits=377/2000, grid=(335, 335, 27), entries/tri=1.36, build=100.263s, bodies=3",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 1.246755,
+      "status": "measured",
+      "subtask": "point_locate_accel",
+      "throughput": 1604.2,
+      "triangles": 12011994,
+      "vertices": 6006003
+    },
+    {
+      "build_seconds": null,
+      "copies": 3,
+      "grid_cells": 0,
+      "index_bytes": 0,
+      "index_cells": 0,
+      "index_entries": 0,
+      "note": "volume=22.537421 m^3, analytic=22.538095 m^3, rel_err=-0.003%, bodies=3",
+      "nx": 2001,
+      "nz": 501,
+      "peak_rss_mb": 5769.546875,
+      "seconds": 6.051269,
+      "status": "measured",
+      "subtask": "volume",
+      "throughput": 1985037.1,
+      "triangles": 12011994,
+      "vertices": 6006003
+    }
+  ],
+  "schema": "tensorcad.perf_benchmark/2",
+  "seconds": 523.104,
+  "verdict": "not_run",
+  "volume_checks": [
+    {
+      "copies": 2,
+      "ok": true,
+      "rel_err": -3e-05,
+      "triangles": 8007996
+    },
+    {
+      "copies": 3,
+      "ok": true,
+      "rel_err": -3e-05,
+      "triangles": 12011994
+    }
+  ]
+}

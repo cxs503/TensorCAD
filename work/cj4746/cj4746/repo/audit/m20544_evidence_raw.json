@@ -1,0 +1,471 @@
+{
+ "audit_mission": 20544,
+ "subject_mission": 20512,
+ "anchor": "XVAL-GEOM-VOLCROSS",
+ "repo": "TensorCAD",
+ "subject_worktree": "/srv/tensor/agent/work/m20512",
+ "inventory": {
+  "tensorcad/volume_xval.py": {
+   "exists": true,
+   "bytes": 29525,
+   "sha256": "c1ff802b8bd1e0eb8f1a551f5c008c892baf4a410025c1e03e5b6b95a3c5b888"
+  },
+  "tensorcad/volume_xval_cli.py": {
+   "exists": true,
+   "bytes": 14063,
+   "sha256": "71b39abc982b4da5eb8150f7c7ba29513fddf43ff89cce702e9d7d3d82c517ec"
+  },
+  "tensorcad/fleet_gate.py": {
+   "exists": true,
+   "bytes": 18900,
+   "sha256": "02a0986710c82775e880223d4f729fddf277fdcc0d8318f32ba0c226aca00644"
+  },
+  "tensorcad/cli.py": {
+   "exists": true,
+   "bytes": 8839,
+   "sha256": "ca836455e01526c7cfddfe0833a4c37c0b8e20a031fc485704e95e4772e0b3b2"
+  },
+  "tensorcad/__init__.py": {
+   "exists": true,
+   "bytes": 21664,
+   "sha256": "2eebfcf855243761ecca562330955c773b109cfd5f05d5d3a1c08e33cd1c5d1a"
+  },
+  "tests/test_volume_xval.py": {
+   "exists": true,
+   "bytes": 12203,
+   "sha256": "45d10703729ab199fe2022d59684a76eedfd1d4348343e7aeb6f72b73df27169"
+  },
+  "tests/test_volume_xval_entry.py": {
+   "exists": true,
+   "bytes": 9597,
+   "sha256": "9094b2aec31dc0cea3eb3857564f82c647c960c5c2c920c0abac44fc9cac1e31"
+  },
+  "artifacts/xval_geom_volcross/results.json": {
+   "exists": true,
+   "bytes": 35918,
+   "sha256": "44211f002ea3843ebfc5ea5a60d1d85b15ceeaf3b25a9cc137dd23f5b365ffd2"
+  },
+  "artifacts/xval_geom_volcross/results.md": {
+   "exists": true,
+   "bytes": 9912,
+   "sha256": "bfec2590639b1804966e8678899f58013ea554fb3622b0c6b3cb1b5fac4cb26f"
+  },
+  "artifacts/xval_geom_volcross/figures/convergence.png": {
+   "exists": true,
+   "bytes": 122941,
+   "sha256": "a5b3ea0abd91290cd43c55672168d829a02c41a1c66061af7ecb893b0d24c64c"
+  },
+  "artifacts/xval_geom_volcross/figures/deviation_vs_reference.png": {
+   "exists": true,
+   "bytes": 40756,
+   "sha256": "b3a4b6ff22ef846efd00fae763e6991aeda9b92e1dcb4837f49324b43714e710"
+  },
+  "artifacts/xval_geom_volcross/figures/hull_geometry.png": {
+   "exists": true,
+   "bytes": 117053,
+   "sha256": "147b675a84af2efd71f50e5a4257293dad58f892332c3529e67601e92f8aec97"
+  },
+  "benchmarks/verified/volume_cross_engine/run_benchmark.py": {
+   "exists": true,
+   "bytes": 14945,
+   "sha256": "8efdd86e0f5393f7832afb7f721f6e100fb2e78f4fb1519b26ecc9a11612a707"
+  },
+  "benchmarks/verified/volume_cross_engine/result.json": {
+   "exists": true,
+   "bytes": 12393,
+   "sha256": "1f425a30d53c0b8a35c483bf5646dee85326d3c88383f4a6e0753357bb779286"
+  },
+  "benchmarks/verified/volume_cross_engine/gates_verified.json": {
+   "exists": true,
+   "bytes": 674,
+   "sha256": "50ec545c38baacff4eb91afb5a39933a726858bbaa8b19d086c1d216911e04d8"
+  },
+  "benchmarks/verified/volume_cross_engine/README.md": {
+   "exists": true,
+   "bytes": 2273,
+   "sha256": "be1081151d1064662ea93d81d868816dc5bb769597367a963a2760807f221fc2"
+  },
+  "benchmarks/verified/volume_cross_engine/figures/volume_cross_engine.png": {
+   "exists": true,
+   "bytes": 88177,
+   "sha256": "2ad8ba1c0ec88f0defa64f91258f39f72782d66b06e40899cb4b43529715d3a0"
+  },
+  "tools/volume_xval_report.py": {
+   "exists": true,
+   "bytes": 35422,
+   "sha256": "e81dbbb26b57e6596ce2b90ff3ae0553514cec65d7f4e1184f301deeef683804"
+  },
+  "docs/volume_xval.md": {
+   "exists": true,
+   "bytes": 9860,
+   "sha256": "e420d80082e6d83fb37015a647a6507af8155757cca7a39aaa671681cb1fcee9"
+  },
+  "_worktree": {
+   "head_commit": "-s\n0d829a68d744d2fb38b26e65716d69b93e5d8d81",
+   "dirty_entries": 0,
+   "branch": "agent/m20512"
+  }
+ },
+ "referee": {
+  "anchor": "XVAL-GEOM-VOLCROSS",
+  "table_cases": 132,
+  "table_distinct_anchors": 93,
+  "rows_for_anchor": 0,
+  "rows": [],
+  "tensorcad_anchor_cases": [
+   [
+    "GAP-CAD-B2-MESH-FORMAT-MATRIX",
+    "CASE-CAD-B2-ROUNDTRIP-18",
+    "passed"
+   ],
+   [
+    "GAP-CAD-D2-GOLDEN-REGRESSION",
+    "CASE-CAD-D2-GOLDEN-DTMB5415",
+    "passed"
+   ],
+   [
+    "GAP-CAD-D2-GOLDEN-REGRESSION",
+    "CASE-CAD-D2-GOLDEN-SERIES60",
+    "passed"
+   ],
+   [
+    "GAP-CAD-D2-GOLDEN-REGRESSION",
+    "CASE-CAD-D2-GOLDEN-SPHERE_ELLIPSOID",
+    "passed"
+   ],
+   [
+    "GAP-CAD-D2-GOLDEN-REGRESSION",
+    "CASE-CAD-D2-GOLDEN-WIGLEY",
+    "passed"
+   ],
+   [
+    "GAP-CAD-T1-BASELINE-FLEET",
+    "CASE-CAD-BASELINE-FLEET-KCS-DISPLACEMENT",
+    "passed"
+   ],
+   [
+    "GAP-CAD-T2-PARAM-SERIES",
+    "Series60 gate-power 突变测试",
+    "pending"
+   ],
+   [
+    "GAP-CAD-T2-PARAM-SERIES",
+    "Series60 父型五档 Cb 系数 vs 公开父型表",
+    "pending"
+   ],
+   [
+    "GAP-CAD-T2-PARAM-SERIES",
+    "Series60 网格积分 vs 解析闭式（分辨率阶梯）",
+    "pending"
+   ]
+  ],
+  "previous_verdicts_same_anchor": [
+   {
+    "scope": "m20416 XVAL-GEOM-VOLCROSS",
+    "level": 1,
+    "gate_state": "reopened",
+    "gate_level": 1,
+    "verdict_by": "board-audit",
+    "created_at": "2026-11-14 13:49:16.513980+00:00"
+   }
+  ]
+ },
+ "recompute": {
+  "cases": {
+   "wigley": {
+    "analytic_volume_own_4LBT_over_9": 2.7777777777777777,
+    "artifact_reference_volume": 2.7777777777777777,
+    "reference_matches_own": true,
+    "rows": [
+     {
+      "stations": 21,
+      "engine_a": 2.7231650437231827,
+      "engine_b": 2.7231649706612653,
+      "my_vs_ref": -0.0196605842596542,
+      "artifact_vs_ref": -0.0196605842596542,
+      "my_engine_spread": 2.682977940443835e-08,
+      "artifact_engine_spread": -2.682977940443835e-08,
+      "spread_delta_abs": 5.36595588088767e-08
+     },
+     {
+      "stations": 41,
+      "engine_a": 2.763654038838464,
+      "engine_b": 2.7636540035839343,
+      "my_vs_ref": -0.005084546018152985,
+      "artifact_vs_ref": -0.005084546018152985,
+      "my_engine_spread": 1.2756491594993997e-08,
+      "artifact_engine_spread": -1.2756491594993997e-08,
+      "spread_delta_abs": 2.5512983189987994e-08
+     },
+     {
+      "stations": 81,
+      "engine_a": 2.774217726899709,
+      "engine_b": 2.774217681435887,
+      "my_vs_ref": -0.0012816183161047157,
+      "artifact_vs_ref": -0.0012816183161047157,
+      "my_engine_spread": 1.6387979068683646e-08,
+      "artifact_engine_spread": -1.6387979068683646e-08,
+      "spread_delta_abs": 3.277595813736729e-08
+     },
+     {
+      "stations": 161,
+      "engine_a": 2.7768859489811852,
+      "engine_b": 2.776885928348123,
+      "my_vs_ref": -0.00032105836677327916,
+      "artifact_vs_ref": -0.00032105836677327916,
+      "my_engine_spread": 7.430288009249435e-09,
+      "artifact_engine_spread": -7.430288009249435e-09,
+      "spread_delta_abs": 1.486057601849887e-08
+     }
+    ],
+    "max_abs_delta_between_my_deviation_and_artifact": 0.0,
+    "my_measured_order": 1.9797132663315644,
+    "artifact_measured_order": null,
+    "my_richardson_limit": 2.7777922292113493,
+    "my_richardson_vs_reference": 5.2025160857738234e-06,
+    "finest_engine_a_vs_reference_own": -0.00032105836677327916
+   },
+   "kcs-fullscale": {
+    "LBT_m3_own": 79984.80000000002,
+    "artifact_LBT_m3": 79984.80000000002,
+    "pipeline_volume_m3": 52062.3901765476,
+    "cb_from_pipeline_volume_own": 0.6509035488811322,
+    "cb_published": 0.6505,
+    "cb_excess_relative": 0.0006203672269520233,
+    "vs_published_volume_own": 0.0006225288592657435,
+    "artifact_pipeline_vs_reference": 0.0002453041994442989,
+    "finest_engine_a_vs_published_own": 0.0002453041994437395,
+    "finest_engine_a_vs_published_artifact": 0.0002453041994437395,
+    "topology_finest": {
+     "vertices": 13483,
+     "faces": 26962,
+     "edges": 40443,
+     "boundary_edges": 0,
+     "nonmanifold_edges": 0,
+     "watertight": true,
+     "edge_manifold": true,
+     "euler_characteristic": 2,
+     "closed_genus": 0,
+     "zero_area_faces": 0,
+     "surface_area_m2": 14385.484833246643
+    }
+   },
+   "kcs-modelscale": {
+    "reference_kind": "none (WITHHELD)",
+    "reference_volume": null,
+    "cb_from_pipeline_own": 0.555394814541249
+   }
+  },
+  "integrator_battery_present": true,
+  "integrator_battery": {
+   "analytic": 7.647567686045139,
+   "engine_a_vs_analytic_own": -0.008261648727800818,
+   "self_vs_engine_a_artifact": 1.4052740459192171e-15,
+   "watertight": true,
+   "genus": 0
+  }
+ },
+ "gates": {
+  "gates": {
+   "G1_engine_agreement": {
+    "committed_value": 2.682977940443835e-08,
+    "limit": 1e-06,
+    "passed": true,
+    "my_recomputed": 2.682977940443835e-08,
+    "matches": true
+   },
+   "G2_reference_at_finest_wigley": {
+    "committed_value": 0.00032105836677327916,
+    "limit": 0.003,
+    "passed": true,
+    "my_recomputed": 0.00032105836677327916,
+    "matches": true
+   },
+   "G3_quadrature_is_exact_for_the_reference_hull": {
+    "committed_value": 1.5987211554602254e-16,
+    "limit": 1e-09,
+    "passed": true,
+    "my_recomputed": 1.5987211554602254e-16,
+    "matches": true
+   },
+   "G4_measured_order": {
+    "committed_value": 2.020500631935433,
+    "limit": [
+     1.5,
+     2.6
+    ],
+    "passed": true,
+    "my_recomputed": 2.020500631935433,
+    "matches": true
+   },
+   "G5_committed_rows_hold": {
+    "committed_value": [],
+    "limit": [],
+    "passed": true,
+    "my_recomputed": null,
+    "matches": true
+   }
+  },
+  "committed_passed": true,
+  "repro_cmd_declared": "python benchmarks/verified/volume_cross_engine/run_benchmark.py",
+  "environment": {
+   "python": "3.11.6",
+   "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+   "trimesh": "5.0.0",
+   "numpy_stl": "absent"
+  },
+  "numpy_stl_reported": "absent"
+ },
+ "report": {
+  "report_rows": 1,
+  "report_id": 18660,
+  "title": "XVAL-GEOM-VOLCROSS 返修轮1：几何体积跨工具互证（L2入口 + L3集成调用 + L4基准全通）",
+  "figures": 1,
+  "markdown_chars": 3854,
+  "token_checks": [
+   {
+    "token": "2.723165",
+    "in_report": true,
+    "expects": -0.0196605842596542
+   },
+   {
+    "token": "-1.9661",
+    "in_report": true,
+    "expects": null
+   },
+   {
+    "token": "2.763654",
+    "in_report": true,
+    "expects": -0.005084546018152985
+   },
+   {
+    "token": "-0.5085",
+    "in_report": true,
+    "expects": null
+   },
+   {
+    "token": "2.774218",
+    "in_report": true,
+    "expects": -0.0012816183161047157
+   },
+   {
+    "token": "-0.1282",
+    "in_report": true,
+    "expects": null
+   },
+   {
+    "token": "2.776886",
+    "in_report": true,
+    "expects": -0.00032105836677327916
+   },
+   {
+    "token": "-0.0321",
+    "in_report": true,
+    "expects": null
+   }
+  ],
+  "tokens_present": 8,
+  "tokens_checked": 8,
+  "precision_truncations": [
+   {
+    "artifact_value": 2.7231650437231827,
+    "rendered_in_report": "2.7",
+    "relative_error_of_rendering": 0.008506661679055139
+   },
+   {
+    "artifact_value": 2.763654038838464,
+    "rendered_in_report": "2.8",
+    "relative_error_of_rendering": 0.013151414992888123
+   },
+   {
+    "artifact_value": 2.774217726899709,
+    "rendered_in_report": "2.8",
+    "relative_error_of_rendering": 0.009293529073186134
+   },
+   {
+    "artifact_value": 2.7768859489811852,
+    "rendered_in_report": "2.8",
+    "relative_error_of_rendering": 0.008323730770179786
+   },
+   {
+    "artifact_value": 52042.76317749706,
+    "rendered_in_report": "52042.8",
+    "relative_error_of_rendering": 7.075431951903764e-07
+   }
+  ],
+  "honest_fail_sentence_present": true,
+  "sections_present": {
+   "①": true,
+   "②": true,
+   "③": true,
+   "④": true,
+   "⑤": true,
+   "⑥": true
+  }
+ },
+ "repro": {
+  "copy": "/tmp/m20544_repro",
+  "run_benchmark": {
+   "returncode": 0,
+   "stdout_tail": [
+    "    81 x  21  A 2.774218 (-0.1282 %)  B 2.774218 (-0.1282 %)  spread 1.64e-08",
+    "   161 x  41  A 2.776886 (-0.0321 %)  B 2.776886 (-0.0321 %)  spread 7.43e-09",
+    "committed rows re-validated: 12, problems 0"
+   ],
+   "stderr_tail": []
+  },
+  "gates_identical": true,
+  "live_rows_identical": true,
+  "committed_problems": [],
+  "pytest": {
+   "returncode": 0,
+   "tail": [
+    "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+    "40 passed, 1 warning in 10.07s"
+   ]
+  },
+  "report_tool": {
+   "returncode": 0,
+   "stdout_tail": [
+    "  quadrature converged to 2.36e-06 relative",
+    "written: /tmp/m20544_repro/artifacts/xval_geom_volcross"
+   ]
+  },
+  "results_md_diff_lines": [
+   3
+  ],
+  "results_md_identical_except_stamp": true,
+  "results_json_identical": false,
+  "results_json_keys_differing": [
+   "generated_at"
+  ],
+  "cli": [
+   {
+    "args": [
+     "wigley"
+    ],
+    "returncode": 0,
+    "last_line": "  [PASS] no_systematic_bias: agrees (limit not 'systematic-bias' / 'engine-disagreement')"
+   },
+   {
+    "args": [
+     "wigley",
+     "--stations",
+     "61",
+     "--levels",
+     "13"
+    ],
+    "returncode": 1,
+    "last_line": "  [PASS] no_systematic_bias: tessellation-deficit (limit not 'systematic-bias' / 'engine-disagreement')"
+   },
+   {
+    "args": [
+     "mesh",
+     "/tmp/does_not_exist.stl"
+    ],
+    "returncode": 2,
+    "last_line": ""
+   }
+  ]
+ }
+}
