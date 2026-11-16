@@ -61,3 +61,83 @@ The ten hull/analytic mutants of the 2026-11-06 audit are unchanged and were not
 re-run here: 9/10 killed, survivor `HUL-4-midship-split`.
 
 Combined: **23/24 killed (96 %)**, above the 80 % bar this mission carries forward.
+
+
+## Provenance: the record, and the mutant that reached main
+
+**Added 2026-11-16 (m23143).** The 14/14 table above is a transcription: the JSON it
+came from was written by `tools/hull_gate_power/generate_s60_artifact.py`, which put
+`{"status": "ok", "run": {"killed": true}}` in the record for every mutant it never
+ran. The acceptance clause scored that as an *external* 100 % kill rate, sha256 and
+all. Three things changed:
+
+1. the transcription script is deleted, and `gate_power_clause` now refuses a record
+   that does not carry, per entry, the injection (`mutant.old` / `mutant.new`) and the
+   measured exit status (`run.returncode`, `run.failed`, `run.wall_seconds`) -- such a
+   record is `unverified`, and the verdict is `incomplete`, not `pass`;
+2. the harness now has 21 Series 60 mutants (the 14 above plus the product entry
+   `series60_cli` and the family comparison table), and the record in
+   `artifacts/series60_gate_power/gate_power_series60.json` was produced by running
+   them;
+3. `mutate.py` restores the mutated file on SIGTERM/SIGINT/SIGHUP and refuses to start
+   on a tree that already carries a `# mutant` marker.
+
+That last guard exists because the tree really did ship one: main carried
+`vertical_centre_buoyancy=-0.5 * draft,  # mutant ANA-2` in
+`tensorcad/hydrostatics_analytic.py`, left by a run killed before cleanup and merged
+as "matured mission deliverables". Six tests in `tests/test_hydrostatics_analytic.py`
+were red because of it. The closed form is `-0.4*T`
+($(-4T/15)/(2/3)$), restored here, and `tests/test_gate_power_source_hygiene.py` now
+fails if any shipped module carries a mutation marker.
+
+### Measured kill rate: 21/21 (100%)
+
+Record `artifacts/series60_gate_power/gate_power_series60.json`, sha256 `aab0a4275bbd5f13...`, status
+`pass` against the anchor's 80% bar.
+
+| mutant | verdict | wall | exit | killing test (first two) |
+|---|---|---|---|---|
+| `S60-1-transom-blend-area` | KILLED | 23.11 s | 1 | test_closed_form_moments_match_the_law_they_describe; test_mesh_displacement_matches_the_closed_form |
+| `S60-10-bulb-centroid-k` | KILLED | 19.92 s | 1 | test_centroid_collapses_to_the_hemisphere_result |
+| `S60-11-bulb-fp-segment` | KILLED | 18.94 s | 1 | test_piercing_the_waterline_keeps_only_the_submerged_part |
+| `S60-12-bulb-waterplane` | KILLED | 19.98 s | 1 | test_piercing_the_waterline_keeps_only_the_submerged_part |
+| `S60-13-bulb-wetted-arc` | KILLED | 19.43 s | 1 | test_wetted_area_against_a_brute_force_summation; test_wetted_area_at_the_axis_is_half_of_the_submerged_area |
+| `S60-14-bulb-wetted-stretch` | KILLED | 21.57 s | 1 | test_exported_solid_volume_and_lateral_area; test_wetted_area_against_a_brute_force_summation |
+| `S60-15-entry-ignores-cb` | KILLED | 7.09 s | 1 | test_cli_honours_the_block_coefficient - a...; test_cli_rejects_invalid_combinations - as... |
+| `S60-16-entry-vcb-frame` | KILLED | 25.38 s | 1 | test_table_is_finite_and_within_the_screen_bar[0.0-0.6]; test_table_is_finite_and_within_the_screen_bar[0.0-0.65] |
+| `S60-17-entry-self-referential-gate` | KILLED | 7.72 s | 1 | test_cli_refuses_a_grid_that_misses_the_closed_form |
+| `S60-18-entry-closure-as-prediction` | KILLED | 7.68 s | 1 | test_family_entry_compares_the_five_parents |
+| `S60-19-derive-midship-coefficient` | KILLED | 24.44 s | 1 | test_table_is_finite_and_within_the_screen_bar[0.0-0.6]; test_table_is_finite_and_within_the_screen_bar[0.0-0.65] |
+| `S60-2-transom-blend-keep` | KILLED | 12.63 s | 1 | test_stern_deck_taper_equals_the_transom_ratio; test_requested_integrals_still_close[0.2] |
+| `S60-20-derive-waterplane-coefficient` | KILLED | 24.34 s | 1 | test_table_is_finite_and_within_the_screen_bar[0.0-0.6]; test_table_is_finite_and_within_the_screen_bar[0.0-0.65] |
+| `S60-21-comparison-is-self-referential` | KILLED | 26.17 s | 1 | test_table_is_finite_and_within_the_screen_bar[0.0-0.6]; test_table_is_finite_and_within_the_screen_bar[0.0-0.65] |
+| `S60-3-transom-first-moment` | KILLED | 18.83 s | 1 | test_transom_changes_the_shape_not_just_the_labels; test_closed_form_moments_match_the_law_they_describe |
+| `S60-4-transom-square-moment` | KILLED | 19.46 s | 1 | test_closed_form_moments_match_the_law_they_describe |
+| `S60-5-deck-taper-half` | KILLED | 18.37 s | 1 | test_fore_half_carries_no_transom; test_closed_form_moments_match_the_law_they_describe |
+| `S60-6-transom-area-factor` | KILLED | 21.27 s | 1 | test_immersed_stern_area_measured_from_the_mesh |
+| `S60-7-single-exponent-bracket` | KILLED | 18.75 s | 1 | test_legacy_single_exponent_holds_cb_with_a_transom |
+| `S60-8-bulb-volume-cubic` | KILLED | 23.27 s | 1 | test_half_and_none_cases; test_volume_against_an_independent_parameterisation[-0.9] |
+| `S60-9-bulb-submerged-clip` | KILLED | 17.25 s | 1 | test_fully_submerged_volume |
+
+Baselines recorded with the same test sets (a kill is only attributable if the
+unmutated set is green):
+
+| baseline | exit | summary |
+|---|---|---|
+| `baseline-ana` | 0 | 112 passed, 1 warning in 31.22s |
+| `baseline-cli` | 0 | 7 passed, 1 warning in 7.00s |
+| `baseline-gen` | 0 | 65 passed, 1 warning in 11.85s |
+| `baseline-series` | 0 | 56 passed, 1 warning in 20.02s |
+
+Reproduce:
+
+```
+python3 tools/hull_gate_power/mutate.py --out artifacts/series60_gate_power/gate_power_series60.json \
+  --only $(python3 -c "import re;print(','.join(re.findall(r'\"id\": \"(S60-[^\"]+)', open('tools/hull_gate_power/mutate.py').read())))")
+python3 tools/series60_family/anchor_acceptance.py
+```
+
+Anchor verdict after this pass: **`pass`** (no failed clauses;
+withheld: external_shape_anchor_todd_offsets). Before the record existed the same
+tool returned `incomplete` with `gate_power_mutation_kill_rate: not_run` -- the clause
+that the ledger's "gate-power >= 80 %" sentence had never been machine-checked.

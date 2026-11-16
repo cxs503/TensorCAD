@@ -378,7 +378,7 @@ def analytic_hydrostatics(
         longitudinal_centre_buoyancy=0.5 * length,
         longitudinal_centre_flotation=0.5 * length,
         # z-weighted mean of zeta**(1/2) on [-T, 0]: (-4T/15) / (2/3) = -0.4*T.
-        vertical_centre_buoyancy=-0.5 * draft,  # mutant ANA-2
+        vertical_centre_buoyancy=-0.4 * draft,
         block_coefficient=taper * (2.0 / 3.0),
         prismatic_coefficient=taper,
         midship_coefficient=2.0 / 3.0,
