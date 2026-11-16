@@ -137,3 +137,41 @@ def test_kcs_station_integral_converges():
                                 waterline=10.8, stations=81, levels=48)
     change = abs(fine.volume - coarse.volume) / fine.volume * 100.0
     assert change < 3.0, f"volume moved {change:.2f} % between grids"
+
+# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# KVLCC2: the second of the "3 real IGES" — frame evidence is real, volume is WITHHELD
+# --------------------------------------------------------------------------- #
+# The KVLCC2 export (same publisher, different frame) puts z = 0 at the design
+# waterline with z growing *downwards* (measured extent 0 ... -28.067 m) and x = 0
+# near the bow (stern at x ~= -328 m).  Feeding it to a route that keeps
+# 0 <= z <= draft keeps *nothing* — the waterline slices vanish.  That is a frame
+# defect, not a shape defect, and the declarative frame transformation
+# (tensorcad.fleet.frames.normalise) is the honest fix.
+#
+# BUT the frame fix does NOT make the volume green: mission m22903 measured the
+# KVLCC2 trim-mask patch set by exact divergence theorem and got 256 657-256 983 m3
+# vs the published 312 622 m3 (-17.9 %), with closure residual |∮n dA| = 11 272 m2
+# (z-residual 10 003 m2 = the waterline cap stored twice).  So KVLCC2 is WITHHELD:
+# the root cause is patch orientation inconsistency + waterline-cap duplication,
+# not the frame.  These tests therefore pin the *frame* evidence (which is real and
+# reproducible) and record the honest WITHHELD status rather than pretend a 3 % gate
+# is green on a file whose exact integral is short by 17.9 %.
+KVLCC2 = ASSET_ROOT / "KVLCC2" / "kvlcc2.igs"
+
+
+@pytest.mark.skipif(not KVLCC2.exists(), reason=f"workshop asset absent: {KVLCC2}")
+def test_kvlcc2_frame_is_z_down_stern_negative():
+    """KVLCC2 IGES is a z-down, stern-negative export: normalise flips z and shifts x."""
+    from tensorcad.geomquality.trim_mesh import import_cad
+    from tensorcad.fleet.frames import normalise
+
+    result = import_cad(KVLCC2, weld_tolerance=1e-3)
+    mesh = result.mesh
+    pts, frep = normalise(list(mesh.vertices))
+    # The frame evidence is the real, reproducible claim: z-down + stern-negative.
+    assert frep.z_flip is True, frep.as_dict()
+    assert frep.x_shift < 0.0, frep.as_dict()   # stern-negative: translate aft-most to 0
+    assert classify_model(pts)["half_breadth"] is True
+    # The file is an open half-breadth surface model; the topology gate must say so.
+    assert result.report["after_repair"]["watertight"] is False
