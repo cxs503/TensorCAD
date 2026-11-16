@@ -28,6 +28,10 @@ deliberately boring and hard to game:
 ``spec_bindings`` / ``coverage``
     how many fleet-spec ships resolve to a verified asset — the number that says
     whether downstream physics can still be re-run from durable bytes;
+``hulls_resolvable`` / ``hull_coverage``
+    how many *registered hulls* a caller can actually ask for by name. ``coverage``
+    above only counts ships a fleet spec binds, so it read 1.0 while the store held two
+    hulls (DTC, KP505) that no spec bound and no consumer could reach;
 ``resolvable_pointer_fraction``
     share of geometry pointers in the specs that resolve (no dead pointers).
 """
@@ -43,6 +47,12 @@ from .store import AssetError, AssetStore, asset_id_of, asset_uri, hull_of, sha2
 
 REGISTRY_SCHEMA = "tensorcad.assetlib.registry.v1"
 KIND_GEOMETRY = "geometry"
+
+#: File stems (extension stripped, lower-cased) that *name the hull itself* rather than an
+#: appendage or a document. Only a stem in this set can be handed out as "the hull" by the
+#: ``hull_form_name`` rule; ``jbc-propeller.igs`` legitimately starts with "jbc" and is
+#: still not the hull.
+HULL_FORM_STEMS = ("{hull}", "{hull}_hull")
 
 
 class RegistryError(ValueError):
@@ -154,6 +164,93 @@ class AssetRegistry:
             raise RegistryError(f"ship {ship!r} has no geometry binding in the registry") from None
 
     # -------------------------------------------------------------- resolution
+    def hull_primary(self, hull: str) -> tuple[AssetEntry, str]:
+        """The hull-form geometry of ``hull``, chosen by rule, or a refusal.
+
+        A fleet spec binds four ships (KCS/KVLCC2/JBC/ONRT) and those bindings win here,
+        because a spec that was measured against one byte should keep pointing at it. But
+        the store also holds hulls no spec binds — DTC, KP505 — and a caller asking for
+        ``DTC`` used to get ``RegistryError: no geometry binding`` even though the registry
+        itself carried the DTC hull block marked ``verified``. Those are resolved by two
+        explicit rules, tried in order:
+
+        ``unique_geometry``
+            the hull owns exactly one non-duplicate geometry asset, so there is nothing to
+            choose between;
+        ``hull_form_name``
+            exactly one asset's file stem is the hull name or ``<hull>_hull``.
+
+        Anything else raises ``RegistryError`` naming every candidate that was considered.
+        Choosing the "most likely" file at this point is exactly the guesswork this library
+        exists to replace: ``DTC_bilgekeel.igs`` is not a hull and a resolver has no right
+        to silently pretend it is.
+        """
+        binding = self.bindings.get(hull)
+        if binding is not None and binding.asset_id:
+            return self.entry(binding.asset_id), "spec_binding"
+
+        candidates = [
+            entry
+            for entry in self.by_hull(hull)
+            if entry.kind == KIND_GEOMETRY and not entry.duplicate_of
+        ]
+        if len(candidates) == 1:
+            return candidates[0], "unique_geometry"
+
+        stems = {alt.format(hull=hull.lower()) for alt in HULL_FORM_STEMS}
+        named = [entry for entry in candidates if Path(entry.asset_id).stem.lower() in stems]
+        if len(named) == 1:
+            return named[0], "hull_form_name"
+
+        if not self.by_hull(hull) and hull not in self.hulls:
+            raise RegistryError(f"hull {hull!r} is not in the registry")
+        considered = ", ".join(sorted(entry.asset_id for entry in candidates)) or "<none>"
+        raise RegistryError(
+            f"hull {hull!r} has no unambiguous hull-form geometry: {len(candidates)} geometry "
+            f"candidate(s) [{considered}] and {len(named)} match {sorted(stems)}; "
+            "bind the ship in the fleet specs or name the hull '<hull>.igs'/'<hull>_hull.igs'"
+        )
+
+    def resolve_explained(
+        self, name: str, *, store: AssetStore | None = None, require_verified: bool = False
+    ) -> dict[str, Any]:
+        """Resolve ``name`` and report *how* it resolved, not only where to."""
+        store = store or AssetStore(self.store_root or None)
+        rule = ""
+        if asset_id_of(name) or "/" in name:
+            asset_id = asset_id_of(name) or name.strip("/")
+            via = "asset_id"
+        else:
+            binding = self.bindings.get(name)
+            if binding is not None and binding.asset_id:
+                asset_id = binding.asset_id
+                via = "spec_binding"
+            else:
+                entry, rule = self.hull_primary(name)
+                asset_id = entry.asset_id
+                via = "hull_primary"
+        entry = self.entry(asset_id)
+        canonical = self.entry(entry.duplicate_of) if entry.duplicate_of else entry
+        path = store.verify_asset(asset_id, entry.sha256, entry.bytes)
+        asset_id, entry = canonical.asset_id, canonical
+        if require_verified and not entry.verified:
+            # Bytes agree with the registry; the manifest itself never declared them
+            # verified. Refuse to launder "present" into "proven".
+            raise AssetError(
+                f"{asset_id} is present and hash-clean but not verified ({entry.note or 'no note'})",
+                reason="unverified",
+            )
+        return {
+            "name": name,
+            "asset_id": asset_id,
+            "path": path,
+            "sha256": entry.sha256,
+            "bytes": entry.bytes,
+            "verified": entry.verified,
+            "via": via,
+            "rule": rule,
+        }
+
     def resolve(self, name: str, *, store: AssetStore | None = None, require_verified: bool = False) -> str:
         """Resolve an asset id/URI or a ship name to a verified absolute path.
 
@@ -167,23 +264,7 @@ class AssetRegistry:
         reader that needs the geometry must still get it. Gates that publish a number
         pass ``require_verified=True`` and refuse anything not yet proven.
         """
-        store = store or AssetStore(self.store_root or None)
-        if asset_id_of(name) or "/" in name:
-            asset_id = asset_id_of(name) or name.strip("/")
-        else:
-            asset_id = self.ship(name).asset_id
-        entry = self.entry(asset_id)
-        canonical = self.entry(entry.duplicate_of) if entry.duplicate_of else entry
-        path = store.verify_asset(asset_id, entry.sha256, entry.bytes)
-        asset_id, entry = canonical.asset_id, canonical
-        if require_verified and not entry.verified:
-            # Bytes agree with the registry; the manifest itself never declared them
-            # verified. Refuse to launder "present" into "proven".
-            raise AssetError(
-                f"{asset_id} is present and hash-clean but not verified ({entry.note or 'no note'})",
-                reason="unverified",
-            )
-        return path
+        return self.resolve_explained(name, store=store, require_verified=require_verified)["path"]
 
     def find_by_sha(self, sha256: str, *, store: AssetStore | None = None) -> str | None:
         for entry in self.assets.values():
@@ -241,6 +322,9 @@ class AssetRegistry:
                 "coverage": None
                 if cov_prev is None
                 else round(float(current["coverage"]) - float(cov_prev), 6),
+                "hull_coverage": None
+                if before.get("hull_coverage", None) is None
+                else round(float(current["hull_coverage"]) - float(before["hull_coverage"]), 6),
             },
             "added": added,
             "removed": removed,
@@ -265,6 +349,13 @@ class AssetRegistry:
             slot["bytes"] += entry.bytes
         verified = sum(int(entry.verified) for entry in self.assets.values())
         bound = sum(int(binding.sha_match) for binding in self.bindings.values())
+        resolvable_hulls: list[str] = []
+        for hull in sorted(self.hulls):
+            try:
+                self.hull_primary(hull)
+            except RegistryError:
+                continue
+            resolvable_hulls.append(hull)
         return {
             "assets": len(self.assets),
             "bytes": total_bytes,
@@ -275,6 +366,12 @@ class AssetRegistry:
             "spec_bindings": bound,
             "spec_ships": len(self.bindings),
             "coverage": round(bound / len(self.bindings), 6) if self.bindings else 0.0,
+            # ``coverage`` only counts ships a fleet spec binds. A hull the store holds but
+            # no spec binds is unreachable by name, which is a coverage hole the old metric
+            # could not show; report it here instead of leaving it implicit.
+            "hulls": len(self.hulls),
+            "hulls_resolvable": len(resolvable_hulls),
+            "hull_coverage": round(len(resolvable_hulls) / len(self.hulls), 6) if self.hulls else 0.0,
             "asset_ids": sorted(self.assets),
         }
 
