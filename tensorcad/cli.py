@@ -84,6 +84,13 @@ def _summary(model: Any) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     argv_list = list(sys.argv[1:] if argv is None else argv)
+    if argv_list and argv_list[0] == "volume-xval":
+        # Integration caller for XVAL-GEOM-VOLCROSS: the product console script reaches
+        # the cross-engine displacement-volume check, so an operator can ask for the
+        # second, code-independent volume opinion on a hull they already have.
+        from tensorcad.volume_xval_cli import main as volume_xval_main
+
+        return volume_xval_main(argv_list[1:])
     if argv_list and argv_list[0] == "fairness":
         # Integration caller for GAP-CAD-A3-CURVATURE-FAIRNESS: the package console
         # script reaches the curvature-field / smoothing-energy entry, so the
