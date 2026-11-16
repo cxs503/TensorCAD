@@ -34,6 +34,8 @@ if str(ROOT) not in sys.path:
 from tensorcad.hull import HullParameters  # noqa: E402
 from tensorcad.perf_subdiv import run_single_body_benchmark  # noqa: E402
 
+DEFAULT_SUBTASKS = "load,subdivide,volume,point_locate_accel,obj_write,obj_read"
+
 
 def _pairs(text: str) -> list[tuple[int, int]]:
     out: list[tuple[int, int]] = []
@@ -65,9 +67,13 @@ def main(argv: list[str] | None = None) -> int:
                         help="ray count for point_locate_accel")
     parser.add_argument("--max-triangles", type=int, default=16_000_000,
                         help="per-rung cap; larger rungs are recorded not_run")
+    parser.add_argument("--subtasks", default=DEFAULT_SUBTASKS,
+                        help=f"comma-separated subtasks (default: {DEFAULT_SUBTASKS})")
     parser.add_argument("--output", default=str(
         ROOT / "benchmarks" / "perf_scale" / "artifacts" / "ladder_single_10m.json"))
     args = parser.parse_args(argv)
+
+    subtasks = [s.strip() for s in args.subtasks.split(",") if s.strip()]
 
     artifact = run_single_body_benchmark(
         bases=_pairs(args.bases),
@@ -75,6 +81,7 @@ def main(argv: list[str] | None = None) -> int:
         hull=HullParameters(length=args.length, beam=args.beam, draft=args.draft),
         n_queries=args.queries,
         max_triangles=args.max_triangles,
+        subtasks=subtasks,
         command=" ".join(shlex.quote(a) for a in (sys.executable, *sys.argv[:1]))
         + " " + " ".join(shlex.quote(a) for a in (argv if argv is not None else sys.argv[1:])),
     )
@@ -83,11 +90,11 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(artifact, indent=2, sort_keys=False) + "\n", encoding="utf-8")
 
-    print(f"{'subtask':<20}{'base':>10}{'lvl':>4}{'triangles':>12}{'seconds':>12}{'status':>10}")
+    print(f"{'subtask':<22}{'base':>10}{'lvl':>4}{'triangles':>12}{'seconds':>12}{'status':>10}")
     for row in artifact["results"]:
         seconds = row["seconds"]
         print(
-            f"{row['subtask']:<20}{str(row['nx']) + 'x' + str(row['nz']):>10}"
+            f"{row['subtask']:<22}{str(row['nx']) + 'x' + str(row['nz']):>10}"
             f"{row['levels']:>4}{row['triangles']:>12,}"
             f"{(f'{seconds:.3f}' if seconds is not None else '-'):>12}"
             f"{row['status']:>10}"
