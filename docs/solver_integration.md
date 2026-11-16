@@ -88,3 +88,19 @@ python -m tensorcad.solver_integration --out artifacts/solver_integration \
   a-axis radius, so the cross-section area is the comparable metric.
 - The FVM route verifies the surface mesh volume (divergence theorem) rather than a full
   volume-mesh solve. The full FVM patch test is in `test_fvm_handoff.py`.
+
+---
+
+## Correction (superseded for the cross-route gate)
+
+An audit of this module found that the cross-route claims above are not
+machine-checked here: `verify_frame_consistency` compares each route with its own
+analytic reference rather than comparing routes with each other, the DG leg is handed
+a circle when the solid is an `a x b x c` ellipsoid, the LBM leg voxelises a cylinder
+(`2 pi a^2 c` = 3x the ellipsoid volume at the default parameters), the FVM leg writes
+no volume bundle, and `frame_tamper_refused` swallowed every exception. The
+replacement — one solid from the unified geometry library, three routes, digest-bound
+"same solid" checks, real verifiers and a positive control — is
+`tensorcad/solver_solid_gate.py`, documented in `docs/solver_solid_gate.md`; run it with
+`python -m tensorcad.solver_solid_gate`. What remains true here: the frame contract,
+the per-route handoff writers and the y-up tamper motivation (the 5415 lesson).
