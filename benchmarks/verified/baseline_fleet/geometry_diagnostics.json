@@ -1,9 +1,9 @@
 {
-  "schema": "tensorcad.baseline_fleet.diagnostics/1.0",
+  "schema": "tensorcad.baseline_fleet.diagnostics/1.1",
   "hulls": {
     "KCS": {
-      "file": "/root/tp-agent/work/m20163/artifacts/baseline_fleet/raw/KCS/KCS_hull_SVA.igs",
-      "sha256": null,
+      "file": "KCS/KCS_hull_SVA.igs",
+      "sha256": "6f5556b2b5e58e14e721eaf438fc2f7874e051c1a858d77d7aa837af17db917d",
       "units": "M",
       "unit_flag": 6,
       "metres_per_unit": 1.0,
@@ -15,8 +15,13 @@
       "layout_histogram": {
         "weight_block": 55
       },
+      "layout_evidence_histogram": {
+        "smoothness": 55
+      },
       "ambiguous_patches": 0,
-      "patches_decided_by_weight_test": 55,
+      "patches_with_uniform_weights": 55,
+      "usable_patches": 55,
+      "quarantined_patches": 0,
       "trailing_values_max": 4,
       "control_cloud_axes_m": [
         {
@@ -53,7 +58,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -65,7 +75,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -77,7 +93,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -89,7 +110,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -101,7 +127,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -113,7 +144,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -125,7 +161,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -137,7 +179,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -149,7 +197,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -161,7 +215,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -173,7 +232,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -185,7 +249,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -197,7 +266,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -209,7 +284,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -221,7 +302,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -233,7 +320,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -245,7 +338,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -257,7 +356,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -269,7 +374,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -281,7 +392,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -293,7 +409,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -305,7 +426,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -317,7 +443,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -329,7 +460,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -341,7 +477,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -353,7 +494,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -365,7 +511,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -377,7 +528,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -389,7 +545,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -401,7 +563,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -413,7 +580,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -425,7 +597,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -437,7 +615,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -449,7 +633,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -461,7 +651,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -473,7 +669,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -485,7 +686,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -497,7 +704,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -509,7 +722,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -521,7 +739,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -533,7 +757,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -545,7 +774,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -557,7 +791,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -569,7 +808,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -581,7 +826,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -593,7 +843,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -605,7 +860,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -617,7 +877,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -629,7 +895,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -641,7 +913,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -653,7 +931,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -665,7 +949,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -677,7 +967,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -689,7 +985,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -701,14 +1002,19 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         }
       ]
     },
     "KVLCC2": {
-      "file": "/root/tp-agent/work/m20163/artifacts/baseline_fleet/raw/KVLCC2/kvlcc2.igs",
-      "sha256": null,
+      "file": "KVLCC2/kvlcc2.igs",
+      "sha256": "ed06c287c7a858a182494cb101e2c322bb2c407994c646a95d9e9f811638e2f9",
       "units": "MM",
       "unit_flag": 2,
       "metres_per_unit": 0.001,
@@ -724,8 +1030,13 @@
       "layout_histogram": {
         "weight_block": 19
       },
-      "ambiguous_patches": 1,
-      "patches_decided_by_weight_test": 19,
+      "layout_evidence_histogram": {
+        "smoothness": 19
+      },
+      "ambiguous_patches": 0,
+      "patches_with_uniform_weights": 19,
+      "usable_patches": 19,
+      "quarantined_patches": 0,
       "trailing_values_max": 6,
       "control_cloud_axes_m": [
         {
@@ -765,7 +1076,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -777,7 +1093,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -789,7 +1110,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -801,7 +1127,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -813,7 +1144,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -825,7 +1161,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -836,8 +1177,13 @@
           ],
           "rational": false,
           "layout": "weight_block",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": true,
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -849,7 +1195,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -861,7 +1212,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -873,7 +1229,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -885,7 +1246,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -897,7 +1263,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -909,7 +1280,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -921,7 +1297,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -933,7 +1314,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -945,7 +1331,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -957,7 +1348,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -969,7 +1365,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -981,14 +1382,19 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         }
       ]
     },
     "JBC": {
-      "file": "/root/tp-agent/work/m20163/artifacts/baseline_fleet/raw/JBC/jbc.igs",
-      "sha256": null,
+      "file": "JBC/jbc.igs",
+      "sha256": "2de08d290e98cc58842faa126f8245024615851fe849de0a49c0c3b74d61e9ab",
       "units": "MM",
       "unit_flag": 2,
       "metres_per_unit": 0.001,
@@ -1003,11 +1409,16 @@
       "transformation_matrices": 0,
       "patch_count": 45,
       "layout_histogram": {
-        "weight_block": 43,
-        "interleaved": 2
+        "weight_block": 45
       },
-      "ambiguous_patches": 4,
-      "patches_decided_by_weight_test": 33,
+      "layout_evidence_histogram": {
+        "unique admissible reading": 10,
+        "smoothness": 35
+      },
+      "ambiguous_patches": 0,
+      "patches_with_uniform_weights": 35,
+      "usable_patches": 45,
+      "quarantined_patches": 0,
       "trailing_values_max": 4,
       "control_cloud_axes_m": [
         {
@@ -1016,23 +1427,23 @@
           "span": 7.50589
         },
         {
-          "min": -3.625,
-          "max": 0.6303826589242381,
-          "span": 4.255382658924238
+          "min": -0.562519,
+          "max": 0.562519,
+          "span": 1.125038
         },
         {
-          "min": -3.625,
+          "min": 0.0,
           "max": 0.6303885,
-          "span": 4.2553885000000005
+          "span": 0.6303885
         }
       ],
       "diagnostic_residuals_percent": {
         "axis0_vs_l_pp": -97.32,
         "axis0_vs_beam": -83.32,
-        "axis1_vs_l_pp": -98.48,
-        "axis1_vs_beam": -90.54,
-        "axis2_vs_l_pp": -98.48,
-        "axis2_vs_beam": -90.54
+        "axis1_vs_l_pp": -99.6,
+        "axis1_vs_beam": -97.5,
+        "axis2_vs_l_pp": -99.77,
+        "axis2_vs_beam": -98.6
       },
       "patches": [
         {
@@ -1044,7 +1455,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 11
         },
         {
@@ -1056,7 +1471,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 11
         },
         {
@@ -1068,7 +1487,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1080,7 +1504,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1092,7 +1521,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1104,7 +1538,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1116,7 +1555,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1128,7 +1572,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1140,7 +1589,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1152,7 +1605,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1164,7 +1622,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1176,7 +1639,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1188,7 +1655,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1200,7 +1672,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1212,7 +1688,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1224,7 +1705,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1236,7 +1722,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1246,10 +1737,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 158,
@@ -1260,7 +1756,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1272,7 +1773,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1284,7 +1790,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1296,7 +1807,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1308,7 +1824,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1320,7 +1841,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1332,7 +1858,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1344,7 +1875,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1356,7 +1892,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1368,7 +1909,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1379,8 +1925,13 @@
           ],
           "rational": false,
           "layout": "weight_block",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": true,
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1392,7 +1943,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1403,8 +1959,13 @@
           ],
           "rational": false,
           "layout": "weight_block",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": true,
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1416,7 +1977,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1428,7 +1994,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1440,7 +2010,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1452,7 +2027,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1464,7 +2043,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1476,7 +2061,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1488,7 +2079,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1500,7 +2095,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1512,7 +2112,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1524,7 +2129,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 11
         },
         {
@@ -1536,7 +2145,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 11
         },
         {
@@ -1546,10 +2159,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 512,
@@ -1560,7 +2178,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1572,14 +2195,19 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         }
       ]
     },
     "ONRT": {
-      "file": "/root/tp-agent/work/m20163/artifacts/baseline_fleet/raw/ONRT/onr5613-full_appendage_deckhous_mergedR.igs",
-      "sha256": null,
+      "file": "ONRT/onr5613-full_appendage_deckhous_mergedR.igs",
+      "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
       "units": "M",
       "unit_flag": 6,
       "metres_per_unit": 1.0,
@@ -1594,36 +2222,41 @@
       "transformation_matrices": 0,
       "patch_count": 132,
       "layout_histogram": {
-        "interleaved": 26,
-        "weight_block": 106
+        "weight_block": 132
       },
-      "ambiguous_patches": 26,
-      "patches_decided_by_weight_test": 72,
+      "layout_evidence_histogram": {
+        "smoothness": 100,
+        "unique admissible reading": 32
+      },
+      "ambiguous_patches": 0,
+      "patches_with_uniform_weights": 98,
+      "usable_patches": 132,
+      "quarantined_patches": 0,
       "trailing_values_max": 7,
       "control_cloud_axes_m": [
         {
-          "min": -0.07514575636397124,
+          "min": -0.01068753573686586,
           "max": 1.000475494567879,
-          "span": 1.0756212509318503
+          "span": 1.011163030304745
         },
         {
-          "min": -0.06101264499994373,
-          "max": 1.0,
-          "span": 1.0610126449999437
+          "min": -0.07514575636397124,
+          "max": 0.07516681303035924,
+          "span": 0.15031256939433046
         },
         {
-          "min": -0.06498955253572838,
-          "max": 1.000473310803697,
-          "span": 1.0654628633394254
+          "min": -0.05265215955443811,
+          "max": 0.1267150175890958,
+          "span": 0.17936717714353392
         }
       ],
       "diagnostic_residuals_percent": {
-        "axis0_vs_l_pp": -99.3,
-        "axis0_vs_beam": -94.27,
-        "axis1_vs_l_pp": -99.31,
-        "axis1_vs_beam": -94.35,
-        "axis2_vs_l_pp": -99.31,
-        "axis2_vs_beam": -94.33
+        "axis0_vs_l_pp": -99.34,
+        "axis0_vs_beam": -94.62,
+        "axis1_vs_l_pp": -99.9,
+        "axis1_vs_beam": -99.2,
+        "axis2_vs_l_pp": -99.88,
+        "axis2_vs_beam": -99.04
       },
       "patches": [
         {
@@ -1633,10 +2266,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 46,
@@ -1645,10 +2283,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 64,
@@ -1659,7 +2302,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1669,10 +2316,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 106,
@@ -1681,10 +2333,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 124,
@@ -1695,7 +2352,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1707,7 +2368,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1719,7 +2384,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1731,7 +2400,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1743,7 +2417,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1753,10 +2433,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 304,
@@ -1765,10 +2450,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 308,
@@ -1777,10 +2467,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 312,
@@ -1791,7 +2486,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1801,10 +2501,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 320,
@@ -1815,7 +2521,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1825,10 +2537,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 328,
@@ -1839,7 +2557,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1851,7 +2573,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1863,7 +2589,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1875,7 +2605,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1887,7 +2621,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1899,7 +2637,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -1911,7 +2653,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1923,7 +2670,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1935,7 +2687,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1947,7 +2704,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1959,7 +2721,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1971,7 +2738,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1983,7 +2755,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -1995,7 +2772,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2007,7 +2789,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2019,7 +2806,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2031,7 +2823,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2043,7 +2840,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2055,7 +2857,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2067,7 +2874,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2079,7 +2891,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2091,7 +2908,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2103,7 +2925,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2115,7 +2942,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2127,7 +2959,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2139,7 +2976,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2151,7 +2993,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2163,7 +3010,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2175,7 +3027,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2187,7 +3044,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2199,7 +3060,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2211,7 +3076,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2223,7 +3092,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2235,7 +3108,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2247,7 +3125,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2259,7 +3142,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2271,7 +3159,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2283,7 +3176,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2295,7 +3193,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2307,7 +3210,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2319,7 +3227,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2331,7 +3244,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 21
         },
         {
@@ -2343,7 +3260,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 5
         },
         {
@@ -2355,7 +3276,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 18
         },
         {
@@ -2367,7 +3292,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 22
         },
         {
@@ -2377,10 +3306,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1212,
@@ -2391,7 +3325,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 31
         },
         {
@@ -2403,7 +3341,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2415,7 +3358,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2427,7 +3375,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2439,7 +3392,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2451,7 +3409,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 6
         },
         {
@@ -2463,7 +3425,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 31
         },
         {
@@ -2475,7 +3441,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2487,7 +3458,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2499,7 +3475,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2511,7 +3492,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2523,7 +3509,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 6
         },
         {
@@ -2535,7 +3525,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 21
         },
         {
@@ -2547,7 +3541,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 5
         },
         {
@@ -2559,7 +3557,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 18
         },
         {
@@ -2571,7 +3573,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 22
         },
         {
@@ -2581,10 +3587,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1544,
@@ -2595,7 +3606,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2607,7 +3623,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2619,7 +3640,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2631,7 +3657,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2643,7 +3674,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2655,7 +3691,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2667,7 +3708,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2679,7 +3725,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2691,7 +3742,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2703,7 +3758,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2715,7 +3774,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2727,7 +3790,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2739,7 +3806,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2751,7 +3823,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2763,7 +3840,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2775,7 +3857,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2787,7 +3874,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2797,10 +3889,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1844,
@@ -2809,10 +3907,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1848,
@@ -2821,10 +3925,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1852,
@@ -2833,10 +3942,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1856,
@@ -2845,10 +3959,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1860,
@@ -2857,10 +3977,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1884,
@@ -2869,10 +3995,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1908,
@@ -2881,10 +4013,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1940,
@@ -2895,7 +4033,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2905,10 +4049,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1968,
@@ -2917,10 +4067,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 1992,
@@ -2931,7 +4087,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2943,7 +4105,12 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -2955,7 +4122,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2967,7 +4140,13 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -2979,7 +4158,12 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": false,
           "weight_count": 3
         },
         {
@@ -2991,7 +4175,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 3
         },
         {
@@ -3003,7 +4191,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3015,7 +4208,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3027,7 +4225,11 @@
           "rational": true,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": false,
+          "admissible_layouts": [
+            "weight_block"
+          ],
+          "layout_evidence": "unique admissible reading",
+          "weights_uniform": false,
           "weight_count": 2
         },
         {
@@ -3039,7 +4241,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3049,10 +4256,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 2096,
@@ -3061,10 +4273,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 2120,
@@ -3075,7 +4292,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3085,10 +4307,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 2156,
@@ -3097,10 +4324,16 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "interleaved",
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 2180,
@@ -3109,10 +4342,15 @@
             2
           ],
           "rational": false,
-          "layout": "interleaved",
-          "layout_ambiguous": true,
-          "decided_by_weight_test": false,
-          "weight_count": 4
+          "layout": "weight_block",
+          "layout_ambiguous": false,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
+          "weight_count": 1
         },
         {
           "de": 2204,
@@ -3123,7 +4361,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3135,7 +4378,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3147,7 +4395,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3159,7 +4412,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3171,7 +4429,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3183,7 +4446,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3195,7 +4463,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         },
         {
@@ -3207,7 +4480,12 @@
           "rational": false,
           "layout": "weight_block",
           "layout_ambiguous": false,
-          "decided_by_weight_test": true,
+          "admissible_layouts": [
+            "weight_block",
+            "polynomial"
+          ],
+          "layout_evidence": "smoothness",
+          "weights_uniform": true,
           "weight_count": 1
         }
       ]
