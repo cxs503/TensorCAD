@@ -356,6 +356,11 @@ class Tessellation:
     max_residual: float
     residual_tolerance: float
     chord_tolerance: float = 0.0
+    # Acceptance budget for a trim loop that does not invert exactly.  See
+    # :func:`tessellate_trimmed_model` for why a face between the two budgets is
+    # tessellated instead of refused, and why that costs no mesh accuracy.
+    transfer_tolerance: float = 0.0
+    faces_in_transfer_band: dict[int, float] = field(default_factory=dict)
 
     @property
     def triangle_count(self) -> int:
@@ -448,16 +453,53 @@ def _distance(a: Sequence[float], b: Sequence[float]) -> float:
 
 
 def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float | None = None,
+                             transfer_tolerance: float | None = None,
                              scale: float = 1.0, chord_tolerance: float | None = None,
                              refine_levels: int = 6) -> Tessellation:
-    """Tessellate every face; faces whose trim does not lie on the surface are refused."""
+    """Tessellate every face; refuse a trim that misses its surface by more than a budget.
+
+    Two budgets, because "the trim lies on the surface" and "the mesh is built to chord
+    tolerance" are different questions:
+
+    ``residual_tolerance`` (exact, ``1e-6`` of the model extent)
+        The residual a *clean* inversion reaches: a trim curve that is an exact
+        intersection (or a parametric image) inverts to round-off.  Meeting it means
+        nothing had to be excused.
+
+    ``transfer_tolerance`` (``1e-4`` of the model extent, i.e. a tenth of the default
+    chord budget)
+        The accuracy at which the face *enters the mesh*.  Boundary vertices are emitted
+        from the inverted parameters ``(u, v)`` -- ``S(u, v)`` is on the surface by
+        construction -- so a loop point that misses the surface by a residual ``r`` costs
+        the mesh a boundary displacement of at most ``r`` along the surface, and nothing
+        at all in the interior.  A face refusing at ``1e-6`` of the extent therefore drops
+        geometry that the mesh either way cannot resolve: on the KP505 propeller one hub
+        face (1/8 of the model, ~210 boundary edges) was refused for a ``2.2e-4 mm``
+        (0.22 um, 1.5e-6 of a 250 mm part) deviation of an exported 3-D trim curve from
+        its revolved surface -- an order of magnitude below the chord tolerance the mesh
+        is built to.  Such a face is accepted and *labelled* (``residual_class`` per face,
+        ``faces_in_transfer_band`` on the result), so the report never claims an exact
+        inversion it did not get.
+
+        The budget still refuses what the old gate was for: a wrong surface, a wrong
+        transformation or a mis-paired curve all miss by order 1 (the m17343 audit
+        measured ``1e2 mm`` on the same propeller, ``1e0`` of the extent), four orders
+        above this budget.  ``test_iges_transfer_budget.py`` pins both sides.
+    """
     extent = _model_extent_from_faces(model.faces)
     tolerance = residual_tolerance if residual_tolerance is not None else 1e-6 * max(extent, 1e-9)
+    transfer = transfer_tolerance if transfer_tolerance is not None else 1e-4 * max(extent, 1e-9)
+    # A caller may tighten the exact budget below the transfer one; the transfer budget is
+    # then the exact budget and no face is ever excused.
+    transfer = max(transfer, tolerance)
     chord = chord_tolerance if chord_tolerance is not None else 1e-3 * max(extent, 1e-9)
     vertices: list[Vec3] = []
     faces: list[Triangle] = []
     stats: list[dict[str, Any]] = []
     refused: dict[int, str] = {}
+    in_transfer_band: dict[int, float] = {}
+    # Worst residual over *every* face that was inverted, refused ones included, so that a
+    # run in which a face was refused cannot report a clean 0.0 residual next to it.
     worst_residual = 0.0
 
     for face in model.faces:
@@ -478,11 +520,14 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
                 face_residual = max(face_residual, residual)
                 uv_loops.append(parameters)
                 routes["inverted"] += 1
-            if face_residual > tolerance:
+            worst_residual = max(worst_residual, face_residual)
+            if face_residual > transfer:
                 raise IgesError(
                     f"trim loop does not lie on its surface: inversion residual "
-                    f"{face_residual:.3e} > tolerance {tolerance:.3e} (file units)"
+                    f"{face_residual:.3e} > transfer budget {transfer:.3e} "
+                    f"(exact budget {tolerance:.3e}; file units x scale)"
                 )
+            residual_class = "exact" if face_residual <= tolerance else "transfer_budget"
             triangles = triangulate_trimmed_domain(uv_loops)
             cleaned = _without_duplicate(uv_loops)
             polygon_area = sum(abs(_signed_area(loop)) for loop in cleaned)
@@ -512,6 +557,7 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
                 "loop_points": sum(len(loop) for loop in uv_loops),
                 "triangles": len(face_triangles),
                 "inversion_residual": face_residual,
+                "residual_class": residual_class,
                 "trim_routes": dict(routes),
                 "parametric_cross_check": max(
                     (value for value in face.cross_checks if value is not None), default=None
@@ -525,7 +571,8 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
                 ),
             })
             faces.extend(face_triangles)
-            worst_residual = max(worst_residual, face_residual)
+            if residual_class != "exact":
+                in_transfer_band[face.index] = face_residual
         except (ValueError, IgesError) as exc:
             refused[face.index] = str(exc)
     return Tessellation(
@@ -536,6 +583,8 @@ def tessellate_trimmed_model(model: TrimmedModel, *, residual_tolerance: float |
         max_residual=worst_residual,
         residual_tolerance=tolerance,
         chord_tolerance=chord,
+        transfer_tolerance=transfer,
+        faces_in_transfer_band=in_transfer_band,
     )
 
 
@@ -1082,6 +1131,8 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
                 weld_tolerance: float | None = None, repair: bool = True,
                 fill_holes: bool = True, max_hole_edges: int = 32,
                 chord_tolerance: float | None = None, refine_levels: int = 6,
+                residual_tolerance: float | None = None,
+                transfer_tolerance: float | None = None,
                 seam_tolerance: float | None = None, seam_audit: bool = True,
                 seal_openings: bool = False, seal_planarity: float | None = None,
                 opening_audit: bool = True) -> CadImport:
@@ -1101,7 +1152,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
     unit_scale = scale if scale is not None else model.metres_per_unit
     tessellation = tessellate_trimmed_model(model, scale=unit_scale,
                                            chord_tolerance=chord_tolerance,
-                                           refine_levels=refine_levels)
+                                           refine_levels=refine_levels,
+                                           residual_tolerance=residual_tolerance,
+                                           transfer_tolerance=transfer_tolerance)
     extent = _model_extent_from_faces(model.faces) * unit_scale
     weld = weld_tolerance if weld_tolerance is not None else 1e-6 * max(extent, 1e-9)
 
@@ -1146,6 +1199,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
             "reader_refused": {str(key): value for key, value in model.refused.items()},
             "max_inversion_residual": tessellation.max_residual,
             "residual_tolerance": tessellation.residual_tolerance,
+            "transfer_tolerance": tessellation.transfer_tolerance,
+            "faces_in_transfer_band": {str(key): value for key, value
+                                       in tessellation.faces_in_transfer_band.items()},
             "chord_tolerance": tessellation.chord_tolerance,
             "weld_tolerance": weld,
             "face_stats": tessellation.face_stats,
@@ -1173,10 +1229,15 @@ def _gates(model: TrimmedModel, tessellation: Tessellation, audit: MeshAudit) ->
             "detail": "faces tessellated / faces in file",
         },
         "G2_trim_on_surface": {
-            "passed": tessellation.max_residual <= tessellation.residual_tolerance,
+            "passed": tessellation.max_residual <= tessellation.transfer_tolerance,
             "value": tessellation.max_residual,
-            "limit": tessellation.residual_tolerance,
-            "detail": "worst inversion residual of a trim loop point (file units x scale)",
+            "limit": tessellation.transfer_tolerance,
+            "exact_limit": tessellation.residual_tolerance,
+            "faces_in_transfer_band": len(tessellation.faces_in_transfer_band),
+            "detail": "worst trim inversion residual (file units x scale) against the "
+                      "transfer budget; a face between the exact and the transfer budget "
+                      "is tessellated from its inverted parameters and labelled, a face "
+                      "beyond the transfer budget is refused",
         },
         "G3_watertight": {
             "passed": audit.watertight,
