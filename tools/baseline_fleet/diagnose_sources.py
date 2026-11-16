@@ -39,7 +39,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from tensorcad import iges  # noqa: E402
-from tensorcad.fleet_baseline import specs_from_json  # noqa: E402
+from tensorcad.fleet_baseline import partition_surfaces, specs_from_json  # noqa: E402
 
 #: Principal particulars used only as *diagnostic references* (they come from the
 #: same publisher tables that ``fleet_specs.json`` carries, with page SHA-256).
@@ -57,7 +57,36 @@ def _bbox(values: list[float]) -> dict[str, float]:
     return {"min": min(values), "max": max(values), "span": max(values) - min(values)}
 
 
-def diagnose(name: str, path: Path) -> dict[str, object]:
+def _layout_evidence(surface: iges.BSplineSurface, body: list[float], points: int,
+                     rational: bool) -> tuple[list[str], str]:
+    """Which readings the record admits, and what the reader's choice rested on.
+
+    Re-derived here from :func:`tensorcad.iges.layout_candidates` so a report can
+    say *why* a patch is not ambiguous, instead of reporting a bare flag.  The
+    classification mirrors :func:`tensorcad.iges._split_control`; the reader stays
+    the only place that decides.
+    """
+    candidates = iges.layout_candidates(body, points, rational)
+    admissible = [
+        candidate
+        for candidate in candidates
+        if all(weight > 0.0 for weight in candidate[2])
+        and all(len(point) == 3 for point in candidate[1])
+    ]
+    names = [candidate[0] for candidate in admissible]
+    uniform = [candidate for candidate in admissible if iges._uniform_weights(candidate[2])]
+    if not admissible:
+        return names, "none"
+    if len(admissible) == 1:
+        return names, "unique admissible reading"
+    if len(uniform) == 1:
+        return names, "weight prior (constant positive weights)"
+    if surface.layout_ambiguous:
+        return names, "smoothness tie, flagged ambiguous"
+    return names, "smoothness"
+
+
+def diagnose(name: str, path: Path, root: Path | None = None) -> dict[str, object]:
     parsed = iges.read_iges(str(path))
     scale = parsed.metres_per_unit
     patches = []
@@ -73,6 +102,7 @@ def diagnose(name: str, path: Path) -> dict[str, object]:
         body = params[start:]
         surface = iges.BSplineSurface.from_parameters(params)
         weights = list(surface.weights)
+        admissible, evidence = _layout_evidence(surface, body, points, rational)
         patches.append(
             {
                 "de": entry.sequence,
@@ -80,7 +110,9 @@ def diagnose(name: str, path: Path) -> dict[str, object]:
                 "rational": rational,
                 "layout": surface.layout,
                 "layout_ambiguous": surface.layout_ambiguous,
-                "decided_by_weight_test": iges._uniform_weights(weights),
+                "admissible_layouts": admissible,
+                "layout_evidence": evidence,
+                "weights_uniform": iges._uniform_weights(weights),
                 "weight_count": len(set(round(w, 12) for w in weights)),
             }
         )
@@ -101,11 +133,16 @@ def diagnose(name: str, path: Path) -> dict[str, object]:
                 continue
             matches[f"axis{axis}_vs_{quantity}"] = round(100.0 * (box["span"] - target) / target, 2)
     kinds: dict[str, int] = {}
+    evidence_kinds: dict[str, int] = {}
     for patch in patches:
         kinds[patch["layout"]] = kinds.get(patch["layout"], 0) + 1
+        evidence_kinds[patch["layout_evidence"]] = evidence_kinds.get(
+            patch["layout_evidence"], 0
+        ) + 1
+    usable, quarantined = partition_surfaces(parsed.surfaces())
     return {
-        "file": str(path),
-        "sha256": parsed.__dict__.get("sha256"),
+        "file": str(path.relative_to(root)) if root is not None else str(path),
+        "sha256": parsed.sha256,
         "units": parsed.unit_name or parsed.units,
         "unit_flag": parsed.unit_flag,
         "metres_per_unit": scale,
@@ -113,8 +150,11 @@ def diagnose(name: str, path: Path) -> dict[str, object]:
         "transformation_matrices": len(parsed.of_type(124)),
         "patch_count": len(patches),
         "layout_histogram": kinds,
+        "layout_evidence_histogram": evidence_kinds,
         "ambiguous_patches": sum(1 for p in patches if p["layout_ambiguous"]),
-        "patches_decided_by_weight_test": sum(1 for p in patches if p["decided_by_weight_test"]),
+        "patches_with_uniform_weights": sum(1 for p in patches if p["weights_uniform"]),
+        "usable_patches": len(usable),
+        "quarantined_patches": len(quarantined),
         "trailing_values_max": max(trailing) if trailing else 0,
         "control_cloud_axes_m": ranges,
         "diagnostic_residuals_percent": matches,
@@ -136,7 +176,7 @@ def main(argv: list[str] | None = None) -> int:
     specs_path = Path(args.specs)
     if not specs_path.is_absolute():
         specs_path = REPO / specs_path
-    report: dict[str, object] = {"schema": "tensorcad.baseline_fleet.diagnostics/1.0", "hulls": {}}
+    report: dict[str, object] = {"schema": "tensorcad.baseline_fleet.diagnostics/1.1", "hulls": {}}
     for spec in specs_from_json(specs_path):
         local = raw / spec.name / Path(spec.iges_path).name
         if not local.exists():
@@ -146,7 +186,7 @@ def main(argv: list[str] | None = None) -> int:
                 "remedy": "tools/baseline_fleet/fetch_sources.py --out artifacts/baseline_fleet",
             }
             continue
-        report["hulls"][spec.name] = diagnose(spec.name, local)
+        report["hulls"][spec.name] = diagnose(spec.name, local, root=raw)
 
     if args.json:
         out = Path(args.json)
@@ -163,7 +203,9 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"{name:8s} units={entry['units']}(x{entry['metres_per_unit']:g}) "
                 f"patches={entry['patch_count']} layouts={entry['layout_histogram']} "
-                f"ambig={entry['ambiguous_patches']} xform124={entry['transformation_matrices']}"
+                f"ambig={entry['ambiguous_patches']} usable={entry['usable_patches']} "
+                f"quarantined={entry['quarantined_patches']} "
+                f"xform124={entry['transformation_matrices']} sha256={str(entry['sha256'])[:12]}"
             )
             for axis, box in enumerate(entry["control_cloud_axes_m"]):
                 print(f"         axis{axis}: {box['min']:+.3f} .. {box['max']:+.3f} m (span {box['span']:.3f})")
