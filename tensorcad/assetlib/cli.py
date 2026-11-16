@@ -62,12 +62,17 @@ def _cmd_verify(args: argparse.Namespace) -> int:
 def _cmd_resolve(args: argparse.Namespace) -> int:
     registry = load_registry(args.registry)
     try:
-        path = registry.resolve(args.name, store=AssetStore(args.store or registry.store_root or None))
+        result = registry.resolve_explained(
+            args.name, store=AssetStore(args.store or registry.store_root or None)
+        )
     except (AssetError, KeyError) as exc:
         reason = getattr(exc, "reason", "not_registered")
         print(json.dumps({"name": args.name, "resolved": False, "reason": reason, "detail": str(exc)}, indent=1))
         return 3
-    print(json.dumps({"name": args.name, "resolved": True, "path": path}, indent=1))
+    # ``via``/``rule`` say *how* the name was tied to the bytes: a spec binding is a
+    # measured claim, a hull_primary rule is an inference, and a caller is entitled to
+    # see which one it got.
+    print(json.dumps({"name": args.name, "resolved": True, **result}, indent=1))
     return 0
 
 

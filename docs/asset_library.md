@@ -179,3 +179,117 @@ python -m pytest tests/test_assetlib.py -q             # 14 passed
 **误差判定（显式回答）**：KCS 排水体积 +0.354 %（dx=0.5）/ +0.201 %（0.25）/ +0.087 %（0.125），
 **<3 % 成立、<1 % 成立**；Cb 同误差；LCB 绝对偏差 0.026 %Lpp（ref −1.48）。KVLCC2/JBC/ONRT
 **无有效 got 值，不能声称 <3 %**，如实记 WITHHELD，原因见上。
+
+---
+
+## ⑦ 第 3 轮补正（m23063）：按名字可达性 · hull-primary · 诚实的 hull_coverage
+
+### 7.1 缺口是什么（本轮实测，不是推测）
+
+第 1 轮把「字节有持久家、名字有可校验登记簿」做完了，登记簿里 **6 个船块**（DTC/JBC/KCS/
+KP505/KVLCC2/ONRT）齐备。但第 1 轮的 `resolve()` 只会走 **船舶绑定**（`bindings`），而
+`bindings` 只由 `fleet_specs.json` 的 4 条 ships 生成。于是：
+
+```
+$ python -m tensorcad.assetlib resolve DTC
+{"name": "DTC", "resolved": false, "reason": "not_registered",
+ "detail": "ship 'DTC' has no geometry binding in the registry"}
+```
+
+`DTC` 与 `KP505` 的字节明明在店里、DTC 的 `MANIFEST.json` 甚至声明 `status=verified` 且有
+m21785 的实测量记录，**消费面却取不到**。更糟的是快照指标把这件事盖住了：
+
+| 指标（第 1 轮） | 值 | 为什么掩盖了缺口 |
+|---|---|---|
+| `coverage` | **1.0** | 分母是「被 fleet_specs 绑定的船」=4，只统计 4 条，天然满分 |
+| 实际可达船数 | **4 / 6** | DTC、KP505 存在但按名字不可达 |
+
+即「库存完备感」是分母造成的假象——这正是本库存在的理由（静默失效要变成可检出失效）。
+
+### 7.2 修法：两条规则 + 拒绝猜测
+
+`AssetRegistry.hull_primary(hull)`（`tensorcad/assetlib/registry.py`）按固定优先级取
+**船体几何**：
+
+| 顺序 | `via` / `rule` | 判据 | 例 |
+|---|---|---|---|
+| 1 | `spec_binding` | fleet_specs 绑定的那条字节（实测基准指向谁就继续指向谁）| KCS→`KCS_hull_SVA.igs` |
+| 2 | `hull_primary` / `unique_geometry` | 该船非重复 geometry 资产**恰好 1 条**，无可比 | KP505→`KP505_modelScale_250mm.igs` |
+| 3 | `hull_primary` / `hull_form_name` | 唯一一条资产文件名主干**就是** `<hull>` 或 `<hull>_hull` | DTC→`DTC_hull.igs` |
+| 4 | 拒绝 | 其余一切情况抛 `RegistryError` 并**列出全部候选** | 两条 `omega_*.igs` → 报错不选 |
+
+第 4 条是关键：`DTC_bilgekeel.igs`、`DTC_rudder_skeg.igs` 的主干**也**以 `DTC` 开头，前缀
+匹配会把艏/舭龙骨当船体发出去。因此只接受精确主干集 `{hull, hull_hull}`；不确定就报错，
+把候选摊开给调用者——本库的全部价值就在「不按文件名猜」。
+
+`resolve_explained(name)` 返回 `{asset_id, path, sha256, bytes, verified, via, rule}`，
+让调用者看得见这次解析是**实测绑定**还是**规则推断**（`resolve()` 行为不变，返回 path，
+内部改为委托）。
+
+### 7.3 指标补正：`hull_coverage`
+
+`snapshot_dict()` 新增 `hulls` / `hulls_resolvable` / `hull_coverage`（分母=登记簿船块数，
+分子=按上述规则真的能取到字节的船数），`growth()` 的 `delta` 同步带 `hull_coverage`。
+旧 `coverage` 保留（语义未变：fleet-spec 船的解析率），两个数并列就不再有「1.0 假象」。
+
+现状（本轮重建后写入 `assets/geometry_registry.json` + 一行 history）：
+
+| 指标 | 值 |
+|---|---|
+| `spec_ships` / `spec_bindings` / `coverage` | 4 / 4 / **1.0** |
+| `hulls` / `hulls_resolvable` / `hull_coverage` | 6 / 6 / **1.0** |
+
+### 7.4 验证（判据 ④：可达 = 哈希一致 = 就是被实测的那块字节）
+
+```
+$ python -m tensorcad.assetlib resolve DTC
+{"name": "DTC", "resolved": true, "asset_id": "geometry/hulls/DTC/DTC_hull.igs",
+ "path": ".../assets/geometry/hulls/DTC/DTC_hull.igs",
+ "sha256": "53c3be90385c7abae6590276a7225edd1b78edb0e5e4c4a446428296e0edc274",
+ "verified": true, "via": "hull_primary", "rule": "hull_form_name"}
+```
+
+该 sha256 与实测量记录 `benchmarks/verified/fleet_refs/dtc_hull_measured.json`
+（`source.hull_sha256`）**逐位相同**——即解析到的就是被测量过的那块字节，
+不是「同名但另一份文件」。对应实测量：∇ 173458.99 m³ vs 173467.0 m³ = **−0.0046 %**，
+Cb −0.039 %，B +0.004 %。
+
+| 判据 | 结果 |
+|---|---|
+| DTC/KP505 按名字可达 | ✅（`geometry_path("DTC")` / `resolve KP505` 均返回店内路径） |
+| 可达字节 == 登记簿 sha256 | ✅（`store.verify_asset` 每次解析都重算哈希） |
+| 可达字节 == 实测量那块 | ✅ DTC `53c3be90…` 双向一致 |
+| 歧义必须报错而非猜 | ✅ 合成 2 候选船 `OMEGA` → `RegistryError` 并列出 `omega_a.igs, omega_b.igs` |
+| 物理误差 < 3 % | ✅ DTC ∇ **−0.0046 %**（既有记录，本轮只复核字节同一性；本轮**未新做** CFD/几何计算） |
+
+**本轮不声称的部分**：KP505 仍是 `status=pending`（`verified:false`，`require_verified=True`
+时正确抛 `unverified`），它可达 ≠ 它已验证；JBC/KVLCC2/ONRT 的 WITHHELD 结论不变。
+
+### 7.5 新增测试与复现
+
+`tests/test_assetlib_hull_primary.py`（13 条）：`hull_form_name` 选中船体而非附体、
+`unique_geometry` 覆盖单文件船、歧义拒绝并点名候选、未知船仍按名拒绝、绑定优先级高于
+一切命名规则、`resolve_explained` 的 `via/rule/sha` 契约、`coverage` vs `hull_coverage`
+的诚实性（4 船 1 歧义 → 0.75）、`growth` 带 `hull_coverage` delta；另有 4 条真店集成
+（六船全部可达、DTC 解析到 `DTC_hull.igs` 而非 `DTC_bilgekeel.igs`、DTC sha 与实测量一致、
+CLI 输出带 `via/rule`）。
+
+可达性图与数据（程序化生成，零手抄）：
+`python tools/assetlib/resolution_report.py --out artifacts/assetlib_hull_primary.png --json artifacts/assetlib_hull_primary.json`
+→ 左图「6 船可达性 before 4/6 → after 6/6（标注每条用的规则）」，右图「DTC 被解析到的那块字节
+的相对误差 vs 3 % 平台线 / 1 % 验收线」。数值：`hull_coverage_before = 0.666667`（新分母套旧规则）
+→ `hull_coverage = 1.0`。
+
+```bash
+export TENSORCAD_ASSET_ROOT=/root/tp-agent/assets
+python -m tensorcad.assetlib resolve DTC              # via=hull_primary rule=hull_form_name
+python -m tensorcad.assetlib resolve KP505            # rule=unique_geometry, verified=false
+python -m tensorcad.assetlib growth                   # delta.hull_coverage
+python -m pytest tests/test_assetlib_hull_primary.py tests/test_assetlib.py -q   # 13 + 14 passed
+python -m pytest tests/test_fleet_baseline.py tests/test_fleet_gate.py -q        # 36 passed
+```
+
+**踩过的坑**：① 前缀匹配会让 `DTC_*` 附体全部"像船体"，必须用精确主干集；
+② `coverage` 这种「分母只含已绑定项」的指标会给出满分假象，新指标必须以**全部船块**
+为分母；③ 修 `resolve()` 时若直接在里面加分支，会把「按 id 解析」和「按名推断」混成
+一条路径，`via/rule` 就无处记录——所以拆出 `resolve_explained()`，`resolve()` 只做兼容委托。
