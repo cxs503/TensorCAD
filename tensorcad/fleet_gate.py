@@ -414,21 +414,87 @@ def judge_mesh(
     return ShipVerdict(ship, WITHHELD, reasons, audit.as_dict())
 
 
+def cross_engine_volume(mesh: Mesh) -> dict[str, Any]:
+    """Reproduce this gate's volume through engines that share no code with it.
+
+    ``audit_mesh`` measures a hull with :func:`tensorcad.mesh.total_signed_volume`;
+    the JBC episode showed what a single route is worth -- when it reported
+    ``-18.3 %`` displacement, every internal check agreed with it because every
+    internal check used the same summation.  This function is the second opinion:
+    :mod:`trimesh` and :mod:`numpy-stl` (Mirtich, through a binary-STL round trip)
+    read the same triangles through their own implementations, and their spread is
+    the measured bar on the gate's own number.
+
+    Imported locally on purpose: :mod:`tensorcad.fleet_gate` stays standard-library
+    only at import time, and a machine without the optional extras gets an
+    ``unavailable`` verdict with the reason instead of an ImportError deep inside a
+    fleet audit.  The engines are never allowed to fail silently: a route that
+    cannot run is named.
+    """
+    from . import volume_xval as xv
+
+    routes: dict[str, Any] = {}
+    withheld: list[str] = []
+    for key, route in (
+        ("divergence", xv.volume_divergence),
+        ("trimesh", xv.volume_trimesh),
+        ("numpy_stl", xv.volume_numpy_stl),
+    ):
+        try:
+            routes[key] = route(mesh)
+        except Exception as exc:  # missing extra, open surface, non-finite input
+            withheld.append(f"{key}: {type(exc).__name__}: {exc}")
+    evidence = {
+        "schema": "tensorcad.fleet_gate.cross_engine/1.0",
+        "routes": routes,
+        "withheld": withheld,
+        "engine_agreement_tolerance": xv.ENGINE_AGREEMENT_TOLERANCE,
+    }
+    if len(routes) < 3:
+        evidence["status"] = "unavailable"
+        evidence["note"] = (
+            "not every engine could run, so the gate's volume is not cross-checked on "
+            "this mesh; the reason is recorded rather than assumed away"
+        )
+        return evidence
+    spread = abs(routes["trimesh"] - routes["numpy_stl"]) / max(abs(routes["trimesh"]), 1e-300)
+    evidence["engine_spread"] = spread
+    evidence["gate_volume_vs_engine_a"] = (routes["divergence"] - routes["trimesh"]) / max(
+        abs(routes["trimesh"]), 1e-300
+    )
+    if spread <= xv.ENGINE_AGREEMENT_TOLERANCE:
+        evidence["status"] = "agrees"
+        evidence["note"] = xv.engine_agreement_note(spread)
+    else:
+        evidence["status"] = "engine-disagreement"
+        evidence["note"] = xv.engine_agreement_note(spread)
+    return evidence
+
+
 def audit_fleet(
     directory: str | Path,
     *,
     published_volumes: Mapping[str, float] | None = None,
     pattern: str = "*_Hull.stl",
     tolerance: float = VOLUME_TOLERANCE,
+    cross_engine: bool = True,
 ) -> dict[str, Any]:
-    """Audit every ``*_Hull.stl`` under ``directory`` and return a JSON report."""
+    """Audit every ``*_Hull.stl`` under ``directory`` and return a JSON report.
+
+    ``cross_engine`` (default on) re-measures each closed mesh with the independent
+    engines of :mod:`tensorcad.volume_xval`; a mesh whose engines disagree is
+    downgraded to ``WITHHELD`` with the spread recorded, because a volume that two
+    implementations cannot reproduce is not a number this gate may certify.
+    """
     directory = Path(directory)
     published = dict(published_volumes or {})
     files = sorted(p for p in directory.glob(pattern) if p.is_file())
     audits: dict[str, MeshAudit] = {}
     failures: dict[str, str] = {}
+    paths: dict[str, Path] = {}
     for path in files:
         ship = path.name[: -len(".stl")].replace("_Hull", "")
+        paths[ship] = path
         try:
             audits[ship] = audit_mesh(path)
         except Exception as exc:  # unreadable file is a reportable state, not a crash
@@ -449,6 +515,34 @@ def audit_fleet(
     for ship, why in failures.items():
         verdicts.append(ShipVerdict(ship, NOT_SUPPORTED, [why]))
     verdicts.sort(key=lambda v: v.ship)
+    cross: dict[str, Any] = {}
+    if cross_engine:
+        for verdict in verdicts:
+            if verdict.grade == NOT_SUPPORTED or not verdict.mesh:
+                continue
+            if not verdict.mesh.get("watertight"):
+                continue
+            try:
+                from .mesh import weld as _weld
+
+                # The file is a triangle soup (every facet stores its own corners);
+                # the audit path welds at 1e-6, so the engines must see the same bread.
+                mesh = _weld(read_stl(paths[verdict.ship]), tolerance=1e-6)
+            except Exception as exc:  # already reported as a failure elsewhere
+                cross[verdict.ship] = {
+                    "status": "unavailable",
+                    "withheld": [f"re-read failed: {type(exc).__name__}: {exc}"],
+                }
+                continue
+            evidence = cross_engine_volume(mesh)
+            cross[verdict.ship] = evidence
+            if evidence["status"] == "engine-disagreement" and verdict.grade == VERIFIED:
+                verdict.grade = WITHHELD
+                verdict.reasons.append(
+                    "independent engines disagree by "
+                    f"{evidence['engine_spread'] * 100:.3e} % on the same triangles: "
+                    "the volume is not reproducible, so it is not certified"
+                )
     counts: dict[str, int] = {}
     for verdict in verdicts:
         counts[verdict.grade] = counts.get(verdict.grade, 0) + 1
@@ -461,6 +555,7 @@ def audit_fleet(
         "counts": counts,
         "duplicate_sha_groups": {sha: ships for sha, ships in by_sha.items() if len(ships) > 1},
         "ships": [v.as_dict() for v in verdicts],
+        "cross_engine": cross,
         "pass": all(v.grade == VERIFIED for v in verdicts) and bool(verdicts),
     }
 

@@ -59,6 +59,10 @@ verdicts are ordered by what they can prove:
     the difference does not shrink under refinement, i.e. it is not a property of
     the mesh at all.  This is the class the JBC incident belongs to and it must
     be booked in the negative-knowledge ledger with the measured magnitude.
+``undetermined``
+    engines agree, the pipeline is outside the acceptance line, and **no**
+    refinement ladder was supplied -- the gap has no measured order, so it is
+    reported as unattributed instead of being called a bias the data cannot show.
 ``agrees``
     within the acceptance line :data:`ACCEPTANCE_TOLERANCE` (0.3 %).
 
@@ -683,6 +687,17 @@ def classify_routes(
             f"above the inscribed polyhedron and the gap decays at observed order "
             f"{order:.2f} (window {ORDER_WINDOW[0]}-{ORDER_WINDOW[1]}) -- this is O(h^2) "
             "tessellation, not an integrator bias"
+        )
+    elif not deficits:
+        # No refinement ladder was supplied, so the gap has no order to read off.
+        # Calling that a bias would be asserting what the data cannot show: the row is
+        # reported as unattributed and the caller is told what to run.
+        status = "undetermined"
+        reason = (
+            f"engines agree to {100 * spread:.2e} % but the pipeline differs by "
+            f"{100 * deficit_rel:+.3f} % and no refinement ladder was supplied, so the gap "
+            "cannot be attributed to tessellation or to bias; re-run with a "
+            "refinement ladder (deficits = [(h, |pipeline - engines|), ...])"
         )
     else:
         status = "systematic-bias"

@@ -235,11 +235,28 @@ GEODESY_API = {
     "vincenty_inverse",
 }
 
+#: Cross-tool displacement-volume cross-check (XVAL-GEOM-VOLCROSS), m22953.
+VOLUME_XVAL_API = {
+    "ACCEPTANCE_TOLERANCE",
+    "ENGINE_AGREEMENT_TOLERANCE",
+    "VolumeXvalError",
+    "classify_routes",
+    "closed_solid_from_breadth",
+    "engine_agreement_note",
+    "fit_order",
+    "richardson_limit",
+    "topology_report",
+    "volume_divergence",
+    "volume_numpy_stl",
+    "volume_sectional",
+    "volume_trimesh",
+}
+
 
 def test_declared_api_is_importable() -> None:
     assert set(tensorcad.__all__) == (
         EXPECTED_API | SHEAR_FLOW_API | MID_SURFACE_API | ELLIPTIC_SECTION_API
-        | GEODESY_API | LATE_MERGED_API
+        | GEODESY_API | LATE_MERGED_API | VOLUME_XVAL_API
     )
     for name in tensorcad.__all__:
         assert getattr(tensorcad, name) is not None

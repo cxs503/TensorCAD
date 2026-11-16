@@ -28,6 +28,8 @@
 - `tessellation-deficit`：引擎彼此一致，管线与引擎之差随加密以**实测阶**收敛（窗口 1.5–2.6）——
   弯曲船体内接多面体的 O(h²) 亏欠，必须外推掉而不是调参调掉；
 - `systematic-bias`：差异不随加密缩小 —— 不是网格属性，正是 JBC 那一类，必须记 negative-knowledge ledger；
+- `undetermined`：引擎一致、管线超线、但**没有提供加密梯** —— 差距没有实测阶，报"未归因"而不是
+  断言数据证明不了的东西（调用方被告知要补跑什么）；
 - `agrees`：落在 0.3 % 验收线内。
 
 单靠网格研究无法评价它所对齐的求积本身，所以管线求积在自己的轴上单独加密（Gauss 阶 8×6 → 48×32），
@@ -144,3 +146,31 @@ python -m pytest tests/test_volume_xval.py -q # 28 passed
 | ⑤ pytest 0 fail | 达成 | `tests/test_volume_xval.py` 33 passed（m20574 增加 5 条回转体用例） |
 | ⑥（m20574 增量）外部几何来源船型互证 | 达成 | SUBOFF 案例：`results.json` → `cases[suboff]`，§6bis |
 | ⑦（m20574 增量）证据包入库 | 达成 | `artifacts/xval_geom_volcross/{results.json,results.md,figures/}` 随分支提交（此前文档指向的文件未在仓内） |
+| ⑧（m22953 增量）能力到达产品面 | 达成 | `python -m tensorcad.cli volume-xval {wigley,mesh}`（退出码 0/1/2）；`fleet_gate.audit_fleet(cross_engine=True)` 默认开；`tests/test_volume_xval_entry.py` 12 passed |
+
+## 8. 产品面：控制台入口与船队门（m22953）
+
+互证能力此前只存在于库函数、测试与报告脚本里——怀疑某个体积的操作员无法在产生第一个数字的
+地方要第二个数字。本单把能力接到产品面：
+
+- **控制台入口** `python -m tensorcad.cli volume-xval`（`tensorcad/volume_xval_cli.py`）：
+  - `wigley [--stations N --levels N --ladder ...]`：闭式基准船，引擎必须落在解析值上；
+  - `mesh FILE.stl [--reference-volume V]`：操作员已有的网格，三条三角形路径互比（无半宽场、
+    无解析基准时，互比本身就是定位共享代码偏置的手段）；
+  - 退出码 `0` 过门 / `1` 诚实 FAIL（报告照写）/ `2` 拒收输入；`--json` 打印与 `--out` 落盘
+    的是同一份 JSON，数字零手抄。
+- **船队门集成**（`tensorcad/fleet_gate.audit_fleet`，`cross_engine` 默认开）：每个水密网格被
+  独立引擎（trimesh / numpy-stl）重测；两引擎读同一批三角形却超 1e-6 相对差时，该船从
+  `VERIFIED` 降为 `WITHHELD` 并记录 spread——两条实现都复现不出来的体积，门不许认证。
+  引擎缺装/不可跑时记 `unavailable` + 具名原因，绝不静默放行。
+- **包面导出**：`tensorcad` 顶层导出 13 个互证符号（`classify_routes`、`closed_solid_from_breadth`、
+  三条体积路由、`topology_report`、`fit_order`、`richardson_limit` 等），不知模块路径的调用方也能找到。
+- **`undetermined` 判定**（§2）：无梯差距不再被误标为 `systematic-bias`——`mesh` 案例（无梯）
+  正是走这条分支的常态路径。
+
+复现：
+
+```bash
+python -m tensorcad.cli volume-xval wigley --json | head
+python -m pytest tests/test_volume_xval.py tests/test_volume_xval_entry.py -q
+```
