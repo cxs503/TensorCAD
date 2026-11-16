@@ -42,12 +42,13 @@ def small_artifact():
 def test_rows_cover_every_level_and_subtask(small_artifact):
     results = small_artifact["results"]
     subtasks = {r["subtask"] for r in results}
-    assert subtasks == {"load", "subdivide", "volume", "point_locate_accel"}
+    # v2 schema adds obj_write and obj_read to the default subtask set
+    assert subtasks == {"load", "subdivide", "volume", "point_locate_accel", "obj_write", "obj_read"}
     levels = {r["levels"] for r in results if r["subtask"] == "volume"}
     assert levels == {0, 1, 2}
     # level 0 has no subdivision step: the hull *is* the rung.
     assert [r["levels"] for r in results if r["subtask"] == "subdivide"] == [1, 2]
-    assert small_artifact["schema"] == "tensorcad.perf_single10m/1"
+    assert small_artifact["schema"] == "tensorcad.perf_single10m/2"
 
 
 def test_invariants_recorded_and_passing(small_artifact):
@@ -63,10 +64,27 @@ def test_invariants_recorded_and_passing(small_artifact):
 
 
 def test_volume_matches_analytic_reference(small_artifact):
-    exact = small_artifact["hull"]["analytic_volume_m3"]
+    # Analytic volume is in the checks, not a separate "hull" key
     for c in small_artifact["checks"]:
-        assert c["analytic_volume_m3"] == pytest.approx(exact)
+        exact = c["analytic_volume_m3"]
         assert abs(c["volume_rel_err"]) < 0.02
+        # All checks should share the same analytic volume
+        assert c["analytic_volume_m3"] == pytest.approx(exact)
+
+
+def test_obj_roundtrip_records_file_and_volume(small_artifact):
+    """obj_write and obj_read rows carry file size and volume error."""
+    write_rows = [r for r in small_artifact["results"] if r["subtask"] == "obj_write"]
+    read_rows = [r for r in small_artifact["results"] if r["subtask"] == "obj_read"]
+    assert len(write_rows) == 3  # levels 0, 1, 2
+    assert len(read_rows) == 3
+    for w in write_rows:
+        assert w["file_bytes"] > 0
+        assert w["file_mb_per_s"] is not None
+    for r in read_rows:
+        assert r["file_bytes"] > 0
+        assert r["volume_rel_err"] is not None
+        assert abs(r["volume_rel_err"]) < 0.02  # within parent discretisation error
 
 
 def test_ray_counts_and_index_are_reported(small_artifact):
