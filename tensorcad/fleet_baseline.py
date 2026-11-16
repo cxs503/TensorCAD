@@ -466,6 +466,12 @@ class ShipSpec:
     license: str = ""
     iges_sha256: str = ""
     iges_path: str = ""
+    #: Published model scale of the bytes (1.0 = full scale) and why it is that value.
+    #: ``fleet_baseline`` reads the file's own unit flag for the metre conversion; this
+    #: field records the *model* scale the publisher shipped (KCS/KVLCC2 full scale,
+    #: JBC/ONRT a model), which ``fleet.scale_calibration`` derives from the waterline.
+    geometry_scale: float = 1.0
+    scale_basis: str = "geometry file is full scale (publisher archive)"
     notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
