@@ -1,0 +1,62 @@
+{
+  "schema": "tensorcad.fleet_baseline.benchmark/1.0",
+  "case": "GAP-CAD-T1-BASELINE-FLEET",
+  "acceptance": {
+    "watertight_and_manifold": true,
+    "volume_rel_error_percent_max": 1.0
+  },
+  "reference_definition": "publisher's displacement volume from the workshop page cached under artifacts/baseline_fleet/raw/pages (each value carries the page SHA-256 and the matched snippet in fleet_specs.json)",
+  "hulls": {
+    "KCS": {
+      "ref_volume_m3": 52030.0,
+      "got_volume_m3": 52187.979152265085,
+      "rel_error_percent": 0.3036308903807128,
+      "within_1_percent": true,
+      "watertight": true,
+      "edge_manifold": true,
+      "triangles": 52320,
+      "verdict": "VERIFIED",
+      "reasons": []
+    },
+    "KVLCC2": {
+      "ref_volume_m3": null,
+      "got_volume_m3": null,
+      "rel_error_percent": null,
+      "within_1_percent": null,
+      "watertight": null,
+      "edge_manifold": null,
+      "triangles": null,
+      "verdict": "WITHHELD",
+      "reasons": [
+        "ValueError: field produced fewer than two usable waterline slices"
+      ]
+    },
+    "JBC": {
+      "ref_volume_m3": 178369.9,
+      "got_volume_m3": 145769.0490375513,
+      "rel_error_percent": -18.277103346724246,
+      "within_1_percent": false,
+      "watertight": true,
+      "edge_manifold": true,
+      "triangles": 75840,
+      "verdict": "WITHHELD",
+      "reasons": [
+        "volume 145769 m3 is -18.28% off the published 178370 m3 (tolerance 1%)"
+      ]
+    },
+    "ONRT": {
+      "ref_volume_m3": 8500.7793948,
+      "got_volume_m3": 92.94890171498025,
+      "rel_error_percent": -98.9065837684032,
+      "within_1_percent": false,
+      "watertight": true,
+      "edge_manifold": true,
+      "triangles": 3360,
+      "verdict": "WITHHELD",
+      "reasons": [
+        "volume 93 m3 is -98.91% off the published 8501 m3 (tolerance 1%)",
+        "geometry extent 42.499 m vs published L_PP 154.0 m (ratio 0.2760): model-scale bytes or a units error, so a volume comparison against the full-scale displacement is not meaningful; scaling by 3.624^3 would give 4422.6 m3"
+      ]
+    }
+  }
+}

@@ -1,0 +1,124 @@
+name: golden-geometry
+
+# The golden geometry regression suite (GAP-CAD-D2-GOLDEN-REGRESSION).
+#
+# Any change to the geometry package re-measures the four golden hulls (Wigley,
+# Series 60, sphere/ellipsoid, DTMB 5415) against the committed baseline in
+# docs/golden/tensorcad_geometry_golden.json. The tolerance of every asserted metric is
+# derived from the two-grid change of that metric, and every reference is recomputed from
+# its declared source on every run, so a hand-edited baseline cannot buy a pass.
+#
+# The second job audits the gate itself: it pushes small mutations into the real
+# tensorcad entry points (battery A) and re-blesses systematically perturbed measurements
+# (battery B) to prove the gate is bound to the library it guards and that its declared
+# tolerance is the threshold that actually decides. docs/golden/mutation_audit.{json,md,png}
+# is the committed record of that audit.
+on:
+  push:
+    paths:
+      - "tensorcad/**"
+      - "tests/test_golden_regression.py"
+      - "tests/test_golden_mutation.py"
+      - "tools/golden/**"
+      - "docs/golden/**"
+      # the shipped datasets the golden cases measure (and one of them is a reference
+      # source): a geometry change that arrives as a data edit touches no file under
+      # tensorcad/, so the path filter has to name the data too
+      - "docs/data/**"
+      - ".githooks/**"
+      - ".github/workflows/golden-geometry.yml"
+  pull_request:
+    paths:
+      - "tensorcad/**"
+      - "tests/test_golden_regression.py"
+      - "tests/test_golden_mutation.py"
+      - "tools/golden/**"
+      - "docs/golden/**"
+      # the shipped datasets the golden cases measure (and one of them is a reference
+      # source): a geometry change that arrives as a data edit touches no file under
+      # tensorcad/, so the path filter has to name the data too
+      - "docs/data/**"
+      - ".githooks/**"
+      - ".github/workflows/golden-geometry.yml"
+  workflow_dispatch:
+
+jobs:
+  golden:
+    runs-on: ci-loong64
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[test]"
+      - name: Golden geometry gate
+        # pipefail so the gate's exit code survives the tee that feeds the job summary
+        run: |
+          set -o pipefail
+          python -m tensorcad.golden --check --json /tmp/golden.json | tee /tmp/golden.txt
+      - name: Publish the table in the job summary
+        if: always()
+        run: |
+          {
+            echo '### Golden geometry regression'
+            echo '```'
+            cat /tmp/golden.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Assert report schema and the four golden cases
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open("/tmp/golden.json"))
+          assert data["schema"] == "tensorcad.golden/1", data["schema"]
+          assert data["passed"] is True, data["findings"]
+          names = {case["name"] for case in data["cases"]}
+          assert names == {"wigley", "series60", "sphere_ellipsoid", "dtmb5415",
+                             "inclined_box"}, names
+          for case in data["cases"]:
+              assert case["measurements"]["coarse"] and case["measurements"]["fine"], case["name"]
+              assert case["reference"], case["name"]
+          print("golden report ok:", sorted(names))
+          PY
+      - name: The suite's own tests (engine contract + the committed baseline)
+        # The gate script above only asserts that the run passed. tests/test_golden_regression.py
+        # is what holds the committed baseline to the contract -- e.g. that every golden case
+        # actually locks its mesh (geometry_sha256), not only the numbers integrated on it.
+        # Without this step a baseline that lost those fingerprints stays green here.
+        run: python -m pytest tests/test_golden_regression.py -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golden-geometry-report
+          path: /tmp/golden.json
+
+  mutation-audit:
+    # Does the gate have teeth? A green gate is worth nothing if the geometry code can
+    # regress underneath it. This job is the negative control for the job above.
+    runs-on: ci-loong64
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[test]"
+      - name: Mutation audit (library binding + blind-spot envelope)
+        run: |
+          set -o pipefail
+          python tools/golden/mutation_audit.py --check --json /tmp/mutation_audit.json \
+            | tee /tmp/mutation_audit.txt
+      - name: Publish the audit in the job summary
+        if: always()
+        run: |
+          {
+            echo '### Golden gate mutation audit'
+            echo '```'
+            cat /tmp/mutation_audit.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: The committed audit must be the one this code produces
+        run: python -m pytest tests/test_golden_mutation.py -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golden-mutation-audit
+          path: |
+            /tmp/mutation_audit.json
+            docs/golden/mutation_audit.md
+            docs/golden/mutation_audit.png
