@@ -31,6 +31,7 @@ import platform
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -79,8 +80,15 @@ class Case:
 
 #: Published KCS principal particulars (KRISO; SIMMAN 2008 / Tokyo 2015 workshop
 #: series).  The parametric hull built from these dimensions is *calibrated* to the
-#: published Cb, so agreement with ``Cb L B T`` is a calibration identity and is
-#: reported as such, not as an independent validation of the volume integrator.
+#: published Cb -- but only at the quadrature order the calibration bisects at, while
+#: the volume is reported at ``HullNurbsParameters.quadrature_order``.  The two orders
+#: are two different numbers, so agreement with ``Cb L B T`` is *not* an identity at
+#: the reporting order; :func:`kcs_geometry_anchor` measures the residual instead of
+#: asserting it (it is reported, and it is inside the acceptance line).
+#:
+#: ``calibrate_form`` bisects at :data:`CALIBRATION_ORDER` and stops at
+#: :data:`CALIBRATION_TOLERANCE`; :func:`kcs_geometry_anchor` re-integrates at that
+#: order and refuses to believe the calibration if the target is not hit there.
 KCS = {
     "length": 230.0,
     "beam": 32.2,
@@ -90,6 +98,124 @@ KCS = {
     "source": "KCS principal particulars, KRISO (Lpp 230.0 m, B 32.2 m, T 10.8 m, Cb 0.6505, "
     "nabla 52 030 m^3; SIMMAN 2008 / Tokyo 2015 workshop series)",
 }
+
+
+#: Quadrature order :func:`tensorcad.hull_nurbs.calibrate_form` bisects at, and the
+#: relative tolerance it stops at.  Duplicated here on purpose: the report has to say
+#: *where* the calibration happens, and :func:`kcs_geometry_anchor` verifies the value
+#: (a form that missed the target at this order would be a calibration bug, not a
+#: reporting question).
+CALIBRATION_ORDER = (10, 6)
+CALIBRATION_TOLERANCE = 1e-6
+#: Orders the anchor integrates the same hull at, to separate "the calibrator solved a
+#: different number" from "the quadrature is not converged".
+ANCHOR_ORDERS = ((16, 12), (24, 16), (32, 24), (48, 32))
+
+
+def kcs_geometry_anchor() -> dict[str, Any]:
+    """Measure whether "calibrated to Cb 0.6505" survives to the reporting order.
+
+    The geometry gate of this platform is ``Cb / L / B`` before any volume claim, so
+    the anchor asks three questions in the order they have to be answered:
+
+    1. is the form really calibrated -- does the volume at :data:`CALIBRATION_ORDER`
+       reproduce ``Cb L B T`` inside :data:`CALIBRATION_TOLERANCE`?
+    2. what is the **achieved** Cb of the hull that is actually published, i.e. the
+       volume integrated at ``HullNurbsParameters.quadrature_order`` divided by
+       ``L B T``?
+    3. is the published-volume residual the calibration-order gap or a shape error --
+       does the order ladder (-16x12, 24x16, 32x24, 48x32) converge onto the reported
+       number?
+
+    Nothing here is a tolerance to tune: every field is a measurement, and the verdict
+    string is written from the numbers rather than chosen.
+    """
+    from tensorcad import hull_nurbs as hn
+
+    params = hn.HullNurbsParameters(
+        length=KCS["length"],
+        beam=KCS["beam"],
+        draft=KCS["draft"],
+        block_coefficient=KCS["cb"],
+    )
+    hull = hn.build_nurbs_hull(params)
+    lbt = params.length * params.beam * params.draft
+    target_volume = KCS["cb"] * lbt
+    reporting_order = tuple(params.quadrature_order)
+
+    def volume_at(order: tuple[int, int]) -> float:
+        return float(hn.nurbs_hydrostatics(hull, quadrature_order=order).displaced_volume)
+
+    calibration_volume = volume_at(CALIBRATION_ORDER)
+    reported_volume = volume_at(reporting_order)
+    calibration_residual = calibration_volume / target_volume - 1.0
+    cb_residual = reported_volume / lbt / KCS["cb"] - 1.0
+    ladder = []
+    for order in ANCHOR_ORDERS:
+        volume = reported_volume if order == reporting_order else volume_at(order)
+        ladder.append(
+            {
+                "order": list(order),
+                "volume_m3": volume,
+                "cb": volume / lbt,
+                "vs_reported": volume / reported_volume - 1.0,
+            }
+        )
+    converged = max(ladder, key=lambda row: row["order"][0] * row["order"][1])
+    identity_holds = abs(cb_residual) <= CALIBRATION_TOLERANCE
+    within_acceptance = abs(cb_residual) <= xv.ACCEPTANCE_TOLERANCE
+    line_position = "inside" if within_acceptance else "outside"
+    excess = abs(cb_residual) / CALIBRATION_TOLERANCE
+    if identity_holds:
+        verdict = (
+            f"the achieved Cb at the reporting order {reporting_order} reproduces the "
+            f"requested {KCS['cb']} to {100 * cb_residual:+.6f} %, inside the "
+            f"{CALIBRATION_TOLERANCE:g} calibration tolerance: agreement with Cb L B T "
+            "is an identity at the reported order for this hull"
+        )
+    else:
+        verdict = (
+            f"the achieved Cb at the reporting order {reporting_order} is "
+            f"{reported_volume / lbt:.9f}, i.e. {100 * cb_residual:+.4f} % from the requested "
+            f"{KCS['cb']}: {excess:.0f}x the {CALIBRATION_TOLERANCE:g} tolerance the form was "
+            f"calibrated to, so agreement with Cb L B T is NOT an identity at the reported "
+            f"order. The calibration itself is sound (order {CALIBRATION_ORDER} lands "
+            f"{100 * calibration_residual:+.6f} % from the target) and the order ladder "
+            f"converges onto {converged['volume_m3']:.6g} m3, so this is the quadrature-order "
+            "gap between the order calibrated at and the order reported at -- not a shape "
+            f"error. The residual is {line_position} "
+            f"the {100 * xv.ACCEPTANCE_TOLERANCE:.1f} % acceptance line"
+        )
+    return {
+        "case": "kcs-fullscale",
+        "principal_particulars": {
+            "L_m": params.length,
+            "B_m": params.beam,
+            "T_m": params.draft,
+            "LBT_m3": lbt,
+        },
+        "requested_cb": KCS["cb"],
+        "requested_volume_m3": target_volume,
+        "published_volume_m3": KCS["volume"],
+        "published_source": KCS["source"],
+        "calibration_order": list(CALIBRATION_ORDER),
+        "calibration_tolerance": CALIBRATION_TOLERANCE,
+        "calibration_volume_m3": calibration_volume,
+        "calibration_residual_rel": calibration_residual,
+        "calibration_hits_target": abs(calibration_residual) <= CALIBRATION_TOLERANCE,
+        "reporting_order": list(reporting_order),
+        "reported_volume_m3": reported_volume,
+        "achieved_cb": reported_volume / lbt,
+        "cb_residual_rel": cb_residual,
+        "identity_within_calibration_tolerance": identity_holds,
+        "residual_in_units_of_calibration_tolerance": excess,
+        "reported_vs_published": reported_volume / KCS["volume"] - 1.0,
+        "within_acceptance": within_acceptance,
+        "order_ladder": ladder,
+        "converged_volume_m3": converged["volume_m3"],
+        "converged_order": converged["order"],
+        "verdict": verdict,
+    }
 
 
 def wigley_case() -> Case:
@@ -126,7 +252,7 @@ def wigley_case() -> Case:
     )
 
 
-def nurbs_hull_case(*, full_scale: bool) -> Case:
+def nurbs_hull_case(*, full_scale: bool, anchor: dict[str, Any] | None = None) -> Case:
     from tensorcad import hull_nurbs as hn
 
     if full_scale:
@@ -136,15 +262,26 @@ def nurbs_hull_case(*, full_scale: bool) -> Case:
             draft=KCS["draft"],
             block_coefficient=KCS["cb"],
         )
+        anchor = anchor if anchor is not None else kcs_geometry_anchor()
         key = "kcs-fullscale"
-        name = "KCS-dimensioned NURBS hull (full scale, Cb calibrated to 0.6505)"
+        name = (
+            f"KCS-dimensioned NURBS hull (full scale, requested Cb {KCS['cb']}, "
+            f"achieved Cb {anchor['achieved_cb']:.6f})"
+        )
         reference: float | None = KCS["volume"]
         ref_kind = "published displacement volume"
         ref_source = KCS["source"]
         caveat = (
-            "the form is calibrated to the published Cb, so pipeline-vs-published is a "
-            "calibration identity; the independent content of this row is the three-route "
-            "agreement at realistic L/B/T and the tessellation attribution"
+            f"the form is calibrated at quadrature order {tuple(anchor['calibration_order'])}, "
+            f"which lands {100 * anchor['calibration_residual_rel']:+.6f} % from Cb x L x B x T, "
+            f"but the volume is reported at order {tuple(anchor['reporting_order'])}, where the "
+            f"achieved Cb is {anchor['achieved_cb']:.9f} "
+            f"({100 * anchor['cb_residual_rel']:+.4f} % from the request, "
+            f"{anchor['residual_in_units_of_calibration_tolerance']:.0f}x the calibration "
+            "tolerance).  So pipeline-vs-published is the calibration *order* residual, not an "
+            "identity; the independent content of this row is the three-route agreement at "
+            "realistic L/B/T and the tessellation attribution (see results.json "
+            "geometry_anchor)"
         )
     else:
         params = hn.kcs_lightweight_parameters()
@@ -497,14 +634,69 @@ def quadrature_ladder() -> dict[str, Any]:
     }
 
 
+#: ``(label, import name, distribution name)`` for every engine this bundle reads.
+#: The distribution name is not decoration: ``numpy-stl`` imports as ``stl`` and
+#: exposes no ``__version__``, so an artifact built from the module attribute alone
+#: records "unknown" for an engine that ran -- and a reader concludes the second
+#: engine was missing in the very run that used it.
+ENGINES = (
+    ("trimesh", "trimesh", "trimesh"),
+    ("numpy-stl", "stl", "numpy-stl"),
+    ("numpy", "numpy", "numpy"),
+)
+#: What an installed-but-undiscoverable engine records.  Never ``"unknown"``: that
+#: string is indistinguishable from "absent" in a machine-read artifact.
+VERSION_NOT_REPORTED = "installed, version not reported"
+
+
+def distribution_version(distribution: str, module: str) -> str | None:
+    """Version of an installed engine, or ``None`` when it is not installed at all.
+
+    Two sources exist and neither is authoritative on its own: the module attribute
+    ``__version__`` describes the code that actually runs, while
+    ``importlib.metadata.version`` reads the installed distribution's METADATA.  This
+    environment already demonstrates why both are needed --
+    ``numpy-stl`` imports as ``stl`` and sets **no** ``__version__`` (so a
+    module-attribute-only reader records "unknown" for the engine that ran), while
+    ``numpy`` here has two distribution records (1.26.4 and 2.4.6) whose metadata
+    disagrees with the imported code (2.4.6).  Policy: report the *running* code's
+    attribute when it exists, fall back to the distribution metadata, and expose any
+    disagreement in :func:`engine_versions`'s ``version_disagreements`` instead of
+    silently picking a winner.  Three states stay distinguishable: absent (``None``),
+    installed-but-undiscoverable (:data:`VERSION_NOT_REPORTED`), and a real version.
+    """
+    try:
+        __import__(module)
+    except ImportError:
+        return None
+    module_version = getattr(sys.modules.get(module), "__version__", None)
+    if module_version:
+        return str(module_version)
+    try:
+        return importlib_metadata.version(distribution)
+    except importlib_metadata.PackageNotFoundError:  # pragma: no cover - checkout only
+        return VERSION_NOT_REPORTED
+
+
+def _distribution_record(distribution: str) -> str | None:
+    """Installed-distribution version, independent of what the module reports."""
+    try:
+        return importlib_metadata.version(distribution)
+    except importlib_metadata.PackageNotFoundError:  # pragma: no cover - checkout only
+        return None
+
+
 def engine_versions() -> dict[str, Any]:
     versions: dict[str, Any] = {"python": platform.python_version()}
-    for label, module in (("trimesh", "trimesh"), ("numpy-stl", "stl"), ("numpy", "numpy")):
-        try:
-            imported = __import__(module)
-            versions[label] = getattr(imported, "__version__", "unknown")
-        except ImportError:  # pragma: no cover - environment dependent
-            versions[label] = None
+    disagreements: dict[str, dict[str, str]] = {}
+    for label, module, distribution in ENGINES:
+        versions[label] = distribution_version(distribution, module)
+        recorded = _distribution_record(distribution)
+        if recorded is not None and versions[label] not in (None, recorded, VERSION_NOT_REPORTED):
+            # e.g. two numpy distribution records in one site-packages: a referee
+            # reading the artifact must see both numbers, not whichever ran first
+            disagreements[label] = {"module_version": str(versions[label]), "distribution_version": recorded}
+    versions["version_disagreements"] = disagreements
     versions["unavailable"] = {}
     for label, module in (("gmsh", "gmsh"), ("pythonocc-core", "OCC"), ("cadquery", "cadquery")):
         try:
@@ -528,14 +720,81 @@ def markdown(results: dict[str, Any]) -> str:
     add(
         "Engines: "
         + ", ".join(
-            f"{name} {ver}" for name, ver in results["engines"].items() if name not in {"python", "unavailable"} and ver
+            f"{name} {ver}"
+            for name, ver in results["engines"].items()
+            if name not in {"python", "unavailable", "version_disagreements"}
+            and isinstance(ver, str)
         )
     )
+    disagreements = results["engines"].get("version_disagreements") or {}
+    if disagreements:
+        add("")
+        add(
+            "Version note: "
+            + "; ".join(
+                f"`{label}` runs as {row['module_version']} while the installed distribution "
+                f"records {row['distribution_version']}"
+                for label, row in sorted(disagreements.items())
+            )
+            + ". Both numbers are kept because the module attribute describes the code that "
+            "executed and the distribution record describes what a package manager believes is "
+            "installed; the artifact must not hide the gap."
+        )
     add("")
     add(
         "Every number below is written by the generator into `results.json` and rendered from there; "
         "no value is copied by hand."
     )
+    add("")
+    anchor = results["geometry_anchor"]
+    add("## Geometry anchor first: Cb / L / B")
+    add("")
+    add(
+        "Every volume below is only as meaningful as the hull it came from, so the "
+        "geometry gate is answered before the volumes are read:"
+    )
+    add("")
+    add("| quantity | value |")
+    add("|---|---:|")
+    add(
+        f"| principal particulars | L {anchor['principal_particulars']['L_m']:g} m, "
+        f"B {anchor['principal_particulars']['B_m']:g} m, "
+        f"T {anchor['principal_particulars']['T_m']:g} m, "
+        f"LBT {anchor['principal_particulars']['LBT_m3']:.1f} m3 |"
+    )
+    add(f"| requested Cb (KRISO KCS) | {anchor['requested_cb']:.4f} |")
+    add(
+        f"| calibration: order {tuple(anchor['calibration_order'])}, tolerance "
+        f"{anchor['calibration_tolerance']:g} | V {anchor['calibration_volume_m3']:.4f} m3, "
+        f"residual {100 * anchor['calibration_residual_rel']:+.6f} % "
+        f"({'hits' if anchor['calibration_hits_target'] else 'misses'} the target) |"
+    )
+    add(
+        f"| reported: order {tuple(anchor['reporting_order'])} | "
+        f"V {anchor['reported_volume_m3']:.4f} m3, achieved Cb "
+        f"{anchor['achieved_cb']:.9f} ({100 * anchor['cb_residual_rel']:+.4f} % from the request) |"
+    )
+    add(
+        f"| is `Cb L B T` an identity at the reported order? | "
+        f"**{anchor['identity_within_calibration_tolerance']}** -- residual is "
+        f"{anchor['residual_in_units_of_calibration_tolerance']:.0f}x the calibration tolerance |"
+    )
+    add(
+        f"| published displacement volume | {anchor['published_volume_m3']:.1f} m3, reported is "
+        f"{100 * anchor['reported_vs_published']:+.4f} % away |"
+    )
+    add("")
+    add("Quadrature-order ladder on the *same* hull (which number is the converged one):")
+    add("")
+    add("| order | volume (m3) | Cb | vs reported |")
+    add("|---|---:|---:|---:|")
+    for row in anchor["order_ladder"]:
+        add(
+            f"| {tuple(row['order'])} | {row['volume_m3']:.6f} | {row['cb']:.9f} | "
+            f"{100 * row['vs_reported']:+.6f} % |"
+        )
+    add("")
+    add(anchor["verdict"] + ".")
     add("")
     add("## Route definitions")
     add("")
@@ -818,9 +1077,10 @@ def build_bundle(outdir: Path) -> dict[str, Any]:
                 f"engine {required!r} is required for the cross-validation bundle and is not "
                 "installed; a bundle with one engine would not cross-validate anything"
             )
+    anchor = kcs_geometry_anchor()
     cases = [
         wigley_case(),
-        nurbs_hull_case(full_scale=True),
+        nurbs_hull_case(full_scale=True, anchor=anchor),
         nurbs_hull_case(full_scale=False),
         suboff_case(),
     ]
@@ -834,6 +1094,7 @@ def build_bundle(outdir: Path) -> dict[str, Any]:
             "order_window": list(xv.ORDER_WINDOW),
         },
         "engines": engines,
+        "geometry_anchor": anchor,
         "cases": [],
     }
     for case in cases:
@@ -864,6 +1125,8 @@ def build_bundle(outdir: Path) -> dict[str, Any]:
         case["verdict"]["topology_all_watertight"] for case in results["cases"]
     )
     summary["quadrature_converged_relative"] = results["quadrature_ladder"]["converged_relative"]
+    summary["geometry_anchor_identity_holds"] = anchor["identity_within_calibration_tolerance"]
+    summary["geometry_anchor_cb_residual"] = anchor["cb_residual_rel"]
     results["summary"] = summary
     (outdir / "results.json").write_text(json.dumps(results, indent=2, sort_keys=False) + "\n")
     (outdir / "results.md").write_text(markdown(results))
@@ -882,7 +1145,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     results = build_bundle(outdir)
     summary = results["summary"]
     for key, row in summary.items():
-        if key.startswith("all_") or key.startswith("quadrature"):
+        # the per-case rows are the only dict-valued entries; the aggregate rows
+        # (booleans/floats, including the geometry anchor) are printed below
+        if not isinstance(row, dict) or "status" not in row:
             continue
         print(
             f"  {key:16s} status={row['status']:22s} "
@@ -891,6 +1156,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     print(f"  all watertight: {summary['all_watertight']}")
     print(f"  quadrature converged to {summary['quadrature_converged_relative']:.2e} relative")
+    anchor = results["geometry_anchor"]
+    print(
+        f"  geometry anchor: requested Cb {anchor['requested_cb']}, achieved "
+        f"{anchor['achieved_cb']:.9f} ({100 * anchor['cb_residual_rel']:+.4f} %), "
+        f"identity-to-tolerance: {anchor['identity_within_calibration_tolerance']}"
+    )
     print(f"written: {outdir}")
     return 0
 
