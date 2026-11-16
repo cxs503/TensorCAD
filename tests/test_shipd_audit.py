@@ -96,19 +96,23 @@ def test_negative_control_matrix_has_no_false_positive() -> None:
 
 
 def test_documented_blind_spot_single_inverted_triangle() -> None:
-    """Known limitation, asserted so it cannot silently disappear or grow.
+    """The round-4 blind spot, re-measured: round 5 closed it.
 
-    A single inverted triangle leaves the mesh watertight, edge-manifold, Euler-2
-    and positively oriented, so none of the ten gates rejects it.  If this test
-    ever fails, a gate gained that power and the audit report must be updated.
+    Round 4 found that a single inverted triangle left the mesh watertight,
+    edge-manifold, Euler-2 and positively oriented, so no gate rejected it, and
+    this test pinned that blind spot ("if this test ever fails, a gate gained that
+    power and the audit report must be updated"). Round 5 hardened
+    ``G4_outward_oriented`` with the oriented-edge test, so the pin moves: the
+    same measurement is asserted in the other direction. Detection must be by G4
+    specifically -- a single flipped face moves the total volume by ~0.1 %, which
+    the 3 % G6 tolerance cannot see, so a G6 hit would not be evidence.
     """
     report = audit.gate_negative_controls()
-    assert report["undetected_defects"] == ["flip_one_triangle"]
+    assert report["undetected_defects"] == []
+    row = next(r for r in report["rows"] if r["mutation"] == "flip_one_triangle")
+    assert "G4_outward_oriented" in row["tripped"]
+    assert "G6_volume_consistency" not in row["tripped"]
 
-
-# --------------------------------------------------------------------------- #
-# continuum vs discrete Cb
-# --------------------------------------------------------------------------- #
 def test_continuum_cb_error_is_well_below_the_volume_gate() -> None:
     report = audit.discretisation_gap(cbs=(0.55, 0.86), grids=((81, 21),), L=200.0)
     assert report["summary"]["max_cb_continuum_error"] < 0.01
