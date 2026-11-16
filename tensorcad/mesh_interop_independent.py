@@ -24,6 +24,13 @@ Supported dialects (those actually produced by
 ``cgns``     CGNS/HDF5 read through ``h5py`` SIDS node paths
 ===========  =========================================================
 
+Three further dialects that meshio's defaults never emit -- binary STL, ASCII
+MSH 2.2 and VTK XML ``.vtu`` -- are dispatched through
+:mod:`tensorcad.mesh_foreign_dialects` under the keys ``stl_binary``,
+``gmsh22`` and ``vtu``.  Those are the dialects real CAD systems and solver
+decks write, so their absence used to mean a genuine third-party hull could not
+be ingested at all.
+
 Anything else raises :class:`IndependentReadError` explicitly rather than
 guessing -- an unreachable format must never be reported as verified.
 
@@ -60,7 +67,18 @@ __all__ = [
     "tetrahedral_volume",
     "oriented_signature",
     "file_identity",
+    "read_independent",
+    "FOREIGN_DIALECT_NOTES",
 ]
+
+
+#: Formats read here but never written by :mod:`tensorcad.meshio_exchange`; they
+#: are documented in :mod:`tensorcad.mesh_foreign_dialects`.
+FOREIGN_DIALECT_NOTES = {
+    "stl_binary": "binary STL: 80-byte header, uint32 facet count, float32 positions",
+    "gmsh22": "Gmsh MSH 2.2 ASCII: $Nodes/$Elements lists",
+    "vtu": "VTK XML UnstructuredGrid: ascii or inline-base64 binary",
+}
 
 
 class IndependentReadError(Exception):
@@ -217,6 +235,10 @@ def file_identity(path: str | Path, *, file_format: str) -> dict[str, Any]:
             "has_npoin": b"NPOIN=" in raw,
             "has_nelem": b"NELEM=" in raw,
         }
+    if file_format in ("stl_binary", "gmsh22", "vtu"):
+        from .mesh_foreign_dialects import foreign_identity
+
+        return foreign_identity(p, dialect=file_format)
     raise IndependentReadError(f"no independent reader for format '{file_format}'")
 
 
@@ -698,25 +720,42 @@ def read_cgns_hdf5(path: str | Path) -> ParsedMesh:
 # Dispatch
 # ---------------------------------------------------------------------------
 
-_READERS = {
+_READERS: dict[str, Any] = {
     "stl": read_stl_ascii,
     "obj": read_obj,
     "vtk": read_vtk_legacy,
     "gmsh": read_gmsh41,
     "su2": read_su2,
     "cgns": read_cgns_hdf5,
+    # Dialects that meshio_exchange does *not* emit but that third-party tools
+    # write in practice (binary STL, MSH 2.2, VTK XML/.vtu).  They live in
+    # ``tensorcad.mesh_foreign_dialects``; the reference is lazy only to keep
+    # that module free to import ``ParsedMesh``/``IndependentReadError`` here
+    # without an import cycle.
+    "stl_binary": ("tensorcad.mesh_foreign_dialects", "read_stl_binary"),
+    "gmsh22": ("tensorcad.mesh_foreign_dialects", "read_gmsh22"),
+    "vtu": ("tensorcad.mesh_foreign_dialects", "read_vtk_xml"),
 }
+
+
+def _resolve_reader(entry: Any) -> Any:
+    if isinstance(entry, tuple):
+        import importlib
+
+        module = importlib.import_module(entry[0])
+        return getattr(module, entry[1])
+    return entry
 
 
 def read_independent(path: str | Path, *, file_format: str) -> ParsedMesh:
     """Parse ``path`` with the independent reader for ``file_format``."""
     try:
-        reader = _READERS[file_format]
+        entry = _READERS[file_format]
     except KeyError as exc:
         raise IndependentReadError(
             f"no independent reader for '{file_format}'; supported: {sorted(_READERS)}"
         ) from exc
-    return reader(path)
+    return _resolve_reader(entry)(path)
 
 # ---------------------------------------------------------------------------
 # The 6-format x 3-geometry campaign (single source of truth for the matrix)
