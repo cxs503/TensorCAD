@@ -1,0 +1,1412 @@
+{
+ "schema": "tensorcad.fleet_refs.rebind/1.0",
+ "anchor": "REPRO-GEOM-FLEET-REFS",
+ "generated_utc": "2026-11-16T05:28:47+00:00",
+ "library": "benchmarks/verified/fleet_refs/crossref.json",
+ "ingest": "benchmarks/verified/fleet_refs/oa_ingest.json",
+ "caches": {
+  "documents": "/tmp/xref/raw",
+  "open_access": "/tmp/oa"
+ },
+ "method": "bytes -> sha256 -> text -> numeral (current reading rules) -> library value; a document that is not cached is NOT_CACHED and never counts as verified",
+ "documents": [
+  {
+   "key": "t2015_kcs",
+   "family": "NMRI-T2015",
+   "kind": "html",
+   "url": "https://www.t2015.nmri.go.jp/kcs_gc.html",
+   "ship": "KCS",
+   "pinned": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "status": "DIGEST_MATCH",
+   "cached": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "cached_stable": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "cached_bytes": 12978,
+   "masks": [],
+   "live": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "live_stable": "68d9c24600cb699b16394fc5c32762ebc875c856d14ef8460e1d0ebf4e7c78a4",
+   "live_bytes": 12978,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 7,
+   "cells_fresh": 7,
+   "ships_fresh": [
+    "KCS"
+   ]
+  },
+  {
+   "key": "t2015_jbc",
+   "family": "NMRI-T2015",
+   "kind": "html",
+   "url": "https://www.t2015.nmri.go.jp/jbc_gc.html",
+   "ship": "JBC",
+   "pinned": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "status": "DIGEST_MATCH",
+   "cached": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "cached_stable": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "cached_bytes": 13694,
+   "masks": [],
+   "live": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "live_stable": "fc2ce9054a8b7842162bac94365853fa076da2527e8c7e455832f9710f58f875",
+   "live_bytes": 13694,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 6,
+   "cells_fresh": 6,
+   "ships_fresh": [
+    "JBC"
+   ]
+  },
+  {
+   "key": "t2015_onrt",
+   "family": "NMRI-T2015",
+   "kind": "html",
+   "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
+   "ship": "ONRT",
+   "pinned": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "status": "DIGEST_MATCH",
+   "cached": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "cached_stable": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "cached_bytes": 8689,
+   "masks": [],
+   "live": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "live_stable": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
+   "live_bytes": 8689,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 6,
+   "cells_fresh": 6,
+   "ships_fresh": [
+    "ONRT"
+   ]
+  },
+  {
+   "key": "simman2020_summary",
+   "family": "SIMMAN-2020",
+   "kind": "html",
+   "url": "https://simman2020.kr/contents/Ship_data_summary.php",
+   "ship": "KCS|KVLCC2|ONRT",
+   "pinned": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "status": "DIGEST_MATCH",
+   "cached": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "cached_stable": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "cached_bytes": 35030,
+   "masks": [],
+   "live": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "live_stable": "c1a668f6d2440c5d83a83c3616285e9288ef618dbc9a2feebd26627be3f4ebb3",
+   "live_bytes": 35030,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 20,
+   "cells_fresh": 20,
+   "ships_fresh": [
+    "KCS",
+    "KVLCC2",
+    "ONRT"
+   ]
+  },
+  {
+   "key": "simman2014_kvlcc2",
+   "family": "SIMMAN-2014",
+   "kind": "html",
+   "url": "https://simman2014.dk/ship-data/moeri-kvlcc2-tanker/geometry-and-conditions-moeri-kvlcc2-tanker/",
+   "ship": "KVLCC2",
+   "pinned": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+   "status": "DIGEST_MATCH",
+   "cached": "bfc9101e3a4afa4fbe02750de3f0ec830ccc948074265ad4e63184f5b67d310b",
+   "cached_stable": "c305f09e7b7ac3a7ed7a9675d4ecf039a254fd090f20bb95ecb58717f3ecc0c0",
+   "cached_bytes": 66359,
+   "masks": [
+    "simman_request_counter"
+   ],
+   "live": "3c870ce1ca08bd05cf67ed9c1b1d0bcb50e1b7cd4d2e43668557d97af808f686",
+   "live_stable": "c305f09e7b7ac3a7ed7a9675d4ecf039a254fd090f20bb95ecb58717f3ecc0c0",
+   "live_bytes": 66359,
+   "live_masks": [
+    "simman_request_counter"
+   ],
+   "live_status": "DIGEST_VOLATILE_ONLY",
+   "cells_stored": 7,
+   "cells_fresh": 7,
+   "ships_fresh": [
+    "KVLCC2"
+   ]
+  },
+  {
+   "key": "simman2014_kcs",
+   "family": "SIMMAN-2014",
+   "kind": "html",
+   "url": "https://simman2014.dk/ship-data/moeri-container-ship/geometry-and-conditions-moeri-container-ship/",
+   "ship": "KCS",
+   "pinned": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+   "status": "DIGEST_MATCH",
+   "cached": "3cbc3a22daf3d494ffb26ce81a1bc951cd5dca6cb04c27dd2fd478f9a5dc9bf1",
+   "cached_stable": "3a35053e11283c1f841793bb86b2d71c24a755888f29d7e78966bfda84a61323",
+   "cached_bytes": 68248,
+   "masks": [
+    "simman_request_counter"
+   ],
+   "live": "3ba0aefbe28c8bf7d3e61ea7c6316467735fce31734e3f2462d87b92eb359814",
+   "live_stable": "3a35053e11283c1f841793bb86b2d71c24a755888f29d7e78966bfda84a61323",
+   "live_bytes": 68248,
+   "live_masks": [
+    "simman_request_counter"
+   ],
+   "live_status": "DIGEST_VOLATILE_ONLY",
+   "cells_stored": 7,
+   "cells_fresh": 7,
+   "ships_fresh": [
+    "KCS"
+   ]
+  },
+  {
+   "key": "ittc_benchmarks",
+   "family": "ITTC",
+   "kind": "pdf",
+   "url": "https://ittc.info/media/11250/list-of-benchmarks-2.pdf",
+   "ship": "KCS|KVLCC2|JBC|ONRT|Series60|DTC",
+   "pinned": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "status": "DIGEST_MATCH",
+   "cached": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "cached_stable": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "cached_bytes": 121652,
+   "masks": [],
+   "live": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "live_stable": "da101e9a352108e4cc73eb5f871fbe27d585f8e7bd4fb21af4261edd85fbaca1",
+   "live_bytes": 121652,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 0,
+   "cells_fresh": 0,
+   "ships_fresh": []
+  },
+  {
+   "key": "kvlcc2_ugent",
+   "family": "JSR-2017",
+   "kind": "pdf",
+   "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+   "ship": "KVLCC2",
+   "pinned": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "status": "DIGEST_MATCH",
+   "cached": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "cached_stable": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "cached_bytes": 2944401,
+   "masks": [],
+   "live": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "live_stable": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "live_bytes": 2944401,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 7,
+   "cells_fresh": 5,
+   "ships_fresh": [
+    "KVLCC2"
+   ]
+  },
+  {
+   "key": "dtc_ugent",
+   "family": "JSR-2017",
+   "kind": "pdf",
+   "url": "https://biblio.ugent.be/publication/8563318/file/8563319.pdf",
+   "ship": "DTC",
+   "pinned": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "status": "DIGEST_MATCH",
+   "cached": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "cached_stable": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "cached_bytes": 2944401,
+   "masks": [],
+   "live": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "live_stable": "172f78d49f36be7455c20295fc51de7ba70ecf0293cc96455e59e0e0bb8f0568",
+   "live_bytes": 2944401,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 5,
+   "cells_fresh": 5,
+   "ships_fresh": [
+    "DTC"
+   ]
+  },
+  {
+   "key": "kvlcc2_hrcak",
+   "family": "BRODOGRADNJA-2017",
+   "kind": "pdf",
+   "url": "https://hrcak.srce.hr/file/274163",
+   "ship": "KVLCC2",
+   "pinned": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "status": "DIGEST_MATCH",
+   "cached": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "cached_stable": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "cached_bytes": 1207162,
+   "masks": [],
+   "live": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "live_stable": "c20acf9e8eae047a0cb4070bd55aa48d8eaddf3a92d27f2ded6adf4499af5f16",
+   "live_bytes": 1207162,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 5,
+   "cells_fresh": 5,
+   "ships_fresh": [
+    "KVLCC2"
+   ]
+  },
+  {
+   "key": "kvlcc2_jstage",
+   "family": "JASNAOE-2016",
+   "kind": "pdf",
+   "url": "https://www.jstage.jst.go.jp/article/jjasnaoe/23/0/23_1/_pdf",
+   "ship": "KVLCC2",
+   "pinned": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "status": "DIGEST_MATCH",
+   "cached": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "cached_stable": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "cached_bytes": 3966527,
+   "masks": [],
+   "live": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "live_stable": "c97b1d3e62b27e19e8a0bbbd9593411b9250b1141d7cb789c60e64dac8d2a5aa",
+   "live_bytes": 3966527,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 2,
+   "cells_fresh": 2,
+   "ships_fresh": [
+    "KVLCC2"
+   ]
+  },
+  {
+   "key": "jbc_cfdletters",
+   "family": "CFDLETTERS-2023",
+   "kind": "pdf",
+   "url": "https://semarakilmu.com.my/journals/index.php/CFD_Letters/article/download/897/940",
+   "ship": "JBC",
+   "pinned": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "status": "DIGEST_MATCH",
+   "cached": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "cached_stable": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "cached_bytes": 1784895,
+   "masks": [],
+   "live": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "live_stable": "dd79da84862148d8115a221d638dcb9ab1fa9e10ba48ab3c02ae41e168dfec2a",
+   "live_bytes": 1784895,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 6,
+   "cells_fresh": 6,
+   "ships_fresh": [
+    "JBC"
+   ]
+  },
+  {
+   "key": "jbc_scse",
+   "family": "SCSE-2025",
+   "kind": "pdf",
+   "url": "https://scienpg.com/scs/index.php/engineering/article/download/scse.2025.3.22/pdf",
+   "ship": "JBC",
+   "pinned": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "status": "DIGEST_MATCH",
+   "cached": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "cached_stable": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "cached_bytes": 576159,
+   "masks": [],
+   "live": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "live_stable": "1b7503d516d7d995eca03bd1470bde8dc1f3a24e6c4697256be2133bb7b2d5fa",
+   "live_bytes": 576159,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 7,
+   "cells_fresh": 7,
+   "ships_fresh": [
+    "JBC"
+   ]
+  },
+  {
+   "key": "jbc_memorial",
+   "family": "MEMORIAL-2025",
+   "kind": "pdf",
+   "url": "https://storage.googleapis.com/dissertations/2025/MEM_2025_KABONGE.pdf",
+   "ship": "JBC",
+   "pinned": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "status": "DIGEST_MATCH",
+   "cached": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "cached_stable": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "cached_bytes": 4702195,
+   "masks": [],
+   "live": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "live_stable": "870e66a568e6dd1f56107cd7d88b1681d8eee40b184ed9acb3291734054f56ac",
+   "live_bytes": 4702195,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 5,
+   "cells_fresh": 5,
+   "ships_fresh": [
+    "JBC"
+   ]
+  },
+  {
+   "key": "dtc_strath",
+   "family": "STRATH-ISNAM2018",
+   "kind": "pdf",
+   "url": "https://strathprints.strath.ac.uk/67912/1/Dogrul_etal_ISNAM2018_Uncertainty_assessment_and_self_propulsion_estimation_of_Duisburg_Test_Case.pdf",
+   "ship": "DTC",
+   "pinned": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "status": "DIGEST_MATCH",
+   "cached": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "cached_stable": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "cached_bytes": 836896,
+   "masks": [],
+   "live": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "live_stable": "550de4394a313431f162a71f5570cbad7c5e79869bea5e8c197f5c98a5e0cd33",
+   "live_bytes": 836896,
+   "live_masks": [],
+   "live_status": "DIGEST_MATCH",
+   "cells_stored": 5,
+   "cells_fresh": 5,
+   "ships_fresh": [
+    "DTC"
+   ]
+  },
+  {
+   "key": "dtc_ije",
+   "family": "IJE-2026",
+   "kind": "pdf",
+   "url": "https://www.ije.ir/article_216832_29a8cfa2456a3039953f306c077880ce.pdf",
+   "ship": "DTC",
+   "pinned": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "status": "DIGEST_MATCH",
+   "cached": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "cached_stable": "8fb745cd9bd2174671b8bf09f1459acd423ae6fcf087338c7373375b40e3a227",
+   "cached_bytes": 3133493,
+   "masks": [],
+   "cells_stored": 5,
+   "cells_fresh": 5,
+   "ships_fresh": [
+    "DTC"
+   ]
+  },
+  {
+   "key": "kvlcc2_osaka",
+   "family": "OSAKA-REPO",
+   "kind": "pdf",
+   "url": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/50514/27117_Dissertation.pdf",
+   "ship": "KVLCC2",
+   "pinned": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "status": "DIGEST_MATCH",
+   "cached": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "cached_stable": "0f1ddf24ddee9b8a1a47b8f8b979cf1f8a2bd6ddb13c402ff0d82782cf89ce72",
+   "cached_bytes": 8079863,
+   "masks": [],
+   "live": "68598e6a651d0f9a3e7bbeffa851dcf69b834e4e9f6b0487f4524f9e4b37c7c0",
+   "live_stable": "68598e6a651d0f9a3e7bbeffa851dcf69b834e4e9f6b0487f4524f9e4b37c7c0",
+   "live_bytes": 8079863,
+   "live_masks": [],
+   "live_status": "DIGEST_DRIFT",
+   "cells_stored": 7,
+   "cells_fresh": 7,
+   "ships_fresh": [
+    "KVLCC2"
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "beam",
+   "stored": 32.2,
+   "fresh": 32.2,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "cb",
+   "stored": 0.6505,
+   "fresh": 0.6505,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "displacement_volume",
+   "stored": 52030.0,
+   "fresh": 52030.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "draft",
+   "stored": 10.8,
+   "fresh": 10.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "lcb_percent",
+   "stored": -1.48,
+   "fresh": -1.48,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "length_pp",
+   "stored": 230.0,
+   "fresh": 230.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_kcs",
+   "ship": "KCS",
+   "quantity": "lwl",
+   "stored": 232.5,
+   "fresh": 232.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_jbc",
+   "ship": "JBC",
+   "quantity": "beam",
+   "stored": 45.0,
+   "fresh": 45.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_jbc",
+   "ship": "JBC",
+   "quantity": "cb",
+   "stored": 0.858,
+   "fresh": 0.858,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_jbc",
+   "ship": "JBC",
+   "quantity": "displacement_volume",
+   "stored": 178369.9,
+   "fresh": 178369.9,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_jbc",
+   "ship": "JBC",
+   "quantity": "draft",
+   "stored": 16.5,
+   "fresh": 16.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_jbc",
+   "ship": "JBC",
+   "quantity": "length_pp",
+   "stored": 280.0,
+   "fresh": 280.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_jbc",
+   "ship": "JBC",
+   "quantity": "lwl",
+   "stored": 285.0,
+   "fresh": 285.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_onrt",
+   "ship": "ONRT",
+   "quantity": "beam",
+   "stored": 18.78,
+   "fresh": 18.78,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_onrt",
+   "ship": "ONRT",
+   "quantity": "cb",
+   "stored": 0.535,
+   "fresh": 0.535,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_onrt",
+   "ship": "ONRT",
+   "quantity": "displacement_volume",
+   "stored": 8299.5,
+   "fresh": 8299.5,
+   "status": "MATCH",
+   "basis": "mass"
+  },
+  {
+   "source": "t2015_onrt",
+   "ship": "ONRT",
+   "quantity": "draft",
+   "stored": 5.494,
+   "fresh": 5.494,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "t2015_onrt",
+   "ship": "ONRT",
+   "quantity": "lcb_percent",
+   "stored": -1.6365,
+   "fresh": -1.6365,
+   "status": "MATCH",
+   "basis": "derived"
+  },
+  {
+   "source": "t2015_onrt",
+   "ship": "ONRT",
+   "quantity": "lwl",
+   "stored": 154.0,
+   "fresh": 154.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "beam",
+   "stored": 32.2,
+   "fresh": 32.2,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "cb",
+   "stored": 0.651,
+   "fresh": 0.651,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "displacement_volume",
+   "stored": 52030.0,
+   "fresh": 52030.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "draft",
+   "stored": 10.8,
+   "fresh": 10.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "lcb_percent",
+   "stored": -1.48,
+   "fresh": -1.48,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "length_pp",
+   "stored": 230.0,
+   "fresh": 230.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KCS",
+   "quantity": "lwl",
+   "stored": 232.5,
+   "fresh": 232.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "beam",
+   "stored": 580.0,
+   "fresh": 580.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "cb",
+   "stored": 0.8098,
+   "fresh": 0.8098,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "displacement_volume",
+   "stored": 312622.0,
+   "fresh": 312622.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "draft",
+   "stored": 20.8,
+   "fresh": 20.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "lcb_percent",
+   "stored": 3.48,
+   "fresh": 3.48,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "length_pp",
+   "stored": 320.0,
+   "fresh": 320.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "KVLCC2",
+   "quantity": "lwl",
+   "stored": 325.5,
+   "fresh": 325.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "ONRT",
+   "quantity": "beam",
+   "stored": 18.78,
+   "fresh": 18.78,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "ONRT",
+   "quantity": "cb",
+   "stored": 0.535,
+   "fresh": 0.535,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "ONRT",
+   "quantity": "displacement_volume",
+   "stored": 8507.0,
+   "fresh": 8507.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "ONRT",
+   "quantity": "draft",
+   "stored": 5.494,
+   "fresh": 5.494,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "ONRT",
+   "quantity": "lcb_percent",
+   "stored": -1.68,
+   "fresh": -1.68,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2020_summary",
+   "ship": "ONRT",
+   "quantity": "lwl",
+   "stored": 154.0,
+   "fresh": 154.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "beam",
+   "stored": 580.0,
+   "fresh": 580.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "cb",
+   "stored": 0.8098,
+   "fresh": 0.8098,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "displacement_volume",
+   "stored": 312622.0,
+   "fresh": 312622.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "draft",
+   "stored": 20.8,
+   "fresh": 20.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "lcb_percent",
+   "stored": 3.48,
+   "fresh": 3.48,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "length_pp",
+   "stored": 320.0,
+   "fresh": 320.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kvlcc2",
+   "ship": "KVLCC2",
+   "quantity": "lwl",
+   "stored": 325.5,
+   "fresh": 325.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "beam",
+   "stored": 32.2,
+   "fresh": 32.2,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "cb",
+   "stored": 0.651,
+   "fresh": 0.651,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "displacement_volume",
+   "stored": 52030.0,
+   "fresh": 52030.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "draft",
+   "stored": 10.8,
+   "fresh": 10.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "lcb_percent",
+   "stored": -1.48,
+   "fresh": -1.48,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "length_pp",
+   "stored": 230.0,
+   "fresh": 230.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "simman2014_kcs",
+   "ship": "KCS",
+   "quantity": "lwl",
+   "stored": 232.5,
+   "fresh": 232.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "DTC",
+   "quantity": "lcb_percent",
+   "stored": -0.969296,
+   "fresh": null,
+   "status": "NOT_IN_BYTES",
+   "basis": "derived",
+   "detail": "the library carries this quantity; the document no longer yields it"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "KVLCC2",
+   "quantity": "beam",
+   "stored": 58.0,
+   "fresh": 58.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "KVLCC2",
+   "quantity": "cb",
+   "stored": 0.8098,
+   "fresh": 0.8098,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "KVLCC2",
+   "quantity": "displacement_volume",
+   "stored": 312622.439,
+   "fresh": 312622.439,
+   "status": "MATCH",
+   "basis": "mass"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "KVLCC2",
+   "quantity": "draft",
+   "stored": 20.8,
+   "fresh": 20.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "KVLCC2",
+   "quantity": "lcb_percent",
+   "stored": 3.46875,
+   "fresh": null,
+   "status": "NOT_IN_BYTES",
+   "basis": "derived",
+   "detail": "the library carries this quantity; the document no longer yields it"
+  },
+  {
+   "source": "kvlcc2_ugent",
+   "ship": "KVLCC2",
+   "quantity": "length_pp",
+   "stored": 320.0,
+   "fresh": 320.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ugent",
+   "ship": "DTC",
+   "quantity": "beam",
+   "stored": 51.0,
+   "fresh": 51.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ugent",
+   "ship": "DTC",
+   "quantity": "cb",
+   "stored": 0.661,
+   "fresh": 0.661,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ugent",
+   "ship": "DTC",
+   "quantity": "displacement_volume",
+   "stored": 173468.0,
+   "fresh": 173468.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ugent",
+   "ship": "DTC",
+   "quantity": "draft",
+   "stored": 14.5,
+   "fresh": 14.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ugent",
+   "ship": "DTC",
+   "quantity": "length_pp",
+   "stored": 355.0,
+   "fresh": 355.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_hrcak",
+   "ship": "KVLCC2",
+   "quantity": "beam",
+   "stored": 58.0,
+   "fresh": 58.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_hrcak",
+   "ship": "KVLCC2",
+   "quantity": "cb",
+   "stored": 0.8098,
+   "fresh": 0.8098,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_hrcak",
+   "ship": "KVLCC2",
+   "quantity": "displacement_volume",
+   "stored": 312622.0,
+   "fresh": 312622.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_hrcak",
+   "ship": "KVLCC2",
+   "quantity": "draft",
+   "stored": 20.8,
+   "fresh": 20.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_hrcak",
+   "ship": "KVLCC2",
+   "quantity": "length_pp",
+   "stored": 320.0,
+   "fresh": 320.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_jstage",
+   "ship": "KVLCC2",
+   "quantity": "draft",
+   "stored": 20.8,
+   "fresh": 20.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_jstage",
+   "ship": "KVLCC2",
+   "quantity": "length_pp",
+   "stored": 320.0,
+   "fresh": 320.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_cfdletters",
+   "ship": "JBC",
+   "quantity": "beam",
+   "stored": 45.0,
+   "fresh": 45.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_cfdletters",
+   "ship": "JBC",
+   "quantity": "cb",
+   "stored": 0.858,
+   "fresh": 0.858,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_cfdletters",
+   "ship": "JBC",
+   "quantity": "displacement_volume",
+   "stored": 178369.9,
+   "fresh": 178369.9,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_cfdletters",
+   "ship": "JBC",
+   "quantity": "draft",
+   "stored": 16.5,
+   "fresh": 16.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_cfdletters",
+   "ship": "JBC",
+   "quantity": "length_pp",
+   "stored": 280.0,
+   "fresh": 280.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_cfdletters",
+   "ship": "JBC",
+   "quantity": "lwl",
+   "stored": 285.0,
+   "fresh": 285.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "beam",
+   "stored": 45.0,
+   "fresh": 45.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "cb",
+   "stored": 0.858,
+   "fresh": 0.858,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "displacement_volume",
+   "stored": 178369.9,
+   "fresh": 178369.9,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "draft",
+   "stored": 16.5,
+   "fresh": 16.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "lcb_percent",
+   "stored": 2.5475,
+   "fresh": 2.5475,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "length_pp",
+   "stored": 280.0,
+   "fresh": 280.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_scse",
+   "ship": "JBC",
+   "quantity": "lwl",
+   "stored": 285.0,
+   "fresh": 285.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_memorial",
+   "ship": "JBC",
+   "quantity": "beam",
+   "stored": 45.0,
+   "fresh": 45.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_memorial",
+   "ship": "JBC",
+   "quantity": "displacement_volume",
+   "stored": 178370.0,
+   "fresh": 178370.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_memorial",
+   "ship": "JBC",
+   "quantity": "draft",
+   "stored": 16.5,
+   "fresh": 16.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_memorial",
+   "ship": "JBC",
+   "quantity": "length_pp",
+   "stored": 280.0,
+   "fresh": 280.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "jbc_memorial",
+   "ship": "JBC",
+   "quantity": "lwl",
+   "stored": 285.0,
+   "fresh": 285.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_strath",
+   "ship": "DTC",
+   "quantity": "beam",
+   "stored": 51.0,
+   "fresh": 51.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_strath",
+   "ship": "DTC",
+   "quantity": "cb",
+   "stored": 0.661,
+   "fresh": 0.661,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_strath",
+   "ship": "DTC",
+   "quantity": "displacement_volume",
+   "stored": 173467.0,
+   "fresh": 173467.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_strath",
+   "ship": "DTC",
+   "quantity": "draft",
+   "stored": 14.5,
+   "fresh": 14.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_strath",
+   "ship": "DTC",
+   "quantity": "length_pp",
+   "stored": 355.0,
+   "fresh": 355.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ije",
+   "ship": "DTC",
+   "quantity": "beam",
+   "stored": 51.0,
+   "fresh": 51.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ije",
+   "ship": "DTC",
+   "quantity": "cb",
+   "stored": 0.661,
+   "fresh": 0.661,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ije",
+   "ship": "DTC",
+   "quantity": "displacement_volume",
+   "stored": 173468.0,
+   "fresh": 173468.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ije",
+   "ship": "DTC",
+   "quantity": "draft",
+   "stored": 14.5,
+   "fresh": 14.5,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "dtc_ije",
+   "ship": "DTC",
+   "quantity": "length_pp",
+   "stored": 355.0,
+   "fresh": 355.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "beam",
+   "stored": 58.0,
+   "fresh": 58.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "cb",
+   "stored": 0.8098,
+   "fresh": 0.8098,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "displacement_volume",
+   "stored": 312622.0,
+   "fresh": 312622.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "draft",
+   "stored": 20.8,
+   "fresh": 20.8,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "lcb_percent",
+   "stored": 3.48,
+   "fresh": 3.48,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "length_pp",
+   "stored": 320.0,
+   "fresh": 320.0,
+   "status": "MATCH",
+   "basis": "volume"
+  },
+  {
+   "source": "kvlcc2_osaka",
+   "ship": "KVLCC2",
+   "quantity": "lwl",
+   "stored": 325.5,
+   "fresh": 325.5,
+   "status": "MATCH",
+   "basis": "volume"
+  }
+ ],
+ "counts": {
+  "documents": 17,
+  "documents_checked": 17,
+  "documents_by_status": {
+   "DIGEST_MATCH": 17
+  },
+  "cells": 107,
+  "cells_by_status": {
+   "MATCH": 105,
+   "NOT_IN_BYTES": 2
+  },
+  "cells_rebound": 105,
+  "non_rebound": [
+   {
+    "source": "kvlcc2_ugent",
+    "ship": "DTC",
+    "quantity": "lcb_percent",
+    "stored": -0.969296,
+    "fresh": null,
+    "status": "NOT_IN_BYTES",
+    "basis": "derived",
+    "detail": "the library carries this quantity; the document no longer yields it"
+   },
+   {
+    "source": "kvlcc2_ugent",
+    "ship": "KVLCC2",
+    "quantity": "lcb_percent",
+    "stored": 3.46875,
+    "fresh": null,
+    "status": "NOT_IN_BYTES",
+    "basis": "derived",
+    "detail": "the library carries this quantity; the document no longer yields it"
+   }
+  ],
+  "unchecked_sources": [],
+  "all_cells_rebound": false
+ }
+}
