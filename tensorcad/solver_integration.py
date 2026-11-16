@@ -251,6 +251,10 @@ def frame_tamper_refused(outdir: Path, route: str) -> bool:
     """A y-up manifest is refused by the route's verifier."""
     tampered = outdir / f"tampered_{route}"
     tampered.mkdir(exist_ok=True)
+    # Only the handoff's own refusal counts. The older version of this helper ended
+    # in ``except Exception: return True``, which scored a *crash* -- or a verifier
+    # that never looks at a frame -- as a pass; the cross-route gate with the
+    # positive control lives in ``tensorcad.solver_solid_gate.tamper_refused``.
     try:
         if route == "volume_msh":
             # Copy a valid bundle then tamper the frame
@@ -296,8 +300,6 @@ def frame_tamper_refused(outdir: Path, route: str) -> bool:
         return True  # no handoff to tamper (DG route uses different structure)
     except HandoffError:
         return True
-    except Exception:
-        return True  # any refusal counts
 
 
 def run_integration(

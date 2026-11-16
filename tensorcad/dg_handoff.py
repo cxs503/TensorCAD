@@ -64,12 +64,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
+from .solver_interface import COORDINATE_CONTRACT
+
 __all__ = [
     "BUNDLE_SCHEMA",
     "DG_CONTRACT_SCHEMA",
     "PLANES",
     "PlaneMap",
     "circle_contract",
+    "ellipse_contract",
+    "ellipse_perimeter",
     "check_plane_ring",
     "curve_geometry_report",
     "evaluate_curve",
@@ -419,6 +423,70 @@ def circle_contract(radius: float, centre: Sequence[float] = (0.0, 0.0), *,
     }
 
 
+# ----------------------------------------------------------------- conics
+
+
+def ellipse_perimeter(a: float, b: float, *, order: int = 24) -> float:
+    """Perimeter of the ellipse with semi-axes ``a``, ``b`` by ``4 a E(e)``.
+
+    The reference is deliberately derived in a **different parametrisation** from
+    the rational-quadratic curve this module hands to TensorDG: here the ellipse
+    is ``(A cos t, B sin t)`` with ``A = max(a, b)``, so the speed is
+    ``A sqrt(1 - e^2 sin^2 t)`` and the perimeter is ``4 A E(e)``, the complete
+    elliptic integral of the second kind evaluated by Gauss-Legendre quadrature
+    on ``t in [0, pi/2]`` (a smooth integrand: 24 nodes reach machine precision).
+    If the NURBS construction were wrong, this number would not notice.
+    """
+    A = max(float(a), float(b))
+    B = min(float(a), float(b))
+    if not (A > 0.0 and math.isfinite(A) and math.isfinite(B)):
+        raise HandoffError("semi-axes must be positive and finite")
+    e2 = 1.0 - (B / A) ** 2
+    nodes, weights = _gauss_legendre(int(order))
+    integral = 0.0
+    for x, w in zip(nodes, weights):
+        theta = 0.25 * math.pi * (x + 1.0)
+        s = math.sin(theta)
+        integral += w * math.sqrt(max(0.0, 1.0 - e2 * s * s))
+    return 4.0 * A * 0.25 * math.pi * integral
+
+
+def ellipse_contract(
+    a: float, b: float, centre: Sequence[float] = (0.0, 0.0), *,
+    segments: int = 8, plane: str = "xy", offset_m: float = 0.0,
+    name: str = "cad-ellipse",
+) -> dict[str, Any]:
+    """Rational-quadratic NURBS **ellipse**, exact for any ``a``, ``b``.
+
+    Built from :func:`circle_contract` by an affine map of the control points.
+    That is not an approximation: a NURBS curve is affinely invariant (Piegl &
+    Tiller 4.2.2), so scaling the unit-circle control polygon by ``(a, b)`` and
+    keeping the tangent-intersection weights ``cos(dtheta/2)`` produces the
+    ellipse exactly, which is what lets a CAD section that is not circular reach
+    TensorDG without being re-fitted.
+
+    A circle is the special case ``a == b``; ``radius_m`` is kept in the payload
+    as the **enclosing** radius ``max(a, b)`` (what a ring-shaped DG domain must
+    clear), not as a semi-axis, and ``semi_axes`` is the authoritative geometry.
+    """
+    ax, by = float(a), float(b)
+    if not (ax > 0.0 and by > 0.0 and math.isfinite(ax) and math.isfinite(by)):
+        raise HandoffError("semi-axes must be positive and finite")
+    cx, cy = float(centre[0]), float(centre[1])
+    base = circle_contract(1.0, (0.0, 0.0), segments=segments, plane=plane,
+                           offset_m=offset_m, name=name)
+    contract = dict(base)
+    contract["control_points"] = [[cx + ax * p[0], cy + by * p[1]]
+                                  for p in base["control_points"]]
+    contract["centre"] = [cx, cy]
+    contract["semi_axes"] = [ax, by]
+    contract["radius_m"] = max(ax, by)
+    contract["radius_kind"] = "enclosing_max_semi_axis"
+    contract["producer"] = (
+        "tensorcad.dg_handoff.ellipse_contract (affine map of the tangent-intersection circle)")
+    return contract
+
+
 # ----------------------------------------------------------------- measurement
 
 
@@ -440,9 +508,24 @@ def curve_geometry_report(contract: dict[str, Any], *, quad_order: int = 20) -> 
     ``pi R^2``) are analytic and independent of the curve under test.
     """
     degree, knots, cps, weights = _check_contract(contract)
-    radius = float(contract.get("radius_m", 0.0))
+    semi = contract.get("semi_axes")
+    ellipse: tuple[float, float] | None = None
+    if semi is not None:
+        if len(semi) != 2:
+            raise HandoffError("semi_axes must hold two positive numbers")
+        ax, ay = float(semi[0]), float(semi[1])
+        if not (ax > 0.0 and ay > 0.0 and math.isfinite(ax) and math.isfinite(ay)):
+            raise HandoffError("semi_axes must be positive and finite")
+        if not contract.get("centre"):
+            raise HandoffError("an ellipse contract must carry its centre")
+        ellipse = (ax, ay)
+        radius = max(ax, ay)  # enclosing radius, only used for the outer-domain check
+        cx, cy = float(contract["centre"][0]), float(contract["centre"][1])
+    radius = float(contract.get("radius_m", 0.0)) if ellipse is None else radius
     centre = contract.get("centre")
-    if radius <= 0.0:
+    if ellipse is not None:
+        pass
+    elif radius <= 0.0:
         # fall back to a measured radius so a foreign contract can still be read
         sample = evaluate_curve(contract, [knots[degree] + (knots[len(cps)] - knots[degree]) * i / 64
                                            for i in range(65)])
@@ -467,21 +550,35 @@ def curve_geometry_report(contract: dict[str, Any], *, quad_order: int = 20) -> 
             speed = math.hypot(dx, dy)
             circumference += w * half * speed
             area2 += w * half * (x * dy - y * dx)
-            worst_radial = max(worst_radial, abs(math.hypot(x - cx, y - cy) - radius))
+            if ellipse is None:
+                worst_radial = max(worst_radial, abs(math.hypot(x - cx, y - cy) - radius))
+            else:
+                # implicit residual of the ellipse, dimensionless: 0 on the curve
+                rho = math.hypot((x - cx) / ellipse[0], (y - cy) / ellipse[1])
+                worst_radial = max(worst_radial, abs(rho - 1.0))
     closure = evaluate_curve(contract, [lo, hi])
     closure_gap = math.hypot(closure[1][0] - closure[0][0], closure[1][1] - closure[0][1])
     area = 0.5 * abs(area2)
-    analytic_circumference = 2.0 * math.pi * radius
-    analytic_area = math.pi * radius * radius
-    return {
+    if ellipse is None:
+        analytic_circumference = 2.0 * math.pi * radius
+        analytic_area = math.pi * radius * radius
+        deviation_m = worst_radial
+        deviation_rel = worst_radial / radius
+    else:
+        analytic_circumference = ellipse_perimeter(*ellipse)
+        analytic_area = math.pi * ellipse[0] * ellipse[1]
+        deviation_m = worst_radial * min(ellipse)
+        deviation_rel = worst_radial
+    report = {
         "degree": degree,
         "segments": len(_spans(knots)),
         "control_points": len(cps),
         "radius_m": radius,
+        "radius_kind": "enclosing_max_semi_axis" if ellipse is not None else "radius_m",
         "centre_m": [cx, cy],
         "closure_gap_m": closure_gap,
-        "max_radial_deviation_m": worst_radial,
-        "max_radial_deviation_rel": worst_radial / radius,
+        "max_radial_deviation_m": deviation_m,
+        "max_radial_deviation_rel": deviation_rel,
         "circumference_m": circumference,
         "circumference_analytic_m": analytic_circumference,
         "circumference_rel_error": abs(circumference - analytic_circumference) / analytic_circumference,
@@ -490,6 +587,11 @@ def curve_geometry_report(contract: dict[str, Any], *, quad_order: int = 20) -> 
         "area_rel_error": abs(area - analytic_area) / analytic_area,
         "quadrature_order": quad_order,
     }
+    if ellipse is not None:
+        # only ellipse contracts carry semi-axes; a circle report keeps exactly the
+        # keys it had before, so old bundles re-verify unchanged
+        report["semi_axes"] = list(ellipse)
+    return report
 
 
 def check_plane_ring(points_3d: Sequence[Sequence[float]], plane: PlaneMap, *,
@@ -566,6 +668,7 @@ def write_dg_bundle(outdir: str | Path, contract: dict[str, Any], *, r_outer_m: 
         "consumer": "tensordg.curved_geometry.mesh_from_contract",
         "case": case,
         "tables": {"curved_wall_json": "curved_wall.json"},
+        "frame": dict(COORDINATE_CONTRACT),
         "plane": plane_map.to_dict(),
         "geometry": {
             "digest": _contract_digest(contract),
@@ -608,6 +711,18 @@ def verify_bundle(outdir: str | Path) -> dict[str, Any]:
         raise HandoffError(
             f"bundle targets {manifest.get('consumer_schema')!r}, this module writes "
             f"{DG_CONTRACT_SCHEMA!r}")
+
+    frame = manifest.get("frame")
+    if frame is None:
+        # pre-frame bundles exist; they are readable but cannot enter a cross-route
+        # frame gate, and the reader is told so rather than guessing a frame
+        raise HandoffError(
+            "bundle declares no frame; a solver-facing handoff must carry the "
+            f"{COORDINATE_CONTRACT['name']!r} contract frame")
+    if frame.get("name") != COORDINATE_CONTRACT["name"]:
+        raise HandoffError(
+            f"bundle frame {frame.get('name')!r} is not the contract frame "
+            f"{COORDINATE_CONTRACT['name']!r}")
 
     digest = _contract_digest(contract)
     if digest != manifest["geometry"]["digest"]:
