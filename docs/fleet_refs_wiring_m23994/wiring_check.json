@@ -1,0 +1,91 @@
+[
+  {
+    "ship": "KCS",
+    "reference_volume_m3": 52030.0,
+    "reference_basis": "literature_value_recalled",
+    "published_verdict": "CROSS_VERIFIED",
+    "published_disputed": false,
+    "families": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+    ],
+    "n_entries": 3,
+    "entry_sources": [
+      "simman2014_kcs",
+      "simman2020_summary",
+      "t2015_kcs"
+    ]
+  },
+  {
+    "ship": "KVLCC2",
+    "reference_volume_m3": 312622.0,
+    "reference_basis": "literature_value_recalled",
+    "published_verdict": "CROSS_VERIFIED",
+    "published_disputed": false,
+    "families": [
+      "JSR-2017",
+      "SIMMAN-SERIES"
+    ],
+    "n_entries": 5,
+    "entry_sources": [
+      "kvlcc2_hrcak",
+      "kvlcc2_osaka",
+      "kvlcc2_ugent",
+      "simman2014_kvlcc2",
+      "simman2020_summary"
+    ]
+  },
+  {
+    "ship": "ONRT",
+    "reference_volume_m3": 8518.1,
+    "reference_basis": "literature_value_recalled",
+    "published_verdict": "CONFLICT",
+    "published_disputed": true,
+    "families": [
+      "NMRI-T2015",
+      "SIMMAN-SERIES"
+    ],
+    "n_entries": 2,
+    "entry_sources": [
+      "simman2020_summary",
+      "t2015_onrt"
+    ]
+  },
+  {
+    "ship": "JBC",
+    "reference_volume_m3": 178369.9,
+    "reference_basis": "literature_value_recalled",
+    "published_verdict": "SINGLE_SOURCE",
+    "published_disputed": false,
+    "families": [
+      "NMRI-T2015"
+    ],
+    "n_entries": 4,
+    "entry_sources": [
+      "jbc_cfdletters",
+      "jbc_memorial",
+      "jbc_scse",
+      "t2015_jbc"
+    ]
+  },
+  {
+    "ship": "DTC",
+    "reference_volume_m3": 173467.0,
+    "reference_basis": "literature_value_recalled",
+    "published_verdict": null,
+    "published_disputed": null,
+    "families": [],
+    "n_entries": 0,
+    "entry_sources": []
+  },
+  {
+    "ship": "Series60",
+    "reference_volume_m3": 4266.6293334,
+    "reference_basis": "closure",
+    "published_verdict": null,
+    "published_disputed": null,
+    "families": [],
+    "n_entries": 0,
+    "entry_sources": []
+  }
+]
