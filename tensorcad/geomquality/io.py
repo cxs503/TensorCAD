@@ -30,6 +30,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
 
+from ..iges import ENTITY_BSPLINE_SURFACE
 from ..nurbs import NURBSCurve, NURBSSurface
 from .brep import (
     BOUNDARY_SAMPLES,
@@ -595,6 +596,24 @@ def _pack_parameters(
 
 
 def _iges_parameters(text: str) -> dict[int, list[float]]:
+    """Decode the parameter (P) section, keyed by the sequence number of a record's first line.
+
+    IGES 5.3 §2.2.4 puts 64 characters of parameter data in columns 1-64, the section
+    letter in column 73 and the line's own sequence number in columns 74-80, and ends a
+    record with ``;``.  The D section's *parameter data pointer* is the sequence number of
+    that record's first line, so keying the grouping on it is the only reading that
+    survives a record longer than one line.
+
+    An earlier version keyed the grouping off columns 65-72 (the *entity pointer* field,
+    which is per-line metadata, not the record identity) and split multi-line records at
+    arbitrary positions.  On the KVLCC2 specimen that shifted the field decode so far that
+    control-point coordinates were read as B-spline weights (a weight of -121.49 m), and
+    the refusal was reported as invalid publisher data; the parameters below decode all
+    19 type-128 records of that file without a single non-positive weight.
+
+    Files written by :func:`write_iges` store the directory-line number in columns 65-72,
+    so a numeric value there is kept as an alias key for those round trips.
+    """
     sections: dict[str, list[str]] = {"S": [], "G": [], "D": [], "P": [], "T": []}
     for line in text.splitlines():
         if len(line) < 73:
@@ -602,24 +621,110 @@ def _iges_parameters(text: str) -> dict[int, list[float]]:
         marker = line[72]
         if marker in sections:
             sections[marker].append(line)
-    blocks: dict[int, list[str]] = {}
-    for line in sections["P"]:
-        pointer = int(line[64:72].strip() or 0)
-        blocks.setdefault(pointer, []).append(line[:64].rstrip())
+    p_lines = sorted(sections["P"], key=lambda line: int(line[73:80].strip() or 0))
+    records: list[tuple[int, int, str]] = []  # (first sequence, alias key, text)
+    start: int | None = None
+    alias = 0
+    chunks: list[str] = []
+    for line in p_lines:
+        sequence = int(line[73:80].strip() or 0)
+        if start is None:
+            start = sequence
+            pointer_field = line[64:72].strip()
+            alias = int(pointer_field) if pointer_field.isdigit() else 0
+        body = line[:64]
+        if ";" in body:
+            head, _, _ = body.partition(";")
+            chunks.append(head)
+            records.append((start, alias, "".join(chunks)))
+            start, chunks = None, []
+        else:
+            chunks.append(body)
+    if start is not None and chunks:
+        records.append((start, alias, "".join(chunks)))
     parameters: dict[int, list[float]] = {}
-    for pointer, chunks in blocks.items():
-        joined = "".join(chunks)
-        joined = joined.replace("D", "E").replace("d", "e")
-        joined = joined.replace(";", "")
-        tokens = [token for token in joined.split(",") if token.strip()]
-        values: list[float] = []
-        for token in tokens:
-            try:
-                values.append(float(token))
-            except ValueError:
-                values.append(float("nan"))
-        parameters[pointer] = values
+    for first, alias_key, joined in records:
+        values = _iges_numbers(joined)
+        parameters[first] = values
+        if alias_key > 0 and alias_key not in parameters:
+            parameters[alias_key] = values
     return parameters
+
+
+def _iges_numbers(joined: str) -> list[float]:
+    """Numbers of one parameter record; ``D`` exponents and stray separators allowed."""
+    joined = joined.replace("D", "E").replace("d", "e").replace(";", "")
+    values: list[float] = []
+    for token in joined.replace(",", " ").split():
+        try:
+            values.append(float(token))
+        except ValueError:
+            values.append(float("nan"))
+    return values
+
+
+def _surface_from_parameters(values: Sequence[float], pointer: int) -> NURBSSurface:
+    """Decode one type-128 parameter record into a :class:`NURBSSurface`.
+
+    Two layouts occur and both are decoded:
+
+    * IGES 5.3 §4.24 -- ``K1, K2, M1, M2, PROP1..4``, then the two knot vectors, then the
+      control points (interleaved ``x, y, z, w`` or a weight block before the coordinates,
+      chosen by scoring the net).  Every publisher file uses this layout, and the decode is
+      delegated to :meth:`tensorcad.iges.BSplineSurface.from_parameters`, the decoder the
+      fleet route already scores against those files, so there is one implementation of
+      the standard record instead of two;
+    * the private dialect :func:`write_iges` emits -- ``deg_u, deg_v, count_u, count_v,
+      PROP1, 0, 0, 0``, control points, knots, a unit-weight block, then the domain
+      corners.  Round trips of this package's own exports stay on that branch.
+    """
+    if values and int(values[0]) == ENTITY_BSPLINE_SURFACE:
+        from ..iges import BSplineSurface
+        from ..iges import IgesError as FleetIgesError
+
+        try:
+            surface = BSplineSurface.from_parameters(values)
+        except (FleetIgesError, ValueError, IndexError) as exc:
+            raise ExchangeError(f"entity 128 at P line {pointer}: {exc}") from exc
+        count_u, count_v = surface.count_u, surface.count_v
+        control, weights = surface.control, surface.weights
+        net = tuple(
+            tuple(control[j * count_u + i] for j in range(count_v)) for i in range(count_u)
+        )
+        grid = tuple(
+            tuple(weights[j * count_u + i] for j in range(count_v)) for i in range(count_u)
+        )
+        return NURBSSurface(
+            degree=(surface.degree_u, surface.degree_v),
+            knots=(surface.knots_u, surface.knots_v),
+            control_net=net,
+            weights=grid,
+        )
+    degree_u = int(values[0])
+    degree_v = int(values[1])
+    count_u = int(values[2])
+    count_v = int(values[3])
+    cursor = 8
+    net = []
+    for _ in range(count_u):
+        row = []
+        for _ in range(count_v):
+            row.append(tuple(values[cursor : cursor + 3]))  # type: ignore[arg-type]
+            cursor += 3
+        net.append(row)
+    u_knots = values[cursor : cursor + count_u + degree_u + 1]
+    cursor += count_u + degree_u + 1
+    v_knots = values[cursor : cursor + count_v + degree_v + 1]
+    cursor += count_v + degree_v + 1
+    raw_weights = values[cursor : cursor + count_u * count_v]
+    cursor += count_u * count_v
+    weights = [list(raw_weights[i * count_v : (i + 1) * count_v]) for i in range(count_u)]
+    return NURBSSurface(
+        degree=(degree_u, degree_v),
+        control_net=net,
+        weights=weights,
+        knots=[list(u_knots), list(v_knots)],
+    )
 
 
 def read_iges(path: str | Path, *, tolerance: float = DEFAULT_TOLERANCE) -> BRep:
@@ -654,40 +759,12 @@ def read_iges(path: str | Path, *, tolerance: float = DEFAULT_TOLERANCE) -> BRep
         if entity_type != 128:
             continue
         # Either column in the two sections can be used to join them; try both.
-        values = parameters.get(directory_pointer) or parameters.get(pointer) or []
+        values = parameters.get(pointer) or parameters.get(directory_pointer) or []
         if len(values) < 8:
             raise ExchangeError(
                 f"entity 128 at P line {pointer} has {len(values)} parameters: truncated file"
             )
-        degree_u = int(values[0])
-        degree_v = int(values[1])
-        count_u = int(values[2])
-        count_v = int(values[3])
-        cursor = 8
-        net: list[list[Vec3]] = []
-        for _ in range(count_u):
-            row = []
-            for _ in range(count_v):
-                row.append(tuple(values[cursor : cursor + 3]))  # type: ignore[arg-type]
-                cursor += 3
-            net.append(row)
-        u_knots = values[cursor : cursor + count_u + degree_u + 1]
-        cursor += count_u + degree_u + 1
-        v_knots = values[cursor : cursor + count_v + degree_v + 1]
-        cursor += count_v + degree_v + 1
-        raw_weights = values[cursor : cursor + count_u * count_v]
-        cursor += count_u * count_v
-        weights = [
-            list(raw_weights[i * count_v : (i + 1) * count_v]) for i in range(count_u)
-        ]
-        surfaces.append(
-            NURBSSurface(
-                degree=(degree_u, degree_v),
-                control_net=net,
-                weights=weights,
-                knots=[list(u_knots), list(v_knots)],
-            )
-        )
+        surfaces.append(_surface_from_parameters(values, pointer))
         wetted_flags.append(level != 2)
     if not surfaces:
         raise ExchangeError("no entity 128 surfaces found in the IGES file")
