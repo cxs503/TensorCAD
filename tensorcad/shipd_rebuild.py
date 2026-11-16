@@ -38,6 +38,7 @@ from typing import Any, Sequence
 
 from tensorcad import mesh as meshlib
 from tensorcad.cb_sections import (
+    LcbRequestUnreachable,
     CalibratedHullParameters,
     build_calibrated_hull,
     realised_coefficients,
@@ -74,6 +75,11 @@ CALIBRATED_CB_WINDOW = (0.30, 0.95)
 #: requested value). Looser than the 3 % volume gate because these two are read
 #: off the *sampled* station grid rather than integrated over the closed surface.
 COEFFICIENT_TOLERANCE = 0.05
+#: Longitudinal centre of buoyancy, as a fraction of L: a requested LCB is honoured
+#: here or the hull is not the ship that was asked for. The band is a policy number
+#: (~500x the worst realised error measured in round 7, 2.7e-05 L); the report
+#: quotes the actual errors, the gate only decides pass/fail.
+LCB_TOLERANCE = 0.005
 #: Seawater density [kg/m^3] and kinematic viscosity [m^2/s] used by the nominal
 #: performance block (ITTC fresh/seawater tables at 15 degC).
 SEAWATER_DENSITY = 1025.0
@@ -123,6 +129,12 @@ class RebuildResult:
     realised_Cwp: float | None = None
     coefficient_gates: list[GateResult] = field(default_factory=list)
     wetted_surface_area: float | None = None
+    #: LCB contract: requested (fraction of L, signed, + forward), realised on the
+    #: mesh by the divergence theorem, and their difference.
+    requested_lcb: float | None = None
+    realised_lcb: float | None = None
+    lcb_error: float | None = None
+    lcb_gates: list[GateResult] = field(default_factory=list)
     #: ``VERIFIED`` only when the eight canonical gates *and* the coefficient
     #: agreement gates pass. :attr:`verdict` keeps the canonical eight so round-2
     #: and round-3 pass rates stay directly comparable.
@@ -154,6 +166,10 @@ class RebuildResult:
             "realised_Cwp": self.realised_Cwp,
             "coefficient_gates": [g.as_dict() for g in self.coefficient_gates],
             "wetted_surface_area": self.wetted_surface_area,
+            "requested_lcb": self.requested_lcb,
+            "realised_lcb": self.realised_lcb,
+            "lcb_error": self.lcb_error,
+            "lcb_gates": [g.as_dict() for g in self.lcb_gates],
             "strict_verdict": self.strict_verdict,
         }
 
@@ -316,6 +332,8 @@ def _rebuild_calibrated(ship: dict, nx: int, nz: int) -> RebuildResult:
             # Optional hull-form features; absent -> the round-3 flat-keel family.
             parallel_body_fraction=float(ship.get("parallel_body_fraction", 0.0)),
             end_draft_ratio=float(ship.get("end_draft_ratio", 1.0)),
+            # ``lcb`` absent -> 0.0 -> the round-3 symmetric family, bit for bit.
+            lcb_offset=float(ship.get("lcb", 0.0) or 0.0),
         )
         problems = params.problems()
         if problems:
@@ -331,6 +349,18 @@ def _rebuild_calibrated(ship: dict, nx: int, nz: int) -> RebuildResult:
         return _evaluate_gates(
             ship, hull.mesh, "cb_calibrated_sections",
             f"Cb={ship['Cb']:.4f}, Cp<=Cwp -> calibrated family", elapsed,
+        )
+    except LcbRequestUnreachable as e:
+        # A refused LCB is a parameter-vector finding, not a mesh defect: nothing was
+        # built, so there is no surface to measure. Classified separately so the
+        # failure ledger distinguishes "unreachable target" from "mesh broke a gate".
+        return RebuildResult(
+            ship_id=ship["ship_id"], ship_type=ship["ship_type"],
+            method="cb_calibrated_sections",
+            method_reason="calibrated family: requested LCB outside the reachable band",
+            verdict="REFUSED", error_message=f"lcb_unreachable: {e}",
+            requested_lcb=float(ship.get("lcb", 0.0) or 0.0),
+            rebuild_time_s=time.time() - t0,
         )
     except Exception as e:  # pragma: no cover - defensive
         return RebuildResult(
@@ -417,6 +447,7 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
     # shows up here even when the volume happens to be right.
     coefficient_gates: list[GateResult] = []
     realised_cb = realised_cm = realised_cwp = None
+    realised_lcb = None
     wetted = None
     try:
         measured = realised_coefficients(
@@ -426,6 +457,9 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
         realised_cm = measured["coefficients"]["Cm"]
         realised_cwp = measured["coefficients"]["Cwp"]
         wetted = measured["wetted_surface_m2"]
+        # Measured by the independent divergence-theorem centroid in
+        # ``cb_sections.realised_lcb_fraction``, never copied from the request.
+        realised_lcb = measured.get("lcb_fraction")
         for name, got, want in (
             ("G9_midship_coefficient", realised_cm, ship.get("Cm", 0.98)),
             ("G10_waterplane_coefficient", realised_cwp, ship.get("Cwp", 0.80)),
@@ -441,7 +475,38 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
             "G9_midship_coefficient", False, f"measurement failed: {exc}",
         ))
 
-    strict_ok = all_passed and all(g.passed for g in coefficient_gates)
+    # LCB contract. Only a vector that *carries* an ``lcb`` target can be held to one:
+    # the legacy Series 60 / Wigley / parametric chains have no LCB degree of freedom,
+    # so asking them for one is reported as unsupported rather than silently passed.
+    lcb_gates: list[GateResult] = []
+    requested_lcb = ship.get("lcb")
+    lcb_error = None
+    if requested_lcb is not None:
+        requested_lcb = float(requested_lcb)
+        if method != "cb_calibrated_sections":
+            lcb_gates.append(GateResult(
+                "G11_longitudinal_centre", False,
+                f"method {method} has no LCB control; requested "
+                f"{requested_lcb:+.5f} L cannot be honoured",
+            ))
+        elif realised_lcb is None:
+            lcb_gates.append(GateResult(
+                "G11_longitudinal_centre", False, "LCB measurement failed",
+            ))
+        else:
+            lcb_error = abs(realised_lcb - requested_lcb)
+            lcb_gates.append(GateResult(
+                "G11_longitudinal_centre", lcb_error < LCB_TOLERANCE,
+                f"realised={realised_lcb:+.6f} L requested={requested_lcb:+.6f} L "
+                f"err={lcb_error:.3e} L",
+                value=lcb_error, threshold=LCB_TOLERANCE,
+            ))
+
+    strict_ok = (
+        all_passed
+        and all(g.passed for g in coefficient_gates)
+        and all(g.passed for g in lcb_gates)
+    )
     return RebuildResult(
         ship_id=ship["ship_id"], ship_type=ship["ship_type"],
         method=method, method_reason=reason,
@@ -452,6 +517,8 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
         triangle_count=tri_count, rebuild_time_s=elapsed,
         realised_Cb=realised_cb, realised_Cm=realised_cm, realised_Cwp=realised_cwp,
         coefficient_gates=coefficient_gates, wetted_surface_area=wetted,
+        requested_lcb=None if requested_lcb is None else float(requested_lcb),
+        realised_lcb=realised_lcb, lcb_error=lcb_error, lcb_gates=lcb_gates,
         strict_verdict="VERIFIED" if strict_ok else "FAILED",
     )
 
@@ -492,6 +559,12 @@ def rebuild_ship(
         )
 
 
+def _rebuild_one(args: tuple[dict, int, int, str]) -> "RebuildResult":
+    """Module-level trampoline so the rebuild loop can run in a process pool."""
+    ship, nx, nz, method_preference = args
+    return rebuild_ship(ship, nx=nx, nz=nz, method_preference=method_preference)
+
+
 def run_shipd_rebuild(
     ships: Sequence[dict],
     *,
@@ -499,12 +572,16 @@ def run_shipd_rebuild(
     nz: int = DEFAULT_NZ,
     out_dir: str | Path = "runs/shipd_rebuild",
     method_preference: str = "calibrated",
+    workers: int = 1,
 ) -> dict[str, Any]:
     """Run the full ShipD rebuild pipeline.
 
     ``method_preference`` selects the reconstruction chain: ``"calibrated"``
     (default) tries the coefficient-calibrated family first, ``"legacy"``
     reproduces the round-2 Series 60 / parametric / Wigley chain.
+
+    ``workers > 1`` runs the per-ship rebuild in a process pool; the assembly and
+    the artefacts are identical either way (each ship is independent).
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -512,9 +589,19 @@ def run_shipd_rebuild(
     results: list[RebuildResult] = []
     t_start = time.time()
 
-    for ship in ships:
-        result = rebuild_ship(ship, nx=nx, nz=nz, method_preference=method_preference)
-        results.append(result)
+    if workers and workers > 1 and len(ships) > 1:
+        import multiprocessing
+
+        with multiprocessing.Pool(workers) as pool:
+            results = pool.map(
+                _rebuild_one,
+                [(ship, nx, nz, method_preference) for ship in ships],
+                chunksize=max(1, len(ships) // (workers * 8)),
+            )
+    else:
+        for ship in ships:
+            result = rebuild_ship(ship, nx=nx, nz=nz, method_preference=method_preference)
+            results.append(result)
 
     total_time = time.time() - t_start
 
@@ -580,6 +667,52 @@ def run_shipd_rebuild(
             ) / len(values),
         }
 
+    # LCB contract accounting: requested / honoured / refused / unsupported.
+    lcb_rows: list[dict[str, Any]] = []
+    for ship, r in zip(ships, results):
+        if r.requested_lcb is None:
+            continue
+        lcb_rows.append({
+            "ship_id": r.ship_id,
+            "ship_type": r.ship_type,
+            "Cb": ship["Cb"],
+            "requested_lcb": r.requested_lcb,
+            "realised_lcb": r.realised_lcb,
+            "lcb_error": r.lcb_error,
+            "verdict": r.verdict,
+            "method": r.method,
+            "lcb_gate_passed": (r.lcb_gates[0].passed if r.lcb_gates else None),
+            "error_message": r.error_message,
+        })
+    lcb_errors = [row["lcb_error"] for row in lcb_rows if row["lcb_error"] is not None]
+    lcb_summary = {
+        "tolerance_L": LCB_TOLERANCE,
+        "n_requested": len(lcb_rows),
+        "n_honoured": sum(1 for row in lcb_rows if row["lcb_gate_passed"]),
+        "n_refused_unreachable": sum(
+            1 for row in lcb_rows
+            if (row["error_message"] or "").startswith("lcb_unreachable")
+        ),
+        "n_unsupported_method": sum(
+            1 for row in lcb_rows
+            if row["method"] != "cb_calibrated_sections" and row["realised_lcb"] is not None
+        ),
+        "n_gate_failed": sum(1 for row in lcb_rows if row["lcb_gate_passed"] is False),
+        "max_abs_error_L": max(lcb_errors) if lcb_errors else float("nan"),
+        "median_abs_error_L": (
+            sorted(lcb_errors)[len(lcb_errors) // 2] if lcb_errors else float("nan")
+        ),
+        "mean_signed_error_L": (
+            sum(row["realised_lcb"] - row["requested_lcb"]
+                for row in lcb_rows if row["realised_lcb"] is not None)
+            / len([row for row in lcb_rows if row["realised_lcb"] is not None])
+            if any(row["realised_lcb"] is not None for row in lcb_rows)
+            else float("nan")
+        ),
+    }
+    (out_dir / "lcb_contract.json").write_text(json.dumps(
+        {"summary": lcb_summary, "rows": lcb_rows}, indent=2))
+
     nominal_fields = {
         ship["ship_id"]: nominal_performance_fields(ship) for ship in ships
     }
@@ -609,6 +742,7 @@ def run_shipd_rebuild(
             key: _coefficient_summary(values) for key, values in coefficient_errors.items()
         },
         "coefficient_tolerance": COEFFICIENT_TOLERANCE,
+        "lcb_contract": lcb_summary,
         "correlation_sanity": correlation,
         "method_distribution": method_counts,
         "ship_type_distribution": type_counts,
@@ -632,13 +766,15 @@ def run_shipd_rebuild(
         writer = csv.writer(f)
         writer.writerow(["ship_id", "ship_type", "L", "B", "T", "Cb", "method", "verdict",
                          "triangle_count", "volume_mesh", "volume_parametric", "volume_error",
-                         "realised_L", "realised_B", "realised_T", "rebuild_time_s"])
+                         "realised_L", "realised_B", "realised_T", "rebuild_time_s",
+                         "requested_lcb", "realised_lcb", "lcb_error"])
         for r, s in zip(results, ships):
             writer.writerow([
                 r.ship_id, r.ship_type, s["L"], s["B"], s["T"], s["Cb"],
                 r.method, r.verdict, r.triangle_count, r.volume_mesh,
                 r.volume_parametric, r.volume_error,
                 r.realised_L, r.realised_B, r.realised_T, r.rebuild_time_s,
+                r.requested_lcb, r.realised_lcb, r.lcb_error,
             ])
 
     failure_ledger = []
@@ -650,7 +786,11 @@ def run_shipd_rebuild(
                 "Cb": orig["Cb"] if orig else None,
                 "method": r.method, "verdict": r.verdict,
                 "error_message": r.error_message,
-                "failed_gates": [g.name for g in r.gates if not g.passed],
+                "requested_lcb": r.requested_lcb,
+                "realised_lcb": r.realised_lcb,
+                "failed_gates": [g.name for g in r.gates if not g.passed]
+                                + [g.name for g in r.lcb_gates if not g.passed],
+                "failed_lcb_gate": any(not g.passed for g in r.lcb_gates),
             })
     (out_dir / "failure_ledger.json").write_text(json.dumps(failure_ledger, indent=2))
 

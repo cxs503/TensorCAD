@@ -3,7 +3,9 @@
 Two jobs, both needed by the GAP-CAD-C2 rebuild campaign:
 
 1. :func:`build_shipd_database` builds the 500-ship parameter table the rebuild
-   pipeline consumes. Round 2 of the campaign cited
+   pipeline consumes, including the longitudinal centre of buoyancy ``lcb`` (a
+   signed fraction of ``L``) -- a principal particular every real hull has and the
+   five scalar coefficients cannot imply. Round 2 of the campaign cited
    ``artifacts/shipd_rebuild/shipd_500.json`` but shipped no generator -- the file
    was not in the tree, so its 59.4 % pass rate could not be re-derived. This
    module *is* the generator: seeded, deterministic, no external file.
@@ -62,6 +64,41 @@ SHIP_TYPE_POPULATION: dict[str, tuple[float, float, float, float, float, float, 
 }
 
 
+#: type -> (LCB_min, LCB_max) as a signed fraction of ``L``, positive forward of
+#: mid-length. Typical *service* positions of the longitudinal centre of buoyancy,
+#: recollected offline from the principal-dimension / coefficient tables in Watson,
+#: *Practical Ship Design* (ch. 2) and Schneekluth & Bertram, *Ship Design for
+#: Efficiency and Economy* (ch. 2, LCB vs Fn plots): full hulls carry their centroid
+#: forward of amidships, fine hulls slightly aft.
+#:
+#: Provenance is ``offline_recollection, verified=false`` -- the same grade as the
+#: fleet manifest. These ranges are wide enough to bracket every value quoted in
+#: the campaign (KCS -1.48 %L, KVLCC2 +3.48 %L) and are *targets for the rebuild
+#: control loop*, not a fit to any particular vessel. They must not be read as a
+#: claim about any individual ship.
+LCB_FRACTION_RANGE: dict[str, tuple[float, float]] = {
+    "container":     (-0.020, -0.005),
+    "tanker":        (+0.015, +0.035),
+    "bulk_carrier":  (+0.010, +0.030),
+    "general_cargo": (+0.000, +0.020),
+    "roro":          (-0.010, +0.015),
+    "cruise":        (-0.015, +0.005),
+    "ferry":         (-0.010, +0.010),
+    "tug":           (-0.015, +0.015),
+    "naval_escort":  (-0.015, +0.010),
+    "fishing":       (-0.020, +0.010),
+}
+
+
+def sample_lcb_fraction(ship_type: str, rng: random.Random) -> float:
+    """One LCB target for ``ship_type``, uniform over :data:`LCB_FRACTION_RANGE`."""
+    try:
+        low, high = LCB_FRACTION_RANGE[ship_type]
+    except KeyError as exc:  # pragma: no cover - table and population are paired
+        raise KeyError(f"no LCB range for ship type {ship_type!r}") from exc
+    return rng.uniform(low, high)
+
+
 def _midship_from_block(cb: float) -> float:
     """Textbook fineness trend ``Cm = 1 - 0.20*(1-Cb)**1.8``."""
     return 1.0 - 0.20 * (1.0 - cb) ** 1.8
@@ -84,6 +121,11 @@ def build_shipd_database(n_ships: int = 500, *, seed: int = 42) -> list[dict[str
     if n_ships <= 0:
         raise ValueError("n_ships must be positive")
     rng = random.Random(seed)
+    # The LCB column has its own stream: drawing it from ``rng`` would shift every
+    # later ship's dimensions and coefficients, and the round-3/5 pass rates would
+    # then describe a different fleet than the one reported here. Separate streams
+    # keep the historical columns bit-for-bit identical while adding the new one.
+    lcb_rng = random.Random(seed * 7919 + 12345)
     types = list(SHIP_TYPE_POPULATION)
     ships: list[dict[str, Any]] = []
     for index in range(n_ships):
@@ -113,6 +155,9 @@ def build_shipd_database(n_ships: int = 500, *, seed: int = 42) -> list[dict[str
             "Cwp": round(cwp, 4),
             "design_froude": round(rng.uniform(fn_min, fn_max), 4),
             "cwp_adjusted": cwp_adjusted,
+            # Separate stream (see ``lcb_rng`` above): the historical columns of this
+            # table are unchanged by the addition of the LCB column.
+            "lcb": round(sample_lcb_fraction(ship_type, lcb_rng), 5),
             "seed": seed,
         })
     return ships
@@ -169,7 +214,10 @@ def nominal_performance_fields(ship: dict[str, Any]) -> dict[str, Any]:
     """
     length, beam, draft = ship["L"], ship["B"], ship["T"]
     cb, cm, cwp = ship["Cb"], ship["Cm"], ship["Cwp"]
-    froude = ship.get("design_froude", 0.20)
+    # Benchmark hulls carry ``design_froude: null`` when the manifest has no service
+    # Froude number; fall back to the mid-range 0.20 rather than raising, so the
+    # geometry-side fields (volume, wetted surface) stay reportable for them.
+    froude = ship.get("design_froude") or 0.20
     volume = cb * length * beam * draft
     speed = froude * math.sqrt(GRAVITY * length)      # m/s
     reynolds = speed * length / SEAWATER_VISCOSITY
