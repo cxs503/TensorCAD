@@ -2,7 +2,8 @@
 
 This is deliberately tiny. The contract is:
 
-``geometry_path(ship)``      verified path for a fleet ship, from the registry;
+``geometry_path(ship)``      verified path for a fleet ship *or* for a hull the store holds
+                             but no spec binds (resolved by ``AssetRegistry.hull_primary``);
 ``resolve_pointer(value, sha)``  verified path for a spec pointer, whatever form it
                              takes (``asset://`` URI, absolute path, dead work-tree path);
 ``open_geometry(ship)``      a binary handle on those bytes.
