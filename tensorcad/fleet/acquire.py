@@ -64,7 +64,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from tensorcad.fleet.build import RouteRefusal, build_ship_geometry
-from tensorcad.fleet.gates import VOLUME_TOLERANCE, evaluate_gates
+from tensorcad.fleet.gates import VOLUME_TOLERANCE, evaluate_gates, quarantine_census
 from tensorcad.fleet.manifest import (
     FleetManifest,
     Provenance,
@@ -457,7 +457,12 @@ def _admitted_block(
                     if route == "iges_field" and k in ("dx", "dz", "ring_points", "samples_per_metre")}
     built = build_ship_geometry(admitted, nx=nx, nz=nz, stl_path=str(geometry_path),
                                 iges_path=str(geometry_path), **route_kwargs)
-    verdict = evaluate_gates(admitted, built.mesh, manifest, volume_tolerance=volume_tolerance, registry=registry)
+    census = quarantine_census(built.details)
+    verdict = evaluate_gates(
+        admitted, built.mesh, manifest, volume_tolerance=volume_tolerance, registry=registry,
+        quarantine=None if census is None else census[0],
+        patch_total=None if census is None else census[1],
+    )
     return {
         "ship": record.name,
         "status": "admitted" if verdict["passed"] else "refused_by_gates",

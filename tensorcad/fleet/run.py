@@ -45,6 +45,7 @@ from tensorcad.fleet.controls import (
 from tensorcad.fleet.gates import (
     VOLUME_TOLERANCE,
     evaluate_gates,
+    quarantine_census,
     gate_particulars_consistent,
     gate_reference_consistency,
     measure,
@@ -211,8 +212,15 @@ def _ship_block(record, manifest: FleetManifest, *, nx: int, nz: int,
         block = refused(record, str(exc))
         block["record"] = record.as_dict()
         return block
-    verdict = evaluate_gates(record, built.mesh, manifest, volume_tolerance=volume_tolerance,
-                             registry=registry)
+    # The patch census travels into the verdict: G9 refuses a hull whose surface lost
+    # patches to the reader's fail-closed quarantine, because the volume G7 measures is
+    # then integrated over a hull with holes filled by the field interpolant.
+    census = quarantine_census(built.details)
+    verdict = evaluate_gates(
+        record, built.mesh, manifest, volume_tolerance=volume_tolerance, registry=registry,
+        quarantine=None if census is None else census[0],
+        patch_total=None if census is None else census[1],
+    )
     verdict["record"] = record.as_dict()
     verdict["build"] = built.as_dict()
     verdict["hydrostatics"] = _hydrostatics(built.mesh)

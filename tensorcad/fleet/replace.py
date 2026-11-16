@@ -40,7 +40,13 @@ from tensorcad.fleet.build import (
     read_stl,
     write_binary_stl,
 )
-from tensorcad.fleet.gates import VOLUME_TOLERANCE, evaluate_gates, measure, placeholder_reasons
+from tensorcad.fleet.gates import (
+    VOLUME_TOLERANCE,
+    evaluate_gates,
+    measure,
+    placeholder_reasons,
+    quarantine_census,
+)
 from tensorcad.fleet.manifest import FleetManifest, ShipRecord, load_manifest, sha256_file
 from tensorcad.fleet.sources import load_registry
 
@@ -206,8 +212,12 @@ def _deliver_one(
         block.update({"action": "withheld", "reason": f"geometry route refused: {exc}",
                       "status": "REFUSED"})
         return block
-    verdict = evaluate_gates(record, built.mesh, manifest, volume_tolerance=volume_tolerance,
-                             registry=registry)
+    census = quarantine_census(built.details)
+    verdict = evaluate_gates(
+        record, built.mesh, manifest, volume_tolerance=volume_tolerance, registry=registry,
+        quarantine=None if census is None else census[0],
+        patch_total=None if census is None else census[1],
+    )
     target = out_dir / entry["file"]
     written_sha = write_binary_stl(built.mesh, target)
     stored_sha = sha256_file(target)
