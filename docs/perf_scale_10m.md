@@ -800,3 +800,35 @@ python -m tensorcad.perf_benchmark --fleet-tier --ladder "641,161;1001,257;2001,
   不要混引。
 - 三体 1.2×10⁷ 的 OBJ 文件 **625.5 MiB 不落仓库**（写 `$TMPDIR`，一档写完删上一档）；
   仓库里只有 JSON 与 provenance，任何读者可按 §11.1 的命令重跑复现。
+**工件（受版本控制、可直接复核）**: `benchmarks/perf_scale/artifacts/{ladder_mesh.json,ladder_voxel.json}`、
+`benchmarks/perf_scale/{baseline.json,ladder_fleet_10m.json,ladder_3pt_mechanism_smoke.json}`；
+图 `benchmarks/perf_scale/figures/*.png`；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
+`benchmarks/perf_scale/figures/scaling.png`（墙钟 vs 规模 log-log）、`point_locate.png`（两条点定位路径吞吐对比）、`index_cost.png`（建索引时间/索引体积）、`voxelize.png`（体素化缩放）；10⁶–10⁷ 带另有两张：`fig3pt_scaling.png`（每个子任务的拟合指数与门限，§9.4）与 `fig3pt_memory.png`（网格占用/索引/活内存 vs 规模）。
+## 4. 误差判定（关键量 vs 基准）
+| 图 | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
+| 作图脚本 | `scripts/gen_perf_scale_figures.py` |
+| 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 峰值 RSS MiB | 导入体积误差 |
+| load | 1 | 25,918 | 0.751 | 34,492 | — | — | 72 | — |
+| load | 1 | 410,878 | 15.406 | 26,671 | — | — | 629 | — |
+| load | 1 | 1,640,958 | 110.528 | 14,847 | — | — | 2,422 | — |
+| load | 1 | 4,003,998 | 283.716 | 14,113 | — | — | 5,751 | — |
+| obj_write | 1 | 25,918 | 0.057 | 454,683 | 1.0 | 18.0 | 72 | — |
+| obj_write | 1 | 410,878 | 1.187 | 346,078 | 18.2 | 15.3 | 629 | — |
+| obj_write | 1 | 1,640,958 | 5.372 | 305,477 | 75.4 | 14.0 | 2,422 | — |
+| obj_write | 1 | 4,003,998 | 11.013 | 363,585 | 206.3 | 18.7 | 5,751 | — |
+| obj_read | 1 | 25,918 | 0.093 | 278,628 | 1.0 | 11.0 | 72 | -1.359e-01 % |
+| obj_read | 1 | 410,878 | 1.676 | 245,172 | 18.2 | 10.9 | 629 | -1.673e-02 % |
+| obj_read | 1 | 1,640,958 | 7.586 | 216,328 | 75.4 | 9.9 | 2,422 | -5.870e-03 % |
+| obj_read | 1 | 4,003,998 | 17.095 | 234,217 | 206.3 | 12.1 | 5,751 | -2.990e-03 % |
+| volume | 1 | 25,918 | 0.010 | 2,520,007 | — | — | 72 | — |
+| volume | 1 | 410,878 | 0.176 | 2,340,416 | — | — | 629 | — |
+| volume | 1 | 1,640,958 | 0.751 | 2,185,953 | — | — | 2,422 | — |
+| volume | 1 | 4,003,998 | 1.877 | 2,133,446 | — | — | 5,751 | — |
+- **文件体积是线性量**：`文件 MiB / 三角面` ≈ 48 B/tri（17 位有效数字的 `v` + `f` 行），10⁷ 档约 0.5 GiB，
+- 表内最大档是 **1.64×10⁶ 三角**。10⁶→10⁷ 带的 OBJ 往返实测（单体 8.2×10⁶ 的 `cj3891`、三体 1.2×10⁷ 的
+  `cj3890`）递交后排队 **35 min 仍未出队**，本节**不填外推数字**：上表结论只覆盖到 1.64×10⁶ 三角。
+  两个作业到件后再 `python scripts/perf_scale_doc.py --write` 无损换表即可（表格与工件绑定，不会静默漂移）。
+- 本节阶梯只有 **2 档**，所以 §11.4 的复杂度指数门 `scaling_obj_write`/`scaling_obj_read` 是
+  **`not_run`（不是 pass）**：2 点拟合给不出可判定的斜率，硬给一个数就是编数字。指数门机制本身由
+  `tests/test_perf_import.py::test_import_subtasks_get_measured_scaling_gates` 在三点阶梯上覆盖
+  （断言 `status=measured` 且指数低于 `SCALING_LIMITS`）；10⁶–10⁷ 档的指数门由 `cj3890` 补齐。
