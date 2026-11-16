@@ -68,6 +68,17 @@ DEFAULT_MAX_CELLS = 32_000_000
 #: instead of being spread over the grid.
 DEFAULT_OVERSIZED_LIMIT = 4096
 
+#: Upper bound on the cells the *automatic* resolution may allocate per triangle.
+#: The volume-based cell size collapses on a degenerate bounding box (a plate, a
+#: shell patch, any open surface), which would otherwise buy millions of cells --
+#: and, in :meth:`TriangleGrid.nearest_surface`, a shell search across all of
+#: them -- for a handful of triangles.
+AUTO_CELLS_PER_TRIANGLE = 8
+
+#: ... and never fewer cells than this in total, so a 1-triangle mesh still has a
+#: grid instead of a single bucket.
+MIN_AUTO_CELLS = 64
+
 #: Geometric tolerances.  Deliberately tiny: the point of the acceleration
 #: structure is to return the *same* answer as the brute-force test, so no slack
 #: is introduced beyond double-precision rounding.
@@ -182,6 +193,10 @@ class TriangleGrid:
         self._flat: array = array("i")
         self._counts: array = array("i", bytes(4 * self._n_cells))
         self.build_seconds: float = 0.0
+        #: Cells the last ``nearest_surface`` query visited (diagnostic: a large
+        #: number means the shell search was the cost driver and the query fell
+        #: back to a flat scan).  Reset by every query.
+        self.last_query_cell_visits: int = 0
         self._build(oversized_limit)
 
     # -- construction -------------------------------------------------------
@@ -205,7 +220,13 @@ class TriangleGrid:
         res = self._clamp_resolution(
             tuple(max(1, int(math.ceil(e / h))) for e in (ex, ey, ez))
         )
-        while res[0] * res[1] * res[2] > max_cells:
+        # Occupancy alone cannot justify a grid that is far bigger than the
+        # triangle set: on a degenerate bbox (zero-thickness extent) the volume
+        # term vanishes and the in-plane axes saturate the per-axis clamp.
+        cell_budget = min(
+            max_cells, max(MIN_AUTO_CELLS, AUTO_CELLS_PER_TRIANGLE * n_tris)
+        )
+        while res[0] * res[1] * res[2] > cell_budget:
             res = self._clamp_resolution(tuple(max(1, int(round(r * 0.8))) for r in res))
             if res == (1, 1, 1):
                 break
@@ -419,6 +440,18 @@ class TriangleGrid:
         band" from "the nearest triangle is at distance band".
 
         Returns ``None`` only for an empty mesh, which the constructor rejects.
+
+        Cost is ``O(min(cells within the answer distance, N triangles))``.  The
+        shell loop alone is only the first half of that bound: on a thin body
+        (a plate, a shell patch) discretised at a fine in-plane resolution the
+        answer distance spans hundreds of cells per axis, so clearing the ball
+        can cost millions of empty cell visits while a flat scan of the
+        triangles would cost ``N``.  Once the shell loop has walked as many cells
+        as the mesh has triangles, the query therefore finishes with that flat
+        scan instead.  The answer is unchanged -- every remaining cell only holds
+        triangles the flat scan also tests -- and the query is bounded by ``N``
+        cell visits plus one flat scan rather than by the grid geometry.
+        :attr:`last_query_cell_visits` exposes the cell count of the last query.
         """
         band2 = None if band is None else float(band) ** 2
         if band2 is not None and band2 <= 0.0:
@@ -433,6 +466,12 @@ class TriangleGrid:
         best = math.inf
         best_tri = -1
         best_q = (px, py, pz)
+
+        # Cost ceiling for the shell walk: a *cell visit* is the unit of work
+        # (empty cells cost little but there can be millions of them), so the
+        # budget is expressed in cells -- the mesh's triangle count, i.e. what a
+        # flat scan costs.
+        visit_budget = self.n_triangles
 
         def consider(k: int) -> None:
             nonlocal best, best_tri, best_q
@@ -457,20 +496,11 @@ class TriangleGrid:
         by = cell_of(py, 1)
         bz = cell_of(pz, 2)
 
-        r = 0
-        while True:
-            ix0 = bx - r if bx - r > 0 else 0
-            ix1 = bx + r if bx + r < nx - 1 else nx - 1
-            iy0 = by - r if by - r > 0 else 0
-            iy1 = by + r if by + r < ny - 1 else ny - 1
-            iz0 = bz - r if bz - r > 0 else 0
-            iz1 = bz + r if bz + r < nz - 1 else nz - 1
-            complete = (
-                ix0 == 0 and ix1 == nx - 1
-                and iy0 == 0 and iy1 == ny - 1
-                and iz0 == 0 and iz1 == nz - 1
-            )
+        visited = 0
 
+        def scan_block(ix0: int, ix1: int, iy0: int, iy1: int, iz0: int, iz1: int) -> bool:
+            """Test every triangle of one shell; True when the test budget ran out."""
+            nonlocal visited
             for iz in range(iz0, iz1 + 1):
                 z_edge = iz == iz0 or iz == iz1
                 zbase = nx * ny * iz
@@ -484,8 +514,31 @@ class TriangleGrid:
                         xs = (ix0,)
                     for ix in xs:
                         c = cellbase + ix
+                        visited += 1
                         for i in range(starts[c], starts[c + 1]):
                             consider(flat[i])
+                        if visited > visit_budget:
+                            return True
+            return False
+
+        r = 0
+        exhausted = False
+        while True:
+            ix0 = bx - r if bx - r > 0 else 0
+            ix1 = bx + r if bx + r < nx - 1 else nx - 1
+            iy0 = by - r if by - r > 0 else 0
+            iy1 = by + r if by + r < ny - 1 else ny - 1
+            iz0 = bz - r if bz - r > 0 else 0
+            iz1 = bz + r if bz + r < nz - 1 else nz - 1
+            complete = (
+                ix0 == 0 and ix1 == nx - 1
+                and iy0 == 0 and iy1 == ny - 1
+                and iz0 == 0 and iz1 == nz - 1
+            )
+
+            if scan_block(ix0, ix1, iy0, iy1, iz0, iz1):
+                exhausted = True
+                break
 
             if complete:
                 break
@@ -527,9 +580,22 @@ class TriangleGrid:
                 # Nothing unexamined can be within the band.
                 if best <= band2:
                     break
+                self.last_query_cell_visits = visited
                 return SurfaceHit(distance=math.sqrt(band2), triangle=-1, point=(px, py, pz))
             r += 1
 
+        if exhausted:
+            # The shell loop has already walked more cells than the mesh has
+            # triangles, so a flat scan of the triangles is the cheaper way to
+            # finish -- and it is exact, being a superset of every cell still
+            # unexamined.
+            for k in range(self.n_triangles):
+                consider(k)
+            if band2 is not None and best > band2:
+                self.last_query_cell_visits = visited
+                return SurfaceHit(distance=math.sqrt(band2), triangle=-1, point=(px, py, pz))
+
+        self.last_query_cell_visits = visited
         if best_tri < 0:
             return None
         return SurfaceHit(distance=math.sqrt(best), triangle=best_tri, point=best_q)

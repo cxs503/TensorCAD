@@ -7,8 +7,12 @@ fallback) is an implementation detail that must not perturb the geometry.
 """
 from __future__ import annotations
 
+import json
 import math
 import random
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -19,6 +23,7 @@ from tensorcad.spatial_index import (
     TriangleGrid,
     brute_force_all,
     brute_force_nearest,
+    brute_force_surface_distance,
 )
 
 
@@ -267,3 +272,206 @@ def test_index_does_not_mutate_mesh(hull_mesh: Mesh) -> None:
     TriangleGrid(hull_mesh)
     after = (len(hull_mesh.vertices), len(hull_mesh.faces), is_watertight(hull_mesh))
     assert before == after
+
+# ---------------------------------------------------------------------------
+# Thin / degenerate bodies: exact nearest-surface queries must stay affordable
+# ---------------------------------------------------------------------------
+#
+# The shell search in ``nearest_surface`` is exact but its cost grows with
+# (answer distance / cell size)**3.  A plate or an open shell patch has a
+# degenerate bounding box, so the volume-based automatic resolution puts
+# thousands of cells along the two in-plane axes while the answer distance is
+# still O(1) mesh units: the query would walk millions of empty cells for a
+# two-triangle mesh.  These tests pin both halves of the contract -- the answers
+# are still the brute-force ones, and the cost is bounded by the triangle count
+# rather than by the grid geometry.
+
+def _sheet(size: float = 1.0) -> Mesh:
+    """Two triangles spanning a square at z = 0 (zero-thickness bbox)."""
+    s = size
+    return Mesh(
+        vertices=[(0.0, 0.0, 0.0), (s, 0.0, 0.0), (s, s, 0.0), (0.0, s, 0.0)],
+        faces=[(0, 1, 2), (0, 2, 3)],
+    )
+
+
+def _thin_plate(size: float = 1.0, thickness: float = 1e-3) -> Mesh:
+    """Closed box with a plate-like aspect ratio (1 m x 1 m x 1 mm)."""
+    x1, y1, z1 = size, size, thickness
+    vertices = [(0.0, 0.0, 0.0), (x1, 0.0, 0.0), (x1, y1, 0.0), (0.0, y1, 0.0),
+                (0.0, 0.0, z1), (x1, 0.0, z1), (x1, y1, z1), (0.0, y1, z1)]
+    faces = [(0, 2, 1), (0, 3, 2), (4, 5, 6), (4, 6, 7),
+             (0, 1, 5), (0, 5, 4), (1, 2, 6), (1, 6, 5),
+             (2, 3, 7), (2, 7, 6), (3, 0, 4), (3, 4, 7)]
+    return Mesh(vertices=vertices, faces=faces)
+
+
+def _count_triangle_tests(monkeypatch) -> dict[str, int]:
+    """Instrument the grid's inner triangle test (the query's unit of work)."""
+    import tensorcad.spatial_index as spatial
+
+    calls = {"n": 0}
+    real = spatial._closest_point_triangle
+
+    def counting(*args, **kwargs):
+        calls["n"] += 1
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(spatial, "_closest_point_triangle", counting)
+    return calls
+
+
+@pytest.mark.parametrize("mesh_factory", [_sheet, _thin_plate])
+def test_nearest_surface_on_thin_body_matches_bruteforce(mesh_factory) -> None:
+    """A degenerate bbox must not change the distance, only its cost."""
+    mesh = mesh_factory()
+    grid = TriangleGrid(mesh)
+    rng = random.Random(11)
+    points = [(0.5, 0.5, 0.25), (0.5, 0.5, 2.0), (-1.0, 0.5, 0.5), (2.5, -0.5, 1.5)]
+    points += [tuple(rng.uniform(-1.5, 2.5) for _ in range(3)) for _ in range(30)]
+    for point in points:
+        hit = grid.nearest_surface(point)
+        assert hit is not None
+        assert hit.distance == brute_force_surface_distance(mesh, point)
+
+
+def test_nearest_surface_query_cost_is_bounded_by_triangle_count(monkeypatch) -> None:
+    """Pinned to a fine forced resolution: the shell loop alone would be hopeless.
+
+    Two independent bounds are checked, because "cheap" has two failure modes:
+    walking empty cells (``last_query_cell_visits``) and testing triangles twice
+    (the instrumented call count).
+    """
+    mesh = _sheet()
+    n_triangles = len(mesh.faces)
+    point = (0.5, 0.5, 0.25)
+    reference = brute_force_surface_distance(mesh, point)
+    for resolution in ((64, 64, 1), (512, 512, 1)):
+        grid = TriangleGrid(mesh, resolution=resolution)
+        calls = _count_triangle_tests(monkeypatch)
+        hit = grid.nearest_surface(point)
+        assert hit is not None and hit.distance == reference
+        assert grid.last_query_cell_visits <= n_triangles + 16, (
+            resolution, grid.last_query_cell_visits
+        )
+        # At most the shell walk plus one flat scan of the mesh.
+        assert calls["n"] <= 2 * n_triangles + 8, (resolution, calls["n"])
+        monkeypatch.undo()
+
+
+def test_nearest_surface_far_query_cost_scales_with_triangles_not_cells() -> None:
+    """Growing the in-plane resolution must not grow the query cost."""
+    mesh = _sheet()
+    n_triangles = len(mesh.faces)
+    point = (0.5, 0.5, 1.0)          # one body length above the sheet
+    visits = []
+    for resolution in ((128, 128, 1), (256, 256, 1), (1024, 1024, 1)):
+        grid = TriangleGrid(mesh, resolution=resolution)
+        assert grid.n_cells >= 128 * 128
+        hit = grid.nearest_surface(point)
+        assert hit is not None
+        assert hit.distance == brute_force_surface_distance(mesh, point)
+        visits.append(grid.last_query_cell_visits)
+        assert grid.last_query_cell_visits <= n_triangles + 16
+    # Identical answers and identical cost across a 64x cell-count change.
+    assert len(set(visits)) == 1
+
+
+def test_nearest_surface_band_truncation_survives_the_budget(monkeypatch) -> None:
+    """A narrow-band miss is still marked 'truncated' (triangle == -1)."""
+    mesh = _sheet()
+    point = (0.5, 0.5, 0.25)          # 0.25 above the sheet
+    grid = TriangleGrid(mesh, resolution=(512, 512, 1))
+    calls = _count_triangle_tests(monkeypatch)
+    inside_band = grid.nearest_surface(point, band=1.0)
+    assert inside_band is not None and inside_band.triangle >= 0
+    assert inside_band.distance == pytest.approx(0.25, rel=1e-12)
+    outside_band = grid.nearest_surface(point, band=0.05)
+    assert outside_band is not None
+    assert outside_band.triangle == -1            # truncated, not "exactly 0.05 away"
+    assert outside_band.distance == pytest.approx(0.05, rel=1e-12)
+    assert calls["n"] <= 4 * len(mesh.faces) + 16
+    assert grid.last_query_cell_visits <= len(mesh.faces) + 16
+    monkeypatch.undo()
+
+
+def test_auto_resolution_does_not_outgrow_the_triangle_set() -> None:
+    """Occupancy sizing must not buy millions of cells for a degenerate bbox."""
+    from tensorcad.spatial_index import AUTO_CELLS_PER_TRIANGLE, MIN_AUTO_CELLS
+
+    for mesh in (_sheet(), _thin_plate(), _sheet(10.0)):
+        grid = TriangleGrid(mesh)
+        budget = max(MIN_AUTO_CELLS, AUTO_CELLS_PER_TRIANGLE * len(mesh.faces))
+        assert grid.n_cells <= budget, (grid.resolution, grid.n_cells, budget)
+        assert min(grid.resolution) >= 1
+    # A solid body keeps a multi-cell grid on every axis (the cap is not binding).
+    cube = TriangleGrid(_thin_plate(thickness=1.0))
+    assert min(cube.resolution) >= 2
+
+
+def test_ray_and_distance_queries_agree_on_thin_bodies() -> None:
+    """The resolution cap must not perturb ray casting either."""
+    mesh = _thin_plate(size=2.0, thickness=1e-2)
+    grid = TriangleGrid(mesh)
+    rng = random.Random(23)
+    for _ in range(40):
+        origin = tuple(rng.uniform(-3.0, 5.0) for _ in range(3))
+        direction = tuple(rng.gauss(0.0, 1.0) for _ in range(3))
+        if direction == (0.0, 0.0, 0.0):
+            continue
+        got = grid.cast_ray(origin, direction)
+        ref = brute_force_nearest(mesh, origin, direction)
+        assert (got is None) == (ref is None)
+        if ref is not None:
+            assert got is not None
+            assert got.distance == pytest.approx(ref, rel=1e-9, abs=1e-12)
+        assert len(grid.cast_all(origin, direction)) == len(brute_force_all(mesh, origin, direction))
+        hit = grid.nearest_surface(origin)
+        assert hit is not None
+        assert hit.distance == brute_force_surface_distance(mesh, origin)
+
+
+# ---------------------------------------------------------------------------
+# Evidence: the cost claim in docs/spatial_index_nearest_cost.md is rendered
+# from the committed artifact, and the artifact still shows the defect fixed.
+# ---------------------------------------------------------------------------
+
+ROOT = Path(__file__).resolve().parents[1]
+NEAREST_COST_JSON = ROOT / "artifacts" / "spatial_nearest_cost.json"
+NEAREST_COST_DOC = ROOT / "docs" / "spatial_index_nearest_cost.md"
+
+
+def test_nearest_cost_doc_table_is_rendered_from_the_artifact() -> None:
+    """A hand-edited number in the evidence table must be a failure."""
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "probe_nearest_surface_cost.py"), "--check-doc"],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=300,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
+def test_nearest_cost_artifact_shows_the_defect_fixed() -> None:
+    """The recorded before/after runs must still demonstrate the pathology."""
+    runs = {run["label"]: run for run in json.loads(NEAREST_COST_JSON.read_text())["runs"]}
+    assert {"before", "after"} <= set(runs)
+    for label, run in runs.items():
+        for case, record in run["cases"].items():
+            assert record["bruteforce_mismatches"] == 0, (label, case)
+    before = runs["before"]["cases"]["sheet_2tri"]
+    after = runs["after"]["cases"]["sheet_2tri"]
+    assert before["timeouts"] > 0, "the pathological case stopped timing out"
+    assert after["timeouts"] == 0
+    assert after["n_cells"] * 100 < before["n_cells"]
+    assert after["seconds_per_query"] * 10 < before["seconds_per_query"]
+
+
+def test_nearest_cost_doc_cites_existing_paths() -> None:
+    import re as _re
+
+    text = NEAREST_COST_DOC.read_text(encoding="utf-8")
+    cited = sorted(set(_re.findall(
+        r"`((?:benchmarks|docs|scripts|tests|tensorcad|artifacts)/[^`\s]*)`", text
+    )))
+    assert cited, "document cites no repository paths"
+    missing = [path for path in cited if not (ROOT / path.split("::")[0]).exists()]
+    assert not missing, f"cited but missing: {missing}"
