@@ -1,5 +1,5 @@
 {
-  "baseline": "/root/tp-agent/work/m20561/docs/golden/tensorcad_geometry_golden.json",
+  "baseline": "docs/golden/tensorcad_geometry_golden.json",
   "blind_spots_ge_1pct": [
     "series60/maximum_section_area_m2"
   ],
