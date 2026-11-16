@@ -1,0 +1,562 @@
+{
+  "schema": "tensorcad.perf_cad_source/1",
+  "route": "patch",
+  "source": {
+    "path": "work/assets/onrt.igs",
+    "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+    "bytes": 3374136,
+    "parse_seconds": 0.668278,
+    "census": {
+      "faces": 132,
+      "edges": 447,
+      "surfaces": 132
+    }
+  },
+  "environment": {
+    "tensorcad": "0.23.0",
+    "python": "3.11.6",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "machine": "loongarch64",
+    "cpu_count": 128,
+    "loadavg": {
+      "load1": 55.99169921875,
+      "load5": 73.2822265625,
+      "load15": 86.10107421875
+    }
+  },
+  "gate_factor": 2.0,
+  "queries": 500,
+  "chunk_faces": 8,
+  "max_triangles": 16000000,
+  "wall_seconds": 63.719,
+  "records": [
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=8x6",
+      "status": "measured",
+      "seconds": 0.225329,
+      "triangles": 12636,
+      "vertices": 8031,
+      "throughput": 56078.0,
+      "parse_seconds": 0.668278,
+      "census": {},
+      "mesh_mb": 2.9828643798828125,
+      "rss_mb": 64.03125,
+      "peak_rss_mb": 64.03125,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 0.22728,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0,
+          64.0
+        ],
+        "rss_peak_of_chunks_mb": 64.0,
+        "rss_first_chunk_mb": 64.0,
+        "speed_ratio": 1.009
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 0.103744,
+        "vertices_before": 8031,
+        "vertices_after": 7649,
+        "vertices_merged": 382,
+        "merged_fraction": 0.047566,
+        "boundary_edges_before": 3383,
+        "boundary_edges_after": 3036,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 12636
+      },
+      "volume": {
+        "seconds": 0.005527,
+        "signed_volume": 0.005813538345099892,
+        "abs_volume": 0.005813538345099892,
+        "surface_area": 0.48665140157936687,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.045764,
+        "queries_per_second": 10925.7,
+        "build_seconds": 0.098429,
+        "index_cells": 3600,
+        "index_entries": 31314,
+        "index_bytes": 1063852,
+        "hits": 500
+      },
+      "rss_mb_end": 64.03125,
+      "peak_rss_mb_end": 64.03125
+    },
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=16x12",
+      "status": "measured",
+      "seconds": 0.797149,
+      "triangles": 50615,
+      "vertices": 28662,
+      "throughput": 63495.0,
+      "parse_seconds": 0.668278,
+      "census": {},
+      "mesh_mb": 11.466358184814453,
+      "rss_mb": 64.03125,
+      "peak_rss_mb": 64.03125,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 0.802035,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          64.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0
+        ],
+        "rss_peak_of_chunks_mb": 72.0,
+        "rss_first_chunk_mb": 64.0,
+        "speed_ratio": 1.006
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 0.357221,
+        "vertices_before": 28662,
+        "vertices_after": 27948,
+        "vertices_merged": 714,
+        "merged_fraction": 0.024911,
+        "boundary_edges_before": 6757,
+        "boundary_edges_after": 6094,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 50615
+      },
+      "volume": {
+        "seconds": 0.023872,
+        "signed_volume": 0.005758326879773485,
+        "abs_volume": 0.005758326879773485,
+        "surface_area": 0.487898124762857,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.058363,
+        "queries_per_second": 8567.0,
+        "build_seconds": 0.385494,
+        "index_cells": 13272,
+        "index_entries": 104137,
+        "index_bytes": 4167008,
+        "hits": 500
+      },
+      "rss_mb_end": 88.03125,
+      "peak_rss_mb_end": 88.03125
+    },
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=32x24",
+      "status": "measured",
+      "seconds": 3.045149,
+      "triangles": 202601,
+      "vertices": 107881,
+      "throughput": 66532.4,
+      "parse_seconds": 0.668278,
+      "census": {},
+      "mesh_mb": 44.95687484741211,
+      "rss_mb": 108.03125,
+      "peak_rss_mb": 108.03125,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 3.033003,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          108.0,
+          108.0,
+          108.0,
+          112.0,
+          112.0,
+          116.0,
+          116.0,
+          116.0,
+          116.0,
+          120.0,
+          120.0,
+          124.0,
+          124.0,
+          132.0,
+          136.0,
+          136.0,
+          136.0
+        ],
+        "rss_peak_of_chunks_mb": 136.0,
+        "rss_first_chunk_mb": 108.0,
+        "speed_ratio": 0.996
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 1.488374,
+        "vertices_before": 107881,
+        "vertices_after": 106545,
+        "vertices_merged": 1336,
+        "merged_fraction": 0.012384,
+        "boundary_edges_before": 13507,
+        "boundary_edges_after": 12193,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 202601
+      },
+      "volume": {
+        "seconds": 0.093229,
+        "signed_volume": 0.005740893680470341,
+        "abs_volume": 0.005740893680470341,
+        "surface_area": 0.48826031448766105,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.081188,
+        "queries_per_second": 6158.5,
+        "build_seconds": 1.559299,
+        "index_cells": 54625,
+        "index_entries": 364957,
+        "index_bytes": 16484104,
+        "hits": 500
+      },
+      "rss_mb_end": 185.609375,
+      "peak_rss_mb_end": 200.578125
+    },
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=64x48",
+      "status": "measured",
+      "seconds": 11.799266,
+      "triangles": 810696,
+      "vertices": 418297,
+      "throughput": 68707.3,
+      "parse_seconds": 0.668278,
+      "census": {},
+      "mesh_mb": 178.05426025390625,
+      "rss_mb": 257.4375,
+      "peak_rss_mb": 277.40625,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 12.075459,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          261.4,
+          269.4,
+          277.4,
+          285.4,
+          293.4,
+          301.4,
+          313.4,
+          321.4,
+          333.4,
+          341.4,
+          349.4,
+          353.4,
+          357.4,
+          385.4,
+          393.4,
+          401.4,
+          405.4
+        ],
+        "rss_peak_of_chunks_mb": 405.4,
+        "rss_first_chunk_mb": 261.4,
+        "speed_ratio": 1.023
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 7.488693,
+        "vertices_before": 418297,
+        "vertices_after": 415458,
+        "vertices_merged": 2839,
+        "merged_fraction": 0.006787,
+        "boundary_edges_before": 26923,
+        "boundary_edges_after": 24383,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 810696
+      },
+      "volume": {
+        "seconds": 0.493979,
+        "signed_volume": 0.005736460624593496,
+        "abs_volume": 0.005736460624593496,
+        "surface_area": 0.4883564785422103,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.091335,
+        "queries_per_second": 5474.4,
+        "build_seconds": 6.762135,
+        "index_cells": 213840,
+        "index_entries": 1298055,
+        "index_bytes": 65273056,
+        "hits": 500
+      },
+      "rss_mb_end": 562.390625,
+      "peak_rss_mb_end": 626.828125
+    }
+  ],
+  "measurements": {
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=8x6": 0.225329,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=8x6": 0.103744,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=8x6": 0.005527,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=8x6": 0.045764,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=8x6": 0.22728,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=16x12": 0.797149,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=16x12": 0.357221,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=16x12": 0.023872,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=16x12": 0.058363,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=16x12": 0.802035,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=32x24": 3.045149,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=32x24": 1.488374,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=32x24": 0.093229,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=32x24": 0.081188,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=32x24": 3.033003,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=64x48": 11.799266,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=64x48": 7.488693,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=64x48": 0.493979,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=64x48": 0.091335,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=64x48": 12.075459
+  },
+  "gates": [
+    {
+      "name": "chunk_equivalence[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "chunk_equivalence[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "chunk_equivalence[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "chunk_equivalence[patch uv=64x48]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=8x6]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate|ff061ab8584e5b0a|patch|uv=8x6'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=8x6]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_weld|ff061ab8584e5b0a|patch|uv=8x6'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=8x6]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_volume|ff061ab8584e5b0a|patch|uv=8x6'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=8x6]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_locate|ff061ab8584e5b0a|patch|uv=8x6'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=8x6]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=8x6'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=16x12]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate|ff061ab8584e5b0a|patch|uv=16x12'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=16x12]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_weld|ff061ab8584e5b0a|patch|uv=16x12'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=16x12]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_volume|ff061ab8584e5b0a|patch|uv=16x12'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=16x12]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_locate|ff061ab8584e5b0a|patch|uv=16x12'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=16x12]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=16x12'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=32x24]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate|ff061ab8584e5b0a|patch|uv=32x24'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=32x24]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_weld|ff061ab8584e5b0a|patch|uv=32x24'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=32x24]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_volume|ff061ab8584e5b0a|patch|uv=32x24'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=32x24]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_locate|ff061ab8584e5b0a|patch|uv=32x24'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=32x24]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=32x24'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=64x48]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate|ff061ab8584e5b0a|patch|uv=64x48'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=64x48]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_weld|ff061ab8584e5b0a|patch|uv=64x48'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=64x48]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_volume|ff061ab8584e5b0a|patch|uv=64x48'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=64x48]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_locate|ff061ab8584e5b0a|patch|uv=64x48'; run --save-baseline first"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=64x48]",
+      "passed": true,
+      "status": "not_run",
+      "detail": "not_run: no baseline entry 'cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=64x48'; run --save-baseline first"
+    },
+    {
+      "name": "scaling_cad_locate",
+      "passed": true,
+      "status": "measured",
+      "detail": "exponent=0.17 (limit 1.50), R^2=0.972, 4 sizes 12,636..810,696"
+    },
+    {
+      "name": "scaling_cad_tessellate",
+      "passed": true,
+      "status": "measured",
+      "detail": "exponent=0.95 (limit 1.50), R^2=1.000, 4 sizes 12,636..810,696"
+    },
+    {
+      "name": "scaling_cad_weld",
+      "passed": true,
+      "status": "measured",
+      "detail": "exponent=1.03 (limit 1.50), R^2=0.996, 4 sizes 12,636..810,696"
+    }
+  ],
+  "cluster_thresholds": {
+    "cad_locate": {
+      "status": "measured",
+      "exponent": 0.166,
+      "budget_seconds": 60.0,
+      "size_at_budget": 7.509514356092896e+22,
+      "measured_max_size": 810696,
+      "measured_max_seconds": 0.0913,
+      "exceeds_max_rung": true
+    },
+    "cad_tessellate": {
+      "status": "measured",
+      "exponent": 0.951,
+      "budget_seconds": 60.0,
+      "size_at_budget": 4481228.5,
+      "measured_max_size": 810696,
+      "measured_max_seconds": 11.7993,
+      "exceeds_max_rung": true
+    },
+    "cad_volume": {
+      "status": "measured",
+      "exponent": 1.08,
+      "budget_seconds": 60.0,
+      "size_at_budget": 69103537.0,
+      "measured_max_size": 810696,
+      "measured_max_seconds": 0.494,
+      "exceeds_max_rung": true
+    },
+    "cad_weld": {
+      "status": "measured",
+      "exponent": 1.028,
+      "budget_seconds": 60.0,
+      "size_at_budget": 6133491.1,
+      "measured_max_size": 810696,
+      "measured_max_seconds": 7.4887,
+      "exceeds_max_rung": true
+    }
+  },
+  "passed": true,
+  "gates_checked": 7,
+  "gates_not_run": 20,
+  "verdict": "not_run"
+}

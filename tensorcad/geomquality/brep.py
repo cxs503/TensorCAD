@@ -35,7 +35,7 @@ on a 6 m model and is not one on a 300 m ship.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -171,6 +171,26 @@ class EdgeRef:
     forward: bool = True
 
 
+def _domain_param(a: float, b: float, t: float) -> float:
+    """Parameter a fraction ``t`` of the way from ``a`` to ``b``, endpoints exact.
+
+    ``a + (b - a) * t`` is *not* ``b`` at ``t == 1`` in binary floating point: for
+    an awkwardly-scaled parametric domain the interpolation lands one ulp outside
+    it, and a B-spline evaluated one ulp past its last knot raises
+    ``NURBSError`` (``find_span`` refuses out-of-domain parameters on purpose).
+    A real IGES hull (ONRT, 132 patches) is exactly that case: the patch
+    boundaries could not be sampled at all, so the whole patch-set route refused
+    a valid file.  Pinning the endpoints keeps every sampled parameter inside
+    the declared domain, which is the invariant the evaluator enforces.
+    """
+    if t <= 0.0:
+        return a
+    if t >= 1.0:
+        return b
+    value = a + (b - a) * t
+    return min(max(value, min(a, b)), max(a, b))
+
+
 @dataclass(frozen=True)
 class Face:
     """A supporting surface plus its boundary loop.
@@ -214,13 +234,13 @@ class Face:
             for k in range(n + 1):
                 t = k / n
                 if i == 0:
-                    point = evaluate(u0 + (u1 - u0) * t, v0)
+                    point = evaluate(_domain_param(u0, u1, t), v0)
                 elif i == 1:
-                    point = evaluate(u1, v0 + (v1 - v0) * t)
+                    point = evaluate(u1, _domain_param(v0, v1, t))
                 elif i == 2:
-                    point = evaluate(u1 - (u1 - u0) * t, v1)
+                    point = evaluate(_domain_param(u1, u0, t), v1)
                 else:
-                    point = evaluate(u0, v1 - (v1 - v0) * t)
+                    point = evaluate(u0, _domain_param(v1, v0, t))
                 segment.append(point)
             segments.append(tuple(segment))
         return tuple(segments)
@@ -278,28 +298,49 @@ class BRep:
         lo, hi = self.bounding_box()
         return hi[0] - lo[0]
 
-    def tessellate(self, u_samples: int = 16, v_samples: int = 8) -> Mesh:
+    def tessellate(self, u_samples: int = 16, v_samples: int = 8,
+                   chunk_faces: int | None = None,
+                   on_chunk: "Callable[[int, int], None] | None" = None) -> Mesh:
         """Sample every face into triangles, honouring ``same_sense``.
 
         Vertices are welded by exact position, so a seam that closes bit-for-bit
         closes in the mesh too.  Faces that only meet within a tolerance stay
         separate on purpose: the mesh is evidence, not a repair.
+
+        ``chunk_faces`` bounds how many faces' sample grids are alive at once
+        (``None`` = all of them): the faces are still visited, and their
+        vertices and quads added to the builder, in exactly the same order, so
+        a chunked run returns a **bit-identical** mesh to an unchunked one - it
+        only caps the transient peak of the per-face grids.  That is the
+        property the 10^6--10^7 real-CAD ladder needs: the sampling peak is
+        bounded while the (necessarily whole-model) vertex pool is not.
+        ``on_chunk(faces_done, faces_total)`` is called after every chunk so a
+        caller can record memory per chunk.
         """
+        if chunk_faces is not None and chunk_faces < 1:
+            raise ValueError(f"chunk_faces must be >= 1, got {chunk_faces!r}")
         builder = MeshBuilder()
-        for face in self.faces:
-            (u0, u1), (v0, v1) = face.domain
-            us = [u0 + (u1 - u0) * i / u_samples for i in range(u_samples + 1)]
-            vs = [v0 + (v1 - v0) * j / v_samples for j in range(v_samples + 1)]
-            us[0], us[-1] = u0, u1
-            vs[0], vs[-1] = v0, v1
-            grid = [[builder.add_vertex(evaluate_fast(face.surface, u, v)) for v in vs] for u in us]
-            for i in range(u_samples):
-                for j in range(v_samples):
-                    quad = (grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1])
-                    if face.same_sense:
-                        builder.add_quad(*quad)
-                    else:
-                        builder.add_quad(quad[0], quad[3], quad[2], quad[1])
+        total = len(self.faces)
+        step = total if chunk_faces is None else chunk_faces
+        for start in range(0, total, max(step, 1)):
+            for face in self.faces[start:start + max(step, 1)]:
+                (u0, u1), (v0, v1) = face.domain
+                us = [u0 + (u1 - u0) * i / u_samples for i in range(u_samples + 1)]
+                vs = [v0 + (v1 - v0) * j / v_samples for j in range(v_samples + 1)]
+                us[0], us[-1] = u0, u1
+                vs[0], vs[-1] = v0, v1
+                grid = [[builder.add_vertex(evaluate_fast(face.surface, u, v))
+                         for v in vs] for u in us]
+                for i in range(u_samples):
+                    for j in range(v_samples):
+                        quad = (grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1])
+                        if face.same_sense:
+                            builder.add_quad(*quad)
+                        else:
+                            builder.add_quad(quad[0], quad[3], quad[2], quad[1])
+                del grid
+            if on_chunk is not None:
+                on_chunk(min(start + max(step, 1), total), total)
         return builder.build()
 
     def to_dict(self) -> dict[str, Any]:
@@ -322,13 +363,13 @@ def _boundary_polyline(face_parts: Sequence[tuple[NURBSSurface, bool]], segment:
     for k in range(samples + 1):
         t = k / samples
         if segment == 0:
-            point = surface.evaluate(u0 + (u1 - u0) * t, v0)
+            point = surface.evaluate(_domain_param(u0, u1, t), v0)
         elif segment == 1:
-            point = surface.evaluate(u1, v0 + (v1 - v0) * t)
+            point = surface.evaluate(u1, _domain_param(v0, v1, t))
         elif segment == 2:
-            point = surface.evaluate(u1 - (u1 - u0) * t, v1)
+            point = surface.evaluate(_domain_param(u1, u0, t), v1)
         else:
-            point = surface.evaluate(u0, v1 - (v1 - v0) * t)
+            point = surface.evaluate(u0, _domain_param(v1, v0, t))
         points.append(point)
     return tuple(points)
 
