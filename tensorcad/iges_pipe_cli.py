@@ -53,6 +53,12 @@ def main(argv: list[str] | None = None) -> int:
                         help="U-direction sample density for untrimmed patches")
     parser.add_argument("--v-samples", type=int, default=32,
                         help="V-direction sample density for untrimmed patches")
+    parser.add_argument("--seal-openings", action="store_true",
+                        help="Cap boundary loops that lie on a plane (the file's own cut "
+                             "planes); leave defect gaps open and reported")
+    parser.add_argument("--seal-planarity", type=float, default=None,
+                        help="Absolute planarity tolerance in model units for the seal "
+                             "stage (default: 1e-3 of the model extent)")
     parser.add_argument("--report", "-r", help="Save gate report as JSON")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Suppress stdout output")
@@ -69,6 +75,8 @@ def main(argv: list[str] | None = None) -> int:
             u_samples=args.u_samples,
             v_samples=args.v_samples,
             weld_tolerance=args.tolerance,
+            seal_openings=args.seal_openings,
+            seal_planarity=args.seal_planarity,
         )
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)

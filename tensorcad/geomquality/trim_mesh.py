@@ -1030,6 +1030,41 @@ def seam_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
 
 
 # --------------------------------------------------------------------------- #
+# opening stage: label the boundary, cap only the planar cuts
+# --------------------------------------------------------------------------- #
+def seal_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
+               seal: bool, planar_tolerance: float | None = None,
+               audit: bool = True) -> tuple[list[Vec3], list[Triangle], dict[str, Any]]:
+    """Classify the open boundary and, when asked, cap the loops that are planar cuts.
+
+    ``seal=False`` (the default) only measures: the report says which openings are the
+    file's own cut planes and which are defect gaps, without touching the mesh, so a
+    caller can see whether sealing is the right move before making it.  ``planar_tolerance``
+    is an absolute distance in model units; ``None`` takes
+    :data:`~tensorcad.geomquality.openings.DEFAULT_PLANAR_RATIO` of the mesh extent.
+    """
+    from .openings import classify_openings, seal_planar_openings
+
+    record: dict[str, Any] = {"requested_planar_tolerance": planar_tolerance}
+    if audit:
+        record["analysis_before"] = classify_openings(
+            vertices, faces, planar_tolerance=planar_tolerance).to_dict()
+    if not seal:
+        record["applied"] = False
+        record["note"] = "measurement only; pass seal_openings=True to cap planar cuts"
+        return list(vertices), [tuple(face) for face in faces], record
+    sealed_vertices, sealed_faces, seal_record = seal_planar_openings(
+        vertices, faces, planar_tolerance=planar_tolerance)
+    record["applied"] = bool(seal_record["applied"])
+    record["seal"] = {key: value for key, value in seal_record.items()
+                      if key != "classification"}
+    if audit:
+        record["analysis_after"] = classify_openings(
+            sealed_vertices, sealed_faces, planar_tolerance=planar_tolerance).to_dict()
+    return sealed_vertices, sealed_faces, record
+
+
+# --------------------------------------------------------------------------- #
 # the import pipeline
 # --------------------------------------------------------------------------- #
 @dataclass
@@ -1047,7 +1082,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
                 weld_tolerance: float | None = None, repair: bool = True,
                 fill_holes: bool = True, max_hole_edges: int = 32,
                 chord_tolerance: float | None = None, refine_levels: int = 6,
-                seam_tolerance: float | None = None, seam_audit: bool = True) -> CadImport:
+                seam_tolerance: float | None = None, seam_audit: bool = True,
+                seal_openings: bool = False, seal_planarity: float | None = None,
+                opening_audit: bool = True) -> CadImport:
     """Import an IGES file: parse, invert trims, tessellate, repair, audit.
 
     ``scale`` converts the file's units to metres; it defaults to the file's own declared
@@ -1071,6 +1108,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
     before = audit_mesh(tessellation.vertices, tessellation.faces, degenerate_area=0.0)
     vertices, faces, seam_record = seam_stage(tessellation.vertices, tessellation.faces,
                                               tolerance=seam_tolerance, audit=seam_audit)
+    vertices, faces, seal_record = seal_stage(vertices, faces, seal=seal_openings,
+                                              planar_tolerance=seal_planarity,
+                                              audit=opening_audit)
     repair_record: dict[str, Any] = {}
     if repair:
         vertices, faces, repair_record = repair_mesh(
@@ -1114,6 +1154,7 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
         },
         "before_repair": before.to_dict(),
         "seam": seam_record,
+        "openings": seal_record,
         "repair": repair_record,
         "after_repair": after.to_dict(),
         "gates": gates,
@@ -1170,7 +1211,8 @@ def _gates(model: TrimmedModel, tessellation: Tessellation, audit: MeshAudit) ->
 
 
 _PATCH_ROUTE_KEYS = {"scale", "weld_tolerance", "repair", "fill_holes", "max_hole_edges",
-                     "seam_tolerance", "seam_audit"}
+                     "seam_tolerance", "seam_audit", "seal_openings", "seal_planarity",
+                     "opening_audit"}
 
 
 def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
@@ -1248,7 +1290,9 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
                      weld_tolerance: float | None = None, repair: bool = True,
                      fill_holes: bool = True, max_hole_edges: int = 32,
                      u_samples: int = 24, v_samples: int = 12,
-                     seam_tolerance: float | None = None, seam_audit: bool = True) -> CadImport:
+                     seam_tolerance: float | None = None, seam_audit: bool = True,
+                     seal_openings: bool = False, seal_planarity: float | None = None,
+                     opening_audit: bool = True) -> CadImport:
     """Import an *untrimmed* patch set (the flavour this repository's writer emits).
 
     IGES 128 patch sets and STEP patch sets carry no topology: adjacency has to be
@@ -1276,6 +1320,9 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
     before = audit_mesh(vertices, faces)
     vertices, faces, seam_record = seam_stage(vertices, faces,
                                               tolerance=seam_tolerance, audit=seam_audit)
+    vertices, faces, seal_record = seal_stage(vertices, faces, seal=seal_openings,
+                                              planar_tolerance=seal_planarity,
+                                              audit=opening_audit)
     if repair:
         vertices, faces, repair_record = repair_mesh(
             vertices, faces, weld_tolerance=weld, max_hole_edges=max_hole_edges,
@@ -1316,6 +1363,7 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
                    "samples": {"u": u_samples, "v": v_samples}, "weld_tolerance": weld},
         "before_repair": before.to_dict(),
         "seam": seam_record,
+        "openings": seal_record,
         "repair": repair_record,
         "after_repair": after.to_dict(),
         "gates": gates,
