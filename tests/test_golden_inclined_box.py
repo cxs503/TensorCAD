@@ -112,7 +112,11 @@ def test_the_case_fires_on_a_perturbed_attitude_route(monkeypatch: pytest.Monkey
 
     case = InclinedBoxGolden()
     reference = case.reference()
-    clean = case.measure("exact")
+    # The acceptance rung, not a level name typed here: m22879 renamed the ladder from
+    # ("exact", "tight") to ("coarse", "fine") and this literal kept asking for a rung that
+    # no longer exists, so the test raised KeyError instead of measuring anything.
+    acceptance = case.levels()[-1]
+    clean = case.measure(acceptance)
     assert _relative(clean["waterplane_area_m2"], reference["waterplane_area_m2"]) < 1e-9
 
     original = box_inclined.box_inclined_hydrostatics
@@ -124,7 +128,7 @@ def test_the_case_fires_on_a_perturbed_attitude_route(monkeypatch: pytest.Monkey
         return dataclasses.replace(hydro, waterplane_area_m2=hydro.waterplane_area_m2 * 1.002)
 
     monkeypatch.setattr(box_inclined, "box_inclined_hydrostatics", skewed)
-    perturbed = case.measure("exact")
+    perturbed = case.measure(acceptance)
     error = _relative(perturbed["waterplane_area_m2"], reference["waterplane_area_m2"])
     assert error > 1e-4, error
     # and the rest of the report is untouched, so the finding localises to this metric
