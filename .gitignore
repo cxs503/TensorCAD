@@ -17,3 +17,6 @@ artifacts/baseline_fleet/iges/
 # fetched third-party sources (no licence: digests only in git)
 .cache/
 artifacts/fleet_refs/raw/
+
+# local measurement payload directory (bundled copies live in artifacts/)
+/runs/
