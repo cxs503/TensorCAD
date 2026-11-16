@@ -126,6 +126,77 @@
         }
       }
     },
+    "inclined_box": {
+      "extrapolated": {},
+      "geometry_sha256": "9fabd7ec127c415ef394503d9db4eceba76dd9ad46382e57f337354e58767869",
+      "invariants": {
+        "identity_mirrored_heel_mirrors_transverse_centre": {
+          "basis": "heel -> -heel must give y_B -> -y_B (body y is starboard, heel>0 is starboard down)",
+          "residual": 5.664912983149861e-14,
+          "tolerance": 1e-08
+        },
+        "identity_volume_equals_requested_displacement": {
+          "basis": "V = L\u00b7B\u00b7T is the constraint the waterline offset is solved for, so it does not depend on the attitude",
+          "residual": -1.4409806681214832e-11,
+          "tolerance": 1e-06
+        }
+      },
+      "known_limitations": [],
+      "measurements": {
+        "coarse": {
+          "displacement_volume_m3": 59.99613215625368,
+          "lcb_x_m": 0.3014445743414265,
+          "tcb_y_m": 0.23819241478947517,
+          "vcb_z_m": 0.790041052172528,
+          "waterline_offset_m": 1.4468098145207264,
+          "waterplane_area_m2": 41.46787750132048
+        },
+        "fine": {
+          "displacement_volume_m3": 59.99999999998559,
+          "lcb_x_m": 0.30142514199963655,
+          "tcb_y_m": 0.23817705993883287,
+          "vcb_z_m": 0.7900868158935876,
+          "waterline_offset_m": 1.446903087771372,
+          "waterplane_area_m2": 41.46787750132049
+        }
+      },
+      "reference": {
+        "displacement_volume_m3": 60.00000000000067,
+        "lcb_x_m": 0.30142514199955955,
+        "tcb_y_m": 0.23817705993877314,
+        "vcb_z_m": 0.7900868158937662,
+        "waterline_offset_m": 1.4469030877717353,
+        "waterplane_area_m2": 41.46787750132051
+      },
+      "reference_source": "tools/golden/inclined_box_oracle.oracle_hydrostatics: submerged column z_w(x,y) integrated analytically in z and by composite Simpson (1200 intervals/axis) in x and y -- no face clip, no cap polygon",
+      "title": "Barge L=10 B=4 depth=3, V=L\u00b7B\u00b7T=60 m3, heel=15 deg trim=3 deg: polyhedron clip vs column integral",
+      "tolerances": {
+        "displacement_volume_m3": {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.446e-05 = 1.289e-04",
+          "value": 0.0001289281243970194
+        },
+        "lcb_x_m": {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.447e-05 = 1.289e-04",
+          "value": 0.00012893643616496665
+        },
+        "tcb_y_m": {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.447e-05 = 1.289e-04",
+          "value": 0.00012893643616433074
+        },
+        "vcb_z_m": {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 5.792e-05 = 1.158e-04",
+          "value": 0.00011584479107633082
+        },
+        "waterline_offset_m": {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.446e-05 = 1.289e-04",
+          "value": 0.0001289281243973398
+        },
+        "waterplane_area_m2": {
+          "basis": "two-grid change 1.713e-16 is below the floor, so the floor 0.0001 applies",
+          "value": 0.0001
+        }
+      }
+    },
     "series60": {
       "extrapolated": {
         "block_coefficient": {
@@ -498,7 +569,7 @@
       }
     ],
     "generated_by": "python -m tensorcad.golden --bless",
-    "geometry_fingerprint": "f8931ca5fb034064c5ced5ac01134ce8b0886a9b52222cb9a976c9a9503489c8",
+    "geometry_fingerprint": "f1edda3d5de44525675be668a0659fe0208def453996ba369fa07b8ec656e14c",
     "git_commit": "9778a1050bb0bd6764dde0b2d0b8116338ed213b",
     "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
     "python": "3.11.6"
