@@ -360,11 +360,18 @@ def _evaluate_gates(ship: dict, mesh: Mesh, method: str, reason: str, elapsed: f
     gates.append(GateResult("G3_euler_char", euler_ok,
                             f"V-E+F={euler} (expected 2)", value=float(euler), threshold=2.0))
 
-    # G4: Outward-oriented
+    # G4: Outward-oriented -- and consistently wound, which the sign alone cannot
+    # establish. Flipping one triangle moves the divergence-theorem sum by that one
+    # tetrahedron: the total stays positive, the topology (G1-G3), the face areas
+    # (G5) and the volume/moment tolerances (G6-G8) are all unchanged, so a mesh
+    # with an inverted patch used to pass every gate. The directed-edge test in
+    # ``mesh.edge_winding_conflicts`` sees it, so both are required here.
     vol = meshlib.total_signed_volume(mesh)
-    oriented = vol > 0
+    conflicts = meshlib.edge_winding_conflicts(mesh)
+    oriented = vol > 0 and not conflicts
     gates.append(GateResult("G4_outward_oriented", oriented,
-                            f"signed volume={vol:.4f} m³",
+                            f"signed volume={vol:.4f} m³, "
+                            f"{len(conflicts)} winding-inconsistent edges",
                             value=vol, threshold=0.0))
 
     # G5: No zero-area faces
