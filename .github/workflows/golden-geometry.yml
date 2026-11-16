@@ -71,7 +71,8 @@ jobs:
           assert data["schema"] == "tensorcad.golden/1", data["schema"]
           assert data["passed"] is True, data["findings"]
           names = {case["name"] for case in data["cases"]}
-          assert names == {"wigley", "series60", "sphere_ellipsoid", "dtmb5415"}, names
+          assert names == {"wigley", "series60", "sphere_ellipsoid", "dtmb5415",
+                             "inclined_box"}, names
           for case in data["cases"]:
               assert case["measurements"]["coarse"] and case["measurements"]["fine"], case["name"]
               assert case["reference"], case["name"]

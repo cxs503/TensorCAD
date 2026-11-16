@@ -102,6 +102,7 @@ def test_committed_baseline_passes(committed: golden.SuiteResult) -> None:
         "series60",
         "sphere_ellipsoid",
         "dtmb5415",
+        "inclined_box",
     }
 
 
@@ -800,6 +801,7 @@ def test_every_golden_case_fingerprints_its_mesh(committed: golden.SuiteResult) 
         "series60",
         "sphere_ellipsoid",
         "dtmb5415",
+        "inclined_box",
     }
     for case in committed.cases:
         fingerprint = case.geometry_sha256
