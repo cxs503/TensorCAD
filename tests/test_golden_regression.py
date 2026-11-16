@@ -720,7 +720,7 @@ def test_cli_check_writes_a_json_report(tmp_path: Path) -> None:
     assert data["schema"] == golden.SCHEMA
     assert data["passed"] is True
     assert data["quick"] is True
-    assert len(data["cases"]) == 4
+    assert len(data["cases"]) == 5
 
 
 def test_cli_check_fails_on_a_stale_baseline(tmp_path: Path) -> None:

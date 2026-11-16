@@ -94,8 +94,8 @@ MUTANTS: tuple[Mutant, ...] = (
         id="numeric-wigley-grid-silently-coarsened",
         kind="numeric",
         target="tensorcad/golden.py",
-        find='{"coarse": (41, 13), "fine": (161, 41)}',
-        replace='{"coarse": (41, 13), "fine": (121, 31)}',
+        find='        "finer": (321, 81),',
+        replace='        "finer": (241, 61),',
         expected=("geometry_changed",),
         expected_full=("drift", "geometry_changed"),
         rationale=(
@@ -182,6 +182,13 @@ def stage(destination: Path) -> None:
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
     shutil.copytree(ROOT / DATA_REL, destination / DATA_REL)
+    # The inclined-box golden case loads its reference oracle by path from
+    # ``tools/golden/inclined_box_oracle.py`` (see ``golden_inclined_box._oracle_module``);
+    # without it the staged control cannot pass, so the red-team must stage it too.
+    oracle_src = ROOT / "tools" / "golden" / "inclined_box_oracle.py"
+    oracle_dst = destination / "tools" / "golden" / "inclined_box_oracle.py"
+    oracle_dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(oracle_src, oracle_dst)
     target = destination / BASELINE_REL
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / BASELINE_REL, target)
