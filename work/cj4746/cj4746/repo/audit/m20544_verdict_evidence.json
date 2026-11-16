@@ -1,0 +1,411 @@
+{
+ "impl_files": [
+  "/root/tp-agent/work/m20544/audit/refs/tensorcad/volume_xval.py",
+  "/root/tp-agent/work/m20544/audit/refs/tensorcad/volume_xval_cli.py",
+  "/root/tp-agent/work/m20544/audit/refs/tensorcad/fleet_gate.py"
+ ],
+ "entry": "/root/tp-agent/work/m20544/audit/refs/tensorcad/volume_xval_cli.py",
+ "run_artifacts": [
+  "/root/tp-agent/work/m20544/audit/refs/artifacts/xval_geom_volcross/results.json",
+  "/root/tp-agent/work/m20544/audit/refs/artifacts/xval_geom_volcross/results.md",
+  "/root/tp-agent/work/m20544/audit/refs/benchmarks/verified/volume_cross_engine/result.json",
+  "/root/tp-agent/work/m20544/audit/refs/benchmarks/verified/volume_cross_engine/gates_verified.json"
+ ],
+ "tests": [
+  "test_box_volume_is_exact_on_every_route",
+  "test_engines_reproduce_the_platform_integrator_bit_for_bit_on_the_same_triangles",
+  "test_wigley_deficit_decays_at_second_order",
+  "test_sectional_route_agrees_with_the_analytic_wigley_volume",
+  "test_richardson_extrapolation_recovers_the_analytic_wigley_volume",
+  "test_classifier_never_excuses_a_constant_gap_as_tessellation",
+  "test_classifier_blames_topology_when_the_engines_disagree",
+  "test_classifier_refuses_to_name_a_bias_without_a_ladder",
+  "test_console_script_reports_an_honest_fail_at_a_coarse_resolution",
+  "test_console_script_writes_the_json_it_prints",
+  "test_console_script_refuses_a_missing_file",
+  "test_fleet_gate_calls_the_independent_engines",
+  "test_fleet_gate_downgrades_a_volume_the_engines_cannot_reproduce"
+ ],
+ "tests_run": {
+  "command": "pytest tests/test_volume_xval.py tests/test_volume_xval_entry.py -q",
+  "result": "40 passed, 1 warning in 10.07s",
+  "returncode": 0
+ },
+ "integration_callers": [
+  "audit_fleet: tensorcad/fleet_gate.py:389 -> cross_engine_volume (fleet_gate.py:330) -> tensorcad.volume_xval; a mesh whose two independent engines disagree is downgraded VERIFIED->WITHHELD with the spread recorded (fleet_gate.py:456-462); covered by tests/test_volume_xval_entry.py::test_fleet_gate_downgrades_a_volume_the_engines_cannot_reproduce",
+  "cross_engine_volume: tensorcad/fleet_gate.py:330 (called at :447)"
+ ],
+ "benchmark": "PLATFORM REFEREE EMPTY: SELECT case_name,metric,tolerance FROM tensor_benchmark_cases WHERE anchor_slug='XVAL-GEOM-VOLCROSS' -> 0 rows (table 132 rows / 93 anchors) => L4 refused on registration, not on numbers. In-repo gates replayed by the auditor: Wigley ref (analytic 4LBT/9) 2.7777777777777777 vs got 2.7768859489811852 at 161x41 -> -3.2106e-04 (-0.0321 %) inside 3e-03; engine A vs B 2.683e-08 inside 1e-06; sectional quadrature vs analytic 1.599e-16; measured deficit order 2.0205 inside [1.5,2.6]; KCS full scale geometry 52062.390 vs published 52030.0 -> +0.0623 % (calibration identity only up to 6.2e-04, see finding F1); asymmetric-transom battery engine A vs analytic closed form -0.8262 % on the same triangles.",
+ "repro_cmd": "cd /root/tp-agent/work/m20512 && python benchmarks/verified/volume_cross_engine/run_benchmark.py   # auditor replay in /tmp/m20544_repro: exit 0, gates_identical=True, live_rows_identical=True; regeneration python tools/volume_xval_report.py --out artifacts/xval_geom_volcross -> results.json identical=False",
+ "external_anchor": "Wigley closed form V = L B T n m / ((n+1)(m+1)) = 4LBT/9 = 2.7777777777777777 m3 (exact, recomputed by the auditor without importing tensorcad: match to 0.0); third-party engines trimesh 5.0.0 and numpy-stl 4.1.3 (Mirtich) through a binary-STL float32 round trip, agreeing to 7.43e-09 on the same triangles; KCS published nabla = 52030 m3 (KRISO / SIMMAN 2008, quoted, not re-fetched by this audit) with the calibration-identity caveat; B-rep route (gmsh / OpenCASCADE / cadquery) WITHHELD - not installable in this environment, recorded not silently dropped.",
+ "verdict_level": {
+  "L1": "pass: 13 named invariants + 40 tests green (pytest, 10.07 s).",
+  "L2": "pass: tensorcad/volume_xval.py (672 lines real code: closed-solid builder, topology census, trimesh/numpy-stl/sectional routes, order fit, Richardson, route classifier) + entry with observable exit codes 0/1/2.",
+  "L3": "pass: fleet_gate.audit_fleet re-measures every closed hull with the independent engines and downgrades VERIFIED->WITHHELD on disagreement; engine-absent is recorded as 'unavailable', never a silent pass.",
+  "L4": "REFUSED, one item: 0 rows in tensor_benchmark_cases for the anchor, so no machine referee exists for ref-vs-got. Substance verified present: complete cases (Wigley analytic, KCS full scale vs published, KCS model scale WITHHELD, asymmetric transom battery), error analysis (measured order 2.02, Richardson extrapolation, engine spread), reproducible (exit 0, gates bit-identical, artifact regeneration identical). Registering two referee rows re-gates to L4 without touching the code.",
+  "L5": "no: nothing beyond the above (no B-rep engine, no new closure result).",
+  "level": 3
+ },
+ "auditor_checks": {
+  "own_arithmetic": {
+   "wigley_analytic_4LBT_over_9": 2.7777777777777777,
+   "max_abs_delta_my_deviation_vs_artifact": 0.0,
+   "my_measured_order_from_artifact_ladder": 1.9797132663315644,
+   "benchmark_live_order": 2.020500631935433,
+   "my_richardson_limit_vs_analytic": 5.2025160857738234e-06,
+   "kcs_cb_from_reported_volume": 0.6509035488811322,
+   "kcs_cb_published": 0.6505,
+   "kcs_topology": {
+    "vertices": 13483,
+    "faces": 26962,
+    "edges": 40443,
+    "boundary_edges": 0,
+    "nonmanifold_edges": 0,
+    "watertight": true,
+    "edge_manifold": true,
+    "euler_characteristic": 2,
+    "closed_genus": 0,
+    "zero_area_faces": 0,
+    "surface_area_m2": 14385.484833246643
+   },
+   "modelscale_cb": 0.555394814541249,
+   "battery_engine_a_vs_analytic": {
+    "analytic": 7.647567686045139,
+    "engine_a_vs_analytic_own": -0.008261648727800818,
+    "self_vs_engine_a_artifact": 1.4052740459192171e-15,
+    "watertight": true,
+    "genus": 0
+   }
+  },
+  "gates_recomputed_from_result_json": {
+   "G1_engine_agreement": {
+    "committed": 2.682977940443835e-08,
+    "limit": 1e-06,
+    "by_auditor": 2.682977940443835e-08,
+    "matches": true
+   },
+   "G2_reference_at_finest_wigley": {
+    "committed": 0.00032105836677327916,
+    "limit": 0.003,
+    "by_auditor": 0.00032105836677327916,
+    "matches": true
+   },
+   "G3_quadrature_is_exact_for_the_reference_hull": {
+    "committed": 1.5987211554602254e-16,
+    "limit": 1e-09,
+    "by_auditor": 1.5987211554602254e-16,
+    "matches": true
+   },
+   "G4_measured_order": {
+    "committed": 2.020500631935433,
+    "limit": [
+     1.5,
+     2.6
+    ],
+    "by_auditor": 2.020500631935433,
+    "matches": true
+   },
+   "G5_committed_rows_hold": {
+    "committed": [],
+    "limit": [],
+    "by_auditor": null,
+    "matches": true
+   }
+  },
+  "repro": {
+   "gates_identical": true,
+   "live_rows_identical": true,
+   "committed_problems": [],
+   "results_json_identical": false,
+   "results_md_identical_except_stamp": true
+  },
+  "cli_exit_codes": [
+   [
+    [
+     "wigley"
+    ],
+    0
+   ],
+   [
+    [
+     "wigley",
+     "--stations",
+     "61",
+     "--levels",
+     "13"
+    ],
+    1
+   ],
+   [
+    [
+     "mesh",
+     "/tmp/does_not_exist.stl"
+    ],
+    2
+   ]
+  ],
+  "report_vs_artifacts": {
+   "report_id": 18660,
+   "figures": 1,
+   "markdown_chars": 3854,
+   "tokens_present": 8,
+   "tokens_checked": 8,
+   "sections_present": {
+    "①": true,
+    "②": true,
+    "③": true,
+    "④": true,
+    "⑤": true,
+    "⑥": true
+   },
+   "precision_truncations": [
+    {
+     "artifact_value": 2.7231650437231827,
+     "rendered_in_report": "2.7",
+     "relative_error_of_rendering": 0.008506661679055139
+    },
+    {
+     "artifact_value": 2.763654038838464,
+     "rendered_in_report": "2.8",
+     "relative_error_of_rendering": 0.013151414992888123
+    },
+    {
+     "artifact_value": 2.774217726899709,
+     "rendered_in_report": "2.8",
+     "relative_error_of_rendering": 0.009293529073186134
+    },
+    {
+     "artifact_value": 2.7768859489811852,
+     "rendered_in_report": "2.8",
+     "relative_error_of_rendering": 0.008323730770179786
+    },
+    {
+     "artifact_value": 52042.76317749706,
+     "rendered_in_report": "52042.8",
+     "relative_error_of_rendering": 7.075431951903764e-07
+    }
+   ]
+  },
+  "referee_query": {
+   "anchor": "XVAL-GEOM-VOLCROSS",
+   "table_cases": 132,
+   "table_distinct_anchors": 93,
+   "rows_for_anchor": 0,
+   "rows": [],
+   "tensorcad_anchor_cases": [
+    [
+     "GAP-CAD-B2-MESH-FORMAT-MATRIX",
+     "CASE-CAD-B2-ROUNDTRIP-18",
+     "passed"
+    ],
+    [
+     "GAP-CAD-D2-GOLDEN-REGRESSION",
+     "CASE-CAD-D2-GOLDEN-DTMB5415",
+     "passed"
+    ],
+    [
+     "GAP-CAD-D2-GOLDEN-REGRESSION",
+     "CASE-CAD-D2-GOLDEN-SERIES60",
+     "passed"
+    ],
+    [
+     "GAP-CAD-D2-GOLDEN-REGRESSION",
+     "CASE-CAD-D2-GOLDEN-SPHERE_ELLIPSOID",
+     "passed"
+    ],
+    [
+     "GAP-CAD-D2-GOLDEN-REGRESSION",
+     "CASE-CAD-D2-GOLDEN-WIGLEY",
+     "passed"
+    ],
+    [
+     "GAP-CAD-T1-BASELINE-FLEET",
+     "CASE-CAD-BASELINE-FLEET-KCS-DISPLACEMENT",
+     "passed"
+    ],
+    [
+     "GAP-CAD-T2-PARAM-SERIES",
+     "Series60 gate-power 突变测试",
+     "pending"
+    ],
+    [
+     "GAP-CAD-T2-PARAM-SERIES",
+     "Series60 父型五档 Cb 系数 vs 公开父型表",
+     "pending"
+    ],
+    [
+     "GAP-CAD-T2-PARAM-SERIES",
+     "Series60 网格积分 vs 解析闭式（分辨率阶梯）",
+     "pending"
+    ]
+   ],
+   "previous_verdicts_same_anchor": [
+    {
+     "scope": "m20416 XVAL-GEOM-VOLCROSS",
+     "level": 1,
+     "gate_state": "reopened",
+     "gate_level": 1,
+     "verdict_by": "board-audit",
+     "created_at": "2026-11-14 13:49:16.513980+00:00"
+    }
+   ]
+  },
+  "subject_commit": {
+   "head_commit": "-s\n0d829a68d744d2fb38b26e65716d69b93e5d8d81",
+   "dirty_entries": 0,
+   "branch": "agent/m20512",
+   "head": "0d829a6"
+  },
+  "refs_sha256": [
+   {
+    "rel": "tensorcad/volume_xval.py",
+    "subject_sha256": "c1ff802b8bd1e0eb8f1a551f5c008c892baf4a410025c1e03e5b6b95a3c5b888",
+    "ref_copy_sha256": "c1ff802b8bd1e0eb8f1a551f5c008c892baf4a410025c1e03e5b6b95a3c5b888",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tensorcad/volume_xval.py"
+   },
+   {
+    "rel": "tensorcad/volume_xval_cli.py",
+    "subject_sha256": "71b39abc982b4da5eb8150f7c7ba29513fddf43ff89cce702e9d7d3d82c517ec",
+    "ref_copy_sha256": "71b39abc982b4da5eb8150f7c7ba29513fddf43ff89cce702e9d7d3d82c517ec",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tensorcad/volume_xval_cli.py"
+   },
+   {
+    "rel": "tensorcad/fleet_gate.py",
+    "subject_sha256": "02a0986710c82775e880223d4f729fddf277fdcc0d8318f32ba0c226aca00644",
+    "ref_copy_sha256": "02a0986710c82775e880223d4f729fddf277fdcc0d8318f32ba0c226aca00644",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tensorcad/fleet_gate.py"
+   },
+   {
+    "rel": "tensorcad/cli.py",
+    "subject_sha256": "ca836455e01526c7cfddfe0833a4c37c0b8e20a031fc485704e95e4772e0b3b2",
+    "ref_copy_sha256": "ca836455e01526c7cfddfe0833a4c37c0b8e20a031fc485704e95e4772e0b3b2",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tensorcad/cli.py"
+   },
+   {
+    "rel": "tests/test_volume_xval.py",
+    "subject_sha256": "45d10703729ab199fe2022d59684a76eedfd1d4348343e7aeb6f72b73df27169",
+    "ref_copy_sha256": "45d10703729ab199fe2022d59684a76eedfd1d4348343e7aeb6f72b73df27169",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tests/test_volume_xval.py"
+   },
+   {
+    "rel": "tests/test_volume_xval_entry.py",
+    "subject_sha256": "9094b2aec31dc0cea3eb3857564f82c647c960c5c2c920c0abac44fc9cac1e31",
+    "ref_copy_sha256": "9094b2aec31dc0cea3eb3857564f82c647c960c5c2c920c0abac44fc9cac1e31",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tests/test_volume_xval_entry.py"
+   },
+   {
+    "rel": "artifacts/xval_geom_volcross/results.json",
+    "subject_sha256": "44211f002ea3843ebfc5ea5a60d1d85b15ceeaf3b25a9cc137dd23f5b365ffd2",
+    "ref_copy_sha256": "44211f002ea3843ebfc5ea5a60d1d85b15ceeaf3b25a9cc137dd23f5b365ffd2",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/artifacts/xval_geom_volcross/results.json"
+   },
+   {
+    "rel": "artifacts/xval_geom_volcross/results.md",
+    "subject_sha256": "bfec2590639b1804966e8678899f58013ea554fb3622b0c6b3cb1b5fac4cb26f",
+    "ref_copy_sha256": "bfec2590639b1804966e8678899f58013ea554fb3622b0c6b3cb1b5fac4cb26f",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/artifacts/xval_geom_volcross/results.md"
+   },
+   {
+    "rel": "benchmarks/verified/volume_cross_engine/run_benchmark.py",
+    "subject_sha256": "8efdd86e0f5393f7832afb7f721f6e100fb2e78f4fb1519b26ecc9a11612a707",
+    "ref_copy_sha256": "8efdd86e0f5393f7832afb7f721f6e100fb2e78f4fb1519b26ecc9a11612a707",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/benchmarks/verified/volume_cross_engine/run_benchmark.py"
+   },
+   {
+    "rel": "benchmarks/verified/volume_cross_engine/result.json",
+    "subject_sha256": "1f425a30d53c0b8a35c483bf5646dee85326d3c88383f4a6e0753357bb779286",
+    "ref_copy_sha256": "1f425a30d53c0b8a35c483bf5646dee85326d3c88383f4a6e0753357bb779286",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/benchmarks/verified/volume_cross_engine/result.json"
+   },
+   {
+    "rel": "benchmarks/verified/volume_cross_engine/gates_verified.json",
+    "subject_sha256": "50ec545c38baacff4eb91afb5a39933a726858bbaa8b19d086c1d216911e04d8",
+    "ref_copy_sha256": "50ec545c38baacff4eb91afb5a39933a726858bbaa8b19d086c1d216911e04d8",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/benchmarks/verified/volume_cross_engine/gates_verified.json"
+   },
+   {
+    "rel": "tools/volume_xval_report.py",
+    "subject_sha256": "e81dbbb26b57e6596ce2b90ff3ae0553514cec65d7f4e1184f301deeef683804",
+    "ref_copy_sha256": "e81dbbb26b57e6596ce2b90ff3ae0553514cec65d7f4e1184f301deeef683804",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/tools/volume_xval_report.py"
+   },
+   {
+    "rel": "docs/volume_xval.md",
+    "subject_sha256": "e420d80082e6d83fb37015a647a6507af8155757cca7a39aaa671681cb1fcee9",
+    "ref_copy_sha256": "e420d80082e6d83fb37015a647a6507af8155757cca7a39aaa671681cb1fcee9",
+    "identical": true,
+    "ref_copy": "/root/tp-agent/work/m20544/audit/refs/docs/volume_xval.md"
+   }
+  ]
+ },
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "medium",
+   "claim": "KCS row is labelled 'Cb calibrated to 0.6505' and its agreement is called a calibration identity",
+   "evidence": "reported hull Cb = 0.650904 (+0.0620 % over 0.6505): calibrate_form (tensorcad/hull_nurbs.py:548) integrates at order (10,6) = 52030.088 m3 (4.7e-07 from the 52030.1124 target) while the reported number uses (24,16) = 52062.390 m3; auditor sweep (16,12)=52063.197, (32,24)=52062.433, (48,32)=52062.405 -> order gap 6.2e-04, 600x the 1e-6 calibration tolerance. hull_nurbs.py:557-559's 'far below the calibration tolerance' is contradicted by tests/test_hull_nurbs.py:271-280 (says 7e-4, asserts 2e-3).",
+   "impact": "the +0.0623 % vs the published 52030 m3 is an order residual, not an identity; no number hidden, the label and the docstring overstate",
+   "fix": "calibrate at the reporting order, or print the achieved Cb (0.650904) in the row"
+  },
+  {
+   "id": "F2",
+   "severity": "blocking-for-L4",
+   "claim": "mission title claims 'L4基准全通'",
+   "evidence": "tensor_benchmark_cases WHERE anchor_slug='XVAL-GEOM-VOLCROSS' -> 0 rows (132 cases / 93 anchors); the in-repo 0.3 % band is self-authored",
+   "impact": "no machine referee for ref-vs-got; L4 not certifiable",
+   "fix": "register the two cases given in audit/BOARD_AUDIT_m20512_XVAL-GEOM-VOLCROSS.md §5"
+  },
+  {
+   "id": "F3",
+   "severity": "low",
+   "claim": "result.json records environment.numpy_stl = 'absent'",
+   "evidence": "numpy-stl 4.1.3 executed engine B in that run; stl exposes no __version__ and run_benchmark.py:_version swallows it",
+   "impact": "artifact metadata contradicts report §2's toolchain and could read as 'second engine missing'",
+   "fix": "importlib.metadata.version('numpy-stl')"
+  },
+  {
+   "id": "F4",
+   "severity": "low",
+   "claim": "G5 'committed_rows_hold' is called re-validation",
+   "evidence": "it re-reads the committed results.json and checks stored spreads/band; it does not rebuild hulls. Reproduction comes from tools/volume_xval_report.py, outside the declared repro_cmd (auditor ran it: results.json identical, results.md identical except the generation stamp)",
+   "impact": "G5 is self-consistency; the real reproduction is a second command",
+   "fix": "call run_case() for the committed rows, or add the report command to repro_cmd"
+  },
+  {
+   "id": "F5",
+   "severity": "low",
+   "claim": "report numbers are '程序化注入, 零手抄'",
+   "evidence": "report §3 multi-hull table renders Wigley volumes at one decimal (2.7 for 2.7231650437231827 = 0.85 % rendering error; 2.8 for 2.763654038838464 = 1.32 %); the artifacts carry full precision",
+   "impact": "the posted report cannot be machine-compared row by row for that table",
+   "fix": "print %.6f from the artifact"
+  },
+  {
+   "id": "F6",
+   "severity": "info",
+   "claim": "docs/volume_xval.md title: 'vs 独立实体引擎'",
+   "evidence": "the second engine is a triangle-mesh engine (numpy-stl/Mirtich); the B-rep route is WITHHELD in the body",
+   "impact": "title only",
+   "fix": "title: vs 独立第三方引擎"
+  }
+ ],
+ "checks_not_run": [
+  "no B-rep (gmsh / OpenCASCADE / cadquery) cross-check: not installable here -> 'third independent solid engine' remains open work, recorded WITHHELD by the subject",
+  "trimesh / numpy-stl internals not re-derived, only cross-compared against the analytic reference and each other",
+  "KCS published 52030 m3 not re-fetched from the KRISO/SIMMAN source page by this audit",
+  "the JBC -18.3 % incident premise that motivates the anchor was not re-verified"
+ ],
+ "audit_scope_limits": "cross-check only; the audited worktree was never written. Independent arithmetic covers the analytic reference, deviations, order, Richardson and Cb; the mesh reconstruction itself still runs the subject's own builder (unavoidable without a second geometry kernel, which is exactly the WITHHELD B-rep gap). Replays ran in /tmp/m20544_repro.",
+ "disposition": "approve with notes: L3 confirmed; L4 gated on referee registration only."
+}

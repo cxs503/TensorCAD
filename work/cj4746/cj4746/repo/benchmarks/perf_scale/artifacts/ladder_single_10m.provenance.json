@@ -1,0 +1,11 @@
+{
+  "artifact": "ladder_single_10m.json",
+  "sha256": "88b4a91561b900e54fc95da118d716223fb458edf61920f3d4c0bbdae82fab66",
+  "job_id": "cj3805",
+  "node": "n330",
+  "rc": 0,
+  "wall_seconds": 771.697,
+  "command": "/usr/bin/python scripts/perf_scale_single10m.py --bases 401:129,1601:513 --levels 0,1,2,3 --queries 2000 --max-triangles 16000000 --output benchmarks/perf_scale/artifacts/ladder_single_10m.json",
+  "transport": "run_compute fetch (tar) + PERF10M_JSON_BEGIN/END log channel",
+  "note": "10^7 single-connected-body rung; landed from the cluster job after the document was first written with single_body_10m_reached=false"
+}

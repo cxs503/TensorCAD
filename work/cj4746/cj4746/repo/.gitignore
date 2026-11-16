@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+results/
+tensorcad-output/
+.venv*/
+artifacts/baseline_fleet/raw/
+artifacts/baseline_fleet/iges/
+
+# fetched third-party sources (no licence: digests only in git)
+.cache/
+artifacts/fleet_refs/raw/
