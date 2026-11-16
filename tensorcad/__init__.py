@@ -877,7 +877,19 @@ __all__ = [
     "run_integration",
     "summary_markdown",
     "verify_frame_consistency",
-
+    "ACCEPTANCE_TOLERANCE",
+    "ENGINE_AGREEMENT_TOLERANCE",
+    "VolumeXvalError",
+    "classify_routes",
+    "closed_solid_from_breadth",
+    "engine_agreement_note",
+    "fit_order",
+    "richardson_limit",
+    "topology_report",
+    "volume_divergence",
+    "volume_numpy_stl",
+    "volume_sectional",
+    "volume_trimesh",
 ]
 
 #: Mesh-exchange submodule, discoverable as ``tensorcad.mesh_formats`` without
@@ -905,5 +917,36 @@ from .solver_integration import (
     summary_markdown,
     verify_frame_consistency,
 )  # noqa: E402  (solver-interface integration)
+
+#: Cross-tool volume cross-check (XVAL-GEOM-VOLCROSS).  Exported lazily: the
+#: module pulls in the optional engine stack (trimesh / numpy-stl), and the
+#: core ``import tensorcad`` must stay standard-library only (see
+#: ``tests/test_public_surface.py``).  The names are in ``__all__`` so a caller
+#: who does not know the module path still finds them; first access pays the
+#: import.
+_VOLUME_XVAL_EXPORTS = {
+    "ACCEPTANCE_TOLERANCE",
+    "ENGINE_AGREEMENT_TOLERANCE",
+    "VolumeXvalError",
+    "classify_routes",
+    "closed_solid_from_breadth",
+    "engine_agreement_note",
+    "fit_order",
+    "richardson_limit",
+    "topology_report",
+    "volume_divergence",
+    "volume_numpy_stl",
+    "volume_sectional",
+    "volume_trimesh",
+}
+
+
+def __getattr__(name: str):
+    if name in _VOLUME_XVAL_EXPORTS:
+        from . import volume_xval
+
+        return getattr(volume_xval, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __version__ = "0.23.0"
