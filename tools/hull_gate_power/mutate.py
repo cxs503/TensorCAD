@@ -35,6 +35,7 @@ import argparse
 import hashlib
 import json
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -406,13 +407,44 @@ def run_pytest(tests: list[str]) -> dict:
     }
 
 
+#: Every injected line carries this marker.  A run killed with SIGKILL cannot run
+#: its own cleanup, so the marker is the thing that lets the *next* invocation
+#: refuse to work on a dirty tree -- and lets a reviewer see the leftover.
+MARKER = "# mutant "
+MUTABLE = {"hull": HULL, "ana": ANA, "series": SERIES, "cli": SERIES_CLI}
+
+
+def stray_markers(paths=None) -> list[str]:
+    """Source lines that still carry an injected mutation (``path:line``)."""
+    offenders = []
+    for path in (paths or sorted((ROOT / "tensorcad").rglob("*.py"))):
+        text = Path(path).read_text(errors="ignore")
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if MARKER in line:
+                offenders.append(f"{Path(path).name}:{lineno}: {line.strip()}")
+    return offenders
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", required=True)
     parser.add_argument("--only", default="")
     args = parser.parse_args()
 
+    stray = stray_markers()
+    if stray:
+        print("[abort] the source tree still carries an injected mutation "
+              "(a previous run was killed before it could restore):", flush=True)
+        for line in stray:
+            print(f"  {line}", flush=True)
+        print("Restore those files (git checkout -- tensorcad) before mutating again.",
+              flush=True)
+        return 2
+
     out_path = ROOT / args.out
+    # The record is written after every mutant so an interrupted run is resumable;
+    # that only works if the directory exists before the first mutant, not after.
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     results: dict = {}
     if out_path.exists():
         results = json.loads(out_path.read_text())
@@ -424,6 +456,20 @@ def main() -> int:
         "cli": SERIES_CLI.read_bytes(),
     }
     digests = {key: sha256(data) for key, data in originals.items()}
+
+    def restore_all() -> None:
+        for key, path in MUTABLE.items():
+            path.write_bytes(originals[key])
+
+    def _on_signal(signum, _frame):
+        # A mutation must never outlive the process that injected it: this is how
+        # ``vertical_centre_buoyancy=-0.5 * draft  # mutant ANA-2`` reached main.
+        restore_all()
+        print(f"[abort] signal {signum}: mutated sources restored", flush=True)
+        raise SystemExit(128 + signum)
+
+    for _sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(_sig, _on_signal)
 
     selected = [m for m in MUTANTS if not args.only or m["id"] in args.only.split(",")]
     for mutant in selected:
@@ -468,7 +514,9 @@ def main() -> int:
     # Baselines for the test sets (recorded once).
     for name, tests in (("gen", GEN_TESTS), ("ana", ANA_TESTS), ("series", SERIES_TESTS),
                         ("cli", SERIES_CLI_TESTS)):
-        if name not in results:
+        # Key must match what is stored, or every invocation re-runs ~90 s of
+        # baselines and quietly overwrites the recorded one.
+        if f"baseline-{name}" not in results:
             results[f"baseline-{name}"] = {"status": "baseline", "run": run_pytest(tests)}
             out_path.write_text(json.dumps(results, indent=2))
             print(f"[done] baseline-{name}: {results[f'baseline-{name}']['run']['summary']}", flush=True)

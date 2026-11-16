@@ -92,7 +92,9 @@ ANCHOR = "GAP-CAD-T2-PARAM-SERIES"
 GRADES = ("external", "closure", "withheld")
 
 #: Clause statuses.  ``not_run`` is deliberately distinct from ``pass``.
-STATUSES = ("pass", "fail", "not_run", "withheld")
+#: ``unverified`` = a record exists but cannot be read as evidence of a real run
+#: (hand-transcribed, or an injection that could not have changed behaviour).
+STATUSES = ("pass", "fail", "not_run", "unverified", "withheld")
 
 #: Which published particular plays which role.  Recorded per quantity so the
 #: closure/external mistake the audit found cannot be re-introduced silently.
@@ -254,6 +256,49 @@ def grade_gradient(published: dict, nx: int = GRID[0], nz: int = GRID[1]) -> dic
     }
 
 
+#: What a kill claim must carry before it can be read as evidence: the injection
+#: that was made (``mutant``) and the measured exit status of the run (``run``).
+#: A record without these is a summary of claims, not a mutation run.
+PROVENANCE_MUTANT_KEYS = ("id", "kind", "file", "old", "new", "claim")
+
+
+def provenance_defects(entry: dict) -> list[str]:
+    """Why one record entry cannot be counted as a mutation kill.
+
+    The failure this guards against is concrete: a hand-written record with
+    ``{"status": "ok", "run": {"killed": true}}`` per mutant used to be scored as
+    an *external* kill rate, sha256-sealed into the verdict.  Nothing was broken,
+    nothing was run, and the acceptance clause read as passed.
+    """
+    defects: list[str] = []
+    mutant = entry.get("mutant")
+    if not isinstance(mutant, dict):
+        return ["no 'mutant' block: the record does not say what was broken"]
+    defects += [f"mutant.{key} missing" for key in PROVENANCE_MUTANT_KEYS
+                if not mutant.get(key)]
+    if mutant.get("old") and mutant.get("new") and mutant["old"] == mutant["new"]:
+        defects.append("mutant.old == mutant.new: a no-op injection cannot change behaviour")
+    run = entry.get("run")
+    if not isinstance(run, dict):
+        return defects + ["no 'run' block: no measured exit status"]
+    returncode = run.get("returncode")
+    killed = run.get("killed")
+    if not isinstance(returncode, int):
+        defects.append("run.returncode missing: a kill must be a measured exit status")
+    if not isinstance(killed, bool):
+        defects.append("run.killed is not a boolean")
+    elif isinstance(returncode, int) and killed != (returncode != 0):
+        defects.append(f"run.killed={killed} contradicts run.returncode={returncode}")
+    if not run.get("summary"):
+        defects.append("run.summary empty: no pytest summary line")
+    if not isinstance(run.get("failed"), list):
+        defects.append("run.failed missing: which test killed it is not recorded")
+    wall = run.get("wall_seconds")
+    if not (isinstance(wall, (int, float)) and wall > 0):
+        defects.append("run.wall_seconds missing or zero")
+    return defects
+
+
 # --------------------------------------------------------------------- clause 3
 def gate_power_clause(record_path: Path, minimum: float = GATE_POWER_MINIMUM) -> dict:
     """Mutation kill rate from a machine-readable record, or ``not_run``."""
@@ -276,9 +321,14 @@ def gate_power_clause(record_path: Path, minimum: float = GATE_POWER_MINIMUM) ->
         return clause
     record = json.loads(record_path.read_text())
     killed = survived = 0
-    survivors = []
+    survivors: list[str] = []
+    unverifiable: dict[str, list[str]] = {}
     for mutant_id, entry in sorted(record.items()):
         if entry.get("status") != "ok":
+            continue
+        defects = provenance_defects(entry)
+        if defects:
+            unverifiable[mutant_id] = defects
             continue
         if entry["run"]["killed"]:
             killed += 1
@@ -296,9 +346,21 @@ def gate_power_clause(record_path: Path, minimum: float = GATE_POWER_MINIMUM) ->
         "total": total,
         "survivors": survivors,
         "kill_rate": rate,
-        "status": "pass" if (rate is not None and rate >= minimum) else "fail",
-        "passed": bool(rate is not None and rate >= minimum),
+        "unverifiable": unverifiable,
+        "passed": bool(rate is not None and rate >= minimum and not unverifiable),
+        "status": ("unverified" if unverifiable
+                   else "pass" if (rate is not None and rate >= minimum)
+                   else "fail"),
     })
+    if unverifiable:
+        first = sorted(unverifiable)[0]
+        clause["detail"] = (
+            f"{len(unverifiable)} of {len(unverifiable) + total} entries carry no "
+            f"injection/exit-status provenance (first: {first}: "
+            f"{'; '.join(unverifiable[first])}). A record that does not say what was "
+            "broken and what the run returned is a summary of claims, not a mutation "
+            "run: regenerate it with tools/hull_gate_power/mutate.py --only <S60-*>."
+        )
     return clause
 
 
@@ -361,13 +423,15 @@ def build_report(published: dict, mutations: Path) -> dict:
         if "status" not in clause:
             clause["status"] = "pass" if clause["passed"] else "fail"
 
-    graded = [c for c in clauses if c["status"] not in ("withheld", "not_run")]
+    graded = [c for c in clauses
+              if c["status"] not in ("withheld", "not_run", "unverified")]
     failed = [c["id"] for c in graded if c["status"] == "fail"]
     unrun = [c["id"] for c in clauses if c["status"] == "not_run"]
+    unverifiable = [c["id"] for c in clauses if c["status"] == "unverified"]
     withheld = [c["id"] for c in clauses if c["status"] == "withheld"]
     if failed:
         verdict = "fail"
-    elif unrun:
+    elif unrun or unverifiable:
         verdict = "incomplete"
     else:
         verdict = "pass"
@@ -408,6 +472,7 @@ def build_report(published: dict, mutations: Path) -> dict:
         "verdict": verdict,
         "failed_clauses": failed,
         "clauses_not_run": unrun,
+        "clauses_unverified": unverifiable,
         "clauses_withheld": withheld,
         "closure_where_external_should_be": overstated,
         "overall_evidence": (

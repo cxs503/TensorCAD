@@ -134,13 +134,34 @@ def test_an_infeasible_published_waterplane_is_rejected_loudly(tool, published):
 
 
 # ------------------------------------------------------------------ gate power
-def _record(tmp_path: Path, killed: int, survived: int) -> Path:
+def _entry(mutant_id: str, killed: bool) -> dict:
+    """One record entry in the shape ``mutate.py`` actually writes."""
+    return {
+        "status": "ok",
+        "mutant": {
+            "id": mutant_id, "kind": "model", "file": "series60",
+            "old": "    return keep * h + transom * 0.5",
+            "new": f"    return keep * h + transom * 0.55  # mutant {mutant_id}",
+            "claim": "the transom's share of the aft section area",
+            "tests": ["tests/test_series60.py"],
+        },
+        "run": {
+            "returncode": 1 if killed else 0,
+            "killed": killed,
+            "summary": "3 failed, 53 passed" if killed else "56 passed",
+            "failed": ["tests/test_series60.py::test_transom"] if killed else [],
+            "wall_seconds": 21.5,
+        },
+    }
+
+
+def _record(tmp_path: Path, killed: int, survived: int, name: str = "gate_power.json") -> Path:
     entries = {}
     for index in range(killed):
-        entries[f"M-K{index}"] = {"status": "ok", "run": {"killed": True}}
+        entries[f"M-K{index}"] = _entry(f"M-K{index}", killed=True)
     for index in range(survived):
-        entries[f"M-S{index}"] = {"status": "ok", "run": {"killed": False}}
-    path = tmp_path / "gate_power.json"
+        entries[f"M-S{index}"] = _entry(f"M-S{index}", killed=False)
+    path = tmp_path / name
     path.write_text(json.dumps(entries))
     return path
 
@@ -165,12 +186,89 @@ def test_mutation_record_at_the_bar_passes(tool, tmp_path):
     assert clause["kill_rate"] == pytest.approx(0.80)
 
 
+def test_a_hand_transcribed_record_is_not_evidence(tool, tmp_path):
+    """The defect this guards: a fabricated record used to be read as a kill rate.
+
+    ``tools/hull_gate_power/generate_s60_artifact.py`` wrote
+    ``{"status": "ok", "run": {"killed": true}}`` for 24 mutants that it never ran,
+    and this clause scored it as an *external* 100 % kill rate with a sha256 stamp.
+    A record must carry the injection it made and the exit status it measured.
+    """
+    fabricated = {f"S60-{i}": {"status": "ok", "run": {"killed": True,
+                                                       "wall_seconds": 18.2}}
+                  for i in range(1, 15)}
+    path = tmp_path / "fabricated.json"
+    path.write_text(json.dumps(fabricated))
+    clause = tool.gate_power_clause(path)
+    assert clause["status"] == "unverified"
+    assert clause["passed"] is False
+    assert clause["kill_rate"] is None
+    assert len(clause["unverifiable"]) == 14
+    assert "mutant" in clause["detail"]
+
+
+def test_a_no_op_injection_cannot_be_a_kill(tool, tmp_path):
+    entry = _entry("S60-x", killed=True)
+    entry["mutant"]["new"] = entry["mutant"]["old"]
+    path = tmp_path / "noop.json"
+    path.write_text(json.dumps({"S60-x": entry}))
+    clause = tool.gate_power_clause(path)
+    assert clause["status"] == "unverified"
+    assert "no-op" in clause["unverifiable"]["S60-x"][0]
+
+
+def test_a_kill_must_agree_with_the_measured_exit_status(tool, tmp_path):
+    entry = _entry("S60-y", killed=True)
+    entry["run"]["returncode"] = 0       # a clean exit cannot be a kill
+    path = tmp_path / "contradiction.json"
+    path.write_text(json.dumps({"S60-y": entry}))
+    clause = tool.gate_power_clause(path)
+    assert clause["status"] == "unverified"
+    assert any("contradicts" in d for d in clause["unverifiable"]["S60-y"])
+
+
+def test_one_unverifiable_entry_taints_the_rate(tool, tmp_path):
+    record = {"M-K0": _entry("M-K0", killed=True),
+              "M-K1": _entry("M-K1", killed=True),
+              "M-S0": _entry("M-S0", killed=False),
+              "M-X": {"status": "ok", "run": {"killed": True}}}
+    path = tmp_path / "mixed.json"
+    path.write_text(json.dumps(record))
+    clause = tool.gate_power_clause(path)
+    assert clause["status"] == "unverified"
+    assert clause["passed"] is False
+    assert clause["survivors"] == ["M-S0"]      # measured survivors still reported
+
+
+def test_no_tool_invents_a_gate_power_record(tool, tmp_path):
+    """There must be exactly one producer: the harness that patches and runs."""
+    assert not (ROOT / "tools" / "hull_gate_power" / "generate_s60_artifact.py").exists()
+    writers = [
+        path.name
+        for path in (ROOT / "tools").rglob("*.py")
+        if "gate_power_series60.json" in path.read_text(errors="ignore")
+        and "json.dumps" in path.read_text(errors="ignore")
+        and "pytest" not in path.read_text(errors="ignore")
+    ]
+    assert writers == []
+
+
 # ------------------------------------------------------------- full assembly
 def test_verdict_is_incomplete_when_a_clause_was_not_run(tool, published, tmp_path):
     report = tool.build_report(published, tmp_path / "absent.json")
     assert report["verdict"] == "incomplete"
     assert "gate_power_mutation_kill_rate" in report["clauses_not_run"]
     assert "external_shape_anchor_todd_offsets" in report["clauses_withheld"]
+
+
+def test_verdict_is_incomplete_when_the_record_is_unverifiable(tool, published, tmp_path):
+    fabricated = {f"S60-{i}": {"status": "ok", "run": {"killed": True}} for i in range(3)}
+    path = tmp_path / "fabricated.json"
+    path.write_text(json.dumps(fabricated))
+    report = tool.build_report(published, path)
+    assert report["verdict"] == "incomplete"
+    assert "gate_power_mutation_kill_rate" in report["clauses_unverified"]
+    assert "gate_power_mutation_kill_rate" not in report["failed_clauses"]
 
 
 def test_no_closure_is_reported_as_an_external_verification(tool, published, tmp_path):
