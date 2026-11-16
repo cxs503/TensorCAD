@@ -742,7 +742,18 @@ class DTMB5415Golden(GoldenCase):
 
 
 def golden_cases() -> list[GoldenCase]:
-    return [WigleyGolden(), Series60Golden(), SphereEllipsoidGolden(), DTMB5415Golden()]
+    # Imported here rather than at module scope: the attitude case lives in its own module
+    # so that the reference route it needs (the column-integration oracle under tools/) is
+    # loaded on demand and the four mesh cases keep a fast import path.
+    from .golden_inclined_box import InclinedBoxGolden
+
+    return [
+        WigleyGolden(),
+        Series60Golden(),
+        SphereEllipsoidGolden(),
+        DTMB5415Golden(),
+        InclinedBoxGolden(),
+    ]
 
 
 # --------------------------------------------------------------------------------------
