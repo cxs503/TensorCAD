@@ -68,6 +68,11 @@ DEFAULT_SAMPLES_PER_METRE = 8.0  # ~0.125 m spacing on the surface
 #: Volume acceptance against the publisher's displacement (the gate's tolerance).
 VOLUME_TOLERANCE = 0.01
 
+#: How far a declared waterline may miss the published draft / beam before the hull is
+#: refused instead of graded (percent).  The two dimensions are measured after the cut, so
+#: this is a check on the *frame*, not on the volume.
+FRAME_CHECK_TOL_PERCENT = 2.0
+
 VERIFIED = "VERIFIED"
 WITHHELD = "WITHHELD"
 
@@ -375,18 +380,27 @@ def solid_from_points(
     dx: float = DEFAULT_DX,
     dz: float = DEFAULT_DZ,
     ring_points: int = DEFAULT_RING_POINTS,
+    waterline_z_file: float | None = None,
 ) -> dict[str, Any]:
     """Scale, place, bin and mesh a point cloud of hull-sheet samples."""
     points = [(x * factor, y * factor, z * factor) for x, y, z in raw_points]
     z_min = min(z for _, _, z in points)
     z_max = max(z for _, _, z in points)
     frame_shift_z = 0.0
-    if z_min < -0.5 * draft and -0.05 * draft <= z_max <= 0.05 * draft:
+    frame_source = "keel_at_origin"
+    if waterline_z_file is not None:
+        # Declared waterline (file units): move that plane onto z = draft, so the
+        # immersed hull is [0, draft] exactly as the field grid expects.
+        frame_shift_z = draft - waterline_z_file * factor
+        points = [(x, y, z + frame_shift_z) for x, y, z in points]
+        frame_source = "declared_waterline_z_file"
+    elif z_min < -0.5 * draft and -0.05 * draft <= z_max <= 0.05 * draft:
         # Waterline-at-origin file: the hull hangs below a plane at z = 0, so the *deepest*
         # point is the keel and the shift that puts it at z = 0 is -z_min.  (Shifting by
         # -z_max moved nothing: z_max is the waterline itself.)
         frame_shift_z = -z_min
         points = [(x, y, z + frame_shift_z) for x, y, z in points]
+        frame_source = "auto_waterline_at_origin"
     field = field_from_points(points, draft, dx=dx, dz=dz)
     mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=draft)
     return {
@@ -395,10 +409,12 @@ def solid_from_points(
         "mesh": mesh,
         "mesh_info": mesh_info,
         "frame_shift_z": frame_shift_z,
+        "frame_source": frame_source,
         "volume_m3": measure_mesh(mesh, draft)["volume_m3"],
         "dz": dz,
         "dx": dx,
     }
+
 
 
 def partition_surfaces(
@@ -745,6 +761,7 @@ def measure_mesh(mesh: Mesh, draft: float) -> dict[str, Any]:
         "boundary_edges": len(meshlib.boundary_edges(mesh)),
         "bbox_min": list(bbox.minimum),
         "bbox_max": list(bbox.maximum),
+        "extent_m": [hi - lo for lo, hi in zip(bbox.minimum, bbox.maximum)],
         "draft": draft,
     }
 
@@ -802,12 +819,22 @@ class ShipSpec:
     license: str = ""
     iges_sha256: str = ""
     iges_path: str = ""
-    #: Published model scale of the bytes (1.0 = full scale) and why it is that value.
-    #: ``fleet_baseline`` reads the file's own unit flag for the metre conversion; this
-    #: field records the *model* scale the publisher shipped (KCS/KVLCC2 full scale,
-    #: JBC/ONRT a model), which ``fleet.scale_calibration`` derives from the waterline.
-    geometry_scale: float = 1.0
+    #: model-space -> full-scale factor of the *geometry file*.  Workshop archives
+    #: ship some hulls at model scale (ONRT 1:48.9355 as published, JBC in a
+    #: model frame) and some at full scale (KVLCC2).  ``None`` means "infer it by
+    #: normalising the point cloud's x-extent to the published L_PP"; that inference
+    #: is recorded in the report and turns the volume gate into a block-coefficient
+    #: (shape) gate, so it is never silent.
+    geometry_scale: float | None = 1.0
     scale_basis: str = "geometry file is full scale (publisher archive)"
+    #: z of the design waterline **in file units**, for archives that neither leave the
+    #: keel at z=0 nor the waterline at z=0 (ONRT: a unit-Lpp model with the superstructure
+    #: sitting above z=0, so the automatic guard below cannot tell which side is the hull).
+    #: ``None`` keeps the automatic keel/waterline-at-origin guard.  A declared value is
+    #: not believed: after sampling the immersed depth it produces is measured against the
+    #: published draft and the hull is refused when they disagree beyond DRAFT_CHECK_TOL.
+    waterline_z_file: float | None = None
+    waterline_basis: str = ""
     notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -820,21 +847,197 @@ def build_ship(
     dz: float = DEFAULT_DZ,
     ring_points: int = DEFAULT_RING_POINTS,
     samples_per_metre: float = DEFAULT_SAMPLES_PER_METRE,
+    #: ``False`` reproduces the pre-2026-11-15 density defect (spacing taken from the
+    #: *declared* unit reading) and exists so the before/after of that defect is a
+    #: one-command repro instead of a claim.  See
+    #: ``docs/gap_cad_t1_iges_pipe_kvlcc2_density.md``.
+    density_follows_adopted_factor: bool = True,
 ) -> tuple[Mesh, dict[str, Any]]:
     """Run the whole IGES -> mesh -> hydrostatics chain for one hull."""
     model = read_iges(spec.iges_path)
+    census = model.surface_census()
     surfaces = model.surfaces()
     if not surfaces:
-        raise ValueError(f"{spec.name}: no B-spline surfaces in {spec.iges_path}")
-    # The workshop files are metres except JBC, whose global section declares
-    # millimetres; scale the samples to metres before any hydrostatics.
-    factor = unit_scale(model.unit_flag)
-    points = [
-        (x * factor, y * factor, z * factor)
-        for x, y, z in sample_patches(surfaces, spacing=1.0 / max(samples_per_metre, 1e-6))
-    ]
-    field = field_from_points(points, spec.draft, dx=dx, dz=dz)
-    mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=spec.draft)
+        detail = (
+            f" ({census['curves_type126']} type-126 rational B-spline *curves* present: "
+            "they are trim boundaries, not surfaces, so they cannot carry the hull)"
+            if census["curves_type126"]
+            else ""
+        )
+        raise ValueError(
+            f"{spec.name}: no type-128 B-spline surfaces in {spec.iges_path}{detail}"
+        )
+    # Scale the samples to metres before any hydrostatics: units flag (metres,
+    # millimetres, ...) times the model-space scale.  The read of the flag is now
+    # Hollerith-positional (see iges.hollerith_fields); the previous content scan read
+    # the JBC file -- millimetres throughout -- as metres, i.e. a 1000x hull.
+    declared_factor = unit_scale(model.unit_flag) * model.model_scale
+    usable, quarantined = partition_surfaces(surfaces)
+    if not usable:
+        raise ValueError(f"{spec.name}: every surface was quarantined")
+    # Sampling density is a *physical* quantity (samples per metre of ship) while
+    # sample_patches() walks the parametric grid in *file* units, so the spacing has to be
+    # divided by metres-per-file-unit.  A fixed 1/8 "unit" spacing happened to be 0.125 m on
+    # KCS (metre archive), was 0.125 mm on the millimetre JBC archive (1.53 M samples, 40 s
+    # of work for no extra accuracy) and 0.125 *ship lengths* on the unit-Lpp ONRT model --
+    # 8 samples over the whole hull, which no reconstruction can survive.
+    metres_per_unit = declared_factor * (spec.geometry_scale if spec.geometry_scale else 1.0)
+    physical_spacing_m = 1.0 / max(samples_per_metre, 1e-6)
+    spacing = (
+        physical_spacing_m / metres_per_unit if metres_per_unit > 0.0 else physical_spacing_m
+    )
+    raw_points = list(sample_patches(usable, spacing=spacing))
+    geometry_scale = spec.geometry_scale
+    scale_basis = spec.scale_basis or "geometry file is full scale"
+    if geometry_scale is None:
+        # No published model scale for this hull: normalise the point cloud's
+        # x-extent to the publisher's L_PP.  The factor is recorded, and the
+        # volume gate below degrades to a block-coefficient (shape) gate because
+        # one length has been fitted.
+        xs_raw = [point[0] for point in raw_points]
+        extent_raw = (max(xs_raw) - min(xs_raw)) * declared_factor if xs_raw else float("nan")
+        if not (extent_raw and extent_raw == extent_raw and extent_raw > 0.0):
+            raise ValueError(f"{spec.name}: cannot infer a scale from an empty point cloud")
+        geometry_scale = spec.length_pp / extent_raw
+        scale_basis = (
+            f"inferred (no published model scale): published L_PP {spec.length_pp:.3f} m / "
+            f"geometric x-extent {extent_raw:.4f} m = {geometry_scale:.5f}"
+        )
+    # Unit gate: measure the archive against the publisher's L_PP instead of trusting the
+    # global section, which on KVLCC2 declares millimetres over metre coordinates.
+    xs_raw = [point[0] for point in raw_points]
+    unit_gate = measured_unit_factor(
+        (max(xs_raw) - min(xs_raw)) if xs_raw else 0.0,
+        declared_factor * geometry_scale,
+        spec.length_pp,
+        metre_factor=model.model_scale * geometry_scale,
+    )
+    factor = unit_gate["factor"]
+    # The sample density is a *physical* quantity, so the spacing that walks the
+    # parametric grid must be divided by the factor that actually turns file units into
+    # metres -- and that factor is decided by measurement above, not by the header.  On
+    # ``KVLCC2/kvlcc2.igs`` the global section declares millimetres over metre
+    # coordinates: using the declared reading gave a 125 file-unit spacing, i.e. a 4x4
+    # grid per patch (kept 4..9 of 16 samples), a half-breadth field covering a quarter
+    # of the sheet and a displacement of 10 876 m3 against the published 312 622 m3
+    # (-96.52 %, WITHHELD).  The unit gate had already measured the contradiction; the
+    # resampling it implies was simply never done.
+    adopted_differs = (
+        abs(factor - metres_per_unit) > 1e-12 * max(abs(factor), abs(metres_per_unit))
+        if (factor > 0.0 and metres_per_unit > 0.0) else False
+    )
+    if density_follows_adopted_factor and adopted_differs:
+        corrected_spacing = physical_spacing_m / factor
+        if corrected_spacing > 0.0 and abs(corrected_spacing - spacing) > 1e-12 * max(abs(spacing), 1e-300):
+            previous_spacing = spacing
+            spacing = corrected_spacing
+            raw_points = list(sample_patches(usable, spacing=spacing))
+            unit_gate["density_resampled_for_adopted_factor"] = {
+                "declared_spacing_file_units": previous_spacing,
+                "adopted_spacing_file_units": corrected_spacing,
+                "samples": len(raw_points),
+                "reason": ("the declared unit reading was contradicted by the geometry; "
+                           "the density follows the factor the gate adopted"),
+            }
+    route = "untrimmed_patch_sheet"
+    trim_record: dict[str, Any] | None = None
+    # A patch set in which *every* basis surface is bound to a trimmed patch is not
+    # described by its untrimmed domains at all (KVLCC2: 19/19 trimmed, untrimmed domains
+    # up to 6x the trimmed region and 7 m below the keel).  The trim loops are then the
+    # authoritative sheet, so that route runs first; the untrimmed cloud stays the entry
+    # point for the sets that carry untrimmed patches (KCS: 0/55 trimmed).
+    fully_trimmed = (
+        census["surfaces_type128"] > 0
+        and census["basis_surfaces_trimmed"] > 0
+        and census["basis_surfaces_untrimmed"] == 0
+    )
+    try:
+        if fully_trimmed:
+            trim_points, trim_record = sample_trimmed_patches(model, spacing=spacing)
+            if not trim_points:
+                raise ValueError(
+                    f"every one of the {census['surfaces_type128']} basis surfaces is trimmed "
+                    f"but the trim loops carried no usable sheet "
+                    f"({trim_record['patches_used']}/{trim_record['patches_total']} patches)"
+                )
+            ingest = solid_from_points(
+                trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points,
+                waterline_z_file=spec.waterline_z_file,
+            )
+            route = "trimmed_patch_loops"
+        else:
+            ingest = solid_from_points(
+                raw_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points,
+                waterline_z_file=spec.waterline_z_file,
+            )
+    except ValueError as exc:
+        # The untrimmed sheet could not carry the hull.  If the patch set is trimmed, the
+        # trim loops are the authoritative description of the sheet the model has, so
+        # resample inside them before refusing.  Both the refusal and the recovery are
+        # measured and reported; nothing is inferred from the file's entity counts.
+        trim_points, trim_record = sample_trimmed_patches(model, spacing=spacing)
+        if not trim_points:
+            raise ValueError(
+                f"{spec.name}: {exc} -- the source binds "
+                f"{census['basis_surfaces_trimmed']}/{census['surfaces_type128']} type-128 "
+                f"basis surfaces to a trimmed patch and leaves "
+                f"{census['basis_surfaces_untrimmed']} untrimmed "
+                f"({census['curves_type126']} type-126 trim curves, "
+                f"{census['boundaries_type141']} type-141 boundaries, "
+                f"{census['curves_on_surface_type142']} type-142 curves-on-surface), and the "
+                f"trim loops carried no usable sheet "
+                f"({trim_record['patches_used']}/{trim_record['patches_total']} patches), so the "
+                "refusal describes the patch set that arrived, not the shape"
+            ) from exc
+        coarse = ingest if route == "trimmed_patch_loops" else solid_from_points(
+            trim_points, factor, spec.draft, dx=dx, dz=dz, ring_points=ring_points,
+            waterline_z_file=spec.waterline_z_file,
+        )
+        fine = solid_from_points(
+            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points,
+            waterline_z_file=spec.waterline_z_file,
+        )
+        # The keel-to-deck extent of a trimmed hull set can exceed the draft by half again
+        # (KVLCC2: 28 m deep, 20.8 m draft), so the default dz is refined once and the
+        # change is reported rather than hidden in the uncertainty.
+        trim_record["dz_refinement"] = {
+            "dz_m": [dz, 0.5 * dz],
+            "volume_m3": [coarse["volume_m3"], fine["volume_m3"]],
+            "relative_change_percent": (
+                (fine["volume_m3"] - coarse["volume_m3"]) / coarse["volume_m3"] * 100.0
+                if coarse["volume_m3"]
+                else float("nan")
+            ),
+            "adopted": "finer (0.5 x dz)",
+            "coarse_route": route,
+        }
+        ingest = fine
+        route = "trimmed_patch_loops"
+    if route == "trimmed_patch_loops" and "dz_refinement" not in (trim_record or {}):
+        # The keel-to-deck extent of a trimmed hull set can exceed the draft by half again
+        # (KVLCC2: 28 m deep, 20.8 m draft), and at the default dz the reconstruction of that
+        # deep set is off by several percent.  Refine once and report the change instead of
+        # hiding it in the uncertainty.
+        fine = solid_from_points(
+            trim_points, factor, spec.draft, dx=dx, dz=0.5 * dz, ring_points=ring_points,
+            waterline_z_file=spec.waterline_z_file,
+        )
+        trim_record["dz_refinement"] = {
+            "dz_m": [dz, 0.5 * dz],
+            "volume_m3": [ingest["volume_m3"], fine["volume_m3"]],
+            "relative_change_percent": (
+                (fine["volume_m3"] - ingest["volume_m3"]) / ingest["volume_m3"] * 100.0
+                if ingest["volume_m3"]
+                else float("nan")
+            ),
+            "adopted": "finer (0.5 x dz)",
+        }
+        ingest = fine
+    field = ingest["field"]
+    mesh = ingest["mesh"]
+    mesh_info = ingest["mesh_info"]
+    points = ingest["points"]
+    frame_shift_z = ingest["frame_shift_z"]
     mesh_stats = measure_mesh(mesh, spec.draft)
     integrals = field_integrals(field)
 
@@ -865,9 +1068,69 @@ def build_ship(
 
     volume_error = None
     volume_ok: bool | None = None
+    volume_gate_basis = (
+        "shape (Cb): scale was fitted to the published L_PP, so a volume match is a "
+        "block-coefficient match, not an independent check of the absolute scale"
+        if spec.geometry_scale is None
+        else "absolute displacement at the publisher's own scale"
+    )
     if spec.published_volume_m3:
         volume_error = (volume - spec.published_volume_m3) / spec.published_volume_m3 * 100.0
         volume_ok = abs(volume_error) <= 100.0 * VOLUME_TOLERANCE
+
+    # Scale guard: a model-scale file or a mis-read units flag shows up as a geometric
+    # extent that is not the published length. This is checked *before* the volume gate so
+    # that "1 m of model" cannot masquerade as a 99.99% volume error.
+    extent_x = mesh_stats.get("extent_m", [float("nan")] * 3)[0]
+    scale_ratio = extent_x / spec.length_pp if spec.length_pp and extent_x else float("nan")
+    scale_consistent = bool(
+        spec.length_pp and extent_x and 0.85 <= scale_ratio <= 1.20
+    )
+
+    # A declared waterline is corroborated, not trusted.  Two facts the cut must reproduce,
+    # both independent of the volume that is being graded: (1) the immersed depth -- the
+    # deepest point of the *widest* sheet, i.e. the hull proper, must sit the publisher's
+    # draft below the waterline plane; (2) the immersed half-breadth must be B/2.  ONRT is
+    # the reason this exists: its archive is a unit-Lpp model whose superstructure sits
+    # *above* z = 0, so both the keel-at-origin and waterline-at-origin guards are silent and
+    # a wrong cut plane would have been accepted silently.
+    frame_check: dict[str, Any] | None = None
+    if spec.waterline_z_file is not None:
+        submerged = [point for point in points if 0.0 <= point[2] <= spec.draft]
+        if submerged:
+            widest = max(abs(point[1]) for point in submerged)
+            if widest > 0.0:
+                keel = min(
+                    point[2] for point in submerged if abs(point[1]) >= 0.98 * widest
+                )
+                immersed = spec.draft - keel
+                draft_error = (
+                    (immersed - spec.draft) / spec.draft * 100.0 if spec.draft else float("nan")
+                )
+                beam_error = (
+                    (2.0 * widest - spec.beam) / spec.beam * 100.0 if spec.beam else float("nan")
+                )
+                frame_check = {
+                    "waterline_z_file": spec.waterline_z_file,
+                    "waterline_basis": spec.waterline_basis,
+                    "frame_shift_z_m": frame_shift_z,
+                    "frame_source": ingest.get("frame_source"),
+                    "immersed_depth_m": immersed,
+                    "published_draft_m": spec.draft,
+                    "draft_relative_error_percent": draft_error,
+                    "immersed_half_breadth_m": widest,
+                    "published_beam_m": spec.beam,
+                    "beam_relative_error_percent": beam_error,
+                    "tolerance_percent": FRAME_CHECK_TOL_PERCENT,
+                    # The *draft* is what the declared waterline is on trial for: it is the one
+                    # dimension a misplaced cut plane destroys.  The immersed half-breadth is
+                    # reported alongside but does not gate, because a cut that is correct can
+                    # still read narrow when the archive's sheets are only partly consumed (ONRT:
+                    # 132 sheets, of which the bare hull is two) -- a coverage fact, reported as
+                    # `patches_used` by the same run, not a frame error.
+                    "ok": bool(abs(draft_error) <= FRAME_CHECK_TOL_PERCENT),
+                }
+    frame_ok = True if frame_check is None else frame_check["ok"]
 
     topology_ok = (
         mesh_stats["is_watertight"]
@@ -875,7 +1138,11 @@ def build_ship(
         and mesh_stats["zero_area_faces"] == 0
         and volume > 0.0
     )
-    verdict = VERIFIED if (topology_ok and volume_ok is True) else WITHHELD
+    verdict = (
+        VERIFIED
+        if (topology_ok and volume_ok is True and scale_consistent and frame_ok)
+        else WITHHELD
+    )
 
     reasons: list[str] = []
     if not mesh_stats["is_watertight"]:
@@ -884,6 +1151,14 @@ def build_ship(
         reasons.append("mesh is not edge-manifold")
     if mesh_stats["zero_area_faces"]:
         reasons.append(f"{mesh_stats['zero_area_faces']} zero-area faces")
+    if not frame_ok:
+        reasons.append(
+            f"declared waterline z={spec.waterline_z_file} (file units) is not corroborated by "
+            f"the geometry: immersed depth {frame_check['immersed_depth_m']:.3f} m vs published "
+            f"draft {spec.draft:.3f} m ({frame_check['draft_relative_error_percent']:+.2f}%), "
+            f"immersed half-breadth {frame_check['immersed_half_breadth_m']:.3f} m vs B/2 "
+            f"{0.5 * spec.beam:.3f} m ({frame_check['beam_relative_error_percent']:+.2f}%)"
+        )
     if volume_ok is False:
         reasons.append(
             f"volume {volume:.0f} m3 is {volume_error:+.2f}% off the published "
@@ -891,20 +1166,51 @@ def build_ship(
         )
     if spec.published_volume_m3 is None:
         reasons.append("no published displacement available for this hull")
+    if not scale_consistent:
+        reasons.append(
+            f"geometry extent {extent_x:.3f} m vs published L_PP {spec.length_pp:.1f} m "
+            f"(ratio {scale_ratio:.4f}): model-scale bytes or a units error, so a volume "
+            f"comparison against the full-scale displacement is not meaningful"
+            + (
+                f"; scaling by {1.0 / scale_ratio:.3f}^3 would give "
+                f"{volume * (1.0 / scale_ratio) ** 3:.1f} m3"
+                if scale_ratio and scale_ratio == scale_ratio and scale_ratio != 0
+                else ""
+            )
+        )
 
     report = {
         "schema": SCHEMA,
+        "volume_gate_basis": volume_gate_basis,
         "spec": spec.to_dict(),
         "source": {
             "iges_stats": model.stats(),
             "units": model.units,
             "unit_flag": model.unit_flag,
+            "unit_name": model.unit_name,
+            "unit_source": model.unit_source,
+            "model_space_scale": model.model_scale,
+            "geometry_scale_to_full": geometry_scale,
+            "scale_basis": scale_basis,
+            "scale_inferred": spec.geometry_scale is None,
+            "route": route,
+            "unit_gate": unit_gate,
+            "trim_sampling": trim_record,
+            "frame_shift_z": frame_shift_z,
             "unit_scale_to_metres": factor,
+            "unit_warnings": list(model.unit_warnings),
+            "patches_total": len(surfaces),
+            "patches_used": len(usable),
+            "patches_quarantined": quarantined,
             "surface_count": len(surfaces),
             "sample_count": len(points),
             "sampling_spacing_m": 1.0 / max(samples_per_metre, 1e-6),
+            "sampling_spacing_file_units": spacing,
+            "metres_per_file_unit_for_spacing": metres_per_unit,
+            "surface_census": census,
         },
         "field": field.to_dict(),
+        "frame_check": frame_check,
         "mesh_info": mesh_info,
         "mesh": mesh_stats,
         "integrals": integrals,
@@ -930,6 +1236,9 @@ def build_ship(
             "edge_manifold": mesh_stats["is_edge_manifold"],
             "positive_volume": volume > 0.0,
             "volume_within_tolerance": volume_ok,
+            "scale_consistent_with_published_lpp": scale_consistent,
+            "units_measured_plausible": unit_gate["verdict"] != "no_plausible_unit",
+            "extent_over_lpp": scale_ratio if scale_ratio == scale_ratio else None,
             "lwl_vs_lpp_percent": (
                 (length_wl - spec.length_pp) / spec.length_pp * 100.0
                 if length_wl and spec.length_pp
@@ -938,6 +1247,7 @@ def build_ship(
         },
     }
     return mesh, report
+
 
 
 # --------------------------------------------------------------------------- #
@@ -1003,6 +1313,21 @@ def specs_from_json(path: str | Path, *, asset_registry: object | None = None) -
                 iges_sha256=entry.get("iges_sha256", ""),
                 iges_path=iges_path,
                 notes=entry.get("notes", ""),
+                # The loader used to drop these, so a JSON-driven fleet run silently graded
+                # every archive as full scale: the millimetre JBC model and the unit-Lpp ONRT
+                # model were read as metre hulls and refused for a "units error" that was
+                # really a dropped field.  Passing them through is what makes the spec file
+                # the single place a hull's scale lives.
+                geometry_scale=(
+                    None if entry.get("geometry_scale", 1.0) is None
+                    else float(entry.get("geometry_scale", 1.0))
+                ),
+                scale_basis=entry.get("scale_basis", ""),
+                waterline_z_file=(
+                    None if entry.get("waterline_z_file") is None
+                    else float(entry["waterline_z_file"])
+                ),
+                waterline_basis=entry.get("waterline_basis", ""),
             )
         )
     return specs
