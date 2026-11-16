@@ -1,6 +1,26 @@
 
 ## Unreleased
 
+- **Wall-clock gate: noise-aware measurement, matched estimators, and a workload-comparability
+  refusal** (`tensorcad/perf_benchmark.py`, `scripts/build_perf_baseline.py`,
+  `scripts/perf_gate_noise_repro.py`, `benchmarks/perf_scale/baseline.json`,
+  `benchmarks/perf_scale/artifacts/baseline_v0.3_max_of_3.json`,
+  `benchmarks/perf_scale/artifacts/gate_noise_repro.json`, `docs/perf_benchmark.md` section 9,
+  `docs/perf_gate_noise.md`, `tests/test_perf_gate_noise.py`). Three defects behind the v0.3
+  "green only on a quiet machine" note: (a) a stored baseline taken as the *max* of 3 runs is
+  inflated by exactly the load noise a single-shot measurement still carries, so the documented
+  "2x = RED" contract was really "2.3x-4.2x = RED" on 21 of 28 keys; (b) the committed baseline
+  was measured with 500 ray queries while the documented CI command runs 1000, a silent ~2x on
+  `point_locate*` (same code, 500 vs 1000 rays: 1.89-2.13x, measured); (c) short measurements
+  were judged from one shot. Now: measurements below 0.5 s repeat (best-of-N, bounded by a
+  per-key time budget), the baseline is recorded `min` of N (same estimator), every query row
+  carries `n_queries` and a differing count is `not_run` instead of a ratio, and a repeat set
+  that straddles the threshold with spread >= 1.5x becomes the third state `noise` (never a
+  pass, never a RED; CLI exit code 2, verdict `inconclusive`). Measured at load1 ~48 on the
+  128-core box: single-shot 2/2 and best-of-3 2/2 runs green, 35 gates each; the noise branch was
+  not triggered in situ and is covered by injected-timing unit tests (23 passed).
+  An unrelated pre-existing failure set (`test_midsurface`, `test_shipd_audit`) is untouched.
+
 - **The 10^6-10^7 complexity gate can now be measured instead of `not_run`, and rung memory is
   reported in three distinct dimensions** (`tensorcad/perf_benchmark.py`,
   `scripts/perf_scale_10m.py`, `scripts/perf_3pt_report.py`, `scripts/gen_perf_3pt_figures.py`,

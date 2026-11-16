@@ -2,14 +2,20 @@
 
 The gate compares a fresh measurement against a stored baseline; a baseline
 taken from a single run on a loaded shared box is noisy, so this script runs the
-ladder ``--runs`` times and keeps, per (sub-task, resolution) key, the
-**slowest** observation.  Taking the max makes the gate tolerant of load noise
-(it flags a real 2x regression, not a busy neighbour) and the policy is written
-into the JSON so the number is not mistaken for a best case.
+ladder ``--runs`` times and keeps, per (sub-task, resolution) key, one
+observation chosen by ``--policy`` (default ``min``, i.e. the fastest).
+
+**The estimator must match the gate's.**  The gate compares the *best* of its
+repeated short measurements against the baseline, because contention only ever
+adds seconds.  A baseline recorded as the *max* of N runs is inflated by load
+noise by exactly the amount the gate then filters out on the measured side, so a
+real 2x regression shows up as ~1.5x and passes - the estimator asymmetry hides
+it.  v0.1-v0.3 shipped that asymmetry with a max-of-3 baseline; v0.4 records
+min-of-N and says so in ``baseline_policy`` (see ``docs/perf_benchmark.md`` §9).
 
 Usage::
 
-    python scripts/build_perf_baseline.py                        # quick ladder, 3 runs
+    python scripts/build_perf_baseline.py                        # quick ladder, 3 runs (min)
     python scripts/build_perf_baseline.py --runs 5 --n-queries 500
     python scripts/build_perf_baseline.py --full \\
         --output benchmarks/perf_scale/baseline_full.json        # 10^6--10^7 rungs
@@ -31,21 +37,32 @@ from tensorcad.perf_benchmark import (  # noqa: E402
     FLEET_BASE_LADDER,
     FLEET_COPIES_LADDER,
     QUICK_LADDER,
+    QUICK_N_QUERIES,
     QUICK_VOXEL_LADDER,
+    FULL_N_QUERIES,
     VOXEL_LADDER,
     _environment,
     clear_fleet_cache,
     clear_mesh_cache,
     measurement_key,
     run_fleet_benchmark,
+    reduce_seconds,
     run_perf_benchmark,
 )
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--runs", type=int, default=3, help="repeat the ladder, keep the slowest")
-    ap.add_argument("--n-queries", type=int, default=500)
+    ap.add_argument("--runs", type=int, default=3,
+                    help="repeat the ladder; --policy picks which observation is kept")
+    ap.add_argument("--policy", choices=("min", "max", "median"), default="min",
+                    help="estimator for the kept observation per key (default min: the "
+                         "fastest, matching the gate's best-of-N; use max only to "
+                         "reproduce the pre-0.4 baselines")
+    ap.add_argument("--n-queries", type=int, default=None,
+                    help="ray queries for point_locate* (default: the same count the "
+                         "gate's --quick/--full run uses, so the baseline is comparable "
+                         "to the documented CI command)")
     ap.add_argument("--full", action="store_true", help="use the full ladder (10^6--10^7)")
     ap.add_argument("--fleet", action="store_true",
                     help="build the 10^6--10^7 multi-body (fleet) tier baseline "
@@ -66,9 +83,12 @@ def main(argv: list[str] | None = None) -> int:
         subtasks = tuple(name.strip() for name in args.subtasks.split(",") if name.strip())
 
     ladder = DEFAULT_LADDER if args.full else QUICK_LADDER
+    if args.n_queries is None:
+        from tensorcad.perf_benchmark import FULL_N_QUERIES, QUICK_N_QUERIES
+        args.n_queries = FULL_N_QUERIES if args.full else QUICK_N_QUERIES
     voxel_ladder = VOXEL_LADDER if args.full else QUICK_VOXEL_LADDER
 
-    merged: dict[str, dict] = {}
+    collected: dict[str, list[dict]] = {}
     for run_index in range(args.runs):
         clear_mesh_cache()
         clear_fleet_cache()
@@ -95,14 +115,19 @@ def main(argv: list[str] | None = None) -> int:
             key = measurement_key(
                 record["subtask"], record["nx"], record["nz"], record.get("copies", 1)
             )
-            if record["seconds"] is None:
-                merged.setdefault(key, record)
-                continue
-            if key in merged and merged[key]["seconds"] is not None:
-                if record["seconds"] <= merged[key]["seconds"]:
-                    continue
-            merged[key] = record
+            collected.setdefault(key, []).append(record)
         print(f"run {run_index + 1}/{args.runs}: {len(result.results)} measurements", flush=True)
+
+    # One record per key, chosen by the estimator: a timing is the fastest (or
+    # slowest) observation, and the rest of the record travels with it.
+    merged: dict[str, dict] = {}
+    for key, records in collected.items():
+        measured = [r["seconds"] for r in records if r["seconds"] is not None]
+        if not measured:
+            merged[key] = records[0]
+            continue
+        target = reduce_seconds(measured, args.policy)
+        merged[key] = next(r for r in records if r["seconds"] == target)
 
     preserved: list[dict] = []
     out_path = Path(args.output)
@@ -129,9 +154,11 @@ def main(argv: list[str] | None = None) -> int:
         "command": "scripts/build_perf_baseline.py " + " ".join(sys.argv[1:]),
         "environment": _environment(),
         "baseline_policy": (
-            f"max of {args.runs} runs per (subtask, nx, nz) key - tolerant of load noise "
-            "on a shared machine"
+            f"{args.policy} of {args.runs} runs per (subtask, nx, nz) key - the same "
+            "estimator the wall-clock gate applies to its own repeats "
+            "(docs/perf_benchmark.md §9)"
         ),
+        "baseline_estimator": args.policy,
         "cluster_warnings": [],
         "gates": [],
         "results": [merged[k] for k in sorted(merged)] + preserved,
