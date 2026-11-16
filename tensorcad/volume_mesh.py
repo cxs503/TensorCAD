@@ -144,7 +144,11 @@ class SectionGrid:
         )
 
         def breadth(i: int, j: int) -> float:
-            return abs(_section_point(parameters, i, j)[1])
+            # Ring point ``nz - 1 - j`` is the one that sits at ``zs[j]``: ring index 0 is the
+            # design waterline and the keel closes the half outline. Pairing index ``j`` with
+            # ``zs[j]`` instead mirrors the body in ``z`` -- the volume is unchanged, so only
+            # a vertical-moment check (VCB) sees it.
+            return abs(_section_point(parameters, i, parameters.nz - 1 - j)[1])
 
         return cls(xs=xs, zs=zs, breadth=breadth)
 
