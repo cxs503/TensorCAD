@@ -14,7 +14,9 @@ This module closes the gap by constructing the surface from the *coefficients*
 instead of hoping the coefficients come out:
 
 * breadth law ``b(x) = B/2 * sin(pi*x/L)**s``            -> ``Cwp``
-* local fullness ``c(x) = Cm * sin(pi*x/L)**r``          -> ``Cb`` (with ``Cm`` at midship)
+* local fullness ``c(x) = Cm * sin(pi*x/L)**r(x)``     -> ``Cb`` (with ``Cm`` at midship),
+  where ``r(x) = r + skew`` aft of midship and ``r - skew`` forward of it
+                                                        -> ``LCB``
 * section profile ``y(x,z) = b(x) * zeta**(p(x))``       -> local sectional area
 
 Each of ``s``, ``r`` and the per-station ``p`` is obtained by *bisection on the
@@ -58,10 +60,15 @@ Known limitations (deliberate, documented rather than hidden)
   the surface comes out high (up to +14.7 % against the Holtrop & Mennen regression
   for fine hulls). With the rise the same coefficients are realised by a hollowed
   run and entrance, which is what a real hull looks like.
-* ``LCB`` is fixed by the symmetric sine law (``LCB = L/2`` for ``s = r``); only
-  symmetric fore/aft families are generated.
-* Only ``Cb``, ``Cm`` and ``Cwp`` are honoured. Anything else a caller thinks a
-  parameter vector carries (LCB, Cp, L/R ratios beyond ``L, B, T``) is derived.
+* ``LCB`` **is** controllable: ``lcb_offset`` splits the fullness exponent into an
+  aft value ``r + skew`` and a fore value ``r - skew`` at the midship station, so the
+  fore/aft volume centroid moves while ``Cb``, ``Cm`` and ``Cwp`` stay exact
+  (:func:`solve_lcb_skew`). The default ``lcb_offset = 0`` reproduces the symmetric
+  round-3 family bit for bit. What is still *not* honoured is a hollow/knuckled
+  waterline or a transom: this is a two-parameter fore/aft family, not a lines plan.
+* Only ``Cb``, ``Cm``, ``Cwp`` and (optionally) ``LCB`` are honoured. Anything else a
+  caller thinks a parameter vector carries (``Cp``, ``LCF``, ``L/R`` ratios beyond
+  ``L, B, T``) is derived.
 """
 from __future__ import annotations
 
@@ -69,7 +76,7 @@ import functools
 import math
 from bisect import bisect_left
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Sequence
 
 from . import mesh as meshlib
 from .geometry import Mesh, MeshBuilder
@@ -107,6 +114,21 @@ FULLNESS_FLOOR = 1.0e-12
 #: middle of a taper body (``taper = 0.5``) the keel has risen only 12.5 % of the way
 #: to its end value, which is the shape of a forefoot, not a straight wedge.
 KEEL_RISE_EXPONENT = 3.0
+
+#: Largest ``|LCB offset|`` from mid-length, as a fraction of L, that the family will
+#: attempt. Real ships sit inside +/-3.5 % L (KVLCC2 is +3.48 %, KCS is -1.48 %); 5 %
+#: is a generous bound that still refuses a request no hull would make.
+LCB_OFFSET_LIMIT = 0.05
+
+#: Bound on the fore/aft tilt used by the outer LCB bisection. A tilt of 1 would
+#: collapse one half's exponents to zero (a full-breadth slab), so the search stays
+#: strictly inside and an unreachable request fails loudly instead of degenerating.
+TILT_LIMIT = 0.9
+
+#: Smallest exponent the tilted family will use. A non-positive breadth or fullness
+#: exponent makes an end section blunter than midship, which breaks ``Cm`` as the
+#: maximum sectional area, so the bracket is closed rather than silently violated.
+MIN_FULLNESS_EXPONENT = 1.0e-3
 
 
 # --------------------------------------------------------------------------- #
@@ -257,6 +279,284 @@ def _solve_sine_power(target: float, nx: int) -> float:
 
 
 # --------------------------------------------------------------------------- #
+# Fore/aft asymmetry: LCB control at fixed Cb, Cm, Cwp
+# --------------------------------------------------------------------------- #
+class LcbRequestUnreachable(ValueError):
+    """The requested LCB cannot be reached without breaking Cb, Cm or Cwp."""
+
+
+def section_side_signs(nx: int) -> tuple[float, ...]:
+    """``+1`` aft of midship, ``-1`` forward of it, ``0`` at the midship station.
+
+    This is the multiplier of the fore/aft tilt: under a tilt ``tau`` the breadth
+    exponent of station ``i`` is ``s * (1 + side_i * tau)`` and the fullness exponent
+    is ``r * (1 + side_i * tau)``. A positive tilt therefore stretches both exponents
+    on the run and shrinks them on the entrance -- slimmer afterbody, fuller
+    forebody -- which moves the centre of buoyancy forward. The midship station keeps
+    the untilted exponents, so ``Cm`` stays realised there.
+    """
+    if nx < 2:
+        raise ValueError(f"need at least two stations, got nx={nx}")
+    mid = 0.5 * (nx - 1)
+    centre = (nx - 1) // 2 if nx % 2 == 1 else None
+    return tuple(
+        0.0 if i == centre else (1.0 if i < mid else -1.0) for i in range(nx)
+    )
+
+
+def asymmetric_mean(
+    taper: Sequence[float],
+    exponent: float,
+    tilt: float,
+    weights: Sequence[float] | None = None,
+) -> float:
+    """``mean(weights * g**(exponent * (1 + side*tilt)))`` -- the tilted mean.
+
+    ``tilt = 0`` reproduces :func:`weighted_power_mean` exactly, so the symmetric
+    round-3 family is a special case rather than a re-derivation.
+    """
+    sides = section_side_signs(len(taper))
+    ws = list(weights) if weights is not None else [1.0] * len(taper)
+    if len(ws) != len(taper):
+        raise ValueError("taper and weights must be the same length")
+    return _trapezoid_mean(
+        [
+            weight * max(g, 0.0) ** (exponent * (1.0 + side * tilt))
+            for g, side, weight in zip(taper, sides, ws)
+        ]
+    )
+
+
+def solve_asymmetric_exponents(
+    taper: Sequence[float],
+    keel: Sequence[float],
+    waterplane_coefficient: float,
+    prismatic_coefficient: float,
+    tilt: float,
+) -> tuple[float, float]:
+    """``(s, r)`` reproducing ``Cwp`` and ``Cp`` at a given fore/aft ``tilt``.
+
+    Two nested bisections on the discrete functionals the loft integrates:
+
+    ``Cwp = mean(g**(s*(1+side*tilt)))``   and
+    ``Cp  = mean(h * g**((s+r)*(1+side*tilt)))``
+
+    Both means fall monotonically with their exponent, so each solve is a bisection in
+    ``log`` exponent. A target outside the reachable band raises
+    :class:`LcbRequestUnreachable` instead of being clamped -- a silently clamped hull
+    is exactly the failure mode this module exists to remove.
+    """
+    if not (-1.0 < tilt < 1.0):
+        raise LcbRequestUnreachable(f"tilt must lie in (-1, 1), got {tilt!r}")
+    sides = section_side_signs(len(taper))
+    factors = [1.0 + side * tilt for side in sides]
+    if any(float(f) <= 0.0 for f in factors):  # pragma: no cover - guarded above
+        raise LcbRequestUnreachable(f"tilt {tilt!r} flips an exponent's sign")
+
+    def solve(target: float, base: Sequence[float], what: str) -> float:
+        """Bisection on the exponent whose tilted mean equals ``target``.
+
+        ``base`` is everything already known at this station (the draft ratio, and the
+        breadth law once it is solved), so each call adds just ``g**(exponent*factor)``
+        -- the term being solved for. Splitting it this way is what keeps the two
+        solves independent; folding ``s`` into the ``r`` solve would silently drop the
+        breadth factor and miss ``Cb`` by percent-level.
+        """
+
+        def mean_of(exponent: float) -> float:
+            return _trapezoid_mean(
+                [
+                    value * max(g, 0.0) ** (exponent * factor)
+                    for g, value, factor in zip(taper, base, factors)
+                ]
+            )
+
+        low, high = math.log10(MIN_FULLNESS_EXPONENT), math.log10(
+            PROFILE_EXPONENT_MAXIMUM
+        )
+        if not (mean_of(10.0**low) > target > mean_of(10.0**high)):
+            raise LcbRequestUnreachable(
+                f"{what} = {target!r} is outside the band "
+                f"({mean_of(10.0**high):.6f}, {mean_of(10.0**low):.6f}) reachable at "
+                f"tilt = {tilt:.4f}"
+            )
+        for _ in range(200):
+            mid = 0.5 * (low + high)
+            if mean_of(10.0**mid) > target:
+                low = mid
+            else:
+                high = mid
+            if high - low < 1.0e-14:
+                break
+        return 10.0 ** (0.5 * (low + high))
+
+    breadth_exponent = solve(waterplane_coefficient, [1.0] * len(taper), "Cwp")
+    # The block coefficient sees the breadth law the waterplane solve just fixed, so
+    # the draft ratio and ``g**s_i`` both enter as the base of the second solve.
+    block_base = [
+        abs(h) * max(g, 0.0) ** (breadth_exponent * factor)
+        for g, h, factor in zip(taper, keel, factors)
+    ]
+    fullness_exponent = solve(prismatic_coefficient, block_base, "Cp")
+    return breadth_exponent, fullness_exponent
+
+
+def station_volume_weights(
+    taper: Sequence[float],
+    keel: Sequence[float],
+    breadth_exponent: float,
+    fullness_exponent: float,
+    tilt: float,
+) -> tuple[float, ...]:
+    """``A_i / (B*T*Cm)``: the sectional areas the tilted loft integrates.
+
+    ``A_i = (B*g_i**s_i) * (T*h_i) * Cm*g_i**r_i`` with ``s_i = s*(1+side*tilt)``,
+    so the normalised station areas are ``h_i * g_i**((s+r)*(1+side*tilt))``. They
+    carry the whole fore/aft distribution, hence the whole LCB, with no scale factor
+    left to get wrong.
+    """
+    sides = section_side_signs(len(taper))
+    if len(keel) != len(taper):
+        raise ValueError("taper and keel must be the same length")
+    total = breadth_exponent + fullness_exponent
+    return tuple(
+        h * g ** (total * (1.0 + side * tilt))
+        for g, h, side in zip(taper, keel, sides)
+    )
+
+
+def longitudinal_offset(weights: Sequence[float]) -> float:
+    """First moment of a sampled station-area curve, as a fraction of L, ``+`` forward.
+
+    ``offset = sum(w_i * (x_i - L/2) * A_i) / sum(w_i * A_i)`` with trapezoid
+    weights: the same integral the lofted mesh carries, so the value is the
+    construction's own LCB, not a separate approximation of it.
+    """
+    n = len(weights)
+    if n < 2:
+        raise ValueError("need at least two stations")
+    trapezoid = [1.0] * n
+    trapezoid[0] = trapezoid[-1] = 0.5
+    mid = 0.5 * (n - 1)
+    moment = math.fsum(
+        w * ((i - mid) / (n - 1)) * value
+        for i, (w, value) in enumerate(zip(trapezoid, weights))
+    )
+    total = math.fsum(w * value for w, value in zip(trapezoid, weights))
+    if total <= 0.0:
+        raise ValueError("the station-area curve carries no volume")
+    return moment / total
+
+
+def lcb_reach(
+    taper: Sequence[float],
+    keel: Sequence[float],
+    waterplane_coefficient: float,
+    prismatic_coefficient: float,
+    limit: float = TILT_LIMIT,
+) -> float:
+    """Largest ``|LCB offset|`` this coefficient set can hold, as a fraction of L.
+
+    The tilted solve refuses a coefficient set once ``Cp`` leaves the band the tilted
+    exponents can reach, so the family has a *saturation* offset: past it the centroid
+    cannot be moved further without missing ``Cb``. That number is a property of the
+    geometry, not of the API, and is what tells a caller whether a requested LCB is
+    inside the envelope before anything is built. Fast: one bisection on the tilt, each
+    step two exponent solves.
+    """
+    def offset_at(tilt: float) -> float | None:
+        try:
+            breadth, fullness = solve_asymmetric_exponents(
+                taper, keel, waterplane_coefficient, prismatic_coefficient, tilt
+            )
+        except LcbRequestUnreachable:
+            return None
+        return longitudinal_offset(
+            station_volume_weights(taper, keel, breadth, fullness, tilt)
+        )
+
+    if not (0.0 < limit < 1.0):
+        raise ValueError(f"limit must lie in (0, 1), got {limit!r}")
+    lo, hi = 0.0, limit
+    if offset_at(hi) is not None:
+        return abs(offset_at(hi) or 0.0)
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        if offset_at(mid) is not None:
+            lo = mid
+        else:
+            hi = mid
+        if hi - lo < 1.0e-12:
+            break
+    reached = offset_at(lo)
+    return 0.0 if reached is None else abs(reached)
+
+
+def solve_lcb_tilt(
+    target_offset: float,
+    taper: Sequence[float],
+    keel: Sequence[float],
+    waterplane_coefficient: float,
+    prismatic_coefficient: float,
+    limit: float = TILT_LIMIT,
+) -> float:
+    """Fore/aft tilt whose realised LCB offset is ``target_offset`` (fraction of L).
+
+    Outer bisection on the tilt, inner solves of ``(s, r)`` for ``Cwp`` and ``Cp``: the
+    realised offset rises monotonically with the tilt, so the inversion is
+    single-valued. ``target_offset = 0`` returns ``0.0`` without touching the search,
+    which is what keeps the symmetric round-3 family bit-for-bit reproducible.
+    """
+    if not math.isfinite(target_offset) or abs(target_offset) >= LCB_OFFSET_LIMIT:
+        raise LcbRequestUnreachable(
+            f"LCB offset {target_offset!r} is outside (-{LCB_OFFSET_LIMIT}, "
+            f"{LCB_OFFSET_LIMIT}) of L"
+        )
+    if target_offset == 0.0:
+        return 0.0
+    sign = 1.0 if target_offset > 0.0 else -1.0
+    magnitude = abs(target_offset)
+
+    def offset_at(tilt: float) -> float | None:
+        try:
+            breadth, fullness = solve_asymmetric_exponents(
+                taper, keel, waterplane_coefficient, prismatic_coefficient, tilt
+            )
+        except LcbRequestUnreachable:
+            return None
+        return longitudinal_offset(
+            station_volume_weights(taper, keel, breadth, fullness, tilt)
+        )
+
+    reach = limit
+    edge: float | None = None
+    while reach > 1.0e-6:
+        edge = offset_at(sign * reach)
+        if edge is not None:
+            break
+        reach *= 0.5
+    if edge is None:  # pragma: no cover - every coefficient set admits some tilt
+        raise LcbRequestUnreachable("no admissible tilt for this coefficient set")
+    if abs(edge) < magnitude:
+        raise LcbRequestUnreachable(
+            f"LCB offset {target_offset:+.4f} L is unreachable for Cb/Cm/Cwp = "
+            f"({prismatic_coefficient!r}): the family saturates at {abs(edge):+.4f} L "
+            "before the deck runs out of breadth"
+        )
+    lo, hi = 0.0, reach
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        value = offset_at(sign * mid)
+        if value is None or abs(value) < magnitude:
+            lo = mid
+        else:
+            hi = mid
+        if hi - lo < 1.0e-15:
+            break
+    return sign * 0.5 * (lo + hi)
+
+
+# --------------------------------------------------------------------------- #
 # Section profile: y_j = b * zeta_j**p, area ratio R(p)
 # --------------------------------------------------------------------------- #
 @functools.lru_cache(maxsize=None)
@@ -363,6 +663,11 @@ class CalibratedHullParameters:
     #: Draft at the extreme ends divided by the design draft -- the forefoot and the
     #: run. ``1`` (default) keeps every station at the design draft, i.e. no rise.
     end_draft_ratio: float = 1.0
+    #: Longitudinal centre of buoyancy, as a signed fraction of ``length`` measured
+    #: forward from mid-length (``+3.48 %`` is KVLCC2, ``-1.48 %`` is KCS). ``0``
+    #: (default) is the symmetric round-3 family. Realised by splitting the fullness
+    #: exponent fore/aft at midship; ``Cb``, ``Cm`` and ``Cwp`` stay exact.
+    lcb_offset: float = 0.0
 
     @property
     def prismatic_coefficient(self) -> float:
@@ -406,6 +711,11 @@ class CalibratedHullParameters:
         if not (0.0 < self.end_draft_ratio <= 1.0):
             out.append(
                 f"end_draft_ratio must lie in (0, 1], got {self.end_draft_ratio!r}"
+            )
+        if not math.isfinite(self.lcb_offset) or abs(self.lcb_offset) >= LCB_OFFSET_LIMIT:
+            out.append(
+                f"lcb_offset must be a finite fraction of L with |offset| < "
+                f"{LCB_OFFSET_LIMIT}, got {self.lcb_offset!r}"
             )
         if out:
             return out
@@ -453,6 +763,38 @@ class CalibratedHullParameters:
         q = _solve_power(self.prismatic_coefficient, taper, keel)
         return s, q - s
 
+    def lcb_tilt(self) -> float:
+        """Fore/aft fullness skew that realises :attr:`lcb_offset` (``0`` when unasked).
+
+        Solved on the same discrete functional the loft integrates, so the realised
+        LCB is the requested one rather than a continuum estimate of it. Raises
+        :class:`LcbRequestUnreachable` when the coefficients leave no room to move the
+        centroid far enough.
+        """
+        if self.lcb_offset == 0.0:
+            return 0.0
+        return solve_lcb_tilt(
+            self.lcb_offset,
+            self.taper(),
+            self.keel_ratios(),
+            self.waterplane_coefficient,
+            self.prismatic_coefficient,
+        )
+
+    def tilted_exponents(self, tilt: float) -> tuple[float, float]:
+        """``(s, r)`` for a given fore/aft tilt: breadth from ``Cwp``, fullness from ``Cb``.
+
+        ``tilt = 0`` reproduces :meth:`fullness_exponents` to round-off, and then the
+        tilt is carried per station by :func:`station_volume_weights`.
+        """
+        return solve_asymmetric_exponents(
+            self.taper(),
+            self.keel_ratios(),
+            self.waterplane_coefficient,
+            self.prismatic_coefficient,
+            tilt,
+        )
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "length": self.length,
@@ -463,6 +805,7 @@ class CalibratedHullParameters:
             "waterplane_coefficient": self.waterplane_coefficient,
             "parallel_body_fraction": self.parallel_body_fraction,
             "end_draft_ratio": self.end_draft_ratio,
+            "lcb_offset": self.lcb_offset,
             "prismatic_coefficient": self.prismatic_coefficient,
             "nx": self.nx,
             "nz": self.nz,
@@ -484,6 +827,10 @@ class CalibratedHull:
     profile_exponents: tuple[float, ...]
     #: Per-station draft / design draft actually used (empty = flat keel).
     keel_ratios: tuple[float, ...] = ()
+    #: Fore/aft tilt actually applied (``0`` = the symmetric family).
+    lcb_tilt: float = 0.0
+    #: Per-station ``A_i / (B*T*Cm)`` the loft integrates, in station order.
+    station_weights: tuple[float, ...] = ()
 
     def calibration_report(self) -> dict[str, Any]:
         """Requested vs realised coefficients, integrated from the mesh itself."""
@@ -498,10 +845,24 @@ class CalibratedHull:
             "Cm": self.parameters.midship_coefficient,
             "Cwp": self.parameters.waterplane_coefficient,
         }
+        requested_offset = self.parameters.lcb_offset
+        realised_offset = realised["lcb_fraction"]
         return {
             "requested": requested,
             "realised": realised["coefficients"],
             "relative_error": relative_errors(realised["coefficients"], requested),
+            "lcb": {
+                "requested_offset": requested_offset,
+                "realised_offset_mesh": realised_offset,
+                # The construction's own moment: an independent route to the same
+                # number, so a bug in either one shows up as a disagreement.
+                "realised_offset_sections": (
+                    longitudinal_offset(self.station_weights)
+                    if self.station_weights
+                    else 0.0
+                ),
+                "tilt": self.lcb_tilt,
+            },
             "breadth_exponent": self.breadth_exponent,
             "fullness_exponent": self.fullness_exponent,
             "settings": {
@@ -511,6 +872,7 @@ class CalibratedHull:
                 "parallel_body_fraction": self.parameters.parallel_body_fraction,
                 "end_draft_ratio": self.parameters.end_draft_ratio,
                 "keel_rise_exponent": KEEL_RISE_EXPONENT,
+                "lcb_offset": requested_offset,
             },
         }
 
@@ -518,6 +880,45 @@ class CalibratedHull:
 # --------------------------------------------------------------------------- #
 # Realised coefficients -- always integrated from the mesh, never from the inputs
 # --------------------------------------------------------------------------- #
+def realised_lcb_fraction(mesh: Mesh) -> float:
+    """Volume centroid of a closed mesh, as a signed fraction of its length.
+
+    Divergence theorem on the triangle soup: every face ``(a, b, c)`` closes a signed
+    tetrahedron ``(0, a, b, c)`` of volume ``a . (b x c) / 6`` whose centroid is
+    ``(a + b + c) / 4``. The volume-weighted mean of those centroids is the centre of
+    buoyancy of the solid, and referring it to the mesh's own longitudinal mid-point
+    keeps the number independent of where the generator put ``x = 0``. Positive is
+    forward of mid-length.
+
+    Pure Python and dependency-free on purpose: this is the *measurement* side of the
+    LCB contract, kept apart from the construction that has to satisfy it.
+    """
+    vertices = mesh.vertices
+    faces = mesh.faces
+    if not faces:
+        raise ValueError("mesh has no faces")
+    volume = 0.0
+    moment = 0.0
+    for i, j, k in faces:
+        ax, ay, az = vertices[i]
+        bx, by, bz = vertices[j]
+        cx, cy, cz = vertices[k]
+        signed = (
+            ax * (by * cz - bz * cy)
+            - ay * (bx * cz - bz * cx)
+            + az * (bx * cy - by * cx)
+        ) / 6.0
+        volume += signed
+        moment += signed * (ax + bx + cx) / 4.0
+    if abs(volume) < 1.0e-12:
+        raise ValueError("mesh encloses no volume")
+    xs = [vertex[0] for vertex in vertices]
+    x_min, x_max = min(xs), max(xs)
+    if x_max - x_min <= 0.0:
+        raise ValueError("mesh has zero longitudinal extent")
+    return (moment / volume - 0.5 * (x_min + x_max)) / (x_max - x_min)
+
+
 def realised_coefficients(mesh: Mesh, *, length: float, beam: float, draft: float) -> dict[str, Any]:
     """Integrate ``Cb``, ``Cm`` and ``Cwp`` off the triangles.
 
@@ -540,6 +941,9 @@ def realised_coefficients(mesh: Mesh, *, length: float, beam: float, draft: floa
         "wetted_surface_m2": hydro.wetted_surface_area,
         "waterplane_area_m2": hydro.waterplane_area,
         "max_section_area_m2": max_section_area(mesh),
+        # Measured, not derived from the request: the LCB contract gets the same
+        # treatment as the three coefficients.
+        "lcb_fraction": realised_lcb_fraction(mesh),
         "relative_error": {},
     }
 
@@ -595,15 +999,28 @@ def build_calibrated_hull(parameters: CalibratedHullParameters) -> CalibratedHul
     #    draft ratio (forefoot / run).
     taper = p.taper()
     keel_ratios = p.keel_ratios()
-    breadth_exponent, fullness_exponent = p.fullness_exponents()
+    sides = section_side_signs(nx)
+    if p.lcb_offset == 0.0:
+        # Untouched round-3 path: one symmetric fullness exponent, solved exactly as
+        # before, so the historical family is reproduced bit for bit.
+        tilt = 0.0
+        breadth_exponent, fullness_exponent = p.fullness_exponents()
+    else:
+        tilt = p.lcb_tilt()
+        breadth_exponent, fullness_exponent = p.tilted_exponents(tilt)
     if fullness_exponent < 0.0:  # pragma: no cover - problems() rejects this request
         raise ValueError("no realisable fullness law for this shape request")
 
     half_breadths: list[float] = []
     fullnesses: list[float] = []
-    for g in taper:
-        half_breadths.append(0.5 * p.beam * g**breadth_exponent)
-        fullnesses.append(p.midship_coefficient * g**fullness_exponent)
+    for g, side in zip(taper, sides):
+        # The tilt stretches both exponents on the run and shrinks them on the
+        # entrance for ``tilt > 0``; the midship station keeps ``(s, r)`` untouched,
+        # so ``Cm`` is still realised there.
+        half_breadths.append(0.5 * p.beam * g ** (breadth_exponent * (1.0 + side * tilt)))
+        fullnesses.append(
+            p.midship_coefficient * g ** (fullness_exponent * (1.0 + side * tilt))
+        )
 
     # 3) Per-station section profile so the sampled area is exactly fullness*B*T.
     profile_exponents = [solve_profile_exponent(f, nz) for f in fullnesses]
@@ -643,6 +1060,10 @@ def build_calibrated_hull(parameters: CalibratedHullParameters) -> CalibratedHul
         half_breadths=tuple(half_breadths),
         profile_exponents=tuple(profile_exponents),
         keel_ratios=tuple(keel_ratios),
+        lcb_tilt=tilt,
+        station_weights=station_volume_weights(
+            taper, keel_ratios, breadth_exponent, fullness_exponent, tilt
+        ),
     )
 
 
