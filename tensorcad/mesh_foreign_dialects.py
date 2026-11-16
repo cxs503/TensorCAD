@@ -176,6 +176,14 @@ def write_stl_binary(
     Positions are cast to float32 because that is the only precision the format
     has; the cast is deliberate and measured, never silent (see
     :data:`STL_BINARY_RELATIVE_TOLERANCE`).
+
+    The facet normal is computed **after** the float32 cast, from the
+    coordinates that are actually stored.  Computing it from the float64
+    positions (which is what ``meshio``'s writer does) leaves the stored normal
+    describing a triangle that is not in the file: for geometry far from the
+    origin the two disagree by up to ~0.45 deg at ``x ~ 1e4 m``, which is
+    visible to renderers and to readers that trust the normal instead of the
+    winding.  See ``docs/m23297_stl_encoding_verification.md``.
     """
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -183,14 +191,15 @@ def write_stl_binary(
     if kind != "tri":
         raise ValueError("binary STL carries triangles only")
     _check_width(kind, len(cells[0]), p)
-    tri = vertices[np.asarray(cells, dtype=np.int64)]
+    tri32 = vertices[np.asarray(cells, dtype=np.int64)].astype(np.float32)
+    tri = tri32.astype(np.float64)  # normals from the *quantised* geometry
     normals = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
     lengths = np.linalg.norm(normals, axis=1)
     lengths[lengths == 0.0] = 1.0
     normals = normals / lengths[:, None]
     records = np.zeros(len(cells), dtype=_STL_RECORD)
     records["normal"] = normals.astype(np.float32)
-    records["vertices"] = tri.astype(np.float32)
+    records["vertices"] = tri32
     raw_header = header.encode("ascii")[:80].ljust(80, b"\x00")
     with p.open("wb") as fh:
         fh.write(raw_header)
