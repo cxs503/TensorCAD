@@ -29,31 +29,29 @@ name: geometry-golden
 on:
   push:
     paths:
-      - "tensorcad/hull.py"
-      - "tensorcad/wigley.py"
-      - "tensorcad/series60.py"
-      - "tensorcad/dtmb5415.py"
-      - "tensorcad/hydrostatics.py"
-      - "tensorcad/hydrostatics_analytic.py"
-      - "tensorcad/mesh.py"
-      - "tensorcad/topology.py"
-      - "tensorcad/exchange.py"
-      - "tensorcad/geometry_audit.py"
-      - "tensorcad/voxel.py"
+      # The whole package. This was an 11-module list; the runtime import trace of the four
+      # golden cases names 80 modules, so the list left ~69 of them (loft.py, geometry_field.py,
+      # csg.py, nurbs.py, analytic_solids.py, ...) able to move a golden number without firing
+      # this gate. Whatever the suite imports while measuring is, by construction, code that can
+      # move its numbers; tests/test_geometry_golden_gate.py re-derives that set from a real run
+      # and fails if any of it is outside these paths.
+      - "tensorcad/**"
+      # the shipped datasets the cases measure: a regression that arrives as a data edit
+      # touches no file under tensorcad/
+      - "docs/data/**"
       - ".github/workflows/geometry-golden.yml"
   pull_request:
     paths:
-      - "tensorcad/hull.py"
-      - "tensorcad/wigley.py"
-      - "tensorcad/series60.py"
-      - "tensorcad/dtmb5415.py"
-      - "tensorcad/hydrostatics.py"
-      - "tensorcad/hydrostatics_analytic.py"
-      - "tensorcad/mesh.py"
-      - "tensorcad/topology.py"
-      - "tensorcad/exchange.py"
-      - "tensorcad/geometry_audit.py"
-      - "tensorcad/voxel.py"
+      # The whole package. This was an 11-module list; the runtime import trace of the four
+      # golden cases names 80 modules, so the list left ~69 of them (loft.py, geometry_field.py,
+      # csg.py, nurbs.py, analytic_solids.py, ...) able to move a golden number without firing
+      # this gate. Whatever the suite imports while measuring is, by construction, code that can
+      # move its numbers; tests/test_geometry_golden_gate.py re-derives that set from a real run
+      # and fails if any of it is outside these paths.
+      - "tensorcad/**"
+      # the shipped datasets the cases measure: a regression that arrives as a data edit
+      # touches no file under tensorcad/
+      - "docs/data/**"
       - ".github/workflows/geometry-golden.yml"
   workflow_dispatch:
 

@@ -32,7 +32,18 @@ TENSORCAD_PATH="${TENSORCAD_PATH:-$repo_root}"
 export TENSORCAD_PATH
 
 # Paths whose change can move a golden number.
-WATCHED='^(tensorcad/(hull|wigley|series60|dtmb5415|hydrostatics|hydrostatics_analytic|mesh|topology|exchange|geometry_audit|voxel)\.py)'
+#
+# The whole package, not a list of modules. A list is a claim that the listed modules are
+# the ones that can move a number, and a measurement says otherwise: the four golden cases
+# import 80 tensorcad modules at run time (the runtime import trace in
+# tests/test_geometry_golden_gate.py re-derives that set on every run), and the previous
+# 11-name list left geometry_field.py, loft.py, csg.py, analytic_solids.py, nurbs.py and 64
+# others ungated. Measured: +2% on SphereField.numpy_callable's radius -- a real geometry
+# regression the suite catches (3 FAIL, exit 1) -- committed through this hook untouched
+# because geometry_field.py was not on the list, and the CI arm's path filter did not name
+# it either. docs/gap-cad-d2-geometry-golden-gate.md documents the probe and the envelope.
+# Over-triggering costs one cheap coarse run; under-triggering loses the gate.
+WATCHED='^tensorcad/'
 
 if [ -n "$GOLDEN_STAGED_FILE" ]; then
   staged=$(cat "$GOLDEN_STAGED_FILE")
