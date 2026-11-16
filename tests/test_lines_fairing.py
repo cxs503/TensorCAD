@@ -23,6 +23,7 @@ from tensorcad.lines_fairing import (
     _flips_per_direction,
     _TangentOperator,
     _grid_of,
+    _plot,
     _operators,
     _solve_with_penalty,
     _free_indices,
@@ -594,3 +595,108 @@ def test_study_measures_both_feature_modes_on_the_same_tables() -> None:
     wigley = next(case for case in report["cases"] if case["form"] == "wigley_iii")
     assert wigley["sweeps"]["auto"][0]["feature_waterlines"] == []
     assert set(report["cases_meeting_criterion_at_a_tolerance_by_mode"]) == {"off", "auto"}
+
+
+# ---------------------------------------------------------------------------
+# the report describes the delivered table, not a discarded trial
+# ---------------------------------------------------------------------------
+
+
+def _rejected_trial_case():
+    """A pinned run whose outer loop rejects its last trial (table comes back unchanged)."""
+    clean = offset_table("wigley_iii", n_stations=11, n_waterlines=9)
+    noisy = perturb_table(clean, amplitude=0.004 * 0.5 * clean.beam, seed=1)
+    result = fair_offset_table(
+        noisy, tolerance=3 * 0.004 * 0.5 * clean.beam, iterations=3
+    )
+    return noisy, result
+
+
+def _flips_of(table) -> int:
+    """Independent re-measurement of the three-family flip count of a table."""
+    grid = _grid_of(table)
+    return sum(_flips_per_direction(grid, grid.flat()).values())
+
+
+def test_a_rejected_trial_does_not_leak_into_the_reported_flip_count() -> None:
+    noisy, result = _rejected_trial_case()
+    assert result.rejected_steps == 1
+    assert not result.last_trial_accepted
+    # the rejected trial raised the count; the delivered table is the untouched input
+    rejected = result.iterations[-1]
+    assert rejected.total_flips_after > rejected.total_flips_before
+    assert result.table_after.digest() == result.table_before.digest()
+    assert result.flips_after == _flips_of(result.table_after) == result.flips_before
+    assert result.flips_after != rejected.total_flips_after
+    assert not result.flips_reduced  # nothing was delivered, so nothing was reduced
+
+
+def test_published_flip_counts_match_the_delivered_table() -> None:
+    """Every number in the payload is re-derived from the ordinates the caller gets."""
+    cases = [
+        ("wigley_iii", 1, 0.004, 3),      # rejected trial, table unchanged
+        ("kvlcc2_class", 3, 0.030, 3),    # rejected trial, earlier step accepted
+        ("series60_cb060", 1, 0.004, 3),  # rejected trial after a measured improvement
+    ]
+    for form, seed, amplitude, multiplier in cases:
+        clean = offset_table(form, n_stations=11, n_waterlines=9)
+        noisy = perturb_table(clean, amplitude=amplitude * 0.5 * clean.beam, seed=seed)
+        result = fair_offset_table(
+            noisy, tolerance=multiplier * amplitude * 0.5 * clean.beam, iterations=3
+        )
+        payload = result.to_dict()
+        assert result.flips_after == _flips_of(result.table_after), form
+        assert payload["flips_after"] == result.flips_after
+        assert payload["flips_after_by_direction"] == result.flips_after_by_direction
+        assert payload["flips_after"] == sum(payload["flips_after_by_direction"].values())
+        assert payload["flips_before"] == _flips_of(result.table_before)
+        assert payload["last_trial_accepted"] == result.last_trial_accepted
+        json.dumps(payload)  # the audit trail stays serialisable
+
+
+def test_an_unchanged_table_is_never_accepted() -> None:
+    """Anti-false-accept invariant: an accepted run must have edited the table."""
+    _, result = _rejected_trial_case()
+    assert result.table_after.digest() == result.table_before.digest()
+    assert not result.accepted()
+    for form, seed in (("wigley_iii", 3), ("series60_cb060", 11)):
+        clean = offset_table(form, n_stations=11, n_waterlines=9)
+        noisy = perturb_table(clean, amplitude=0.004 * 0.5 * clean.beam, seed=seed)
+        run = fair_offset_table(
+            noisy, tolerance=0.016 * 0.5 * clean.beam, iterations=2
+        )
+        if run.accepted():
+            assert run.table_after.digest() != run.table_before.digest(), form
+            assert run.flips_after < run.flips_before, form
+
+
+def test_study_reports_delivered_flips_and_keeps_the_rejected_trial() -> None:
+    report = fairing_study(
+        forms=("wigley_iii",),
+        n_stations=11,
+        n_waterlines=9,
+        noise_fraction=0.004,
+        tolerance_fractions=(0.012,),
+        iterations=3,
+        seed=1,
+        feature_modes=("off",),
+    )
+    entry = report["cases"][0]["sweeps"]["off"][0]
+    assert entry["rejected_steps"] == 1 and entry["last_trial_accepted"] is False
+    assert entry["flips_after"] == sum(entry["flips_by_direction"][key]["after"] or 0
+                                      for key in entry["flips_by_direction"])
+    for key, pair in entry["flips_by_direction"].items():
+        assert pair["after"] == entry["flips_after_by_direction"][key]
+    # the discarded trial is still in the audit trail, with its own number
+    last = entry["iterations"][-1]
+    assert last["accepted"] is False
+    assert sum(d["flips_after"] for d in last["directions"]) != entry["flips_after"]
+
+
+def test_the_figure_survives_a_rejected_trial(tmp_path) -> None:
+    """The histogram must plot the delivered value, with the refused trial off the path."""
+    pytest.importorskip("matplotlib")
+    _, result = _rejected_trial_case()
+    assert not result.last_trial_accepted
+    target = _plot(result, tmp_path / "rejected.png", form="wigley_iii")
+    assert target.exists() and target.stat().st_size > 0

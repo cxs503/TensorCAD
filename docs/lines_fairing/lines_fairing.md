@@ -16,6 +16,13 @@ d in {waterlines (z const), stations (x const), buttocks (y const)}
 * The perpendiculars, the keel row and every already-zero ordinate are frozen.
 * `lam` is found by bracketing + geometric bisection so the correction uses 98 % of the deviation budget and never exceeds it.
 * An outer sweep is kept only if the total sign-flip count does not rise; rejections are counted in `rejected_steps`.
+* **Every reported number is measured on the delivered table.** `flips_after` /
+  `flips_after_by_direction` are re-measured on `table_after`, and the per-family `before`
+  column is the table as handed in. A rejected trial stays in `iterations` (with
+  `"accepted": false` and `last_trial_accepted: false`), but its numbers are no longer
+  published as if they described the result; before this rule they did, so the older tables
+  in this document reported flip counts of discarded tables (KVLCC2-class 0.4 % B/2 read 299
+  for a table returned unchanged at 298) and a per-family `before` column one sweep stale.
 * `features="auto"` declares **design-feature waterline rows**: rows that own more than
   `_FEATURE_SHARE` (50 %) of the `zeta`-curvature energy of the whole table.  On a power-law
   section (`zeta**(1/24)` Series 60, `zeta**(1/10)` KVLCC2-class) the near-keel row owns
@@ -50,12 +57,12 @@ Settings: 21 stations x 17 waterlines, `order=2`, ordinate jitter 0.4 % of the h
 | `wigley_iii` | 0 | 140 | 0.4 % B/2 | 0.0019 | 19 | True | j=9 | 0.00103 -> 0.00062 | -0.054 % |
 | `wigley_iii` | 0 | 140 | 0.8 % B/2 | 0.0039 | 7 | True | j=15 | 0.00103 -> 0.00085 | -0.206 % |
 | `wigley_iii` | 0 | 140 | 1.6 % B/2 | 0.0078 | 13 | True | j=15 | 0.00103 -> 0.00266 | -0.938 % |
-| `wigley_iii` | 0 | 140 | 3.2 % B/2 | 0.0155 | 19 | True | j=13 | 0.00103 -> 0.00726 | -3.071 % |
+| `wigley_iii` | 0 | 140 | 3.2 % B/2 | 0.0155 | 17 | True | j=13 | 0.00103 -> 0.00726 | -3.071 % |
 | `series60_cb060` | 0 | 180 | 0.4 % B/2 | 0.0020 | 174 | True | j=1 | 0.00103 -> 0.00104 | -0.023 % |
 | `series60_cb060` | 0 | 180 | 0.8 % B/2 | 0.0038 | 172 | True | j=1 | 0.00103 -> 0.00114 | -0.045 % |
 | `series60_cb060` | 0 | 180 | 1.6 % B/2 | 0.0078 | 168 | True | j=1 | 0.00103 -> 0.00159 | -0.095 % |
-| `series60_cb060` | 0 | 180 | 3.2 % B/2 | 0.0154 | 168 | True | j=1 | 0.00103 -> 0.00273 | -0.192 % |
-| `kvlcc2_class` | 0 | 298 | 0.4 % B/2 | 0.0000 | 299 | False | j=3 | 0.05961 -> 0.05961 | +0.000 % |
+| `series60_cb060` | 0 | 180 | 3.2 % B/2 | 0.0154 | 166 | True | j=1 | 0.00103 -> 0.00273 | -0.192 % |
+| `kvlcc2_class` | 0 | 298 | 0.4 % B/2 | 0.0000 | 298 | False | j=3 | 0.05961 -> 0.05961 | +0.000 % |
 | `kvlcc2_class` | 0 | 298 | 0.8 % B/2 | 0.2192 | 297 | True | j=1 | 0.05961 -> 0.06650 | -0.039 % |
 | `kvlcc2_class` | 0 | 298 | 1.6 % B/2 | 0.4409 | 293 | True | j=1 | 0.05961 -> 0.08464 | -0.080 % |
 | `kvlcc2_class` | 0 | 298 | 3.2 % B/2 | 0.8949 | 291 | True | j=1 | 0.05961 -> 0.13795 | -0.166 % |
@@ -64,9 +71,9 @@ Settings: 21 stations x 17 waterlines, `order=2`, ordinate jitter 0.4 % of the h
 
 | hull form | waterlines | stations | buttocks |
 |---|---|---|---|
-| `wigley_iii` | 2 -> 2 | 5 -> 5 | 0 -> 0 |
-| `series60_cb060` | 0 -> 0 | 172 -> 172 | 0 -> 0 |
-| `kvlcc2_class` | 104 -> 104 | 158 -> 158 | 35 -> 35 |
+| `wigley_iii` | 34 -> 2 | 100 -> 5 | 6 -> 0 |
+| `series60_cb060` | 0 -> 0 | 180 -> 172 | 0 -> 0 |
+| `kvlcc2_class` | 100 -> 104 | 162 -> 158 | 36 -> 35 |
 
 ## Design-feature rows: the near-keel band of a power-law section
 
@@ -81,15 +88,15 @@ in `results.json` (`case["sweeps"][mode]`), same jittered tables, same code path
 | `wigley_iii` | 0.4 | 140 | 19 | 19 | 0.00103 | 0.00062 | 0.00062 | none |
 | `wigley_iii` | 0.8 | 140 | 7 | 7 | 0.00103 | 0.00085 | 0.00085 | none |
 | `wigley_iii` | 1.6 | 140 | 13 | 13 | 0.00103 | 0.00266 | 0.00266 | none |
-| `wigley_iii` | 3.2 | 140 | 19 | 19 | 0.00103 | 0.00726 | 0.00726 | none |
-| `series60_cb060` | 0.4 | 180 | 174 | 158 | 0.00103 | 0.00104 | 0.00086 | 1 |
-| `series60_cb060` | 0.8 | 180 | 172 | 134 | 0.00103 | 0.00114 | 0.00090 | 1 |
+| `wigley_iii` | 3.2 | 140 | 17 | 17 | 0.00103 | 0.00726 | 0.00726 | none |
+| `series60_cb060` | 0.4 | 180 | 174 | 156 | 0.00103 | 0.00104 | 0.00086 | 1 |
+| `series60_cb060` | 0.8 | 180 | 172 | 132 | 0.00103 | 0.00114 | 0.00090 | 1 |
 | `series60_cb060` | 1.6 | 180 | 168 | 90 | 0.00103 | 0.00159 | 0.00153 | 1 |
-| `series60_cb060` | 3.2 | 180 | 168 | 18 | 0.00103 | 0.00273 | 0.00365 | 1 |
-| `kvlcc2_class` | 0.4 | 298 | 299 | 297 | 0.05961 | 0.05961 | 0.06367 | 1 |
+| `series60_cb060` | 3.2 | 180 | 166 | 16 | 0.00103 | 0.00273 | 0.00365 | 1 |
+| `kvlcc2_class` | 0.4 | 298 | 298 | 297 | 0.05961 | 0.05961 | 0.06367 | 1 |
 | `kvlcc2_class` | 0.8 | 298 | 297 | 291 | 0.05961 | 0.06650 | 0.07473 | 1 |
-| `kvlcc2_class` | 1.6 | 298 | 293 | 287 | 0.05961 | 0.08464 | 0.10890 | 1 |
-| `kvlcc2_class` | 3.2 | 298 | 291 | 275 | 0.05961 | 0.13795 | 0.18699 | 1 |
+| `kvlcc2_class` | 1.6 | 298 | 293 | 285 | 0.05961 | 0.08464 | 0.10890 | 1 |
+| `kvlcc2_class` | 3.2 | 298 | 291 | 273 | 0.05961 | 0.13795 | 0.18699 | 1 |
 
 ![feature_rows.png](feature_rows.png)
 
@@ -100,10 +107,10 @@ What the table says, without rounding anything up:
 * **Series 60 is fixed at the budgets that matter.**  Where the budget is of the order of the
   jitter (0.4 % and 0.8 % B/2), the reference agreement now *improves* instead of degrading:
   0.00103 -> 0.00086 m and 0.00103 -> 0.00090 m, and the flips fall far below the plain energy
-  (158 vs 174, 134 vs 172).  At 3.2 % the switch removes 18 of 180 flips (plain: 12) but moves
+  (156 vs 174, 132 vs 172).  At 3.2 % the switch removes 16 of 180 flips (plain: 14) but moves
   the table further from the analytic shape (0.00365 vs 0.00273 m) -- see the limit below.
 * **KVLCC2 improves in the acceptance metric and not in the reference metric**: flips
-  298 -> 297/291/287/275 against 299/297/293/291 for the plain energy, while the distance to the
+  298 -> 297/293/285/273 against 298/297/293/291 for the plain energy, while the distance to the
   analytic table is worse at every budget.  Honest reading: on this coarse 21 x 17 grid of a
   320 m hull the fairing is *re-designing* the sections rather than removing the jitter, and the
   feature rows make it re-design them faster.  This form does not yet meet the "moves towards
@@ -117,7 +124,7 @@ What the table says, without rounding anything up:
 
 ## Verdict against the acceptance
 
-* **Deviation < tolerance**: holds for every **accepted** case above -- by construction (the penalty is searched against the budget and the correction is scaled back if the bisection lands high). Measured deviations of the accepted runs sit at 0.94-0.97 of the budget. One run is rejected and is reported as such: KVLCC2-class at 0.4 % B/2, where the budget (0.116 m) equals the jitter amplitude, finds no penalty that both fits the budget and removes a sign flip, so the table comes back unchanged (`accepted: False`, deviation 0.0000 m) -- the table shows the candidate it refused, which is why `flips after` reads 299 against 298 before for that row.
+* **Deviation < tolerance**: holds for every **accepted** case above -- by construction (the penalty is searched against the budget and the correction is scaled back if the bisection lands high). Measured deviations of the accepted runs sit at 0.94-0.97 of the budget. One run is rejected and is reported as such: KVLCC2-class at 0.4 % B/2, where the budget (0.116 m) equals the jitter amplitude, finds no penalty that both fits the budget and removes a sign flip, so the table comes back unchanged (`accepted: False`, deviation 0.0000 m). The row therefore reads `flips after` 298 against 298 before, i.e. the delivered table; the refused candidate that raised the count to 299 survives only in the audit trail (`iterations[-1]`, `"accepted": false`), not in the published number.
 * **Monotone decrease of the sign-flip count**: holds in every accepted run; the per-iteration `total_flips_before/after` in `results.json` is the evidence, and a step that would raise the count is rejected (`rejected_steps`).
 * **>= 2 ship tables**: three (Wigley III, Series 60 Cb=0.60, KVLCC2-class).
 * **Agreement with a manual-fairing reference**: on Wigley the rms distance to the smooth table falls 0.00103 -> 0.00062 m (-40 %) at the 0.4 % B/2 budget and 0.00103 -> 0.00085 m at 0.8 %. With the plain energy the power-law sections do **not** improve at every budget (Series 60: 0.00103 -> 0.00114 m at 0.8 %); with the near-keel band declared a design feature (`features="auto"`) Series 60 improves at the budgets at or below the jitter amplitude (0.00103 -> 0.00086 m at 0.4 %, 0.00103 -> 0.00090 m at 0.8 %) and KVLCC2 does not, which is stated as a limitation below rather than hidden.
@@ -128,8 +135,8 @@ The Series 60 and KVLCC2 baselines use full `zeta**(1/m)` sections. Their near-k
 
 That diagnosis is what `features="auto"` acts on, and the section above is the measurement of the
 result: Series 60 now reaches a genuine reference improvement at 0.4-0.8 % B/2 and 90-158 flips
-where the plain energy stays at 168-174; the flips of KVLCC2 also fall further (275-297 against
-291-299).  What is **not** fixed:
+where the plain energy stays at 166-174; the flips of KVLCC2 also fall further (273-297 against
+291-298).  What is **not** fixed:
 
 1. **KVLCC2 still does not converge towards the smooth table** (0.0596 -> 0.0637...0.187 m, worse
    with the switch than without it).  The declared feature does not create information: on a
