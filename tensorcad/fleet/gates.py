@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 from tensorcad import mesh as meshlib
 from tensorcad.geometry import Mesh
@@ -30,6 +30,14 @@ PARTICULARS_TOLERANCE = 0.03
 #: of L, B, T, Cb or the volume shows up far above this band, while round-off of the
 #: published particulars stays below it.
 REFERENCE_CONSISTENCY_TOLERANCE = 0.005
+
+#: Source patches the mesh builder is allowed to have dropped (``G9``).  Default 0: a
+#: patch whose control-point layout the reader could not decide was never meshed, and
+#: the half-breadth field fills the hole from its neighbours, so the volume of G7 is
+#: computed over a hull that is *missing surface* without any of the other gates seeing
+#: it.  A caller that has measured the impact of a dropped patch may raise this
+#: deliberately; it cannot happen by accident.
+QUARANTINE_TOLERANCE = 0
 
 
 @dataclass(frozen=True)
@@ -430,6 +438,89 @@ def gate_principal_dimensions(record: ShipRecord, facts: TopologyFacts, toleranc
     )
 
 
+def gate_patch_quarantine(
+    quarantine: Sequence[dict[str, Any]],
+    patch_total: int | None = None,
+    tolerance: int = QUARANTINE_TOLERANCE,
+) -> GateResult:
+    """No source patch may silently drop out of the mesh.
+
+    The IGES reader fails closed: a type-128 patch whose control-point layout cannot be
+    decided (two candidate readings within a factor of four in control-net roughness,
+    e.g. a degenerate 2x2 net where the smoothness score is identically zero) is
+    reported with ``layout_ambiguous`` instead of being guessed at.  The mesh builder
+    then quarantines it.  That is the right behaviour *inside the reader*, but the
+    consequence outside it is that the hull underneath the verdict has fewer patches
+    than the file: the half-breadth field interpolates the hole from its neighbours, the
+    mesh stays watertight, G7 integrates a volume that is missing surface and can still
+    land inside its 1% band.  Nothing in G1-G8 can see the difference between "this hull
+    is right" and "this hull lost 4 of its 45 patches".
+
+    So the census travels into the verdict.  ``quarantine`` is the list of quarantined
+    patches (``patch_index`` / ``layout_chosen`` / ``reason``), ``patch_total`` the
+    number of source patches the file declared.  A hull with more dropped patches than
+    ``tolerance`` does not pass, whatever its volume error.
+
+    This is a *completeness* gate, not an accuracy gate: it says the geometry the other
+    gates graded is not the geometry the file describes.
+    """
+    dropped = list(quarantine)
+    count = len(dropped)
+    fraction = None if not patch_total else count / patch_total
+    reasons = sorted({
+        f"patch {item.get('patch_index', '?')}: {item.get('reason', 'unspecified')}"
+        for item in dropped
+    })
+    detail = (
+        f"{count} of {patch_total if patch_total is not None else '?'} source patches quarantined "
+        f"(tolerance {tolerance}); the mesh and every volume below it cover only the usable patches"
+    )
+    if reasons:
+        detail += "; " + "; ".join(reasons[:6]) + (f"; (+{len(reasons) - 6} more)" if len(reasons) > 6 else "")
+    return GateResult(
+        "G9_patch_quarantine",
+        count <= tolerance,
+        detail,
+        {
+            "quarantined": dropped,
+            "quarantined_count": count,
+            "patch_total": patch_total,
+            "quarantined_fraction": fraction,
+            "tolerance": tolerance,
+        },
+    )
+
+
+def quarantine_census(details: Mapping[str, Any] | None) -> tuple[list[dict[str, Any]], int | None] | None:
+    """Read the patch census out of a built-geometry ``details`` mapping.
+
+    Two shapes exist and both must be understood, because they were written by
+    different generations of the builder:
+
+    * ``{"patch_quarantine": {"patches_total": n, "patches_quarantined": [...]}}`` -- the
+      fleet route (:func:`tensorcad.fleet.build.iges_field_mesh`);
+    * ``{"source": {"patches_total": n, "patches_quarantined": [...]}}`` -- the legacy
+      :func:`tensorcad.fleet_baseline.build_ship` report.
+
+    Returns ``None`` when the mapping carries no census at all (a non-IGES route, or a
+    builder that predates the census), so the caller can say "not measured" rather than
+    "zero dropped".
+    """
+    if not details:
+        return None
+    block = details.get("patch_quarantine")
+    if not isinstance(block, Mapping):
+        source = details.get("source")
+        block = source if isinstance(source, Mapping) else None
+    if not isinstance(block, Mapping):
+        return None
+    dropped = block.get("patches_quarantined")
+    if not isinstance(dropped, Sequence) or isinstance(dropped, (str, bytes)):
+        return None
+    total = block.get("patches_total")
+    return [dict(item) for item in dropped], (int(total) if isinstance(total, (int, float)) else None)
+
+
 def evaluate_gates(
     record: ShipRecord,
     mesh: Mesh,
@@ -437,8 +528,18 @@ def evaluate_gates(
     *,
     volume_tolerance: float = VOLUME_TOLERANCE,
     registry: SourceRegistry | None = None,
+    quarantine: Sequence[Mapping[str, Any]] | None = None,
+    patch_total: int | None = None,
+    quarantine_tolerance: int = QUARANTINE_TOLERANCE,
 ) -> dict[str, Any]:
-    """Run every gate for one ship and return a serialisable verdict block."""
+    """Run every gate for one ship and return a serialisable verdict block.
+
+    ``quarantine`` is the patch census of the builder that produced ``mesh`` (see
+    :func:`quarantine_census`).  When it is ``None`` the geometry-completeness gate G9
+    is *not* added and the verdict says so -- ``geometry_completeness`` is then
+    ``"unknown"`` rather than ``"complete"``, because "this route never reported which
+    patches it dropped" is not the same statement as "nothing was dropped".
+    """
     facts = measure(mesh)
     gates: list[GateResult] = [
         gate_provenance(record, manifest),
@@ -454,6 +555,14 @@ def evaluate_gates(
     ]
     if registry is not None:
         gates.insert(1, gate_source_anchor(record, registry))
+    if quarantine is not None:
+        gates.append(gate_patch_quarantine(quarantine, patch_total, quarantine_tolerance))
+    if quarantine is None:
+        completeness = "unknown"
+    elif quarantine:
+        completeness = "patches_dropped"
+    else:
+        completeness = "complete"
     return {
         "ship": record.name,
         "ship_class": record.ship_class,
@@ -467,6 +576,14 @@ def evaluate_gates(
         ),
         "reference_basis": record.reference_basis(),
         "reference_is_external": record.reference_is_external(),
+        "geometry_completeness": completeness,
+        "patches_quarantined": (
+            None if quarantine is None else {
+                "count": len(quarantine),
+                "total": patch_total,
+                "patches": [dict(item) for item in quarantine],
+            }
+        ),
     }
 
 
