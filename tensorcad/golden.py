@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import math
 import platform
@@ -256,8 +257,19 @@ class GoldenCase:
     def reference(self) -> dict[str, float]:
         raise NotImplementedError
 
-    def invariants(self, values: Mapping[str, float]) -> dict[str, tuple[float, float, str]]:
-        """Identities over the measurements: name -> (residual, tolerance, basis)."""
+    def invariants(
+        self, values: Mapping[str, float], *, level: str | None = None
+    ) -> dict[str, tuple[float, float, str]]:
+        """Identities over the measurements: name -> (residual, tolerance, basis).
+
+        ``level`` is the rung of the ladder the values were measured on (the acceptance
+        level, ``levels()[-1]`` in a quick run and ``levels()[-2]`` on a three-level
+        ladder).  An identity between numbers that a *grid* moves is bounded by the grid
+        noise the suite already derives, so most cases ignore it; an identity whose
+        residual is bounded by the case's own *solve* accuracy cannot use one hand-picked
+        band at every rung, and reads the level from here.  Cases that do not name the
+        argument keep working (:func:`_case_invariants`).
+        """
         return {}
 
     def reference_tolerance(
@@ -1338,6 +1350,26 @@ def _checked_declarations(
     return declared
 
 
+def _case_invariants(
+    case: GoldenCase, values: Mapping[str, float], level: str
+) -> dict[str, tuple[float, float, str]]:
+    """Assert ``case``'s invariants on the measurement taken at ``level``.
+
+    A pure function of the measured numbers cannot tell which rung of the ladder produced
+    them, and a case whose identity residual is bounded by *solve* accuracy rather than by
+    a grid needs that rung: ``inclined_box`` solves its waterline offset to 3e-5 at
+    ``coarse`` and 1e-13 at ``fine``, so one hand-picked band cannot hold at both.  The
+    git hook runs ``coarse`` alone, the full suite ends at ``fine``; without the level the
+    two runs asserted different criteria and the hook reported an ERROR on a tree the CI
+    passed (the failure this adapter closes).  Cases that name ``level`` receive it; the
+    older single-argument signature still works, which is what keeps the probe cases in
+    the test suite honest.
+    """
+    if "level" in inspect.signature(case.invariants).parameters:
+        return case.invariants(values, level=level)
+    return case.invariants(values)
+
+
 def evaluate_case(
     case: GoldenCase,
     blessed: Mapping[str, Any] | None,
@@ -1376,7 +1408,7 @@ def evaluate_case(
         acceptance, partner = levels[-1], (levels[0] if len(levels) > 1 else None)
     finest = result.measurements[acceptance]
     coarsest = result.measurements[partner] if partner is not None else None
-    result.invariants = case.invariants(finest)
+    result.invariants = _case_invariants(case, finest, acceptance)
     result.known_limitations = case.known_limitations(finest)
     declared_tolerances = _checked_declarations(case, finest, reference, findings)
 
