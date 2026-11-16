@@ -288,13 +288,17 @@ def test_real_iges_import_succeeds(name: str, path: Path, spec: dict):
             f"(error {beam_error*100:.1f}%)"
         )
 
-    # Inversion residual must be within tolerance
+    # Inversion residual must be inside the acceptance (transfer) budget, and a face that
+    # was accepted there must be declared, never presented as an exact inversion.
     import_info = report.get("import", {})
     max_residual = import_info.get("max_inversion_residual", 0)
-    residual_tol = import_info.get("residual_tolerance", 1e-6)
-    assert max_residual <= residual_tol, (
-        f"{name}: inversion residual {max_residual} exceeds tolerance {residual_tol}"
+    acceptance = import_info.get("transfer_tolerance", import_info.get("residual_tolerance", 1e-6))
+    assert max_residual <= acceptance, (
+        f"{name}: inversion residual {max_residual} exceeds the transfer budget {acceptance}"
     )
+    band = import_info.get("faces_in_transfer_band", {})
+    if band:
+        assert report["gates"]["G2_trim_on_surface"]["faces_in_transfer_band"] == len(band)
 
 
 # --------------------------------------------------------------------------- #

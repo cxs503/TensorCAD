@@ -135,7 +135,14 @@ def test_publisher_kcs_hull_imports_without_a_refused_face():
     report = result.report
     assert report["import"]["faces_in_file"] == 55
     assert report["import"]["faces_refused"] == 0, report["import"]["refused"]
-    assert report["import"]["max_inversion_residual"] <= report["import"]["residual_tolerance"]
+    imported = report["import"]
+    acceptance = imported.get("transfer_tolerance", imported["residual_tolerance"])
+    assert imported["max_inversion_residual"] <= acceptance
+    # A face excused by the transfer budget has to be visible in the audit trail.
+    assert set(imported.get("faces_in_transfer_band", {})) <= {
+        str(stat["index"]) for stat in imported["face_stats"]
+        if stat.get("residual_class") == "transfer_budget"
+    }
     assert report["before_repair"]["triangles"] > 3000
     vertices = result.mesh.vertices
     beam = 2.0 * max(point[1] for point in vertices)
