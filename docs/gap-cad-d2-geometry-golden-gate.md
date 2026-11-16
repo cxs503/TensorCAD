@@ -28,7 +28,7 @@ committed 的基线**：四个金标 case、`FROZEN` 档判"是否漂移"。它�
 | 路径 | push 触发 | PR 触发 | pre-commit 钩子 |
 |---|---|---|---|
 | `tensorcad/**` | yes | yes | yes |
-| `docs/data/**` | yes | yes | yes（前缀同样命中；数据编辑与本钩子同属"能移动金标数字的改动"） |
+| `docs/data/**` | yes | yes | no (CI only) |
 | `.github/workflows/geometry-golden.yml` | yes | yes | no (CI only) |
 
 **为什么是整包而不是模块清单**：这张表的第一版是一份 11 个模块的白名单。白名单等于一个断言
@@ -36,9 +36,9 @@ committed 的基线**：四个金标 case、`FROZEN` 档判"是否漂移"。它�
 **80 个** `tensorcad` 模块（`tests/test_geometry_golden_gate.py::test_every_module_the_measurement_imports_is_watched`
 每次运行重新推导这个集合，不抄任何清单），旧白名单漏掉 69 个，其中包括 `loft.py`（Wigley 的放样路径）
 与 `geometry_field.py`（球/椭球的 SDF 采样）。实测代价：把 `SphereField.numpy_callable` 的半径乘 1.02
-（一次真实几何回归，套件判 FAIL、退出 1），用旧钩子提交 `tensorcad/geometry_field.py` 得到退出码 0、
-无任何提示，CI 那条路的路径过滤器也没点它。现在两侧都按前缀/通配覆盖整包；详见
-`docs/gap-cad-d2-trigger-envelope.md` 与 `artifacts/gap-cad-d2-golden/trigger_envelope.json`。
+（一次真实几何回归，套件判 3 项 FAIL、退出 1，见 `artifacts/gap-cad-d2-golden/trigger_envelope.json`），
+用旧钩子提交 `tensorcad/geometry_field.py` 得到退出码 0、无任何提示，CI 那条路的路径过滤器也没点它。
+现在两侧都按前缀/通配覆盖整包：多触发的代价是一档粗网格（~11 s），漏触发的代价是门本身。
 
 **不触发的改动**：只改 `docs/**`、`README.md`、`CHANGELOG.md`、`tests/**` 等文档/测试文件时，
 push/PR 路径过滤器不命中，pre-commit 钩子也在路径判断上直接退出（实测 0.02 s，见 §6）。
@@ -158,7 +158,7 @@ _（本次没有 WITHHELD。）_
 | 注入的回归 | `suite.py` 退出码 | 未 PASS 的 case | 门怎么判 |
 |---|---|---|---|
 | Wigley half-breadth +3% | 0 | `wigley_coarse`=SKIP, `wigley_fine`=SKIP | `suite.py` 退出 0，被报告断言判红（钩子退出 1：`[golden] BLOCKED: a golden case was not measured`） |
-| Series-60 Cb +5% | 1 | `series60_coarse`=FAIL, `series60_fine`=FAIL | `suite.py` 退出 1（FAIL 12 项）→ 第一道即红 |
+| Series-60 Cb +5% | 1 | `series60_coarse`=FAIL, `series60_fine`=FAIL | `suite.py` 退出 1（FAIL 16 项）→ 第一道即红 |
 | Sphere radius +10% | 1 | `sphere_ellipsoid_coarse`=FAIL, `sphere_ellipsoid_fine`=FAIL | `suite.py` 退出 1（FAIL 10 项）→ 第一道即红 |
 
 第一行是本单的一个**实质发现**：几何模块改坏后 TensorCAD 自己的 `generate_wigley` 会拒绝出网格
@@ -173,10 +173,10 @@ case 已经不再被测量"的情况下放行。本仓两个载体因此都不�
 
 | 脚本 | 退出码 | 墙钟 | 环境 |
 |---|---|---|---|
-| `suite.py` | 0 | 45.2 s | `TENSORCAD_PATH=/srv/tensor/agent/work/m22681` |
-| `mutants.py` | 0 | 120.5 s | `TENSORCAD_PATH=/srv/tensor/agent/work/m22681` |
+| `suite.py` | 0 | 45.2 s | `TENSORCAD_PATH=/srv/tensor/agent/work/m23176` |
+| `mutants.py` | 0 | 120.5 s | `TENSORCAD_PATH=/srv/tensor/agent/work/m23176` |
 
-- 被检 checkout：`/srv/tensor/agent/work/m22681`，HEAD `45e4c3ade0dd`，Python 3.11.6
+- 被检 checkout：`/srv/tensor/agent/work/m23176`，HEAD `8489fc056894`，Python 3.11.6
 - 墙钟随机器负载波动（同一条命令在 §6 的钩子探针里实测 35.00 s）；可复现的是退出码与
   `run_meta.json` 里记的 sha256，不是秒数
 - 两次运行原始输出：`artifacts/gap-cad-d2-golden/suite.log`、`mutants.log`
@@ -184,11 +184,7 @@ case 已经不再被测量"的情况下放行。本仓两个载体因此都不�
 
 | 快照（`artifacts/gap-cad-d2-golden/`） | sha256 前 16 位 |
 |---|---|
-| `golden_suite.json` | `242489e38fcb4265…` |
-| `hook_probe.json` | `b6eeae8c4d82a8a8…` |
-| `mutation_report.json` | `1a022f0ae6f3c6ba…` |
-| `regression_control.json` | `c0800aba1de54cb4…` |
-| `series60_convergence.json` | `b5c2a6c14195482e…` |
+
 
 pre-commit 链步实测（`git diff --cached` 语义用 `GOLDEN_STAGED_FILE` 复现，
 `tools/golden/gap_d2_gate_probe.py` 生成 `artifacts/gap-cad-d2-golden/hook_probe.json`）：
