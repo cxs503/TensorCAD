@@ -1051,7 +1051,8 @@ def repair_mesh(vertices: Sequence[Vec3], faces: Sequence[Triangle], *, weld_tol
 # seam stage: measured, optional, and never silent
 # --------------------------------------------------------------------------- #
 def seam_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
-               tolerance: float | None, audit: bool = True) -> tuple[list[Vec3], list[Triangle], dict[str, Any]]:
+               tolerance: float | None, audit: bool = True,
+               strict: bool = False) -> tuple[list[Vec3], list[Triangle], dict[str, Any]]:
     """Measure the open boundary and, when asked, stitch near-coincident seams.
 
     ``tolerance`` is a *seam coincidence* budget in model units, not a weld tolerance:
@@ -1059,6 +1060,12 @@ def seam_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
     the surface therefore moves by at most that much.  ``None`` (the default) measures
     without touching the mesh, so a caller can ask "would stitching help here?" without
     changing the geometry it is about to report.
+
+    ``strict`` decides what happens when the stitch would *increase* the non-manifold edge
+    count: the default (``False``) keeps the stitch -- it still closes most of the boundary
+    -- but records ``manifold_degraded`` plus the before/after topology, so the damage is
+    visible in the report; ``strict=True`` refuses it and returns the unstitched mesh.
+    Duplicate triangles created by the splits are always dropped and counted.
     """
     record: dict[str, Any] = {"requested_tolerance": tolerance}
     if audit:
@@ -1070,12 +1077,58 @@ def seam_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
         return list(vertices), [tuple(face) for face in faces], record
     stitched_vertices, stitched_faces, stitch_record = stitch_t_junctions(
         vertices, faces, tolerance=tolerance)
+    # A T-junction split re-emits the parent triangle and its two children; when the same
+    # chord is hit twice the split can repeat an existing triangle.  Those repeats are
+    # never geometry, so they are dropped here and counted, and the topology delta is
+    # measured rather than assumed: on publisher hull patch sets the stitch is measurably
+    # *harmful* (it introduces non-manifold chords while leaving most of the boundary open),
+    # and in that case it is refused instead of silently degrading the mesh.
+    stitched_faces, dropped = _drop_duplicate_triangles(stitched_faces)
+    stitch_record["duplicate_triangles_dropped"] = dropped
+    before = audit_mesh(vertices, faces, degenerate_area=0.0)
+    after = audit_mesh(stitched_vertices, stitched_faces, degenerate_area=0.0)
+    record["topology_before"] = _topology(before)
+    record["topology_after"] = _topology(after)
     record["applied"] = True
     record["stitch"] = stitch_record
+    degraded = after.non_manifold_edge_count > before.non_manifold_edge_count
+    record["manifold_degraded"] = degraded
+    if degraded and strict:
+        record["applied"] = False
+        record["rejected"] = ("stitching introduced "
+                              f"{after.non_manifold_edge_count - before.non_manifold_edge_count}"
+                              " non-manifold edge(s); the unstitched mesh is kept")
+        record["note"] = "stitch refused: it degrades manifoldness"
+        return list(vertices), [tuple(face) for face in faces], record
     if audit:
         record["analysis_after"] = seam_report(stitched_vertices, stitched_faces,
                                                tolerance=tolerance)
     return stitched_vertices, stitched_faces, record
+
+
+def _topology(audit: MeshAudit) -> dict[str, int]:
+    """The four counts a repair stage is allowed to change, and how."""
+    return {
+        "free_edges": audit.free_edge_count,
+        "non_manifold_edges": audit.non_manifold_edge_count,
+        "orientation_conflicts": audit.orientation_conflicts,
+        "components": audit.component_count,
+    }
+
+
+def _drop_duplicate_triangles(faces: Sequence[Triangle]) -> tuple[list[Triangle], int]:
+    """Remove triangles that repeat an earlier triangle's vertex set (any rotation)."""
+    kept: list[Triangle] = []
+    seen: set[tuple[int, int, int]] = set()
+    dropped = 0
+    for face in faces:
+        key = tuple(sorted(face))
+        if key in seen:
+            dropped += 1
+            continue
+        seen.add(key)
+        kept.append(tuple(face))
+    return kept, dropped
 
 
 # --------------------------------------------------------------------------- #
