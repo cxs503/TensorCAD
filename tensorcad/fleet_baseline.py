@@ -188,10 +188,45 @@ def field_from_points(
     min_x: float | None = None,
     max_x: float | None = None,
 ) -> HalfBreadthField:
-    """Accumulate the half-breadth field from surface samples below ``draft``."""
-    kept = [(x, y, z) for x, y, z in points if 0.0 <= z <= draft and abs(y) > 1e-9]
+    """Accumulate the half-breadth field from surface samples below ``draft``.
+
+    Automatically detects the IGES coordinate frame:
+    - **Keel-at-origin** (z ∈ [0, draft]): waterline at z=draft, hull above keel.
+      Typical of NMRI/SIMMAN workshop files (KCS, JBC, ONRT).
+    - **Waterline-at-origin** (z ∈ [-draft, 0]): waterline at z=0, hull below.
+      Typical of some CFD pre-processing conventions.
+
+    The detection uses the z-extent of points with significant |y| (hull surface):
+    if max(z) > draft/2 the frame is keel-at-origin; otherwise waterline-at-origin.
+    """
+    pts = list(points)
+    hull_pts = [(x, y, z) for x, y, z in pts if abs(y) > 1e-9]
+    if not hull_pts:
+        raise ValueError("no surface samples with non-zero half-breadth")
+
+    z_min = min(z for _, _, z in hull_pts)
+    z_max = max(z for _, _, z in hull_pts)
+
+    # Detect coordinate frame: if z_max > draft/2, the waterline is at z=draft
+    # (keel-at-origin frame); otherwise waterline is at z=0.
+    if z_max > draft / 2:
+        # Keel at origin, waterline at z=draft: keep z in [0, draft]
+        z_lo, z_hi = 0.0, draft
+        kept = [(x, y, z) for x, y, z in hull_pts if z_lo <= z <= z_hi]
+        z_offset = 0.0
+    else:
+        # Waterline at origin, hull below: keep z in [-draft, 0]
+        z_lo, z_hi = -draft, 0.0
+        kept = [(x, y, z) for x, y, z in hull_pts if z_lo <= z <= z_hi]
+        z_offset = draft  # shift so z=0 becomes k=0
+
     if not kept:
-        raise ValueError("no surface samples below the design waterline")
+        raise ValueError(
+            f"no surface samples in the immersed hull zone "
+            f"(z ∈ [{z_lo}, {z_hi}], draft={draft}; "
+            f"point cloud z ∈ [{z_min:.3f}, {z_max:.3f}])"
+        )
+
     x_lo = min_x if min_x is not None else min(x for x, _, _ in kept)
     x_hi = max_x if max_x is not None else max(x for x, _, _ in kept)
     nx = int(math.floor((x_hi - x_lo) / dx)) + 1
@@ -200,7 +235,7 @@ def field_from_points(
     seen = [[False] * nz for _ in range(nx)]
     for x, y, z in kept:
         i = int(round((x - x_lo) / dx))
-        k = int(round(z / dz))
+        k = int(round((z - z_lo) / dz))
         if not (0 <= i < nx and 0 <= k < nz):
             continue
         magnitude = abs(y)
