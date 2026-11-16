@@ -530,6 +530,30 @@ def iges_field_mesh(
     if not surfaces:
         raise RouteRefusal(f"no B-spline surfaces found in {iges_path}")
 
+    # Fail closed exactly as the reader does.  ``read_iges`` marks a type-128 patch whose
+    # control-point layout could not be decided (two candidate readings within a factor of
+    # four in control-net roughness, which is what a degenerate 2x2/2xn net produces) as
+    # ``layout_ambiguous``.  This route used to sample *every* surface, so the quarantine
+    # the reader, ``fleet_baseline.build_ship`` and every diagnostic tool honoured never
+    # reached the fleet's own acceptance path: the mis-read patch was meshed and the hull
+    # was graded on geometry the file does not describe.  The census is carried out in
+    # ``details`` so G9 (``tensorcad.fleet.gates.gate_patch_quarantine``) can refuse a hull
+    # that lost patches, and the dropped patches are excluded from the field.
+    from tensorcad.fleet_baseline import partition_surfaces
+
+    usable, quarantined = partition_surfaces(surfaces)
+    quarantine_report = {
+        "patches_total": len(surfaces),
+        "patches_used": len(usable),
+        "patches_quarantined": quarantined,
+    }
+    if not usable:
+        raise RouteRefusal(
+            f"every one of the {len(surfaces)} B-spline surfaces of {iges_path} was quarantined "
+            "(ambiguous control-point layout): the file cannot be read as this hull"
+        )
+    surfaces = usable
+
     spacing = 1.0 / samples_per_metre
     raw_points: list[tuple[float, float, float]]
     trim_report: dict[str, Any] = {"mode": "untrimmed"}
@@ -541,8 +565,28 @@ def iges_field_mesh(
 
         records = trim_polygons(iges)
         decided = [r for r in records if r.get("verdict") == "decided"]
+        # The trimmed route grades the *basis* surfaces of the type-143/144 wrappers, which
+        # ``IgesFile.trimmed_surfaces`` re-parses into objects of their own, so the census
+        # has to be taken over those patches and not over the plain type-128 list above.
+        kept_records = [r for r in decided if not getattr(r.get("basis"), "layout_ambiguous", False)]
+        dropped_records = [
+            {
+                "patch_index": r.get("patch"),
+                "layout_chosen": getattr(r.get("basis"), "layout", "unknown"),
+                "reason": "ambiguous control-point layout of a trimmed patch's basis surface",
+            }
+            for r in decided
+            if getattr(r.get("basis"), "layout_ambiguous", False)
+        ]
+        if dropped_records:
+            quarantine_report = {
+                "patches_total": len(records),
+                "patches_used": len(records) - len(dropped_records),
+                "patches_quarantined": dropped_records,
+            }
+        decided = kept_records
         if decided:
-            trimmed_points, trim_report = sample_trimmed_patches(records, spacing=spacing)
+            trimmed_points, trim_report = sample_trimmed_patches(decided, spacing=spacing)
             trim_report["patches_decided"] = len(decided)
             trim_report["patches_total"] = len(records)
             raw_points = trimmed_points
@@ -601,6 +645,7 @@ def iges_field_mesh(
             "frame_normalisation": frame_report.as_dict(),
             "x_extent": x_extent,
             "trim": trim_report,
+            "patch_quarantine": quarantine_report,
             "field": field.to_dict(),
             "loft": loft_info,
             "dx": dx,
