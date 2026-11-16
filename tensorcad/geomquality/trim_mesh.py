@@ -1051,6 +1051,23 @@ def repair_mesh(vertices: Sequence[Vec3], faces: Sequence[Triangle], *, weld_tol
 # --------------------------------------------------------------------------- #
 # seam stage: measured, optional, and never silent
 # --------------------------------------------------------------------------- #
+def closure_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
+                  tolerance: float | None, planes: Sequence[Any] = (),
+                  audit: bool = True) -> dict[str, Any]:
+    """Classify the remaining open boundary (seam / overlap / declared plane / gap).
+
+    This stage never changes the mesh: it answers *why* the mesh is not closed, in
+    metres per cause, which is the question a repair decision needs
+    (:mod:`tensorcad.geomquality.open_boundary`).  ``tolerance`` is the coincidence
+    budget in model units; ``None`` skips the measurement (the default: the audit is
+    opt-in because it costs a spatial hash over every triangle).
+    """
+    if not audit or tolerance is None or tolerance <= 0.0:
+        return {}
+    from .open_boundary import classify_open_boundary
+    return classify_open_boundary(vertices, faces, tolerance=tolerance, planes=planes)
+
+
 def seam_stage(vertices: Sequence[Vec3], faces: Sequence[Triangle], *,
                tolerance: float | None, audit: bool = True,
                strict: bool = False) -> tuple[list[Vec3], list[Triangle], dict[str, Any]]:
@@ -1191,7 +1208,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
                 seal_openings: bool = False, seal_planarity: float | None = None,
                 opening_audit: bool = True, symmetry_closure: bool = False,
                 symmetry_band: float | None = None,
-                symmetry_min_coverage: float = 0.5) -> CadImport:
+                symmetry_min_coverage: float = 0.5,
+                closure_tolerance: float | None = None,
+                closure_planes: Sequence[Any] = ()) -> CadImport:
     """Import an IGES file: parse, invert trims, tessellate, repair, audit.
 
     ``scale`` converts the file's units to metres; it defaults to the file's own declared
@@ -1240,6 +1259,8 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
         units="m" if abs(unit_scale - 1.0) > 0 or model.metres_per_unit else model.units_name,
     )
     gates = _gates(model, tessellation, after)
+    closure = closure_stage(vertices, faces, tolerance=closure_tolerance,
+                            planes=closure_planes)
     report: dict[str, Any] = {
         "tool": "tensorcad.geomquality.trim_mesh",
         "source": {
@@ -1272,6 +1293,7 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
         "openings": seal_record,
         "repair": repair_record,
         "symmetry": symmetry_record,
+        "open_boundary": closure,
         "after_repair": after.to_dict(),
         "gates": gates,
         "elapsed_seconds": round(time.time() - started, 3),
@@ -1334,7 +1356,7 @@ def _gates(model: TrimmedModel, tessellation: Tessellation, audit: MeshAudit) ->
 _PATCH_ROUTE_KEYS = {"scale", "weld_tolerance", "repair", "fill_holes", "max_hole_edges",
                      "seam_tolerance", "seam_audit", "seal_openings", "seal_planarity",
                      "opening_audit", "symmetry_closure", "symmetry_band",
-                     "symmetry_min_coverage"}
+                     "symmetry_min_coverage", "closure_tolerance", "closure_planes"}
 
 
 def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
@@ -1416,7 +1438,9 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
                      seal_openings: bool = False, seal_planarity: float | None = None,
                      opening_audit: bool = True, symmetry_closure: bool = False,
                      symmetry_band: float | None = None,
-                     symmetry_min_coverage: float = 0.5) -> CadImport:
+                     symmetry_min_coverage: float = 0.5,
+                     closure_tolerance: float | None = None,
+                     closure_planes: Sequence[Any] = ()) -> CadImport:
     """Import an *untrimmed* patch set (the flavour this repository's writer emits).
 
     IGES 128 patch sets and STEP patch sets carry no topology: adjacency has to be
@@ -1480,6 +1504,8 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
                              "value": after.degenerate_triangle_count, "limit": 0,
                              "detail": "degenerate + duplicate triangles"},
     }
+    closure = closure_stage(vertices, faces, tolerance=closure_tolerance,
+                            planes=closure_planes)
     report = {
         "tool": "tensorcad.geomquality.trim_mesh",
         "route": "patch-set (untrimmed, sewn)",
@@ -1493,6 +1519,7 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
         "openings": seal_record,
         "repair": repair_record,
         "symmetry": symmetry_record,
+        "open_boundary": closure,
         "after_repair": after.to_dict(),
         "gates": gates,
         "elapsed_seconds": round(time.time() - started, 3),
