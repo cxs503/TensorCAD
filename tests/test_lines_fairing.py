@@ -14,6 +14,7 @@ from tensorcad.lines_fairing import (
     curvature_sign_flips,
     fair_offset_table,
     fairing_study,
+    feature_waterlines,
     main,
     perturb_table,
     polyline_sign_flips,
@@ -26,6 +27,7 @@ from tensorcad.lines_fairing import (
     _solve_with_penalty,
     _free_indices,
     _Grid,
+    _energy_share_per_waterline,
 )
 from tensorcad.offset_forms import offset_table
 from tensorcad.offset_loft import OffsetProvenance, ShipOffsetTable
@@ -126,6 +128,16 @@ def test_bad_requests_are_refused() -> None:
         fair_offset_table(table, tolerance=0.01, weights=(0.0, 0.0, 0.0))
     with pytest.raises(FairingError):
         perturb_table(table, amplitude=-1.0)
+    with pytest.raises(FairingError):
+        fair_offset_table(table, tolerance=0.01, features="sometimes")
+    with pytest.raises(FairingError):
+        fair_offset_table(table, tolerance=0.01, features=(table.n_waterlines,))
+    with pytest.raises(FairingError):
+        fair_offset_table(table, tolerance=0.01, features=("1",))  # type: ignore[arg-type]
+    with pytest.raises(FairingError):
+        feature_waterlines(table, threshold=0.0)
+    with pytest.raises(FairingError):
+        fairing_study(forms=("wigley_iii",), feature_modes=("sometimes",))
 
 
 # ---------------------------------------------------------------------------
@@ -274,8 +286,8 @@ def test_study_payload_is_json_serialisable_and_complete() -> None:
     assert json.loads(text)["cases_total"] == 2
     for case in report["cases"]:
         assert case["analytic_flips"] == {"waterlines": 0, "stations": 0, "buttocks": 0}
-        assert len(case["sweep"]) == 2
-        for entry in case["sweep"]:
+        assert len(case["sweeps"]["off"]) == 2
+        for entry in case["sweeps"]["off"]:
             assert entry["within_tolerance"]
             assert entry["monotone"]
 
@@ -457,3 +469,128 @@ def test_fairing_a_tumblehome_table_reports_the_third_family() -> None:
     assert buttocks.curves > len(coverage["levels"])
     assert buttocks.flips_before > 0  # the old contour reported zero here
     assert buttocks.flips_after <= buttocks.flips_before
+
+
+# ---------------------------------------------------------------------------
+# design-feature rows: the near-keel band of a power-law section
+# ---------------------------------------------------------------------------
+
+
+def test_energy_share_names_the_keel_band_of_a_power_law_section() -> None:
+    """One row owning the whole zeta-curvature energy is the detection signal."""
+    for key, others in (("series60_cb060", 0.01), ("kvlcc2_class", 0.01)):
+        grid = _grid_of(_form(key, stations=15, waterlines=11))
+        share = _energy_share_per_waterline(grid)
+        assert sum(share.values()) == pytest.approx(1.0, rel=1e-9)
+        assert share[1] > 0.5, key
+        assert max(value for index, value in share.items() if index != 1) < others, key
+
+    wigley = _energy_share_per_waterline(_grid_of(_form("wigley_iii", stations=15, waterlines=11)))
+    assert max(wigley.values()) < 0.3  # a parabola concentrates nothing
+
+
+def test_feature_waterlines_flags_the_power_law_forms_only() -> None:
+    assert feature_waterlines(_form("wigley_iii")) == ()
+    assert feature_waterlines(_form("series60_cb060")) == (1,)
+    assert feature_waterlines(_form("kvlcc2_class")) == (1,)
+    # the frozen keel and deck rows are never "features": they are not unknowns
+    assert 0 not in feature_waterlines(_form("series60_cb060"))
+    assert 10 not in feature_waterlines(_form("series60_cb060"))
+
+
+def test_features_off_reproduces_the_plain_energy_bit_for_bit() -> None:
+    clean = _form("series60_cb060")
+    noisy = perturb_table(clean, amplitude=0.004 * 0.5 * clean.beam, seed=11)
+    plain = fair_offset_table(noisy, tolerance=0.016 * 0.5 * clean.beam, iterations=2)
+    explicit_off = fair_offset_table(
+        noisy, tolerance=0.016 * 0.5 * clean.beam, iterations=2, features=()
+    )
+    assert plain.table_after.digest() == explicit_off.table_after.digest()
+    assert plain.feature_waterlines == ()
+    assert all(iteration.penalty_rows_dropped == 0 for iteration in plain.iterations)
+
+    switched_on = fair_offset_table(
+        noisy, tolerance=0.016 * 0.5 * clean.beam, iterations=2, features="auto"
+    )
+    assert switched_on.feature_waterlines == (1,)
+    assert all(iteration.penalty_rows_dropped > 0 for iteration in switched_on.iterations)
+    assert switched_on.table_after.digest() != plain.table_after.digest()
+
+
+def _series60_budget(fraction: float = 0.008):
+    """The study's Series 60 case: the configuration the docs report."""
+    clean = offset_table("series60_cb060", n_stations=21, n_waterlines=17)
+    noisy = perturb_table(clean, amplitude=0.004 * 0.5 * clean.beam, seed=20261114)
+    return clean, noisy, fraction * 0.5 * clean.beam
+
+
+def test_declaring_the_keel_band_a_feature_moves_towards_the_smooth_table() -> None:
+    """The documented limitation of the plain energy, measured on the same table."""
+    clean, noisy, tolerance = _series60_budget(0.008)
+    plain = fair_offset_table(noisy, tolerance=tolerance, iterations=3, reference=clean)
+    featured = fair_offset_table(
+        noisy, tolerance=tolerance, iterations=3, reference=clean, features="auto"
+    )
+    assert featured.within_tolerance and featured.monotone
+    assert featured.flips_after < plain.flips_after          # more sign flips removed
+    assert featured.reference.rms_after < plain.reference.rms_after
+    # and the improvement is a real one: closer to the smooth table than the input was
+    # (the plain energy is further from it than the unfaired table -- the limitation)
+    assert featured.reference.rms_after < featured.reference.rms_before
+    assert plain.reference.rms_after > plain.reference.rms_before
+    assert featured.reference.rms_before == pytest.approx(plain.reference.rms_before)
+
+
+def test_the_feature_switch_does_not_rescue_a_budget_far_above_the_noise() -> None:
+    """Honest limit: at 3.2 % B/2 the max-norm budget is 8x the jitter, and spending it
+    moves the table away from the smooth shape in both modes.  The feature rows give the
+    largest flip reduction of the whole sweep (180 -> 18) and the worst reference
+    agreement, which is why the docs recommend the small budgets for this switch."""
+    clean, noisy, tolerance = _series60_budget(0.032)
+    plain = fair_offset_table(noisy, tolerance=tolerance, iterations=3, reference=clean)
+    featured = fair_offset_table(
+        noisy, tolerance=tolerance, iterations=3, reference=clean, features="auto"
+    )
+    assert featured.flips_after < plain.flips_after
+    assert featured.reference.rms_after > featured.reference.rms_before
+    assert featured.within_tolerance and featured.monotone
+
+
+def test_a_wigley_table_gains_nothing_from_the_feature_switch() -> None:
+    """No detected row means no change: the switch cannot flatter a smooth form."""
+    clean = _form("wigley_iii")
+    noisy = perturb_table(clean, amplitude=0.004 * 0.5 * clean.beam, seed=5)
+    tolerance = 0.016 * 0.5 * clean.beam
+    plain = fair_offset_table(noisy, tolerance=tolerance, iterations=2)
+    automatic = fair_offset_table(noisy, tolerance=tolerance, iterations=2, features="auto")
+    assert automatic.feature_waterlines == ()
+    assert automatic.table_after.digest() == plain.table_after.digest()
+
+
+def test_study_measures_both_feature_modes_on_the_same_tables() -> None:
+    report = fairing_study(
+        forms=("series60_cb060", "wigley_iii"),
+        n_stations=13,
+        n_waterlines=9,
+        tolerance_fractions=(0.016,),
+        iterations=2,
+        feature_modes=("off", "auto"),
+    )
+    assert report["feature_modes"] == ["off", "auto"]
+    for case in report["cases"]:
+        assert set(case["sweeps"]) == {"off", "auto"}
+        assert case["accepted_at"] == case["accepted_at_by_mode"]["off"]
+        for mode, sweep in case["sweeps"].items():
+            assert len(sweep) == 1
+            assert sweep[0]["feature_mode"] == mode
+        assert case["settings"]["feature_modes"] == ["off", "auto"]
+        # the analytic table is what both modes are compared against
+        assert case["sweeps"]["off"][0]["reference"]["rms_before_m"] == pytest.approx(
+            case["sweeps"]["auto"][0]["reference"]["rms_before_m"]
+        )
+    series = next(case for case in report["cases"] if case["form"] == "series60_cb060")
+    assert series["sweeps"]["off"][0]["feature_waterlines"] == []
+    assert series["sweeps"]["auto"][0]["feature_waterlines"] == [1]
+    wigley = next(case for case in report["cases"] if case["form"] == "wigley_iii")
+    assert wigley["sweeps"]["auto"][0]["feature_waterlines"] == []
+    assert set(report["cases_meeting_criterion_at_a_tolerance_by_mode"]) == {"off", "auto"}

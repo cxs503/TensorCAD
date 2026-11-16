@@ -1,6 +1,29 @@
 
 ## Unreleased
 
+- **Lines fairing: design-feature rows for the near-keel band of a power-law section**
+  (`tensorcad/lines_fairing.py`, `tests/test_lines_fairing.py`,
+  `docs/lines_fairing/lines_fairing.md`, `docs/lines_fairing/results.json`,
+  `docs/lines_fairing/feature_rows.png`, `docs/lines_fairing/feature_evidence.py`).  The
+  documented limitation of GAP-CAD-C3 was that on a full `zeta**(1/m)` section the near-keel
+  band owns the whole fairness energy, so a max-norm deviation budget is spent there and the
+  rest of the table barely moves (Series 60 went *away* from the analytic reference,
+  0.00103 -> 0.00114 m at 0.8 % B/2).  `features="auto"` now detects the rows that own more than
+  50 % of the `zeta`-curvature energy (measured: 99-100 % on waterline `j = 1` for Series 60 and
+  the KVLCC2-class hull, <= 10 % for any row of the parabolic Wigley), drops their
+  `d^n/dzeta^n` and buttock-curvature rows from the objective and leaves the `d^n/dx^n` family
+  untouched; the ordinates of those rows stay free and the tolerance still bounds the whole
+  table.  Measured on the same jittered tables (21x17, `results.json`, both sweeps): Series 60
+  180 -> 158/134 sign flips with the reference distance improving to 0.00086/0.00090 m at
+  0.4/0.8 % B/2 (plain energy: 174/172 flips and 0.00104/0.00114 m, i.e. worse than unfaired),
+  Wigley bit-identical (no row detected), KVLCC2 flips 298 -> 297/291/287/275 but reference
+  distance still worse than unfaired at every budget -- recorded as a limitation, not hidden.
+  The study payload now carries both sweeps (`case["sweeps"]["off"|"auto"]`) and every table in
+  the document is regenerated/verified by `docs/lines_fairing/feature_evidence.py --check`, which
+  also corrected three stale rows (KVLCC2 302 -> the measured 298 flips, and a rejected run
+  reported as accepted) left behind by hand-copying.
+
+
 - **Wall-clock gate: noise-aware measurement, matched estimators, and a workload-comparability
   refusal** (`tensorcad/perf_benchmark.py`, `scripts/build_perf_baseline.py`,
   `scripts/perf_gate_noise_repro.py`, `benchmarks/perf_scale/baseline.json`,
