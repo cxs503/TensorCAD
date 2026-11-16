@@ -1,0 +1,446 @@
+{
+  "schema": "tensorcad.perf_cad_source/1",
+  "route": "patch",
+  "source": {
+    "path": "work/assets/onrt.igs",
+    "sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21",
+    "bytes": 3374136,
+    "parse_seconds": 0.673066,
+    "census": {
+      "faces": 132,
+      "edges": 447,
+      "surfaces": 132
+    }
+  },
+  "environment": {
+    "tensorcad": "0.23.0",
+    "python": "3.11.6",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "machine": "loongarch64",
+    "cpu_count": 128,
+    "loadavg": {
+      "load1": 53.0224609375,
+      "load5": 71.482421875,
+      "load15": 85.234375
+    }
+  },
+  "gate_factor": 2.0,
+  "queries": 500,
+  "chunk_faces": 8,
+  "max_triangles": 16000000,
+  "wall_seconds": 16.581,
+  "records": [
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=8x6",
+      "status": "measured",
+      "seconds": 0.229783,
+      "triangles": 12636,
+      "vertices": 8031,
+      "throughput": 54991.1,
+      "parse_seconds": 0.673066,
+      "census": {},
+      "mesh_mb": 2.9828643798828125,
+      "rss_mb": 68.03125,
+      "peak_rss_mb": 68.03125,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 0.229758,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0
+        ],
+        "rss_peak_of_chunks_mb": 68.0,
+        "rss_first_chunk_mb": 68.0,
+        "speed_ratio": 1.0
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 0.102233,
+        "vertices_before": 8031,
+        "vertices_after": 7649,
+        "vertices_merged": 382,
+        "merged_fraction": 0.047566,
+        "boundary_edges_before": 3383,
+        "boundary_edges_after": 3036,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 12636
+      },
+      "volume": {
+        "seconds": 0.005974,
+        "signed_volume": 0.005813538345099892,
+        "abs_volume": 0.005813538345099892,
+        "surface_area": 0.48665140157936687,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.047776,
+        "queries_per_second": 10465.6,
+        "build_seconds": 0.101378,
+        "index_cells": 3600,
+        "index_entries": 31314,
+        "index_bytes": 1063852,
+        "hits": 500
+      },
+      "rss_mb_end": 68.03125,
+      "peak_rss_mb_end": 68.03125
+    },
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=16x12",
+      "status": "measured",
+      "seconds": 0.809762,
+      "triangles": 50615,
+      "vertices": 28662,
+      "throughput": 62506.0,
+      "parse_seconds": 0.673066,
+      "census": {},
+      "mesh_mb": 11.466358184814453,
+      "rss_mb": 68.03125,
+      "peak_rss_mb": 68.03125,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 0.811805,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          68.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          72.0,
+          76.0,
+          76.0
+        ],
+        "rss_peak_of_chunks_mb": 76.0,
+        "rss_first_chunk_mb": 68.0,
+        "speed_ratio": 1.003
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 0.36287,
+        "vertices_before": 28662,
+        "vertices_after": 27948,
+        "vertices_merged": 714,
+        "merged_fraction": 0.024911,
+        "boundary_edges_before": 6757,
+        "boundary_edges_after": 6094,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 50615
+      },
+      "volume": {
+        "seconds": 0.024655,
+        "signed_volume": 0.005758326879773485,
+        "abs_volume": 0.005758326879773485,
+        "surface_area": 0.487898124762857,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.060272,
+        "queries_per_second": 8295.7,
+        "build_seconds": 0.391105,
+        "index_cells": 13272,
+        "index_entries": 104137,
+        "index_bytes": 4167008,
+        "hits": 500
+      },
+      "rss_mb_end": 88.03125,
+      "peak_rss_mb_end": 88.03125
+    },
+    {
+      "subtask": "cad_tessellate",
+      "route": "patch",
+      "parameter": "uv=32x24",
+      "status": "measured",
+      "seconds": 3.044768,
+      "triangles": 202601,
+      "vertices": 107881,
+      "throughput": 66540.7,
+      "parse_seconds": 0.673066,
+      "census": {},
+      "mesh_mb": 44.95687484741211,
+      "rss_mb": 104.03125,
+      "peak_rss_mb": 104.03125,
+      "note": "",
+      "chunked": {
+        "chunk_faces": 8,
+        "seconds": 3.050457,
+        "identical": true,
+        "rss_per_chunk_mb": [
+          104.0,
+          104.0,
+          108.0,
+          108.0,
+          112.0,
+          112.0,
+          116.0,
+          120.0,
+          120.0,
+          124.0,
+          124.0,
+          128.0,
+          128.0,
+          136.0,
+          136.0,
+          140.0,
+          140.0
+        ],
+        "rss_peak_of_chunks_mb": 140.0,
+        "rss_first_chunk_mb": 104.0,
+        "speed_ratio": 1.002
+      },
+      "weld": {
+        "tolerance": 1.000475494567879e-06,
+        "seconds": 1.501898,
+        "vertices_before": 107881,
+        "vertices_after": 106545,
+        "vertices_merged": 1336,
+        "merged_fraction": 0.012384,
+        "boundary_edges_before": 13507,
+        "boundary_edges_after": 12193,
+        "watertight_before": false,
+        "watertight_after": false,
+        "triangles": 202601
+      },
+      "volume": {
+        "seconds": 0.139061,
+        "signed_volume": 0.005740893680470341,
+        "abs_volume": 0.005740893680470341,
+        "surface_area": 0.48826031448766105,
+        "watertight": false
+      },
+      "locate": {
+        "queries": 500,
+        "seconds": 0.082026,
+        "queries_per_second": 6095.6,
+        "build_seconds": 1.74223,
+        "index_cells": 54625,
+        "index_entries": 364957,
+        "index_bytes": 16484104,
+        "hits": 500
+      },
+      "rss_mb_end": 183.1875,
+      "peak_rss_mb_end": 203.046875
+    }
+  ],
+  "measurements": {
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=8x6": 0.229783,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=8x6": 0.102233,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=8x6": 0.005974,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=8x6": 0.047776,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=8x6": 0.229758,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=16x12": 0.809762,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=16x12": 0.36287,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=16x12": 0.024655,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=16x12": 0.060272,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=16x12": 0.811805,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=32x24": 3.044768,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=32x24": 1.501898,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=32x24": 0.139061,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=32x24": 0.082026,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=32x24": 3.050457
+  },
+  "gates": [
+    {
+      "name": "chunk_equivalence[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "chunk_equivalence[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "chunk_equivalence[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "chunked tessellation is bit-identical to the one-shot mesh"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.02x of baseline 0.2253s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "0.99x of baseline 0.1037s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.08x of baseline 0.0055s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.04x of baseline 0.0458s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=8x6]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.01x of baseline 0.2273s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.02x of baseline 0.7971s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.02x of baseline 0.3572s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.03x of baseline 0.0239s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.03x of baseline 0.0584s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=16x12]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.01x of baseline 0.8020s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_tessellate[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.00x of baseline 3.0451s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_weld[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.01x of baseline 1.4884s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_volume[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.49x of baseline 0.0932s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_locate[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.01x of baseline 0.0812s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "regression_cad_tessellate_chunked[patch uv=32x24]",
+      "passed": true,
+      "status": "measured",
+      "detail": "1.01x of baseline 3.0330s (limit 2.0x) -> ok"
+    },
+    {
+      "name": "scaling_cad_locate",
+      "passed": true,
+      "status": "measured",
+      "detail": "exponent=0.19 (limit 1.50), R^2=0.993, 3 sizes 12,636..202,601"
+    },
+    {
+      "name": "scaling_cad_tessellate",
+      "passed": true,
+      "status": "measured",
+      "detail": "exponent=0.93 (limit 1.50), R^2=1.000, 3 sizes 12,636..202,601"
+    },
+    {
+      "name": "scaling_cad_weld",
+      "passed": true,
+      "status": "measured",
+      "detail": "exponent=0.97 (limit 1.50), R^2=0.999, 3 sizes 12,636..202,601"
+    }
+  ],
+  "cluster_thresholds": {
+    "cad_locate": {
+      "status": "measured",
+      "exponent": 0.195,
+      "budget_seconds": 60.0,
+      "size_at_budget": 1.0228932668941407e+20,
+      "measured_max_size": 202601,
+      "measured_max_seconds": 0.082,
+      "exceeds_max_rung": true
+    },
+    "cad_tessellate": {
+      "status": "measured",
+      "exponent": 0.931,
+      "budget_seconds": 60.0,
+      "size_at_budget": 4974513.4,
+      "measured_max_size": 202601,
+      "measured_max_seconds": 3.0448,
+      "exceeds_max_rung": true
+    },
+    "cad_volume": {
+      "status": "measured",
+      "exponent": 1.134,
+      "budget_seconds": 60.0,
+      "size_at_budget": 42607839.2,
+      "measured_max_size": 202601,
+      "measured_max_seconds": 0.1391,
+      "exceeds_max_rung": true
+    },
+    "cad_weld": {
+      "status": "measured",
+      "exponent": 0.968,
+      "budget_seconds": 60.0,
+      "size_at_budget": 9125884.2,
+      "measured_max_size": 202601,
+      "measured_max_seconds": 1.5019,
+      "exceeds_max_rung": true
+    }
+  },
+  "passed": true,
+  "gates_checked": 21,
+  "gates_not_run": 0,
+  "verdict": "pass"
+}

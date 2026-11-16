@@ -1,0 +1,40 @@
+{
+  "baseline_policy": "min of the ladder's own rungs; one key per (subtask, source digest, route, parameter)",
+  "environment": {
+    "cpu_count": 128,
+    "loadavg": {
+      "load1": 55.99169921875,
+      "load15": 86.10107421875,
+      "load5": 73.2822265625
+    },
+    "machine": "loongarch64",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "python": "3.11.6",
+    "tensorcad": "0.23.0"
+  },
+  "generated_from": "work/assets/onrt.igs",
+  "measurements": {
+    "cad_locate|ff061ab8584e5b0a|patch|uv=16x12": 0.058363,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=32x24": 0.081188,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=64x48": 0.091335,
+    "cad_locate|ff061ab8584e5b0a|patch|uv=8x6": 0.045764,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=16x12": 0.802035,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=32x24": 3.033003,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=64x48": 12.075459,
+    "cad_tessellate_chunked|ff061ab8584e5b0a|patch|uv=8x6": 0.22728,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=16x12": 0.797149,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=32x24": 3.045149,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=64x48": 11.799266,
+    "cad_tessellate|ff061ab8584e5b0a|patch|uv=8x6": 0.225329,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=16x12": 0.023872,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=32x24": 0.093229,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=64x48": 0.493979,
+    "cad_volume|ff061ab8584e5b0a|patch|uv=8x6": 0.005527,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=16x12": 0.357221,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=32x24": 1.488374,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=64x48": 7.488693,
+    "cad_weld|ff061ab8584e5b0a|patch|uv=8x6": 0.103744
+  },
+  "schema": "tensorcad.perf_cad_source/1",
+  "source_sha256": "ff061ab8584e5b0a8965e02b2665940003ceeeb29b848c9684eb327afb7bab21"
+}
