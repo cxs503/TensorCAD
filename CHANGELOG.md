@@ -1,6 +1,31 @@
 
 ## Unreleased
 
+- **Spatial index: `nearest_surface` cost bounded on thin/plate geometry, and the automatic
+  resolution stops outgrowing the triangle set** (`tensorcad/spatial_index.py`,
+  `tests/test_spatial_index.py`, `scripts/probe_nearest_surface_cost.py`,
+  `docs/spatial_index_nearest_cost.md`, `artifacts/spatial_nearest_cost.json`).  The exact
+  shell search in `TriangleGrid.nearest_surface` walks cells at a cost of
+  (answer distance / cell size)^3, and `_auto_resolution` derived the cell size from the
+  bounding-box *volume*: a plate or any open shell patch has a degenerate box, so the in-plane
+  axes saturated the per-axis clamp (2048 x 2048 x 1 = 4.19 M cells for a 2-triangle sheet)
+  while the answer distance stayed O(1).  Measured: 1.12 s per query on the 2-triangle sheet
+  (two of 48 probes hit the 5 s ceiling), 1.65 ms on a 1 m x 1 m x 1 mm closed plate, and 19.9 ms
+  per query on a 2 304-triangle closed hull; a first attempt that budgeted *triangle tests*
+  instead of cell visits was still 67 s at `resolution=(1024, 1024, 1)` because empty cells test
+  nothing.  Two changes: (1) the shell walk counts visited cells and finishes with a flat scan
+  once it has visited more cells than the mesh has triangles -- every remaining cell only holds
+  triangles the flat scan also tests, so answers and `band` truncation semantics are unchanged
+  (0 mismatches against `brute_force_surface_distance` on all four cases), and the query is
+  bounded by N cell visits plus one O(N) scan; (2) the automatic resolution is additionally
+  capped at `max(64, 8 N)` cells, which binds only on degenerate boxes (explicit `resolution=`
+  untouched, the quick ladder's 20 wall-clock gates and 5 scaling gates unchanged).  After:
+  34 us per query on the sheet (64 cells, 0.3 ms build), 148 us on the plate, 14.4 ms on the
+  2 304-triangle hull.  `TriangleGrid.last_query_cell_visits` exposes the cost of the last query.
+  The evidence table in the new document is rendered from the committed JSON by the probe script
+  and freshness-locked by a test.
+
+
 - **Lines fairing: design-feature rows for the near-keel band of a power-law section**
   (`tensorcad/lines_fairing.py`, `tests/test_lines_fairing.py`,
   `docs/lines_fairing/lines_fairing.md`, `docs/lines_fairing/results.json`,
