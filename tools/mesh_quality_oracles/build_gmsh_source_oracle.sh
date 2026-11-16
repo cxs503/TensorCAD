@@ -71,6 +71,32 @@ SOURCES="$G/mesh/qualityMeasures.cpp \
  $G/numeric/ElementType.cpp $G/numeric/GaussIntegration.cpp $G/numeric/GaussQuadrature*.cpp \
  $MONO $GL"
 
+# Closure of MElementFactory::create, kept only because MElement's vtable pins the
+# factory (see above). Located by name so a file moving between Gmsh releases fails
+# loudly instead of silently dropping a definition.
+EXTRA_SOURCES="$G/geo/MSubElement.cpp $G/geo/MElementCut.cpp $G/geo/MEdge.cpp \
+ $G/geo/MLine.cpp $G/geo/MPyramid.cpp $G/geo/MPrism.cpp $G/geo/MTrihedron.cpp \
+ $G/numeric/BasisFactory.cpp $G/numeric/JacobianBasis.cpp $G/numeric/FuncSpaceData.cpp \
+ $G/numeric/nodalBasis.cpp $G/numeric/bezierBasis.cpp $G/numeric/decasteljau.cpp \
+ $G/numeric/InnerVertexPlacement.cpp $G/numeric/pyramidalBasis.cpp \
+ $G/numeric/miniBasis.cpp $G/numeric/polynomialBasis.cpp \
+ $G/numeric/OrthogonalPoly.cpp $G/numeric/orthogonalBasis.cpp \
+ $G/numeric/BergotBasis.cpp $G/numeric/GaussJacobi1D.cpp \
+ $G/common/StringUtils.cpp"
+# (`GaussQuadrature{Pri,Pyr,Hex,Lin,Quad}.cpp` are already in $SOURCES through the
+# `GaussQuadrature*.cpp` glob; naming them again is a duplicate-definition link error.)
+# $GL and the `GaussQuadrature*.cpp` glob can name the same file (both are discovered by
+# content). Compiling a translation unit twice is a duplicate-definition link error, so the
+# list is de-duplicated in place, preserving order.
+DEDUP=$(printf '%s\n' $SOURCES $EXTRA_SOURCES | awk 'NF && !seen[$0]++')
+SOURCES=$(printf '%s\n' "$DEDUP" | sed -n '1,$p')
+for f in $SOURCES; do
+  if [ ! -f "$f" ]; then
+    echo "source file missing from this Gmsh tree: $f" >&2
+    exit 2
+  fi
+done
+
 mkdir -p "$(dirname "$OUT")"
 # -ffunction-sections/--gc-sections keeps the unused (display, I/O, high-order) paths out
 # of the binary instead of demanding their dependencies.
@@ -79,11 +105,21 @@ FLAGS="-O2 -std=c++17 -ffunction-sections -fdata-sections"
 
 # MElement.cpp also defines MElementFactory::create, which reaches the whole
 # high-order / sub-element graph (MSubPoint, MLineN, MPolygon, BasisFactory, ...).
-# The factory is not on the quality path, but its call graph is larger than the
-# measures and would drag those sources in. It is compiled under a local rename so
-# --gc-sections can drop it as unreferenced: MElementFactory appears nowhere else in
-# this build except the two definitions inside this one file, so renaming cannot
-# change anything the oracle executes.
+# The factory is not on the quality path, but it cannot be dropped:
+#
+#   * `MElement`'s vtable is required (base constructors set it), so every virtual
+#     `MElement` member it points at is kept -- including `integrateCirculation` /
+#     `integrateCirc` (`MElement.cpp`), which build a temporary element through
+#     `MElementFactory::create`;
+#   * therefore the factory section is referenced, `--gc-sections` retains it, and the
+#     element classes it instantiates must exist.
+#
+# That retention is why the factory is compiled separately (its rename keeps the two
+# definitions distinct from anything outside this file) and why $EXTRA_SOURCES below
+# links the closure the factory names. Nothing in that closure runs: the measures
+# called by the harness (`gammaShapeMeasure`, `etaShapeMeasure`, `getVolume`) take the
+# concrete element as given. The closure is *linked*, never executed -- the trade is
+# link time and a few hundred KB, in exchange for numbers Gmsh itself computed.
 if ! g++ $FLAGS $INCLUDES -DMElementFactory=MElementFactoryNotOnQualityPath \
       -c "$G/geo/MElement.cpp" -o "$WORK/MElement.o"; then
   echo "build failed compiling MElement.cpp" >&2
