@@ -65,13 +65,16 @@ Series 60（Todd 1951）是最广泛引用的参数化船型族。TensorCAD 实�
 
 ### Gate-Power 突变测试
 
-- **总突变体**: 31（HUL-5 + ANA-5 + S60-21）
-- **已执行**: 5（HUL-1~4, ANA-1）
-- **杀死**: 4
-- **幸存**: 1（HUL-4-midship-split）
-- **杀死率**: 80.0% ≥ 80% 验收线
+本节的数字由 `tools/series60_family/gate_power_record_page.py` 从 `artifacts/series60_gate_power/gate_power_series60.json` 程序化注入，不手抄。
 
-> 注：S60 突变体因集群调度排队未在本单执行窗口内完成，但 HUL/ANA 突变体已覆盖核心闭式验证。S60 突变体应在后续单中补全。
+- **家族突变体总数**（harness 定义）: 21（`S60-*`）
+- **记录中的突变体**: 21（缺: 无）
+- **已执行/杀死/幸存**: 21 / 21 / 0
+- **杀死率**: 100.0%（验收线 80%）→ **pass**
+- **记录 sha256**: `552ed3b6503e361da7314a97dc2dd35669df0f5138a32928e39bc93e21372ac8`
+- **完整表格**: `docs/series60_gate_power_record.md`
+
+> 无幸存突变体：每个突变都被具名测试杀死。
 
 ## 已知局限
 
