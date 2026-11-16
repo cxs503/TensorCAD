@@ -127,6 +127,307 @@ def sample_patches(
     return points
 
 
+
+
+UNIT_BAND = (0.5, 2.0)
+
+
+def measured_unit_factor(
+    extent_units: float,
+    declared_factor: float,
+    length_pp: float,
+    *,
+    metre_factor: float | None = None,
+    band: tuple[float, float] = UNIT_BAND,
+) -> dict[str, Any]:
+    """Pick the file-unit -> metre factor by measuring the archive, not its header.
+
+    The IGES global section declares a unit flag, and on archive files it can contradict
+    the coordinates: ``KVLCC2/kvlcc2.igs`` carries flag 2 (millimetres) while its
+    geometry is in metres, so the declared factor makes a 0.334 m hull out of a 320 m
+    ship.  A silent 1000x error is worse than a refusal, because it still produces a
+    watertight mesh -- of the wrong object.
+
+    So both readings are evaluated against the publisher's own principal dimension.  The
+    declared reading is kept when its implied length is plausible; else the
+    one-file-unit-per-metre reading is adopted *with the contradiction recorded*; if
+    neither is plausible the declared reading is kept and the verdict says so, which lets
+    the downstream scale guard refuse instead of guessing.
+    """
+    candidates: list[dict[str, Any]] = [
+        {"name": "declared_global_section", "factor": float(declared_factor)}
+    ]
+    if metre_factor is not None and abs(metre_factor - declared_factor) > 1e-12:
+        candidates.append({"name": "one_file_unit_is_one_metre", "factor": float(metre_factor)})
+    rows: list[dict[str, Any]] = []
+    for candidate in candidates:
+        implied = float(extent_units) * candidate["factor"]
+        ratio = implied / length_pp if length_pp else float("nan")
+        plausible = bool(length_pp) and band[0] <= ratio <= band[1]
+        rows.append(
+            {
+                "name": candidate["name"],
+                "factor": candidate["factor"],
+                "implied_length_m": implied,
+                "ratio_to_published_lpp": ratio,
+                "plausible": bool(plausible),
+            }
+        )
+    chosen = next((row for row in rows if row["plausible"]), None)
+    if chosen is None:
+        chosen = rows[0]
+        verdict = "no_plausible_unit"
+        reason = (
+            f"neither the declared unit ({rows[0]['factor']:.6g} m/file unit, implied length "
+            f"{rows[0]['implied_length_m']:.3f} m) nor a metre archive implies a hull within "
+            f"{band[0]}-{band[1]}x the published L_PP {length_pp:.3f} m; the declared reading is "
+            "kept and the scale guard must decide"
+            if length_pp
+            else "no published L_PP to measure the units against"
+        )
+    elif chosen["name"] == rows[0]["name"]:
+        verdict = "declared_consistent"
+        reason = (
+            f"declared unit gives an implied length of {chosen['implied_length_m']:.3f} m, "
+            f"{chosen['ratio_to_published_lpp']:.3f}x the published L_PP {length_pp:.3f} m"
+        )
+    else:
+        verdict = "declared_contradicted_by_geometry"
+        reason = (
+            f"the declared unit ({rows[0]['factor']:.6g} m/file unit) implies a "
+            f"{rows[0]['implied_length_m']:.3f} m hull against the published L_PP "
+            f"{length_pp:.3f} m (ratio {rows[0]['ratio_to_published_lpp']:.4f}); the metre "
+            f"reading gives {chosen['implied_length_m']:.3f} m "
+            f"({chosen['ratio_to_published_lpp']:.3f}x) and is adopted -- the file's global "
+            "section contradicts its own coordinates"
+        )
+    return {
+        "verdict": verdict,
+        "factor": chosen["factor"],
+        "relative_to_declared": chosen["factor"] / float(declared_factor)
+        if declared_factor
+        else float("nan"),
+        "band": list(band),
+        "extent_file_units": float(extent_units),
+        "published_length_pp_m": length_pp,
+        "candidates": rows,
+        "reason": reason,
+    }
+
+
+def point_in_polygon(point: tuple[float, float], polygon: Sequence[tuple[float, float]]) -> bool:
+    """Even-odd ray cast in the patch's own ``(u, v)`` plane."""
+    x, y = point
+    inside = False
+    count = len(polygon)
+    for index in range(count):
+        x1, y1 = polygon[index]
+        x2, y2 = polygon[(index + 1) % count]
+        if (y1 > y) != (y2 > y):
+            crossing = x1 + (y - y1) * (x2 - x1) / (y2 - y1)
+            if crossing > x:
+                inside = not inside
+    return inside
+
+
+def _inside_domain(polygon: Sequence[tuple[float, float]], domain: tuple[float, float, float, float]) -> float:
+    """Share of ``polygon`` vertices that lie inside ``(u0, u1, v0, v1)``."""
+    if not polygon:
+        return 0.0
+    u0, u1, v0, v1 = domain
+    inside = sum(
+        1 for point in polygon if u0 - 1e-9 <= point[0] <= u1 + 1e-9 and v0 - 1e-9 <= point[1] <= v1 + 1e-9
+    )
+    return inside / len(polygon)
+
+
+def trim_loops_uv(model: Any, basis: BSplineSurface, curves: Sequence[Any], *, samples: int = 96) -> dict[str, Any]:
+    """Parameter-space trim loops of one patch, chosen by measurement.
+
+    Entity 142 carries both a model-space curve and the parameter-space loop, and which
+    field is which differs between exporters, so the choice is made by measuring: a
+    parameter-space loop lies inside the basis surface's knot domain, a model-space curve
+    does not.  A curve whose samples are degenerate (one repeated point) is *not* allowed
+    to win on that test -- it would score a perfect inside-fraction by sitting in a corner
+    of the domain -- which is why the polygon spread is checked as well.
+    """
+    u0, u1 = basis.domain_u
+    v0, v1 = basis.domain_v
+    domain = (u0, u1, v0, v1)
+    span = max(abs(u1 - u0), abs(v1 - v0), 1e-12)
+    loops: list[list[tuple[float, float]]] = []
+    rows: list[dict[str, Any]] = []
+    for curve in curves:
+        scored: list[dict[str, Any]] = []
+        for label, pointer in (("curve_uv", curve.curve_uv), ("curve_3d", curve.curve_3d)):
+            if not pointer:
+                continue
+            try:
+                polygon = model.trim_polygon_uv(pointer, samples=samples)
+            except Exception as error:  # noqa: BLE001 - recorded, never guessed
+                scored.append({"field": label, "pointer": pointer, "error": f"{type(error).__name__}: {error}"})
+                continue
+            spread = 0.0
+            if polygon:
+                us = [point[0] for point in polygon]
+                vs = [point[1] for point in polygon]
+                spread = max(max(us) - min(us), max(vs) - min(vs)) / span
+            fraction = _inside_domain(polygon, domain)
+            scored.append(
+                {
+                    "field": label,
+                    "pointer": pointer,
+                    "points": len(polygon),
+                    "inside_fraction": fraction,
+                    "spread_over_domain": spread,
+                    "degenerate": spread < 1e-6,
+                }
+            )
+        winner = None
+        for row in scored:
+            if row.get("degenerate", True) or row.get("inside_fraction", 0.0) < 0.5:
+                continue
+            if winner is None or row["inside_fraction"] > winner["inside_fraction"]:
+                winner = row
+        if winner is None:
+            rows.append({"candidates": scored, "verdict": "undecided"})
+            continue
+        try:
+            loops.append([tuple(p) for p in model.trim_polygon_uv(winner["pointer"], samples=samples)])
+        except Exception as error:  # noqa: BLE001
+            rows.append({"candidates": scored, "verdict": f"unreadable: {error}"})
+            continue
+        rows.append({"candidates": scored, "verdict": "decided", "field": winner["field"]})
+    return {"loops": loops, "curves": rows}
+
+
+def sample_trimmed_patches(
+    model: Any,
+    spacing: float = 1.0 / DEFAULT_SAMPLES_PER_METRE,
+    max_axis: int = 400,
+) -> tuple[list[tuple[float, float, float]], dict[str, Any]]:
+    """Sample each trimmed patch *inside its own trim loops*.
+
+    Why this route exists: a workshop hull set can arrive with **every** basis surface
+    bound to a trimmed patch (KVLCC2: 19/19), and then an untrimmed sample grid describes
+    sheet the hull does not have -- the domains of that file are up to 6x larger than the
+    trimmed region and reach 7 m below the keel.  The half-breadth field is built from
+    ``max |y|`` per ``(x, z)`` cell, so that stray sheet is not averaged away, it *sets*
+    the breadth.  Sampling inside the loops removes it at the source.
+
+    Coverage is reported per patch (``kept``, ``grid``, ``domain_area_fraction``) so a
+    patch that lost its samples is visible instead of silently thin.
+    """
+    points: list[tuple[float, float, float]] = []
+    rows: list[dict[str, Any]] = []
+    for index, (wrapper, basis, curves) in enumerate(model.trimmed_surfaces()):
+        row: dict[str, Any] = {"patch": index, "surface_de": getattr(wrapper, "surface", None)}
+        if basis is None or not curves:
+            rows.append({**row, "verdict": "no_basis_or_no_curve", "kept": 0})
+            continue
+        decided = trim_loops_uv(model, basis, curves)
+        loops = decided["loops"]
+        if not loops:
+            rows.append({**row, "verdict": "undecided_trim_curves", "kept": 0, "curves": decided["curves"]})
+            continue
+        u0, u1 = basis.domain_u
+        v0, v1 = basis.domain_v
+        corner = basis.evaluate(u0, v0)
+        length_u = math.dist(corner, basis.evaluate(u1, v0))
+        length_v = math.dist(corner, basis.evaluate(u0, v1))
+        count_u = max(4, min(max_axis, int(math.ceil(length_u / max(spacing, 1e-9))) + 1))
+        count_v = max(4, min(max_axis, int(math.ceil(length_v / max(spacing, 1e-9))) + 1))
+        kept = 0
+        for i in range(count_u):
+            u = u0 + (u1 - u0) * i / (count_u - 1) if count_u > 1 else u0
+            for j in range(count_v):
+                v = v0 + (v1 - v0) * j / (count_v - 1) if count_v > 1 else v0
+                hits = sum(1 for loop in loops if point_in_polygon((u, v), loop))
+                if hits % 2 == 1:  # even-odd: inner loops are holes
+                    points.append(basis.evaluate(u, v))
+                    kept += 1
+        rows.append(
+            {
+                **row,
+                "verdict": "trimmed",
+                "loops": len(loops),
+                "grid": [count_u, count_v],
+                "kept": kept,
+                "domain_area_fraction": kept / float(count_u * count_v),
+            }
+        )
+    record = {
+        "schema": "tensorcad.fleet_baseline.trim_sampling.v1",
+        "patches": rows,
+        "patches_total": len(rows),
+        "patches_used": sum(1 for row in rows if row["verdict"] == "trimmed" and row["kept"]),
+        "samples": len(points),
+        "sampling_spacing_file_units": spacing,
+    }
+    return points, record
+
+
+def solid_from_points(
+    raw_points: Sequence[tuple[float, float, float]],
+    factor: float,
+    draft: float,
+    *,
+    dx: float = DEFAULT_DX,
+    dz: float = DEFAULT_DZ,
+    ring_points: int = DEFAULT_RING_POINTS,
+) -> dict[str, Any]:
+    """Scale, place, bin and mesh a point cloud of hull-sheet samples."""
+    points = [(x * factor, y * factor, z * factor) for x, y, z in raw_points]
+    z_min = min(z for _, _, z in points)
+    z_max = max(z for _, _, z in points)
+    frame_shift_z = 0.0
+    if z_min < -0.5 * draft and -0.05 * draft <= z_max <= 0.05 * draft:
+        # Waterline-at-origin file: the hull hangs below a plane at z = 0, so the *deepest*
+        # point is the keel and the shift that puts it at z = 0 is -z_min.  (Shifting by
+        # -z_max moved nothing: z_max is the waterline itself.)
+        frame_shift_z = -z_min
+        points = [(x, y, z + frame_shift_z) for x, y, z in points]
+    field = field_from_points(points, draft, dx=dx, dz=dz)
+    mesh, mesh_info = build_solid(field, ring_points=ring_points, draft=draft)
+    return {
+        "points": points,
+        "field": field,
+        "mesh": mesh,
+        "mesh_info": mesh_info,
+        "frame_shift_z": frame_shift_z,
+        "volume_m3": measure_mesh(mesh, draft)["volume_m3"],
+        "dz": dz,
+        "dx": dx,
+    }
+
+
+def partition_surfaces(
+    surfaces: Sequence[BSplineSurface],
+) -> tuple[list[BSplineSurface], list[dict[str, Any]]]:
+    """Split patches into ``(mesh_these, quarantined_with_reason)``.
+
+    A patch whose control-point layout is ambiguous (two candidate layouts within a
+    factor of four in control-net roughness) may be a mis-read net, so it is not meshed:
+    guessing would put a fictitious surface into the half-breadth field, and the field's
+    interior-hole fill already covers a small missing patch from its neighbours. The
+    census travels with the hull report so the deliverable never hides a hole.
+    """
+    usable: list[BSplineSurface] = []
+    quarantined: list[dict[str, Any]] = []
+    for index, surface in enumerate(surfaces):
+        if surface.layout_ambiguous:
+            quarantined.append(
+                {
+                    "patch_index": index,
+                    "layout_chosen": surface.layout,
+                    "reason": "ambiguous control-point layout (two candidates within 4x)",
+                }
+            )
+            continue
+        usable.append(surface)
+    return usable, quarantined
+
+
 # --------------------------------------------------------------------------- #
 # half-breadth field
 # --------------------------------------------------------------------------- #

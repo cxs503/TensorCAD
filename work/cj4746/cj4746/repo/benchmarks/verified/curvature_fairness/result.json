@@ -1,0 +1,1347 @@
+{
+  "all_gates_pass": true,
+  "campaign_node": "GAP-CAD-A3-CURVATURE-FAIRNESS",
+  "case": "curvature_fairness",
+  "cross_check": {
+    "cases": [
+      {
+        "case": "sphere",
+        "faces": 15584,
+        "gaussian_curvature_mesh_vs_field": {
+          "count": 40,
+          "max_relative": 0.8761178848713456,
+          "median_relative": 0.00048399059041639574,
+          "p95_relative": 0.6924581637751299
+        },
+        "gaussian_curvature_mesh_vs_normal_cycle": {
+          "count": 40,
+          "max_relative": 0.785701991494563,
+          "median_relative": 0.07499731572393664,
+          "p95_relative": 0.7001507184889313
+        },
+        "geometry": "unit sphere: marching tets, taubin_smooth(10), project_to_field(2)",
+        "mean_curvature_mesh_vs_field": {
+          "count": 40,
+          "max_relative": 1.068647739873749,
+          "median_relative": 0.015806845271172203,
+          "p95_relative": 1.0491251440788691
+        },
+        "mean_curvature_mesh_vs_normal_cycle": {
+          "count": 40,
+          "max_relative": 0.8013632629407912,
+          "median_relative": 0.0435234665217507,
+          "p95_relative": 0.5751504924365353
+        },
+        "normal_cycle_total_gaussian_measure": 12.566370614357345,
+        "normal_cycle_total_mean_measure": 34.41101559435697,
+        "probe_points": 40,
+        "probe_radius": 0.09245199959727632,
+        "reference": "normal_cycle(cohen_steiner_morvan)",
+        "samples": [
+          {
+            "gaussian_curvature_exact_field": 0.9999999129146415,
+            "gaussian_curvature_normal_cycle": 0.9751823274256468,
+            "gaussian_curvature_tensorcad": 1.0001929029817371,
+            "mean_curvature_exact_field": 0.9999999564573199,
+            "mean_curvature_normal_cycle": 0.9893930631165908,
+            "mean_curvature_tensorcad": 1.0036266990297258,
+            "point": [
+              -0.9491316680318371,
+              -0.261127805146437,
+              -0.17595836473014762
+            ],
+            "vertex": 0
+          },
+          {
+            "gaussian_curvature_exact_field": 0.9999999446992595,
+            "gaussian_curvature_normal_cycle": 0.981536555251993,
+            "gaussian_curvature_tensorcad": 1.0003943766180923,
+            "mean_curvature_exact_field": 0.9999999723496297,
+            "mean_curvature_normal_cycle": 1.0326281368036971,
+            "mean_curvature_tensorcad": 1.0138938783232467,
+            "point": [
+              -0.8791030922904882,
+              -0.4551177884403976,
+              0.14158231446870057
+            ],
+            "vertex": 194
+          },
+          {
+            "gaussian_curvature_exact_field": 0.9999999225838221,
+            "gaussian_curvature_normal_cycle": 1.004266977608054,
+            "gaussian_curvature_tensorcad": 1.000390986358193,
+            "mean_curvature_exact_field": 0.9999999612919104,
+            "mean_curvature_normal_cycle": 0.9987496059359878,
+            "mean_curvature_tensorcad": 0.9974770255206633,
+            "point": [
+              -0.9301241987439804,
+              0.11498962196794002,
+              -0.34877838486693924
+            ],
+            "vertex": 388
+          },
+          {
+            "gaussian_curvature_exact_field": 0.9999999552855366,
+            "gaussian_curvature_normal_cycle": 0.9943162470893409,
+            "gaussian_curvature_tensorcad": 0.9954364848260241,
+            "mean_curvature_exact_field": 0.9999999776427684,
+            "mean_curvature_normal_cycle": 1.093125492315536,
+            "mean_curvature_tensorcad": 1.0106328074497575,
+            "point": [
+              -0.8499896097260139,
+              -0.49178903012326525,
+              0.188841767647409
+            ],
+            "vertex": 582
+          },
+          {
+            "gaussian_curvature_exact_field": 0.999999967573955,
+            "gaussian_curvature_normal_cycle": 1.1263759573710133,
+            "gaussian_curvature_tensorcad": 0.8042331278594861,
+            "mean_curvature_exact_field": 0.9999999837869775,
+            "mean_curvature_normal_cycle": 1.5367447322298122,
+            "mean_curvature_tensorcad": 0.6648707330378054,
+            "point": [
+              -0.8231739375728445,
+              0.3562548638334502,
+              0.4421166593736313
+            ],
+            "vertex": 776
+          }
+        ],
+        "vertices": 7794
+      },
+      {
+        "case": "ellipsoid",
+        "faces": 15584,
+        "gaussian_curvature_mesh_vs_field": {
+          "count": 40,
+          "max_relative": 5.356273754916545,
+          "median_relative": 0.2242820063341572,
+          "p95_relative": 1.6348137938805454
+        },
+        "gaussian_curvature_mesh_vs_normal_cycle": {
+          "count": 40,
+          "max_relative": 4.396360835894757,
+          "median_relative": 0.2258288450611123,
+          "p95_relative": 1.3652204832874806
+        },
+        "geometry": "ellipsoid a=1.0 b=0.6 c=0.5, conditioned the same way",
+        "mean_curvature_mesh_vs_field": {
+          "count": 40,
+          "max_relative": 2.0010271867454295,
+          "median_relative": 0.12832572501284903,
+          "p95_relative": 1.3514600359253133
+        },
+        "mean_curvature_mesh_vs_normal_cycle": {
+          "count": 40,
+          "max_relative": 1.0128078770942601,
+          "median_relative": 0.08007850833481239,
+          "p95_relative": 0.7213530165686386
+        },
+        "normal_cycle_total_gaussian_measure": 12.56637061435723,
+        "normal_cycle_total_mean_measure": 27.115303300218763,
+        "probe_points": 40,
+        "probe_radius": 0.06663117710669152,
+        "reference": "normal_cycle(cohen_steiner_morvan)",
+        "samples": [
+          {
+            "gaussian_curvature_exact_field": 7.539363851203729,
+            "gaussian_curvature_normal_cycle": 7.716165306396212,
+            "gaussian_curvature_tensorcad": 7.72325209299272,
+            "mean_curvature_exact_field": 2.8111615282055418,
+            "mean_curvature_normal_cycle": 2.730853640089849,
+            "mean_curvature_tensorcad": 2.835031308980812,
+            "point": [
+              -0.9491627305853865,
+              -0.15664167109530103,
+              -0.08794392222448225
+            ],
+            "vertex": 0
+          },
+          {
+            "gaussian_curvature_exact_field": 5.442163108952268,
+            "gaussian_curvature_normal_cycle": 5.731513861826505,
+            "gaussian_curvature_tensorcad": 5.443531272622802,
+            "mean_curvature_exact_field": 2.4647568732713934,
+            "mean_curvature_normal_cycle": 2.335793808086354,
+            "mean_curvature_tensorcad": 2.4860422876266144,
+            "point": [
+              -0.8789289175118382,
+              -0.27321453572664756,
+              0.07086423554358719
+            ],
+            "vertex": 194
+          },
+          {
+            "gaussian_curvature_exact_field": 5.75981750068142,
+            "gaussian_curvature_normal_cycle": 6.131764540146828,
+            "gaussian_curvature_tensorcad": 5.7569296808344905,
+            "mean_curvature_exact_field": 2.4091352463707367,
+            "mean_curvature_normal_cycle": 2.441556448176604,
+            "mean_curvature_tensorcad": 2.400885004595991,
+            "point": [
+              -0.9300260032724792,
+              0.06901637970896383,
+              -0.17449814208730363
+            ],
+            "vertex": 388
+          },
+          {
+            "gaussian_curvature_exact_field": 4.701788291092004,
+            "gaussian_curvature_normal_cycle": 4.656117405538765,
+            "gaussian_curvature_tensorcad": 4.847121262581272,
+            "mean_curvature_exact_field": 2.3074490913198833,
+            "mean_curvature_normal_cycle": 2.3034317600236305,
+            "mean_curvature_tensorcad": 2.344680347058811,
+            "point": [
+              -0.8498758294252908,
+              -0.2951449592569943,
+              0.09446918496286795
+            ],
+            "vertex": 582
+          },
+          {
+            "gaussian_curvature_exact_field": 3.380609413487569,
+            "gaussian_curvature_normal_cycle": 3.3317414049293905,
+            "gaussian_curvature_tensorcad": 2.150625713184818,
+            "mean_curvature_exact_field": 1.907379518007048,
+            "mean_curvature_normal_cycle": 3.821465995488942,
+            "mean_curvature_tensorcad": 1.0747343327324304,
+            "point": [
+              -0.8228667571814601,
+              0.21380831265762348,
+              0.2212086036949924
+            ],
+            "vertex": 776
+          }
+        ],
+        "vertices": 7794
+      },
+      {
+        "case": "wigley_flank",
+        "faces": 2242,
+        "gaussian_curvature_mesh_vs_field": {
+          "count": 0,
+          "max_relative": null,
+          "median_relative": null,
+          "p95_relative": null
+        },
+        "gaussian_curvature_mesh_vs_normal_cycle": {
+          "count": 40,
+          "max_relative": 1.8403324465890243,
+          "median_relative": 0.9987303654020186,
+          "p95_relative": 1.0041553249388013
+        },
+        "geometry": "Wigley starboard flank patch L=10 B=1 T=0.625 on 60x20 grid (open patch: no crease, no cap)",
+        "integral": {
+          "measured": {
+            "area": 6.427099825449231,
+            "bending": 9.382537021143113,
+            "gaussian": 0.02676311515419509,
+            "willmore": 2.3590158128628755
+          },
+          "reference": {
+            "area": 7.439531552478888,
+            "bending": 10.768938662523052,
+            "gaussian": 3.3455886790694836e-17,
+            "quadrature_relative_change": 9.89711369932197e-16,
+            "willmore": 2.692234665630763
+          },
+          "relative_difference": {
+            "area": -0.13608810176929886,
+            "bending": -0.12874078726112081,
+            "willmore": -0.1237703596279256
+          }
+        },
+        "mean_curvature_mesh_vs_field": {
+          "count": 0,
+          "max_relative": null,
+          "median_relative": null,
+          "p95_relative": null
+        },
+        "mean_curvature_mesh_vs_normal_cycle": {
+          "count": 40,
+          "max_relative": 1.411684601247184,
+          "median_relative": 0.39998180088484914,
+          "p95_relative": 1.3209495597752114
+        },
+        "normal_cycle_total_gaussian_measure": 496.37163926718733,
+        "normal_cycle_total_mean_measure": 13.026927519479132,
+        "probe_points": 40,
+        "probe_radius": 0.25585321656162785,
+        "reference": "normal_cycle(cohen_steiner_morvan)",
+        "samples": [
+          {
+            "gaussian_curvature_exact_field": NaN,
+            "gaussian_curvature_normal_cycle": 145.11885713067318,
+            "gaussian_curvature_tensorcad": 0.005128534898053438,
+            "mean_curvature_exact_field": NaN,
+            "mean_curvature_normal_cycle": 0.36356759820970214,
+            "mean_curvature_tensorcad": 0.10270266398292277,
+            "point": [
+              0.1694915254237288,
+              0.0332314479632608,
+              -0.03289473684210526
+            ],
+            "vertex": 21
+          },
+          {
+            "gaussian_curvature_exact_field": NaN,
+            "gaussian_curvature_normal_cycle": -0.07960702337131927,
+            "gaussian_curvature_tensorcad": -0.06521577707026474,
+            "mean_curvature_exact_field": NaN,
+            "mean_curvature_normal_cycle": 1.3221434903720617,
+            "mean_curvature_tensorcad": 0.18235796593704529,
+            "point": [
+              0.3389830508474576,
+              0.05080209861050214,
+              -0.29605263157894735
+            ],
+            "vertex": 49
+          },
+          {
+            "gaussian_curvature_exact_field": NaN,
+            "gaussian_curvature_normal_cycle": 45.70857814582992,
+            "gaussian_curvature_tensorcad": -0.22344834864375338,
+            "mean_curvature_exact_field": NaN,
+            "mean_curvature_normal_cycle": 1.4059997115658056,
+            "mean_curvature_tensorcad": 0.22915405490160837,
+            "point": [
+              0.5084745762711864,
+              0.019251321578716583,
+              -0.5592105263157895
+            ],
+            "vertex": 77
+          },
+          {
+            "gaussian_curvature_exact_field": NaN,
+            "gaussian_curvature_normal_cycle": 15.256779343076708,
+            "gaussian_curvature_tensorcad": -0.00971662139515164,
+            "mean_curvature_exact_field": NaN,
+            "mean_curvature_normal_cycle": 1.0765608058188865,
+            "mean_curvature_tensorcad": 0.39558529555860156,
+            "point": [
+              0.847457627118644,
+              0.13407170385177627,
+              -0.23026315789473684
+            ],
+            "vertex": 107
+          },
+          {
+            "gaussian_curvature_exact_field": NaN,
+            "gaussian_curvature_normal_cycle": 45.750298473630586,
+            "gaussian_curvature_tensorcad": -0.0995498189185197,
+            "mean_curvature_exact_field": NaN,
+            "mean_curvature_normal_cycle": 1.3479124176576731,
+            "mean_curvature_tensorcad": 0.36446567663621027,
+            "point": [
+              1.0169491525423728,
+              0.06883111405723671,
+              -0.4934210526315789
+            ],
+            "vertex": 135
+          }
+        ],
+        "vertices": 1200
+      }
+    ],
+    "provenance": {
+      "attempts": [
+        "python -c 'import meshmagick' -> ModuleNotFoundError (2026-11-13)",
+        "pip download meshmagick --no-deps -> no versions on the internal index (lpypi.loongnix.cn), ties to 2026-11-13",
+        "git clone / pip git+https://github.com/... -> egress blocked by the sandbox network policy (curl and git+https both refused)"
+      ],
+      "requested_tool": "meshmagick",
+      "status": "meshmagick comparison WITHHELD; three-case comparison executed against trimesh + closed forms instead",
+      "substitute": "trimesh.curvature (normal-cycle measures, Cohen-Steiner & Morvan)"
+    },
+    "rows": [
+      {
+        "error": 0.015806845271172203,
+        "error_percent": null,
+        "gate": "G7",
+        "holds": true,
+        "measured": 0.015806845271172203,
+        "note": "p95 104.91%; estimator vs exact operator",
+        "quantity": "sphere: median |mean curvature H - exact| / |exact| over 40 probes",
+        "reference": 0.0,
+        "reference_source": "exact analytic field on the same probe points",
+        "tolerance": 0.15,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      },
+      {
+        "error": 0.00048399059041639574,
+        "error_percent": null,
+        "gate": "G7",
+        "holds": true,
+        "measured": 0.00048399059041639574,
+        "note": "p95 69.25%; estimator vs exact operator",
+        "quantity": "sphere: median |Gaussian curvature K - exact| / |exact| over 40 probes",
+        "reference": 0.0,
+        "reference_source": "exact analytic field on the same probe points",
+        "tolerance": 0.15,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      },
+      {
+        "error": 0.12832572501284903,
+        "error_percent": null,
+        "gate": "G7",
+        "holds": true,
+        "measured": 0.12832572501284903,
+        "note": "p95 135.15%; estimator vs exact operator",
+        "quantity": "ellipsoid: median |mean curvature H - exact| / |exact| over 40 probes",
+        "reference": 0.0,
+        "reference_source": "exact analytic field on the same probe points",
+        "tolerance": 0.15,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      },
+      {
+        "error": 0.2242820063341572,
+        "error_percent": null,
+        "gate": "G7",
+        "holds": false,
+        "measured": 0.2242820063341572,
+        "note": "p95 163.48%; estimator vs exact operator",
+        "quantity": "ellipsoid: median |Gaussian curvature K - exact| / |exact| over 40 probes",
+        "reference": 0.0,
+        "reference_source": "exact analytic field on the same probe points",
+        "tolerance": 0.15,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      },
+      {
+        "error": -0.12874078726112081,
+        "error_percent": -12.874078726112081,
+        "gate": "G7",
+        "holds": true,
+        "measured": 9.382537021143113,
+        "note": "mesh 2242 faces",
+        "quantity": "wigley_flank: E_bending integral vs analytic flank half",
+        "reference": 10.768938662523052,
+        "reference_source": "analytic_flank_energy / 2 (one flank)",
+        "tolerance": 0.15,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": -0.13608810176929886,
+        "error_percent": -13.608810176929886,
+        "gate": "G7",
+        "holds": true,
+        "measured": 6.427099825449231,
+        "note": "mesh 2242 faces",
+        "quantity": "wigley_flank: wetted area vs analytic flank half",
+        "reference": 7.439531552478888,
+        "reference_source": "analytic_flank_energy / 2 (one flank)",
+        "tolerance": 0.15,
+        "tolerance_kind": "relative",
+        "unit": "m^2"
+      }
+    ],
+    "three_case_agreement": {
+      "ellipsoid": {
+        "H_mesh_vs_field_median": 0.12832572501284903,
+        "H_vs_normal_cycle_median": 0.08007850833481239,
+        "K_mesh_vs_field_median": 0.2242820063341572,
+        "K_vs_normal_cycle_median": 0.2258288450611123,
+        "reference": "normal_cycle(cohen_steiner_morvan)"
+      },
+      "sphere": {
+        "H_mesh_vs_field_median": 0.015806845271172203,
+        "H_vs_normal_cycle_median": 0.0435234665217507,
+        "K_mesh_vs_field_median": 0.00048399059041639574,
+        "K_vs_normal_cycle_median": 0.07499731572393664,
+        "reference": "normal_cycle(cohen_steiner_morvan)"
+      },
+      "wigley_flank": {
+        "H_mesh_vs_field_median": null,
+        "H_vs_normal_cycle_median": 0.39998180088484914,
+        "K_mesh_vs_field_median": null,
+        "K_vs_normal_cycle_median": 0.9987303654020186,
+        "reference": "normal_cycle(cohen_steiner_morvan)"
+      }
+    }
+  },
+  "diagnostic_failing": [
+    "ellipsoid: median |Gaussian curvature K - exact| / |exact| over 40 probes"
+  ],
+  "diagnostics": {
+    "G7": {
+      "criterion": "three-case cross-check vs exact field / analytic flank",
+      "failing": [
+        "ellipsoid: median |Gaussian curvature K - exact| / |exact| over 40 probes"
+      ],
+      "rows": [
+        {
+          "error": 0.015806845271172203,
+          "error_percent": null,
+          "gate": "G7",
+          "holds": true,
+          "measured": 0.015806845271172203,
+          "note": "p95 104.91%; estimator vs exact operator",
+          "quantity": "sphere: median |mean curvature H - exact| / |exact| over 40 probes",
+          "reference": 0.0,
+          "reference_source": "exact analytic field on the same probe points",
+          "tolerance": 0.15,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        },
+        {
+          "error": 0.00048399059041639574,
+          "error_percent": null,
+          "gate": "G7",
+          "holds": true,
+          "measured": 0.00048399059041639574,
+          "note": "p95 69.25%; estimator vs exact operator",
+          "quantity": "sphere: median |Gaussian curvature K - exact| / |exact| over 40 probes",
+          "reference": 0.0,
+          "reference_source": "exact analytic field on the same probe points",
+          "tolerance": 0.15,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        },
+        {
+          "error": 0.12832572501284903,
+          "error_percent": null,
+          "gate": "G7",
+          "holds": true,
+          "measured": 0.12832572501284903,
+          "note": "p95 135.15%; estimator vs exact operator",
+          "quantity": "ellipsoid: median |mean curvature H - exact| / |exact| over 40 probes",
+          "reference": 0.0,
+          "reference_source": "exact analytic field on the same probe points",
+          "tolerance": 0.15,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        },
+        {
+          "error": 0.2242820063341572,
+          "error_percent": null,
+          "gate": "G7",
+          "holds": false,
+          "measured": 0.2242820063341572,
+          "note": "p95 163.48%; estimator vs exact operator",
+          "quantity": "ellipsoid: median |Gaussian curvature K - exact| / |exact| over 40 probes",
+          "reference": 0.0,
+          "reference_source": "exact analytic field on the same probe points",
+          "tolerance": 0.15,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        },
+        {
+          "error": -0.12874078726112081,
+          "error_percent": -12.874078726112081,
+          "gate": "G7",
+          "holds": true,
+          "measured": 9.382537021143113,
+          "note": "mesh 2242 faces",
+          "quantity": "wigley_flank: E_bending integral vs analytic flank half",
+          "reference": 10.768938662523052,
+          "reference_source": "analytic_flank_energy / 2 (one flank)",
+          "tolerance": 0.15,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": -0.13608810176929886,
+          "error_percent": -13.608810176929886,
+          "gate": "G7",
+          "holds": true,
+          "measured": 6.427099825449231,
+          "note": "mesh 2242 faces",
+          "quantity": "wigley_flank: wetted area vs analytic flank half",
+          "reference": 7.439531552478888,
+          "reference_source": "analytic_flank_energy / 2 (one flank)",
+          "tolerance": 0.15,
+          "tolerance_kind": "relative",
+          "unit": "m^2"
+        }
+      ],
+      "scope": "diagnostic only: mesh-path pointwise estimates against the exact analytic field, resolution limited; meshmagick requested by the acceptance clause is not obtainable in this environment",
+      "verdict": "fail"
+    }
+  },
+  "environment": {
+    "machine": "loongarch64",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "python": "3.11.6"
+  },
+  "figure": "benchmarks/verified/curvature_fairness/figures/curvature_fairness.png",
+  "gates": {
+    "G1 sphere principal curvature == 1/R (A3 clause, 1e-6 1/m)": {
+      "criterion": "G1 sphere principal curvature == 1/R (A3 clause, 1e-6 1/m)",
+      "failing": [],
+      "rows": [
+        {
+          "error": 3.8546943414985435e-13,
+          "error_percent": 3.8546943414985435e-12,
+          "gate": "G1",
+          "holds": true,
+          "measured": 10.000000000000385,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=0.1",
+          "reference": 10.0,
+          "reference_source": "closed form 1/R = 10 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        },
+        {
+          "error": 3.588240815588506e-13,
+          "error_percent": 8.970602038971265e-12,
+          "gate": "G1",
+          "holds": true,
+          "measured": 4.000000000000359,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=0.25",
+          "reference": 4.0,
+          "reference_source": "closed form 1/R = 4 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        },
+        {
+          "error": 1.794120407794253e-13,
+          "error_percent": 8.970602038971265e-12,
+          "gate": "G1",
+          "holds": true,
+          "measured": 2.0000000000001794,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=0.5",
+          "reference": 2.0,
+          "reference_source": "closed form 1/R = 2 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        },
+        {
+          "error": 8.970602038971265e-14,
+          "error_percent": 8.970602038971265e-12,
+          "gate": "G1",
+          "holds": true,
+          "measured": 1.0000000000000897,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=1",
+          "reference": 1.0,
+          "reference_source": "closed form 1/R = 1 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        },
+        {
+          "error": 4.4853010194856324e-14,
+          "error_percent": 8.970602038971265e-12,
+          "gate": "G1",
+          "holds": true,
+          "measured": 0.5000000000000449,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=2",
+          "reference": 0.5,
+          "reference_source": "closed form 1/R = 0.5 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        },
+        {
+          "error": -2.5479618415147343e-14,
+          "error_percent": -1.2739809207573671e-11,
+          "gate": "G1",
+          "holds": true,
+          "measured": 0.19999999999997453,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=5",
+          "reference": 0.2,
+          "reference_source": "closed form 1/R = 0.2 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        },
+        {
+          "error": -1.2739809207573671e-14,
+          "error_percent": -1.2739809207573671e-11,
+          "gate": "G1",
+          "holds": true,
+          "measured": 0.09999999999998727,
+          "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+          "quantity": "principal curvature k of a sphere R=10",
+          "reference": 0.1,
+          "reference_source": "closed form 1/R = 0.1 1/m",
+          "tolerance": 1e-06,
+          "tolerance_kind": "absolute",
+          "unit": "1/m"
+        }
+      ],
+      "verdict": "pass"
+    },
+    "G2 sphere energies, field path (0.1 %)": {
+      "criterion": "G2 sphere energies, field path (0.1 %)",
+      "failing": [],
+      "rows": [
+        {
+          "error": 0.0009371054480802332,
+          "error_percent": 0.09371054480802332,
+          "gate": "G2",
+          "holds": true,
+          "measured": 25.156293257448965,
+          "note": "quadrature of the analytic surface at level 24",
+          "quantity": "sphere E_bending (field path, level 24)",
+          "reference": 25.132741228718345,
+          "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+          "tolerance": 0.001,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": 0.0009371054480795671,
+          "error_percent": 0.09371054480795671,
+          "gate": "G2",
+          "holds": true,
+          "measured": 12.578146628724475,
+          "note": "quadrature of the analytic surface at level 24",
+          "quantity": "sphere E_willmore (field path, level 24)",
+          "reference": 12.566370614359172,
+          "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+          "tolerance": 0.001,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": 0.000937105448078901,
+          "error_percent": 0.0937105448078901,
+          "gate": "G2",
+          "holds": true,
+          "measured": 12.578146628724468,
+          "note": "quadrature of the analytic surface at level 24",
+          "quantity": "sphere E_gaussian (field path, level 24)",
+          "reference": 12.566370614359172,
+          "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+          "tolerance": 0.001,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        }
+      ],
+      "verdict": "pass"
+    },
+    "G3 sphere energies, mesh path (6 %)": {
+      "criterion": "G3 sphere energies, mesh path (6 %)",
+      "failing": [],
+      "rows": [
+        {
+          "error": 0.057330930085483844,
+          "error_percent": 5.733093008548384,
+          "gate": "G3",
+          "holds": true,
+          "measured": 26.573624658958554,
+          "note": "cotangent Laplacian + angle defect on a marching-tet mesh",
+          "quantity": "sphere E_bending (conditioned mesh path, level 32)",
+          "reference": 25.132741228718345,
+          "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+          "tolerance": 0.06,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": 0.015658899662782444,
+          "error_percent": 1.5658899662782444,
+          "gate": "G3",
+          "holds": true,
+          "measured": 12.76314615093476,
+          "note": "cotangent Laplacian + angle defect on a marching-tet mesh",
+          "quantity": "sphere E_willmore (conditioned mesh path, level 32)",
+          "reference": 12.566370614359172,
+          "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+          "tolerance": 0.06,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": -0.026013130759918957,
+          "error_percent": -2.6013130759918957,
+          "gate": "G3",
+          "holds": true,
+          "measured": 12.239479972390244,
+          "note": "cotangent Laplacian + angle defect on a marching-tet mesh",
+          "quantity": "sphere E_gaussian (conditioned mesh path, level 32)",
+          "reference": 12.566370614359172,
+          "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+          "tolerance": 0.06,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        }
+      ],
+      "verdict": "pass"
+    },
+    "G4 Wigley integrals vs analytic flank (15 %)": {
+      "criterion": "G4 Wigley integrals vs analytic flank (15 %)",
+      "failing": [],
+      "rows": [
+        {
+          "error": -0.06745970483773023,
+          "error_percent": -6.745970483773023,
+          "gate": "G4",
+          "holds": true,
+          "measured": 20.08493847786725,
+          "note": "resolution limited; the convergence series below is the honest view",
+          "quantity": "Wigley smooth E_bending at 121x37",
+          "reference": 21.537877325046104,
+          "reference_source": "analytic_flank_energy (Gauss-Legendre, order doubled internally)",
+          "tolerance": 0.15,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": -0.06466171690499678,
+          "error_percent": -6.466171690499678,
+          "gate": "G4",
+          "holds": true,
+          "measured": 5.036300299679856,
+          "note": "",
+          "quantity": "Wigley smooth E_willmore at 121x37",
+          "reference": 5.384469331261526,
+          "reference_source": "analytic_flank_energy",
+          "tolerance": 0.15,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        }
+      ],
+      "verdict": "pass"
+    },
+    "G5 Wigley reference self-check + Richardson (0.5 %)": {
+      "criterion": "G5 Wigley reference self-check + Richardson (0.5 %)",
+      "failing": [],
+      "rows": [
+        {
+          "error": 0.0005772384124282937,
+          "error_percent": 0.057723841242829366,
+          "gate": "G5",
+          "holds": true,
+          "measured": 21.55030981516029,
+          "note": "Lagrange in h through the three finest resolutions",
+          "quantity": "Wigley Richardson-extrapolated E_bending vs analytic flank",
+          "reference": 21.537877325046104,
+          "reference_source": "analytic_flank_energy",
+          "tolerance": 0.005,
+          "tolerance_kind": "relative",
+          "unit": "-"
+        },
+        {
+          "error": 9.89711369932197e-16,
+          "error_percent": null,
+          "gate": "G5",
+          "holds": true,
+          "measured": 9.89711369932197e-16,
+          "note": "the reference carries its own error bar",
+          "quantity": "Wigley analytic area vs its own order-doubled quadrature",
+          "reference": 0.0,
+          "reference_source": "relative change of the reference under 2x order",
+          "tolerance": 1e-12,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        }
+      ],
+      "verdict": "pass"
+    },
+    "G6 invariance of E_bending (1e-12)": {
+      "criterion": "G6 invariance of E_bending (1e-12)",
+      "failing": [],
+      "rows": [
+        {
+          "error": 0.0,
+          "error_percent": null,
+          "gate": "G6",
+          "holds": true,
+          "measured": 0.0,
+          "note": "",
+          "quantity": "E_bending under uniform scaling (L, B, T doubled)",
+          "reference": 0.0,
+          "reference_source": "dimensionless energy: exactly invariant",
+          "tolerance": 1e-10,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        },
+        {
+          "error": 2.2737367544323206e-13,
+          "error_percent": null,
+          "gate": "G6",
+          "holds": true,
+          "measured": 2.2737367544323206e-13,
+          "note": "",
+          "quantity": "E_bending under cell reordering",
+          "reference": 0.0,
+          "reference_source": "math.fsum is exactly rounded: order independent",
+          "tolerance": 1e-10,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        },
+        {
+          "error": 1.1368683772161603e-11,
+          "error_percent": null,
+          "gate": "G6",
+          "holds": true,
+          "measured": 1.1368683772161603e-11,
+          "note": "the hard one: cotangent weights are coordinate differences",
+          "quantity": "E_bending under translation by ~1.6 km",
+          "reference": 0.0,
+          "reference_source": "translation invariance of the differential geometry",
+          "tolerance": 1e-10,
+          "tolerance_kind": "absolute",
+          "unit": "-"
+        }
+      ],
+      "verdict": "pass"
+    }
+  },
+  "invariance": {
+    "area_ratio_under_scaling": 4.0,
+    "base_energy": 458.69707004257657,
+    "rows": [
+      {
+        "error": 0.0,
+        "error_percent": null,
+        "gate": "G6",
+        "holds": true,
+        "measured": 0.0,
+        "note": "",
+        "quantity": "E_bending under uniform scaling (L, B, T doubled)",
+        "reference": 0.0,
+        "reference_source": "dimensionless energy: exactly invariant",
+        "tolerance": 1e-10,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      },
+      {
+        "error": 2.2737367544323206e-13,
+        "error_percent": null,
+        "gate": "G6",
+        "holds": true,
+        "measured": 2.2737367544323206e-13,
+        "note": "",
+        "quantity": "E_bending under cell reordering",
+        "reference": 0.0,
+        "reference_source": "math.fsum is exactly rounded: order independent",
+        "tolerance": 1e-10,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      },
+      {
+        "error": 1.1368683772161603e-11,
+        "error_percent": null,
+        "gate": "G6",
+        "holds": true,
+        "measured": 1.1368683772161603e-11,
+        "note": "the hard one: cotangent weights are coordinate differences",
+        "quantity": "E_bending under translation by ~1.6 km",
+        "reference": 0.0,
+        "reference_source": "translation invariance of the differential geometry",
+        "tolerance": 1e-10,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      }
+    ]
+  },
+  "provenance": {
+    "branch": "agent/m17465",
+    "commit": "c6141004a748ca99bc4b77557c020fea9d35103d",
+    "module_sha256": "b5582bfd48192c5e7d5bb7dd6235f321eb0f2ee46cb2cfac07d064cc1b2c66e4",
+    "script_sha256": "109ef25fe58c5c4cea4784005194464a2ef7a3e35d2bc7937b11ed5b825938b9",
+    "sources_dirty": "no",
+    "tensorcad_version": "0.23.0"
+  },
+  "schema": "tensorcad.fairness.benchmark/1",
+  "settings": {
+    "curvature_tolerance": 1e-06,
+    "invariance_tolerance": 1e-10,
+    "mesh_path_tolerance": 0.06,
+    "probes": 256,
+    "richardson_tolerance": 0.005,
+    "sphere_energy_tolerance": 0.001,
+    "sphere_level": 24,
+    "standard_tolerance": 0.15,
+    "wigley_resolutions": [
+      [
+        21,
+        7
+      ],
+      [
+        41,
+        13
+      ],
+      [
+        81,
+        25
+      ],
+      [
+        121,
+        37
+      ]
+    ]
+  },
+  "sphere": {
+    "convergence": [
+      {
+        "bending_relative_error": 0.00399372518753216,
+        "faces": 3680,
+        "level": 12
+      },
+      {
+        "bending_relative_error": 0.0021615649872568365,
+        "faces": 6656,
+        "level": 16
+      },
+      {
+        "bending_relative_error": 0.0009371054480802332,
+        "faces": 15584,
+        "level": 24
+      },
+      {
+        "bending_relative_error": 0.0005300029463126688,
+        "faces": 28032,
+        "level": 32
+      }
+    ],
+    "rows": [
+      {
+        "error": 3.8546943414985435e-13,
+        "error_percent": 3.8546943414985435e-12,
+        "gate": "G1",
+        "holds": true,
+        "measured": 10.000000000000385,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=0.1",
+        "reference": 10.0,
+        "reference_source": "closed form 1/R = 10 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": 3.588240815588506e-13,
+        "error_percent": 8.970602038971265e-12,
+        "gate": "G1",
+        "holds": true,
+        "measured": 4.000000000000359,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=0.25",
+        "reference": 4.0,
+        "reference_source": "closed form 1/R = 4 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": 1.794120407794253e-13,
+        "error_percent": 8.970602038971265e-12,
+        "gate": "G1",
+        "holds": true,
+        "measured": 2.0000000000001794,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=0.5",
+        "reference": 2.0,
+        "reference_source": "closed form 1/R = 2 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": 8.970602038971265e-14,
+        "error_percent": 8.970602038971265e-12,
+        "gate": "G1",
+        "holds": true,
+        "measured": 1.0000000000000897,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=1",
+        "reference": 1.0,
+        "reference_source": "closed form 1/R = 1 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": 4.4853010194856324e-14,
+        "error_percent": 8.970602038971265e-12,
+        "gate": "G1",
+        "holds": true,
+        "measured": 0.5000000000000449,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=2",
+        "reference": 0.5,
+        "reference_source": "closed form 1/R = 0.5 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": -2.5479618415147343e-14,
+        "error_percent": -1.2739809207573671e-11,
+        "gate": "G1",
+        "holds": true,
+        "measured": 0.19999999999997453,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=5",
+        "reference": 0.2,
+        "reference_source": "closed form 1/R = 0.2 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": -1.2739809207573671e-14,
+        "error_percent": -1.2739809207573671e-11,
+        "gate": "G1",
+        "holds": true,
+        "measured": 0.09999999999998727,
+        "note": "262 deterministic probes; |k - 1/R| is the A3 clause",
+        "quantity": "principal curvature k of a sphere R=10",
+        "reference": 0.1,
+        "reference_source": "closed form 1/R = 0.1 1/m",
+        "tolerance": 1e-06,
+        "tolerance_kind": "absolute",
+        "unit": "1/m"
+      },
+      {
+        "error": 0.0009371054480802332,
+        "error_percent": 0.09371054480802332,
+        "gate": "G2",
+        "holds": true,
+        "measured": 25.156293257448965,
+        "note": "quadrature of the analytic surface at level 24",
+        "quantity": "sphere E_bending (field path, level 24)",
+        "reference": 25.132741228718345,
+        "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+        "tolerance": 0.001,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": 0.0009371054480795671,
+        "error_percent": 0.09371054480795671,
+        "gate": "G2",
+        "holds": true,
+        "measured": 12.578146628724475,
+        "note": "quadrature of the analytic surface at level 24",
+        "quantity": "sphere E_willmore (field path, level 24)",
+        "reference": 12.566370614359172,
+        "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+        "tolerance": 0.001,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": 0.000937105448078901,
+        "error_percent": 0.0937105448078901,
+        "gate": "G2",
+        "holds": true,
+        "measured": 12.578146628724468,
+        "note": "quadrature of the analytic surface at level 24",
+        "quantity": "sphere E_gaussian (field path, level 24)",
+        "reference": 12.566370614359172,
+        "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+        "tolerance": 0.001,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": 0.057330930085483844,
+        "error_percent": 5.733093008548384,
+        "gate": "G3",
+        "holds": true,
+        "measured": 26.573624658958554,
+        "note": "cotangent Laplacian + angle defect on a marching-tet mesh",
+        "quantity": "sphere E_bending (conditioned mesh path, level 32)",
+        "reference": 25.132741228718345,
+        "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+        "tolerance": 0.06,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": 0.015658899662782444,
+        "error_percent": 1.5658899662782444,
+        "gate": "G3",
+        "holds": true,
+        "measured": 12.76314615093476,
+        "note": "cotangent Laplacian + angle defect on a marching-tet mesh",
+        "quantity": "sphere E_willmore (conditioned mesh path, level 32)",
+        "reference": 12.566370614359172,
+        "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+        "tolerance": 0.06,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": -0.026013130759918957,
+        "error_percent": -2.6013130759918957,
+        "gate": "G3",
+        "holds": true,
+        "measured": 12.239479972390244,
+        "note": "cotangent Laplacian + angle defect on a marching-tet mesh",
+        "quantity": "sphere E_gaussian (conditioned mesh path, level 32)",
+        "reference": 12.566370614359172,
+        "reference_source": "closed form (8 pi / 4 pi / 4 pi)",
+        "tolerance": 0.06,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      }
+    ]
+  },
+  "wigley": {
+    "reference": {
+      "beam": 1.0,
+      "bending": 21.537877325046104,
+      "bending_per_unit_area": 1.4475291335964278,
+      "corner_charge": 12.566370614359172,
+      "draft": 0.625,
+      "gaussian": 6.691177358138967e-17,
+      "length": 10.0,
+      "longitudinal_exponent": 2.0,
+      "order": 64,
+      "panels": 4,
+      "quadrature_relative_change": 9.89711369932197e-16,
+      "schema": "tensorcad.wigley.flank_energy/1",
+      "units": {
+        "bending": "dimensionless",
+        "gaussian": "dimensionless",
+        "wetted_area": "m^2",
+        "willmore": "dimensionless"
+      },
+      "vertical_exponent": 2.0,
+      "wetted_area": 14.879063104957776,
+      "willmore": 5.384469331261526,
+      "willmore_inequality_slack": -7.1819012830976465
+    },
+    "richardson": {
+      "energies": [
+        17.1565288671672,
+        19.352544442206483,
+        20.08493847786725
+      ],
+      "extrapolated_bending": 21.55030981516029,
+      "extrapolated_relative_error": 0.0005772384124282937,
+      "hs": [
+        0.025,
+        0.0125,
+        0.008333333333333333
+      ]
+    },
+    "rows": [
+      {
+        "error": -0.06745970483773023,
+        "error_percent": -6.745970483773023,
+        "gate": "G4",
+        "holds": true,
+        "measured": 20.08493847786725,
+        "note": "resolution limited; the convergence series below is the honest view",
+        "quantity": "Wigley smooth E_bending at 121x37",
+        "reference": 21.537877325046104,
+        "reference_source": "analytic_flank_energy (Gauss-Legendre, order doubled internally)",
+        "tolerance": 0.15,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": -0.06466171690499678,
+        "error_percent": -6.466171690499678,
+        "gate": "G4",
+        "holds": true,
+        "measured": 5.036300299679856,
+        "note": "",
+        "quantity": "Wigley smooth E_willmore at 121x37",
+        "reference": 5.384469331261526,
+        "reference_source": "analytic_flank_energy",
+        "tolerance": 0.15,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": 0.0005772384124282937,
+        "error_percent": 0.057723841242829366,
+        "gate": "G5",
+        "holds": true,
+        "measured": 21.55030981516029,
+        "note": "Lagrange in h through the three finest resolutions",
+        "quantity": "Wigley Richardson-extrapolated E_bending vs analytic flank",
+        "reference": 21.537877325046104,
+        "reference_source": "analytic_flank_energy",
+        "tolerance": 0.005,
+        "tolerance_kind": "relative",
+        "unit": "-"
+      },
+      {
+        "error": 9.89711369932197e-16,
+        "error_percent": null,
+        "gate": "G5",
+        "holds": true,
+        "measured": 9.89711369932197e-16,
+        "note": "the reference carries its own error bar",
+        "quantity": "Wigley analytic area vs its own order-doubled quadrature",
+        "reference": 0.0,
+        "reference_source": "relative change of the reference under 2x order",
+        "tolerance": 1e-12,
+        "tolerance_kind": "absolute",
+        "unit": "-"
+      }
+    ],
+    "series": [
+      {
+        "condition": 1.0735339409917415,
+        "crease_area_fraction": 0.5858427790675909,
+        "crease_energy": 157.48410297877302,
+        "faces": 518,
+        "nonpositive_fraction": 0.015444015444015444,
+        "nx": 21,
+        "nz": 7,
+        "smooth_energy": 12.926518650905306,
+        "smooth_relative_error": -0.3998239262012495,
+        "total_energy": 170.41062162967833,
+        "wetted_area": 21.51708951675464,
+        "willmore_smooth": 3.2765496395118654
+      },
+      {
+        "condition": 1.0551926536982243,
+        "crease_area_fraction": 0.4538213334883861,
+        "crease_energy": 252.6462395805538,
+        "faces": 1998,
+        "nonpositive_fraction": 0.004004004004004004,
+        "nx": 41,
+        "nz": 13,
+        "smooth_energy": 17.1565288671672,
+        "smooth_relative_error": -0.20342526757657275,
+        "total_energy": 269.802768447721,
+        "wetted_area": 21.53857455709131,
+        "willmore_smooth": 4.323629127550551
+      },
+      {
+        "condition": 1.0354873194399479,
+        "crease_area_fraction": 0.38321566728414747,
+        "crease_energy": 439.3445256003701,
+        "faces": 7838,
+        "nonpositive_fraction": 0.0010206685378923194,
+        "nx": 81,
+        "nz": 25,
+        "smooth_energy": 19.352544442206483,
+        "smooth_relative_error": -0.10146463599262523,
+        "total_energy": 458.69707004257657,
+        "wetted_area": 21.543941269999543,
+        "willmore_smooth": 4.859289238081637
+      },
+      {
+        "condition": 1.0260920000508351,
+        "crease_area_fraction": 0.3589770251480544,
+        "crease_energy": 622.6595295291072,
+        "faces": 17518,
+        "nonpositive_fraction": 0.0004566731362027629,
+        "nx": 121,
+        "nz": 37,
+        "smooth_energy": 20.08493847786725,
+        "smooth_relative_error": -0.06745970483773023,
+        "total_energy": 642.7444680069744,
+        "wetted_area": 21.544934906851182,
+        "willmore_smooth": 5.036300299679856
+      }
+    ]
+  }
+}

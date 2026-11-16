@@ -1,0 +1,100 @@
+name: mesh-quality-gate
+
+# The mesh-quality door (`GAP-CAD-D1-MESH-QUALITY-LIB`).
+#
+# Board audit docs/mesh-quality-lib-audit-m17404.md finding F2 recorded that the canonical
+# mesh-quality gate "can be a door" but that no workflow invoked it. This workflow is that
+# invocation. Three things run, and they fail differently:
+#
+#  1. the differential   -- tools/mesh_quality_crosscheck.py: every measure against an
+#                           independent route and against exact rational arithmetic;
+#  2. the door           -- tools/mesh_quality_door.py: a fixed nine-mesh suite (hulls,
+#                           closed-form volume controls, two defect controls) through
+#                           tensorcad.meshquality.door.admit, plus a regression baseline in
+#                           docs/meshquality/door_baseline.json that is recomputed on every
+#                           run and never read back, so a hand-edited baseline cannot buy a
+#                           pass;
+#  3. the mutation cases -- tests/test_meshquality_door.py: a hand-edited baseline, a scaled
+#                           element measure and a flattened non-orthogonality angle each have
+#                           to be caught. A door whose references are not bound to the library
+#                           is not a door.
+#
+# Upstream (`vtk` / `gmsh` / `meshmagick`) is not installed: those packages have no wheel for
+# every platform this repository is built on, and the cross-check records the absence per run
+# rather than pretending. The differential this workflow enforces is closed-form plus
+# regression, which is exactly as strong as the documentation says it is.
+on:
+  push:
+    paths:
+      - "tensorcad/meshquality/**"
+      - "tools/mesh_quality_door.py"
+      - "tools/mesh_quality_crosscheck.py"
+      - "tools/quality_oracle.py"
+      - "tests/test_meshquality*.py"
+      - "tests/test_mesh_quality*.py"
+      - "docs/meshquality/**"
+      - ".github/workflows/mesh-quality-gate.yml"
+  pull_request:
+    paths:
+      - "tensorcad/meshquality/**"
+      - "tools/mesh_quality_door.py"
+      - "tools/mesh_quality_crosscheck.py"
+      - "tools/quality_oracle.py"
+      - "tests/test_meshquality*.py"
+      - "tests/test_mesh_quality*.py"
+      - "docs/meshquality/**"
+      - ".github/workflows/mesh-quality-gate.yml"
+  workflow_dispatch:
+
+jobs:
+  door:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: differential cross-check (independent route + exact arithmetic)
+        run: python tools/mesh_quality_crosscheck.py
+
+      - name: door over the fixed suite (closed form + frozen baseline)
+        run: python tools/mesh_quality_door.py
+
+      - name: the door's own tests, including the mutation cases
+        run: python -m pytest tests/test_meshquality_door.py -q
+
+      - name: neighbouring mesh-quality suites (no regression elsewhere)
+        run: |
+          python -m pytest tests/test_mesh_quality_lib.py tests/test_meshquality.py \
+            tests/test_meshquality_topology.py tests/test_meshquality_polymesh.py \
+            tests/test_meshquality_prism_pyramid.py tests/test_meshquality_dialects.py \
+            tests/test_mesh_quality_dialect_boundary.py -q
+
+      - name: the door must not be a rubber stamp (a documented FAIL is still a FAIL)
+        # `docs/mesh_quality_gate_power.md` reports FAIL for the claim "a PASS implies the
+        # engineering quantity is right". That study is not re-run here (it is expensive),
+        # but its verdict is published: this step makes the committed record visible in the
+        # job log so nobody reads a green door as that stronger claim.
+        run: |
+          grep -m1 "Pre-registered verdict" docs/mesh_quality_gate_power.md || true
+          echo "A green door means: inside the declared limits, numbers reproduce."
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mesh-quality-door-${{ matrix.python-version }}
+          path: |
+            artifacts/mesh_quality_door/results.json
+            artifacts/mesh_quality_lib/crosscheck.json
+            docs/mesh_quality_door.md
