@@ -44,6 +44,10 @@ not on the operator.
 
 Three design decisions worth stating up front:
 
+* **Every reported number describes the delivered table.**  An outer trial that raises the
+  flip count is rejected, so the last trial can describe ordinates that were discarded;
+  :attr:`FairingResult.flips_after` is therefore re-measured on ``table_after`` and the
+  rejected trial stays in the audit trail (``iterations``, each with ``accepted``).
 * **The tolerance is a budget, not a check.**  ``lam`` is solved for by bisection so
   that the correction uses ``98 %`` of the deviation budget and never exceeds it; the
   final correction is additionally scaled down if the bisection landed high
@@ -1264,6 +1268,7 @@ class FairingResult:
     rejected_steps: int
     reference: ReferenceComparison | None = None
     feature_waterlines: tuple[int, ...] = ()
+    delivered_flips: dict[str, int] | None = None
 
     # -- summary numbers -----------------------------------------------------
     @property
@@ -1304,20 +1309,46 @@ class FairingResult:
         return self.deviation_max <= self.tolerance * (1.0 + 1e-12)
 
     @property
+    def flips_before_by_direction(self) -> dict[str, int]:
+        """Per-family flip count of the table as it was handed in."""
+        return {metric.direction: metric.flips_before for metric in self.iterations[0].metrics}
+
+    @property
+    def flips_after_by_direction(self) -> dict[str, int]:
+        """Per-family flip count of :attr:`table_after` -- measured on the delivered table.
+
+        Deliberately **not** ``self.iterations[-1].metrics``: the last outer trial may have
+        been rejected (its flip count rose), and then that trial describes a table which was
+        thrown away.  Every reported number has to describe the ordinates the caller gets
+        back, otherwise ``flips_after`` can disagree with ``table_after.digest()`` -- which
+        is exactly what a rejected step used to do (published Series 60 / KVLCC2 rows
+        reported flip counts of discarded tables).
+        """
+        if self.delivered_flips is not None:
+            return dict(self.delivered_flips)
+        return _flips_per_direction(*_grid_and_flat(self.table_after))
+
+    @property
     def flips_before(self) -> int:
-        return sum(metric.flips_before for metric in self.iterations[0].metrics)
+        return sum(self.flips_before_by_direction.values())
 
     @property
     def flips_after(self) -> int:
-        return sum(metric.flips_after for metric in self.iterations[-1].metrics)
+        return sum(self.flips_after_by_direction.values())
+
+    @property
+    def last_trial_accepted(self) -> bool:
+        """Whether the final outer trial survived the accept rule."""
+        return bool(self.iterations) and self.iterations[-1].accepted
 
     @property
     def monotone(self) -> bool:
-        """The total flip count never rose, iteration by iteration."""
+        """The delivered total flip count never rose along the accepted path."""
         sequence = [self.iterations[0].total_flips_before]
         for iteration in self.iterations:
             if iteration.accepted:
                 sequence.append(iteration.total_flips_after)
+        sequence.append(self.flips_after)
         return all(later <= earlier for earlier, later in zip(sequence, sequence[1:]))
 
     @property
@@ -1369,6 +1400,9 @@ class FairingResult:
             "flips_after": self.flips_after,
             "monotone": self.monotone,
             "flips_reduced": self.flips_reduced,
+            "flips_before_by_direction": self.flips_before_by_direction,
+            "flips_after_by_direction": self.flips_after_by_direction,
+            "last_trial_accepted": self.last_trial_accepted,
             "accepted": self.accepted(),
             "iterations": [iteration.to_dict() for iteration in self.iterations],
             "reference": self.reference.to_dict() if self.reference else None,
@@ -1600,6 +1634,9 @@ def fair_offset_table(
             break
 
     after = _table_from(grid, table, current)
+    # The verdict has to describe the table that is returned, not the last trial: a
+    # rejected trial (flip count rose) leaves ``table_after`` at the previous iterate.
+    delivered_flips = _flips_per_direction(*_grid_and_flat(after))
     comparison = None
     if reference is not None:
         comparison = compare_to_reference(table, after, reference, name=reference_name)
@@ -1615,6 +1652,7 @@ def fair_offset_table(
         rejected_steps=rejected,
         reference=comparison,
         feature_waterlines=tuple(used),
+        delivered_flips=delivered_flips,
     )
 
 
@@ -1796,11 +1834,11 @@ def fairing_study(
                 payload["tolerance_fraction_of_half_beam"] = fraction
                 payload["feature_mode"] = mode
                 payload["flips_by_direction"] = {
-                    iteration.direction: {
-                        "before": iteration.flips_before,
-                        "after": iteration.flips_after,
+                    direction: {
+                        "before": result.flips_before_by_direction[direction],
+                        "after": result.flips_after_by_direction.get(direction),
                     }
-                    for iteration in result.iterations[-1].metrics
+                    for direction in result.flips_before_by_direction
                 }
                 sweep.append(payload)
             sweeps[mode] = sweep
@@ -1930,11 +1968,25 @@ def _plot(result: FairingResult, path: Path, *, form: str) -> Path:
     ax_bt.set_title("buttocks (level sets), dashed = before")
     ax_bt.legend(fontsize=7)
 
-    labels = ["before"] + [f"iter {iteration.iteration}" for iteration in result.iterations]
-    totals = [result.iterations[0].total_flips_before] + [
-        iteration.total_flips_after for iteration in result.iterations
-    ]
+    # The histogram follows the accepted path and ends on the delivered table; a rejected
+    # trial is drawn off the path, because it is not a result the caller ever sees.
+    totals = [result.iterations[0].total_flips_before]
+    labels = ["before"]
+    rejected: list[tuple[int, int, int]] = []
+    for iteration in result.iterations:
+        if iteration.accepted:
+            totals.append(iteration.total_flips_after)
+            labels.append(f"iter {iteration.iteration}")
+        else:
+            rejected.append((len(totals) - 1, iteration.total_flips_after, iteration.iteration))
+    totals.append(result.flips_after)
+    labels.append("delivered")
     ax_hist.plot(range(len(totals)), totals, "o-")
+    for position, value, index in rejected:
+        ax_hist.plot([position], [value], "x", color="tab:red", ms=9,
+                     label=f"iter {index} rejected")
+    if rejected:
+        ax_hist.legend(fontsize=7)
     ax_hist.set_xticks(range(len(totals)))
     ax_hist.set_xticklabels(labels, fontsize=8)
     ax_hist.set_ylabel("curvature sign flips (three families)")
