@@ -748,7 +748,7 @@ def audit(*, quick: bool = True, baseline_path: Path = golden.BASELINE) -> dict[
     payload = {
         "schema": SCHEMA,
         "generated_by": "python tools/golden/mutation_audit.py",
-        "baseline": str(baseline_path),
+        "baseline": golden.display_path(baseline_path),
         "seconds": round(time.perf_counter() - started, 2),
         "policy": {
             "accuracy_lower_factor": ACCURACY_LOWER,

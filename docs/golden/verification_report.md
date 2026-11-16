@@ -154,3 +154,107 @@ np.load("holdout_fixture.npz")["per_config_rms_m"][0]
 ---
 
 **结论**: 金标回归套件完整实现，4 个金标案例全覆盖（3/4 含 GCI 三网格外推），CI 工作流与 Git Hook 双触发机制就位，对拍判据零手抄，83 项测试全部通过，变异审计 8/8 突变被检出。验收通过。
+
+---
+
+## 10. 重开第 1 轮（#655 关闭后重开）：证据产物与门禁的一致性
+
+上一轮的四个交付文件（`results.json`、`results.md`、`tensorcad_geometry_golden.json`、本报告）
+是在 #655 被关闭前写的。本轮**从当前 main 重做**：先复核它们是否仍描述这棵树，再补上让它们
+不会再静默失效的检查。
+
+### 10.1 本轮查实的三个问题
+
+| # | 问题 | 为什么门禁没发现 | 证据 |
+|---|---|---|---|
+| 1 | **证据陈旧**：门禁注册并经 bless 的 case 有 5 个（`wigley`、`series60`、`sphere_ellipsoid`、`dtmb5415`、`inclined_box`），而 `docs/golden/results.json`、`results.md` 仍只报告 **4** 个（缺 `inclined_box`） | `python -m tensorcad.golden --check` 只比对**基线 ↔ 代码**；两者一致即全绿，**没有任何一步比对"证据文件 ↔ 基线"**，缺失的第五个 case 因此无人发现 | `git show HEAD:docs/golden/results.json` 的 case 列表 = ['wigley', 'series60', 'sphere_ellipsoid', 'dtmb5415']；`docs/golden/inclined_box_case.md` 已声明"第五个金标 case" |
+| 2 | **机器绑定**：`results.json`、`results.md`、`mutation_audit.json` 记录了生成者工作树的**绝对路径**（`/root/tp-agent/work/<mission>/docs/golden/...`） | 报告里没有任何断言检查路径形态；在另一台机器上重跑同一命令必然产出不同文件，这份"证据"永远无法与重跑结果做 diff | 修复前 `docs/golden/results.json` 第 2 行 |
+| 3 | **溯源陈旧**：基线 `provenance.git_commit` 仍指向 `9778a10`（`inclined_box` 入库**之前**），`geometry_fingerprint` 也是旧值 | 门禁不校验 provenance 与当前树的关系，只校验测量值 | 重 bless 后 fingerprint 由 `f1edda3d5de44525…` 变为 `cdadcd27af6107bf…` |
+
+### 10.2 修法（改动最小、可验证）
+
+1. `tensorcad/golden.py` 新增 `display_path()`：baseline 路径在仓库内时记录为**仓库相对路径**，
+   在仓库外保留绝对路径（那里绝对路径是唯一能标识文件的写法）；`run_suite()` 的记录改用它。
+   于是 `results.json`、`results.md` 在任何机器上重跑都得到同一字符串。
+2. `tools/golden/mutation_audit.py` 的 payload `baseline` 走同一个 `display_path()`。
+3. 重放生成：`python -m tensorcad.golden --bless`（5 case，55.6 s，退出码 0）→
+   `python tools/golden/render_evidence.py`（退出码 0），`results.json`、`results.md`、
+   `golden_errors.png` 全部刷新。**重 bless 前后全部已 bless 的测量值逐位相同**（去掉
+   `provenance` 块后两版基线相等 = `True`），因此本轮基线 diff 只有 provenance 两行。
+4. 新增 `tests/test_golden_evidence_freshness.py`（9 项），把"证据必须描述当前这棵树"变成 CI
+   可见的断言：报告的 case 集合 == 注册 case 集合；报告里每个测量值、几何指纹、容差 == 基线记录；
+   报告记录的 baseline 路径为仓库相对路径；Markdown 表覆盖每个断言。并**带两项对检查器自身的
+   变异测试**（删掉一个 case 必须判红、写回机器绝对路径必须判红），证明这些检查不是恒真。
+
+### 10.3 计算结果（本树实测，程序化注入）
+
+门禁判定：**PASS**；case 5 个；
+本轮 re-render 墙钟 55.25 s；检查点 = 35 条对基准断言 + 10 条恒等式 + 17 条 GCI 外推。
+
+| case | 对基准断言 | 恒等式 | GCI 外推 | 最大 |误差|/容差 | 该量 | 该量误差 |
+|---|---|---|---|---|---|---|
+| wigley | 8 | 0 | 7 | 0.267 | maximum_section_area_m2 | 0.0078% |
+| series60 | 6 | 2 | 6 | 0.756 | maximum_section_area_m2 | 0.8315% |
+| sphere_ellipsoid | 10 | 0 | 4 | 0.261 | sphere_volume_m3 | 0.0435% |
+| dtmb5415 | 5 | 6 | 0 | 0.523 | block_coefficient | 1.5693% |
+| inclined_box | 6 | 2 | 0 | 0.000 | identity_volume_equals_requested_displacement | 0.0000% |
+
+`inclined_box`（L=10 m、B=4 m、型深 3 m、∇=L·B·T=60 m³、横倾 15°、纵倾 3°；基准是与库
+**结构不同**的按列解析积分 oracle，见 `tools/golden/inclined_box_oracle.py`）：
+
+| 量 | 测得 | 独立基准 | 相对误差 | 派生容差 | 相对误差 (%) | <3% ? |
+|---|---|---|---|---|---|---|
+| displacement_volume_m3 | 60 | 60 | -2.513e-13 | 1.289e-04 | 2.51e-11% | 是 |
+| lcb_x_m | 0.301425142 | 0.301425142 | +2.554e-13 | 1.289e-04 | 2.55e-11% | 是 |
+| tcb_y_m | 0.2381770599 | 0.2381770599 | +2.508e-13 | 1.289e-04 | 2.51e-11% | 是 |
+| vcb_z_m | 0.7900868159 | 0.7900868159 | -2.260e-13 | 1.158e-04 | 2.26e-11% | 是 |
+| waterline_offset_m | 1.446903088 | 1.446903088 | -2.511e-13 | 1.289e-04 | 2.51e-11% | 是 |
+| waterplane_area_m2 | 41.4678775 | 41.4678775 | -5.140e-16 | 1.000e-04 | 5.14e-14% | 是 |
+| identity_volume_equals_requested_displacement | -1.440980668e-11 | 0 | +1.441e-11 | 1.000e-06 | 1.44e-09% | 是 |
+| identity_mirrored_heel_mirrors_transverse_centre | 5.664912983e-14 | 0 | +5.665e-14 | 1.000e-08 | 5.66e-12% | 是 |
+
+### 10.4 误差判定（逐项 vs 基准，是否 <3%）
+
+- 五个 case **全部**断言项满足 `|相对误差| ≤ 派生容差`；最紧的一项是
+  `series60/maximum_section_area_m2`，占其容差的 75.6%
+  （该量绝对误差 8.31e-01%）。
+- 绝对误差最大的一项：`dtmb5415/block_coefficient` = 1.569%
+  → **<3%，是**（该量的基准是发布表而非闭式解，3% 档由数据集自身的几何合同声明，
+  见 `tools/dtmb5415_param/verify_geometry.py`）。
+- `inclined_box` 六个水动力量 vs 独立 oracle：最大相对误差 2.55e-11%，
+  即双精度地板量级 → **<3%，是**（倾斜水线下的多面体裁剪与按列积分是两种不同算法，
+  这一致性是"零离散误差"的证据，而不是同一个公式算两遍）。
+- 变异审计（`docs/golden/mutation_audit.json`，路径标签已改为仓库相对）：
+  6/6 个绑定对照被检出，
+  策略违规 0 项 —— 门禁仍绑在它守护的库上。
+
+### 10.5 注意点与残留（如实）
+
+| 项 | 状态 |
+|---|---|
+| `mutation_audit.json` / `.md` 的测量载荷 | 本轮**未**在集群重跑（递交 cj4591 / cj4595 后队列饱和，>60 min 未派发）。产物中**只**把 baseline 路径标签改成生成器现在会写出的值（由 `golden.display_path` 计算，非手抄数字）；审计读数只取决于基线的测量载荷，而该载荷已验证逐位不变 |
+| `docs/golden/gate_reach.md`、`docs/golden/grid_convergence.md` | 仍引用 `/tmp` 下的日志路径（早期任务的手写记录，不属本生成器产物），本轮未改，登记为残留 |
+| 全套 `pytest` | 本轮**未**跑全量：本地 shell 有 120 s 上限，集群作业仍在排队。已验证的是 `--bless` 的完整 5-case 门禁退出码 0、`render_evidence.py` 退出码 0、新增 9 项测试全过 |
+| series60 盲点 | `maximum_section_area_m2` 收敛阶 ~1（龙骨处斜率无界），容差占比 0.756，是全套最紧的一项 |
+| dtmb5415 | 仍为开壳（722 条边界边），位移用数据集/站面积口径，`displacement-withheld-open-shell` 继续如实登记 |
+
+### 10.6 本轮撞到的既有缺陷（不在本 PR 范围，如实登记）
+
+`python -m tensorcad.golden --check --quick` 在**当前 main 上就失败**（退出码 1）：
+
+```
+ERROR inclined_box invariant_violated identity_volume_equals_requested_displacement:
+      residual -3.868e-03 > 1e-06 (V = L·B·T ...)
+ERROR inclined_box invariant_violated identity_mirrored_heel_mirrors_transverse_centre:
+      residual 1.535e-05 > 1e-08
+```
+
+即 `inclined_box` 的两条恒等式容差（1e-6 m³ / 1e-8 m）只在细网格上成立，在 `--quick`
+的单档（coarse）测量下超出。全量 `--check` / `--bless`（两档）通过，所以 CI 与 bless 都看不见；
+但 `.githooks/pre-commit` 跑的正是 `--staged --quick`，因此**任何触及 `docs/golden/` 或几何代码的
+提交都会被钩子拦下**，本轮提交只能使用仓库自带的 `TENSORCAD_GOLDEN_SKIP=1` 一次性绕过。
+
+本 PR 的代码改动只有 `display_path()`（一个路径字符串格式化）与审计 payload 的同一处，不可能影响
+恒等式残差（残差来自测量值，而重 bless 已证明测量值逐位不变）。建议的后续修法（本轮未做）：
+恒等式应在**最细档**断言（或按档位给容差），并让 `--quick` 与全量的通过集合一致，
+另补一个测试固定"quick 与 full 的 ERROR 集合相同"。

@@ -55,6 +55,23 @@ SCHEMA = "tensorcad.golden/1"
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "docs" / "golden" / "tensorcad_geometry_golden.json"
 
+def display_path(path: Path | str) -> str:
+    """A path as a *committed* report should record it: repository-relative when inside.
+
+    ``docs/golden/results.json`` and ``docs/golden/mutation_audit.json`` are generated
+    evidence committed to the repository.  If the report records the absolute path of
+    whichever checkout happened to run the suite, the same command produces a different
+    file on every machine (and publishes the local layout of the machine that ran it), so
+    the artifact can never be diffed against a re-run.  Relative to :data:`ROOT` the string
+    is identical everywhere; a baseline outside the repository keeps its absolute form,
+    because there the absolute path is the only name that identifies the file.
+    """
+    candidate = Path(path)
+    try:
+        return candidate.resolve().relative_to(ROOT).as_posix()
+    except (OSError, ValueError):
+        return str(candidate)
+
 #: Relative floor on an acceptance tolerance: keeps ``2 * |fine - coarse|`` from
 #: collapsing to ~0 on an exactly-integrated metric.
 TOLERANCE_FLOOR = 1e-4
@@ -1655,7 +1672,7 @@ def run_suite(
 ) -> SuiteResult:
     started = time.perf_counter()
     path = Path(baseline_path)
-    result = SuiteResult(baseline=str(path), quick=quick)
+    result = SuiteResult(baseline=display_path(path), quick=quick)
     findings: list[Finding] = []
     data: dict[str, Any] = {}
     if not path.is_file():

@@ -1,5 +1,5 @@
 {
-  "baseline": "/root/tp-agent/work/m22531/docs/golden/tensorcad_geometry_golden.json",
+  "baseline": "docs/golden/tensorcad_geometry_golden.json",
   "cases": [
     {
       "findings": [
@@ -224,7 +224,7 @@
         "wetted_surface_area_m2": 14.879063104957783
       },
       "reference_source": "tensorcad.wigley.wigley_analytic_hydrostatics (closed forms)",
-      "seconds": 7.961,
+      "seconds": 8.37,
       "title": "Wigley hull (L=10, B=1, T=0.625, n=m=2): lofted and capped surface"
     },
     {
@@ -424,7 +424,7 @@
         "waterplane_area_m2": 9.374999999999998
       },
       "reference_source": "tensorcad.series60.analytic_* over the exponents fitted from Cb",
-      "seconds": 10.488,
+      "seconds": 12.742,
       "title": "Series 60 hull (L=10, B=1.5, T=0.6, Cb=0.60): fitted exponent family"
     },
     {
@@ -647,7 +647,7 @@
         "sphere_volume_m3": 4.1887902047863905
       },
       "reference_source": "(4/3)\u03c0r\u00b3 and (4/3)\u03c0abc over the exact primitive fields; the areas from the exact semi-axes: 4\u03c0r\u00b2 for the sphere and tensorcad.analytic_solids.ellipsoid_surface_area for the triaxial ellipsoid (converged Gauss-Legendre quadrature of the exact area element, cross-checked against the spheroid closed form)",
-      "seconds": 33.969,
+      "seconds": 32.131,
       "title": "Sphere (r=1) and ellipsoid (2.0, 1.5, 0.5): SDF -> marching tetrahedra"
     },
     {
@@ -845,8 +845,134 @@
         "waterline_beam_m": 18.86713286713287
       },
       "reference_source": "docs/data/dtmb5415/holdout_fixture.npz:per_config_rms_m[0]; principal particulars from tensorcad.dtmb5415.readme_reference() (dataset README model-scale table x lambda)",
-      "seconds": 2.083,
+      "seconds": 1.838,
       "title": "DTMB 5415 baseline hull: shipped rank-40 reduced model (npz, no 1 GB source)"
+    },
+    {
+      "findings": [],
+      "geometry_sha256": "9fabd7ec127c415ef394503d9db4eceba76dd9ad46382e57f337354e58767869",
+      "known_limitations": [],
+      "measurements": {
+        "coarse": {
+          "displacement_volume_m3": 59.99613215625368,
+          "lcb_x_m": 0.3014445743414265,
+          "tcb_y_m": 0.23819241478947517,
+          "vcb_z_m": 0.790041052172528,
+          "waterline_offset_m": 1.4468098145207264,
+          "waterplane_area_m2": 41.46787750132048
+        },
+        "fine": {
+          "displacement_volume_m3": 59.99999999998559,
+          "lcb_x_m": 0.30142514199963655,
+          "tcb_y_m": 0.23817705993883287,
+          "vcb_z_m": 0.7900868158935876,
+          "waterline_offset_m": 1.446903087771372,
+          "waterplane_area_m2": 41.46787750132049
+        }
+      },
+      "metrics": [
+        {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.446e-05 = 1.289e-04",
+          "kind": "analytic",
+          "name": "displacement_volume_m3",
+          "origin": "two-grid",
+          "passed": true,
+          "reference": 60.00000000000067,
+          "relative_error": -2.51295280880486e-13,
+          "tolerance": 0.0001289281243970194,
+          "value": 59.99999999998559
+        },
+        {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.447e-05 = 1.289e-04",
+          "kind": "analytic",
+          "name": "lcb_x_m",
+          "origin": "two-grid",
+          "passed": true,
+          "reference": 0.30142514199955955,
+          "relative_error": 2.5543312759845066e-13,
+          "tolerance": 0.00012893643616496665,
+          "value": 0.30142514199963655
+        },
+        {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.447e-05 = 1.289e-04",
+          "kind": "analytic",
+          "name": "tcb_y_m",
+          "origin": "two-grid",
+          "passed": true,
+          "reference": 0.23817705993877314,
+          "relative_error": 2.507798137242431e-13,
+          "tolerance": 0.00012893643616433074,
+          "value": 0.23817705993883287
+        },
+        {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 5.792e-05 = 1.158e-04",
+          "kind": "analytic",
+          "name": "vcb_z_m",
+          "origin": "two-grid",
+          "passed": true,
+          "reference": 0.7900868158937662,
+          "relative_error": -2.259547416416188e-13,
+          "tolerance": 0.00011584479107633082,
+          "value": 0.7900868158935876
+        },
+        {
+          "basis": "two-grid: 2 x |fine - coarse| / |reference| = 2 x 6.446e-05 = 1.289e-04",
+          "kind": "analytic",
+          "name": "waterline_offset_m",
+          "origin": "two-grid",
+          "passed": true,
+          "reference": 1.4469030877717353,
+          "relative_error": -2.510637904690547e-13,
+          "tolerance": 0.0001289281243973398,
+          "value": 1.446903087771372
+        },
+        {
+          "basis": "two-grid change 1.713e-16 is below the floor, so the floor 0.0001 applies",
+          "kind": "analytic",
+          "name": "waterplane_area_m2",
+          "origin": "two-grid",
+          "passed": true,
+          "reference": 41.46787750132051,
+          "relative_error": -5.140432391825265e-16,
+          "tolerance": 0.0001,
+          "value": 41.46787750132049
+        },
+        {
+          "basis": "V = L\u00b7B\u00b7T is the constraint the waterline offset is solved for, so it does not depend on the attitude",
+          "kind": "invariant",
+          "name": "identity_volume_equals_requested_displacement",
+          "origin": "invariant",
+          "passed": true,
+          "reference": 0,
+          "relative_error": 1.4409806681214832e-11,
+          "tolerance": 1e-06,
+          "value": -1.4409806681214832e-11
+        },
+        {
+          "basis": "heel -> -heel must give y_B -> -y_B (body y is starboard, heel>0 is starboard down)",
+          "kind": "invariant",
+          "name": "identity_mirrored_heel_mirrors_transverse_centre",
+          "origin": "invariant",
+          "passed": true,
+          "reference": 0,
+          "relative_error": 5.664912983149861e-14,
+          "tolerance": 1e-08,
+          "value": 5.664912983149861e-14
+        }
+      ],
+      "name": "inclined_box",
+      "passed": true,
+      "reference": {
+        "displacement_volume_m3": 60.00000000000067,
+        "lcb_x_m": 0.30142514199955955,
+        "tcb_y_m": 0.23817705993877314,
+        "vcb_z_m": 0.7900868158937662,
+        "waterline_offset_m": 1.4469030877717353,
+        "waterplane_area_m2": 41.46787750132051
+      },
+      "reference_source": "tools/golden/inclined_box_oracle.oracle_hydrostatics: submerged column z_w(x,y) integrated analytically in z and by composite Simpson (1200 intervals/axis) in x and y -- no face clip, no cap polygon",
+      "seconds": 0.169,
+      "title": "Barge L=10 B=4 depth=3, V=L\u00b7B\u00b7T=60 m3, heel=15 deg trim=3 deg: polyhedron clip vs column integral"
     }
   ],
   "findings": [
@@ -860,5 +986,5 @@
   "passed": true,
   "quick": false,
   "schema": "tensorcad.golden/1",
-  "seconds": 54.502
+  "seconds": 55.25
 }
