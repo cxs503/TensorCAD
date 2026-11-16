@@ -2765,16 +2765,16 @@
        "family": "NMRI-T2015",
        "cell": {
         "quantity": "lcb_percent",
-        "value": -1.704545,
-        "raw": "LCB LCB (m) aft of FP 1.625 NA",
+        "value": -1.6365,
+        "raw": "1.625",
         "label": "LCB converted to percent_Lpp_fwd_from_lpp_mid",
         "source": "t2015_onrt",
         "url": "https://www.t2015.nmri.go.jp/onrt_gc.html",
         "sha256": "5e13427332de8be17b9dc2245dc5830300baf2e2340efcd8a80eee2269c43a11",
         "column": 0,
         "unit_basis": "derived",
-        "note": "scale_derived; page 1",
-        "derivation": "LCB 1.625 x49 m, fp datum, aft+ -> x=74.3750 m from AP; (74.3750 - 77.000) / 154.000 = -1.7045 %Lpp"
+        "note": "1.625 m aft of FP at model scale -> 79.52 m full scale (48.9355) -> -1.6365 % of Lwl = 154 m, midship at L/2",
+        "derivation": "LCB = (L/2 - x_aft_FP)/L * 100 with L = Lwl = 154 m, x_aft_FP = 1.625 m * 48.9355 = 79.52 m"
        },
        "votes": false
       }
@@ -2783,18 +2783,12 @@
       "cells": [
        {
         "family": "NMRI-T2015",
-        "value": -1.704545,
+        "value": -1.6365,
         "unit_basis": "derived",
-        "derivation": "LCB 1.625 x49 m, fp datum, aft+ -> x=74.3750 m from AP; (74.3750 - 77.000) / 154.000 = -1.7045 %Lpp",
-        "note": "scale_derived; page 1"
+        "derivation": "LCB = (L/2 - x_aft_FP)/L * 100 with L = Lwl = 154 m, x_aft_FP = 1.625 m * 48.9355 = 79.52 m",
+        "note": "1.625 m aft of FP at model scale -> 79.52 m full scale (48.9355) -> -1.6365 % of Lwl = 154 m, midship at L/2"
        }
-      ],
-      "vs_voters": {
-       "reference": -1.68,
-       "deltas": [
-        -0.024545
-       ]
-      }
+      ]
      }
     },
     "lwl": {
