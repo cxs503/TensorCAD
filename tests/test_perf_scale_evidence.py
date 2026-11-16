@@ -363,3 +363,57 @@ def test_committed_mesh_artifact_reaches_the_generator_limit() -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(pytest.main([__file__, "-q"]))
+
+# ---------------------------------------------------------------------------
+# Figure validation (GAP-CAD-D4-PERF-SCALE: figures must exist and be valid)
+# ---------------------------------------------------------------------------
+
+FIGURES_DIR = ROOT / "benchmarks" / "perf_scale" / "figures"
+
+#: All figures that the document references and must be committed.
+EXPECTED_FIGURES = [
+    "scaling.png",
+    "point_locate.png",
+    "index_cost.png",
+    "voxelize.png",
+    "fig3pt_scaling.png",
+    "fig3pt_memory.png",
+    "import_scaling.png",
+    "import_throughput.png",
+    "import_volume_accuracy.png",
+    "single10m_scaling.png",
+    "single10m_memory.png",
+    "single10m_volume_accuracy.png",
+]
+
+
+def test_perf_scale_figures_exist_and_are_valid_png() -> None:
+    """Every figure referenced by docs/perf_scale_10m.md must be a committed PNG."""
+    assert FIGURES_DIR.is_dir(), f"missing figures directory: {FIGURES_DIR}"
+    for name in EXPECTED_FIGURES:
+        path = FIGURES_DIR / name
+        assert path.is_file(), f"missing figure: {path}"
+        data = path.read_bytes()
+        assert data[:8] == b"\x89PNG\r\n\x1a\n", f"{name} is not a valid PNG"
+        assert len(data) > 4096, f"{name} looks truncated ({len(data)} bytes)"
+
+
+def test_perf_scale_figures_are_referenced_in_doc() -> None:
+    """The document must reference every committed figure (via brace-expansion or wildcard)."""
+    doc = DOC.read_text(encoding="utf-8")
+    # The doc uses brace expansion: figures/{scaling,point_locate,...}.png
+    # and wildcard: figures/*.png — check that all figure basenames appear
+    # somewhere in the doc (either in a brace list or as a standalone ref).
+    for name in EXPECTED_FIGURES:
+        basename = name.replace(".png", "")
+        # Check if the basename appears in any brace expansion or standalone ref
+        found = (
+            f"benchmarks/perf_scale/figures/{name}" in doc
+            or f"figures/{name}" in doc
+            or f"figures/*" in doc  # wildcard covers all
+            or basename in doc       # appears in brace expansion like {scaling,point_locate,...}
+        )
+        assert found, (
+            f"docs/perf_scale_10m.md does not reference {name} "
+            f"(checked: direct path, figures/{name}, figures/*, and brace expansion for '{basename}')"
+        )
