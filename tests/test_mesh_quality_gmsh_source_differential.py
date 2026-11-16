@@ -42,7 +42,8 @@ def _fake_oracle(path: Path, scale: float) -> Path:
         "#!/usr/bin/env python3\n"
         "import sys\n"
         "SCALE = " + repr(float(scale)) + "\n"
-        "KINDS = {'tri': ('gamma', 'eta'), 'quad': ('eta', 'area'),\n"
+        "KINDS = {'tri': ('gamma', 'eta', 'minSICN'),\n"
+        "         'quad': ('eta', 'area', 'minSICN'),\n"
         "         'tet': ('gamma', 'eta', 'volume'), 'hex': ('minSICN',)}\n"
         "f = open(sys.argv[1])\n"
         "for line in f:\n"
@@ -75,7 +76,7 @@ def test_gate_fails_when_gmsh_arm_disagrees(tmp_path):
     )
     assert proc.returncode == 1, proc.stdout + proc.stderr
     report = json.loads(artifact.read_text())
-    assert report["pairs_compared"] >= 5          # tri, quad, tet over five meshes
+    assert report["pairs_compared"] >= 8          # tri, quad, tet over five meshes
     assert report["elements_beyond_tolerance"] > 0
     assert "pairs beyond" not in proc.stdout      # stale wording would mean stale code
     # every compared metric is reported as DIFFER, none as the old phantom "COMPARED"
