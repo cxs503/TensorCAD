@@ -1,0 +1,291 @@
+{
+  "schema": "tensorcad.perf_voxel_mesh/1",
+  "passed": false,
+  "verdict": "fail",
+  "gates_checked": 3,
+  "gates_not_run": 0,
+  "seconds": 9.758,
+  "band_factor": 1.0,
+  "solver": {
+    "sdf": "exact Euclidean, truncated to band",
+    "sign": "ray-crossing parity",
+    "field": "tensorcad.mesh_field.MeshSDFField"
+  },
+  "environment": {
+    "tensorcad": "0.23.0",
+    "python": "3.11.6",
+    "platform": "Linux-6.6.52-1.7.lns23.loongarch64-loongarch64-with-glibc2.38",
+    "machine": "loongarch64",
+    "cpu_count": 128,
+    "loadavg": {
+      "load1": 57.03,
+      "load5": 65.82,
+      "load15": 68.33
+    }
+  },
+  "ladder_a": {
+    "bases": [
+      [
+        41,
+        13
+      ]
+    ],
+    "levels": [
+      0,
+      3,
+      4
+    ],
+    "grids": [
+      [
+        16,
+        8,
+        4
+      ]
+    ]
+  },
+  "ladder_b": {
+    "bases": [
+      [
+        41,
+        13
+      ]
+    ],
+    "levels": [
+      4
+    ],
+    "grids": [
+      [
+        8,
+        4,
+        2
+      ],
+      [
+        24,
+        12,
+        6
+      ],
+      [
+        32,
+        16,
+        8
+      ]
+    ]
+  },
+  "pending_rungs": {
+    "job": "cj4424",
+    "why": "10^6-10^7 rungs (levels 5,6 -> 1.97e6 and 7.86e6 triangles) submitted to the compute scheduler; still queued at the time this artifact was written, so no numbers are claimed for them here"
+  },
+  "cluster_warnings": [
+    "voxelize_mesh volume error -3.83% at 7,992 tri / grid 32x16x8 exceeds 3%",
+    "voxelize_mesh volume error -4.54% at 7,992 tri / grid 24x12x6 exceeds 3%",
+    "voxelize_mesh volume error -5.44% at 7,992 tri / grid 8x4x2 exceeds 3%",
+    "voxelize_mesh volume error -5.65% at 1,998 tri / grid 16x8x4 exceeds 3%",
+    "voxelize_mesh volume error -5.65% at 31,968 tri / grid 16x8x4 exceeds 3%",
+    "voxelize_mesh volume error -5.65% at 7,992 tri / grid 16x8x4 exceeds 3%"
+  ],
+  "gates": [
+    {
+      "name": "scaling_voxelize_mesh",
+      "status": "measured",
+      "passed": true,
+      "detail": "worst exponent=0.35 (limit 1.50), R^2=0.895, 3 sizes, grid=16x8x4 sizes 1,998..31,968",
+      "ratio": 0.353
+    },
+    {
+      "name": "scaling_voxelize_mesh_cells",
+      "status": "measured",
+      "passed": true,
+      "detail": "worst exponent=0.96 (limit 1.50), R^2=0.999, 4 sizes, mesh 7,992 tri, cells 64..4,096",
+      "ratio": 0.96
+    },
+    {
+      "name": "voxel_volume_accuracy",
+      "status": "measured",
+      "passed": false,
+      "detail": "worst |rel err|=5.648% (tolerance 3%) at 1,998 tri, grid (16, 8, 4)",
+      "ratio": 0.056478
+    }
+  ],
+  "results": [
+    {
+      "subtask": "voxelize_mesh",
+      "nx": 41,
+      "nz": 13,
+      "levels": 0,
+      "grid": [
+        16,
+        8,
+        4
+      ],
+      "grid_cells": 512,
+      "triangles": 1998,
+      "vertices": 1001,
+      "seconds": 0.467121,
+      "status": "measured",
+      "queries_per_second": 1096.1,
+      "us_per_query": 912.3,
+      "band": 0.625,
+      "index_cells": 672,
+      "index_entries": 5876,
+      "index_bytes": 172740,
+      "build_seconds": 0.017257,
+      "peak_rss_mb": 36.0,
+      "rss_mb": 36.0,
+      "mesh_mb": 0.048,
+      "voxel_volume": 7.088398094,
+      "analytic_volume": 7.512698221,
+      "volume_rel_err": -0.056477728,
+      "note": "exact-Euclidean SDF truncated at band=0.6250 m (1 voxel widths); band >= half a cell so the solid fraction is unaffected"
+    },
+    {
+      "subtask": "voxelize_mesh",
+      "nx": 41,
+      "nz": 13,
+      "levels": 3,
+      "grid": [
+        16,
+        8,
+        4
+      ],
+      "grid_cells": 512,
+      "triangles": 7992,
+      "vertices": 3998,
+      "seconds": 0.569837,
+      "status": "measured",
+      "queries_per_second": 898.5,
+      "us_per_query": 1113.0,
+      "band": 0.625,
+      "index_cells": 2000,
+      "index_entries": 19039,
+      "index_bytes": 667584,
+      "build_seconds": 0.078098,
+      "peak_rss_mb": 36.0,
+      "rss_mb": 36.0,
+      "mesh_mb": 0.191856,
+      "voxel_volume": 7.088398094,
+      "analytic_volume": 7.512698221,
+      "volume_rel_err": -0.056477728,
+      "note": "exact-Euclidean SDF truncated at band=0.6250 m (1 voxel widths); band >= half a cell so the solid fraction is unaffected"
+    },
+    {
+      "subtask": "voxelize_mesh",
+      "nx": 41,
+      "nz": 13,
+      "levels": 4,
+      "grid": [
+        16,
+        8,
+        4
+      ],
+      "grid_cells": 512,
+      "triangles": 31968,
+      "vertices": 15986,
+      "seconds": 1.244442,
+      "status": "measured",
+      "queries_per_second": 411.4,
+      "us_per_query": 2430.6,
+      "band": 0.625,
+      "index_cells": 8960,
+      "index_entries": 67351,
+      "index_bytes": 2642784,
+      "build_seconds": 0.26658,
+      "peak_rss_mb": 44.0,
+      "rss_mb": 44.0,
+      "mesh_mb": 0.76728,
+      "voxel_volume": 7.088398094,
+      "analytic_volume": 7.512698221,
+      "volume_rel_err": -0.056477728,
+      "note": "exact-Euclidean SDF truncated at band=0.6250 m (1 voxel widths); band >= half a cell so the solid fraction is unaffected"
+    },
+    {
+      "subtask": "voxelize_mesh",
+      "nx": 41,
+      "nz": 13,
+      "levels": 4,
+      "grid": [
+        8,
+        4,
+        2
+      ],
+      "grid_cells": 64,
+      "triangles": 7992,
+      "vertices": 3998,
+      "seconds": 0.08637,
+      "status": "measured",
+      "queries_per_second": 741.0,
+      "us_per_query": 1349.5,
+      "band": 1.25,
+      "index_cells": 2000,
+      "index_entries": 19039,
+      "index_bytes": 667584,
+      "build_seconds": 0.065689,
+      "peak_rss_mb": 44.0,
+      "rss_mb": 44.0,
+      "mesh_mb": 0.191856,
+      "voxel_volume": 7.103709067,
+      "analytic_volume": 7.512698221,
+      "volume_rel_err": -0.054439716,
+      "note": "exact-Euclidean SDF truncated at band=1.2500 m (1 voxel widths); band >= half a cell so the solid fraction is unaffected"
+    },
+    {
+      "subtask": "voxelize_mesh",
+      "nx": 41,
+      "nz": 13,
+      "levels": 4,
+      "grid": [
+        24,
+        12,
+        6
+      ],
+      "grid_cells": 1728,
+      "triangles": 7992,
+      "vertices": 3998,
+      "seconds": 2.099032,
+      "status": "measured",
+      "queries_per_second": 823.2,
+      "us_per_query": 1214.7,
+      "band": 0.416667,
+      "index_cells": 2000,
+      "index_entries": 19039,
+      "index_bytes": 667584,
+      "build_seconds": 0.067221,
+      "peak_rss_mb": 44.0,
+      "rss_mb": 44.0,
+      "mesh_mb": 0.191856,
+      "voxel_volume": 7.171790378,
+      "analytic_volume": 7.512698221,
+      "volume_rel_err": -0.045377551,
+      "note": "exact-Euclidean SDF truncated at band=0.4167 m (1 voxel widths); band >= half a cell so the solid fraction is unaffected"
+    },
+    {
+      "subtask": "voxelize_mesh",
+      "nx": 41,
+      "nz": 13,
+      "levels": 4,
+      "grid": [
+        32,
+        16,
+        8
+      ],
+      "grid_cells": 4096,
+      "triangles": 7992,
+      "vertices": 3998,
+      "seconds": 4.526608,
+      "status": "measured",
+      "queries_per_second": 904.9,
+      "us_per_query": 1105.1,
+      "band": 0.3125,
+      "index_cells": 2000,
+      "index_entries": 19039,
+      "index_bytes": 667584,
+      "build_seconds": 0.064315,
+      "peak_rss_mb": 44.0,
+      "rss_mb": 44.0,
+      "mesh_mb": 0.191856,
+      "voxel_volume": 7.225123959,
+      "analytic_volume": 7.512698221,
+      "volume_rel_err": -0.038278426,
+      "note": "exact-Euclidean SDF truncated at band=0.3125 m (1 voxel widths); band >= half a cell so the solid fraction is unaffected"
+    }
+  ]
+}
