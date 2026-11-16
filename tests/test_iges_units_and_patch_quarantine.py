@@ -99,12 +99,18 @@ def test_model_space_scale_is_read_and_applied():
 
 
 @need
-def test_ambiguous_layout_is_reported_not_raised():
-    """The JBC DE-386 tail against the real bytes: 46 values for 9 control points.
+def test_the_ambiguous_keel_patch_is_decided_by_the_weight_block_reading():
+    """The JBC DE-386 tail against the real bytes: 40 values for 9 control points.
 
-    Before m17800 this raised IgesError and made all 45 patches of the hull unreadable.
+    Before m17800 this raised IgesError and made all 45 patches of the hull unreadable;
+    m20163 reported it as ambiguous and quarantined it.  It is in fact decidable, and the
+    decision is verifiable from the record: the ``interleaved`` reading puts
+    coordinates in weight slots and yields negative weights, which no writer emits, so only
+    the ``weight_block`` reading is admissible.  The proof that it is the right one is
+    the piece it decodes to -- a 3.406 m x 0.518 m flat plate, which is what the keel
+    piece of this hull is, not a net that spans the unit cube.
     """
-    from tensorcad.iges import _split_control
+    from tensorcad.iges import layout_candidates
 
     model = read_iges(str(RAW_GLOBALS["JBC"]))
     values = model.raw_parameters[386]
@@ -112,13 +118,20 @@ def test_ambiguous_layout_is_reported_not_raised():
     count_v = int(values[2]) + 1
     cursor = 10 + (count_u + int(values[3]) + 1) + (count_v + int(values[4]) + 1)
     body = values[cursor:]
-    control, weights, layout, ambiguous = _split_control(
-        body, points=count_u * count_v, rational=int(values[7]) == 0,
-        count_u=count_u, count_v=count_v,
+    candidates = {name: (control, weights) for name, control, weights in layout_candidates(
+        body, count_u * count_v, int(values[7]) == 0
+    )}
+    assert min(candidates["interleaved"][1]) <= 0.0, "the interleaved reading is not admissible"
+    surface = next(
+        s for s, entry in zip(model.surfaces(), model.of_type(128)) if entry.sequence == 386
     )
-    assert len(control) == len(weights) == count_u * count_v
-    assert layout in {"interleaved", "weight_block", "polynomial"}
-    assert ambiguous is True
+    assert surface.layout == "weight_block"
+    assert surface.layout_ambiguous is False
+    assert len(surface.control) == len(surface.weights) == count_u * count_v
+    xs = [point[0] for point in surface.control]
+    ys = [point[1] for point in surface.control]
+    assert (max(xs) - min(xs)) * model.metres_per_unit == pytest.approx(3.406, abs=0.01)
+    assert (max(ys) - min(ys)) * model.metres_per_unit == pytest.approx(0.518, abs=0.01)
 
 
 def _surface(ambiguous: bool) -> BSplineSurface:
@@ -145,18 +158,17 @@ def test_cached_jbc_is_millimetres_and_parses_completely():
     surfaces = model.surfaces()  # must not raise on the ambiguous patch
     assert len(surfaces) == 45
     usable, quarantined = partition_surfaces(surfaces)
-    # 3 of the 45 patches are 2x2 nets whose control-net layout the smoothness
-    # score cannot decide (every second difference is identically zero), so they
-    # are quarantined instead of being meshed from a possibly mis-read net: the
-    # pre-existing 3x3 keel patch (DE 386) plus two 2x2 patches.  Before the
-    # weight-test prior in tensorcad.iges._split_control they were read as
-    # ``interleaved`` and used silently.
-    assert (len(usable), len(quarantined)) == (41, 4)
-    quarantined_de = {
-        entry if isinstance(entry, int) else (entry.get("de") if isinstance(entry, dict) else getattr(entry, "sequence", None))
-        for entry in quarantined
-    }
-    assert 386 in quarantined_de
+    # All 45 patches are readable and none has to be quarantined.  m20163 recorded
+    # (41, 4) here -- one 3x3 keel patch (DE 386) plus three 2x2 nets whose layout
+    # the smoothness score cannot decide -- but the rejection of non-positive weights
+    # (added in m20487) decides those records outright: the competing reading needs a
+    # weight of 0.  Measured, not assumed: see
+    # ``benchmarks/verified/baseline_fleet/geometry_diagnostics.json``
+    # (``usable_patches`` / ``quarantined_patches`` / ``layout_evidence_histogram``)
+    # and ``tests/test_iges_diagnostics_tool.py``.
+    assert (len(usable), len(quarantined)) == (45, 0)
+    assert all(not surface.layout_ambiguous for surface in surfaces)
+    assert {surface.layout for surface in surfaces} == {"weight_block"}
 
 
 @pytest.mark.skipif(not (RAW / "KCS" / "KCS_hull_SVA.igs").exists(), reason="cached IGES absent")
