@@ -63,7 +63,6 @@ done
 
 # Gauss-Legendre point tables live in whichever numeric file defines them.
 GL=$(grep -rl --include="*.cpp" -e GaussLegendreTri -e GaussLegendreTet "$G" 2>/dev/null | sort -u | tr "\n" " ")
-       "$G/numeric" "$G/mesh" "$G/common" 2>/dev/null | sort -u | tr '\n' ' ')
 
 SOURCES="$G/mesh/qualityMeasures.cpp \
  $G/geo/MTriangle.cpp $G/geo/MQuadrangle.cpp $G/geo/MTetrahedron.cpp \
@@ -75,10 +74,26 @@ SOURCES="$G/mesh/qualityMeasures.cpp \
 mkdir -p "$(dirname "$OUT")"
 # -ffunction-sections/--gc-sections keeps the unused (display, I/O, high-order) paths out
 # of the binary instead of demanding their dependencies.
-if ! g++ -O2 -std=c++17 -ffunction-sections -fdata-sections \
-      -I"$WORK/inc" -I"$G/common" -I"$G/geo" -I"$G/numeric" -I"$G/mesh" -I"$G/post" \
+INCLUDES="-I$WORK/inc -I$G/common -I$G/geo -I$G/numeric -I$G/mesh -I$G/post"
+FLAGS="-O2 -std=c++17 -ffunction-sections -fdata-sections"
+
+# MElement.cpp also defines MElementFactory::create, which reaches the whole
+# high-order / sub-element graph (MSubPoint, MLineN, MPolygon, BasisFactory, ...).
+# The factory is not on the quality path, but its call graph is larger than the
+# measures and would drag those sources in. It is compiled under a local rename so
+# --gc-sections can drop it as unreferenced: MElementFactory appears nowhere else in
+# this build except the two definitions inside this one file, so renaming cannot
+# change anything the oracle executes.
+if ! g++ $FLAGS $INCLUDES -DMElementFactory=MElementFactoryNotOnQualityPath \
+      -c "$G/geo/MElement.cpp" -o "$WORK/MElement.o"; then
+  echo "build failed compiling MElement.cpp" >&2
+  exit 3
+fi
+SOURCES=$(echo "$SOURCES" | sed "s#$G/geo/MElement.cpp##")
+
+if ! g++ $FLAGS $INCLUDES \
       "$HERE/gmsh_source_oracle.cpp" "$HERE/gmsh_source_shims.cpp" \
-      $SOURCES -Wl,--gc-sections -o "$OUT"; then
+      $SOURCES "$WORK/MElement.o" -Wl,--gc-sections -o "$OUT"; then
   echo "build failed (see the linker output above)" >&2
   exit 3
 fi

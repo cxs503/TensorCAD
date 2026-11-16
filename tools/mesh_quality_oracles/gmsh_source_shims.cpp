@@ -13,6 +13,7 @@
 #include <cstdio>
 
 #include "Context.h"
+#include "GModel.h"
 #include "GmshMessage.h"
 
 void Msg::Error(const char *fmt, ...)
@@ -34,3 +35,13 @@ void Msg::Warning(const char *fmt, ...)
 static char ctxStorage[1 << 16] __attribute__((aligned(64)));
 
 CTX *CTX::instance() { return reinterpret_cast<CTX *>(ctxStorage); }
+// * `GModel::current(int)` -- `MVertex`'s constructor (reached by the oracle when it
+//   builds the vertices of a corpus mesh) asks the current model for its vertex
+//   numbering (`setMaxVertexNumber` / `incrementAndGetMaxVertexNumber`, both inline in
+//   `GModel.h`). Gmsh's own definition lives in `GModel.cpp`, which drags the full
+//   model/Geo/Mesh graph; the numbering is bookkeeping the quality measures never read,
+//   so a zero-initialised model image is supplied instead. Only inline member access
+//   happens on it; no virtual call, no allocation.
+static char modelStorage[sizeof(GModel)] __attribute__((aligned(64)));
+
+GModel *GModel::current(int) { return reinterpret_cast<GModel *>(modelStorage); }
