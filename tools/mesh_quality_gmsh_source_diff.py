@@ -48,12 +48,19 @@ ARTIFACT = REPO / "artifacts" / "mesh_quality_external_diff" / "gmsh_source_diff
 
 
 def ours_for(kind: str, points, elems):
-    """Per-element measures from the library (same functions the driver uses)."""
+    """Per-element measures from the library, as ``{metric: [values]}``.
+
+    ``METRIC_FN`` returns an :class:`tensorcad.meshquality.metrics.ElementQuality`, not a
+    mapping, so ``.metrics`` has to be unwrapped before :func:`drv.compare` can index it.
+    The scalar backend is requested explicitly: the driver compares against a scalar C++
+    oracle, so a vectorised backend would be a second variable in the measurement.
+    """
     fn = drv.METRIC_FN[kind]
     try:
-        return fn(points, elems)
+        quality = fn(points, elems, backend="scalar")
     except TypeError:
-        return fn(elems, points)
+        quality = fn(elems, points)
+    return quality.metrics
 
 
 def main(argv: list[str] | None = None) -> int:

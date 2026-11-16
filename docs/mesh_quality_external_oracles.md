@@ -95,7 +95,14 @@ does not repeat the audit's finding-F1 mistake (a dialect presented as "the same
   The mapping to the library is already encoded in `MAP["gmsh"]`, including the one pair
   expected to differ by construction (`min_sicn` vs `minSICN`: the library exposes Gmsh's unit
   as the separate metric `gmsh_icn`).
-- **Why it did not execute:** Debian's `libgmsh.so.4.15.2` links, and therefore needs at run
+- **Update (m22768): the source oracle now builds and runs.** The retention blocking the
+  link was `MElement`'s vtable pinning `integrateCirc`/`integrateCirculation`, which call the
+  factory; the closure is now linked explicitly and the script builds. Executed: tet `volume`
+  vs Gmsh agrees to <1e-6 on 2 meshes; `gamma`/`eta` read 0 because the harness dispatches the
+  base-class `virtual gammaShapeMeasure() { return 0.; }` (`MElement.h:257`) instead of the
+  element's own overload — see `docs/m22768_gmsh_source_oracle_build.md`. The table in §6 below
+  therefore still says NOT RUN for the *differential*; the change is in the apparatus.
+- **Why the `libgmsh` route did not execute:** Debian's `libgmsh.so.4.15.2` links, and therefore needs at run
   time, a closure that is not on this image — measured with
   `ldd libgmsh.so.4.15.2 | grep "not found"`: `libfltk{,_images,_gl}.so.1.3`, `libcgns.so.4.5`,
   `libmetis.so.5`, `libvoro++.so.1`, `libann.so.0`, `libalglib.so.4.7`, and ~20 OpenCASCADE

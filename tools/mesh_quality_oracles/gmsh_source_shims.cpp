@@ -15,6 +15,7 @@
 #include "Context.h"
 #include "GModel.h"
 #include "GmshMessage.h"
+#include "MElement.h"
 
 void Msg::Error(const char *fmt, ...)
 {
@@ -45,3 +46,15 @@ CTX *CTX::instance() { return reinterpret_cast<CTX *>(ctxStorage); }
 static char modelStorage[sizeof(GModel)] __attribute__((aligned(64)));
 
 GModel *GModel::current(int) { return reinterpret_cast<GModel *>(modelStorage); }
+
+// * `GModel::getMeshElementByTag(n, entityTag)` -- the MSub* element constructors
+//   (`MSubElement.cpp`) resolve their parent element through the model. Those
+//   constructors are only reached from `MElementFactory::create`, which nothing on
+//   the quality path calls (see the retention note in `build_gmsh_source_oracle.sh`);
+//   they are linked only because the factory is. Returning `nullptr` is therefore never
+//   observed: the only code that would read it is unreachable.
+MElement *GModel::getMeshElementByTag(std::size_t, int &entityTag)
+{
+  entityTag = 0;
+  return nullptr;
+}
