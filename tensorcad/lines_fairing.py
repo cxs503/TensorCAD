@@ -99,6 +99,14 @@ _SIGN_EPS = 1e-3
 #: exact solution to be scaled back instead of overrunning the tolerance).
 _BUDGET_FRACTION = 0.98
 
+#: Share of the zeta-direction bending energy at which one waterline row is read as a
+#: *design feature* rather than as unfairness.  On a full ``zeta**(1/m)`` section the
+#: near-keel row owns 99-100 % of that energy (the section is nearly vertical there, so
+#: its second difference in ``zeta`` is singular), while on a parabolic hull no row owns
+#: more than 10 %.  The gap is two orders of magnitude wide, so the threshold does not
+#: need tuning -- see :func:`feature_waterlines`.
+_FEATURE_SHARE = 0.5
+
 
 class FairingError(ValueError):
     """The table or the request cannot be faired as asked."""
@@ -641,6 +649,111 @@ def _free_indices(frozen: Sequence[bool]) -> list[int]:
     return [index for index, flag in enumerate(frozen) if not flag]
 
 
+def _energy_share_per_waterline(grid: _Grid, *, order: int = 2) -> dict[int, float]:
+    """Share of the ``zeta``-curvature bending energy anchored on each waterline row.
+
+    The rows of the ``stations`` operator are the curvature of the section profiles, so
+    the ones anchored at waterline ``j`` are exactly the ones that see the near-keel band.
+    Normalising by the total makes the number grid- and scale-free.
+    """
+    operator = _AxisOperator(
+        "stations", grid.n, grid.m, grid.zeta, axis="waterline", order=order
+    )
+    residual = operator.evaluate(grid.flat())
+    energy: dict[int, float] = {}
+    for node, _coefficients, weight in operator.rows:
+        index = node % grid.m
+        energy[index] = energy.get(index, 0.0) + weight * residual[node] ** 2
+    total = math.fsum(energy.values())
+    if not total > 0.0:
+        return {index: 0.0 for index in range(grid.m)}
+    return {index: value / total for index, value in energy.items()}
+
+
+def feature_waterlines(
+    table: ShipOffsetTable, *, threshold: float = _FEATURE_SHARE, order: int = 2
+) -> tuple[int, ...]:
+    """Waterline rows whose section curvature is a **design feature**, not unfairness.
+
+    A power-law section ``zeta**(1/m)`` (Series 60 ``m = 24``, the KVLCC2-class hull
+    ``m = 10``) turns the curvature energy of the near-keel band into an unbounded number:
+    the fairing then spends the whole max-norm deviation budget on that band and the rest
+    of the table barely moves (the limitation measured in ``docs/lines_fairing.md``
+    before this helper existed).  Declaring the band a *feature* -- the language a
+    B-spline fairing uses for a crease -- removes its rows from the energy, so the budget
+    is spent on the smooth part of the surface.
+
+    The detection is one number per row: the share of the ``zeta``-curvature energy the
+    row carries.  A row above ``threshold`` is reported.  The keel row (index ``0``) and
+    the deck row (index ``m-1``) are never reported: they are frozen by
+    :meth:`_Grid.frozen`, so they are not unknowns of the problem in the first place.
+    """
+    if not (0.0 < threshold <= 1.0):
+        raise FairingError(
+            f"feature_waterlines: threshold must be in (0, 1], got {threshold!r}"
+        )
+    grid = _grid_of(table)
+    share = _energy_share_per_waterline(grid, order=order)
+    return tuple(
+        index for index in range(1, grid.m - 1) if share.get(index, 0.0) > threshold
+    )
+
+
+def _resolve_features(
+    features: Sequence[int] | str, grid: _Grid, *, order: int
+) -> tuple[int, ...]:
+    """Turn the ``features`` request of :func:`fair_offset_table` into row indices."""
+    if isinstance(features, str):
+        if features in ("", "off", "none"):
+            return ()
+        if features != "auto":
+            raise FairingError(
+                "fair_offset_table: features must be a sequence of waterline indices, "
+                f"'off' or 'auto', got {features!r}"
+            )
+        share = _energy_share_per_waterline(grid, order=order)
+        return tuple(
+            index for index in range(1, grid.m - 1) if share.get(index, 0.0) > _FEATURE_SHARE
+        )
+    resolved: list[int] = []
+    for index in features:
+        if not isinstance(index, int) or isinstance(index, bool):
+            raise FairingError(
+                f"fair_offset_table: feature waterline indices must be integers, got {index!r}"
+            )
+        if not 0 <= index < grid.m:
+            raise FairingError(
+                f"fair_offset_table: feature waterline index {index} outside the grid "
+                f"(0 <= index < {grid.m})"
+            )
+        if index not in resolved:
+            resolved.append(index)
+    return tuple(sorted(resolved))
+
+
+def _drop_feature_rows(
+    operators: Sequence[Any], features: Sequence[int], m: int
+) -> int:
+    """Remove the ``zeta``-direction rows anchored on ``features``; return how many.
+
+    Only the ``stations`` (``d^n/dzeta^n``) and ``buttocks`` (level-curve curvature)
+    families are touched.  The ``waterlines`` family differentiates along ``x`` at fixed
+    ``zeta``, where a power-law section is smooth: excluding it there would delete real
+    evidence rather than a design feature.
+    """
+    if not features:
+        return 0
+    excluded = set(features)
+    dropped = 0
+    for operator in operators:
+        if operator.label == "waterlines":
+            continue
+        kept = [row for row in operator.rows if (row[0] % m) not in excluded]
+        dropped += len(operator.rows) - len(kept)
+        operator.rows = kept
+    return dropped
+
+
 def _solve_with_penalty(
     eta0: Sequence[float],
     operators: Sequence[Any],
@@ -1083,6 +1196,8 @@ class FairingIteration:
     total_flips_after: int
     metrics: tuple[DirectionMetrics, ...]
     accepted: bool
+    feature_waterlines: tuple[int, ...] = ()
+    penalty_rows_dropped: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -1098,6 +1213,8 @@ class FairingIteration:
             "total_flips_before": self.total_flips_before,
             "total_flips_after": self.total_flips_after,
             "accepted": self.accepted,
+            "feature_waterlines": list(self.feature_waterlines),
+            "penalty_rows_dropped": self.penalty_rows_dropped,
             "directions": [metric.to_dict() for metric in self.metrics],
         }
 
@@ -1146,6 +1263,7 @@ class FairingResult:
     iterations: tuple[FairingIteration, ...]
     rejected_steps: int
     reference: ReferenceComparison | None = None
+    feature_waterlines: tuple[int, ...] = ()
 
     # -- summary numbers -----------------------------------------------------
     @property
@@ -1245,6 +1363,7 @@ class FairingResult:
                 "waterline_m": self.table_before.waterlines[self.deviation_argmax[1]],
             },
             "within_tolerance": self.within_tolerance,
+            "feature_waterlines": list(self.feature_waterlines),
             "rejected_steps": self.rejected_steps,
             "flips_before": self.flips_before,
             "flips_after": self.flips_after,
@@ -1365,6 +1484,7 @@ def fair_offset_table(
     penalty_range: tuple[float, float] = (1e-16, 1e2),
     reference: ShipOffsetTable | None = None,
     reference_name: str = "reference",
+    features: Sequence[int] | str = (),
 ) -> FairingResult:
     """Fair ``table`` on all three families inside ``tolerance`` (metres).
 
@@ -1376,6 +1496,13 @@ def fair_offset_table(
     (see the module docstring); ``weights`` fixes the relative cost of the three
     families and ``iterations`` bounds the outer sweep, because the buttock operator
     depends on the table it is evaluated on.
+
+    ``features`` declares waterline rows whose section curvature is a *design feature*
+    (the near-keel band of a ``zeta**(1/m)`` section): their ``zeta``-direction rows are
+    removed from the energy, so the deviation budget is spent on the smooth part of the
+    table instead of on the singular band.  ``"auto"`` detects the rows with
+    :func:`feature_waterlines`; a sequence fixes them by hand; the default ``()`` leaves
+    the energy exactly as it was before the option existed (the same table comes out).
     """
     if not (tolerance > 0.0):
         raise FairingError(f"fair_offset_table: tolerance must be positive, got {tolerance!r}")
@@ -1386,6 +1513,11 @@ def fair_offset_table(
     if len(weights) != 3 or any(w < 0.0 for w in weights) or not any(w > 0.0 for w in weights):
         raise FairingError(f"fair_offset_table: weights must be 3 non-negative numbers with a "
                            f"positive one, got {weights!r}")
+    if isinstance(features, str) and features not in ("", "off", "none", "auto"):
+        raise FairingError(
+            "fair_offset_table: features must be a sequence of waterline indices, "
+            f"'off' or 'auto', got {features!r}"
+        )
 
     grid = _grid_of(table)
     origin = grid.flat()
@@ -1408,6 +1540,8 @@ def fair_offset_table(
             half_beam=grid.half_beam, draft=grid.draft,
         )
         operators = _operators(current_grid, current_grid.eta, order=order)
+        active_features = _resolve_features(features, current_grid, order=order)
+        rows_dropped = _drop_feature_rows(operators, active_features, grid.m)
         flips_now = _flips_per_direction(current_grid, current)
         total_before = sum(flips_now.values())
 
@@ -1451,6 +1585,8 @@ def fair_offset_table(
                 total_flips_after=total_after,
                 metrics=metrics,
                 accepted=accepted,
+                feature_waterlines=tuple(active_features),
+                penalty_rows_dropped=rows_dropped,
             )
         )
         if accepted:
@@ -1467,6 +1603,10 @@ def fair_offset_table(
     comparison = None
     if reference is not None:
         comparison = compare_to_reference(table, after, reference, name=reference_name)
+    used = next(
+        (record.feature_waterlines for record in reversed(records) if record.accepted),
+        records[0].feature_waterlines if records else (),
+    )
     return FairingResult(
         table_before=table,
         table_after=after,
@@ -1474,6 +1614,7 @@ def fair_offset_table(
         iterations=tuple(records),
         rejected_steps=rejected,
         reference=comparison,
+        feature_waterlines=tuple(used),
     )
 
 
@@ -1586,6 +1727,7 @@ def fairing_study(
     order: int = 2,
     seed: int = 20261114,
     waterline_exponent: float = 1.0,
+    feature_modes: Sequence[str] = ("off", "auto"),
 ) -> dict[str, Any]:
     """Fair every built-in form over a sweep of tolerances and report the evidence.
 
@@ -1604,8 +1746,23 @@ def fairing_study(
     smooth to machine precision by construction; no human-faired table exists in this
     repository.  That substitution is the study's main assumption and is restated in
     ``docs/lines_fairing.md``.
+
+    ``feature_modes`` runs the whole sweep once per mode and keeps both: ``"off"`` is the
+    plain energy and ``"auto"`` declares the detected design-feature rows
+    (:func:`feature_waterlines`), so the effect of the declaration is measured on the same
+    jittered tables rather than asserted.  The sweeps live in ``case["sweeps"][mode]``
+    (the payload written before the option existed is ``case["sweeps"]["off"]``, and
+    ``case["accepted_at"]`` still reports that mode).
     """
     from .offset_forms import offset_table
+
+    unknown = [mode for mode in feature_modes if mode not in ("off", "auto")]
+    if unknown:
+        raise FairingError(
+            f"fairing_study: unknown feature mode(s) {unknown!r}; use 'off' and/or 'auto'"
+        )
+    if not feature_modes:
+        raise FairingError("fairing_study: feature_modes must name at least one mode")
 
     cases: list[dict[str, Any]] = []
     for key in forms:
@@ -1621,26 +1778,32 @@ def fairing_study(
         # the number of samples behind its curves.  Record that, per level.
         grid_unfair = _grid_of(unfair)
         coverage = buttock_coverage(grid_unfair.eta, grid_unfair.xi, grid_unfair.zeta)
-        sweep: list[dict[str, Any]] = []
-        for fraction in tolerance_fractions:
-            result = fair_offset_table(
-                unfair,
-                tolerance=fraction * half_beam,
-                iterations=iterations,
-                order=order,
-                reference=clean,
-                reference_name=f"{key} analytic ordinates (manual-fairing stand-in)",
-            )
-            payload = result.to_dict()
-            payload["tolerance_fraction_of_half_beam"] = fraction
-            payload["flips_by_direction"] = {
-                iteration.direction: {
-                    "before": iteration.flips_before,
-                    "after": iteration.flips_after,
+        sweeps: dict[str, list[dict[str, Any]]] = {}
+        for mode in feature_modes:
+            request: Sequence[int] | str = "auto" if mode == "auto" else ()
+            sweep: list[dict[str, Any]] = []
+            for fraction in tolerance_fractions:
+                result = fair_offset_table(
+                    unfair,
+                    tolerance=fraction * half_beam,
+                    iterations=iterations,
+                    order=order,
+                    reference=clean,
+                    reference_name=f"{key} analytic ordinates (manual-fairing stand-in)",
+                    features=request,
+                )
+                payload = result.to_dict()
+                payload["tolerance_fraction_of_half_beam"] = fraction
+                payload["feature_mode"] = mode
+                payload["flips_by_direction"] = {
+                    iteration.direction: {
+                        "before": iteration.flips_before,
+                        "after": iteration.flips_after,
+                    }
+                    for iteration in result.iterations[-1].metrics
                 }
-                for iteration in result.iterations[-1].metrics
-            }
-            sweep.append(payload)
+                sweep.append(payload)
+            sweeps[mode] = sweep
         cases.append(
             {
                 "form": key,
@@ -1659,16 +1822,25 @@ def fairing_study(
                     "iterations": iterations,
                     "order": order,
                     "seed": seed,
+                    "feature_modes": list(feature_modes),
                 },
                 "analytic_flips": clean_flips,
                 "unfair_flips": unfair_flips,
                 "buttock_coverage": coverage,
-                "sweep": sweep,
+                "sweeps": sweeps,
                 "accepted_at": [
                     entry["tolerance_fraction_of_half_beam"]
-                    for entry in sweep
+                    for entry in sweeps.get("off", next(iter(sweeps.values())))
                     if entry["accepted"]
                 ],
+                "accepted_at_by_mode": {
+                    mode: [
+                        entry["tolerance_fraction_of_half_beam"]
+                        for entry in sweep
+                        if entry["accepted"]
+                    ]
+                    for mode, sweep in sweeps.items()
+                },
             }
         )
     return {
@@ -1679,9 +1851,14 @@ def fairing_study(
             "accepted iterations and strictly lower overall, on >= 2 hull tables"
         ),
         "order": order,
+        "feature_modes": list(feature_modes),
         "cases": cases,
         "cases_total": len(cases),
         "cases_meeting_criterion_at_a_tolerance": sum(1 for case in cases if case["accepted_at"]),
+        "cases_meeting_criterion_at_a_tolerance_by_mode": {
+            mode: sum(1 for case in cases if case["accepted_at_by_mode"][mode])
+            for mode in feature_modes
+        },
     }
 
 
@@ -1795,6 +1972,11 @@ def build_parser() -> argparse.ArgumentParser:
                         help="2 = curvature energy, 3 = curvature-variation energy")
     parser.add_argument("--iterations", type=int, default=3)
     parser.add_argument("--seed", type=int, default=20261114)
+    parser.add_argument("--features", default="off", choices=("off", "auto"),
+                        help="declare design-feature waterline rows (single case); "
+                             "'auto' uses the energy-share detection")
+    parser.add_argument("--feature-modes", default="off,auto",
+                        help="comma-separated feature modes for --study (off, auto)")
     parser.add_argument("--study", action="store_true",
                         help="run all built-in forms instead of one")
     parser.add_argument("--json", type=Path, help="write the report JSON here")
@@ -1819,6 +2001,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             iterations=args.iterations,
             seed=args.seed,
             waterline_exponent=args.waterline_exponent,
+            feature_modes=tuple(
+                mode.strip() for mode in args.feature_modes.split(",") if mode.strip()
+            ),
         )
         text = json.dumps(report, indent=2, sort_keys=True)
         if args.json:
@@ -1840,6 +2025,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         order=args.order,
         reference=clean,
         reference_name=f"{args.form} analytic ordinates (manual-fairing stand-in)",
+        features=args.features,
     )
     payload = result.to_dict()
     payload["form"] = args.form
