@@ -629,7 +629,7 @@ def read_iges(path: str | Path, *, tolerance: float = DEFAULT_TOLERANCE) -> BRep
     boundaries closer than ``tolerance`` become one edge.  A crack wider than the
     tolerance therefore stays a free edge and is reported as such.
     """
-    text = Path(path).read_text()
+    text = Path(path).read_text(encoding="latin-1")
     directory: list[tuple[int, int, int, int, int]] = []
     lines = [line for line in text.splitlines() if len(line) >= 73]
     d_lines = [line for line in lines if line[72] == "D"]
