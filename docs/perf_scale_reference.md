@@ -208,6 +208,24 @@ v1.0.0 把这条路径列为"未测"欠账；`ladder_import_single_10m.json` 与
 
 ---
 
+### 1.6 真实 CAD 源路径（IGES → 10⁵–10⁷ 三角，patch-set 路线）
+
+前 5 个子节的三角面全部来自**生成器**（参数化船体 / 细分 / 多体副本 / OBJ 往返）。本锚点自己写下的
+最后一个结构性缺口——「真实 CAD 曲面镶嵌」（`docs/perf_scale_import_10m.md` §5.2）——由 `perf_cad_source`
+子线承担：ONR tumblehome 船体（`work/assets/onrt.igs`，132 张 B 样条曲面）沿采样密度轴 `(u,v)` 镶嵌，
+子任务为 `cad_parse` / `cad_tessellate` / `cad_tessellate_chunked` / `cad_weld` / `cad_volume` / `cad_locate`。
+完整表与门槛见 `docs/perf_scale_cad_source.md`；本节只登记工件指针与门槛判词，保证「每个已提交阶梯
+都被综合文档注意到」（`tests/test_perf_scale_reference_doc.py::test_every_committed_ladder_is_cited_by_the_document`）。
+
+| 工件 | 路径 | 内容 | 门槛判词 |
+|---|---|---|---|
+| ONRT patch 阶梯（regate） | `benchmarks/perf_scale/artifacts/cad_source_patch_onrt_regate.json` | 3 档 uv=8x6→32x24，12,636→202,601 三角；21 条门全 measured | pass（墙钟比值 0.99–1.49×，限 2.0×） |
+| ONRT patch 阶梯（small，4 档） | `benchmarks/perf_scale/artifacts/cad_source_patch_onrt_small.json` | 4 档 uv=8x6→64x48，至 810,696 三角；分块等价门 measured | not_run（回归门无基线键，不判 pass） |
+| CAD 源回归基线 | `benchmarks/perf_scale/cad_source_baseline.json` | min of 本阶梯自身档；键=(子任务, 源 SHA-256, 路线, 参数) | — |
+
+真实 CAD 源上的点定位指数 0.17–0.19（亚线性），与 §4「点定位的集群需求是算法缺口」的结论一致；
+trimmed 路线在 10⁶ 带的成本边界见 `docs/perf_scale_cad_source.md` §5（方法边界，非缺测）。
+
 ## 2. 复杂度指数汇总（log-log 斜率，全部由工件重算）
 
 v1.0.0 的本节是手抄的，且已漂移（`load` 写成 1.17，工件实测 1.08）。现在每行都由
