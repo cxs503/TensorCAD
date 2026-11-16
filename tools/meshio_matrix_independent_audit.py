@@ -1,474 +1,459 @@
-#!/usr/bin/env python3
-"""Independent audit of the meshio format matrix (GAP-CAD-B2-MESH-FORMAT-MATRIX).
+"""Independent audit of the 6-format exchange matrix (anchor GAP-CAD-B2).
 
-Verifies 6 formats × 3 geometries = 18 combinations for round-trip fidelity:
-volume, topology, orientation.  Does NOT import tensorcad.meshio_exchange or
-tensorcad.mesh_formats for the audit logic — only uses them as the system under
-test.  All comparison math is done here from first principles.
+The matrix in ``tests/test_meshio_format_matrix.py`` writes every file with the
+package and reads it back with the package, so it cannot see a format
+misunderstanding the two directions share.  This script is the same 18 cells
+(6 formats x cube/sphere/Wigley hull) re-checked from the other side:
 
-Usage:
-    python tools/meshio_matrix_independent_audit.py --out runs/m21456_matrix18
+**out** (export)
+    write with ``tensorcad.meshio_exchange.write_meshio``, then parse the bytes
+    on disk with ``tensorcad.format_conformance`` -- spec-level readers that do
+    not use meshio and do not use the TensorCAD reader set -- and compare the
+    volume / point count / cell count / orientation / closedness the *file*
+    declares against the source mesh.
+
+**in** (import)
+    write the same geometry with ``meshio`` directly from a plain
+    ``meshio.Mesh`` (no TensorCAD writer involved), then read it with
+    ``tensorcad.meshio_exchange.read_meshio`` and compare against the source.
+
+Plus, for CGNS, the SIDS conformance of the file (``cgns_issues``): the audit
+records how many SIDS violations a meshio-written file has and how many ours
+has.
+
+Artefacts (default ``runs/m21004_meshio_matrix18_independent/``):
+
+* ``matrix18.json`` -- every number in the report, one record per cell
+* ``files/``        -- the files that were audited (re-checkable without rerunning)
+* ``matrix.md``     -- the 18-cell table
+* ``figures/``      -- matplotlib panels (volume error, cell-status grid, hull)
+* ``manifest.json`` -- sha256 of every artefact
+
+Usage::
+
+    python tools/meshio_matrix_independent_audit.py [--out DIR] [--fig DIR]
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
-import os
+import platform
+import shutil
 import sys
-import tempfile
-from dataclasses import dataclass, field, asdict
+import warnings
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
-# ---------------------------------------------------------------------------
-# System under test — import only the public API
-# ---------------------------------------------------------------------------
-from tensorcad.meshio_exchange import (
-    FORMATS_ALL, FORMATS_SURFACE, FORMATS_VOLUME,
-    MeshioFormatError, TetrahedralMesh,
-    mesh_to_meshio, meshio_to_mesh, meshio_to_tetrahedral,
-    round_trip_meshio, surface_signed_volume, tetrahedral_volume,
-    tetrahedralise_surface, write_meshio, read_meshio,
-)
-from tensorcad.geometry import Mesh, MeshBuilder
-from tensorcad import mesh as meshlib
-from tensorcad import wigley
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
 
-# ---------------------------------------------------------------------------
-# Audit geometry fixtures (built from first principles, not from the module)
-# ---------------------------------------------------------------------------
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-def make_cube() -> Mesh:
-    """Unit cube, outward-oriented, 8 vertices, 12 triangles. Volume = 1."""
-    vertices = (
-        (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.0),
-        (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (1.0, 1.0, 1.0), (0.0, 1.0, 1.0),
-    )
-    faces = (
-        (0, 3, 2), (0, 2, 1),
-        (4, 5, 6), (4, 6, 7),
-        (0, 1, 5), (0, 5, 4),
-        (2, 3, 7), (2, 7, 6),
-        (1, 2, 6), (1, 6, 5),
-        (0, 4, 7), (0, 7, 3),
-    )
-    return Mesh(vertices=vertices, faces=faces, units="m")
+from test_meshio_format_matrix import ANALYTIC_VOLUME, GEOMETRIES  # noqa: E402
 
-
-def make_sphere(n_lat: int = 24, n_lon: int = 48) -> Mesh:
-    """Unit sphere via pole fans + quad bands, outward-oriented, watertight."""
-    builder = MeshBuilder(units="m")
-    north = builder.add_vertex((0.0, 0.0, 1.0))
-    rings: list[list[int]] = []
-    for i_lat in range(1, n_lat):
-        phi = math.pi * i_lat / n_lat
-        ring = []
-        for i_lon in range(n_lon):
-            theta = 2 * math.pi * i_lon / n_lon
-            ring.append(
-                builder.add_vertex(
-                    (math.sin(phi) * math.cos(theta),
-                     math.sin(phi) * math.sin(theta),
-                     math.cos(phi))
-                )
-            )
-        rings.append(ring)
-    south = builder.add_vertex((0.0, 0.0, -1.0))
-    for i_lon in range(n_lon):
-        j = (i_lon + 1) % n_lon
-        builder.add_triangle(north, rings[0][i_lon], rings[0][j])
-        builder.add_triangle(south, rings[-1][j], rings[-1][i_lon])
-    for i_lat in range(len(rings) - 1):
-        upper, lower = rings[i_lat], rings[i_lat + 1]
-        for i_lon in range(n_lon):
-            j = (i_lon + 1) % n_lon
-            builder.add_quad(upper[i_lon], lower[i_lon], lower[j], upper[j])
-    return meshlib.orient_outward(builder.build()).mesh
-
-
-def make_wigley_hull() -> Mesh:
-    """Wigley parabolic hull from the package's own validated generator."""
-    return wigley.generate_wigley().mesh
-
-
-@dataclass(frozen=True)
-class GeometryFixture:
-    name: str
-    mesh: Mesh
-    analytic_volume: float  # reference for discretisation error check
-
-
-FIXTURES = (
-    GeometryFixture("cube", make_cube(), 1.0),
-    GeometryFixture("sphere", make_sphere(), 4.0 / 3.0 * math.pi),
-    GeometryFixture("wigley_hull", make_wigley_hull(), 4.0 * 10.0 * 1.0 * 0.625 / 9.0),
+from tensorcad import format_conformance as fc  # noqa: E402
+from tensorcad.mesh_cgns import write_cgns  # noqa: E402
+from tensorcad.meshio_exchange import (  # noqa: E402
+    FORMATS_ALL,
+    FORMATS_SURFACE,
+    FORMATS_VOLUME,
+    _EXT,
+    TetrahedralMesh,
+    read_meshio,
+    surface_signed_volume,
+    write_meshio,
 )
 
-# ---------------------------------------------------------------------------
-# Independent comparison math (no module imports)
-# ---------------------------------------------------------------------------
+#: The three geometries of the acceptance cell (cube = exact box, sphere =
+#: curved body, wigley_hull = the real ship hull with collapsed end stations).
+GEOM_NAMES = ("cube", "sphere", "wigley_hull")
 
-def independent_signed_volume(mesh: Mesh) -> float:
-    """Divergence-theorem volume, computed here from first principles."""
-    total = 0.0
-    verts = mesh.vertices
-    for a, b, c in mesh.faces:
-        ax, ay, az = verts[a]
-        bx, by, bz = verts[b]
-        cx, cy, cz = verts[c]
-        total += (
-            ax * (by * cz - bz * cy)
-            - ay * (bx * cz - bz * cx)
-            + az * (bx * cy - by * cx)
-        )
-    return total / 6.0
+#: Volume tolerance per format.  STL stores single-precision coordinates by
+#: definition, everything else carries the double values unchanged.
+VOLUME_TOL = {"stl": 1e-5}
+DEFAULT_TOL = 1e-12
 
 
-def independent_tetra_volume(verts, tet: tuple[int, int, int, int]) -> float:
-    p0, p1, p2, p3 = (verts[i] for i in tet)
-    a = np.subtract(p1, p0)
-    b = np.subtract(p2, p0)
-    c = np.subtract(p3, p0)
-    return float(np.dot(a, np.cross(b, c)) / 6.0)
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
-def relative_error(a: float, b: float) -> float:
-    scale = max(abs(a), abs(b), 1e-300)
-    return abs(a - b) / scale
+def _rel(path: Path) -> str:
+    """Repo-relative path when the file is inside the checkout, else the
+    absolute path.  Keeps matrix18.json / manifest.json portable when
+    ``--out`` / ``--fig`` point outside the repository (e.g. a scratch dir).
+    """
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(path.resolve())
 
 
-def is_closed_manifold(mesh: Mesh) -> bool:
-    """Every undirected edge shared by exactly 2 faces."""
-    counts = meshlib.edge_face_counts(mesh)
-    return all(c == 2 for c in counts.values())
+def _source_volume(mesh) -> float:
+    return mesh.volume() if isinstance(mesh, TetrahedralMesh) else surface_signed_volume(mesh)
 
 
-# ---------------------------------------------------------------------------
-# Audit engine
-# ---------------------------------------------------------------------------
-
-@dataclass
-class AuditCell:
-    direction: str  # "out" or "in"
-    fmt: str
-    geometry: str
-    v_file: float
-    v_source: float
-    rel_err: float
-    n_pts: int
-    n_cells: int
-    orientation: str  # "outward" or "inward"
-    closed: bool | None  # None for volume meshes
-    spec_ok: bool
-    verdict: str  # "PASS" or "FAIL"
-    notes: str = ""
+def _geom(name: str):
+    return next(g for g in GEOMETRIES if g.name == name)
 
 
-@dataclass
-class AuditReport:
-    mission: str = "m21456"
-    anchor: str = "GAP-CAD-B2-MESH-FORMAT-MATRIX"
-    cells: list[AuditCell] = field(default_factory=list)
-    summary: dict[str, Any] = field(default_factory=dict)
-    figures: list[str] = field(default_factory=list)
+def _relative(new: float, old: float) -> float:
+    return abs(new - old) / max(abs(old), 1e-300)
 
 
-def audit_out_direction(fmt: str, geom: GeometryFixture, tmpdir: str) -> AuditCell:
-    """Audit the 'out' direction: write_meshio → spec parser → compare."""
-    mesh = geom.mesh
-    v_source = independent_signed_volume(mesh)
-
-    if fmt in FORMATS_VOLUME:
-        # Volume path: tetrahedralise first
-        tet = tetrahedralise_surface(mesh)
-        v_source = tet.volume()
-        path = write_meshio(Path(tmpdir) / f"test.{fmt}", tet, file_format=fmt)
-        back = read_meshio(path, file_format=fmt)
-        v_file = back.volume()
-        n_pts = len(back.vertices)
-        n_cells = len(back.tets)
-        orient = "outward" if back.signed_volume() > 0 else "inward"
-        closed = None
-        # Check SIDS for CGNS
-        spec_ok = True
-        if fmt == "cgns":
-            from tensorcad.mesh_formats import sids_violations
-            spec_ok = len(sids_violations(path)) == 0
-    else:
-        # Surface path
-        path = write_meshio(Path(tmpdir) / f"test.{fmt}", mesh, file_format=fmt)
-        back = read_meshio(path, file_format=fmt)
-        v_file = independent_signed_volume(back)
-        n_pts = len(back.vertices)
-        n_cells = len(back.faces)
-        orient = "outward" if v_file > 0 else "inward"
-        closed = is_closed_manifold(back)
-        spec_ok = True
-
-    rel = relative_error(v_file, v_source)
-    verdict = "PASS" if rel < 1e-5 else "FAIL"
-    return AuditCell(
-        direction="out", fmt=fmt, geometry=geom.name,
-        v_file=v_file, v_source=v_source, rel_err=rel,
-        n_pts=n_pts, n_cells=n_cells, orientation=orient,
-        closed=closed, spec_ok=spec_ok, verdict=verdict,
+def audit_out(fmt: str, geom_name: str, files_dir: Path) -> dict:
+    """Write with TensorCAD, verify by parsing the file bytes independently."""
+    geom = _geom(geom_name)
+    source = geom.tetra if fmt in FORMATS_VOLUME else geom.mesh
+    path = write_meshio(
+        files_dir / f"out_{fmt}_{geom_name}{_EXT[fmt]}", source, file_format=fmt
     )
+    parsed, meta = fc.parse_file(path, fmt)
+    src_vol = _source_volume(source)
+    vol = parsed.volume()
+    tol = VOLUME_TOL.get(fmt, DEFAULT_TOL)
+    record = {
+        "direction": "out",
+        "format": fmt,
+        "geometry": geom_name,
+        "topology": "tetra" if isinstance(source, TetrahedralMesh) else "triangle",
+        "file": _rel(path),
+        "bytes": path.stat().st_size,
+        "sha256": _sha256(path),
+        "source_volume": src_vol,
+        "file_volume": vol,
+        "relative_error": _relative(vol, src_vol),
+        "volume_tol": tol,
+        "source_points": len(source.vertices),
+        "file_points": int(len(parsed.points)),
+        "source_cells": len(source.tets) if isinstance(source, TetrahedralMesh) else len(source.faces),
+        "file_cells": int(len(parsed.cells)),
+        "orientation": parsed.orientation(),
+        "open_edges": None if parsed.cell_kind == "tetra" else parsed.open_edges(),
+        "spec_issues": meta.get("issues", []),
+        "encoding": meta.get("encoding"),
+    }
+    record["volume_ok"] = record["relative_error"] < tol
+    record["topology_ok"] = (
+        record["file_points"] == record["source_points"]
+        and record["file_cells"] == record["source_cells"]
+    )
+    record["orientation_ok"] = record["orientation"] == "outward"
+    record["closed_ok"] = record["open_edges"] in (None, 0)
+    record["spec_ok"] = not record["spec_issues"]
+    if fmt == "cgns":
+        record["cgns_sids_violations"] = fc.cgns_issues(path)
+        record["sids_ok"] = not record["cgns_sids_violations"]
+    record["green"] = all(
+        record[key]
+        for key in ("volume_ok", "topology_ok", "orientation_ok", "closed_ok", "spec_ok")
+    ) and record.get("sids_ok", True)
+    return record
 
 
-def audit_in_direction(fmt: str, geom: GeometryFixture, tmpdir: str) -> AuditCell:
-    """Audit the 'in' direction: meshio.Mesh → write → read_meshio → compare."""
+def audit_in(fmt: str, geom_name: str, files_dir: Path) -> dict:
+    """Write with meshio alone, then import through the TensorCAD reader."""
     import meshio
 
-    mesh = geom.mesh
-
+    geom = _geom(geom_name)
     if fmt in FORMATS_VOLUME:
-        tet = tetrahedralise_surface(mesh)
-        v_source = tet.volume()
-        # Build meshio.Mesh from tetrahedral data
-        pts = np.array(tet.vertices, dtype=float)
-        cells = [("tetra", np.array(tet.tets, dtype=np.int64))]
-        mio = meshio.Mesh(pts, cells)
-        path = Path(tmpdir) / f"test_in.{fmt}"
-        meshio.write(str(path), mio, file_format=fmt)
-        back = read_meshio(path, file_format=fmt)
-        v_file = back.volume()
-        n_pts = len(back.vertices)
-        n_cells = len(back.tets)
-        orient = "outward" if back.signed_volume() > 0 else "inward"
-        closed = None
+        points = np.array(geom.tetra.vertices, dtype=np.float64)
+        cells = [("tetra", np.array(geom.tetra.tets, dtype=np.int64))]
+        src_vol = geom.tetra.volume()
     else:
-        v_source = independent_signed_volume(mesh)
-        pts = np.array(mesh.vertices, dtype=float)
-        cells = [("triangle", np.array(mesh.faces, dtype=np.int64))]
-        mio = meshio.Mesh(pts, cells)
-        path = Path(tmpdir) / f"test_in.{fmt}"
-        meshio.write(str(path), mio, file_format=fmt)
-        back = read_meshio(path, file_format=fmt)
-        v_file = independent_signed_volume(back)
-        n_pts = len(back.vertices)
-        n_cells = len(back.faces)
-        orient = "outward" if v_file > 0 else "inward"
-        closed = is_closed_manifold(back)
-
-    rel = relative_error(v_file, v_source)
-    verdict = "PASS" if rel < 1e-5 else "FAIL"
-    return AuditCell(
-        direction="in", fmt=fmt, geometry=geom.name,
-        v_file=v_file, v_source=v_source, rel_err=rel,
-        n_pts=n_pts, n_cells=n_cells, orientation=orient,
-        closed=closed, spec_ok=True, verdict=verdict,
+        points = np.array(geom.mesh.vertices, dtype=np.float64)
+        cells = [("triangle", np.array(geom.mesh.faces, dtype=np.int64))]
+        src_vol = surface_signed_volume(geom.mesh)
+    path = files_dir / f"in_{fmt}_{geom_name}{_EXT[fmt]}"
+    meshio.write(str(path), meshio.Mesh(points, cells), file_format=fmt)
+    back = read_meshio(path, file_format=fmt)
+    vol = _source_volume(back)
+    tol = VOLUME_TOL.get(fmt, DEFAULT_TOL)
+    record = {
+        "direction": "in",
+        "format": fmt,
+        "geometry": geom_name,
+        "file": _rel(path),
+        "sha256": _sha256(path),
+        "source_volume": src_vol,
+        "file_volume": vol,
+        "relative_error": _relative(vol, src_vol),
+        "volume_tol": tol,
+        "source_points": len(points),
+        "file_points": len(back.vertices),
+        "source_cells": len(cells[0][1]),
+        "file_cells": len(back.tets) if isinstance(back, TetrahedralMesh) else len(back.faces),
+    }
+    record["volume_ok"] = record["relative_error"] < tol
+    record["topology_ok"] = (
+        record["file_points"] == record["source_points"]
+        and record["file_cells"] == record["source_cells"]
     )
+    record["orientation_ok"] = record["file_volume"] > 0
+    record["green"] = record["volume_ok"] and record["topology_ok"] and record["orientation_ok"]
+    return record
 
 
-# ---------------------------------------------------------------------------
-# Figure generation
-# ---------------------------------------------------------------------------
+def cgns_defect_evidence(files_dir: Path) -> dict:
+    """Document the defect the audit found: meshio's CGNS file is not SIDS."""
+    import meshio
 
-def generate_figures(report: AuditReport, out_dir: Path) -> list[str]:
-    """Generate matplotlib figures for the report."""
+    geom = _geom("cube")
+    path = write_cgns(files_dir / "cgns_cube_sids.cgns", geom.tetra)
+    ours = fc.cgns_issues(path)
+
+    legacy = files_dir / "cgns_cube_meshio_writer.cgns"
+    meshio.write(
+        str(legacy),
+        meshio.Mesh(
+            np.array(geom.tetra.vertices, dtype=np.float64),
+            [("tetra", np.array(geom.tetra.tets, dtype=np.int64))],
+        ),
+        file_format="cgns",
+    )
+    theirs = fc.cgns_issues(legacy)
+    # meshio can read our SIDS file (the node names it looks for are kept)...
+    meshio_read_ok = True
+    try:
+        mio = meshio.read(str(path), file_format="cgns")
+        meshio_read_ok = mio.cells[0].type == "tetra" and len(mio.cells[0].data) == len(geom.tetra.tets)
+    except Exception as exc:  # pragma: no cover - recorded, not raised
+        meshio_read_ok = f"{type(exc).__name__}: {exc}"
+    return {
+        "sids_writer": _rel(path),
+        "sids_violations_ours": ours,
+        "meshio_writer_file": _rel(legacy),
+        "sids_violations_meshio": theirs,
+        "meshio_reads_our_sids_file": meshio_read_ok,
+    }
+
+
+def make_figures(rows: list[dict], fig_dir: Path) -> list[dict]:
     import matplotlib
+
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    import matplotlib.ticker as mticker
 
-    fig_dir = out_dir / "figures"
     fig_dir.mkdir(parents=True, exist_ok=True)
-    fig_paths = []
+    figures: list[dict] = []
 
-    # Figure 1: Volume error matrix (log scale)
-    formats = ["stl", "obj", "vtk", "gmsh", "su2", "cgns"]
-    geometries = ["cube", "sphere", "wigley_hull"]
-    errors = np.zeros((len(formats), len(geometries)))
-    for cell in report.cells:
-        if cell.direction == "out":
-            fi = formats.index(cell.fmt)
-            gi = geometries.index(cell.geometry)
-            errors[fi, gi] = max(cell.rel_err, 1e-18)
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(np.log10(errors), cmap="RdYlGn_r", aspect="auto",
-                   vmin=-15, vmax=-3)
-    ax.set_xticks(range(len(geometries)))
-    ax.set_xticklabels(geometries, rotation=15, ha="right")
-    ax.set_yticks(range(len(formats)))
-    ax.set_yticklabels(formats)
-    ax.set_xlabel("Geometry")
-    ax.set_ylabel("Format")
-    ax.set_title("log₁₀(relative volume error) — out direction")
-    cbar = plt.colorbar(im, ax=ax)
-    cbar.set_label("log₁₀(rel err)")
-    # Gate lines
-    ax.axhline(y=3.5, color="orange", linestyle="--", alpha=0.7, label="1e-3 gate")
-    ax.axhline(y=-0.8, color="red", linestyle="--", alpha=0.7, label="15% owner line")
-    ax.legend(loc="lower right")
-    plt.tight_layout()
-    p1 = fig_dir / "volume_error_matrix.png"
-    fig.savefig(p1, dpi=150)
+    # 1) volume relative error per cell, log scale
+    fig, ax = plt.subplots(figsize=(11, 4.6))
+    labels = [f"{r['format']}\n{r['geometry']}" for r in rows]
+    values = [max(r["relative_error"], 1e-17) for r in rows]
+    colors = ["#2b8a3e" if r["green"] else "#c92a2a" for r in rows]
+    ax.bar(range(len(rows)), values, color=colors)
+    ax.set_yscale("log")
+    ax.axhline(1e-12, color="#495057", ls="--", lw=1, label="tolerance (exact formats)")
+    ax.axhline(1e-5, color="#f08c00", ls=":", lw=1, label="tolerance (STL, float32)")
+    ax.set_xticks(range(len(rows)))
+    ax.set_xticklabels(labels, fontsize=6.5, rotation=90)
+    ax.set_ylabel("|V_file - V_source| / V_source")
+    ax.set_title("6 formats x 3 geometries: volume fidelity read back from the file bytes")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    out = fig_dir / "volume_error_matrix.png"
+    fig.savefig(out, dpi=150)
     plt.close(fig)
-    fig_paths.append(str(p1))
+    figures.append({"name": out.name, "caption": "Relative volume error of each audited cell, read back from the file bytes by the spec parser. Green = inside tolerance and topology/orientation/closedness all pass; red = a failing cell."})
 
-    # Figure 2: Cell status grid
-    fig, ax = plt.subplots(figsize=(10, 5))
-    status = np.ones((len(formats), len(geometries)))  # 1 = PASS
-    for cell in report.cells:
-        if cell.direction == "out" and cell.verdict == "FAIL":
-            fi = formats.index(cell.fmt)
-            gi = geometries.index(cell.geometry)
-            status[fi, gi] = 0
-    cmap = plt.cm.colors.ListedColormap(["#ff4444", "#44cc44"])
-    im = ax.imshow(status, cmap=cmap, aspect="auto", vmin=0, vmax=1)
-    ax.set_xticks(range(len(geometries)))
-    ax.set_xticklabels(geometries, rotation=15, ha="right")
-    ax.set_yticks(range(len(formats)))
-    ax.set_yticklabels(formats)
-    ax.set_xlabel("Geometry")
-    ax.set_ylabel("Format")
-    ax.set_title("Cell status grid (green=PASS, red=FAIL)")
-    plt.tight_layout()
-    p2 = fig_dir / "cell_status_grid.png"
-    fig.savefig(p2, dpi=150)
+    # 2) status grid, out vs in
+    fig, ax = plt.subplots(figsize=(7.2, 4.4))
+    names = sorted({r["format"] for r in rows})
+    geoms = sorted({r["geometry"] for r in rows})
+    grid = np.zeros((len(names), len(geoms) * 2))
+    for r in rows:
+        d = 0 if r["direction"] == "out" else 1
+        grid[names.index(r["format"]), geoms.index(r["geometry"]) * 2 + d] = 1.0 if r["green"] else -1.0
+    ax.imshow(grid, cmap=matplotlib.colors.ListedColormap(["#c92a2a", "#2b8a3e"]), vmin=-1, vmax=1)
+    ax.set_xticks(range(len(geoms) * 2))
+    ax.set_xticklabels([f"{g}\n{d}" for g in geoms for d in ("out", "in")], fontsize=8)
+    ax.set_yticks(range(len(names)))
+    ax.set_yticklabels(names)
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            ax.text(j, i, "pass" if grid[i, j] > 0 else "FAIL", ha="center", va="center", fontsize=7, color="white")
+    ax.set_title("18 cells x 2 directions (out = our writer, in = meshio writer)")
+    fig.tight_layout()
+    out = fig_dir / "cell_status_grid.png"
+    fig.savefig(out, dpi=150)
     plt.close(fig)
-    fig_paths.append(str(p2))
+    figures.append({"name": out.name, "caption": "Status of all audited cells. 'out' verifies our export by parsing the bytes with an independent spec parser, 'in' verifies our import against files written by meshio alone."})
 
-    # Figure 3: Wigley hull reconstruction
-    fig = plt.figure(figsize=(12, 4))
-    wigley_geom = next(g for g in FIXTURES if g.name == "wigley_hull")
-    mesh = wigley_geom.mesh
-    pts = np.array(mesh.vertices)
-    faces = np.array(mesh.faces)
-
-    ax1 = fig.add_subplot(131, projection="3d")
-    ax1.plot_trisurf(pts[:, 0], pts[:, 1], pts[:, 2], triangles=faces,
-                     cmap="viridis", edgecolor="none", alpha=0.8)
-    ax1.set_title("Source mesh")
-    ax1.set_xlabel("x"); ax1.set_ylabel("y"); ax1.set_zlabel("z")
-
-    # Reconstructed from file (OBJ round-trip)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        back = read_meshio(write_meshio(Path(tmpdir) / "w.obj", mesh, file_format="obj"), file_format="obj")
-    bpts = np.array(back.vertices)
-    bfaces = np.array(back.faces)
-
-    ax2 = fig.add_subplot(132, projection="3d")
-    ax2.plot_trisurf(bpts[:, 0], bpts[:, 1], bpts[:, 2], triangles=bfaces,
-                     cmap="viridis", edgecolor="none", alpha=0.8)
-    ax2.set_title("Reconstructed (OBJ)")
-    ax2.set_xlabel("x"); ax2.set_ylabel("y"); ax2.set_zlabel("z")
-
-    # Error map
-    from scipy.spatial import cKDTree
-    tree = cKDTree(bpts)
-    dists, _ = tree.query(pts)
-    ax3 = fig.add_subplot(133, projection="3d")
-    sc = ax3.plot_trisurf(pts[:, 0], pts[:, 1], pts[:, 2], triangles=faces,
-                          cmap="RdYlGn", edgecolor="none", alpha=0.8)
-    ax3.set_title(f"Reconstruction error (max={dists.max():.2e})")
-    ax3.set_xlabel("x"); ax3.set_ylabel("y"); ax3.set_zlabel("z")
-    plt.colorbar(sc, ax=ax3, shrink=0.6, label="distance [m]")
-
-    plt.tight_layout()
-    p3 = fig_dir / "wigley_hull_from_file.png"
-    fig.savefig(p3, dpi=150)
+    # 3) the hull geometry as the file declares it, with the analytic volume
+    geom = _geom("wigley_hull")
+    parsed, _meta = fc.parse_file(ROOT / _hull_file(rows), "obj")
+    tris = parsed.points[parsed.triangles()]
+    fig = plt.figure(figsize=(9, 4.4))
+    ax = fig.add_subplot(121, projection="3d")
+    ax.plot_trisurf(
+        tris[:, :, 0].ravel(),
+        tris[:, :, 1].ravel(),
+        tris[:, :, 2].ravel(),
+        triangles=np.arange(len(tris) * 3).reshape(-1, 3),
+        color="#4dabf7",
+        linewidth=0,
+        alpha=0.9,
+    )
+    ax.set_title("Wigley hull as parsed from the OBJ file")
+    ax.set_xlabel("x [m]")
+    ax.set_ylabel("y [m]")
+    ax.set_zlabel("z [m]")
+    ax2 = fig.add_subplot(122)
+    vol_file = parsed.volume()
+    analytic = ANALYTIC_VOLUME["wigley_hull"]
+    ax2.bar(["file (OBJ)", "analytic"], [vol_file, analytic], color=["#4dabf7", "#adb5bd"])
+    ax2.set_ylabel("volume [m^3]")
+    ax2.set_title(
+        f"hull volume: file vs analytic\nrelative difference {abs(vol_file-analytic)/analytic:.2%}"
+    )
+    for x, v in enumerate([vol_file, analytic]):
+        ax2.text(x, v, f"{v:.6f}", ha="center", va="bottom", fontsize=8)
+    fig.tight_layout()
+    out = fig_dir / "wigley_hull_from_file.png"
+    fig.savefig(out, dpi=150)
     plt.close(fig)
-    fig_paths.append(str(p3))
+    figures.append({"name": out.name, "caption": "Wigley hull surface reconstructed from the exported OBJ bytes, and its divergence-theorem volume against the analytic hull volume."})
+    return figures
 
-    return fig_paths
+
+def _hull_file(rows: list[dict]) -> str:
+    for r in rows:
+        if r["geometry"] == "wigley_hull" and r["format"] == "obj" and r["direction"] == "out":
+            return r["file"]
+    raise KeyError("no wigley_hull OBJ record")
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Independent meshio format matrix audit")
-    parser.add_argument("--out", default="runs/m21456_matrix18", help="Output directory")
-    args = parser.parse_args()
-    out_dir = Path(args.out)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    report = AuditReport()
-    formats = list(FORMATS_ALL)  # stl, obj, vtk, gmsh, su2, cgns
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for geom in FIXTURES:
-            for fmt in formats:
-                # out direction
-                cell_out = audit_out_direction(fmt, geom, tmpdir)
-                report.cells.append(cell_out)
-                # in direction
-                cell_in = audit_in_direction(fmt, geom, tmpdir)
-                report.cells.append(cell_in)
-
-    # Summary
-    total = len(report.cells)
-    passed = sum(1 for c in report.cells if c.verdict == "PASS")
-    failed = total - passed
-    max_err = max(c.rel_err for c in report.cells)
-
-    report.summary = {
-        "total_cells": total,
-        "passed": passed,
-        "failed": failed,
-        "max_rel_err": max_err,
-        "formats": formats,
-        "geometries": [g.name for g in FIXTURES],
-        "combinations": len(formats) * len(FIXTURES),
-        "directions": 2,
-    }
-
-    # Generate figures
-    report.figures = generate_figures(report, out_dir)
-
-    # Write JSON
-    with open(out_dir / "matrix18.json", "w") as f:
-        json.dump({
-            "cells": [asdict(c) for c in report.cells],
-            "summary": report.summary,
-            "figures": report.figures,
-        }, f, indent=2, default=str)
-
-    # Write Markdown table
-    md_lines = [
-        "# meshio Format Matrix — Independent Audit (m21456)",
+def markdown_table(rows: list[dict], evidence: dict) -> str:
+    lines = [
+        "# 6 formats x 3 geometries: independent audit of the exchange matrix",
         "",
-        f"**Total cells**: {total} | **Passed**: {passed} | **Failed**: {failed}",
-        f"**Max relative error**: {max_err:.2e}",
+        "Anchor: `GAP-CAD-B2-MESH-FORMAT-MATRIX`.",
         "",
-        "| # | dir | format | geometry | V_file | V_source | rel_err | pts | cells | orient | closed | verdict |",
-        "|---|-----|--------|----------|--------|----------|---------|-----|-------|--------|--------|---------|",
+        "`out` = written by `tensorcad.meshio_exchange.write_meshio`, verified by parsing the",
+        "file bytes with the spec readers in `tensorcad.format_conformance` (no meshio, no",
+        "TensorCAD reader). `in` = written by meshio alone from a plain `meshio.Mesh`, read",
+        "back by `tensorcad.meshio_exchange.read_meshio`.",
+        "",
+        "| # | dir | format | geometry | V_file [m3] | V_source [m3] | rel err | pts | cells | orient | closed | spec/SIDS | verdict |",
+        "|---|-----|--------|----------|-------------|---------------|---------|-----|-------|--------|--------|-----------|---------|",
     ]
-    for i, c in enumerate(report.cells, 1):
-        closed_str = str(c.closed) if c.closed is not None else "—"
-        md_lines.append(
-            f"| {i} | {c.direction} | {c.fmt} | {c.geometry} | "
-            f"{c.v_file:.9f} | {c.v_source:.9f} | {c.rel_err:.2e} | "
-            f"{c.n_pts} | {c.n_cells} | {c.orientation} | {closed_str} | **{c.verdict}** |"
+    for i, r in enumerate(rows, 1):
+        checks = []
+        if r["direction"] == "out":
+            checks.append("spec ok" if r["spec_ok"] else f"{len(r['spec_issues'])} spec issue(s)")
+            if "sids_ok" in r:
+                checks.append("SIDS ok" if r["sids_ok"] else f"{len(r['cgns_sids_violations'])} SIDS violation(s)")
+        else:
+            checks.append("n/a (meshio writer)")
+        lines.append(
+            "| {i} | {d} | {f} | {g} | {v:.9f} | {s:.9f} | {e:.2e} | {p} | {c} | {o} | {cl} | {chk} | {verd} |".format(
+                i=i,
+                d=r["direction"],
+                f=r["format"],
+                g=r["geometry"],
+                v=r["file_volume"],
+                s=r["source_volume"],
+                e=r["relative_error"],
+                p=r["file_points"],
+                c=r["file_cells"],
+                o="outward" if r["orientation_ok"] else "INWARD",
+                cl="-" if r["direction"] == "out" and r.get("open_edges") is None else ("yes" if r.get("closed_ok", True) else "OPEN"),
+                chk="; ".join(checks),
+                verd="PASS" if r["green"] else "FAIL",
+            )
         )
-    md_lines.append("")
-    md_lines.append(f"**{passed}/{total} cells PASS.**")
-    with open(out_dir / "matrix.md", "w") as f:
-        f.write("\n".join(md_lines))
+    passing = sum(1 for r in rows if r["green"])
+    lines += [
+        "",
+        f"**{passing}/{len(rows)} audited cells green.**",
+        "",
+        "## CGNS SIDS conformance",
+        "",
+        f"* `tensorcad.mesh_cgns.write_cgns`: **{len(evidence['sids_violations_ours'])} SIDS violations**",
+        f"* meshio-written CGNS (what the exporter used before this change): "
+        f"**{len(evidence['sids_violations_meshio'])} SIDS violations**",
+        f"* meshio reads our SIDS file back: {evidence['meshio_reads_our_sids_file']}",
+        "",
+        "meshio-written file, violations:",
+        "",
+    ]
+    lines += [f"{i}. {p}" for i, p in enumerate(evidence["sids_violations_meshio"], 1)]
+    return "\n".join(lines) + "\n"
 
-    # Manifest
-    manifest = {
-        "mission": "m21456",
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--out",
+        default=str(ROOT / "runs" / "m21004_meshio_matrix18_independent"),
+        help="run directory",
+    )
+    parser.add_argument(
+        "--fig",
+        default=str(ROOT / "artifacts" / "m21004_meshio_matrix18_independent"),
+        help="figure directory",
+    )
+    args = parser.parse_args(argv)
+
+    run_dir = Path(args.out)
+    files_dir = run_dir / "files"
+    if files_dir.exists():
+        shutil.rmtree(files_dir)
+    files_dir.mkdir(parents=True, exist_ok=True)
+    fig_dir = Path(args.fig) / "figures"
+
+    rows: list[dict] = []
+    for fmt in FORMATS_ALL:
+        for name in GEOM_NAMES:
+            rows.append(audit_out(fmt, name, files_dir))
+            rows.append(audit_in(fmt, name, files_dir))
+
+    evidence = cgns_defect_evidence(files_dir)
+    figures = make_figures(rows, fig_dir)
+
+    payload = {
         "anchor": "GAP-CAD-B2-MESH-FORMAT-MATRIX",
-        "files": {
-            "matrix18.json": str(out_dir / "matrix18.json"),
-            "matrix.md": str(out_dir / "matrix.md"),
-        },
-        "figures": report.figures,
-        "summary": report.summary,
+        "python": platform.python_version(),
+        "meshio": __import__("meshio").__version__,
+        "geometries": list(GEOM_NAMES),
+        "formats": list(FORMATS_ALL),
+        "surface_formats": list(FORMATS_SURFACE),
+        "volume_formats": list(FORMATS_VOLUME),
+        "analytic_volumes": {g: ANALYTIC_VOLUME[g] for g in GEOM_NAMES},
+        "rows": rows,
+        "cgns": evidence,
+        "figures": [_rel(fig_dir / f["name"]) for f in figures],
     }
-    with open(out_dir / "manifest.json", "w") as f:
-        json.dump(manifest, f, indent=2)
+    (run_dir / "matrix18.json").write_text(json.dumps(payload, indent=2, sort_keys=False))
+    (run_dir / "matrix.md").write_text(markdown_table(rows, evidence))
 
-    print(f"Audit complete: {passed}/{total} cells PASS, max rel_err={max_err:.2e}")
-    print(f"Results written to {out_dir}")
+    manifest = {}
+    for path in sorted(list(files_dir.glob("*")) + list(fig_dir.glob("*.png")) + [
+        run_dir / "matrix18.json",
+        run_dir / "matrix.md",
+    ]):
+        manifest[_rel(path)] = _sha256(path)
+    (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
+
+    green = sum(1 for r in rows if r["green"])
+    print(f"audited cells: {len(rows)}  green: {green}")
+    for r in rows:
+        if not r["green"]:
+            print("FAIL", r["direction"], r["format"], r["geometry"], r.get("spec_issues"), r.get("cgns_sids_violations"))
+    print("CGNS SIDS violations  ours:", len(evidence["sids_violations_ours"]),
+          " meshio:", len(evidence["sids_violations_meshio"]))
+    print("artefacts:", run_dir, fig_dir)
+    return 0 if green == len(rows) else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
