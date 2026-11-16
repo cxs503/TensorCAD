@@ -86,7 +86,10 @@ does not repeat the audit's finding-F1 mistake (a dialect presented as "the same
 
 ## 4. Gmsh differential — NOT RUN, with the harness complete and the blocker quantified
 
-- Harness written and compiled: `tools/mesh_quality_oracles/gmsh_oracle.cpp` (native loong64
+- Harness written (*not* compiled, see `docs/audit_m22616_gmsh_source_oracle.md`: the
+  source-oracle build script carried an `sh` parse error until audit m22616, and after that
+  fix the link stops on Gmsh's element-factory closure, which no measure calls):
+  `tools/mesh_quality_oracles/gmsh_oracle.cpp` (native loong64
   `libgmsh.so.4.15.2` from the Debian pool, `gmsh::model::mesh::getElementQualities`), covering
   `minSICN`, `gamma`, `eta`, `volume`, `minEdge`, `maxEdge`, `innerRadius`, `outerRadius`.
   The mapping to the library is already encoded in `MAP["gmsh"]`, including the one pair
