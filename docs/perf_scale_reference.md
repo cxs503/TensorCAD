@@ -4,7 +4,8 @@
 **版本**: 2.0.0 · **实测节点**: LoongArch64, 128 核, Python 3.11.6, TensorCAD 0.23.0
 **工件源**: `benchmarks/perf_scale/{artifacts/ladder_mesh.json, artifacts/ladder_voxel.json,
 ladder_fleet_10m_3pt.json, artifacts/ladder_single_10m.json, artifacts/ladder_import_single_10m.json,
-artifacts/ladder_import_fleet_10m.json}`
+artifacts/ladder_import_fleet_10m.json,
+artifacts/ladder_voxelize_mesh.json}`
 **回归基线**: `benchmarks/perf_scale/baseline.json`（本地 3 轮取最慢，闸门 2×）
 **验证**:
 - 表格漂移：`python scripts/perf_scale_reference_doc.py --check`（本文件全部 8 张表）
