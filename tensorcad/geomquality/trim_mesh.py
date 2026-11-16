@@ -43,6 +43,7 @@ from typing import Any, Iterable, Sequence
 
 from ..geometry import Mesh
 from .stitch import seam_report, stitch_t_junctions
+from .symmetry import symmetry_stage
 from .iges_trim import (
     IgesError,
     PlaneSurface,
@@ -1188,7 +1189,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
                 transfer_tolerance: float | None = None,
                 seam_tolerance: float | None = None, seam_audit: bool = True,
                 seal_openings: bool = False, seal_planarity: float | None = None,
-                opening_audit: bool = True) -> CadImport:
+                opening_audit: bool = True, symmetry_closure: bool = False,
+                symmetry_band: float | None = None,
+                symmetry_min_coverage: float = 0.5) -> CadImport:
     """Import an IGES file: parse, invert trims, tessellate, repair, audit.
 
     ``scale`` converts the file's units to metres; it defaults to the file's own declared
@@ -1226,6 +1229,9 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
     else:
         vertices, faces, merged = weld_vertices(vertices, faces, weld)
         repair_record = {"vertices_merged": merged, "weld_only": True}
+    vertices, faces, symmetry_record = symmetry_stage(
+        vertices, faces, enabled=symmetry_closure, weld_tolerance=max(weld, 1e-12),
+        band=symmetry_band, min_coverage=symmetry_min_coverage)
     after = audit_mesh(vertices, faces, degenerate_area=0.0)
 
     mesh = Mesh(
@@ -1265,6 +1271,7 @@ def import_iges(path: str | Path, *, tolerance: float | None = None, scale: floa
         "seam": seam_record,
         "openings": seal_record,
         "repair": repair_record,
+        "symmetry": symmetry_record,
         "after_repair": after.to_dict(),
         "gates": gates,
         "elapsed_seconds": round(time.time() - started, 3),
@@ -1326,7 +1333,8 @@ def _gates(model: TrimmedModel, tessellation: Tessellation, audit: MeshAudit) ->
 
 _PATCH_ROUTE_KEYS = {"scale", "weld_tolerance", "repair", "fill_holes", "max_hole_edges",
                      "seam_tolerance", "seam_audit", "seal_openings", "seal_planarity",
-                     "opening_audit"}
+                     "opening_audit", "symmetry_closure", "symmetry_band",
+                     "symmetry_min_coverage"}
 
 
 def import_cad(path: str | Path, *, allow_patch_fallback: bool = True,
@@ -1406,7 +1414,9 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
                      u_samples: int = 24, v_samples: int = 12,
                      seam_tolerance: float | None = None, seam_audit: bool = True,
                      seal_openings: bool = False, seal_planarity: float | None = None,
-                     opening_audit: bool = True) -> CadImport:
+                     opening_audit: bool = True, symmetry_closure: bool = False,
+                     symmetry_band: float | None = None,
+                     symmetry_min_coverage: float = 0.5) -> CadImport:
     """Import an *untrimmed* patch set (the flavour this repository's writer emits).
 
     IGES 128 patch sets and STEP patch sets carry no topology: adjacency has to be
@@ -1445,6 +1455,9 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
     else:
         vertices, faces, merged = weld_vertices(vertices, faces, weld)
         repair_record = {"vertices_merged": merged, "weld_only": True}
+    vertices, faces, symmetry_record = symmetry_stage(
+        vertices, faces, enabled=symmetry_closure, weld_tolerance=max(weld, 1e-12),
+        band=symmetry_band, min_coverage=symmetry_min_coverage)
     after = audit_mesh(vertices, faces)
     mesh_out = Mesh(vertices=tuple(vertices), faces=tuple(faces), units="m")
     gates = {
@@ -1479,6 +1492,7 @@ def import_patch_set(path: str | Path, *, scale: float | None = None,
         "seam": seam_record,
         "openings": seal_record,
         "repair": repair_record,
+        "symmetry": symmetry_record,
         "after_repair": after.to_dict(),
         "gates": gates,
         "elapsed_seconds": round(time.time() - started, 3),
