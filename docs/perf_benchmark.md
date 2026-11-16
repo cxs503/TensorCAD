@@ -5,8 +5,10 @@
 > 的**回归门口径**（基线在哪、阈值多少、`not_run` 与 pass 的区别），并记录 v0.2.0 版
 > 文档的五处**勘误**（§5）。本文件所有数字由 `tensorcad.perf_evidence` 从受版本控制的
 > JSON 渲染，`python scripts/perf_benchmark_doc.py --check` 在漂移时失败。
+> v0.4.0 新增 §9：墙钟门的**噪声口径**（重复取样、两侧同估计量、`noise` 第三态、
+> 工作量口径可比性），实测证据在 `docs/perf_gate_noise.md`。
 
-**版本**: 0.3.0（取代 0.2.0）
+**版本**: 0.4.0（取代 0.3.0）
 **日期**: 2026-11-15
 **锚点**: `GAP-CAD-D4-PERF-SCALE`
 **模块**: `tensorcad/perf_benchmark.py`
@@ -80,36 +82,36 @@ RED 阈值列用模块的 `DEFAULT_GATE_FACTOR`，不是手写的 `2`。
 <!-- perf-evidence:baseline-gate-table begin -->
 | 门键 | 规模 | 基线秒 | RED 阈值 2× | 基线吞吐 |
 |---|---:|---:|---:|---:|
-| `load:21x9` | 三角面 678 | 0.0239 | 0.0478 | 28,363 tri/s |
-| `load:41x13` | 三角面 1,998 | 0.0963 | 0.1926 | 20,746 tri/s |
-| `load:81x21` | 三角面 6,558 | 0.2753 | 0.5506 | 23,823 tri/s |
-| `load:161x41` | 三角面 25,918 | 1.5618 | 3.1236 | 16,595 tri/s |
-| `point_locate:21x9` | 三角面 678 | 0.0836 | 0.1673 | 5,978 query/s |
-| `point_locate:41x13` | 三角面 1,998 | 0.2869 | 0.5738 | 1,743 query/s |
-| `point_locate:81x21` | 三角面 6,558 | 0.9659 | 1.9317 | 518 query/s |
-| `point_locate:161x41` | 三角面 25,918 | 6.2272 | 12.4543 | 80 query/s |
-| `point_locate_accel:21x9` | 三角面 678 | 0.0289 | 0.0577 | 17,326 query/s |
-| `point_locate_accel:41x13` | 三角面 1,998 | 0.0374 | 0.0748 | 13,369 query/s |
-| `point_locate_accel:81x21` | 三角面 6,558 | 0.0643 | 0.1287 | 7,773 query/s |
-| `point_locate_accel:161x41` | 三角面 25,918 | 0.0938 | 0.1877 | 5,328 query/s |
-| `volume:21x9` | 三角面 678 | 0.0003 | 0.0006 | 2,229,672 tri/s |
-| `volume:41x13` | 三角面 1,998 | 0.0012 | 0.0024 | 1,653,507 tri/s |
-| `volume:81x21` | 三角面 6,558 | 0.0054 | 0.0108 | 1,214,359 tri/s |
-| `volume:161x41` | 三角面 25,918 | 0.0192 | 0.0383 | 1,352,668 tri/s |
-| `voxelize:32x0` | 体素 32,768 | 0.2501 | 0.5002 | 131,015 cell/s |
-| `voxelize:48x0` | 体素 110,592 | 0.8719 | 1.7438 | 126,840 cell/s |
-| `voxelize:64x0` | 体素 262,144 | 2.3300 | 4.6600 | 112,509 cell/s |
-| `voxelize:96x0` | 体素 884,736 | 7.0643 | 14.1287 | 125,240 cell/s |
-| `obj_read:21x9` | 规模 678 | 0.0040 | 0.0080 | 169,712 |
-| `obj_write:21x9` | 规模 678 | 0.0025 | 0.0050 | 268,535 |
-| `obj_read:41x13` | 规模 1,998 | 0.0113 | 0.0226 | 176,988 |
-| `obj_write:41x13` | 规模 1,998 | 0.0079 | 0.0159 | 251,950 |
-| `obj_read:81x21` | 规模 6,558 | 0.0403 | 0.0805 | 162,874 |
-| `obj_write:81x21` | 规模 6,558 | 0.0258 | 0.0517 | 253,828 |
-| `obj_read:161x41` | 规模 25,918 | 0.1400 | 0.2801 | 185,087 |
-| `obj_write:161x41` | 规模 25,918 | 0.0947 | 0.1894 | 273,671 |
+| `load:21x9` | 三角面 678 | 0.0176 | 0.0352 | 38,533 tri/s |
+| `load:41x13` | 三角面 1,998 | 0.0511 | 0.1022 | 39,114 tri/s |
+| `load:81x21` | 三角面 6,558 | 0.1777 | 0.3555 | 36,895 tri/s |
+| `load:161x41` | 三角面 25,918 | 0.7514 | 1.5028 | 34,494 tri/s |
+| `point_locate:21x9` | 三角面 678 | 0.1263 | 0.2527 | 7,915 query/s |
+| `point_locate:41x13` | 三角面 1,998 | 0.4000 | 0.7999 | 2,500 query/s |
+| `point_locate:81x21` | 三角面 6,558 | 1.2638 | 2.5275 | 791 query/s |
+| `point_locate:161x41` | 三角面 25,918 | 4.9534 | 9.9067 | 202 query/s |
+| `point_locate_accel:21x9` | 三角面 678 | 0.0396 | 0.0793 | 25,221 query/s |
+| `point_locate_accel:41x13` | 三角面 1,998 | 0.0533 | 0.1066 | 18,770 query/s |
+| `point_locate_accel:81x21` | 三角面 6,558 | 0.0861 | 0.1721 | 11,620 query/s |
+| `point_locate_accel:161x41` | 三角面 25,918 | 0.1260 | 0.2519 | 7,939 query/s |
+| `volume:21x9` | 三角面 678 | 0.0003 | 0.0005 | 2,523,824 tri/s |
+| `volume:41x13` | 三角面 1,998 | 0.0008 | 0.0016 | 2,504,829 tri/s |
+| `volume:81x21` | 三角面 6,558 | 0.0028 | 0.0056 | 2,359,935 tri/s |
+| `volume:161x41` | 三角面 25,918 | 0.0110 | 0.0221 | 2,346,380 tri/s |
+| `voxelize:32x0` | 体素 32,768 | 0.1807 | 0.3614 | 181,358 cell/s |
+| `voxelize:48x0` | 体素 110,592 | 0.5492 | 1.0984 | 201,376 cell/s |
+| `voxelize:64x0` | 体素 262,144 | 1.3902 | 2.7804 | 188,568 cell/s |
+| `voxelize:96x0` | 体素 884,736 | 4.8896 | 9.7791 | 180,944 cell/s |
+| `obj_read:21x9` | 规模 678 | 0.0023 | 0.0046 | 292,572 |
+| `obj_write:21x9` | 规模 678 | 0.0017 | 0.0034 | 404,081 |
+| `obj_read:41x13` | 规模 1,998 | 0.0071 | 0.0141 | 282,431 |
+| `obj_write:41x13` | 规模 1,998 | 0.0045 | 0.0090 | 445,220 |
+| `obj_read:81x21` | 规模 6,558 | 0.0238 | 0.0476 | 275,439 |
+| `obj_write:81x21` | 规模 6,558 | 0.0146 | 0.0291 | 450,343 |
+| `obj_read:161x41` | 规模 25,918 | 0.0946 | 0.1891 | 274,088 |
+| `obj_write:161x41` | 规模 25,918 | 0.0575 | 0.1151 | 450,382 |
 
-基线记录 28 条；环境 `machine=loongarch64`、`cpu_count=128`、`python=3.11.6`；口径：max of 3 runs per (subtask, nx, nz) key - tolerant of load noise on a shared machine
+基线记录 28 条；环境 `machine=loongarch64`、`cpu_count=128`、`python=3.11.6`；口径：min of 3 runs per (subtask, nx, nz) key - the same estimator the wall-clock gate applies to its own repeats (docs/perf_benchmark.md §9)
 <!-- perf-evidence:baseline-gate-table end -->
 
 **读法**：一份实测取值 `s`，与同键基线秒 `b` 比较，`s/b > factor` 即 RED。环境
@@ -192,3 +194,56 @@ v0.2.0 的几处结论在后续实测中被推翻或被发现不可复现；保�
 4. **测量数据来自共享节点**，绝对秒数不可跨作业逐档相减，只比同工件内部的比值与数量级。
 5. **本文件不测量导入式网格**（STEP/IGES/STL 路径）；阶梯全部由参数化生成器产生，
    10⁷ 带是多体装配规模而非单网格。
+
+## 9. 墙钟门的噪声口径（v0.4.0）
+
+v0.3 §5 的结论是「闸门机制成立，但全绿只在安静机器上可复现」——共享机上连测三次，
+每次都出现 RED，**且 RED 落在不同行**。v0.4 不动阈值（放宽 2× 会把真回归放过去），
+改的是**测量与判据**。实测与逐键量化见 `docs/perf_gate_noise.md`（由
+`scripts/perf_gate_noise_repro.py` 从 JSON 工件渲染），本节只写规则。
+
+### 9.1 三个改动
+
+| # | 改动 | 为什么 |
+|---|---|---|
+| 1 | 短测量重复取样：基线 < `NOISE_BUDGET_SECONDS`(0.5 s) 的键重复 `NOISE_REPEATS`(3) 次，单键累计受 `NOISE_REPEAT_SECONDS`(1.0 s) 约束 | 0.03–0.2 s 的档在共享机上的抖动大于信号；重复是唯一不放松阈值的办法 |
+| 2 | **两侧同估计量**：基线也取 `min` of N（v0.1–v0.3 是 `max` of 3） | 只改测量侧会让估计量不对称：基线被负载抬高多少，门就瞎多少 |
+| 3 | **拒绝不可比**：`point_locate*` 记录 `n_queries`，查询数不同判 `not_run` 并给原因 | 旧基线是 500 条射线，文档的 CI 命令跑 1000 条，键上凭空多出 ~2× |
+
+改动 2 和 3 是**缺陷修复而非调参**：逐键量化显示旧基线（`max` of 3，500 射线）
+把「2× = RED」的实际阈值抬高到 **2.3×–4.2×**（28 键中 21 键），并且对
+`point_locate*` 8 键另有约 2× 的口径偏差——同代码同查询数实测比值 1.89–2.13×。
+
+### 9.2 判定语义
+
+* `measured` + 通过 / 不通过：best-of-N 与基线同口径比较，比值 > `DEFAULT_GATE_FACTOR` 判 RED。
+  **重复之后仍超限 = RED**（不是噪声）。
+* `noise`：仅当同一份代码、同一次运行的重复观测**跨越阈值**且离散度 ≥
+  `NOISE_SPREAD_LIMIT`(1.5×) 时成立——数据不足以判定。`noise` **不是 pass**
+  （`PerfBenchmarkResult.verdict == "inconclusive"`），也**不是 RED**（不进 RED 清单）。
+* `not_run`：工作量不可比、无基线、规模点不足。**不是 pass**。
+
+CLI 退出码三态：`0` = 全部门判定为绿且无 abstain；`1` = 有 RED；`2` = 只有
+`noise`/参数错误——「本机判不出来，别读成绿色」。
+
+### 9.3 复现
+
+```bash
+# 闸门（默认 --repeats auto：只重复短测量）
+python -m tensorcad.perf_benchmark --quick --baseline benchmarks/perf_scale/baseline.json
+
+# 重建基线（估计量必须与门一致；--policy 默认 min）
+python scripts/build_perf_baseline.py --runs 3 --policy min \
+    --subtasks load,point_locate,point_locate_accel,voxelize,volume,obj_write,obj_read
+
+# 噪声口径的实测证据（约 2 min，两次协议 × N 次运行）
+python scripts/perf_gate_noise_repro.py --runs 2        # 渲染 docs/perf_gate_noise.md
+python scripts/perf_gate_noise_repro.py --check         # 漂移校验
+```
+
+### 9.4 仍然成立的局限
+
+* 重复只针对**短测量**：10 s 档不重复，它的 2× 判定靠单发，仍受负载影响。
+* `noise` 只解决「同代码重复跨越阈值」这一种不可判定；机器整体慢 2×（换节点、
+  CPU 降频）不会显示为 `noise`，而是显示为 RED——跨架构拒比（`not_run`）拦的是另一类。
+* §8 第 1 条的欠账不变：10⁶ 带没有自动 RED 判定。
