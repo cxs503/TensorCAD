@@ -970,3 +970,28 @@ def test_perf_benchmark_doc_cited_test_names_exist() -> None:
     suite = (ROOT / "tests" / "test_perf_benchmark.py").read_text(encoding="utf-8")
     missing = [name for name in cited if f"def {name}(" not in suite]
     assert not missing, f"cited but absent: {missing}"
+
+
+# ---------------------------------------------------------------------------
+# Perf-scale figures (GAP-CAD-D4-PERF-SCALE)
+# ---------------------------------------------------------------------------
+
+PERF_SCALE_FIGURES = ROOT / "benchmarks" / "perf_scale" / "figures"
+EXPECTED_FIGURES = [
+    "scaling.png", "point_locate.png", "index_cost.png", "voxelize.png",
+    "fig3pt_scaling.png", "fig3pt_memory.png",
+    "import_scaling.png", "import_throughput.png", "import_volume_accuracy.png",
+    "single10m_scaling.png", "single10m_memory.png", "single10m_volume_accuracy.png",
+]
+
+
+def test_perf_scale_figures_exist() -> None:
+    """All 12 figures referenced by docs/perf_scale_10m.md must exist as committed PNGs."""
+    assert PERF_SCALE_FIGURES.is_dir(), f"missing directory: {PERF_SCALE_FIGURES}"
+    missing = [name for name in EXPECTED_FIGURES if not (PERF_SCALE_FIGURES / name).exists()]
+    assert not missing, f"missing figures: {missing}"
+    for name in EXPECTED_FIGURES:
+        png = PERF_SCALE_FIGURES / name
+        data = png.read_bytes()
+        assert data[:8] == b"\x89PNG\r\n\x1a\n", f"{name} is not a valid PNG"
+        assert len(data) > 4096, f"{name} looks truncated ({len(data)} bytes)"
