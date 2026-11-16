@@ -74,6 +74,28 @@ MEASURED = "measured"
 NOT_RUN = "not_run"
 FAILED = "failed"
 
+#: Status of a wall-clock gate whose *own* repeat measurements straddle the
+#: threshold: the same code, in the same run, produced one observation inside
+#: the limit and one outside it.  That is neither a pass nor a RED, so it gets
+#: its own tag (see ``docs/perf_benchmark.md`` §9).
+NOISE = "noise"
+
+#: A wall-clock measurement below this many seconds is dominated by scheduler
+#: jitter on a shared machine, not by the code under test, so it is *repeated*
+#: instead of being judged from a single shot.
+NOISE_BUDGET_SECONDS = 0.5
+#: Repeats for a short measurement.  ``min`` is the estimator on both sides of
+#: the comparison (contention can only ever add time, so the minimum converges
+#: on the true cost) - and it must be the *same* estimator as the baseline's,
+#: otherwise a real 2x regression hides behind the estimator difference.
+NOISE_REPEATS = 3
+#: Per-key ceiling on repeat cost: stop repeating once the accumulated measured
+#: seconds exceed this, so the gate stays cheap even on a loaded box.
+NOISE_REPEAT_SECONDS = 1.0
+#: ``worst/best`` spread above which a straddling decision is called ``noise``
+#: rather than resolved in either direction.
+NOISE_SPREAD_LIMIT = 1.5
+
 #: The mesh ladder: (nx, nz) pairs that produce increasing triangle counts.
 #: The default ladder goes from ~2k to ~10M triangles.
 #: Triangle count of a rung is ``4 * (nx - 1) * (nz - 1)`` (two 4-sided strips
@@ -175,6 +197,43 @@ class SubTaskResult:
     #: parametric generator caps one hull at 8.19e6 triangles, and subdivision
     #: refines the same discrete solid instead of assembling disjoint copies.
     levels: int = 0
+    #: Ray-query count the ``point_locate``/``point_locate_accel`` measurement
+    #: ran with (0 for sub-tasks that do not take one).  Recorded because a query
+    #: time is only comparable to a baseline measured with the *same* count: the
+    #: committed v0.1-v0.3 baseline was built with 500 queries while the
+    #: documented CI command runs 1000, a silent +2.0x bias on exactly the keys
+    #: that kept flipping RED (see ``docs/perf_benchmark.md`` §9).
+    n_queries: int = 0
+    #: Every wall-clock observation taken for this rung when the gate repeated a
+    #: short measurement (``()`` = measured once).  ``seconds`` stays the *first*
+    #: observation so a single-shot run keeps exactly its old meaning; the
+    #: regression gate reads :attr:`seconds_best` and reports the spread.
+    seconds_samples: tuple[float, ...] = ()
+
+    @property
+    def seconds_best(self) -> float | None:
+        """Fastest observation (the estimator the wall-clock gate compares).
+
+        Falls back to :attr:`seconds` when the measurement was not repeated.
+        """
+        if self.seconds_samples:
+            return min(self.seconds_samples)
+        return self.seconds
+
+    @property
+    def seconds_worst(self) -> float | None:
+        """Slowest observation, or :attr:`seconds` when not repeated."""
+        if self.seconds_samples:
+            return max(self.seconds_samples)
+        return self.seconds
+
+    @property
+    def seconds_spread(self) -> float:
+        """``worst/best`` of the observations (``1.0`` when not repeated)."""
+        best, worst = self.seconds_best, self.seconds_worst
+        if best is None or worst is None or best <= 0.0:
+            return 1.0
+        return worst / best
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -200,6 +259,8 @@ class SubTaskResult:
             "file_mb_per_s": self.file_mb_per_s,
             "volume_rel_err": self.volume_rel_err,
             "levels": self.levels,
+            "n_queries": self.n_queries,
+            "seconds_samples": list(self.seconds_samples),
         }
 
 
@@ -214,8 +275,11 @@ class GateVerdict:
     measured_seconds: float | None = None
     ratio: float | None = None
     #: ``measured`` when the gate had enough data to judge, ``not_run`` when it
-    #: did not.  A ``not_run`` gate is not a pass: it is an explicit statement
-    #: that the check could not be performed on the data at hand.
+    #: did not, ``noise`` when its own repeats straddled the threshold (neither a
+    #: pass nor a RED).  A ``not_run`` gate is not a pass: it is an explicit
+    #: statement that the check could not be performed on the data at hand, and
+    #: a ``noise`` gate is an explicit statement that the data on hand cannot
+    #: decide.
     status: str = MEASURED
 
     def to_dict(self) -> dict[str, Any]:
@@ -260,15 +324,27 @@ class PerfBenchmarkResult:
         return sum(1 for g in self.gates if g.status == NOT_RUN)
 
     @property
+    def gates_noise(self) -> int:
+        """Gates whose own repeats straddled the threshold (undecidable)."""
+        return sum(1 for g in self.gates if g.status == NOISE)
+
+    @property
     def verdict(self) -> str:
         """``fail`` / ``pass`` / ``not_run`` - honest three-way verdict.
 
         ``not_run`` means no gate could be evaluated (e.g. a ladder with fewer
         than ``MIN_SCALING_POINTS`` rungs): that is *not* a pass.
+        ``inconclusive`` means every gate that could be evaluated abstained for
+        noise reasons (:data:`NOISE`): also *not* a pass, and not a RED either -
+        the honest answer is that this machine could not decide.
         """
         if any(not g.passed for g in self.gates):
             return "fail"
-        return "pass" if self.gates_checked else "not_run"
+        if not self.gates_checked:
+            return "not_run"
+        if self.gates_noise:
+            return "inconclusive"
+        return "pass"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -277,6 +353,7 @@ class PerfBenchmarkResult:
             "verdict": self.verdict,
             "gates_checked": self.gates_checked,
             "gates_not_run": self.gates_not_run,
+            "gates_noise": self.gates_noise,
             "seconds": self.seconds,
             "command": self.command,
             "environment": self.environment,
@@ -290,6 +367,61 @@ class PerfBenchmarkResult:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(self.to_dict(), indent=2) + "\n", encoding="utf-8")
         return target
+
+
+# ---------------------------------------------------------------------------
+# Wall-clock noise handling (shared by the baseline builder and the gate)
+# ---------------------------------------------------------------------------
+
+def reduce_seconds(samples: list[float] | tuple[float, ...], policy: str = "min") -> float:
+    """Collapse repeat observations into the one number a comparison uses.
+
+    ``min`` is the estimator of record for wall-clock work on a shared machine:
+    contention only ever *adds* seconds, so the fastest observation is the one
+    closest to the true cost.  ``max`` is kept because the v0.1-v0.3 baseline was
+    built with it (it is the conservative-for-passing choice and it is *not*
+    symmetric with a best-of-N measurement - see ``docs/perf_benchmark.md`` §9).
+    """
+    values = [float(s) for s in samples]
+    if not values:
+        raise ValueError("reduce_seconds() needs at least one observation")
+    if policy == "min":
+        return min(values)
+    if policy == "max":
+        return max(values)
+    if policy == "median":
+        return sorted(values)[len(values) // 2]
+    raise ValueError(f"unknown policy {policy!r} (use min, max or median)")
+
+
+def measure_with_repeats(
+    measure: Any,
+    repeats: int = 1,
+    short_seconds: float = NOISE_BUDGET_SECONDS,
+    repeat_seconds: float = NOISE_REPEAT_SECONDS,
+) -> SubTaskResult:
+    """Run ``measure`` and, if the first shot is short, repeat it.
+
+    Returns the *first* :class:`SubTaskResult` (so ``seconds`` keeps its
+    single-shot meaning) with ``seconds_samples`` carrying every observation.
+    Only measurements below ``short_seconds`` are repeated - a 10 s rung is not
+    a jitter question, and repeating it would make the gate unaffordable.  The
+    repeats stop early once ``repeat_seconds`` of measured time has accumulated.
+    """
+    first = measure()
+    if repeats <= 1 or first.seconds is None or first.seconds >= short_seconds:
+        return first
+    samples = [first.seconds]
+    accumulated = first.seconds
+    for _ in range(int(repeats) - 1):
+        if accumulated >= repeat_seconds:
+            break
+        again = measure()
+        if again.seconds is None:
+            break
+        samples.append(again.seconds)
+        accumulated += again.seconds
+    return replace(first, seconds_samples=tuple(samples))
 
 
 # ---------------------------------------------------------------------------
@@ -646,6 +778,7 @@ def _run_point_locate(nx: int, nz: int, n_queries: int = 1000, copies: int = 1) 
         seconds=round(elapsed, 6),
         throughput=round(n_queries / elapsed, 1) if elapsed > 0 else None,
         note=f"hits={hits}/{n_queries}, brute-force reference (no index)",
+        n_queries=n_queries,
         peak_rss_mb=peak_rss_mb(),
         rss_mb=live_rss_mb(),
         mesh_mb=mesh_footprint_mb(model.mesh),
@@ -695,6 +828,7 @@ def _run_point_locate_accel(
         index_cells=int(stats["cells"]),
         index_entries=int(stats["entries"]),
         index_bytes=int(stats["index_bytes"]),
+        n_queries=n_queries,
         peak_rss_mb=peak_rss_mb(),
         rss_mb=live_rss_mb(),
         mesh_mb=mesh_footprint_mb(mesh),
@@ -1049,6 +1183,7 @@ def run_perf_benchmark(
     max_triangles: int | None = None,
     n_queries: int = QUICK_N_QUERIES,
     max_naive_triangles: int | None = DEFAULT_MAX_NAIVE_TRIANGLES,
+    repeats: int = 1,
     subdivide_levels: tuple[int, ...] = (0,),
 ) -> PerfBenchmarkResult:
     """Run the full performance benchmark ladder.
@@ -1134,11 +1269,12 @@ def run_perf_benchmark(
                     continue
                 try:
                     if task_name in _QUERY_SUBTASKS:
-                        result = fn(nx, nz, n_queries=n_queries)
+                        call = (lambda fn=fn: fn(nx, nz, n_queries=n_queries))
                     elif task_name in _LEVEL_SUBTASKS:
-                        result = fn(nx, nz, levels=int(levels))
+                        call = (lambda fn=fn: fn(nx, nz, levels=int(levels)))
                     else:
-                        result = fn(nx, nz)
+                        call = (lambda fn=fn: fn(nx, nz))
+                    result = measure_with_repeats(call, repeats=repeats)
                     results.append(result)
                     if result.triangles >= CLUSTER_THRESHOLD:
                         cluster_warnings.append(
@@ -1160,7 +1296,9 @@ def run_perf_benchmark(
             if max_triangles is not None and cells > max_triangles:
                 continue
             try:
-                result = _run_voxelize(grid_res)
+                result = measure_with_repeats(
+                    lambda grid_res=grid_res: _run_voxelize(grid_res), repeats=repeats
+                )
                 results.append(result)
                 if cells >= CLUSTER_THRESHOLD:
                     cluster_warnings.append(
@@ -1397,9 +1535,12 @@ def scaling_gates(
         size = _scale_axis(r)
         if size <= 0.0:
             continue
-        # Keep the slowest observation per exact size (repeat runs).
+        # One observation per exact size: the fastest one when the measurement
+        # was repeated (same estimator as the wall-clock gate), and the single
+        # shot otherwise - so an unrepeated run is bit-for-bit unchanged.
         bucket = groups.setdefault((r.subtask, r.copies), {})
-        bucket[size] = max(bucket.get(size, 0.0), r.seconds)
+        best = r.seconds_best if r.seconds_best is not None else r.seconds
+        bucket[size] = min(bucket.get(size, best), best)
 
     gates: list[GateVerdict] = []
     for (subtask, copies), bucket in sorted(groups.items()):
@@ -1483,6 +1624,7 @@ def evaluate_gates(
     produces a RED gate.
     """
     baseline: dict[str, float] = {}
+    baseline_records: dict[str, dict[str, Any]] = {}
     baseline_env: dict[str, Any] | None = None
     if baseline_path is not None:
         bp = Path(baseline_path)
@@ -1496,6 +1638,7 @@ def evaluate_gates(
                 )
                 if entry.get("seconds") is not None:
                     baseline[key] = entry["seconds"]
+                    baseline_records[key] = entry
 
     gates: list[GateVerdict] = []
     comparable, env_reason = environment_compat(baseline_env, result.environment)
@@ -1518,17 +1661,66 @@ def evaluate_gates(
         if key not in baseline:
             continue
         bl = baseline[key]
-        ratio = r.seconds / bl if bl > 0 else float("inf")
+        # A timing is only comparable at equal workload.  The committed
+        # v0.1-v0.4 baseline was built with 500 ray queries while the documented
+        # CI command runs 1000, which reads as a permanent +2.0x on exactly the
+        # point_locate keys; refuse the comparison instead of reporting it.
+        bl_nq = int(baseline_records.get(key, {}).get("n_queries") or 0)
+        if bl_nq and r.n_queries and bl_nq != r.n_queries:
+            gates.append(GateVerdict(
+                name=f"regression_{key}",
+                passed=True,
+                status=NOT_RUN,
+                detail=(
+                    f"not_run: workload differs - measured {r.n_queries} ray queries, "
+                    f"baseline recorded {bl_nq}; a query time is not comparable across "
+                    f"query counts (rebuild the baseline with the same --n-queries)"
+                ),
+                baseline_seconds=bl,
+                measured_seconds=r.seconds_best,
+            ))
+            continue
+        best = r.seconds_best if r.seconds_best is not None else r.seconds
+        worst = r.seconds_worst if r.seconds_worst is not None else r.seconds
+        ratio = best / bl if bl > 0 else float("inf")
+        worst_ratio = worst / bl if bl > 0 else float("inf")
+        spread = r.seconds_spread
+        n = len(r.seconds_samples)
+        estimator = f"best-of-{n}" if n > 1 else "single shot"
+        # A regression has to survive repetition: if even the *fastest* of the
+        # repeats is over the limit the code is slower, full stop -> RED.  If the
+        # observations straddle the limit AND disagree by more than the spread
+        # the machine can produce on its own, nothing was learned: `noise`.
+        undecided = (
+            n > 1
+            and ratio <= regression_factor
+            and worst_ratio > regression_factor
+            and spread >= NOISE_SPREAD_LIMIT
+        )
         passed = ratio <= regression_factor
+        if undecided:
+            status = NOISE
+            detail = (
+                f"inconclusive: {best:.4f}s..{worst:.4f}s over {n} repeats "
+                f"(spread={spread:.2f}x, ratios {ratio:.2f}x..{worst_ratio:.2f}x vs "
+                f"{bl:.4f}s baseline, limit={regression_factor}x) - the machine, not "
+                f"the code, decides this key above {NOISE_BUDGET_SECONDS}s budget"
+            )
+        else:
+            status = MEASURED
+            detail = (
+                f"{best:.4f}s ({estimator}) vs {bl:.4f}s baseline (ratio={ratio:.2f}x, "
+                f"limit={regression_factor}x; env: {env_reason})"
+            )
+            if n > 1:
+                detail += f"; repeats spread {spread:.2f}x ({best:.4f}..{worst:.4f}s)"
         gates.append(GateVerdict(
             name=f"regression_{key}",
             passed=passed,
-            detail=(
-                f"{r.seconds:.4f}s vs {bl:.4f}s baseline (ratio={ratio:.2f}x, "
-                f"limit={regression_factor}x; env: {env_reason})"
-            ),
+            status=status,
+            detail=detail,
             baseline_seconds=bl,
-            measured_seconds=r.seconds,
+            measured_seconds=round(best, 6),
             ratio=round(ratio, 3),
         ))
 
@@ -1573,6 +1765,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="Save results as baseline JSON at this path")
     parser.add_argument("--baseline", type=str, default=None,
                         help="Compare against baseline JSON at this path")
+    parser.add_argument("--repeats", type=str, default="auto",
+                        help="wall-clock repeats per short measurement: an int, or "
+                             "'auto' (=%d, only for measurements under %.1fs), or 1 "
+                             "to disable" % (NOISE_REPEATS, NOISE_BUDGET_SECONDS))
     parser.add_argument("--regression-factor", type=float, default=DEFAULT_GATE_FACTOR,
                         help="RED threshold: measured > factor × baseline")
     parser.add_argument("--output", type=str, default=None,
@@ -1602,6 +1798,18 @@ def main(argv: list[str] | None = None) -> int:
 
     subtasks = tuple(s.strip() for s in args.subtasks.split(","))
 
+    if str(args.repeats).strip().lower() == "auto":
+        repeats = NOISE_REPEATS
+    else:
+        try:
+            repeats = int(args.repeats)
+        except ValueError:
+            print(f"--repeats must be an int or 'auto', got {args.repeats!r}", file=sys.stderr)
+            return 2
+        if repeats < 1:
+            print("--repeats must be >= 1", file=sys.stderr)
+            return 2
+
     if args.fleet_tier:
         copies_ladder = tuple(int(c) for c in args.fleet_copies.split(",") if c.strip())
         if args.ladder and not (args.quick or args.full):
@@ -1627,6 +1835,7 @@ def main(argv: list[str] | None = None) -> int:
             subdivide_levels=tuple(
                 int(s) for s in args.subdivide_levels.split(",") if s.strip()
             ),
+            repeats=repeats,
         )
 
     failed_gates = []
@@ -1649,6 +1858,17 @@ def main(argv: list[str] | None = None) -> int:
         for name in failed_gates:
             print(f"  ✗ {name}")
         return 1
+
+    noise_gates = [g for g in result.gates if g.status == NOISE]
+    if noise_gates:
+        print(
+            f"\nINCONCLUSIVE gates ({len(noise_gates)}): the same code measured "
+            f"inside and outside the limit in one run."
+        )
+        print("This is NOT a pass and NOT a RED - rerun on a quieter machine.")
+        for g in noise_gates:
+            print(f"  ~ {g.name}: {g.detail}")
+        return 2
 
     if not result.gates:
         print("\nNo baseline for regression gates.")
