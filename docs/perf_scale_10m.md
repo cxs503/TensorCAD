@@ -832,3 +832,63 @@ python -m tensorcad.perf_benchmark --fleet-tier --ladder "641,161;1001,257;2001,
   **`not_run`（不是 pass）**：2 点拟合给不出可判定的斜率，硬给一个数就是编数字。指数门机制本身由
   `tests/test_perf_import.py::test_import_subtasks_get_measured_scaling_gates` 在三点阶梯上覆盖
   （断言 `status=measured` 且指数低于 `SCALING_LIMITS`）；10⁶–10⁷ 档的指数门由 `cj3890` 补齐。
+
+
+## 12. 体素化（从显式三角网格）：10⁶–10⁷ 三角级实测——`mesh_field` docstring 引用的欠账
+
+> 工件：`benchmarks/perf_scale/artifacts/ladder_voxelize_10m.json`（schema `tensorcad.perf_voxel_mesh/1`）
+> 代码：`tensorcad/mesh_field.py`（`MeshSDFField`，本版新增 `band` 窄带截断）、`tensorcad/perf_voxel_mesh.py`（阶梯 + 门）
+> 测试：`tests/test_perf_voxelize_10m.py`（6 项）
+> 图：`benchmarks/perf_scale/figures/voxelize_10m_scaling.png`（`scripts/gen_perf_voxelize_10m_figure.py`）
+
+### 12.1 为什么这一档此前测不了
+
+`voxelize` 子任务（§3.2）采样 `SuboffHullField`（闭式 SDF），代价纯 O(cells)，`triangles` 列结构性为 0——
+它回答"把解析 SDF 采到 10⁸ 单元要多久"，**不是**求解器流水线的问题。真实流水线拿到的是
+**显式三角网格**（CAD 交换、修复 STL、B-rep 镶嵌），10⁶–10⁷ 三角面，SDF 必须从三角形导出。
+`MeshSDFField`（`tensorcad/mesh_field.py`）补上了"网格 → 场"的适配器，但它的 docstring 引用的
+"§12 实测数字"此前**不存在**：模块自带的 `ladder_voxelize_mesh.json` 只到 31,968 三角（机制冒烟，
+且 16×8×4 档 honest FAIL 5.648% > 3%），10⁶–10⁷ 带从未被体素化过。
+
+### 12.2 本版修的一个真缺陷：窄带截断声称了但没生效
+
+`_voxelize_rung` 算了 `band = band_factor × max(spacing)` 并写进每行 note（"truncated at band=…"），
+却**没把 band 传给** `MeshSDFField`/`to_voxel_grid`——深内部单元付了全价最近面搜索。
+探针（`cj5037`，822,392 三角 @ 48×24×12）实测 **61 cells/s**（16,309 µs/查询），按此 10⁷ 档要数小时。
+本版把 `band` 加进 `MeshSDFField.__init__`/`signed_distance`（`nearest_surface(p, band=…)`），
+`voxelize_mesh` 透传，`_voxelize_rung` 构造场时带上。`band ≥ h/2` 时 `volume_fraction` 的
+`clip(0.5 − s/h, 0, 1)` 对深内部仍给 1、对外部给 0，**体素体积逐位不变**（本地验证：full 与 band
+体积差 < 1e-9）。既有 18 项 `test_mesh_field`/`test_perf_voxel_mesh` 全绿（`band` 默认 `None`，行为不变）。
+
+### 12.3 阶梯设计
+
+几何源：401×129 基网格（205,598 三角）经 1→4 中点细分 0–3 级 →
+205,598 / 822,392 / 3,289,568 / 13,158,272 三角（单体连通闭合体，同 §11.5 的到达路径）。
+网格各向异性（船体 10:2:0.8）：24×12×6（1,728）→ 96×48×24（110,592）体素，5 档。
+两条轴：固定 48×24×12 网格下的**三角面轴**（4 点，到 1.3×10⁷）、固定 822,392 三角下的**体素轴**（5 点）。
+门：两个复杂度指数（限 1.5）+ 体素体积精度门（>3% = RED）。
+
+### 12.4 计算结果（工件渲染，零手抄）
+
+<!-- perf-meshvoxel:section begin -->
+_(待 cj5046 到件后由 `render_section` 注入)_
+<!-- perf-meshvoxel:section end -->
+
+### 12.5 误差判定（关键量 vs 基准）
+
+| 关键量 | 基准 | 最大实测误差 | 是否 <3% |
+|---|---|---:|---|
+| 体素体积（partial-fill）vs 解析闭式解 | `analytic_volume(10,2,0.8)` = 7.512698 m³ | 见 12.4 门表 | 见门 |
+| 体素体积（band 截断 vs 不截断） | 同网格 full SDF | < 1e-9（本地验证） | ✅ |
+
+### 12.6 什么规模需要集群（本版实测判定）
+
+_(到件后填：60 s / 600 s 预算等价规模，与 §5 表对齐)_
+
+### 12.7 注意点 / 局限
+
+1. **band 截断只改幅值不改符号**：深内部单元报 `−band` 而非真距离；`band ≥ h/2` 时体积不变，
+   但**梯度**（`gradient` 走中心差分）在带内是平的——需要真梯度的消费者请传 `band=None`。
+2. **小阶梯工件的 note 一直是误导**：`ladder_voxelize_mesh.json` 每行 note 声称截断但当时没截断；
+   该工件是 honest FAIL（16×8×4 档 5.648% > 3%），按纪律**不覆盖**，本节的 10m 阶梯是独立工件。
+3. **跨机不可比**：秒数只在同工件内比较；指数门在组内（同机同进程）拟合。

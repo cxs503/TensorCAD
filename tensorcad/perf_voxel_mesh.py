@@ -160,7 +160,7 @@ def _voxelize_rung(
     index = TriangleGrid(mesh)
     build_seconds = time.perf_counter() - t0
     stats = index.stats()
-    field = MeshSDFField(mesh, grid=index)
+    field = MeshSDFField(mesh, grid=index, band=band)
 
     cells = int(grid[0]) * int(grid[1]) * int(grid[2])
     t0 = time.perf_counter()
