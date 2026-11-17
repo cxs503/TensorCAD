@@ -6,7 +6,7 @@
 本版重算 `cj3563`（网格阶梯）/ `cj3564`（体素阶梯）
 **工件（受版本控制、可直接复核）**: `benchmarks/perf_scale/artifacts/{ladder_mesh.json,ladder_voxel.json,ladder_import.json,ladder_single_10m.json}`、
 `benchmarks/perf_scale/{baseline.json,ladder_fleet_10m_3pt.json,ladder_3pt_mechanism_smoke.json}`；
-图 `benchmarks/perf_scale/figures/*.png`（12 张）；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
+图 `docs/perf_scale/figures/*.png`（12 张）；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
 
 本篇取代 `docs/perf_benchmark.md` 的 0.2.0 数据（那版最高只测到 103k 三角）——**本版第一次真正测到 10⁶ 带**。
 
@@ -255,10 +255,10 @@ OBJ 文本格式在 4.0M 三角面时文件 206 MiB，写入 18.7 MiB/s、读取
 | 表格渲染/漂移校验 | `tensorcad/perf_evidence.py`、`scripts/perf_scale_doc.py` |
 | 证据包测试 | `tests/test_perf_scale_evidence.py` |
 | 10⁶–10⁷ 三点阶梯驱动 / 表格 / 作图 | `scripts/perf_scale_10m.py`、`scripts/perf_3pt_report.py`、`scripts/gen_perf_3pt_figures.py` |
-| 图（基础阶梯） | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
-| 图（10⁶–10⁷ 三点） | `benchmarks/perf_scale/figures/{fig3pt_scaling,fig3pt_memory}.png` |
-| 图（OBJ 导入/导出） | `benchmarks/perf_scale/figures/{import_scaling,import_throughput,import_volume_accuracy}.png` |
-| 图（单体 10⁷ 细分） | `benchmarks/perf_scale/figures/{single10m_scaling,single10m_memory,single10m_volume_accuracy}.png` |
+| 图（基础阶梯） | `docs/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
+| 图（10⁶–10⁷ 三点） | `docs/perf_scale/figures/{fig3pt_scaling,fig3pt_memory}.png` |
+| 图（OBJ 导入/导出） | `docs/perf_scale/figures/{import_scaling,import_throughput,import_volume_accuracy}.png` |
+| 图（单体 10⁷ 细分） | `docs/perf_scale/figures/{single10m_scaling,single10m_memory,single10m_volume_accuracy}.png` |
 | 作图脚本 | `scripts/gen_perf_scale_figures.py`、`scripts/gen_perf_3pt_figures.py`、`scripts/gen_perf_import_figures.py`、`scripts/gen_perf_single10m_figures.py` |
 
 ---
@@ -553,6 +553,12 @@ verdict=**pass**，gates_checked=7，gates_not_run=0；体积校验 6/6 通过�
    `cpu_count`/`python` 差异只写进 detail；无反证测试不会有人发现这条从未触发，
    `tests/test_perf_benchmark.py::test_cross_machine_baseline_refuses_comparison` 用 x86_64 基线
    断言"不产生任何 `regression_load*` 绿门"。
+4. **12 张图入库**（重开单 m24557 落地）：图从 `benchmarks/perf_scale/figures/` 迁到
+   `docs/perf_scale/figures/`——推送门禁只放行 `docs/` 下的 PNG（v5.8 F3：交付图是文档成果
+   非运行记录），旧路径的图在 PR 里会被整单滤除（原 PR#755 与第 1 轮 m24541 均因此落空）。
+   渲染改为紧凑画布（`FIGSIZE`/`DPI`，见 `scripts/gen_perf_scale_figures.py` 的 Rendering
+   budget），12 张合计压在合并门禁的 200 KiB 工件预算内；生成脚本与
+   `tests/test_perf_scale_evidence.py` 各带一道同预算断言，超预算的再生成会当场失败。
 
 ### 10.3 本版实测范围（诚实边界）
 
@@ -802,10 +808,10 @@ python -m tensorcad.perf_benchmark --fleet-tier --ladder "641,161;1001,257;2001,
   仓库里只有 JSON 与 provenance，任何读者可按 §11.1 的命令重跑复现。
 **工件（受版本控制、可直接复核）**: `benchmarks/perf_scale/artifacts/{ladder_mesh.json,ladder_voxel.json}`、
 `benchmarks/perf_scale/{baseline.json,ladder_fleet_10m.json,ladder_3pt_mechanism_smoke.json}`；
-图 `benchmarks/perf_scale/figures/*.png`；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
-`benchmarks/perf_scale/figures/scaling.png`（墙钟 vs 规模 log-log）、`point_locate.png`（两条点定位路径吞吐对比）、`index_cost.png`（建索引时间/索引体积）、`voxelize.png`（体素化缩放）；10⁶–10⁷ 带另有两张：`fig3pt_scaling.png`（每个子任务的拟合指数与门限，§9.4）与 `fig3pt_memory.png`（网格占用/索引/活内存 vs 规模）。
+图 `docs/perf_scale/figures/*.png`；渲染/校验 `tensorcad/perf_evidence.py` + `scripts/perf_scale_doc.py`
+`docs/perf_scale/figures/scaling.png`（墙钟 vs 规模 log-log）、`point_locate.png`（两条点定位路径吞吐对比）、`index_cost.png`（建索引时间/索引体积）、`voxelize.png`（体素化缩放）；10⁶–10⁷ 带另有两张：`fig3pt_scaling.png`（每个子任务的拟合指数与门限，§9.4）与 `fig3pt_memory.png`（网格占用/索引/活内存 vs 规模）。
 ## 4. 误差判定（关键量 vs 基准）
-| 图 | `benchmarks/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
+| 图 | `docs/perf_scale/figures/{scaling,point_locate,index_cost,voxelize}.png` |
 | 作图脚本 | `scripts/gen_perf_scale_figures.py` |
 | 子任务 | 体数 | 三角面 | 秒 | 吞吐 tri/s | 文件 MiB | 文件 MiB/s | 峰值 RSS MiB | 导入体积误差 |
 | load | 1 | 25,918 | 0.751 | 34,492 | — | — | 72 | — |
