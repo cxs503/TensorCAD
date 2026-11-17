@@ -13,13 +13,17 @@
       },
       "runs": {
         "control_quick": {
-          "codes": [],
+          "codes": [
+            "forced_bless_recorded"
+          ],
           "passed": true,
           "quick": true,
           "returncode": 0
         },
         "inflated_full": {
           "codes": [
+            "forced_bless_recorded",
+            "richardson_unavailable",
             "tolerance_not_derived"
           ],
           "passed": false,
@@ -28,6 +32,7 @@
         },
         "inflated_quick": {
           "codes": [
+            "forced_bless_recorded",
             "tolerance_not_derived"
           ],
           "passed": false,
@@ -38,7 +43,7 @@
       "source": {
         "dirty": true,
         "kind": "worktree",
-        "sha256": "45c006770fc3e89e7001ac8cd574fcab213a8991c0d22a1b1f9353875ba23b1a"
+        "sha256": "88e0742bd523e920341565a6cdef9e31fda84449d4589712197917a9254bbbdd"
       }
     },
     "before": {
@@ -62,9 +67,9 @@
         }
       },
       "source": {
-        "commit": "57dde0f3f56b75d3b8b57f5782e55a8e06a66bab",
+        "commit": "740c5f80e9fb54e47219732e8dace682496c50bf",
         "kind": "git",
-        "rev": "HEAD",
+        "rev": "740c5f80",
         "sha256": "64ed9648160a2d95331e83754df138514e6e5ad4e19425e881770278c20c68ab"
       }
     }

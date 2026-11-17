@@ -8,9 +8,12 @@ the criterion while every measured number, reference and fingerprint stayed hone
 
 This script reproduces that in two trees and runs the real gate on each:
 
-``before``  ``tensorcad/golden.py`` as of ``--before-rev`` (the revision the fix is diffed
-            against, so the claim "this used to pass" is bound to a commit, not a memory);
-``after``   the worktree's ``tensorcad/golden.py``.
+``before``  the whole gate-relevant tree as of ``--before-rev`` (the revision the fix is
+            diffed against, so the claim "this used to pass" is bound to a commit, not a
+            memory): ``tensorcad/``, the blessed baseline and the 5415 data are all taken
+            from that revision, because the baseline has since grown (a new case was
+            blessed) and the pre-fix code cannot run against a baseline it does not know;
+``after``   the worktree (``tensorcad/golden.py`` as it stands).
 
 Each tree gets the same hand edit -- the Wigley block-coefficient band x100 -- and the gate
 is run in quick mode (the hook's mode) and, for ``after``, in full mode (CI's mode). A
@@ -61,16 +64,41 @@ def _source(revision: str | None) -> tuple[bytes, dict]:
     return text, ident
 
 
-def _stage(destination: Path, source: bytes) -> None:
+def _stage_worktree(destination: Path) -> None:
+    """The ``after`` tree: the worktree's package, data and blessed baseline."""
     shutil.copytree(
         ROOT / "tensorcad", destination / "tensorcad",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
     shutil.copytree(ROOT / DATA_REL, destination / DATA_REL)
+    # The inclined-box case loads its reference oracle by path from
+    # ``tools/golden/inclined_box_oracle.py``; without it the staged control crashes
+    # (the red-team harness stages it for the same reason).
+    oracle_src = ROOT / "tools" / "golden" / "inclined_box_oracle.py"
+    oracle_dst = destination / "tools" / "golden" / "inclined_box_oracle.py"
+    oracle_dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(oracle_src, oracle_dst)
     target = destination / BASELINE_REL
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / BASELINE_REL, target)
-    (destination / "tensorcad" / "golden.py").write_bytes(source)
+
+
+def _stage_snapshot(destination: Path, revision: str) -> None:
+    """The ``before`` tree: the gate-relevant tree exactly as of ``revision``.
+
+    A snapshot, not a swap: the pre-fix code registers the cases its own baseline
+    records, so the baseline and the data must come from the same revision.  Swapping
+    only ``golden.py`` into the worktree's baseline would fail closed on the newer
+    cases (``baseline_case_unknown``) and the control run could no longer pass.
+    """
+    tarball = destination / "snapshot.tar"
+    with tarball.open("wb") as handle:
+        subprocess.run(
+            ["git", "archive", revision, "tensorcad", str(BASELINE_REL), str(DATA_REL)],
+            cwd=ROOT, stdout=handle, check=True,
+        )
+    subprocess.run(["tar", "-xf", str(tarball), "-C", str(destination)], check=True)
+    tarball.unlink()
 
 
 def _inflate(root: Path) -> dict:
@@ -117,7 +145,10 @@ def main(argv: list[str] | None = None) -> int:
             source, ident = _source(revision)
             root = workspace / label
             root.mkdir()
-            _stage(root, source)
+            if revision is None:
+                _stage_worktree(root)
+            else:
+                _stage_snapshot(root, revision)
             control = _run_gate(root, quick=True)
             edit = _inflate(root)
             runs = {"control_quick": control, "inflated_quick": _run_gate(root, quick=True)}

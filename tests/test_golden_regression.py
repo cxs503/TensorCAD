@@ -850,7 +850,9 @@ def test_redteam_harness_kills_an_identity_mutant(tmp_path: Path) -> None:
     assert report["control"]["passed"], report["control"]
     (mutant,) = report["mutants"]
     assert mutant["killed"], mutant
-    assert mutant["observed"] == ["geometry_changed"], mutant["observed"]
+    # The kill is the fingerprint: the committed baseline carries a forced-bless record,
+    # so every run (control included) also reports the forced_bless_recorded warning.
+    assert "geometry_changed" in mutant["observed"], mutant["observed"]
 
 
 def _load_redteam():
@@ -942,6 +944,9 @@ def test_dtmb5415_particulars_gate_has_teeth(monkeypatch: pytest.MonkeyPatch) ->
     case = dtmb5415_golden_case()
     findings: list[golden.Finding] = []
     result = golden.evaluate_case(case, _blessed_5415(), quick=False, findings=findings)
+    # evaluate_case appends to the output list; run_suite is what assigns it onto the
+    # result, so a direct call must do the same before reading result.findings/passed.
+    result.findings = findings
 
     codes = {finding.code for finding in result.findings} | {f.code for f in findings}
     assert "reference_not_reproducible" in codes, codes
@@ -1332,14 +1337,16 @@ def test_sphere_ellipsoid_has_three_grid_gci(committed: golden.SuiteResult) -> N
     assert {"coarse", "fine", "finer"} <= set(case.measurements), (
         f"sphere_ellipsoid missing finer level; levels={sorted(case.measurements)}"
     )
-    assert case.measurements.get("extrapolated"), "sphere_ellipsoid has no GCI extrapolation"
+    # The extrapolated values are the richardson metrics (the blessed record keeps them
+    # under cases[sphere_ellipsoid].extrapolated); measurements carries the grid levels.
+    extrapolated = {m.name: m for m in case.metrics if m.kind == "richardson"}
+    assert extrapolated, "sphere_ellipsoid has no GCI extrapolation"
     # The extrapolated values must be closer to the reference than the fine-level values
-    extrapolated = case.measurements["extrapolated"]
     fine = case.measurements["fine"]
     for key in ("sphere_volume_m3", "sphere_surface_area_m2",
                 "ellipsoid_volume_m3", "ellipsoid_surface_area_m2"):
         assert key in extrapolated, f"missing extrapolated {key}"
-        ext_val = extrapolated[key]["value"]
+        ext_val = extrapolated[key].value
         fine_val = fine[key]
         ref = case.reference[key]
         ext_err = abs(ext_val - ref) / ref
