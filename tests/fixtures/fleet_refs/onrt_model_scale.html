@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+  Synthetic test fixture for the round-4 derived-cell reader
+  (tensorcad.fleet.crossref.parse_source / derive_cells).
+
+  This is ORIGINAL content: a minimal table that reproduces the *structure* of the
+  NMRI Tokyo 2015 workshop "Model scale | Full scale" layout -- a full-scale column
+  that says NA next to a model-scale numeral, and a length (Lwl) printed in both
+  columns that pins the document's own scale ratio.  It is NOT the publisher's page
+  bytes (those stay git-ignored; see the licence note on the t2015_* sources in
+  tensorcad.fleet.crossref.SOURCES).  The numerals are the published ONRT values,
+  which are facts, not expression.
+
+  Column layout (matches the pinned t2015_onrt page, spec.column == 3):
+    [0] quantity name   [1] symbol/units   [2] model scale   [3] full scale
+-->
+<html>
+<body>
+<TABLE WIDTH="650" BORDER="1">
+  <TR>
+    <TD COLSPAN="2"><strong>Main particulars</strong></TD>
+    <TD><strong>Model scale</strong></TD>
+    <TD><strong>Full scale</strong></TD>
+  </TR>
+  <TR>
+    <TD>Length of waterline</TD>
+    <TD>L<sub>WL</sub> (m)</TD>
+    <TD>3.147</TD>
+    <TD>154.0</TD>
+  </TR>
+  <TR>
+    <TD>Maximum beam of waterline</TD>
+    <TD>B<sub>WL</sub> (m)</TD>
+    <TD>0.384</TD>
+    <TD>18.78</TD>
+  </TR>
+  <TR>
+    <TD>Draft</TD>
+    <TD>T (m)</TD>
+    <TD>0.112</TD>
+    <TD>5.494</TD>
+  </TR>
+  <TR>
+    <TD>Displacement</TD>
+    <TD>&Delta;</TD>
+    <TD>72.6 kg</TD>
+    <TD>8507 ton</TD>
+  </TR>
+  <TR>
+    <TD>Block coefficient (CB)</TD>
+    <TD>&nabla; /(L<sub>WL</sub>B<sub>WL</sub> T)</TD>
+    <TD>0.535</TD>
+    <TD>0.535</TD>
+  </TR>
+  <TR>
+    <TD>LCB</TD>
+    <TD>LCB (m) aft of FP</TD>
+    <TD>1.625</TD>
+    <TD>NA</TD>
+  </TR>
+</TABLE>
+</body>
+</html>
