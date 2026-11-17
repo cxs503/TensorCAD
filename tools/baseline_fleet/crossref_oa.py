@@ -170,14 +170,23 @@ def cells_from_report(report: Mapping[str, Any]) -> dict[str, dict[str, dict[str
 
 
 def lineage_tally(report: Mapping[str, Any]) -> dict[str, Any]:
-    """Per ship: publisher families vs independent lineages behind the numerals."""
+    """Per ship: publisher families vs independent lineages behind the numerals.
+
+    Only *voting* entries count.  A derived or fallback-column reading is kept in the
+    report for the audit trail, but it is not a published statement: letting it into the
+    tally would turn arithmetic into a second opinion and let one document's derived numeral
+    flip an acceptance criterion.  The core verdict is computed from the same voting set, so
+    the block stays internally consistent (a ``SINGLE_SOURCE`` verdict never lists two
+    lineages).
+    """
     out: dict[str, Any] = {}
     for ship, row in report.items():
         per_quantity: dict[str, Any] = {}
         for quantity in QUANTITIES:
             cell = row["quantities"][quantity]
-            families = sorted({entry["family"] for entry in cell["entries"]})
-            lineages = sorted({lineage_of(entry["cell"]["source"]) for entry in cell["entries"]})
+            voting = [entry for entry in cell["entries"] if entry["votes"]]
+            families = sorted({entry["family"] for entry in voting})
+            lineages = sorted({lineage_of(entry["cell"]["source"]) for entry in voting})
             values = sorted({round(entry["cell"]["value"], 4) for entry in cell["entries"] if entry["cell"]["unit_basis"] == "volume"})
             verdict = cell["verdict"]
             if verdict == "CROSS_VERIFIED" and len(lineages) < 2:
