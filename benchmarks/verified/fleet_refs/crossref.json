@@ -3552,12 +3552,8 @@
    "lcb_percent": {
     "verdict": "MISSING",
     "core_verdict": "MISSING",
-    "families": [
-     "JSR-2017"
-    ],
-    "lineages": [
-     "JSR-2017"
-    ],
+    "families": [],
+    "lineages": [],
     "sources": [
      "kvlcc2_ugent"
     ],
@@ -3919,13 +3915,11 @@
     "core_verdict": "CROSS_VERIFIED",
     "families": [
      "NMRI-T2015",
-     "SIMMAN-SERIES",
-     "dtc_arxiv"
+     "SIMMAN-SERIES"
     ],
     "lineages": [
      "NMRI-T2015",
-     "SIMMAN-SERIES",
-     "dtc_arxiv"
+     "SIMMAN-SERIES"
     ],
     "sources": [
      "dtc_arxiv",
@@ -4144,11 +4138,9 @@
     "verdict": "SINGLE_SOURCE",
     "core_verdict": "SINGLE_SOURCE",
     "families": [
-     "JSR-2017",
      "SIMMAN-SERIES"
     ],
     "lineages": [
-     "JSR-2017",
      "SIMMAN-SERIES"
     ],
     "sources": [
@@ -4373,11 +4365,9 @@
     "verdict": "SINGLE_SOURCE",
     "core_verdict": "SINGLE_SOURCE",
     "families": [
-     "NMRI-T2015",
      "SIMMAN-SERIES"
     ],
     "lineages": [
-     "NMRI-T2015",
      "SIMMAN-SERIES"
     ],
     "sources": [

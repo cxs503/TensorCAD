@@ -44,23 +44,24 @@
      "pass": false,
      "cross_verified_lineages": [
       "displacement_volume",
-      "cb",
-      "lcb_percent"
+      "cb"
      ],
      "failing": [
+      "lcb_percent",
       "lwl"
      ],
      "documents_total": 6
     },
     "ONRT": {
-     "pass": true,
+     "pass": false,
      "cross_verified_lineages": [
       "displacement_volume",
       "cb",
-      "lcb_percent",
       "lwl"
      ],
-     "failing": [],
+     "failing": [
+      "lcb_percent"
+     ],
      "documents_total": 2
     },
     "Series60": {
