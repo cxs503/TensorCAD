@@ -29,9 +29,9 @@ cells 42, cross-verified 21, single-source 10, conflict 1, missing 10; fully cro
 |---|---|---|---|---|---|---|---|
 | DTC | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | MISSING (0) | MISSING (0) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
 | JBC | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) |
-| KCS | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (3) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
-| KVLCC2 | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (2) | SINGLE_SOURCE (1) | CROSS_VERIFIED (3) | CROSS_VERIFIED (2) | CROSS_VERIFIED (3) |
-| ONRT | CONFLICT (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (2) | CROSS_VERIFIED (2) | MISSING (0) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
+| KCS | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
+| KVLCC2 | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (1) | SINGLE_SOURCE (1) | CROSS_VERIFIED (3) | CROSS_VERIFIED (2) | CROSS_VERIFIED (3) |
+| ONRT | CONFLICT (2) | CROSS_VERIFIED (2) | SINGLE_SOURCE (1) | CROSS_VERIFIED (2) | MISSING (0) | CROSS_VERIFIED (2) | CROSS_VERIFIED (2) |
 | Series60 | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) | MISSING (0) |
 
 Cells show the family-level verdict with the number of independent **lineages** in brackets;
@@ -42,7 +42,7 @@ from one origin — both numbers are printed so the reader is not misled.
 
 | criterion | verdict | detail |
 |---|---|---|
-| ① ≥2 independent sources per ship on ∇/Cb/LCB/Lwl | **FAIL** | DTC: 2 of 4 quantities short; JBC: 4 of 4 quantities short; KCS: 0 of 4 quantities short; KVLCC2: 1 of 4 quantities short; ONRT: 0 of 4 quantities short; Series60: 4 of 4 quantities short |
+| ① ≥2 independent sources per ship on ∇/Cb/LCB/Lwl | **FAIL** | DTC: 2 of 4 quantities short; JBC: 4 of 4 quantities short; KCS: 0 of 4 quantities short; KVLCC2: 2 of 4 quantities short; ONRT: 1 of 4 quantities short; Series60: 4 of 4 quantities short |
 | ①b ≥2 independent *documents* per ship on the four named quantities (tier B: a reprinted table counts, and is labelled) | **FAIL** | DTC: 2 short, 0 lineage-limited; JBC: 1 short, 3 lineage-limited; KCS: 0 short, 0 lineage-limited; KVLCC2: 0 short, 2 lineage-limited; ONRT: 1 short, 1 lineage-limited; Series60: 4 short, 0 lineage-limited |
 | ② citation + source digest on every value | **PASS** | 108 cells checked, 0 without citation |
 | ③ >0.5 % spread marked disputed with both values | **PASS** | 1 conflicts, 1 recorded dissents |
