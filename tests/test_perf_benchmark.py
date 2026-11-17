@@ -976,7 +976,7 @@ def test_perf_benchmark_doc_cited_test_names_exist() -> None:
 # Perf-scale figures (GAP-CAD-D4-PERF-SCALE)
 # ---------------------------------------------------------------------------
 
-PERF_SCALE_FIGURES = ROOT / "benchmarks" / "perf_scale" / "figures"
+PERF_SCALE_FIGURES = ROOT / "docs" / "perf_scale" / "figures"
 EXPECTED_FIGURES = [
     "scaling.png", "point_locate.png", "index_cost.png", "voxelize.png",
     "fig3pt_scaling.png", "fig3pt_memory.png",

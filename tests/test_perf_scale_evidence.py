@@ -368,7 +368,7 @@ if __name__ == "__main__":  # pragma: no cover
 # Figure validation (GAP-CAD-D4-PERF-SCALE: figures must exist and be valid)
 # ---------------------------------------------------------------------------
 
-FIGURES_DIR = ROOT / "benchmarks" / "perf_scale" / "figures"
+FIGURES_DIR = ROOT / "docs" / "perf_scale" / "figures"
 
 #: All figures that the document references and must be committed.
 EXPECTED_FIGURES = [
@@ -396,6 +396,15 @@ def test_perf_scale_figures_exist_and_are_valid_png() -> None:
         data = path.read_bytes()
         assert data[:8] == b"\x89PNG\r\n\x1a\n", f"{name} is not a valid PNG"
         assert len(data) > 4096, f"{name} looks truncated ({len(data)} bytes)"
+    # Merge-gate artifact cap (owner discipline 2026-11-04, max_artifact_kb=200):
+    # the figures are artifact-class files, so their committed total must stay
+    # under the cap or the PR carrying them is held.  scripts/gen_perf_scale_figures.py
+    # enforces the same budget at generation time.
+    total = sum((FIGURES_DIR / name).stat().st_size for name in EXPECTED_FIGURES)
+    assert total <= 200 * 1024, (
+        f"figures total {total} B exceeds the 200 KiB merge-gate artifact cap; "
+        "reduce FIGSIZE/DPI in scripts/gen_perf_scale_figures.py"
+    )
 
 
 def test_perf_scale_figures_are_referenced_in_doc() -> None:
