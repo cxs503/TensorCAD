@@ -45,16 +45,24 @@ one line plus its reason.
 
 | evidence | file | how it is produced |
 | --- | --- | --- |
-| before/after, bound to commits and file hashes | `docs/golden/criterion_provenance.json` | `python tools/golden/criterion_provenance.py --before-rev 57dde0f --json … --png …` |
+| before/after, bound to commits and file hashes | `docs/golden/criterion_provenance.json` | `python tools/golden/criterion_provenance.py --before-rev 740c5f80 --json … --png …` |
 | figure: recorded vs derived band, verdict matrix | `docs/golden/criterion_provenance.png` | same command |
 | mutation red team, 8/8 killed | `docs/golden/redteam.md`, `docs/golden/redteam_quick.json` | `python tools/golden/mutation_redteam.py --json … --markdown …` |
 | regression tests | `tests/test_golden_regression.py` | `python -m pytest tests/test_golden_regression.py -q` |
 
-`criterion_provenance.json`: the *same* hand edit (Wigley Cb band ×100) is run against
-`golden.py` at the pre-fix commit (`before`, sha256 `64ed9648…`) and against the fixed worktree
-(`after`, sha256 `45c00677…`). Result: `before` quick gate **PASS** (the hole), `after` quick and
-full gate **FAIL** with `tolerance_not_derived`, and both trees pass their honest-baseline
-control — so the difference is attributable to the edit, not to a broken harness.
+`criterion_provenance.json`: the *same* hand edit (Wigley Cb band ×100) is run against the
+pre-fix tree (`before`, the whole gate-relevant tree at `740c5f80`, the parent of the fix
+merge; `golden.py` sha256 `64ed9648…`) and against the fixed worktree (`after`, sha256
+`88e0742b…`). Result: `before` quick gate **PASS** (the hole), `after` quick and full gate
+**FAIL** with `tolerance_not_derived`, and both trees pass their honest-baseline control —
+so the difference is attributable to the edit, not to a broken harness.
+
+The `before` tree is a faithful snapshot, not a `golden.py` swap: the blessed baseline has
+since grown a fifth case (`inclined_box`), and the pre-fix code fails closed on a baseline
+it does not register (`baseline_case_unknown`), so a swap could no longer produce a passing
+control.  Staging the baseline and the 5415 data from the same revision keeps the control
+honest; the `after` tree additionally stages `tools/golden/inclined_box_oracle.py`, which the
+inclined-box case loads by path.
 
 Red team: the new mutant `baseline-tolerance-hand-inflated` (kind `criterion`) widens the blessed
 Wigley Cb band 100× and no other character changes; it is killed by `tolerance_not_derived`, in a
