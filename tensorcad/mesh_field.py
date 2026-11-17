@@ -85,6 +85,15 @@ class MeshSDFField(GeometryField):
         values there.
     units / coordinate_frame:
         Copied into the field metadata so a solver handoff is self-describing.
+    band:
+        Narrow-band truncation for the distance magnitude.  When set, the
+        magnitude is capped at ``band`` (a deep-interior cell reports ``-band``
+        instead of its true distance).  The sign is unaffected.  This is the
+        narrow-band rule real voxelisers use: with ``band >= h/2`` (``h`` the
+        largest cell edge) the partial-fill solid fraction is unchanged, so the
+        voxelised volume is unchanged, but deep-interior cells stop paying for a
+        full nearest-surface search.  ``None`` (the default) keeps the exact
+        distance everywhere.
     """
 
     kind: ClassVar[str] = MESH_SDF_KIND
@@ -100,9 +109,12 @@ class MeshSDFField(GeometryField):
         closed: bool = True,
         units: str | None = None,
         coordinate_frame: str | None = None,
+        band: float | None = None,
     ) -> None:
         if len(mesh.faces) == 0:
             raise FieldError("a mesh field needs at least one triangle")
+        if band is not None and band <= 0:
+            raise FieldError(f"band must be positive or None, got {band!r}")
         self.mesh = mesh
         if grid is not None:
             self.grid = grid
@@ -114,6 +126,7 @@ class MeshSDFField(GeometryField):
         else:
             self.grid = TriangleGrid(mesh)
         self.closed = bool(closed)
+        self.band = band
         self.units = units if units is not None else getattr(mesh, "units", DEFAULT_UNITS)
         self.coordinate_frame = (
             coordinate_frame
@@ -130,7 +143,7 @@ class MeshSDFField(GeometryField):
         contains = self.grid.contains
         for point in points:
             p = (float(point[0]), float(point[1]), float(point[2]))
-            hit = nearest(p)
+            hit = nearest(p, band=self.band)
             distance = 0.0 if hit is None else hit.distance
             out.append(-distance if contains(p) else distance)
         return out
@@ -214,7 +227,7 @@ def voxelize_mesh(
     """
     from .voxel import to_voxel_grid
 
-    field_kwargs = {k: kwargs.pop(k) for k in list(kwargs) if k in {"grid", "resolution_index", "closed", "units", "coordinate_frame"}}
+    field_kwargs = {k: kwargs.pop(k) for k in list(kwargs) if k in {"grid", "resolution_index", "closed", "units", "coordinate_frame", "band"}}
     field = MeshSDFField(
         mesh,
         grid=field_kwargs.get("grid"),
@@ -222,5 +235,6 @@ def voxelize_mesh(
         closed=field_kwargs.get("closed", True),
         units=field_kwargs.get("units"),
         coordinate_frame=field_kwargs.get("coordinate_frame"),
+        band=field_kwargs.get("band"),
     )
     return to_voxel_grid(field, resolution, **kwargs)
