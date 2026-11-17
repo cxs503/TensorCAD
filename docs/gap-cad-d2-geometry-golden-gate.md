@@ -252,3 +252,16 @@ cd $GOLDEN_DIR && TENSORCAD_PATH=$(git -C /path/to/TensorCAD rev-parse --show-to
 | `tools/golden/gap_d2_gate_docs.py` | 本文生成器（`--check` 查陈旧） |
 | `artifacts/gap-cad-d2-golden/regression_control.json` | 真回归对照（注入改动 → 套件与门怎么判） |
 | `artifacts/gap-cad-d2-golden/` | 首跑快照：suite/mutants JSON、日志、run_meta |
+| `docs/data/**` | yes | yes | yes（前缀同样命中；数据编辑与本钩子同属"能移动金标数字的改动"） |
+（一次真实几何回归，套件判 FAIL、退出 1），用旧钩子提交 `tensorcad/geometry_field.py` 得到退出码 0、
+无任何提示，CI 那条路的路径过滤器也没点它。现在两侧都按前缀/通配覆盖整包；详见
+`docs/gap-cad-d2-trigger-envelope.md` 与 `artifacts/gap-cad-d2-golden/trigger_envelope.json`。
+| Series-60 Cb +5% | 1 | `series60_coarse`=FAIL, `series60_fine`=FAIL | `suite.py` 退出 1（FAIL 12 项）→ 第一道即红 |
+| `suite.py` | 0 | 45.2 s | `TENSORCAD_PATH=/srv/tensor/agent/work/m22681` |
+| `mutants.py` | 0 | 120.5 s | `TENSORCAD_PATH=/srv/tensor/agent/work/m22681` |
+- 被检 checkout：`/srv/tensor/agent/work/m22681`，HEAD `45e4c3ade0dd`，Python 3.11.6
+| `golden_suite.json` | `242489e38fcb4265…` |
+| `hook_probe.json` | `b6eeae8c4d82a8a8…` |
+| `mutation_report.json` | `1a022f0ae6f3c6ba…` |
+| `regression_control.json` | `c0800aba1de54cb4…` |
+| `series60_convergence.json` | `b5c2a6c14195482e…` |
