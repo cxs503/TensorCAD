@@ -20,3 +20,6 @@ artifacts/fleet_refs/raw/
 
 # local measurement payload directory (bundled copies live in artifacts/)
 /runs/
+
+# scratch space (staged to cluster nodes, never committed)
+work/
