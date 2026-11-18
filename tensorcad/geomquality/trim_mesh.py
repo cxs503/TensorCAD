@@ -846,15 +846,16 @@ def audit_mesh(vertices: Sequence[Vec3], faces: Sequence[Triangle],
                     component_of[neighbour] = component_count
                     stack.append(neighbour)
         component_count += 1
-    closed_components = 0
-    for component in range(component_count):
-        member_faces = {index for index, value in component_of.items() if value == component}
-        member_edges = {
-            key for key, uses in edge_uses.items()
-            if any(index in member_faces for index, _ in uses)
-        }
-        if all(len(edge_uses[key]) == 2 for key in member_edges):
-            closed_components += 1
+    # A component is closed iff no edge touching it has a use count other than
+    # two.  The old per-component scan was O(components x edges) -- on a
+    # fragmented mesh (ONRT: 1794 components x ~240k edges) that is the whole
+    # import wall clock; this single pass over the edges is O(edges) and
+    # computes the identical predicate.
+    open_components: set[int] = set()
+    for uses in edge_uses.values():
+        if len(uses) != 2:
+            open_components.update(component_of[face_index] for face_index, _ in uses)
+    closed_components = component_count - len(open_components)
 
     referenced = {index for face in faces for index in face}
     vertex_count = len(referenced)
