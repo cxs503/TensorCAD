@@ -293,7 +293,7 @@ def test_trimesh_is_an_independent_oracle_when_installed() -> None:
 
 def test_external_availability_reports_versions() -> None:
     available = reference.external_availability()
-    assert set(available) == {"gmsh", "meshmagick", "trimesh"}
+    assert set(available) == {"gmsh", "meshmagick", "trimesh", "verdict_oracle"}
     assert all(value is None or isinstance(value, str) for value in available.values())
 
 
