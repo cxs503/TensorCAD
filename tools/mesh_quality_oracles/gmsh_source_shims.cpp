@@ -47,7 +47,6 @@ void Msg::Warning(const char *fmt, ...)
 
 static char ctxStorage[1 << 16] __attribute__((aligned(64)));
 
-CTX *CTX::instance() { return reinterpret_cast<CTX *>(ctxStorage); }
 // * `GModel::current(int)` -- `MVertex`'s constructor (reached by the oracle when it
 //   builds the vertices of a corpus mesh) asks the current model for its vertex
 //   numbering (`setMaxVertexNumber` / `incrementAndGetMaxVertexNumber`, both inline in
