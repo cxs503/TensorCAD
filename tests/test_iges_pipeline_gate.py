@@ -91,6 +91,15 @@ JBC_SPEC = ShipSpec(
 )
 
 
+def _path_probe(path: str) -> bool:
+    """Collection-safe existence probe: a stat() that raises (e.g. EACCES on a
+    parent directory this user cannot search) means "not available here", which
+    is exactly what the skip guard wants to know — never a collection error."""
+    try:
+        return Path(path).exists()
+    except OSError:
+        return False
+
 def _skip_if_missing(spec: ShipSpec) -> None:
     if not Path(spec.iges_path).exists():
         pytest.skip(f"IGES file not present: {spec.iges_path}")
@@ -192,7 +201,7 @@ class TestGoldRegression:
     """DTMB5415_Hull_exact: the gold standard for regression."""
 
     @pytest.mark.skipif(
-        not Path("/root/ship-performance-platform/backend/data/geometry/ships/DTMB5415_Hull_exact.stl").exists(),
+        not _path_probe("/root/ship-performance-platform/backend/data/geometry/ships/DTMB5415_Hull_exact.stl"),
         reason="platform gold mesh not present",
     )
     def test_dtmb5415_gold_regression(self):

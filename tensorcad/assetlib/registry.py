@@ -39,11 +39,12 @@ deliberately boring and hard to game:
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-from .store import AssetError, AssetStore, asset_id_of, asset_uri, hull_of, sha256_file
+from .store import ENV_VAR, AssetError, AssetStore, asset_id_of, asset_uri, hull_of, sha256_file
 
 REGISTRY_SCHEMA = "tensorcad.assetlib.registry.v1"
 KIND_GEOMETRY = "geometry"
@@ -143,6 +144,23 @@ class AssetRegistry:
     store_root: str = ""
     schema: str = REGISTRY_SCHEMA
 
+    # ------------------------------------------------------------------ stores
+    def _effective_store(self, store: AssetStore | None) -> AssetStore:
+        """The store a lookup should hit when the caller did not pass one.
+
+        The registry records *where it was built* (``store_root``) as provenance,
+        but the operator may have moved the store: ``$TENSORCAD_ASSET_ROOT`` is the
+        documented runtime override (``AssetStore.default_store_root``) and must win
+        over the recorded root, otherwise every consumer keeps reading a dead path
+        after the store is relocated.  With no env override the recorded root is
+        used as before (empty string -> ``AssetStore``'s own default).
+        """
+        if store is not None:
+            return store
+        if os.environ.get(ENV_VAR):
+            return AssetStore(None)
+        return AssetStore(self.store_root or None)
+
     # ------------------------------------------------------------------ lookups
     def by_kind(self, kind: str) -> list[AssetEntry]:
         return [entry for entry in self.assets.values() if entry.kind == kind]
@@ -215,7 +233,7 @@ class AssetRegistry:
         self, name: str, *, store: AssetStore | None = None, require_verified: bool = False
     ) -> dict[str, Any]:
         """Resolve ``name`` and report *how* it resolved, not only where to."""
-        store = store or AssetStore(self.store_root or None)
+        store = self._effective_store(store)
         rule = ""
         if asset_id_of(name) or "/" in name:
             asset_id = asset_id_of(name) or name.strip("/")
@@ -270,13 +288,13 @@ class AssetRegistry:
         for entry in self.assets.values():
             if entry.sha256 == sha256:
                 return entry.asset_id
-        store = store or AssetStore(self.store_root or None)
+        store = self._effective_store(store)
         return store.find_by_sha(sha256)
 
     # ------------------------------------------------------------ verification
     def verify(self, *, store: AssetStore | None = None) -> dict[str, Any]:
         """Re-hash every registered byte; report per-asset state, never raise per asset."""
-        store = store or AssetStore(self.store_root or None)
+        store = self._effective_store(store)
         results: dict[str, str] = {}
         for asset_id, entry in sorted(self.assets.items()):
             try:

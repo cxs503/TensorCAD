@@ -54,7 +54,7 @@ def _cmd_build(args: argparse.Namespace) -> int:
 
 def _cmd_verify(args: argparse.Namespace) -> int:
     registry = load_registry(args.registry)
-    report = registry.verify(store=AssetStore(args.store or registry.store_root or None))
+    report = registry.verify(store=registry._effective_store(AssetStore(args.store) if args.store else None))
     print(json.dumps(report, indent=1))
     return 0 if report["ok"] else 1
 
@@ -63,7 +63,7 @@ def _cmd_resolve(args: argparse.Namespace) -> int:
     registry = load_registry(args.registry)
     try:
         result = registry.resolve_explained(
-            args.name, store=AssetStore(args.store or registry.store_root or None)
+            args.name, store=registry._effective_store(AssetStore(args.store) if args.store else None)
         )
     except (AssetError, KeyError) as exc:
         reason = getattr(exc, "reason", "not_registered")
@@ -85,9 +85,10 @@ def _cmd_growth(args: argparse.Namespace) -> int:
 
 def _cmd_scan(args: argparse.Namespace) -> int:
     registry = load_registry(args.registry) if Path(args.registry).is_file() else None
-    report = scan_spec_pointers(
-        args.specs, store=AssetStore(args.store or (registry.store_root if registry else "") or None), registry=registry
-    )
+    store = AssetStore(args.store) if args.store else None
+    if registry is not None:
+        store = registry._effective_store(store)
+    report = scan_spec_pointers(args.specs, store=store, registry=registry)
     print(json.dumps(report.as_dict(), indent=1))
     return 0 if not report.pointers or report.dead or report.withheld else 0
 
@@ -95,10 +96,13 @@ def _cmd_scan(args: argparse.Namespace) -> int:
 def _cmd_repair(args: argparse.Namespace) -> int:
     registry = load_registry(args.registry) if Path(args.registry).is_file() else None
     url_map, archive_map = _url_maps()
+    store = AssetStore(args.store) if args.store else None
+    if registry is not None:
+        store = registry._effective_store(store)
     result = repair_spec_file(
         args.specs,
         out_path=args.out,
-        store=AssetStore(args.store or (registry.store_root if registry else "") or None),
+        store=store,
         registry=registry,
         repo_root=REPO,
         url_map=url_map,

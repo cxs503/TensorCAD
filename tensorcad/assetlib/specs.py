@@ -194,7 +194,7 @@ def scan_spec_pointers(
     registry: AssetRegistry | None = None,
 ) -> PointerReport:
     """Classify every pointer in ``spec_path`` without modifying it."""
-    store = store or AssetStore((registry.store_root if registry else "") or None)
+    store = store or (registry._effective_store(None) if registry else AssetStore(None))
     payload = load_spec_payload(spec_path)
     roots = _candidate_roots(Path(spec_path), None if repo_root is None else Path(repo_root))
     report = PointerReport(path=str(spec_path))
