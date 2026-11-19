@@ -200,6 +200,62 @@ def test_inner_loop_is_a_hole():
 
 
 # --------------------------------------------------------------------------- #
+# spec loading: one absent hull must not take the whole fleet down
+# --------------------------------------------------------------------------- #
+def test_specs_from_json_passes_through_a_pointer_that_resolves_nowhere(tmp_path):
+    """One absent hull must not take the whole fleet spec down.
+
+    ``specs_from_json`` resolves every geometry pointer through the asset library.  A
+    pointer that resolves nowhere on this machine (an ``asset://`` URI whose bytes are
+    not in this store, or a dead work-tree path) is passed through unchanged so the
+    geometry reader reports the absence with its own message -- instead of the whole
+    spec load dying on the first missing hull and taking every present hull down with
+    it.  That is what happened when the JBC bytes left the store: the KVLCC2 intake
+    could no longer even load its own spec.
+    """
+    import json as _json
+
+    from tensorcad.fleet_baseline import specs_from_json
+
+    # A pointer that resolves nowhere: an asset:// URI with no bytes in this store.
+    absent_uri = "asset://geometry/hulls/NO_SUCH_HULL/absent.igs"
+    # A pointer that resolves: a real file on disk.
+    present = tmp_path / "present.igs"
+    present.write_bytes(b"dummy-iges-bytes")
+    spec_file = tmp_path / "fleet_specs.json"
+    spec_file.write_text(
+        _json.dumps(
+            {
+                "ships": [
+                    {
+                        "name": "PRESENT",
+                        "draft": 10.0,
+                        "length_pp": 100.0,
+                        "beam": 20.0,
+                        "iges_path": str(present),
+                        "iges_sha256": "",
+                    },
+                    {
+                        "name": "ABSENT",
+                        "draft": 10.0,
+                        "length_pp": 100.0,
+                        "beam": 20.0,
+                        "iges_path": absent_uri,
+                        "iges_sha256": "",
+                    },
+                ]
+            }
+        )
+    )
+    specs = {ship.name: ship for ship in specs_from_json(spec_file)}
+    assert set(specs) == {"PRESENT", "ABSENT"}
+    # the present pointer resolves to the real path
+    assert specs["PRESENT"].iges_path == str(present)
+    # the absent pointer is passed through unchanged, not raised away
+    assert specs["ABSENT"].iges_path == absent_uri
+
+
+# --------------------------------------------------------------------------- #
 # real-archive regression (skipped when the publisher bytes are absent)
 # --------------------------------------------------------------------------- #
 @pytest.mark.skipif(not KVLCC2.exists(), reason="KVLCC2 publisher geometry not in the asset store")
