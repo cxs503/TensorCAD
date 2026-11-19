@@ -1287,16 +1287,27 @@ def specs_from_json(path: str | Path, *, asset_registry: object | None = None) -
     is more honest than failing here with a different message.
     """
     from tensorcad.assetlib.consumer import resolve_pointer
+    from tensorcad.assetlib.registry import RegistryError
+    from tensorcad.assetlib.store import AssetError
 
     payload = json.loads(Path(path).read_text())
     ships = payload["ships"] if isinstance(payload, dict) else payload
     specs = []
     for entry in ships:
-        iges_path = resolve_pointer(
-            entry["iges_path"],
-            entry.get("iges_sha256", ""),
-            registry=asset_registry,  # type: ignore[arg-type]
-        )
+        try:
+            iges_path = resolve_pointer(
+                entry["iges_path"],
+                entry.get("iges_sha256", ""),
+                registry=asset_registry,  # type: ignore[arg-type]
+            )
+        except (AssetError, RegistryError):
+            # The pointer resolves nowhere on this machine: an ``asset://`` URI whose
+            # bytes are not in this store (``AssetError``), an id that is not in the
+            # registry at all (``RegistryError``), or a dead work-tree path.  Pass it
+            # through unchanged: the geometry reader reports the absence with its own
+            # message, which is more honest than failing here with a different one --
+            # and one absent hull must not take the whole fleet spec down with it.
+            iges_path = entry["iges_path"]
         specs.append(
             ShipSpec(
                 name=entry["name"],
