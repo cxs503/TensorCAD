@@ -40,6 +40,14 @@ GOLD = Path("/root/ship-performance-platform/backend/data/geometry/ships/"
             "DTMB5415_Hull_exact.stl")
 
 
+def _available(path: Path) -> bool:
+    """Collection-safe existence probe (see test_iges_pipeline_gate._path_probe)."""
+    try:
+        return path.exists()
+    except OSError:
+        return False
+
+
 def _volume(vertices, faces) -> float:
     points = np.asarray(vertices, dtype=float)
     triangles = np.asarray(faces, dtype=int)
@@ -120,7 +128,7 @@ def test_pipeline_reproduces_the_written_patch_volume_within_3pct(tmp_path):
     assert abs(measured - reference) / reference < 0.03, (measured, reference)
 
 
-@pytest.mark.skipif(not GOLD.exists(), reason="platform gold mesh not present")
+@pytest.mark.skipif(not _available(GOLD), reason="platform gold mesh not present")
 def test_dtmb5415_loft_imports_watertight_and_tracks_the_gold_surface(tmp_path):
     triangles = read_stl(GOLD)
     brep, info = loft_gold_hull(triangles)

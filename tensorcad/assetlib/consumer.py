@@ -46,7 +46,7 @@ def resolve_pointer(
 ) -> str:
     """Turn a spec pointer into a path whose SHA-256 equals ``sha256`` (when given)."""
     registry = registry if registry is not None else _default_registry()
-    store = store or AssetStore((registry.store_root if registry else "") or None)
+    store = store or (registry._effective_store(None) if registry else AssetStore(None))
     asset_id = asset_id_of(value)
     if asset_id:
         if registry is not None:

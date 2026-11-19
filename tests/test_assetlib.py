@@ -95,13 +95,14 @@ def test_registry_records_every_byte_and_marks_duplicates(store: AssetStore) -> 
 
 def test_resolve_verifies_bytes_and_honours_the_verified_gate(store: AssetStore) -> None:
     registry = build_registry(store=store)
-    assert Path(registry.resolve("geometry/hulls/ALPHA/alpha.igs")) == store.root / "geometry/hulls/ALPHA/alpha.igs"
-    assert resolve_pointer("asset://geometry/hulls/ALPHA/alpha.igs", registry=registry).endswith("alpha.igs")
+    alpha = "geometry/hulls/ALPHA/alpha.igs"
+    assert Path(registry.resolve(alpha, store=store)) == store.root / alpha
+    assert resolve_pointer("asset://" + alpha, registry=registry, store=store).endswith("alpha.igs")
     # BETA's bytes are hash-clean but its manifest never claimed physics verification:
     # reading is allowed, publishing a number from it is not.
-    registry.resolve("geometry/hulls/BETA/beta.igs")
+    registry.resolve("geometry/hulls/BETA/beta.igs", store=store)
     with pytest.raises(AssetError) as excinfo:
-        registry.resolve("geometry/hulls/BETA/beta.igs", require_verified=True)
+        registry.resolve("geometry/hulls/BETA/beta.igs", require_verified=True, store=store)
     assert excinfo.value.reason == "unverified"
 
 
@@ -292,3 +293,24 @@ def test_fleet_baseline_reads_geometry_through_the_registry() -> None:
         assert Path(spec.iges_path).is_file(), spec.iges_path
         assert sha256_file(spec.iges_path) == spec.iges_sha256, spec.name
         assert Path(spec.iges_path).is_relative_to(REAL_STORE.root), spec.iges_path
+
+
+def test_env_override_moves_the_store_for_a_relocated_registry(store: AssetStore, monkeypatch) -> None:
+    """``$TENSORCAD_ASSET_ROOT`` is the runtime store root and must beat the root
+    recorded in the registry file (mere build-time provenance): a registry whose
+    ``store_root`` points at a dead path keeps resolving after the store moves,
+    instead of silently reporting every asset missing."""
+    registry = build_registry(store=store)
+    assert registry.store_root == str(store.root)
+    moved = store.root.parent / "assets-moved"
+    moved.mkdir()
+    (moved / "geometry" / "hulls").mkdir(parents=True)
+    (moved / "geometry" / "hulls" / "ALPHA").mkdir()
+    (moved / "geometry" / "hulls" / "ALPHA" / "alpha.igs").write_bytes(b"ALPHA-IGES")
+    monkeypatch.setenv("TENSORCAD_ASSET_ROOT", str(moved))
+    resolved = resolve_pointer("asset://geometry/hulls/ALPHA/alpha.igs", registry=registry)
+    assert Path(resolved) == moved / "geometry/hulls/ALPHA/alpha.igs"
+    # without the override the recorded root is still honoured
+    monkeypatch.delenv("TENSORCAD_ASSET_ROOT")
+    resolved = resolve_pointer("asset://geometry/hulls/ALPHA/alpha.igs", registry=registry)
+    assert Path(resolved) == store.root / "geometry/hulls/ALPHA/alpha.igs"

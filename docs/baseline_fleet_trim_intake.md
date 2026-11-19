@@ -71,11 +71,21 @@ no tessellation is guessed in its place.
   default 0.1 m cell is not converged, hence the reported refinement.
 * KCS keeps its historical route deliberately: its 55 surfaces are all untrimmed, and
   changing a verified hull's path to "prove" a fix is how a regression gets shipped.
+* **A partial store must not fail the whole fleet intake (2026-11-19 incident).** The
+  durable store lost the JBC bytes (and the DTC/KP505/JBC-extras entries) while the
+  committed registry still listed them; `specs_from_json` resolved every pointer eagerly,
+  so one absent hull took the whole fleet spec down with an `AssetError`. Two repairs
+  landed: the pointer pass-through (an unresolvable pointer is carried into `ShipSpec`
+  unchanged, so the geometry reader reports the absence with its own message and the
+  other hulls still build), and the store itself was restored from the complete copy.
+  The store-root contract is now pinned by `test_env_override_moves_the_store_for_a_relocated_registry`:
+  `$TENSORCAD_ASSET_ROOT` is the runtime root and beats the root recorded in the registry
+  file (build-time provenance only), so a relocated store keeps resolving.
 
 ## 6. Reproduction
 
 ```bash
-PYTHONPATH=$PWD python -m pytest tests/test_fleet_trim_intake.py -q     # 10 passed
+PYTHONPATH=$PWD python -m pytest tests/test_fleet_trim_intake.py -q     # 11 passed
 PYTHONPATH=$PWD python -m pytest tests/test_iges_pipeline_gate.py tests/test_real_iges_gate.py \
     tests/test_iges_gold_regression.py -q                              # 21 passed, 1 skipped
 ```

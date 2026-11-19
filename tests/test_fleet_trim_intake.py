@@ -35,7 +35,13 @@ from tensorcad.fleet_baseline import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-STORE = Path(os.environ.get("TENSORCAD_ASSET_STORE", "/srv/tensor/agent/assets"))
+# The library reads $TENSORCAD_ASSET_ROOT (tensorcad.assetlib.store.ENV_VAR);
+# TENSORCAD_ASSET_STORE is accepted for backwards compatibility with earlier gates.
+STORE = Path(
+    os.environ.get("TENSORCAD_ASSET_ROOT")
+    or os.environ.get("TENSORCAD_ASSET_STORE")
+    or "/srv/tensor/agent/assets"
+)
 KVLCC2 = STORE / "geometry/hulls/KVLCC2/kvlcc2.igs"
 SPECS = ROOT / "benchmarks/verified/baseline_fleet/fleet_specs.json"
 
