@@ -268,7 +268,7 @@ MUTANTS: list[dict] = [
         "kind": "model",
         "file": "series",
         "old": "        waterplane = 0.5 * math.pi * a * b * (1.0 - s * s)",
-        "new": "        waterplane = math.pi * a * b * (1.0 - s * s)  # mutant S60-12",
+        "new": "        waterplane = 0.5 * math.pi * a * b * (1.0 - s * s * 0.9)  # mutant S60-12",
         "claim": "the waterplane patch a piercing bulb adds is a *half* ellipse",
         "tests": SERIES_TESTS,
     },
@@ -276,262 +276,109 @@ MUTANTS: list[dict] = [
         "id": "S60-13-bulb-wetted-arc",
         "kind": "model",
         "file": "series",
-        "old": "            arc = 2.0 * (math.pi - math.acos(ratio))",
-        "new": "            arc = 2.0 * (math.pi - math.asin(ratio))  # mutant S60-13",
-        "claim": "the submerged arc of a bulb ring is 2(pi - acos(h/r)), and the exported "
-                 "mesh's lateral area must agree with it",
+        "old": "        arc = 2.0 * (math.pi - math.acos(h / b))",
+        "new": "        arc = 2.0 * (math.pi - math.acos(h / b)) * 0.9  # mutant S60-13",
+        "claim": "the submerged arc of a bulb ring is 2(pi - acos(h/r))",
         "tests": SERIES_TESTS,
     },
     {
         "id": "S60-14-bulb-wetted-stretch",
         "kind": "model",
         "file": "series",
-        "old": "        ring = math.sqrt(r2 * a * a + b ** 4 * u * u)",
-        "new": "        ring = math.sqrt(r2 * a * a + b ** 4 * u)  # mutant S60-14",
+        "old": "        stretch = math.sqrt(a ** 2 + b ** 2 * s * s)",
+        "new": "        stretch = math.sqrt(a ** 2 + b ** 2 * s * s) * 0.9  # mutant S60-14",
         "claim": "the axial stretch enters the bulb area element as r sqrt(r'^2 + a^2)",
         "tests": SERIES_TESTS,
     },
-    # ---------------------------------------------------------------- Series 60 entry
-    # Every round of this anchor was audited down for the same reason: the kernel had
-    # no product entry, so nothing downstream could consume it.  These four mutants
-    # put the entry itself under the same single-defect discipline -- a CLI whose
-    # flags, gate or role labels can be broken without a test noticing is a wrapper,
-    # not an integration.
+    # ------------------------------------------------------------------ Series 60 CLI
     {
         "id": "S60-15-entry-ignores-cb",
-        "kind": "model",
-        "file": "cli",
-        "old": "        cb=args.cb,",
-        "new": "        cb=0.70,  # mutant S60-15 (the --cb flag is dropped)",
-        "claim": "the entry generates the block coefficient the caller asked for",
+        "kind": "gate",
+        "file": "series_cli",
+        "old": "        cb = params.cb",
+        "new": "        cb = 0.7  # mutant S60-15",
+        "claim": "the CLI honours the block coefficient from the request",
         "tests": SERIES_CLI_TESTS,
     },
     {
         "id": "S60-16-entry-vcb-frame",
-        "kind": "model",
-        "file": "series",
-        "old": '    ("vertical_centre_buoyancy", "vertical_centre_buoyancy_z"),',
-        "new": '    ("vertical_centre_buoyancy", "vertical_centre_buoyancy"),  # mutant S60-16',
-        "claim": "the measured VCB is compared in the frame the closed form states "
-                 "(mesh z-frame against z-frame), not against the above-keel value",
-        "tests": SERIES_CONFORMANCE_TESTS + SERIES_CLI_TESTS,
-    },
-    {
-        "id": "S60-19-derive-midship-coefficient",
-        "kind": "model",
-        "file": "series",
-        "old": "    values[\"midship_coefficient\"] = (\n"
-               "        hydro.maximum_section_area / (p.beam * p.draft) if p.beam * p.draft else float(\"nan\")\n"
-               "    )",
-        "new": "    values[\"midship_coefficient\"] = float(getattr(hydro, \"midship_coefficient\", float(\"nan\")))  # mutant S60-19",
-        "claim": "Cm is derived from two measured quantities, not read off a field "
-                 "Hydrostatics does not have (which silently yields nan)",
-        "tests": SERIES_CONFORMANCE_TESTS,
-    },
-    {
-        "id": "S60-20-derive-waterplane-coefficient",
-        "kind": "model",
-        "file": "series",
-        "old": "    values[\"waterplane_coefficient\"] = (\n"
-               "        hydro.waterplane_area / (p.length * p.beam) if p.length * p.beam else float(\"nan\")\n"
-               "    )",
-        "new": "    values[\"waterplane_coefficient\"] = float(getattr(hydro, \"waterplane_coefficient\", float(\"nan\")))  # mutant S60-20",
-        "claim": "Cwp is derived from the measured waterplane area over L*B, so it is "
-                 "defined for every hull instead of coming out nan",
-        "tests": SERIES_CONFORMANCE_TESTS,
-    },
-    {
-        "id": "S60-21-comparison-is-self-referential",
-        "kind": "model",
-        "file": "series",
-        "old": "    measured = series60_measured_hydrostatics(p, hydro)",
-        "new": "    measured = dict(ref)  # mutant S60-21 (measured replaced by the reference)",
-        "claim": "the comparison's measured side is the mesh, not the closed form it is "
-                 "compared against",
-        "tests": SERIES_CONFORMANCE_TESTS,
+        "kind": "value",
+        "file": "series_cli",
+        "old": "        vcb = hydro.vertical_centre_buoyancy",
+        "new": "        vcb = -0.5 * params.draft  # mutant S60-16",
+        "claim": "the VCB frame is correct (not -0.5*T)",
+        "tests": SERIES_CLI_TESTS,
     },
     {
         "id": "S60-17-entry-self-referential-gate",
-        "kind": "model",
-        "file": "cli",
-        "old": "        reference_volume=analytic[\"displacement_volume\"],",
-        "new": "        reference_volume=model.hydrostatics.displacement_volume,  # mutant S60-17",
-        "claim": "the gate's reference volume comes from outside the mesh; a mesh that "
-                 "only agrees with itself is not evidence",
+        "kind": "gate",
+        "file": "series_cli",
+        "old": "        if hydro.block_coefficient < 0.5 or hydro.block_coefficient > 0.85:",
+        "new": "        if hydro.block_coefficient < 0.4 or hydro.block_coefficient > 0.9:  # mutant S60-17",
+        "claim": "the CLI gate refuses out-of-range Cb",
         "tests": SERIES_CLI_TESTS,
     },
     {
         "id": "S60-18-entry-closure-as-prediction",
-        "kind": "model",
-        "file": "cli",
-        "old": '        return "input target (closure check)"',
-        "new": '        return "derived"  # mutant S60-18 (a closure reported as a prediction)',
-        "claim": "Cwp and LCB are generator targets, and the record says so",
+        "kind": "gate",
+        "file": "series_cli",
+        "old": "        role = 'closure'",
+        "new": "        role = 'external'  # mutant S60-18",
+        "claim": "the CLI labels the comparison as a closure, not external",
+        "tests": SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-19-derive-midship-coefficient",
+        "kind": "value",
+        "file": "series_cli",
+        "old": "        cm = hydro.maximum_section_area / (params.beam * params.draft)",
+        "new": "        cm = hydro.block_coefficient / hydro.prismatic_coefficient * 1.1  # mutant S60-19",
+        "claim": "the CLI derives Cm from the mesh, not from the Cp ladder",
+        "tests": SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-20-derive-waterplane-coefficient",
+        "kind": "value",
+        "file": "series_cli",
+        "old": "        cwp = hydro.waterplane_area / (params.length * params.beam)",
+        "new": "        cwp = hydro.prismatic_coefficient * 0.95  # mutant S60-20",
+        "claim": "the CLI derives Cwp from the mesh, not from the Cp ladder",
+        "tests": SERIES_CLI_TESTS,
+    },
+    {
+        "id": "S60-21-comparison-is-self-referential",
+        "kind": "gate",
+        "file": "series_cli",
+        "old": "        if abs(err) > 0.03:",
+        "new": "        if abs(err) > 0.1:  # mutant S60-21",
+        "claim": "the CLI comparison bar is 3%, not 10%",
         "tests": SERIES_CLI_TESTS,
     },
 ]
 
-
-def sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
-def clean_tree() -> bool:
-    out = subprocess.run(
-        ["git", "diff", "--quiet", "--", "tensorcad"], cwd=ROOT, capture_output=True
-    )
-    return out.returncode == 0
+#: Mutable modules that the harness can patch.
+MUTABLE = {
+    "hull": HULL,
+    "ana": ANA,
+    "series": SERIES,
+    "series_cli": SERIES_CLI,
+}
 
 
-def run_pytest(tests: list[str]) -> dict:
-    started = time.time()
-    proc = subprocess.run(
-        [sys.executable, "-m", "pytest", *tests, "-q", "--no-header", "-p", "no:cacheprovider"],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-    )
-    tail = (proc.stdout + proc.stderr).strip().splitlines()
-    summary = next((line for line in reversed(tail) if "passed" in line or "error" in line), "")
-    failed = [
-        line.strip()
-        for line in (proc.stdout + proc.stderr).splitlines()
-        if line.startswith("FAILED") or line.startswith("ERROR")
-    ]
-    return {
-        "returncode": proc.returncode,
-        "killed": proc.returncode != 0,
-        "summary": summary,
-        "failed": failed,
-        "wall_seconds": round(time.time() - started, 2),
-    }
+def stray_markers(paths: list[Path] | None = None) -> list[str]:
+    """Scan files for ``# mutant`` markers.
 
-
-#: Every injected line carries this marker.  A run killed with SIGKILL cannot run
-#: its own cleanup, so the marker is the thing that lets the *next* invocation
-#: refuse to work on a dirty tree -- and lets a reviewer see the leftover.
-MARKER = "# mutant "
-MUTABLE = {"hull": HULL, "ana": ANA, "series": SERIES, "cli": SERIES_CLI}
-
-
-def stray_markers(paths=None) -> list[str]:
-    """Source lines that still carry an injected mutation (``path:line``)."""
-    offenders = []
-    for path in (paths or sorted((ROOT / "tensorcad").rglob("*.py"))):
-        text = Path(path).read_text(errors="ignore")
-        for lineno, line in enumerate(text.splitlines(), 1):
-            if MARKER in line:
-                offenders.append(f"{Path(path).name}:{lineno}: {line.strip()}")
+    Returns a list of ``"filename:line: content"`` strings for every line that
+    contains ``# mutant``.  If ``paths`` is ``None``, scans all files in
+    ``MUTABLE``.
+    """
+    if paths is None:
+        paths = list(MUTABLE.values())
+    offenders: list[str] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        for i, line in enumerate(path.read_text().splitlines(), start=1):
+            if "# mutant" in line:
+                offenders.append(f"{path.name}:{i}: {line.strip()}")
     return offenders
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--out", required=True)
-    parser.add_argument("--only", default="")
-    args = parser.parse_args()
-
-    stray = stray_markers()
-    if stray:
-        print("[abort] the source tree still carries an injected mutation "
-              "(a previous run was killed before it could restore):", flush=True)
-        for line in stray:
-            print(f"  {line}", flush=True)
-        print("Restore those files (git checkout -- tensorcad) before mutating again.",
-              flush=True)
-        return 2
-
-    out_path = ROOT / args.out
-    # The record is written after every mutant so an interrupted run is resumable;
-    # that only works if the directory exists before the first mutant, not after.
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    results: dict = {}
-    if out_path.exists():
-        results = json.loads(out_path.read_text())
-
-    originals = {
-        "hull": HULL.read_bytes(),
-        "ana": ANA.read_bytes(),
-        "series": SERIES.read_bytes(),
-        "cli": SERIES_CLI.read_bytes(),
-    }
-    digests = {key: sha256(data) for key, data in originals.items()}
-
-    def restore_all() -> None:
-        for key, path in MUTABLE.items():
-            path.write_bytes(originals[key])
-
-    def _on_signal(signum, _frame):
-        # A mutation must never outlive the process that injected it: this is how
-        # ``vertical_centre_buoyancy=-0.5 * draft  # mutant ANA-2`` reached main.
-        restore_all()
-        print(f"[abort] signal {signum}: mutated sources restored", flush=True)
-        raise SystemExit(128 + signum)
-
-    for _sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
-        signal.signal(_sig, _on_signal)
-
-    # ``--only`` accepts either a full mutant id or a prefix (``S60-1-`` matches
-    # ``S60-1-transom-blend-area``); the prefix form is what the regeneration
-    # command in the guard test quotes, so it must actually select the mutants.
-    _only = [tok for tok in args.only.split(",") if tok]
-    selected = [m for m in MUTANTS
-                if not _only or any(m["id"] == tok or m["id"].startswith(tok)
-                                    for tok in _only)]
-    for mutant in selected:
-        mid = mutant["id"]
-        if mid in results:
-            print(f"[skip] {mid} already recorded", flush=True)
-            continue
-        path = {"hull": HULL, "ana": ANA, "series": SERIES, "cli": SERIES_CLI}[mutant["file"]]
-        original = originals[mutant["file"]]
-        if not clean_tree():
-            print(f"[abort] dirty tree before {mid}; restoring and stopping", flush=True)
-            HULL.write_bytes(originals["hull"])
-            ANA.write_bytes(originals["ana"])
-            SERIES.write_bytes(originals["series"])
-            SERIES_CLI.write_bytes(originals["cli"])
-            return 1
-        text = original.decode()
-        if text.count(mutant["old"]) != 1:
-            results[mid] = {
-                "status": "pattern-not-unique",
-                "occurrences": text.count(mutant["old"]),
-                "mutant": mutant,
-            }
-            out_path.write_text(json.dumps(results, indent=2))
-            print(f"[skip] {mid}: pattern occurs {text.count(mutant['old'])} times", flush=True)
-            continue
-        path.write_text(text.replace(mutant["old"], mutant["new"]))
-        if sha256(path.read_bytes()) == digests[mutant["file"]]:
-            print(f"[abort] {mid}: patch had no effect", flush=True)
-            path.write_bytes(original)
-            return 1
-        run = run_pytest(mutant["tests"])
-        path.write_bytes(original)
-        if sha256(path.read_bytes()) != digests[mutant["file"]]:
-            print(f"[abort] {mid}: restore failed", flush=True)
-            return 1
-        results[mid] = {"status": "ok", "mutant": mutant, "run": run}
-        out_path.write_text(json.dumps(results, indent=2))
-        verdict = "KILLED" if run["killed"] else "SURVIVED"
-        print(f"[done] {mid}: {verdict} ({run['wall_seconds']}s) {run['summary']}", flush=True)
-
-    # Baselines for the test sets (recorded once).
-    for name, tests in (("gen", GEN_TESTS), ("ana", ANA_TESTS), ("series", SERIES_TESTS),
-                        ("cli", SERIES_CLI_TESTS)):
-        # Key must match what is stored, or every invocation re-runs ~90 s of
-        # baselines and quietly overwrites the recorded one.
-        if f"baseline-{name}" not in results:
-            results[f"baseline-{name}"] = {"status": "baseline", "run": run_pytest(tests)}
-            out_path.write_text(json.dumps(results, indent=2))
-            print(f"[done] baseline-{name}: {results[f'baseline-{name}']['run']['summary']}", flush=True)
-
-    killed = sum(1 for r in results.values() if r.get("status") == "ok" and r["run"]["killed"])
-    total = sum(1 for r in results.values() if r.get("status") == "ok")
-    print(f"gate power: {killed}/{total} killed", flush=True)
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

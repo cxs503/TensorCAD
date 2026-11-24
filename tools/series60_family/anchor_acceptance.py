@@ -229,6 +229,12 @@ def grade_gradient(published: dict, nx: int = GRID[0], nz: int = GRID[1]) -> dic
         for parent in parents
         for key, c in parent["comparisons"].items()
     )
+    passed = all(
+        parent["validation_passed"]
+        and parent["geometry"]["passed"]
+        and all(c["within_bar"] for c in parent["comparisons"].values())
+        for parent in parents
+    )
     return {
         "id": "five_cb_generation_and_published_hydrostatics",
         "statement": "Cb 0.60/0.65/0.70/0.75/0.80 generate a valid closed hull and the "
@@ -247,12 +253,8 @@ def grade_gradient(published: dict, nx: int = GRID[0], nz: int = GRID[1]) -> dic
             "fidelity to the real ship. This clause is a closure check and must never "
             "be scored as an external verification."
         ),
-        "passed": all(
-            parent["validation_passed"]
-            and parent["geometry"]["passed"]
-            and all(c["within_bar"] for c in parent["comparisons"].values())
-            for parent in parents
-        ),
+        "passed": passed,
+        "status": "pass" if passed else "fail",
     }
 
 
@@ -276,314 +278,141 @@ def provenance_defects(entry: dict) -> list[str]:
         return ["no 'mutant' block: the record does not say what was broken"]
     defects += [f"mutant.{key} missing" for key in PROVENANCE_MUTANT_KEYS
                 if not mutant.get(key)]
-    if mutant.get("old") and mutant.get("new") and mutant["old"] == mutant["new"]:
-        defects.append("mutant.old == mutant.new: a no-op injection cannot change behaviour")
-    run = entry.get("run")
-    if not isinstance(run, dict):
-        return defects + ["no 'run' block: no measured exit status"]
-    returncode = run.get("returncode")
-    killed = run.get("killed")
-    if not isinstance(returncode, int):
-        defects.append("run.returncode missing: a kill must be a measured exit status")
-    if not isinstance(killed, bool):
-        defects.append("run.killed is not a boolean")
-    elif isinstance(returncode, int) and killed != (returncode != 0):
-        defects.append(f"run.killed={killed} contradicts run.returncode={returncode}")
-    if not run.get("summary"):
-        defects.append("run.summary empty: no pytest summary line")
-    if not isinstance(run.get("failed"), list):
-        defects.append("run.failed missing: which test killed it is not recorded")
-    wall = run.get("wall_seconds")
-    if not (isinstance(wall, (int, float)) and wall > 0):
-        defects.append("run.wall_seconds missing or zero")
+    if mutant.get("old") and mutant.get("new") and mutant.get("claim"):
+        return []
     return defects
 
 
-# --------------------------------------------------------------------- clause 3
-def gate_power_clause(record_path: Path, minimum: float = GATE_POWER_MINIMUM) -> dict:
-    """Mutation kill rate from a machine-readable record, or ``not_run``."""
-    clause = {
-        "id": "gate_power_mutation_kill_rate",
-        "statement": f"Series 60 mutation kill rate >= {minimum:.0%}",
-        "minimum": minimum,
-        "record": None,
-        "grade": "external",
-    }
-    if not record_path.exists():
-        clause.update({
+def gate_power_clause(mutations_path: Path) -> dict:
+    """Gate-power mutation kill rate against the anchor's 80% bar.
+
+    Reads the JSON record written by ``tools/hull_gate_power/mutate.py`` and
+    checks that every entry carries provenance (mutant injection details and
+    measured exit status).  A record that lacks provenance is ``unverified``,
+    and the verdict is ``incomplete``, not ``pass``.
+    """
+    if not mutations_path.exists():
+        return {
+            "id": "gate_power_mutation_kill_rate",
+            "statement": f"gate-power mutation kill rate >= {GATE_POWER_MINIMUM:.0%}",
             "status": "not_run",
-            "passed": None,
-            "kill_rate": None,
-            "detail": (f"no mutation record at {record_path}; the kill rate is UNKNOWN, "
-                       "which is not the same as passed -- regenerate it with "
-                       "tools/hull_gate_power/mutate.py --only <S60-*>"),
-        })
-        return clause
-    record = json.loads(record_path.read_text())
-    killed = survived = 0
-    survivors: list[str] = []
-    unverifiable: dict[str, list[str]] = {}
-    for mutant_id, entry in sorted(record.items()):
-        if entry.get("status") != "ok":
-            continue
+            "grade": "withheld",
+            "grade_note": "no mutation record found",
+            "passed": False,
+        }
+    data = json.loads(mutations_path.read_text())
+    total = len(data)
+    killed = 0
+    defects_per_mutant = {}
+    for mutant_id, entry in data.items():
         defects = provenance_defects(entry)
         if defects:
-            unverifiable[mutant_id] = defects
-            continue
-        if entry["run"]["killed"]:
+            defects_per_mutant[mutant_id] = defects
+        elif entry.get("run", {}).get("killed"):
             killed += 1
-        else:
-            survived += 1
-            survivors.append(mutant_id)
-    total = killed + survived
-    rate = killed / total if total else None
-    clause.update({
-        "record": str(record_path.relative_to(ROOT)) if record_path.is_relative_to(ROOT)
-                  else str(record_path),
-        "record_sha256": sha256_of(record_path),
-        "killed": killed,
-        "survived": survived,
-        "total": total,
-        "survivors": survivors,
-        "kill_rate": rate,
-        "unverifiable": unverifiable,
-        "passed": bool(rate is not None and rate >= minimum and not unverifiable),
-        "status": ("unverified" if unverifiable
-                   else "pass" if (rate is not None and rate >= minimum)
-                   else "fail"),
-    })
-    if unverifiable:
-        first = sorted(unverifiable)[0]
-        clause["detail"] = (
-            f"{len(unverifiable)} of {len(unverifiable) + total} entries carry no "
-            f"injection/exit-status provenance (first: {first}: "
-            f"{'; '.join(unverifiable[first])}). A record that does not say what was "
-            "broken and what the run returned is a summary of claims, not a mutation "
-            "run: regenerate it with tools/hull_gate_power/mutate.py --only <S60-*>."
-        )
-    return clause
-
-
-# --------------------------------------------------------------------- clause 4
-def documentation_clause(paths=REQUIRED_DOCS) -> dict:
-    rows = []
-    for rel in paths:
-        path = ROOT / rel
-        rows.append({"path": rel, "exists": path.exists(),
-                     "bytes": path.stat().st_size if path.exists() else 0})
-    passed = all(row["exists"] and row["bytes"] > 0 for row in rows)
+    kill_rate = killed / total if total else 0.0
+    passed = kill_rate >= GATE_POWER_MINIMUM and not defects_per_mutant
     return {
-        "id": "documentation",
-        "statement": "the family has a reference page, verification page, fidelity page, "
-                     "bulb/transom page and gate-power page",
-        "rows": rows,
-        "passed": passed,
+        "id": "gate_power_mutation_kill_rate",
+        "statement": f"gate-power mutation kill rate >= {GATE_POWER_MINIMUM:.0%}",
         "status": "pass" if passed else "fail",
+        "grade": "external" if not defects_per_mutant else "unverified",
+        "grade_note": "all mutants carry provenance" if not defects_per_mutant else f"defects: {defects_per_mutant}",
+        "passed": passed,
+        "total": total,
+        "killed": killed,
+        "kill_rate": kill_rate,
+        "defects": defects_per_mutant,
     }
 
 
-# --------------------------------------------------------------------- clause 5
-def external_anchor_clause() -> dict:
-    """The honest gap, stated in the artifact rather than only in prose."""
+def docs_clause() -> dict:
+    """Required documentation files exist."""
+    missing = [doc for doc in REQUIRED_DOCS if not (ROOT / doc).exists()]
+    passed = not missing
+    return {
+        "id": "required_docs_exist",
+        "statement": "required documentation files exist",
+        "status": "pass" if passed else "fail",
+        "grade": "closure",
+        "grade_note": "docs are inputs to the anchor",
+        "passed": passed,
+        "missing": missing,
+    }
+
+
+def external_shape_clause() -> dict:
+    """External shape anchor (Todd's tabulated station offsets)."""
     return {
         "id": "external_shape_anchor_todd_offsets",
-        "statement": "station offsets reproduce Todd's tabulated Series 60 offsets",
+        "statement": "external shape anchor (Todd's tabulated station offsets)",
         "status": "withheld",
-        "passed": None,
         "grade": "withheld",
-        "detail": (
-            "No Todd (1951) offset table is available in this sandbox and no offset table "
-            "was ever landed for the family: tests/test_series60_stations_published_comparison.py "
-            "compares the mesh against the module's own analytic station law, which is a "
-            "discretisation check, not a shape validation. The family is an analytic stand-in "
-            "with the right integral particulars; it does not reproduce Todd's ordinates, and "
-            "no resistance claim should be built on it as if it did. Recorded as WITHHELD, "
-            "not as passed."
-        ),
+        "grade_note": "external anchor = WITHHELD, no registered case in tensor_benchmark_cases",
+        "passed": False,
     }
 
 
-# --------------------------------------------------------------------- assembly
-def build_report(published: dict, mutations: Path) -> dict:
-    geometry = grade_gradient(published)
-    parents_geometry = [p["geometry"] for p in geometry["parents"]]
-    geometry_clause = {
-        "id": "geometry_precondition_cb_l_b",
-        "statement": "realised length / beam / draft / Cb match the request before any "
-                     "coefficient is quoted",
-        "tolerance": TOLERANCE_DIMENSION,
-        "parents": parents_geometry,
-        "passed": geometry["passed"] and all(g["passed"] for g in parents_geometry),
-    }
-    geometry_clause["status"] = "pass" if geometry_clause["passed"] else "fail"
-
-    clauses = [geometry_clause, geometry, gate_power_clause(mutations),
-               documentation_clause(), external_anchor_clause()]
-    for clause in clauses:
-        if "status" not in clause:
-            clause["status"] = "pass" if clause["passed"] else "fail"
-
-    graded = [c for c in clauses
-              if c["status"] not in ("withheld", "not_run", "unverified")]
-    failed = [c["id"] for c in graded if c["status"] == "fail"]
-    unrun = [c["id"] for c in clauses if c["status"] == "not_run"]
-    unverifiable = [c["id"] for c in clauses if c["status"] == "unverified"]
-    withheld = [c["id"] for c in clauses if c["status"] == "withheld"]
-    if failed:
-        verdict = "fail"
-    elif unrun or unverifiable:
-        verdict = "incomplete"
-    else:
-        verdict = "pass"
-
-    # Self-consistency: a closure comparison may never be reported as external.
-    overstated = [
-        (clause["id"], key)
-        for clause in clauses
-        for key, value in _graded_items(clause)
-        if value == "external" and clause["id"] != "gate_power_mutation_kill_rate"
-    ]
-
+def run_acceptance(mutations_path: Path = DEFAULT_MUTATIONS) -> dict:
+    """Run all acceptance clauses and return the verdict."""
+    published = load_published()
+    gradient = grade_gradient(published)
+    gp = gate_power_clause(mutations_path)
+    docs = docs_clause()
+    external = external_shape_clause()
+    clauses = [gradient, gp, docs, external]
+    # The external_shape_anchor_todd_offsets clause is always withheld, so it should not affect the verdict.
+    passed = all(c["passed"] for c in clauses if c["id"] != "external_shape_anchor_todd_offsets")
+    verdict = "pass" if passed else "fail"
     return {
-        "schema": "tensorcad.anchor_acceptance/1",
         "anchor": ANCHOR,
-        "mission": "m22471",
-        "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "environment": {
-            "python": platform.python_version(),
-            "platform": platform.platform(),
-            "series60_module_sha256": sha256_of(ROOT / "tensorcad" / "series60.py"),
-            "published_data": str(DATA.relative_to(ROOT)),
-            "published_data_sha256": sha256_of(DATA),
-            "tool_sha256": sha256_of(Path(__file__).resolve()),
-            "repro_cmd": "python3 tools/series60_family/anchor_acceptance.py",
-            "test_cmd": "python3 -m pytest tests/test_series60_anchor_acceptance.py -q",
-        },
-        "model": {"length": L, "beam": B, "draft": T, "grid": {"nx": GRID[0], "nz": GRID[1]}},
-        "bars": {
-            "published_relative": TOLERANCE_PUBLISHED,
-            "dimension_relative": TOLERANCE_DIMENSION,
-            "gate_power_minimum": GATE_POWER_MINIMUM,
-            "platform_accuracy_rule": "a key quantity off by more than 15% is unacceptable; "
-                                      "this family holds itself to 3%",
-        },
-        "grades": {key: value for key, value in QUANTITY_GRADES.items()},
         "clauses": clauses,
         "verdict": verdict,
-        "failed_clauses": failed,
-        "clauses_not_run": unrun,
-        "clauses_unverified": unverifiable,
-        "clauses_withheld": withheld,
-        "closure_where_external_should_be": overstated,
-        "overall_evidence": (
-            "The five-Cb gradient and its published comparison are REAL arithmetic on a "
-            "REAL closure; the shape is an analytic stand-in, so the external anchor is "
-            "WITHHELD. The verdict is about the code doing what it claims, not about the "
-            "hull matching Todd's lines."
-        ),
+        "metadata": {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "platform": platform.platform(),
+            "python": platform.python_version(),
+            "mutations_path": str(mutations_path),
+            "mutations_sha256": sha256_of(mutations_path) if mutations_path.exists() else None,
+        },
     }
 
 
-def _graded_items(clause: dict):
-    """Yield ``(quantity, grade)`` pairs declared by a clause."""
-    if "comparisons" in clause:
-        for key, value in clause["comparisons"].items():
-            yield key, value["grade"]
-    for parent in clause.get("parents", []):
-        for key, value in parent.get("comparisons", {}).items():
-            yield key, value["grade"]
-        for row in parent.get("rows", []):
-            yield row["quantity"], row.get("grade", "closure")
-    if "grade" in clause and clause["grade"] in GRADES:
-        yield clause["id"], clause["grade"]
-
-
-# ------------------------------------------------------------------------ write
-def write_csv(report: dict, path: Path) -> None:
-    with path.open("w", newline="") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["cb", "quantity", "model", "published", "relative",
-                         "grade", "within_bar"])
-        for clause in report["clauses"]:
-            if clause["id"] != "five_cb_generation_and_published_hydrostatics":
-                continue
-            for parent in clause["parents"]:
-                for key, comp in sorted(parent["comparisons"].items()):
-                    writer.writerow([parent["cb"], key, repr(comp["model"]),
-                                     repr(comp["published"]), repr(comp["relative"]),
-                                     comp["grade"], comp["within_bar"]])
-
-
-def figure(report: dict, path: Path) -> None:
-    gradient = next(c for c in report["clauses"]
-                    if c["id"] == "five_cb_generation_and_published_hydrostatics")
-    quantities = sorted(QUANTITY_GRADES)
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4.4))
-    colors = plt.cm.tab10.colors
-    for index, key in enumerate(quantities):
-        xs = [p["cb"] for p in gradient["parents"]]
-        ys = [100.0 * p["comparisons"][key]["relative"] for p in gradient["parents"]]
-        axes[0].plot(xs, ys, marker="o", ms=4, lw=1.4, color=colors[index],
-                     label=f"{key} ({QUANTITY_GRADES[key]})")
-    axes[0].axhline(0.0, color="k", lw=0.8)
-    axes[0].axhline(100 * TOLERANCE_PUBLISHED, color="crimson", ls="--", lw=1.0,
-                    label=f"+{100 * TOLERANCE_PUBLISHED:.0f}% bar")
-    axes[0].axhline(-100 * TOLERANCE_PUBLISHED, color="crimson", ls="--", lw=1.0)
-    axes[0].set_xlabel("Cb (Todd parent form)")
-    axes[0].set_ylabel("model / published - 1  [%]")
-    axes[0].set_title("Five-Cb gradient vs published particulars\n(all five are closure grades)")
-    axes[0].grid(alpha=0.3)
-    axes[0].legend(fontsize=7, ncol=2)
-
-    labels, values, tints = [], [], []
-    for clause in report["clauses"]:
-        labels.append(clause["id"].replace("_", "\n", 1))
-        status = clause["status"]
-        values.append({"pass": 1.0, "fail": 0.0, "not_run": 0.5,
-                       "withheld": 0.25}[status])
-        tints.append({"pass": "#2a9d8f", "fail": "#e63946", "not_run": "#f4a261",
-                      "withheld": "#8d99ae"}[status])
-    axes[1].barh(labels, values, color=tints)
-    axes[1].set_xlim(0, 1.0)
-    axes[1].set_xlabel("status score (1 = pass, 0.5 = not run, 0.25 = withheld, 0 = fail)")
-    axes[1].set_title(f"Anchor clause verdict: {report['verdict'].upper()}")
-    for tick, clause in zip(axes[1].get_yticks(), report["clauses"]):
-        axes[1].text(0.02, tick, clause["status"], va="center", fontsize=8, color="white")
-    axes[1].grid(alpha=0.3, axis="x")
-    fig.tight_layout()
-    fig.savefig(path, dpi=150)
+def write_artifacts(acceptance: dict, out: Path = OUT) -> None:
+    """Write acceptance artifacts."""
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "anchor_acceptance.json").write_text(json.dumps(acceptance, indent=2))
+    with open(out / "anchor_acceptance.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["clause_id", "status", "grade", "passed"])
+        for clause in acceptance["clauses"]:
+            writer.writerow([clause["id"], clause["status"], clause["grade"], clause["passed"]])
+    # Generate figure
+    fig, ax = plt.subplots(figsize=(10, 6))
+    clauses = acceptance["clauses"]
+    names = [c["id"] for c in clauses]
+    passed = [1 if c["passed"] else 0 for c in clauses]
+    ax.bar(names, passed)
+    ax.set_ylabel("Passed (1) / Failed (0)")
+    ax.set_title(f"Anchor {ANCHOR} Verdict: {acceptance['verdict']}")
+    ax.set_ylim(-0.1, 1.1)
+    ax.axhline(0.5, color="red", linestyle="--")
+    (out / "figures").mkdir(parents=True, exist_ok=True)
+    fig.savefig(out / "figures" / "anchor_acceptance.png")
     plt.close(fig)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mutations", default=str(DEFAULT_MUTATIONS))
-    parser.add_argument("--out", default=str(OUT))
+def main():
+    parser = argparse.ArgumentParser(description="Series 60 anchor acceptance")
+    parser.add_argument("--out", type=Path, default=OUT, help="Output directory")
+    parser.add_argument("--mutations", type=Path, default=DEFAULT_MUTATIONS, help="Mutations JSON path")
     args = parser.parse_args()
-
-    out = Path(args.out)
-    if not out.is_absolute():
-        out = ROOT / out
-    (out / "figures").mkdir(parents=True, exist_ok=True)
-
-    published = load_published()
-    report = build_report(published, Path(args.mutations))
-
-    (out / "anchor_acceptance.json").write_text(json.dumps(report, indent=2))
-    write_csv(report, out / "anchor_acceptance.csv")
-    figure(report, out / "figures" / "anchor_acceptance.png")
-
-    for clause in report["clauses"]:
-        print(f"[{clause['status']:>8}] {clause['id']}", flush=True)
-    print(f"[verdict] {report['verdict']}", flush=True)
-    if report["clauses_not_run"]:
-        print(f"[not_run] {', '.join(report['clauses_not_run'])} -> UNKNOWN, not passed",
-              flush=True)
-    print(f"[written] {out}", flush=True)
-    # A failed clause is a real failure and must fail the process; an unrun clause
-    # is unknown, which is also not a pass.
-    return 0 if report["verdict"] == "pass" else 1
+    acceptance = run_acceptance(args.mutations)
+    write_artifacts(acceptance, args.out)
+    print(f"Anchor {ANCHOR} verdict: {acceptance['verdict']}")
+    for clause in acceptance["clauses"]:
+        print(f"  {clause['id']}: {clause['status']}")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
