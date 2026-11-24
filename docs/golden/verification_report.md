@@ -370,3 +370,11 @@ ERROR inclined_box invariant_violated identity_mirrored_heel_mirrors_transverse_
 | `docs/golden/results.json`、`results.md` | 证据重放（`render_evidence.py`），含新容差与依据 |
 | `docs/golden/quick_mode_parity.png` | 新增本图 |
 | `docs/golden/verification_report.md` | 本节 |
+
+### 11.7 第 3 轮增量（回归测试）
+
+| 文件 | 改动 |
+|---|---|
+| `tests/test_golden_regression.py` | 新增 `test_inclined_box_quick_and_full_error_sets_match`：固定 `--quick` 与全量梯级对同一棵树给出同一判决（ERROR 集合相同），防止容差随档推导的修复被回退 |
+
+**效果**: 门禁对 `inclined_box` 的两档一致性有了自动化回归保护。

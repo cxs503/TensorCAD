@@ -1354,3 +1354,26 @@ def test_sphere_ellipsoid_has_three_grid_gci(committed: golden.SuiteResult) -> N
         assert ext_err <= fine_err, (
             f"{key}: GCI extrapolation error {ext_err:.3e} > fine error {fine_err:.3e}"
         )
+
+
+def test_inclined_box_quick_and_full_error_sets_match(committed: golden.SuiteResult) -> None:
+    """Regression: ``--quick`` and ``--full`` must report the same ERROR set for ``inclined_box``.
+
+    Before the ``level``-aware invariant bands were added, ``--quick`` (coarse solve)
+    reported ``invariant_violated`` on the two identities because the bands were
+    hand-picked for the fine solve.  The fix derives the bands from the level's
+    ``SOLVE_TOLERANCE``, so both rungs use the same *criterion* (the band appropriate
+    to their own solve accuracy) and the ERROR sets are identical.
+    """
+    from tensorcad.golden_inclined_box import InclinedBoxGolden
+
+    quick = golden.run_suite(cases=[InclinedBoxGolden()], quick=True)
+    full = golden.run_suite(cases=[InclinedBoxGolden()], quick=False)
+
+    quick_codes = {f.code for f in quick.all_findings if f.severity == golden.ERROR}
+    full_codes = {f.code for f in full.all_findings if f.severity == golden.ERROR}
+
+    assert quick_codes == full_codes, (
+        f"quick ERRORs {quick_codes} != full ERRORs {full_codes}; "
+        "the gate must not disagree between --quick and --full"
+    )
