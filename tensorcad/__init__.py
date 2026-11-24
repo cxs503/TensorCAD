@@ -378,6 +378,17 @@ from .transom import (
     truncated_taper_integral,
     truncated_taper_moment,
 )
+from .transom_asymmetric import (
+    MAX_SKEW,
+    AsymmetricTransomModel,
+    AsymmetricTransomParameters,
+    analytic_asymmetric_hydrostatics,
+    build_asymmetric_mesh,
+    generate_asymmetric_transom_hull,
+    mesh_transverse_centroid,
+    simpson_reference,
+)
+
 from .series60 import (
     PARENT_CB,
     Series60Model,
@@ -890,6 +901,14 @@ __all__ = [
     "volume_numpy_stl",
     "volume_sectional",
     "volume_trimesh",
+    "MAX_SKEW",
+    "AsymmetricTransomModel",
+    "AsymmetricTransomParameters",
+    "analytic_asymmetric_hydrostatics",
+    "build_asymmetric_mesh",
+    "generate_asymmetric_transom_hull",
+    "mesh_transverse_centroid",
+    "simpson_reference",
 ]
 
 #: Mesh-exchange submodule, discoverable as ``tensorcad.mesh_formats`` without
