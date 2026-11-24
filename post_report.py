@@ -15,7 +15,7 @@ def login():
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read())["access_token"]
 
-def post_report(token, report_path="/tmp/report.json"):
+def post_report(token, report_path="/root/tp-agent/work/m25806/runs/report.json"):
     with open(report_path) as f:
         report = json.load(f)
     data = json.dumps(report).encode()
