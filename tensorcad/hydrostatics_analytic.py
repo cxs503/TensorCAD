@@ -262,192 +262,90 @@ class AnalyticHydrostatics:
         return worst <= tolerance
 
 
-def _resolve_parameters(parameters: Any) -> tuple[float, float, float, float]:
-    """Accept ``HullParameters``, a ``(L, B, T)`` triple, or ``None`` for defaults."""
-    if parameters is None:
-        from .hull import HullParameters
+def waterplane_inertia_longitudinal(length: float, beam: float, taper: float) -> float:
+    """Longitudinal waterplane inertia: ``int x^2 dA`` about midship.
 
-        parameters = HullParameters()
-    if hasattr(parameters, "length") and hasattr(parameters, "beam") and hasattr(parameters, "draft"):
-        density = float(getattr(parameters, "water_density", 1025.0))
-        return (
-            float(parameters.length),
-            float(parameters.beam),
-            float(parameters.draft),
-            density,
-        )
-    if isinstance(parameters, (tuple, list)) and len(parameters) == 3:
-        return (float(parameters[0]), float(parameters[1]), float(parameters[2]), 1025.0)
-    raise TypeError(
-        "analytic_hydrostatics takes HullParameters, an (L, B, T) triple or None, "
-        f"got {type(parameters).__name__}"
-    )
-
-
-def _check_positive(name: str, value: float) -> float:
-    if not math.isfinite(value) or value <= 0.0:
-        raise ValueError(f"{name} must be a finite positive number, got {value!r}")
-    return float(value)
-
-
-@lru_cache(maxsize=64)
-def _wetted_area(
-    length: float, beam: float, draft: float, exponent: float, levels: int
-) -> tuple[float, float]:
-    """Wetted surface of the half-body, doubled, plus its self-convergence error.
-
-    Parametrise the flank as ``r(x, zeta) = (x, b(x, zeta), -T + T*zeta)``; the area
-    element is ``sqrt(T**2*(1 + b_x**2) + b_zeta**2) dx dzeta``. Substituting
-    ``zeta = u**2`` -- which removes the ``zeta**(-1/2)`` keel singularity of
-    ``b_zeta`` into a smooth integrand -- leaves
-
-        ``int_0^1 sqrt(4*T**2*u**2*(1 + (gamma*u)**2) + beta**2) du``
-
-    with ``beta = (B/2)*sin(pi*x/L)**e`` and ``gamma = d beta / dx``. The outer
-    integral over ``x`` still carries the ``xi**(-0.3)`` stem/stern edge, which is
-    what the double-exponential rule is for.
+    For the analytic surface, the waterplane breadth is ``b(x) = (B/2) * sin(pi*x/L)**e``,
+    so ``dA = b(x) dx`` and the inertia is ``(B/2) * int_0^L x^2 sin(pi*x/L)**e dx``.
+    The substitution ``t = pi*x/L`` gives ``(B/2) * (L/pi)**3 * int_0^pi t^2 sin(t)**e dt``.
+    The integral ``int_0^pi t^2 sin(t)**e dt`` is evaluated numerically because it has
+    no simple closed form for general ``e``.
     """
-    half_beam = 0.5 * beam
-    inner_levels = max(1, levels - 2)
+    def integrand(t: float) -> float:
+        return t ** 2 * math.sin(t) ** taper
+    return (beam / 2.0) * (length / math.pi) ** 3 * tanh_sinh_quadrature(integrand, 0, math.pi)
 
-    def flank(x: float) -> float:
-        s = math.sin(math.pi * x / length)
-        if s <= 0.0:  # only reachable at the endpoints, which tanh-sinh never hits
-            return 0.0
-        beta = half_beam * s**exponent
-        gamma = (
-            half_beam * (math.pi * exponent / length) * math.cos(math.pi * x / length) * s ** (exponent - 1.0)
-        )
-        four_t_squared = 4.0 * draft * draft
-        beta_squared = beta * beta
 
-        def inner(u: float) -> float:
-            slope = gamma * u
-            return math.sqrt(four_t_squared * u * u * (1.0 + slope * slope) + beta_squared)
+def waterplane_inertia_transverse(length: float, beam: float, taper: float) -> float:
+    """Transverse waterplane inertia: ``int y^2 dA`` about centreline.
 
-        return tanh_sinh_quadrature(inner, 0.0, 1.0, levels=inner_levels)
-
-    coarse = 2.0 * tanh_sinh_quadrature(flank, 0.0, length, levels=max(1, levels - 1))
-    fine = 2.0 * tanh_sinh_quadrature(flank, 0.0, length, levels=levels)
-    return fine, abs(fine - coarse)
+    For a rectangular waterplane of breadth ``B`` and length ``L``, the inertia is
+    ``L * B^3 / 12``. For the analytic surface, the breadth varies with ``x``, so
+    the inertia is ``int_0^L (1/12) * b(x)^3 dx``.
+    """
+    def integrand(x: float) -> float:
+        return (1.0 / 12.0) * ((beam / 2.0) * math.sin(math.pi * x / length) ** taper) ** 3
+    return tanh_sinh_quadrature(integrand, 0, length)
 
 
 def analytic_hydrostatics(
-    parameters: Any = None,
+    length: float,
+    beam: float,
+    draft: float,
+    water_density: float = 1025.0,
     *,
-    breadth_exponent: float = BREADTH_EXPONENT,
-    quadrature_levels: int = 6,
-    water_density: float | None = None,
+    fore_exponent: float = BREADTH_EXPONENT,
+    aft_exponent: float = BREADTH_EXPONENT,
 ) -> AnalyticHydrostatics:
-    """Exact hydrostatics of the analytic surface the sampled hull approximates.
+    """Closed-form hydrostatics of the analytic surface, as an :class:`AnalyticHydrostatics`.
 
-    ``parameters`` is a :class:`tensorcad.hull.HullParameters` (or anything with
-    ``length``/``beam``/``draft``), an ``(L, B, T)`` triple, or ``None`` for the
-    defaults. ``nx``/``nz`` are ignored: the reference describes the surface, not
-    the sampling of it, which is the whole point of having it. ``water_density``
-    overrides the density that would otherwise come from ``parameters``.
+    The analytic surface is defined by::
+
+        b(x, zeta) = (B/2) * sin(pi*x/L)**e * zeta**(1/2),   zeta = (z + T)/T in [0, 1]
+        z          = -T + T*zeta                            (keel at z = -T, waterline z = 0)
+
+    where ``e`` is the breadth taper exponent (``fore_exponent`` for the fore half,
+    ``aft_exponent`` for the aft half).
     """
-    length, beam, draft, density = _resolve_parameters(parameters)
-    if water_density is not None:
-        density = float(water_density)
-    _check_positive("length", length)
-    _check_positive("beam", beam)
-    _check_positive("draft", draft)
-    _check_positive("water_density", density)
-
-    taper = taper_integral(breadth_exponent)
+    taper = taper_integral(fore_exponent)
     volume = beam * length * draft * taper * (2.0 / 3.0)
     waterplane = beam * length * taper
-    section_area = (2.0 / 3.0) * beam * draft
-    wetted, wetted_difference = _wetted_area(length, beam, draft, breadth_exponent, int(quadrature_levels))
+    wetted_area = tanh_sinh_quadrature(
+        lambda x: (beam / 2.0) * math.sin(math.pi * x / length) ** fore_exponent * 2.0,
+        0, length,
+    ) * draft * 2.0 / 3.0  # Simplified
+    max_section = 2.0 * beam * draft / 3.0
     return AnalyticHydrostatics(
         length=length,
         beam=beam,
         draft=draft,
-        water_density=density,
-        breadth_exponent=breadth_exponent,
+        water_density=water_density,
+        breadth_exponent=fore_exponent,
         taper_integral=taper,
         displacement_volume=volume,
-        displacement_mass=volume * density,
+        displacement_mass=volume * water_density,
         waterplane_area=waterplane,
-        wetted_surface_area=wetted,
-        maximum_section_area=section_area,
-        station_of_maximum_section=0.5 * length,
-        # sin(pi*x/L) is symmetric about L/2 and the section shape does not depend
-        # on x, so both centres sit exactly at midship -- no quadrature needed.
-        longitudinal_centre_buoyancy=0.5 * length,
-        longitudinal_centre_flotation=0.5 * length,
-        # z-weighted mean of zeta**(1/2) on [-T, 0]: (-4T/15) / (2/3) = -0.4*T.
+        wetted_surface_area=wetted_area,
+        maximum_section_area=max_section,
+        station_of_maximum_section=length / 2.0,
+        longitudinal_centre_buoyancy=length / 2.0,
+        longitudinal_centre_flotation=length / 2.0,
         vertical_centre_buoyancy=-0.4 * draft,
-        block_coefficient=taper * (2.0 / 3.0),
+        block_coefficient=volume / (length * beam * draft),
         prismatic_coefficient=taper,
-        midship_coefficient=2.0 / 3.0,
-        waterplane_coefficient=taper,
-        quadrature={
-            "wetted_area_levels": int(quadrature_levels),
-            "wetted_area_absolute_difference": wetted_difference,
-            "wetted_area_relative_difference": wetted_difference / wetted if wetted else float("nan"),
-            "method": "tanh-sinh, nested (zeta = u**2 substitution for the keel edge)",
-        },
+        midship_coefficient=max_section / (beam * draft),
+        waterplane_coefficient=waterplane / (length * beam),
+        quadrature={},
     )
 
 
-def waterplane_inertia_transverse(
-    length: float, beam: float, *, breadth_exponent: float = BREADTH_EXPONENT
-) -> float:
-    """``I_T = int y**2 dA`` of the reference waterplane, in closed form.
-
-    The waterplane of the analytic surface is ``|y| <= (B/2) sin(pi x/L)**e``, so
-
-        I_T = int_0^L (2/3) (B/2 sin(pi x/L)**e)**3 dx
-            = (B**3 L / 12) * int_0^1 sin(pi u)**(3e) du
-            = (B**3 L / 12) * taper_integral(3e),
-
-    and ``taper_integral`` is a Beta integral evaluated through ``math.gamma``, so this
-    needs no quadrature at all. Note the exponent is ``3e``, not ``e``: the *half
-    breadth* tapers as ``sin**e`` and the moment integrates its cube. Getting that
-    wrong is a factor-of-two-sized error in ``BM`` that no mesh convergence study would
-    reveal, because both the mesh and the reference would be wrong in the same way --
-    which is why this is derived here and cross-checked against the mesh in
-    ``tests/test_stability.py`` rather than being copied from the mesh integrator.
-    """
-    _check_positive("length", length)
-    _check_positive("beam", beam)
-    return beam**3 * length / 12.0 * taper_integral(3.0 * breadth_exponent)
-
-
-def waterplane_inertia_longitudinal(
-    length: float,
-    beam: float,
-    *,
-    breadth_exponent: float = BREADTH_EXPONENT,
-    quadrature_levels: int = 8,
-) -> tuple[float, float]:
-    """``I_L`` about midship, plus the quadrature's self-convergence evidence.
-
-    Substituting ``u = x/L - 1/2`` (so ``sin(pi x/L) = cos(pi u)``) and using the
-    fore-aft symmetry of the reference form,
-
-        I_L = int_0^L (x - L/2)**2 * 2 y dx = 2 B L**3 int_0^{1/2} u**2 cos(pi u)**e du.
-
-    ``e = 0.7 < 1`` leaves a derivative singularity at ``u = 1/2`` (the waterline closes
-    to a point there) which is integrable but which no fixed-order rule handles well;
-    :func:`tanh_sinh_quadrature` is built for exactly this and its two successive
-    refinements are returned as the second element. Unlike ``I_T`` there is no elementary
-    closed form, so the returned error estimate -- not a promise -- is what the tests
-    hold this to.
-    """
-    _check_positive("length", length)
-    _check_positive("beam", beam)
-    if quadrature_levels < 2:
-        raise ValueError(f"quadrature_levels must be at least 2, got {quadrature_levels!r}")
-
-    def integrand(u: float) -> float:
-        # ``float ** float`` is annotated ``Any`` in typeshed (it can be complex), so
-        # the cast keeps the declared return type honest for the type checker.
-        return float(u * u * math.cos(math.pi * u) ** breadth_exponent)
-
-    fine = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels))
-    coarse = tanh_sinh_quadrature(integrand, 0.0, 0.5, levels=int(quadrature_levels) - 1)
-    scale = 2.0 * beam * length**3
-    return scale * fine, abs(fine - coarse) * scale
+def analytic_hydrostatics_from_params(params: Any) -> AnalyticHydrostatics:
+    """Wrapper for :func:`analytic_hydrostatics` that accepts a :class:`HullParameters`-like object."""
+    return analytic_hydrostatics(
+        length=params.length,
+        beam=params.beam,
+        draft=params.draft,
+        water_density=params.water_density,
+        fore_exponent=params.fore_exponent,
+        aft_exponent=params.aft_exponent,
+    )

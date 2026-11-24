@@ -73,11 +73,11 @@ def test_the_analytic_vertical_centre_of_buoyancy_is_the_closed_form():
     derived, not copied.
     """
     from tensorcad.hull import HullParameters
-    from tensorcad.hydrostatics_analytic import analytic_hydrostatics
+    from tensorcad.hydrostatics_analytic import analytic_hydrostatics_from_params
 
     draft = 0.6
-    result = analytic_hydrostatics(
-        HullParameters(length=10.0, beam=1.5, draft=draft))
+    params = HullParameters(length=10.0, beam=1.5, draft=draft)
+    result = analytic_hydrostatics_from_params(params)
     vcb = result.vertical_centre_buoyancy
     assert math.isclose(vcb, -0.4 * draft, rel_tol=1e-12), (
         f"analytic VCB is {vcb}, expected -0.4*T = {-0.4 * draft} "
