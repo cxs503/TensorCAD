@@ -55,38 +55,38 @@
 ## 3. 结果
 
 <!-- nearest-cost:begin -->
-| 案例 | 指标 | before | after |
-|---|---|---|---|
-| `hull_like_2k` | 三角面 | 2304 | 2304 |
-| `hull_like_2k` | 自动分辨率 | 34×7×3 | 34×7×3 |
-| `hull_like_2k` | 网格单元 | 714 | 714 |
-| `hull_like_2k` | 建索引 s | 0.044194 | 0.029523 |
-| `hull_like_2k` | 每查询 s | 0.01988 | 0.014371 |
-| `hull_like_2k` | 超时数 | 0 | 0 |
-| `hull_like_2k` | 与全扫不符 | 0 | 0 |
-| `plate_box_thin` | 三角面 | 12 | 12 |
-| `plate_box_thin` | 自动分辨率 | 15×15×1 | 8×8×1 |
-| `plate_box_thin` | 网格单元 | 225 | 64 |
-| `plate_box_thin` | 建索引 s | 0.002053 | 0.00048 |
-| `plate_box_thin` | 每查询 s | 0.00165 | 0.000148 |
-| `plate_box_thin` | 超时数 | 0 | 0 |
-| `plate_box_thin` | 与全扫不符 | 0 | 0 |
-| `sheet_2tri` | 三角面 | 2 | 2 |
-| `sheet_2tri` | 自动分辨率 | 2048×2048×1 | 8×8×1 |
-| `sheet_2tri` | 网格单元 | 4194304 | 64 |
-| `sheet_2tri` | 建索引 s | 0.643218 | 0.00028 |
-| `sheet_2tri` | 每查询 s | 1.12387 | 3.4e-05 |
-| `sheet_2tri` | 超时数 | 2 | 0 |
-| `sheet_2tri` | 与全扫不符 | 0 | 0 |
-| `unit_box` | 三角面 | 12 | 12 |
-| `unit_box` | 自动分辨率 | 2×2×2 | 2×2×2 |
-| `unit_box` | 网格单元 | 8 | 8 |
-| `unit_box` | 建索引 s | 0.000338 | 0.000251 |
-| `unit_box` | 每查询 s | 0.000152 | 0.000144 |
-| `unit_box` | 超时数 | 0 | 0 |
-| `unit_box` | 与全扫不符 | 0 | 0 |
+| 案例 | 指标 | run |
+|---|---|---|
+| `hull_like_2k` | 三角面 | 2304 |
+| `hull_like_2k` | 自动分辨率 | 34×7×3 |
+| `hull_like_2k` | 网格单元 | 714 |
+| `hull_like_2k` | 建索引 s | 0.021058 |
+| `hull_like_2k` | 每查询 s | 0.010667 |
+| `hull_like_2k` | 超时数 | 0 |
+| `hull_like_2k` | 与全扫不符 | 0 |
+| `plate_box_thin` | 三角面 | 12 |
+| `plate_box_thin` | 自动分辨率 | 8×8×1 |
+| `plate_box_thin` | 网格单元 | 64 |
+| `plate_box_thin` | 建索引 s | 0.000317 |
+| `plate_box_thin` | 每查询 s | 0.000113 |
+| `plate_box_thin` | 超时数 | 0 |
+| `plate_box_thin` | 与全扫不符 | 0 |
+| `sheet_2tri` | 三角面 | 2 |
+| `sheet_2tri` | 自动分辨率 | 8×8×1 |
+| `sheet_2tri` | 网格单元 | 64 |
+| `sheet_2tri` | 建索引 s | 0.000288 |
+| `sheet_2tri` | 每查询 s | 2.7e-05 |
+| `sheet_2tri` | 超时数 | 0 |
+| `sheet_2tri` | 与全扫不符 | 0 |
+| `unit_box` | 三角面 | 12 |
+| `unit_box` | 自动分辨率 | 2×2×2 |
+| `unit_box` | 网格单元 | 8 |
+| `unit_box` | 建索引 s | 0.00018 |
+| `unit_box` | 每查询 s | 0.000107 |
+| `unit_box` | 超时数 | 0 |
+| `unit_box` | 与全扫不符 | 0 |
 
-每查询上限 before: 5s s / after: 5s（超过记为“超时”，不是 0）。
+每查询上限 run: 20s（超过记为“超时”，不是 0）。
 
 <!-- nearest-cost:end -->
 
