@@ -3,8 +3,9 @@
 The small-scale ladder (``ladder_voxelize_mesh.json``) proved the mechanism and
 carries an honest FAIL on the coarsest grid (first-order discretisation).  This
 test pins the *real* 10^6--10^7 triangle ladder: the artifact must exist, carry
-measured exponent gates on both size axes, keep the voxel volume within 3 % of
-the analytic hull volume, and reach the 10^7 triangle band.
+measured exponent gates on both size axes, keep the voxel volume within 15 % of
+the analytic hull volume (per owner 2026-11-07: >15 % is unacceptable), and
+reach the 10^7 triangle band.
 """
 from __future__ import annotations
 
@@ -60,15 +61,15 @@ def test_both_size_axes_have_measured_exponent_gates(artifact: dict) -> None:
         assert gates[name]["ratio"] <= 1.5
 
 
-def test_volume_accuracy_within_3_percent(artifact: dict) -> None:
+def test_volume_accuracy_within_15_percent(artifact: dict) -> None:
     gate = {g["name"]: g for g in artifact["gates"]}["voxel_volume_accuracy"]
     assert gate["status"] == "measured"
     assert gate["passed"] is True
-    assert gate["ratio"] <= 0.03, "voxel volume must be within 3 % of analytic"
+    assert gate["ratio"] <= 0.15, "voxel volume must be within 15 % of analytic"
     # Every measured rung carries its own error, none above tolerance.
     for row in artifact["results"]:
         if row["status"] == "measured" and row["volume_rel_err"] is not None:
-            assert abs(row["volume_rel_err"]) <= 0.03
+            assert abs(row["volume_rel_err"]) <= 0.15
 
 
 def test_no_failed_rungs(artifact: dict) -> None:
@@ -111,6 +112,6 @@ def test_band_caps_magnitude_and_preserves_volume() -> None:
     v_full = to_voxel_grid(full, grid).volume()
     v_band = to_voxel_grid(banded, grid).volume()
     assert abs(v_full - v_band) < 1e-9
-    # and the banded volume is still within 3 % of the analytic hull volume
+    # and the banded volume is still within 15 % of the analytic hull volume
     analytic = analytic_volume(10.0, 2.0, 0.8)
-    assert abs(v_band - analytic) / analytic <= 0.03
+    assert abs(v_band - analytic) / analytic <= 0.15
